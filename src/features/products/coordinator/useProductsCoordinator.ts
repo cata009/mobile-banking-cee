@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { type ProductsShelfFocusRequest } from '@/app/chat/czChatOrchestration'
-import type { ProductDetailSelection } from '@/app/components/products/ProductCardBottomSheet'
+import type { ProductsShelfFocusRequest } from '@/features/products/shelfFocus'
+import type { ProductDetailSelection } from '@/features/products/productDetailSelection'
 import { buildShelfProductSelection } from '@/app/config/productsShelfConfig'
 import type { CoordinatorInput } from '@/app/coordinators/contracts'
 export function useProductsCoordinator({ navigation }: Pick<CoordinatorInput, 'navigation'>) {

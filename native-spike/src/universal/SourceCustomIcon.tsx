@@ -109,6 +109,19 @@ function vectorXml(node: unknown, color: string): string {
     color,
   )}</${element.type}>`;
 }
+/** Preserve a Source product's actual vector paths and its authored viewport. */
+export function SourceVector({
+  node,
+  color = '#262626',
+  size = 32,
+}: {
+  node: unknown;
+  color?: string;
+  size?: number;
+}) {
+  const xml = useMemo(() => vectorXml(node, color), [node, color]);
+  return <SvgXml xml={xml} width={size} height={size} />;
+}
 export function sourceCustomIconXml(
   name: string,
   color = '#262626',

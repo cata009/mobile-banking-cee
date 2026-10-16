@@ -1,0 +1,189 @@
+import type { ReactNode } from "react";
+import { AppIcon, type IconName } from "@/app/components/icons";
+import { cn } from "@/app/components/ui/utils";
+
+interface PageHeaderProps {
+  title: string;
+  onBack: () => void;
+  onHelpClick?: () => void;
+  onRightActionClick?: () => void;
+  variant?: "light" | "dark" | "transparent" | "gray";
+  showHelp?: boolean;
+  showBack?: boolean;
+  compact?: boolean;
+  renderLargeTitle?: boolean;
+  collapsedTitleProgress?: number;
+  includeSafeArea?: boolean;
+  rightActionIcon?: ReactNode;
+  rightActionLabel?: string;
+  rightActionPressed?: boolean;
+  backIconName?: IconName;
+  backLabel?: string;
+  largeTitleAlign?: "left" | "center";
+  largeTitleColor?: string;
+  hideCollapsedTitleWhenHidden?: boolean;
+  /** Sits before the large title, e.g. the category icon of the page being read. */
+  leadingVisual?: ReactNode;
+  /** Rendered under the large title — a total, a count, whatever names the page's figures. */
+  subtitle?: ReactNode;
+  headerSubtitle?: ReactNode;
+}
+
+export default function PageHeader({
+  title,
+  onBack,
+  onHelpClick,
+  onRightActionClick,
+  variant = "light",
+  showHelp = true,
+  showBack = true,
+  compact = false,
+  renderLargeTitle = true,
+  collapsedTitleProgress = 0,
+  includeSafeArea = false,
+  rightActionIcon,
+  rightActionLabel = "Action",
+  rightActionPressed,
+  backIconName = "back-heavy",
+  backLabel = "Back",
+  largeTitleAlign = "left",
+  largeTitleColor,
+  hideCollapsedTitleWhenHidden = false,
+  leadingVisual,
+  subtitle,
+  headerSubtitle,
+}: PageHeaderProps) {
+  const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
+  const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
+  const bgColor =
+    variant === "dark" || variant === "transparent"
+      ? "bg-transparent"
+      : variant === "gray"
+      ? "bg-[var(--uc-app-bg)]"
+      : "bg-[var(--uc-surface)]";
+  const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
+  const largeTitleOpacity = 1 - titleProgress;
+  const shouldRenderLargeTitle = renderLargeTitle && !(compact && titleProgress >= 0.999);
+
+  const stickyBgStyle = variant === "dark"
+    ? {
+        backgroundColor: `rgba(26, 26, 26, ${titleProgress * 0.95})`,
+        backdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
+        WebkitBackdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
+      }
+    : variant === "gray"
+    ? {
+        backgroundColor: "var(--uc-app-bg)",
+      }
+    : undefined;
+
+  const largeTitle = (
+    <h1
+      className={cn("uc-type-h1", textColor)}
+      style={{
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        color: largeTitleColor,
+      }}
+    >
+      {title}
+    </h1>
+  );
+
+  const rightAction = rightActionIcon ? (
+    <button
+      onClick={onRightActionClick}
+      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
+      style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+      aria-label={rightActionLabel}
+      aria-pressed={rightActionPressed}
+      title={rightActionLabel}
+    >
+      {rightActionIcon}
+    </button>
+  ) : showHelp ? (
+    <button
+      onClick={onHelpClick}
+      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
+      style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+      aria-label="Help"
+    >
+      <AppIcon name="help-circle" color={iconColor} />
+    </button>
+  ) : null;
+
+  return (
+    <>
+      <div
+        className={cn(
+          "sticky z-10 w-full transition-shadow duration-200",
+          "top-0",
+          variant !== "dark" && variant !== "gray" ? bgColor : "",
+          includeSafeArea ? "pt-[var(--uc-phone-top-reserve,54px)]" : ""
+        )}
+        style={stickyBgStyle}
+      >
+        <div className="grid h-[48px] grid-cols-[40px_1fr_40px] items-center px-[8px] pt-[8px]">
+          {showBack ? (
+            <button
+              onClick={onBack}
+              className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
+              style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+              aria-label={backLabel}
+              title={backLabel}
+            >
+              <AppIcon name={backIconName} color={iconColor} />
+            </button>
+          ) : (
+            <div className="h-[40px] w-[40px]" />
+          )}
+
+          <div
+            className="pointer-events-none min-w-0 text-center"
+            aria-hidden={hideCollapsedTitleWhenHidden && titleProgress === 0}
+            style={{
+              opacity: titleProgress,
+              transform: `translateY(${(1 - titleProgress) * 6}px)`,
+            }}
+          >
+            <h1 className={cn("uc-type-n4-strong truncate", textColor)}>{title}</h1>
+            {headerSubtitle ? (
+              <p className="mt-[2px] truncate text-[12px] leading-[16px] text-[var(--uc-text-muted)]">
+                {headerSubtitle}
+              </p>
+            ) : null}
+          </div>
+
+          {rightAction}
+        </div>
+      </div>
+
+      {shouldRenderLargeTitle ? (
+        <div
+          className={cn(
+            "flex items-center gap-[12px]",
+            largeTitleAlign === "center" ? "justify-center text-center" : "",
+            bgColor
+          )}
+          style={{
+            width: "100%",
+            padding: "8px 16px",
+            opacity: largeTitleOpacity,
+          }}
+        >
+          {leadingVisual}
+          {/* Only pages that pass a visual or a subtitle get the extra wrapper; the rest keep the bare title. */}
+          {leadingVisual || subtitle ? (
+            <div className="min-w-0 flex-1">
+              {largeTitle}
+              {subtitle}
+            </div>
+          ) : largeTitle}
+        </div>
+      ) : null}
+    </>
+  );
+}

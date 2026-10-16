@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { resolveAccountInfoField } from '@/app/components/contracts/accountInfoField';
 
 interface AccountDetailsInfoFieldProps {
   title: string;
@@ -11,13 +12,14 @@ export default function AccountDetailsInfoField({
   subtitle,
   trailingIcon,
 }: AccountDetailsInfoFieldProps) {
+  const state = resolveAccountInfoField({ hasTrailing: Boolean(trailingIcon) });
   return (
     <div
       className={`h-[80px] w-full items-center ${
-        trailingIcon ? "grid grid-cols-[minmax(0,1fr)_40px] gap-[16px]" : "flex"
+        state.layoutClass
       }`}
       data-account-details-info-field
-      data-account-details-info-field-variant={trailingIcon ? "with-icon" : "default"}
+      data-account-details-info-field-variant={state.variant}
     >
       <div className="flex min-w-0 flex-col gap-[4px]">
         <p className="uc-type-n4 uppercase text-[var(--uc-text)]">

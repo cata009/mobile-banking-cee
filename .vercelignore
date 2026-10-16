@@ -1,4 +1,4 @@
-# Only the browser application and its API routes are deployed here.
+# Browser shell and the shared Native Web bundle are built here; Android outputs remain private.
 .git/
 .codex-temp/
 .agent-task.json
@@ -6,11 +6,20 @@
 .creator-worktrees/
 .claude/
 .superpowers/
+.env
+.env.*
 node_modules/
 dist/
 coverage/
 test-results/
-native-spike/
+native-spike/android/
+native-spike/ios/
+native-spike/node_modules/
+native-spike/dist/
+native-spike/dist-host/
+native-spike/.hot-updater/
+native-spike/.bundle/
+native-spike/keys/
 native-update-server/
 android-spike/
 scripts/android-spike/

@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
@@ -58,6 +59,7 @@ export function InvestmentHistory({
   onToApprove?: () => void;
   footer?: React.ReactNode;
 }) {
+  const market = useInvestmentMarket();
   const [tab, setTab] = useState(initialTab),
     [query, setQuery] = useState(filterByTitle ?? ''),
     [open, setOpen] = useState(false),
@@ -66,7 +68,7 @@ export function InvestmentHistory({
     >(null);
   const currencies: Currency[] = [
     ...new Set<Currency>([
-      'CZK',
+      market.currency,
       ...transactions.map(row => row.currency),
       ...orders.map(row => row.currency),
     ]),
@@ -99,7 +101,7 @@ export function InvestmentHistory({
   });
   const rows = tab === 'transactions' ? data.transactions : data.orders;
   const money = (value: number, currency: string) =>
-    formatInvestmentMoney(value, 'CZ', currency, amountsHidden);
+    formatInvestmentMoney(value, market.country, currency, amountsHidden);
   const check = (label: string, checked: boolean, onPress: () => void) => (
     <Pressable
       key={label}

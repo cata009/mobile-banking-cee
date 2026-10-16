@@ -84,30 +84,47 @@ test('Back invalidates a pending biometric result', async () => {
   expect(onBack).toHaveBeenCalledTimes(1);
   expect(onSign).not.toHaveBeenCalled();
 });
-test('logout login has no portal-password form and requires explicit demo continuation when device biometrics are unavailable', async () => {
-  const props: CzechNativeScreenProps = {
-    route: { screen: 'login' },
-    scenario: 'active',
-    productCounts: DEFAULT_CZECH_COUNTS,
-    amountsHidden: false,
-    onBack: jest.fn(),
-    onNavigate: jest.fn(),
-    onSearch: jest.fn(),
-    onProfile: jest.fn(),
-    onAmountsToggle: jest.fn(),
-    onChanged: jest.fn(),
-  };
-  const Screen = CZECH_PROFILE_ADAPTER.screens.login!;
-  let tree!: Renderer.ReactTestRenderer;
-  await act(async () => {
-    tree = Renderer.create(<Screen {...props} />);
-  });
-  mounted.push(tree);
-  expect(JSON.stringify(tree.toJSON())).not.toContain('Password');
-  await press(tree, translateCzech('preLoginActive.loginButton'));
-  expect(props.onNavigate).not.toHaveBeenCalled();
-  await press(tree, 'Continue demo');
-  expect(props.onNavigate).toHaveBeenCalledWith({ screen: 'home' });
+test('logout login runs the shared Source Face ID demo for 840ms and navigates Home once without OS biometrics', async () => {
+  jest.useFakeTimers();
+  try {
+    available.mockClear();
+    authenticate.mockClear();
+    const onNavigate = jest.fn();
+    const props: CzechNativeScreenProps = {
+      route: { screen: 'login' },
+      scenario: 'active',
+      productCounts: DEFAULT_CZECH_COUNTS,
+      amountsHidden: false,
+      onBack: jest.fn(),
+      onNavigate,
+      onSearch: jest.fn(),
+      onProfile: jest.fn(),
+      onAmountsToggle: jest.fn(),
+      onChanged: jest.fn(),
+    };
+    const Screen = CZECH_PROFILE_ADAPTER.screens.login!;
+    let tree!: Renderer.ReactTestRenderer;
+    await act(async () => {
+      tree = Renderer.create(<Screen {...props} />);
+    });
+    mounted.push(tree);
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Password');
+
+    await press(tree, translateCzech('preLoginActive.loginButton'));
+    expect(onNavigate).not.toHaveBeenCalled();
+    expect(available).not.toHaveBeenCalled();
+    expect(authenticate).not.toHaveBeenCalled();
+
+    await act(async () => jest.advanceTimersByTime(839));
+    expect(onNavigate).not.toHaveBeenCalled();
+    await act(async () => jest.advanceTimersByTime(1));
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    expect(onNavigate).toHaveBeenCalledWith({ screen: 'home' });
+    expect(available).not.toHaveBeenCalled();
+    expect(authenticate).not.toHaveBeenCalled();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 test('inactive authorization clears typed private PIN without completing', async () => {
   const { tree, onSign, onBack } = await render();

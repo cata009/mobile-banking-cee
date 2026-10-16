@@ -24,6 +24,7 @@ type CardAction = {
   lines: string;
   screen: CzechNativeScreen;
   icon: keyof typeof evoGlyphs;
+  params?: Readonly<Record<string, string>>;
 };
 
 export function ProductCard({
@@ -98,6 +99,7 @@ export function ProductCard({
             lines: 'Account\ninfo',
             screen: 'account-info',
             icon: 'account-info',
+            params: { productId: product.id },
           },
         ]
       : product.type === 'debit_card'
@@ -107,24 +109,28 @@ export function ProductCard({
             lines: 'Card\nDetails',
             screen: 'card-info',
             icon: 'account-info',
+            params: { productId: product.id },
           },
           {
             label: 'Card options',
             lines: 'Card\nOptions',
             screen: 'card-options',
             icon: 'account-options',
+            params: { productId: product.id },
           },
           {
             label: 'Block card',
             lines: 'Block\nCard',
             screen: 'card-options',
             icon: 'block-card',
+            params: { productId: product.id },
           },
           {
             label: 'View PIN',
             lines: 'View\nPIN',
             screen: 'card-options',
             icon: 'view-pin',
+            params: { productId: product.id },
           },
         ]
       : [];
@@ -223,7 +229,7 @@ export function ProductCard({
               onPress={() =>
                 onNavigate({
                   screen: action.screen,
-                  params: { productId: product.id, action: action.label },
+                  ...(action.params ? { params: action.params } : {}),
                 })
               }
               style={s.action}

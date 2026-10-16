@@ -23,7 +23,15 @@ describe('stable-origin native OTA proxy', () => {
       destination: '/api/native-update-proxy?__native_ota_route=:path*',
     })
     expect(config.rewrites.filter((item: { source: string }) => item.source.startsWith('/assets/'))).toHaveLength(4)
-    expect(config.headers).toHaveLength(9)
+    expect(config.headers.filter((item: { source: string }) => !item.source.startsWith('/native-demo/'))).toHaveLength(
+      9,
+    )
+    expect(config.headers.filter((item: { source: string }) => item.source.startsWith('/native-demo/'))).toEqual(
+      ['manifest.json', 'current-host.js', 'current-host.css'].map((file) => ({
+        source: `/native-demo/${file}`,
+        headers: [{ key: 'Cache-Control', value: 'no-store, max-age=0, must-revalidate' }],
+      })),
+    )
   })
 
   test.each([

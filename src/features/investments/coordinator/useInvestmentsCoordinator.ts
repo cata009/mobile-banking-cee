@@ -4,8 +4,8 @@ import type {
   InvestmentBuyRequest,
   InvestmentFundsRequest,
   InvestmentSecurityDetailRequest,
-} from '@/app/screens/investments/InvestmentsPortfolioScreen'
-import type { FutureGainFundSimulatorState } from '@/app/screens/investments/FutureGainInvestmentSimulatorScreen'
+} from '@/features/investments/orders/requests'
+import type { FutureGainFundSimulatorState } from '@/features/investments/future-gain/smartInvestment'
 import type { CoordinatorInput } from '@/app/coordinators/contracts'
 export function useInvestmentsCoordinator({
   navigation,

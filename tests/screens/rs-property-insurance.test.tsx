@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import MiniPhone from '@/app/screens/flow-library/components/MiniPhone'
 import FlowLibraryScreen from '@/app/screens/flow-library/FlowLibraryScreen'
 import { FLOW_DEMO } from '@/app/screens/flow-library/flows/demoData'
@@ -11,9 +11,30 @@ import { screenTitle } from '@/app/screens/flow-library/flows/rules'
 import type { RsPropertyInsuranceScreenKind } from '@/app/screens/flow-library/flows/types'
 import { resetRsPurchase } from '@/app/screens/flow-library/components/rsPurchaseStore'
 import { DemoProvider } from '@/app/state/demoStore'
+import {
+  asyncNativeReady,
+  nativeWebRendererDiagnostics,
+  resetNativeWebRendererDiagnostics,
+} from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+let originalMatchMedia: typeof window.matchMedia
+
+beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
+})
 
 afterEach(() => {
   cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
+  vi.unstubAllGlobals()
   resetRsPurchase()
 })
 
@@ -580,12 +601,14 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByLabelText('Close purchase')).not.toBeInTheDocument()
   })
 
-  it('closes straight out before any data is entered and confirms once there is', () => {
+  it('closes straight out before any data is entered and confirms once there is', async () => {
     const preview = renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
     fireEvent.click(preview.getByLabelText('Close purchase'))
-    expect(preview.getByRole('heading', { name: 'Products' })).toBeInTheDocument()
+    await asyncNativeReady(document.body)
+    await waitFor(() => expect(nativeWebRendererDiagnostics.snapshots.at(-1)?.route).toEqual({ screen: 'products' }))
+    expect(preview.getByRole('heading', { name: 'Offers' })).toBeInTheDocument()
 
     jumpToScreen('rs-pi-policyholder')
     fireEvent.click(preview.getByLabelText('Close purchase'))

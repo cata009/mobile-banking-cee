@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AppIcon } from "@/app/components/icons";
+import ToggleButton from '@/app/components/ToggleButton';
 import advisorImage from "figma:asset/e693dd6eed452da6c4cda0e69dbdd3f45039c9f2.png";
 
 export type PrimeMailApp = "gmail" | "mail";
@@ -180,9 +181,7 @@ export function PrimeContactActionFlow({
           </div>
           <div className="mt-[22px] flex items-center justify-between gap-[16px] px-[4px]">
             <span className="uc-type-n5 text-white/80">{text("prime.advisor.askMailEveryTime", "Ask me which app to use every time")}</span>
-            <button type="button" role="switch" aria-checked={mailPreferences.askEveryTime} aria-label={text("prime.advisor.askMailEveryTime", "Ask me which app to use every time")} onClick={toggleMailPreference} className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors ${mailPreferences.askEveryTime ? "bg-[#0a84ff]" : "bg-[#616166]"}`}>
-              <span className={`absolute top-[3px] size-[24px] rounded-full bg-white shadow transition-transform ${mailPreferences.askEveryTime ? "left-[25px]" : "left-[3px]"}`} />
-            </button>
+            <ToggleButton variant="prime-mail" checked={mailPreferences.askEveryTime} ariaLabel={text("prime.advisor.askMailEveryTime", "Ask me which app to use every time")} onToggle={toggleMailPreference} />
           </div>
         </section>
       </div>

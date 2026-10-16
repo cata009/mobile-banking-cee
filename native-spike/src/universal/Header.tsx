@@ -18,6 +18,8 @@ export function Header({
   leadingVisual,
   subtitle,
   headerSubtitle,
+  collapsedTitleOpacity,
+  largeTitleColor,
 }: Themed & {
   title: string;
   onBack: () => void;
@@ -31,9 +33,12 @@ export function Header({
   leadingVisual?: React.ReactNode;
   subtitle?: React.ReactNode;
   headerSubtitle?: React.ReactNode;
+  collapsedTitleOpacity?: number;
+  largeTitleColor?: string;
 }) {
   const progress = Math.max(0, Math.min(1, collapsedTitleProgress));
-  const titleOpacity = renderLargeTitle ? progress : 1;
+  const titleOpacity =
+    collapsedTitleOpacity ?? (renderLargeTitle ? progress : 1);
   if (variant === 'current')
     return (
       <>
@@ -66,6 +71,7 @@ export function Header({
               ]}
             >
               <Text
+                accessibilityRole="header"
                 numberOfLines={1}
                 style={[
                   s.collapsedTitle,
@@ -114,7 +120,7 @@ export function Header({
                   s.largeTitle,
                   {
                     fontFamily: tokens.strongFont,
-                    color: tokens.text,
+                    color: largeTitleColor ?? tokens.text,
                   },
                 ]}
               >
@@ -171,7 +177,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   copy: { flex: 1 },
-  collapsedTitle: { fontSize: 16, lineHeight: 22, textAlign: 'center' },
+  collapsedTitle: { fontSize: 16, lineHeight: 17.5, textAlign: 'center' },
   headerSubtitle: {
     fontSize: 12,
     lineHeight: 16,
@@ -185,5 +191,5 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  largeTitle: { fontSize: 28, lineHeight: 32 },
+  largeTitle: { fontSize: 28, lineHeight: 31 },
 });

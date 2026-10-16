@@ -1,7 +1,10 @@
 import { ESLint } from 'eslint'
 import { expect, it } from 'vitest'
+import repositoryConfig from '../../eslint.config.js'
 
-const lint = new ESLint()
+// Load the real policy at collection time, rather than lazily importing its
+// parser/plugin graph inside the first assertion's execution budget.
+const lint = new ESLint({ overrideConfigFile: true, overrideConfig: repositoryConfig })
 async function labelMessages(source) {
   const [result] = await lint.lintText(source, { filePath: 'src/app/components/LabelContractExample.tsx' })
   return result.messages.filter((message) => message.ruleId?.startsWith('jsx-a11y/label'))

@@ -2,12 +2,22 @@
 
 import '@testing-library/jest-dom/vitest'
 import { cleanup, render } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { DemoProvider } from '@/app/state/demoStore'
 import MoreScreen from '@/app/screens/more/MoreScreen'
 import PaymentsScreen from '@/app/screens/payments/PaymentsScreen'
 import ProductsScreen from '@/app/screens/products/ProductsScreen'
+import {
+  asyncNativeReady,
+  nativeWebRendererDiagnostics,
+  resetNativeWebRendererDiagnostics,
+} from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
 
 function DestinationProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -17,19 +27,35 @@ function DestinationProviders({ children }: { children: React.ReactNode }) {
   )
 }
 
-afterEach(cleanup)
+let originalMatchMedia: typeof window.matchMedia
+
+beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
+})
+
+afterEach(() => {
+  cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
+  vi.unstubAllGlobals()
+})
 
 describe('Evo destination surfaces', () => {
-  it('uses the same app-gray canvas as Home in Payments, Products, and More', () => {
+  it('routes Payments, Products, and More into their Native destination surfaces', async () => {
     const destinations = [
-      { name: 'Payments', screen: <PaymentsScreen /> },
-      { name: 'Products', screen: <ProductsScreen /> },
-      { name: 'More', screen: <MoreScreen /> },
+      { name: 'Payments', route: 'payments', screen: <PaymentsScreen /> },
+      { name: 'Products', route: 'products', screen: <ProductsScreen /> },
+      { name: 'More', route: 'profile', screen: <MoreScreen /> },
     ]
 
     for (const destination of destinations) {
+      resetNativeWebRendererDiagnostics()
       const { container, unmount } = render(destination.screen, { wrapper: DestinationProviders })
-      expect(container.firstElementChild, destination.name).toHaveClass('bg-[var(--uc-app-bg)]')
+      await asyncNativeReady(container)
+      expect(container.querySelector('[data-native-current-host="true"]'), destination.name).toBeInTheDocument()
+      expect(nativeWebRendererDiagnostics.snapshots.at(-1)?.route.screen, destination.name).toBe(destination.route)
       unmount()
     }
   })

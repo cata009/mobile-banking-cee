@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import App from "@/app/App";
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from "../helpers/nativeWebRenderer";
 import {
   MORE_CARD_IMAGE_BY_TYPE,
   preloadMoreCardImages,
@@ -20,6 +21,10 @@ const moreScreenSource = readFileSync(
 );
 
 const requestedImageSources: string[] = [];
+
+vi.mock("@/app/components/demo/nativeDemoLoader", () => ({
+  loadNativeDemoModule: async () => (await import("../helpers/nativeWebRenderer")).loadNativeDemoModuleForWebTest(),
+}));
 
 class ImageStub {
   decoding = "auto";
@@ -38,25 +43,13 @@ class ResizeObserverStub {
 beforeAll(() => {
   vi.stubGlobal("Image", ImageStub);
   vi.stubGlobal("ResizeObserver", ResizeObserverStub);
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    value: () => ({
-      matches: false,
-      media: "",
-      onchange: null,
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
-      addListener: () => undefined,
-      removeListener: () => undefined,
-      dispatchEvent: () => false,
-    }),
-  });
 });
 
 afterEach(() => {
   cleanup();
   requestedImageSources.length = 0;
   window.history.replaceState({}, "", "/");
+  resetNativeWebRendererDiagnostics();
 });
 
 describe("More card image preload ownership", () => {
@@ -65,9 +58,10 @@ describe("More card image preload ownership", () => {
     expect(appSource).not.toMatch(/preloadMoreCardImages\s*\(\s*\)/);
   });
 
-  it("keeps contextual ownership in MoreScreen and passes only available cards", () => {
-    expect(moreScreenSource).toContain("preloadMoreCardImages(availableCards)");
-    expect(moreScreenSource).not.toMatch(/preloadMoreCardImages\s*\(\s*\)/);
+  it("routes the Source More compatibility entry to the Native profile without Source image preloads", () => {
+    expect(moreScreenSource).toContain("route={{ screen: 'profile' }}");
+    expect(moreScreenSource).not.toContain("preloadMoreCardImages");
+    // Native's country-specific More cards are covered in native-spike/__tests__/current-profile.test.tsx.
   });
 
   it("requests selected sources only, deduplicates repeats, and ignores missing sources", () => {
@@ -109,9 +103,17 @@ describe("More card image preload ownership", () => {
     });
   });
 
-  it("makes no More-card image requests while App boots", () => {
-    render(<App />);
+  it("makes no More-card image requests while App boots", async () => {
+    const rendered = render(<App />);
+    await asyncNativeReady(rendered.container);
 
-    expect(requestedImageSources).toEqual([]);
+    const moreCardImageHashes = new Set(
+      Object.values(MORE_CARD_IMAGE_BY_TYPE).flatMap((source) => source.match(/[a-f0-9]{40}/gi) ?? []),
+    );
+    const requestedMoreCardImageHashes = requestedImageSources
+      .flatMap((source) => source.match(/[a-f0-9]{40}/gi) ?? [])
+      .filter((assetHash) => moreCardImageHashes.has(assetHash));
+
+    expect(requestedMoreCardImageHashes).toEqual([]);
   });
 });

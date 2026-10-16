@@ -30,6 +30,7 @@ public/downloads/
 native-spike/.bundle/
 native-spike/.hot-updater/
 native-spike/dist/
+native-spike/dist-host/
 
 # Superseded browser-wrapper experiment, retained locally for provenance.
 android-spike/

@@ -4,19 +4,23 @@ import { useNavigationContext } from '@/app/contexts/NavigationContext'
 import { useDemo } from '@/app/state/demoStore'
 import { appShellReducer, createAppShellState } from '@/app/state/appShellState'
 import { DemoNavigationSync } from '@/app/components/demo/DemoNavigationSync'
+import { NativeDemoSurface } from '@/app/components/demo/NativeDemoSurface'
+import { isNativePiCustomerRoute } from '@/features/demo-native/policy'
+import { nativePaymentIntentFromSource } from '@/features/demo-native/paymentIntents'
 import { ScreenErrorBoundary } from '@/app/components/ScreenErrorBoundary'
 import { getScreenRecoveryKey } from '@/app/platform/screenRecoveryKey'
 import MobileFrame from '@/app/components/MobileFrame'
 import FramelessDeviceFrame from '@/app/components/FramelessDeviceFrame'
-import { type HomeTheme } from '@/app/screens/home/App2027ThemePicker'
+import { APP_2027_THEMES, type HomeTheme } from '@/features/products/evoAppearance'
+import { storeApp2027Theme } from '@/features/products/evoAppearancePreferences'
 import EdgeLoadingAnimation from '@/app/components/EdgeLoadingAnimation'
 import { resolveRouteStatusBarVariant } from '@/app/navigation/routePolicy'
 import { parseDeepLinkFromUrl } from '@/app/utils/deepLink'
-import { CoAppingChatLauncher } from '../../package/mobile-pi-coapping-chat-package/src'
-import InvestmentChatChart from '@/app/components/investments/InvestmentChatChart'
 import PanelOverlay from '@/app/components/PanelOverlay'
 import { useAppCoordinators } from './coordinators/useAppCoordinators'
 import { AppScreenRouter, FloatingCoAppingButton, TerminateSessionPopup } from './AppScreenRouter'
+import { getFrequentBeneficiaries } from '@/data/paymentsHub'
+import { getPaymentTemplates, getSavedBeneficiaries, getEvo2027TemplateBeneficiaryName } from '@/data/paymentTemplates'
 export function AppContentWithRecovery(props: AppShellProps) {
   const { currentRoute, navigateToAndReset } = useNavigationContext()
   const demoState = useDemo()
@@ -49,12 +53,10 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
     designSystem,
     themeMode,
     release,
-    amountsHidden,
     coAppingAvailable,
     isCzCoAppingChatbotPreviewActive,
     currentRoutePolicy,
     isInAppScreen,
-    czChatLauncherVariant,
     isKidsRuntimeContext,
     isSupportedRuntimeContext,
   } = coordinators.context
@@ -62,7 +64,8 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
 
   const { czChatOpen, czChatContext, czChatInitialMode, czChatOpportunities, czChatReplyResolver } =
     coordinators.chat.view
-  const { handleCzChatLauncherOpen, handleCzChatAction, openChanged } = coordinators.chat.actions
+  const { handleCzChatLauncherOpen, handleCzChatAction, openChanged, openCzChatHelp, openCzChatForYou } =
+    coordinators.chat.actions
   const [shellState, dispatchShell] = useReducer(appShellReducer, undefined, createAppShellState)
   const [mobileFirstPhoneChrome, setMobileFirstPhoneChrome] = useState<'light' | 'dark'>('light')
   const mobileFirstSettings = useSyncExternalStore(
@@ -71,6 +74,7 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
     profileSettingsStore.getSnapshot,
   )
   const isItalyMobileFirst = product === 'PI' && country === 'IT' && designSystem === 'mobile-first'
+  const nativeOwned = isNativePiCustomerRoute(demoState, currentRoute)
   const { showTerminatePopup, showPanel, coAppingOriginScreen, showEdgeAnimation, showFABSlideIn } = shellState
 
   const routeStatusBarVariant = resolveRouteStatusBarVariant(currentScreen, {
@@ -216,32 +220,160 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
   // In device mode the app is rendered fullscreen (no bezel); otherwise the
   // desktop preview shows it inside the simulated phone frame.
   const FrameComponent = deviceMode ? FramelessDeviceFrame : MobileFrame
-  const czChatLayer =
-    isCzCoAppingChatbotPreviewActive && isInAppScreen ? (
-      <CoAppingChatLauncher
-        buttonLabel="Open CZ - Chatbot"
-        variant={czChatLauncherVariant}
-        open={czChatOpen}
-        onOpenChange={openChanged}
-        onLauncherOpen={handleCzChatLauncherOpen}
-        onAction={handleCzChatAction}
-        entryContext={czChatContext}
-        opportunities={czChatOpportunities}
-        initialMode={czChatInitialMode}
-        resolveReply={czChatReplyResolver}
-        renderInvestmentChart={(chart) => (
-          <InvestmentChatChart chart={chart} country={country} amountsHidden={amountsHidden} />
-        )}
-      />
-    ) : null
   const screenRecoveryKey = getScreenRecoveryKey(demoState, currentRoute)
 
-  const content = (
+  const referenceContent = (
     <AppScreenRouter
       coordinators={coordinators}
       shell={shell}
       onMobileFirstPhoneChromeChange={setMobileFirstPhoneChrome}
     />
+  )
+  const selectedTransactionProduct = coordinators.accounts.view.selectedAccountProduct
+  const transactionSelection =
+    coordinators.accounts.view.selectedTransaction && selectedTransactionProduct
+      ? {
+          productId: selectedTransactionProduct.id,
+          source:
+            selectedTransactionProduct.type === 'credit_card' || selectedTransactionProduct.type === 'debit_card'
+              ? ('card' as const)
+              : ('account' as const),
+          transaction: coordinators.accounts.view.selectedTransaction,
+        }
+      : null
+  const paymentIntent = nativePaymentIntentFromSource(currentRoute.screen, coordinators.accounts.view.paymentDraft)
+  const paymentFlow =
+    paymentIntent?.type === 'enter'
+      ? {
+          draft: paymentIntent.draft,
+          step: paymentIntent.step,
+          entryId: coordinators.accounts.view.paymentEntryId,
+          initialStep: coordinators.accounts.view.paymentInitialStep,
+        }
+      : null
+  const content = nativeOwned ? (
+    <NativeDemoSurface
+      deviceMode={deviceMode}
+      productsShelfFocusRequest={coordinators.products.view.productsShelfFocusRequest}
+      onProductsShelfFocusHandled={coordinators.products.actions.focusHandled}
+      onProductsShelfHeroCollapsedChange={coordinators.products.actions.heroCollapsedChanged}
+      productDetailPresentation={
+        currentRoute.screen === 'product-detail' && currentRoute.selection ? currentRoute.selection : undefined
+      }
+      homeTheme={app2027Theme}
+      onHomeThemeChange={(theme) => {
+        const selected = APP_2027_THEMES.find((item) => item.id === theme)
+        if (selected) storeApp2027Theme(selected.id)
+      }}
+      coAppingContext={{
+        assistantAvailable: isCzCoAppingChatbotPreviewActive && isInAppScreen,
+        assistantOpen: czChatOpen,
+        chatContext: czChatContext,
+        assistantMode: czChatInitialMode,
+        selectedInvestmentSecurity: coordinators.investments.view.selectedInvestmentSecurity,
+        sessionActive: isCoAppingActive,
+        opportunities: czChatOpportunities.map((opportunity) => ({
+          ...opportunity,
+          relatedItem: opportunity.relatedItem
+            ? {
+                title: opportunity.relatedItem.title,
+                description: opportunity.relatedItem.description,
+                visualKind: opportunity.relatedItem.visualKind,
+                action: opportunity.relatedItem.action,
+              }
+            : undefined,
+        })),
+      }}
+      investmentRequests={{
+        buy: coordinators.investments.view.investmentBuyRequest,
+        funds: coordinators.investments.view.investmentFundsRequest,
+        detail: coordinators.investments.view.investmentSecurityDetailRequest,
+      }}
+      onInvestmentBuyRequestConsumed={coordinators.investments.actions.handleInvestmentBuyRequestConsumed}
+      onInvestmentSecuritySelected={coordinators.investments.actions.handleSelectedInvestmentSecurityChange}
+      onInvestmentReturnToSimulator={coordinators.investments.actions.handleReturnToFutureGainSimulator}
+      onContinueCoapping={handleContinueCoApping}
+      onCoAppingChatAction={handleCzChatAction}
+      onCoAppingChatRequest={(request) => {
+        if (request.kind === 'help' && request.area) openCzChatHelp(request.area)
+        else if (request.kind === 'for-you') openCzChatForYou()
+        else {
+          handleCzChatLauncherOpen()
+          openChanged(true)
+        }
+      }}
+      onCoAppingChatOpenChange={openChanged}
+      onCoAppingSessionEnd={handleConfirmTermination}
+      onResolveCoAppingReply={czChatReplyResolver}
+      futureGainSimulatorResumeState={coordinators.investments.view.futureGainFundSimulatorResumeState}
+      onStartCoapping={handleStartCoApping}
+      onFutureGainInvestmentFunds={coordinators.investments.actions.handleFutureGainInvestmentFundsClick}
+      onSmartInvestmentBack={coordinators.investments.actions.handleSmartInvestmentBack}
+      onTransactionCategoryChange={coordinators.accounts.actions.handleTransactionCategoryChange}
+      creditLimitOffer={coordinators.accounts.view.creditLimitOfferFlowCard}
+      creditLimitOverrides={coordinators.accounts.view.creditLimitOverrides}
+      onCreditLimitOfferCancel={coordinators.accounts.actions.cancelCreditOffer}
+      onCreditLimitOfferComplete={coordinators.accounts.actions.completeCreditOffer}
+      onPaymentEntryRequest={(route) => {
+        const params = route.params
+        if (params?.entry === 'redo' || params?.transactionId) {
+          coordinators.accounts.actions.handleRedoPaymentClick()
+        } else if (params?.beneficiaryId) {
+          const beneficiary = getFrequentBeneficiaries(country).find((item) => item.id === params.beneficiaryId)
+          if (beneficiary) coordinators.accounts.actions.handleBeneficiaryPaymentClick(beneficiary)
+        } else if (params?.templateId) {
+          const template = [...getPaymentTemplates(country), ...getSavedBeneficiaries(country, true)].find(
+            (item) => item.id === params.templateId,
+          )
+          if (template)
+            coordinators.accounts.actions.handlePaymentTemplateSelect(
+              release === 'release-future-evo-2027'
+                ? { ...template, beneficiaryName: getEvo2027TemplateBeneficiaryName(template, country) }
+                : template,
+            )
+        } else coordinators.accounts.actions.handleDomesticPaymentClick()
+      }}
+      transactionSelection={transactionSelection}
+      paymentFlow={paymentFlow}
+      onTransactionSelected={(selection) => {
+        const selectedProduct = coordinators.accounts.view.accountProducts.find(
+          (product) => product.id === selection.productId,
+        )
+        if (selectedProduct)
+          coordinators.accounts.actions.handleTransactionClick(selection.transaction, selectedProduct)
+      }}
+      onPaymentFlowChange={(next) => {
+        if (!next) {
+          coordinators.accounts.actions.handlePaymentDone()
+          return
+        }
+        const steps = ['create', 'review', 'sign', 'success'] as const
+        if (
+          next.step === 'review' &&
+          paymentFlow?.step !== 'review' &&
+          paymentFlow?.step !== 'sign' &&
+          paymentFlow?.step !== 'success'
+        ) {
+          coordinators.accounts.actions.handleDomesticPaymentNext(next.draft)
+          return
+        }
+        coordinators.accounts.actions.handlePaymentDraftChange(next.draft)
+        if (next.step === paymentFlow?.step) return
+        if (paymentFlow && steps.indexOf(next.step) < steps.indexOf(paymentFlow.step)) {
+          goBack()
+          return
+        }
+        const screens = {
+          create: 'domestic-payment',
+          review: 'payment-review',
+          sign: 'payment-sign',
+          success: 'payment-success',
+        } as const
+        navigateTo(screens[next.step])
+      }}
+    />
+  ) : (
+    referenceContent
   )
   return (
     <>
@@ -256,7 +388,6 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
           authoringWidth={product === 'PI' && country === 'IT' && designSystem === 'mobile-first' ? 393 : 375}
           statusBarVariant={statusBarVariant}
           isCoAppingActive={isCoAppingActive && coAppingAvailable}
-          overlay={czChatLayer}
         >
           <div
             data-mf-large-text={(isItalyMobileFirst && mobileFirstSettings.textSize) || undefined}
@@ -273,7 +404,7 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
             <ScreenErrorBoundary resetKey={screenRecoveryKey} onBack={goBack}>
               <Suspense fallback={<ScreenFallback />}>
                 {content}
-                {isSupportedRuntimeContext && !isKidsRuntimeContext && (
+                {!nativeOwned && isSupportedRuntimeContext && !isKidsRuntimeContext && (
                   <>
                     {/* Panel Overlay - appears on PreLogin screens when OTHER is clicked */}
                     {showPanel && <PanelOverlay onClose={handleClosePanel} onStartCoApping={handleStartCoApping} />}

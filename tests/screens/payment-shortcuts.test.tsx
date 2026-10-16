@@ -1,13 +1,19 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { DemoProvider } from '@/app/state/demoStore'
 import PaymentsScreen from '@/app/screens/payments/PaymentsScreen'
 import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
 import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
 
 function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -20,6 +26,7 @@ function Providers({ children }: { children: React.ReactNode }) {
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+  resetNativeWebRendererDiagnostics()
 })
 
 describe('Payments shortcut screens', () => {
@@ -100,20 +107,23 @@ describe('Payments shortcut screens', () => {
     expect(screen.getByRole('button', { name: 'Choose currency, current RON' })).toBeInTheDocument()
   })
 
-  it('opens both child views from the existing Payments shortcuts and returns to the hub', () => {
+  it('opens both child views from the existing Payments shortcuts and returns to the hub', async () => {
     const onTemplateSelect = vi.fn()
-    render(<PaymentsScreen onTemplateSelect={onTemplateSelect} />, { wrapper: Providers })
+    const firstView = render(<PaymentsScreen onTemplateSelect={onTemplateSelect} />, { wrapper: Providers })
+    await asyncNativeReady(firstView.container)
 
     fireEvent.click(screen.getByRole('button', { name: 'My Templates' }))
-    expect(screen.getAllByRole('heading', { name: 'Templates' }).length).toBeGreaterThan(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Use template GREEN ENERGY INVOICE for Green Energy Services' }))
-    expect(onTemplateSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'green-energy' }))
+    expect((await screen.findAllByRole('heading', { name: 'Templates' })).some((title) => title.isConnected)).toBe(true)
+    fireEvent.click(await screen.findByRole('button', { name: 'Use template GREEN ENERGY INVOICE for Green Energy Services' }))
+    await waitFor(() => expect(onTemplateSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'green-energy' })))
 
     cleanup()
-    render(<PaymentsScreen />, { wrapper: Providers })
+    resetNativeWebRendererDiagnostics()
+    const secondView = render(<PaymentsScreen />, { wrapper: Providers })
+    await asyncNativeReady(secondView.container)
     fireEvent.click(screen.getByRole('button', { name: 'Exchange Rates' }))
-    expect(screen.getAllByRole('heading', { name: 'Exchange rates' }).length).toBeGreaterThan(0)
+    expect((await screen.findAllByRole('heading', { name: 'Exchange rates' })).some((title) => title.isConnected)).toBe(true)
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    expect(screen.getByRole('heading', { name: 'Payments' })).toBeInTheDocument()
+    expect((await screen.findAllByRole('heading', { name: 'Payments' })).some((title) => title.isConnected)).toBe(true)
   })
 })

@@ -1,7 +1,7 @@
 import {
   type CoAppingFollowUpSuggestion,
   type CoAppingRichBlock,
-} from '../../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import {
   buildCzChatFollowUp,
   formatCzChatMoney,

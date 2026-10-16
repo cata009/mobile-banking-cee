@@ -1,4 +1,7 @@
-import type { CoAppingChatMessage, CoAppingReplyResult } from '../../../../package/mobile-pi-coapping-chat-package/src'
+import type {
+  CoAppingChatMessage,
+  CoAppingReplyResult,
+} from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 import type { CzChatNormalizedContext } from './normalizedContext'
 import { buildCzInvestmentRequestContext, type CzInvestmentRequestContext } from './investmentRequestContext'
 import { normalizeCzChatInput } from './matching'

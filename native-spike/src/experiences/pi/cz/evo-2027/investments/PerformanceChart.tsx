@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, {
@@ -33,6 +34,7 @@ export function PerformanceChart({
   zeroBaselineOnly?: boolean;
   currency?: string;
 }) {
+  const market = useInvestmentMarket();
   const [width, setWidth] = useState(327),
     [active, setActive] = useState<number | null>(null);
   const safe = points.filter(point => Number.isFinite(point.value));
@@ -101,7 +103,7 @@ export function PerformanceChart({
   const comparison =
     active === null
       ? undefined
-      : safe[active - 1] ?? safe[active + 1] ?? selected;
+      : (safe[active - 1] ?? safe[active + 1] ?? selected);
   const tooltipX = point ? Math.min(width - 100, Math.max(6, point.x - 45)) : 0,
     tooltipY = point
       ? point.y + 90 <= 154
@@ -230,7 +232,12 @@ export function PerformanceChart({
               fontFamily="UniCredit-bold"
               fill="#262626"
             >
-              {formatInvestmentMoney(selected.value, 'CZ', currency, hidden)}
+              {formatInvestmentMoney(
+                selected.value,
+                market.country,
+                currency,
+                hidden,
+              )}
             </SvgText>
             {showPerformance && comparison ? (
               <SvgText

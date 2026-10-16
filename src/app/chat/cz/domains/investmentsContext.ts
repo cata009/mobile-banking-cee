@@ -9,7 +9,7 @@ import { getCountryConfig } from '@/app/registry/countryConfig'
 import {
   type CoAppingInvestmentChart,
   type CoAppingRichBlock,
-} from '../../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzNavigateAction, formatCzChatDate, formatCzChatMoney, type CzChatSmartReplyOptions } from '../helpers'
 import type { buildCzProfileChatContext } from './profileContext'
 import { normalizeCzChatInput as normalize } from '../matching'

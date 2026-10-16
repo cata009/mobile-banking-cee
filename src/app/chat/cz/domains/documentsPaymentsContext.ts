@@ -1,4 +1,4 @@
-import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzNavigateAction, getCzLatestDocument, type CzChatSmartReplyOptions } from '../helpers'
 
 /** Domain-owned derivation used once when a chat resolver snapshots its input. */

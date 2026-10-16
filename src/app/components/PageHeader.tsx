@@ -1,19 +1,14 @@
 import type { ReactNode } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
+import { pageHeaderWeb } from "./contracts/pageHeaderWeb";
+import type { PageHeaderOptions } from "./contracts/pageHeader";
 
-interface PageHeaderProps {
+interface PageHeaderProps extends PageHeaderOptions {
   title: string;
   onBack: () => void;
   onHelpClick?: () => void;
   onRightActionClick?: () => void;
-  variant?: "light" | "dark" | "transparent" | "gray";
-  showHelp?: boolean;
-  showBack?: boolean;
-  compact?: boolean;
-  renderLargeTitle?: boolean;
-  collapsedTitleProgress?: number;
-  includeSafeArea?: boolean;
   rightActionIcon?: ReactNode;
   rightActionLabel?: string;
   rightActionPressed?: boolean;
@@ -21,7 +16,6 @@ interface PageHeaderProps {
   backLabel?: string;
   largeTitleAlign?: "left" | "center";
   largeTitleColor?: string;
-  hideCollapsedTitleWhenHidden?: boolean;
   /** Sits before the large title, e.g. the category icon of the page being read. */
   leadingVisual?: ReactNode;
   /** Rendered under the large title — a total, a count, whatever names the page's figures. */
@@ -53,29 +47,8 @@ export default function PageHeader({
   subtitle,
   headerSubtitle,
 }: PageHeaderProps) {
-  const iconColor = variant === "dark" ? "white" : "var(--uc-text)";
-  const textColor = variant === "dark" ? "text-[var(--uc-static-white)]" : "text-[var(--uc-text)]";
-  const bgColor =
-    variant === "dark" || variant === "transparent"
-      ? "bg-transparent"
-      : variant === "gray"
-      ? "bg-[var(--uc-app-bg)]"
-      : "bg-[var(--uc-surface)]";
-  const titleProgress = Math.min(1, Math.max(0, collapsedTitleProgress));
-  const largeTitleOpacity = 1 - titleProgress;
-  const shouldRenderLargeTitle = renderLargeTitle && !(compact && titleProgress >= 0.999);
-
-  const stickyBgStyle = variant === "dark"
-    ? {
-        backgroundColor: `rgba(26, 26, 26, ${titleProgress * 0.95})`,
-        backdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
-        WebkitBackdropFilter: titleProgress > 0 ? "blur(8px)" : "none",
-      }
-    : variant === "gray"
-    ? {
-        backgroundColor: "var(--uc-app-bg)",
-      }
-    : undefined;
+  const contract = pageHeaderWeb({ variant, showHelp, showBack, compact, renderLargeTitle, collapsedTitleProgress, includeSafeArea, hideCollapsedTitleWhenHidden });
+  const { iconColor, textColor, bgColor, titleProgress, largeTitleOpacity, shouldRenderLargeTitle, stickyBgStyle } = contract;
 
   const largeTitle = (
     <h1
@@ -96,8 +69,8 @@ export default function PageHeader({
   const rightAction = rightActionIcon ? (
     <button
       onClick={onRightActionClick}
-      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
-      style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+      className={contract.actionClass}
+      style={contract.actionStyle}
       aria-label={rightActionLabel}
       aria-pressed={rightActionPressed}
       title={rightActionLabel}
@@ -107,8 +80,8 @@ export default function PageHeader({
   ) : showHelp ? (
     <button
       onClick={onHelpClick}
-      className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
-      style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+      className={contract.actionClass}
+      style={contract.actionStyle}
       aria-label="Help"
     >
       <AppIcon name="help-circle" color={iconColor} />
@@ -130,8 +103,8 @@ export default function PageHeader({
           {showBack ? (
             <button
               onClick={onBack}
-              className="flex h-[40px] w-[40px] self-center cursor-pointer items-center justify-center"
-              style={{ padding: "8px 7.998px 7.997px 7.998px" }}
+              className={contract.actionClass}
+              style={contract.actionStyle}
               aria-label={backLabel}
               title={backLabel}
             >
@@ -143,10 +116,10 @@ export default function PageHeader({
 
           <div
             className="pointer-events-none min-w-0 text-center"
-            aria-hidden={hideCollapsedTitleWhenHidden && titleProgress === 0}
+            aria-hidden={contract.collapsedTitleHidden}
             style={{
               opacity: titleProgress,
-              transform: `translateY(${(1 - titleProgress) * 6}px)`,
+              transform: `translateY(${contract.collapsedTitleTranslateY}px)`,
             }}
           >
             <h1 className={cn("uc-type-n4-strong truncate", textColor)}>{title}</h1>

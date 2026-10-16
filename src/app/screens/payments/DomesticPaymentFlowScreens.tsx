@@ -1,81 +1,58 @@
-import { useMemo, useState } from "react";
-import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
-import type { ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import PrimaryButton from "@/app/components/PrimaryButton";
-import AccountActionBar, { type AccountActionBarItem } from "@/app/components/accounts/AccountActionBar";
-import CardNavigationRow from "@/app/components/cards/CardNavigationRow";
-import { AppIcon } from "@/app/components/icons";
-import AmountField from "@/app/components/AmountField";
-import ToggleButton from "@/app/components/ToggleButton";
-import { useLanguage } from "@/app/contexts/LanguageContext";
-import { useProducts } from "@/hooks/useProducts";
-import PageHeader from "@/app/components/PageHeader";
-import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
-import TransactionAvatar from "@/app/components/transactions/TransactionAvatar";
-import PfmCategoryChangeSheet from "@/app/components/pfm/PfmCategoryChangeSheet";
-import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
-import PaymentTemplatesScreen from "@/app/screens/payments/PaymentTemplatesScreen";
-import TextField from "@/app/components/TextField";
-import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
-import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
-import type { AccountTransaction } from "@/data/accountDetails";
-import { useDemo } from "@/app/state/demoStore";
-import { getPfmCategorySelection, type PfmCategorySelection } from "@/data/pfmCategories";
-import type { CreditCard, DebitCard, Product } from "@/data/products";
-import {
-  createTransactionDetailData,
-  createTemplateDomesticPaymentDraft,
-  formatDraftAmount,
-  type DomesticPaymentDraft,
-} from "@/data/paymentFlow";
-import type { PaymentTemplateSelection } from "@/data/paymentTemplates";
-import type { CountryId } from "@/app/state/demoTypes";
-import {
-  getCzechPaymentBankName,
-  isValidCzechBankCode,
-  isValidCzechMainAccountNumber,
-  isValidCzechPrefix,
-  parseCzechDomesticAccountClipboard,
-} from "@/data/czechDomesticAccount";
+import { NativeScreenPreview } from '@/app/components/demo/NativeScreenPreview'
+import { serializeNativeTransactionVisual } from '@/app/components/demo/serializeNativeTransactionVisual'
+import type { NativeDemoEvents, NativeDemoRoute } from '@/features/demo-native/contracts'
+import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents'
+import type { NativeTransactionLeadingVisual } from '@/features/demo-native/bankingPresentation'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { CardTransactionMerchantEnrichment } from '@/features/cards/transactions/contracts'
+export type { CardTransactionMerchantEnrichment } from '@/features/cards/transactions/contracts'
+import { useCollapsingHeader } from '@/hooks/useCollapsingHeader'
+import type { ReactNode } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
+import AccountActionBar, { type AccountActionBarItem } from '@/app/components/accounts/AccountActionBar'
+import CardNavigationRow from '@/app/components/cards/CardNavigationRow'
+import { AppIcon } from '@/app/components/icons'
+import { useLanguage } from '@/app/contexts/LanguageContext'
+import { useProducts } from '@/hooks/useProducts'
+import PageHeader from '@/app/components/PageHeader'
+import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
+import TransactionAvatar from '@/app/components/transactions/TransactionAvatar'
+import PfmCategoryChangeSheet from '@/app/components/pfm/PfmCategoryChangeSheet'
+import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
+import type { AccountTransaction } from '@/data/accountDetails'
+import { useDemo } from '@/app/state/demoStore'
+import { getPfmCategorySelection, type PfmCategorySelection } from '@/data/pfmCategories'
+import type { CreditCard, DebitCard, Product } from '@/data/products'
+import { createTransactionDetailData, type DomesticPaymentDraft } from '@/data/paymentFlow'
+import type { CountryId } from '@/app/state/demoTypes'
 
 function SectionTitle({
   children,
   darkNoDivider = false,
-  className = "",
+  className = '',
 }: {
-  children: string;
-  darkNoDivider?: boolean;
-  className?: string;
+  children: string
+  darkNoDivider?: boolean
+  className?: string
 }) {
-  const wrapperClassName = `pt-[30px] ${className}`;
+  const wrapperClassName = `pt-[30px] ${className}`
 
   if (darkNoDivider) {
     return (
       <div className={wrapperClassName} data-ds-label="SectionHeadingDivider">
         <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[#262626]">{children}</h2>
       </div>
-    );
+    )
   }
 
-  return <SectionHeadingDivider title={children} className={wrapperClassName} />;
+  return <SectionHeadingDivider title={children} className={wrapperClassName} />
 }
 
-function DetailRow({
-  label,
-  value,
-  copy,
-}: {
-  label: string;
-  value: string;
-  copy?: boolean;
-}) {
+function DetailRow({ label, value, copy }: { label: string; value: string; copy?: boolean }) {
   return (
     <div className="flex items-start gap-[12px] py-[17px]">
       <div className="min-w-0 flex-1">
-        <p className="uc-type-n5 text-[var(--uc-text-muted)]">
-          {label}
-        </p>
+        <p className="uc-type-n5 text-[var(--uc-text-muted)]">{label}</p>
         <p className="uc-type-n4-strong mt-[3px] whitespace-pre-line break-words leading-[20px] text-[var(--uc-text)]">
           {value}
         </p>
@@ -86,18 +63,10 @@ function DetailRow({
         </button>
       )}
     </div>
-  );
+  )
 }
 
-function EvoTransactionFactRow({
-  label,
-  value,
-  copy,
-}: {
-  label: string;
-  value: string;
-  copy?: boolean;
-}) {
+function EvoTransactionFactRow({ label, value, copy }: { label: string; value: string; copy?: boolean }) {
   return (
     <div data-transaction-detail-fact-row className="flex items-start justify-between gap-[14px] py-[13px]">
       <span className="min-w-0 flex-1 text-[13px] text-[var(--uc-text-muted)]">{label}</span>
@@ -110,69 +79,25 @@ function EvoTransactionFactRow({
         ) : null}
       </span>
     </div>
-  );
+  )
 }
 
 function getMccDisplayName(value?: string) {
-  const mcc = value?.trim();
-  if (!mcc) return undefined;
+  const mcc = value?.trim()
+  if (!mcc) return undefined
 
-  const localizedName = mcc.match(/^\d{4}\s*[·•–—-]\s*(.+)$/)?.[1]?.trim();
-  if (localizedName) return localizedName;
+  const localizedName = mcc.match(/^\d{4}\s*[·•–—-]\s*(.+)$/)?.[1]?.trim()
+  if (localizedName) return localizedName
 
   // A numeric MCC without a description is not customer-facing display text.
-  return /^\d{4}$/.test(mcc) ? undefined : mcc;
+  return /^\d{4}$/.test(mcc) ? undefined : mcc
 }
 
-function FlowField({
-  children,
-  minHeight,
+function MerchantLocationDetail({
+  location,
 }: {
-  children: ReactNode;
-  minHeight?: number;
+  location: NonNullable<CardTransactionMerchantEnrichment['location']>
 }) {
-  return (
-    <div
-      className="flex min-h-[80px] flex-col justify-center"
-      style={minHeight ? { minHeight } : undefined}
-    >
-      {children}
-    </div>
-  );
-}
-
-function formatAmountInput(value: string) {
-  return value.replace(/\s/g, "");
-}
-
-const CZ_DOMESTIC_PAYMENT_FIELD_LIMITS = {
-  prefix: 6,
-  accountNumber: 10,
-  bankCode: 4,
-} as const;
-
-function sanitizeCzAccountPart(value: string, maxLength: number) {
-  return value.replace(/\D/g, "").slice(0, maxLength);
-}
-
-function getCzSelectionAccountParts(selection: PaymentTemplateSelection) {
-  // Synthetic CZ template and saved-beneficiary identifiers encode local account parts.
-  const match = selection.accountNumber.match(/^CZ\d{2}BACX(\d{6})(\d{6})$/);
-  return match ? { prefix: match[1], accountNumber: match[2] } : null;
-}
-
-export interface CardTransactionMerchantEnrichment {
-  cleanMerchantName: string;
-  /** A trusted merchant-logo node supplied by the caller; absent means no logo is rendered. */
-  merchantLogo?: ReactNode;
-  location?: {
-    label: string;
-    address: string;
-  };
-  mcc?: string;
-}
-
-function MerchantLocationDetail({ location }: { location: NonNullable<CardTransactionMerchantEnrichment["location"]> }) {
   return (
     <section
       className="mb-[8px] w-full overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] text-left"
@@ -189,8 +114,18 @@ function MerchantLocationDetail({ location }: { location: NonNullable<CardTransa
           <path d="M-12 104C38 81 70 72 114 77C160 82 189 102 229 94C269 86 292 60 356 54V132H-12Z" fill="#DDE7D8" />
           <path d="M257 -8C250 20 257 42 276 61C291 76 298 97 306 126" fill="none" stroke="#ACD3E6" strokeWidth="12" />
           <path d="M257 -8C250 20 257 42 276 61C291 76 298 97 306 126" fill="none" stroke="#D4EEF8" strokeWidth="5" />
-          <path d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19" fill="none" stroke="#FFFDF8" strokeWidth="20" />
-          <path d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19" fill="none" stroke="#D4D4CE" strokeWidth="2" />
+          <path
+            d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19"
+            fill="none"
+            stroke="#FFFDF8"
+            strokeWidth="20"
+          />
+          <path
+            d="M-18 26C40 29 67 46 105 57C156 72 204 67 249 37C282 15 314 12 358 19"
+            fill="none"
+            stroke="#D4D4CE"
+            strokeWidth="2"
+          />
           <path d="M11 129C32 92 64 80 102 64C151 44 182 19 208 -12" fill="none" stroke="#FFFDF8" strokeWidth="15" />
           <path d="M11 129C32 92 64 80 102 64C151 44 182 19 208 -12" fill="none" stroke="#D4D4CE" strokeWidth="2" />
           <path d="M66 -6C78 29 91 49 125 75C149 93 178 104 221 122" fill="none" stroke="#FFFDF8" strokeWidth="10" />
@@ -217,14 +152,130 @@ function MerchantLocationDetail({ location }: { location: NonNullable<CardTransa
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function isPhysicalCard(product?: Product | null): product is DebitCard | CreditCard {
-  return product?.type === "debit_card" || product?.type === "credit_card";
+  return product?.type === 'debit_card' || product?.type === 'credit_card'
 }
 
-export function TransactionDetailScreen({
+function usePaymentPreviewFlow(initialFlow: NativePaymentFlow | null) {
+  const key = JSON.stringify(initialFlow)
+  const [flow, setFlow] = useState(initialFlow)
+  const previousKey = useRef(key)
+  const latestFlow = useRef(initialFlow)
+  latestFlow.current = initialFlow
+
+  useEffect(() => {
+    if (previousKey.current === key) return
+    previousKey.current = key
+    setFlow(latestFlow.current)
+  }, [key])
+
+  return [flow, setFlow] as const
+}
+
+function PaymentFlowPreview({
+  route,
+  initialFlow,
+  onBack,
+  onFlowChange,
+}: {
+  route: NativeDemoRoute
+  initialFlow: NativePaymentFlow | null
+  onBack: () => void
+  onFlowChange: NonNullable<NativeDemoEvents['onPaymentFlowChange']>
+}) {
+  const [flow, setFlow] = usePaymentPreviewFlow(initialFlow)
+  return (
+    <NativeScreenPreview
+      route={route}
+      snapshot={{ paymentFlow: flow }}
+      events={{
+        onPaymentFlowChange: (nextFlow) => {
+          setFlow(nextFlow)
+          onFlowChange(nextFlow)
+        },
+      }}
+      onBack={onBack}
+      onNavigate={(_route, action) => action === 'push'}
+    />
+  )
+}
+
+export function TransactionDetailScreen(props: {
+  country: CountryId
+  product?: Product | null
+  transaction: AccountTransaction
+  onBack: () => void
+  onRedoPayment: () => void
+  onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void
+  /** Optional ETHOCA-style enrichment; omitted in the current baseline runtime. */
+  merchantEnrichment?: CardTransactionMerchantEnrichment
+  /** Plain Native visual supplied by fixed-data flow previews. */
+  nativeMerchantVisual?: NativeTransactionLeadingVisual
+  /** Optional market-specific representation for the linked physical card. */
+  cardUsedContent?: ReactNode
+}) {
+  const { product: demoProduct, country: demoCountry, designSystem } = useDemo()
+  const { categories } = useProducts()
+  const useNativeTransactionDetail =
+    demoProduct === 'PI' &&
+    designSystem === 'current' &&
+    demoCountry !== 'IT' &&
+    props.country !== 'IT'
+  // Keep non-PI, non-current design-system, and Italy details on the Source renderer.
+  if (!useNativeTransactionDetail) return <LegacySourceTransactionDetailBody {...props} />
+
+  const { country, product, transaction, merchantEnrichment, nativeMerchantVisual } = props
+  const productId = product?.id ?? ''
+  const source = transaction.source === 'card' ? 'card' : 'account'
+  const transactionPresentation = {
+    product: product ?? null,
+    ...(merchantEnrichment
+      ? {
+          merchantEnrichment: {
+            cleanMerchantName: merchantEnrichment.cleanMerchantName,
+            leadingVisual:
+              nativeMerchantVisual ??
+              serializeNativeTransactionVisual(merchantEnrichment.merchantLogo, transaction),
+            ...(merchantEnrichment.location ? { location: merchantEnrichment.location } : {}),
+            ...(merchantEnrichment.mcc ? { mcc: merchantEnrichment.mcc } : {}),
+          },
+        }
+      : {}),
+  }
+
+  return (
+    <NativeScreenPreview
+      route={{ screen: 'transaction', params: { productId, transactionId: transaction.id, source } }}
+      snapshot={{
+        country,
+        bankingPresentation: { productCategories: categories },
+        transactionSelection: { productId, source, transaction },
+        transactionPresentation,
+      }}
+      events={
+        props.onCategoryChange
+          ? {
+              onTransactionCategoryChange: (selectedTransaction, selection) =>
+                props.onCategoryChange?.(selectedTransaction, selection),
+            }
+          : undefined
+      }
+      onBack={props.onBack}
+      onNavigate={(route, action) => {
+        if (action === 'push' && route.screen === 'payment-create') {
+          props.onRedoPayment()
+          return true
+        }
+        return false
+      }}
+    />
+  )
+}
+
+function LegacySourceTransactionDetailBody({
   country,
   product,
   transaction,
@@ -234,60 +285,79 @@ export function TransactionDetailScreen({
   merchantEnrichment,
   cardUsedContent,
 }: {
-  country: CountryId;
-  product?: Product | null;
-  transaction: AccountTransaction;
-  onBack: () => void;
-  onRedoPayment: () => void;
-  onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void;
+  country: CountryId
+  product?: Product | null
+  transaction: AccountTransaction
+  onBack: () => void
+  onRedoPayment: () => void
+  onCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void
   /** Optional ETHOCA-style enrichment; omitted in the current baseline runtime. */
-  merchantEnrichment?: CardTransactionMerchantEnrichment;
+  merchantEnrichment?: CardTransactionMerchantEnrichment
   /** Optional market-specific representation for the linked physical card. */
-  cardUsedContent?: ReactNode;
+  cardUsedContent?: ReactNode
 }) {
-  const { t } = useLanguage();
-  const { release } = useDemo();
-  const { categories } = useProducts();
-  const isEvo2027 = release === "release-future-evo-2027";
-  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
-  const [areDetailsExpanded, setAreDetailsExpanded] = useState(false);
-  const [categorySheetOpen, setCategorySheetOpen] = useState(false);
-
+  const { t } = useLanguage()
+  const { release } = useDemo()
+  const { categories } = useProducts()
+  const isEvo2027 = release === 'release-future-evo-2027'
+  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48)
+  const [areDetailsExpanded, setAreDetailsExpanded] = useState(false)
+  const [categorySheetOpen, setCategorySheetOpen] = useState(false)
 
   const detail = useMemo(
     () => createTransactionDetailData(transaction, country, product),
     [country, product, transaction],
-  );
-  const merchantCategoryName = getMccDisplayName(merchantEnrichment?.mcc);
-  const currencyLabel = detail.amount.split(" ").slice(-1)[0];
-  const isPending = transaction.status === "Pending";
+  )
+  const merchantCategoryName = getMccDisplayName(merchantEnrichment?.mcc)
+  const currencyLabel = detail.amount.split(' ').slice(-1)[0]
+  const isPending = transaction.status === 'Pending'
   const cardUsed = isPhysicalCard(product)
     ? product
-    : product?.type === "current_account" && transaction.source === "card"
-      ? categories
+    : product?.type === 'current_account' && transaction.source === 'card'
+      ? (categories
           .flatMap((category) => category.products)
-          .find((candidate): candidate is DebitCard => candidate.type === "debit_card" && candidate.linkedAccountId === product.id) ?? null
-      : null;
-  const isCardTransaction = cardUsed !== null;
+          .find(
+            (candidate): candidate is DebitCard =>
+              candidate.type === 'debit_card' && candidate.linkedAccountId === product.id,
+          ) ?? null)
+      : null
+  const isCardTransaction = cardUsed !== null
   const renderDetailRow = (label: string, value: string, copy = false) =>
-    isEvo2027
-      ? <EvoTransactionFactRow label={label} value={value} copy={copy} />
-      : <DetailRow label={label} value={value} copy={copy} />;
-  const transactionActionItems: AccountActionBarItem[] = isPending ? [] : [
-    {
-      id: "change-category",
-      iconName: "grid-2x2",
-      label: t("runtime.transactionDetail.actions.changeCategory", "Change\ncategory"),
-      onClick: onCategoryChange ? () => setCategorySheetOpen(true) : undefined,
-    },
-    isCardTransaction
-      ? { id: "standing-order-slot", iconName: "standing-order", label: "Create\nStanding order", hidden: true }
-      : { id: "standing-order", iconName: "standing-order", label: t("runtime.transactionDetail.actions.createStandingOrder", "Create\nStanding order") },
-    isCardTransaction
-      ? { id: "request-chargeback", iconName: "request-chargeback", label: "Request\nchargeback" }
-      : { id: "redo-payment", iconName: "redo-payment", label: t("runtime.transactionDetail.actions.redoPayment", "Redo\npayment"), onClick: onRedoPayment },
-    { id: "send-payment", iconName: "send-payment", label: t("runtime.transactionDetail.actions.sendPayment", "Send\npayment") },
-  ];
+    isEvo2027 ? (
+      <EvoTransactionFactRow label={label} value={value} copy={copy} />
+    ) : (
+      <DetailRow label={label} value={value} copy={copy} />
+    )
+  const transactionActionItems: AccountActionBarItem[] = isPending
+    ? []
+    : [
+        {
+          id: 'change-category',
+          iconName: 'grid-2x2',
+          label: t('runtime.transactionDetail.actions.changeCategory', 'Change\ncategory'),
+          onClick: onCategoryChange ? () => setCategorySheetOpen(true) : undefined,
+        },
+        isCardTransaction
+          ? { id: 'standing-order-slot', iconName: 'standing-order', label: 'Create\nStanding order', hidden: true }
+          : {
+              id: 'standing-order',
+              iconName: 'standing-order',
+              label: t('runtime.transactionDetail.actions.createStandingOrder', 'Create\nStanding order'),
+            },
+        isCardTransaction
+          ? { id: 'request-chargeback', iconName: 'request-chargeback', label: 'Request\nchargeback' }
+          : {
+              id: 'redo-payment',
+              iconName: 'redo-payment',
+              label: t('runtime.transactionDetail.actions.redoPayment', 'Redo\npayment'),
+              onClick: onRedoPayment,
+            },
+        {
+          id: 'send-payment',
+          iconName: 'send-payment',
+          label: t('runtime.transactionDetail.actions.sendPayment', 'Send\npayment'),
+        },
+      ]
 
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
@@ -320,14 +390,15 @@ export function TransactionDetailScreen({
             >
               {merchantEnrichment?.cleanMerchantName ?? detail.title}
             </h1>
-            <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">
-              {detail.bookingDate}
-            </p>
+            <p className="uc-type-n5-strong mt-[8px] text-[var(--uc-text-muted)]">{detail.bookingDate}</p>
             <p className="mt-[8px] font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
               {detail.amount}
             </p>
             {isPending ? (
-              <p className="mt-[18px] inline-flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]" data-pending-status>
+              <p
+                className="mt-[18px] inline-flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]"
+                data-pending-status
+              >
                 <span className="size-[8px] rounded-full bg-[var(--uc-orange-status)]" aria-hidden="true" />
                 Pending
               </p>
@@ -355,70 +426,72 @@ export function TransactionDetailScreen({
             )}
           </section>
 
-          {!isPending ? <section className="mt-[31px]">
-            <AccountActionBar items={transactionActionItems} />
-          </section> : null}
+          {!isPending ? (
+            <section className="mt-[31px]">
+              <AccountActionBar items={transactionActionItems} />
+            </section>
+          ) : null}
         </div>
 
-        {!isPending ? <section className="px-[22px] pt-[23px]">
-          <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
-            {t("runtime.transactionDetail.spendingInsight", "Spending Insight")}
-          </h2>
-          <SectionTitle>{t("runtime.payments.domesticFlow.overviewFor2026", "OVERVIEW FOR 2026")}</SectionTitle>
-          <div className="pt-[28px]">
-            <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-              {detail.categoryGroup}
-            </p>
-            <p className="uc-type-h2 text-[var(--uc-text)]">
-              26,341.33 {currencyLabel}
-            </p>
-            <div className="mt-[10px] h-[16px] w-full rounded-full bg-[var(--uc-action)]" />
-            <div className="mt-[18px] h-[16px] w-[166px] rounded-full bg-[var(--uc-action)]" />
-            <p className="mt-[9px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
-              {detail.categoryTag}
-            </p>
-            <p className="uc-type-h2 text-[var(--uc-text)]">
-              10,334.22 {currencyLabel}
-            </p>
-          </div>
-          <SectionTitle>{`${t("runtime.transactionDetail.breakdownFor", "BREAKDOWN FOR")} ${detail.categoryTag}`}</SectionTitle>
-          <div className="mt-[34px]">
-            <div className="flex h-[120px] items-end justify-between px-[18px]">
-              {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (
-                <div key={index} className="w-[16px] rounded-t-full bg-[var(--uc-action)]" style={{ height }} />
-              ))}
+        {!isPending ? (
+          <section className="px-[22px] pt-[23px]">
+            <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
+              {t('runtime.transactionDetail.spendingInsight', 'Spending Insight')}
+            </h2>
+            <SectionTitle>{t('runtime.payments.domesticFlow.overviewFor2026', 'OVERVIEW FOR 2026')}</SectionTitle>
+            <div className="pt-[28px]">
+              <p className="font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
+                {detail.categoryGroup}
+              </p>
+              <p className="uc-type-h2 text-[var(--uc-text)]">26,341.33 {currencyLabel}</p>
+              <div className="mt-[10px] h-[16px] w-full rounded-full bg-[var(--uc-action)]" />
+              <div className="mt-[18px] h-[16px] w-[166px] rounded-full bg-[var(--uc-action)]" />
+              <p className="mt-[9px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
+                {detail.categoryTag}
+              </p>
+              <p className="uc-type-h2 text-[var(--uc-text)]">10,334.22 {currencyLabel}</p>
             </div>
-            <div className="h-px w-full bg-[var(--uc-border)]" />
-            <div className="flex justify-between px-[18px] pt-[14px]">
-              {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL"].map((label) => (
-                <span key={label} className="text-[11px] font-bold text-[var(--uc-text-muted)]">
-                  {label}
-                </span>
-              ))}
+            <SectionTitle>{`${t('runtime.transactionDetail.breakdownFor', 'BREAKDOWN FOR')} ${detail.categoryTag}`}</SectionTitle>
+            <div className="mt-[34px]">
+              <div className="flex h-[120px] items-end justify-between px-[18px]">
+                {[118, 74, 47, 86, 69, 51, 82].map((height, index) => (
+                  <div key={index} className="w-[16px] rounded-t-full bg-[var(--uc-action)]" style={{ height }} />
+                ))}
+              </div>
+              <div className="h-px w-full bg-[var(--uc-border)]" />
+              <div className="flex justify-between px-[18px] pt-[14px]">
+                {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL'].map((label) => (
+                  <span key={label} className="text-[11px] font-bold text-[var(--uc-text-muted)]">
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        </section> : null}
+          </section>
+        ) : null}
 
         <section className="px-[24px] pt-[30px]">
           <h2 className="font-['UniCredit',sans-serif] text-[22px] font-bold leading-normal text-[var(--uc-text)]">
-            {t("runtime.transactionDetail.title", "Transaction details")}
+            {t('runtime.transactionDetail.title', 'Transaction details')}
           </h2>
           <div className="pt-[20px]">
             {isCardTransaction ? (
               <>
-                {merchantEnrichment?.location ? <MerchantLocationDetail location={merchantEnrichment.location} /> : null}
+                {merchantEnrichment?.location ? (
+                  <MerchantLocationDetail location={merchantEnrichment.location} />
+                ) : null}
                 <div
-                  data-evo2027-transaction-details={isEvo2027 ? "true" : undefined}
-                  className={isEvo2027 ? "rounded-[18px] bg-[var(--uc-surface)] px-[16px]" : undefined}
+                  data-evo2027-transaction-details={isEvo2027 ? 'true' : undefined}
+                  className={isEvo2027 ? 'rounded-[18px] bg-[var(--uc-surface)] px-[16px]' : undefined}
                 >
-                  <div className={isEvo2027 ? "divide-y divide-[var(--uc-border-muted)]" : undefined}>
+                  <div className={isEvo2027 ? 'divide-y divide-[var(--uc-border-muted)]' : undefined}>
                     {renderDetailRow(
-                      t("runtime.cardTransactionDetail.description", "Transaction description"),
+                      t('runtime.cardTransactionDetail.description', 'Transaction description'),
                       merchantEnrichment?.cleanMerchantName ?? transaction.label,
                     )}
-                    {renderDetailRow(t("runtime.transactionDetail.amount", "Amount"), detail.amount)}
+                    {renderDetailRow(t('runtime.transactionDetail.amount', 'Amount'), detail.amount)}
                     {renderDetailRow(
-                      t("runtime.cardTransactionDetail.postingDate", "Posting date"),
+                      t('runtime.cardTransactionDetail.postingDate', 'Posting date'),
                       detail.bookingDate,
                     )}
                     <AnimatePresence initial={false}>
@@ -426,50 +499,76 @@ export function TransactionDetailScreen({
                         <motion.div
                           key="card-transaction-date"
                           initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
+                          animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                          style={{ overflow: "hidden" }}
+                          style={{ overflow: 'hidden' }}
                         >
                           {renderDetailRow(
-                            t("runtime.cardTransactionDetail.transactionDate", "Transaction date"),
+                            t('runtime.cardTransactionDetail.transactionDate', 'Transaction date'),
                             detail.bookingDate,
                           )}
                         </motion.div>
                       ) : null}
                     </AnimatePresence>
                     {merchantCategoryName
-                      ? renderDetailRow("Merchant Category Code (MCC)", merchantCategoryName)
+                      ? renderDetailRow('Merchant Category Code (MCC)', merchantCategoryName)
                       : null}
                   </div>
                 </div>
               </>
             ) : (
               <div
-                data-evo2027-transaction-details={isEvo2027 ? "true" : undefined}
-                className={isEvo2027 ? "rounded-[18px] bg-[var(--uc-surface)] px-[16px]" : undefined}
+                data-evo2027-transaction-details={isEvo2027 ? 'true' : undefined}
+                className={isEvo2027 ? 'rounded-[18px] bg-[var(--uc-surface)] px-[16px]' : undefined}
               >
-                <div className={isEvo2027 ? "divide-y divide-[var(--uc-border-muted)]" : undefined}>
-                  {renderDetailRow(t("runtime.accounts.detailsInfo.accountNumber", "Account number"), detail.accountNumber, true)}
-                  {renderDetailRow(t("runtime.accounts.detailsInfo.accountTitle", "Account title"), detail.accountTitle)}
-                  {renderDetailRow(t("runtime.transactionDetail.accountOwner", "Account owner"), detail.accountOwner)}
+                <div className={isEvo2027 ? 'divide-y divide-[var(--uc-border-muted)]' : undefined}>
+                  {renderDetailRow(
+                    t('runtime.accounts.detailsInfo.accountNumber', 'Account number'),
+                    detail.accountNumber,
+                    true,
+                  )}
+                  {renderDetailRow(
+                    t('runtime.accounts.detailsInfo.accountTitle', 'Account title'),
+                    detail.accountTitle,
+                  )}
+                  {renderDetailRow(t('runtime.transactionDetail.accountOwner', 'Account owner'), detail.accountOwner)}
                   <AnimatePresence initial={false}>
                     {areDetailsExpanded ? (
                       <motion.div
                         key="extra-transaction-details"
                         initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
+                        animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                        style={{ overflow: "hidden" }}
+                        style={{ overflow: 'hidden' }}
                       >
-                        {renderDetailRow(t("runtime.transactionDetail.bookingDate", "Booking date"), detail.bookingDate)}
-                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryName", "Beneficiary Name"), detail.beneficiaryName)}
-                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryBankName", "Beneficiary Bank Name"), detail.beneficiaryBankName)}
-                        {renderDetailRow(t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number"), detail.beneficiaryAccountNumber, true)}
-                        {renderDetailRow(t("runtime.transactionDetail.amount", "Amount"), detail.amount)}
-                        {renderDetailRow(t("runtime.payments.domesticFlow.paymentDetails", "Payment details"), detail.paymentDetails)}
-                        {renderDetailRow(t("runtime.transactionDetail.referenceNumber", "Reference number"), detail.referenceNumber)}
+                        {renderDetailRow(
+                          t('runtime.transactionDetail.bookingDate', 'Booking date'),
+                          detail.bookingDate,
+                        )}
+                        {renderDetailRow(
+                          t('runtime.transactionDetail.beneficiaryName', 'Beneficiary Name'),
+                          detail.beneficiaryName,
+                        )}
+                        {renderDetailRow(
+                          t('runtime.transactionDetail.beneficiaryBankName', 'Beneficiary Bank Name'),
+                          detail.beneficiaryBankName,
+                        )}
+                        {renderDetailRow(
+                          t('runtime.transactionDetail.beneficiaryAccountNumber', 'Beneficiary account number'),
+                          detail.beneficiaryAccountNumber,
+                          true,
+                        )}
+                        {renderDetailRow(t('runtime.transactionDetail.amount', 'Amount'), detail.amount)}
+                        {renderDetailRow(
+                          t('runtime.payments.domesticFlow.paymentDetails', 'Payment details'),
+                          detail.paymentDetails,
+                        )}
+                        {renderDetailRow(
+                          t('runtime.transactionDetail.referenceNumber', 'Reference number'),
+                          detail.referenceNumber,
+                        )}
                       </motion.div>
                     ) : null}
                   </AnimatePresence>
@@ -484,12 +583,12 @@ export function TransactionDetailScreen({
             className="mx-auto mt-[18px] block pb-[18px] text-center font-['UniCredit',sans-serif] text-[14px] font-bold leading-normal text-[var(--uc-action)]"
           >
             {areDetailsExpanded
-              ? t("runtime.actions.showLess", "Show less")
-              : t("runtime.actions.showMore", "Show more")}
+              ? t('runtime.actions.showLess', 'Show less')
+              : t('runtime.actions.showMore', 'Show more')}
           </button>
           {cardUsed ? (
             <section className="pt-[14px]" data-card-used>
-              <SectionHeadingDivider title={t("runtime.cardTransactionDetail.cardUsed", "Card used")} />
+              <SectionHeadingDivider title={t('runtime.cardTransactionDetail.cardUsed', 'Card used')} />
               {cardUsedContent ?? <CardNavigationRow card={cardUsed} />}
             </section>
           ) : null}
@@ -500,463 +599,158 @@ export function TransactionDetailScreen({
           currentSelection={getPfmCategorySelection(transaction.pfmCategory, transaction.pfmSubcategory)}
           onClose={() => setCategorySheetOpen(false)}
           onConfirm={(selection) => {
-            onCategoryChange?.(transaction, selection);
-            setCategorySheetOpen(false);
+            onCategoryChange?.(transaction, selection)
+            setCategorySheetOpen(false)
           }}
         />
       ) : null}
     </div>
-  );
+  )
 }
 
 export function DomesticPaymentCreateScreen({
   draft,
+  initialStep = 'recipient',
+  paymentFlow,
+  onDraftChange,
+  onPaymentFlowChange,
   onBack,
   onNext,
 }: {
-  draft: DomesticPaymentDraft;
-  onBack: () => void;
-  onNext: (draft: DomesticPaymentDraft) => void;
+  draft: DomesticPaymentDraft
+  initialStep?: 'recipient' | 'amount'
+  paymentFlow?: NativePaymentFlow | null
+  onDraftChange?: (draft: DomesticPaymentDraft) => void
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange']
+  onBack: () => void
+  onNext: (draft: DomesticPaymentDraft) => void
 }) {
-  const { t } = useLanguage();
-  const { product, country, release } = useDemo();
-  const [form, setForm] = useState(draft);
-  const [isRecipientPickerOpen, setIsRecipientPickerOpen] = useState(false);
-  const [czTouched, setCzTouched] = useState({ prefix: false, accountNumber: false, bankCode: false });
-  const [czClipboardAccount, setCzClipboardAccount] = useState<ReturnType<typeof parseCzechDomesticAccountClipboard>>(null);
-  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
-  const usesCzBaselineDomesticPaymentLayout =
-    product === "PI" && country === "CZ" && release === "release-current";
-  const czAccountValidity = {
-    prefix: isValidCzechPrefix(form.prefix.trim()),
-    accountNumber: isValidCzechMainAccountNumber(form.accountNumber.trim()),
-    bankCode: isValidCzechBankCode(form.bankCode.trim()),
-  };
-  const czTouchedErrors = [
-    czTouched.prefix && !czAccountValidity.prefix
-      ? t("runtime.payments.domesticFlow.prefix", "Prefix")
-      : "",
-    czTouched.accountNumber && !czAccountValidity.accountNumber
-      ? t("runtime.accounts.detailsInfo.accountNumber", "Account number")
-      : "",
-    czTouched.bankCode && !czAccountValidity.bankCode
-      ? t("runtime.payments.domesticFlow.bankCode", "Bank code")
-      : "",
-  ].filter(Boolean);
-  const updateCzAccountPart = (
-    key: "prefix" | "accountNumber" | "bankCode",
-    rawValue: string,
-  ) => {
-    const maxLength = CZ_DOMESTIC_PAYMENT_FIELD_LIMITS[key];
-    const value = sanitizeCzAccountPart(rawValue, maxLength);
-    setForm((current) => ({
-      ...current,
-      [key]: value,
-      ...(key === "bankCode" ? { bankName: getCzechPaymentBankName(value) ?? "" } : {}),
-    }));
-  };
-  const checkCzClipboard = async () => {
-    if (!navigator.clipboard?.readText) {
-      setCzClipboardAccount(null);
-      return;
-    }
-    try {
-      const clipboardText = await navigator.clipboard.readText();
-      setCzClipboardAccount(parseCzechDomesticAccountClipboard(clipboardText));
-    } catch {
-      // Clipboard access is optional; denied permission or unsupported browsers show no suggestion.
-      setCzClipboardAccount(null);
-    }
-  };
-  const applyCzClipboardAccount = () => {
-    if (!czClipboardAccount) return;
-    setForm((current) => ({
-      ...current,
-      ...czClipboardAccount,
-      bankName: getCzechPaymentBankName(czClipboardAccount.bankCode) ?? "",
-    }));
-    setCzTouched({ prefix: true, accountNumber: true, bankCode: true });
-    setCzClipboardAccount(null);
-  };
-  const update = (key: keyof DomesticPaymentDraft, value: string | boolean) => {
-    setForm((current) => ({ ...current, [key]: value }));
-  };
-  const handleRecipientSelection = (selection: PaymentTemplateSelection) => {
-    const selectedDraft = createTemplateDomesticPaymentDraft(selection, country);
-    const czLocalAccountParts = usesCzBaselineDomesticPaymentLayout
-      ? getCzSelectionAccountParts(selection)
-      : null;
-
-    setForm((current) => {
-      const next = {
-        ...current,
-        beneficiaryName: selectedDraft.beneficiaryName,
-        prefix: czLocalAccountParts?.prefix ?? selectedDraft.prefix,
-        accountNumber: czLocalAccountParts?.accountNumber ?? selectedDraft.accountNumber,
-        bankCode: selectedDraft.bankCode,
-        bankName: usesCzBaselineDomesticPaymentLayout
-          ? getCzechPaymentBankName(selectedDraft.bankCode) ?? ""
-          : selectedDraft.bankName,
-        recipientKind: selectedDraft.recipientKind,
-        currency: selectedDraft.currency,
-      };
-
-      return selection.kind === "template"
-        ? {
-            ...next,
-            amount: selectedDraft.amount,
-            informationForBeneficiary: selectedDraft.informationForBeneficiary,
-          }
-        : next;
-    });
-    setIsRecipientPickerOpen(false);
-  };
-
-  if (usesCzBaselineDomesticPaymentLayout && isRecipientPickerOpen) {
-    return (
-      <PaymentTemplatesScreen
-        onBack={() => setIsRecipientPickerOpen(false)}
-        onSelect={handleRecipientSelection}
-        isEvo2027={false}
-      />
-    );
-  }
-
-  const isFormValid =
-    form.beneficiaryName.trim().length > 0 &&
-    (usesCzBaselineDomesticPaymentLayout || form.prefix.trim().length > 0) &&
-    form.accountNumber.trim().length > 0 &&
-    form.bankCode.trim().length > 0 &&
-    (!usesCzBaselineDomesticPaymentLayout || (
-      czAccountValidity.prefix && czAccountValidity.accountNumber && czAccountValidity.bankCode
-    )) &&
-    form.amount.trim().length > 0;
-
-
+  const initialFlow = paymentFlow ?? { draft, step: 'create' as const, initialStep }
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
-        <PageHeader
-          title={t("runtime.payments.domesticFlow.domesticPaymentTitle", "Domestic payment")}
-          onBack={onBack}
-          onHelpClick={() => undefined}
-          collapsedTitleProgress={headerProgress}
-          includeSafeArea
-          showHelp={usesCzBaselineDomesticPaymentLayout}
-          subtitle={
-            usesCzBaselineDomesticPaymentLayout ? (
-              <div className="mt-[8px]">
-                <p className="uc-type-n4 text-[var(--uc-text-muted)]">
-                  {t("runtime.payments.domesticFlow.to", "To")}
-                </p>
-                <h2 className="uc-type-h1 mt-[8px] text-[var(--uc-text)]">
-                  {t("runtime.payments.domesticFlow.newBeneficiary", "New beneficiary")}
-                </h2>
-              </div>
-            ) : undefined
-          }
-        />
-        <div className="px-[24px] pb-[18px]">
-        <SectionTitle
-          darkNoDivider={usesCzBaselineDomesticPaymentLayout}
-          className={usesCzBaselineDomesticPaymentLayout ? "pb-[12px]" : undefined}
-        >
-          {t("runtime.payments.domesticFlow.fromAccount", "FROM ACCOUNT")}
-        </SectionTitle>
-        <FlowField minHeight={usesCzBaselineDomesticPaymentLayout ? 96 : undefined}>
-          <TextField
-            label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
-            value={form.payerAccountNumber}
-            onChange={(value) => update("payerAccountNumber", value)}
-            helperText={form.payerAccountName}
-            helperText2={form.payerBalance}
-            trailingIconName="chevron-down-wide"
-            trailingIconPlacement={usesCzBaselineDomesticPaymentLayout ? "floating" : "inline"}
-          />
-        </FlowField>
-
-        <SectionTitle darkNoDivider={usesCzBaselineDomesticPaymentLayout}>
-          {usesCzBaselineDomesticPaymentLayout
-            ? t("runtime.payments.domesticFlow.toBeneficiary", "TO BENEFICIARY")
-            : t("runtime.payments.domesticFlow.beneficiary", "BENEFICIARY")}
-        </SectionTitle>
-        <FlowField>
-          {usesCzBaselineDomesticPaymentLayout ? (
-            <TextField
-              label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")}
-              value={form.beneficiaryName}
-              onChange={(value) => update("beneficiaryName", value)}
-              trailingIconName="chevron-down-wide"
-              trailingIconPlacement="floating"
-              trailingIconAction={{
-                ariaLabel: t("runtime.payments.templates.open", "Choose beneficiary or template"),
-                onClick: () => setIsRecipientPickerOpen(true),
-              }}
-            />
-          ) : (
-            <TextField
-              label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary")}
-              value={form.beneficiaryName}
-              onChange={(value) => update("beneficiaryName", value)}
-            />
-          )}
-        </FlowField>
-        {usesCzBaselineDomesticPaymentLayout ? (
-          <FlowField>
-            <div
-              className="grid min-w-0 items-end gap-x-[8px] gap-y-[6px]"
-              style={{
-                gridTemplateColumns: `minmax(56px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.prefix}fr) minmax(100px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.accountNumber}fr) minmax(66px, ${CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.bankCode}fr) 32px`,
-              }}
-            >
-              <TextField
-                label={t("runtime.payments.domesticFlow.prefix", "Prefix")}
-                value={form.prefix}
-                onChange={(value) => updateCzAccountPart("prefix", value)}
-                inputMode="numeric"
-                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.prefix}
-                suffixOutsideDivider
-                forceFloatLabel
-                ariaInvalid={czTouched.prefix && !czAccountValidity.prefix}
-                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
-                visualState={czTouched.prefix && !czAccountValidity.prefix ? "error-filled" : undefined}
-                onFocus={() => void checkCzClipboard()}
-                onBlur={() => setCzTouched((current) => ({ ...current, prefix: true }))}
-              />
-              <TextField
-                label={t("runtime.accounts.detailsInfo.accountNumber", "Account number")}
-                value={form.accountNumber}
-                onChange={(value) => updateCzAccountPart("accountNumber", value)}
-                inputMode="numeric"
-                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.accountNumber}
-                suffixOutsideDivider
-                forceFloatLabel
-                ariaInvalid={czTouched.accountNumber && !czAccountValidity.accountNumber}
-                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
-                visualState={czTouched.accountNumber && !czAccountValidity.accountNumber
-                  ? (form.accountNumber.trim() ? "error-filled" : "error-empty")
-                  : undefined}
-                onFocus={() => void checkCzClipboard()}
-                onBlur={() => setCzTouched((current) => ({ ...current, accountNumber: true }))}
-              />
-              <TextField
-                label={t("runtime.payments.domesticFlow.bankCode", "Bank code")}
-                value={form.bankCode}
-                onChange={(value) => updateCzAccountPart("bankCode", value)}
-                inputMode="numeric"
-                maxLength={CZ_DOMESTIC_PAYMENT_FIELD_LIMITS.bankCode}
-                suffixOutsideDivider
-                forceFloatLabel
-                ariaInvalid={czTouched.bankCode && !czAccountValidity.bankCode}
-                ariaDescribedBy={czTouchedErrors.length ? "cz-account-validation" : undefined}
-                visualState={czTouched.bankCode && !czAccountValidity.bankCode
-                  ? (form.bankCode.trim() ? "error-filled" : "error-empty")
-                  : undefined}
-                onFocus={() => void checkCzClipboard()}
-                onBlur={() => setCzTouched((current) => ({ ...current, bankCode: true }))}
-              />
-              <span className="grid h-[32px] w-[32px] shrink-0 place-items-center" aria-hidden="true">
-                <AppIcon name="payment-photo-camera" color="var(--uc-text)" />
-              </span>
-              {getCzechPaymentBankName(form.bankCode.trim()) ? (
-                <p className="col-start-1 col-span-4 row-start-2 mt-[6px] uc-type-n5 text-[var(--uc-text-muted)]">
-                  {getCzechPaymentBankName(form.bankCode.trim())}
-                </p>
-              ) : null}
-              {czTouchedErrors.length ? (
-                <p id="cz-account-validation" className="col-span-4 row-start-3 mt-[4px] uc-type-n5 text-[var(--uc-status-red)]" role="alert">
-                  {t("runtime.payments.domesticFlow.czechAccountValidation", "Check the highlighted account details")}: {czTouchedErrors.join(", ")}.
-                </p>
-              ) : null}
-              {czClipboardAccount ? (
-                <button
-                  type="button"
-                  onClick={applyCzClipboardAccount}
-                  className="col-span-4 row-start-4 mt-[2px] flex h-[32px] items-center justify-center rounded-[16px] bg-[rgba(38,38,38,0.06)] px-0 text-left text-[#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
-                  aria-label={`Use account from clipboard: ${czClipboardAccount.prefix ? `${czClipboardAccount.prefix}-` : ""}${czClipboardAccount.accountNumber} / ${czClipboardAccount.bankCode}`}
-                >
-                  <span className="flex min-w-0 items-center gap-[4px]">
-                    <span className="grid size-[32px] shrink-0 place-items-center">
-                      <AppIcon name="payment-use-account" size={16} color="#262626" />
-                    </span>
-                    <span className="uc-type-n5 truncate text-[#000]">
-                      <span className="font-normal">Use account: </span>
-                      <span className="uc-type-n5-strong font-bold">{czClipboardAccount.prefix ? `${czClipboardAccount.prefix}-` : ""}{czClipboardAccount.accountNumber} / {czClipboardAccount.bankCode}</span>
-                    </span>
-                  </span>
-                </button>
-              ) : null}
-            </div>
-          </FlowField>
-        ) : (
-          <>
-            <FlowField>
-              <TextField label={t("runtime.payments.domesticFlow.prefix", "Prefix")} value={form.prefix} onChange={(value) => update("prefix", value)} />
-            </FlowField>
-            <FlowField>
-              <TextField
-                label={t("runtime.payments.domesticFlow.accountNumberMandatory", "Account number (mandatory)")}
-                value={form.accountNumber}
-                onChange={(value) => update("accountNumber", value)}
-                trailingIconName="camera"
-              />
-            </FlowField>
-            <FlowField>
-              <TextField
-                label={t("runtime.payments.domesticFlow.bankCodeMandatory", "Bank code (mandatory)")}
-                value={form.bankCode}
-                onChange={(value) => update("bankCode", value)}
-                helperText={form.bankName}
-                trailingIconName="camera"
-              />
-            </FlowField>
-          </>
-        )}
-
-        <SectionTitle darkNoDivider={usesCzBaselineDomesticPaymentLayout}>
-          {t("runtime.payments.domesticFlow.paymentDetails", "PAYMENT DETAILS")}
-        </SectionTitle>
-        <FlowField>
-          <AmountField
-            label={t("runtime.payments.domesticFlow.amountLimit", "Amount limit")}
-            value={form.amount}
-            onChange={(value) => update("amount", formatAmountInput(value))}
-            currency={form.currency}
-            hideCurrencySelector
-          />
-        </FlowField>
-
-        <div className="flex items-center justify-between pt-[34px]">
-          <p className="uc-type-n5-strong text-[var(--uc-text)]">
-            {t("runtime.payments.domesticFlow.instantPayment", "INSTANT PAYMENT")}
-          </p>
-          <ToggleButton
-            checked={form.instantPayment}
-            onToggle={(checked) => update("instantPayment", checked)}
-            ariaLabel={t("runtime.payments.domesticFlow.instantPayment", "Instant payment")}
-          />
-        </div>
-
-        <div className="flex items-center justify-between pt-[32px]">
-          <p className="uc-type-n5-strong text-[var(--uc-text)]">
-            {t("runtime.payments.domesticFlow.addVariableSymbolAndMore", "ADD VARIABLE SYMBOL AND MORE")}
-          </p>
-          <span className="grid h-[32px] w-[32px] place-items-center">
-            <AppIcon name="chevron-down" color="var(--uc-text)" />
-          </span>
-        </div>
-
-        <FlowField>
-          <TextField
-            label={t("runtime.payments.domesticFlow.informationForBeneficiary", "Information for beneficiary")}
-            value={form.informationForBeneficiary}
-            onChange={(value) => update("informationForBeneficiary", value)}
-          />
-        </FlowField>
-        <FlowField>
-          <TextField
-            label={t("runtime.payments.domesticFlow.informationForMe", "Information for me")}
-            value={form.informationForMe}
-            onChange={(value) => update("informationForMe", value)}
-          />
-        </FlowField>
-        <p className="uc-type-n5 px-[8px] pt-[44px] text-center leading-[18px] text-[var(--uc-text)]">
-          {t("runtime.payments.domesticFlow.reviewAndSignHint", "You can review and sign your payment in the next step")}
-        </p>
-        </div>
-      </div>
-      <div className="w-full px-[24px] pb-[42px]" data-domestic-payment-footer>
-        <PrimaryButton className="!w-full" disabled={!isFormValid} onClick={() => onNext(form)}>{t("runtime.actions.next", "Next")}</PrimaryButton>
-      </div>
-    </div>
-  );
+    <PaymentFlowPreview
+      route={{ screen: 'payment-create' }}
+      initialFlow={initialFlow}
+      onBack={onBack}
+      onFlowChange={(nextFlow) => {
+        if (!nextFlow) {
+          onBack()
+          return
+        }
+        if (nextFlow.step === 'review') {
+          onNext(nextFlow.draft)
+          return
+        }
+        if (nextFlow.step === 'create') {
+          if (onDraftChange) onDraftChange(nextFlow.draft)
+          else onPaymentFlowChange?.(nextFlow)
+          return
+        }
+        onPaymentFlowChange?.(nextFlow)
+      }}
+    />
+  )
 }
 
 export function PaymentReviewScreen({
   draft,
+  paymentFlow,
+  onPaymentFlowChange,
+  onDraftChange,
   onBack,
   onSign,
 }: {
-  draft: DomesticPaymentDraft;
-  onBack: () => void;
-  onSign: () => void;
+  draft: DomesticPaymentDraft
+  paymentFlow?: NativePaymentFlow | null
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange']
+  onDraftChange?: (draft: DomesticPaymentDraft) => void
+  onBack: () => void
+  onSign: () => void
 }) {
-  const { t } = useLanguage();
-  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
-  const { progress: headerProgress, onScroll: handlePageScroll } = useCollapsingHeader(48);
-  const beneficiaryAccount = [draft.prefix, draft.accountNumber, draft.bankCode].filter(Boolean).join("-");
-
-
+  const initialFlow = paymentFlow ?? { draft, step: 'review' as const }
   return (
-    <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]">
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide" onScroll={handlePageScroll}>
-        <PageHeader
-          title={t("runtime.payments.domesticFlow.reviewData", "Review data")}
-          onBack={onBack}
-          collapsedTitleProgress={headerProgress}
-          includeSafeArea
-          showHelp={false}
-        />
-        <div className="px-[24px] pb-[18px]">
-        <SectionTitle>{t("runtime.payments.domesticFlow.paymentOrder", "PAYMENT ORDER")}</SectionTitle>
-        <div className="pt-[22px]">
-          <DetailRow label={t("runtime.payments.domesticFlow.payerAccount", "Payer account")} value={draft.payerAccountName || t("runtime.payments.domesticFlow.primaryAccountName", "Primary Account name")} />
-          <DetailRow label={t("runtime.payments.domesticFlow.payerAccountNumber", "Payer account number")} value={draft.payerAccountNumber} />
-          <DetailRow label={t("runtime.transactionDetail.beneficiaryName", "Beneficiary name")} value={draft.beneficiaryName || t("runtime.transactionDetail.beneficiaryName", "Beneficiary")} />
-          <DetailRow label={t("runtime.transactionDetail.beneficiaryAccountNumber", "Beneficiary account number")} value={beneficiaryAccount || "-"} />
-          <DetailRow label={t("runtime.transactionDetail.amount", "Amount")} value={formatDraftAmount(draft)} />
-          <DetailRow label={t("runtime.payments.domesticFlow.instantPayment", "Instant Payment")} value={draft.instantPayment ? t("runtime.common.yes", "Yes") : t("runtime.common.no", "No")} />
-          <DetailRow label={t("runtime.payments.domesticFlow.dueDate", "Due date")} value={draft.dueDate} />
-          <DetailRow label={t("runtime.payments.domesticFlow.expressPayment", "Express Payment (a fee is charged)")} value={draft.expressPayment ? t("runtime.common.yes", "Yes") : t("runtime.common.no", "No")} />
-          <DetailRow label={t("runtime.payments.domesticFlow.informationForBeneficiary", "Information for beneficiary")} value={draft.informationForBeneficiary || "-"} />
-        </div>
-        <div className="flex items-center justify-between py-[16px]">
-          <p className="uc-type-n5-strong text-[var(--uc-text)]">
-            {t("runtime.payments.domesticFlow.saveAsTemplate", "SAVE AS TEMPLATE")}
-          </p>
-          <ToggleButton
-            checked={saveAsTemplate}
-            onToggle={setSaveAsTemplate}
-            ariaLabel={t("runtime.payments.domesticFlow.saveAsTemplate", "Save as template")}
-          />
-        </div>
-        </div>
-      </div>
-      <div className="w-full px-[24px] pb-[42px]" data-domestic-payment-footer>
-        <PrimaryButton className="!w-full" onClick={onSign}>{t("runtime.actions.sign", "Sign")}</PrimaryButton>
-      </div>
-    </div>
-  );
+    <PaymentFlowPreview
+      route={{ screen: 'payment-create' }}
+      initialFlow={initialFlow}
+      onBack={onBack}
+      onFlowChange={(nextFlow) => {
+        if (!nextFlow) {
+          onBack()
+          return
+        }
+        if (nextFlow.step === 'review') {
+          if (onDraftChange) onDraftChange(nextFlow.draft)
+          else onPaymentFlowChange?.(nextFlow)
+          return
+        }
+        if (nextFlow.step === 'create') {
+          onDraftChange?.(nextFlow.draft)
+          onBack()
+          return
+        }
+        if (nextFlow.step === 'sign') {
+          onDraftChange?.(nextFlow.draft)
+          onSign()
+          return
+        }
+        onPaymentFlowChange?.(nextFlow)
+      }}
+    />
+  )
 }
 
 export function PaymentSignScreen({
+  paymentFlow,
+  onPaymentFlowChange,
   onBack,
   onSign,
 }: {
-  onBack: () => void;
-  onSign: () => void;
+  paymentFlow?: NativePaymentFlow | null
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange']
+  onBack: () => void
+  onSign: () => void
 }) {
-  const { t } = useLanguage();
   return (
-    <StandardSignScreen
-      title={t("runtime.actions.sign", "Sign")}
-      pinLabel={t("runtime.payments.domesticFlow.enterPinCode", "Enter pin code")}
-      pinHelper={t("runtime.payments.domesticFlow.pinPrivacyHint", "Be sure that nobody is watching you")}
-      actionLabel={t("runtime.actions.sign", "Sign")}
+    <PaymentFlowPreview
+      route={{ screen: 'payment-create' }}
+      initialFlow={paymentFlow ?? null}
       onBack={onBack}
-      onSign={onSign}
+      onFlowChange={(nextFlow) => {
+        if (!nextFlow || nextFlow.step === 'review') {
+          onBack()
+          return
+        }
+        if (nextFlow.step === 'success') {
+          if (onPaymentFlowChange) onPaymentFlowChange(nextFlow)
+          else onSign()
+          return
+        }
+        onPaymentFlowChange?.(nextFlow)
+      }}
     />
-  );
+  )
 }
 
-export function PaymentSuccessScreen({ onDone }: { onDone: () => void }) {
-  const { t } = useLanguage();
+export function PaymentSuccessScreen({
+  paymentFlow,
+  onPaymentFlowChange,
+  onDone,
+}: {
+  paymentFlow?: NativePaymentFlow | null
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange']
+  onDone: () => void
+}) {
   return (
-    <StandardSuccessScreen
-      title={t("runtime.payments.domesticFlow.successfulPayment", "Successful payment")}
-      body={t("runtime.payments.domesticFlow.paymentSentToBank", "Your payment has been successfully sent to the bank")}
-      actionLabel={t("runtime.actions.okGotIt", "Ok, got it")}
-      onDone={onDone}
+    <PaymentFlowPreview
+      route={{ screen: 'payment-create' }}
+      initialFlow={paymentFlow ?? null}
+      onBack={onDone}
+      onFlowChange={(nextFlow) => {
+        if (!nextFlow) {
+          onDone()
+          return
+        }
+        onPaymentFlowChange?.(nextFlow)
+      }}
     />
-  );
+  )
 }

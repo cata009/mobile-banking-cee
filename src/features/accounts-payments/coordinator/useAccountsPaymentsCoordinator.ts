@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getUnavailableProductRouteFallback } from '@/app/navigation/productRouteAvailability'
 import { useCreditLimitOverrides } from '@/features/cards/credit-limit/useCreditLimitOverrides'
-import { type CardTransactionMerchantEnrichment } from '@/app/screens/payments/DomesticPaymentFlowScreens'
+import type { CardTransactionMerchantEnrichment } from '@/features/cards/transactions/contracts'
 import { isCreditCardProduct } from '@/app/chat/czChatOrchestration'
 import type { AccountTransaction } from '@/data/accountDetails'
 import type { FrequentBeneficiary } from '@/data/paymentsHub'

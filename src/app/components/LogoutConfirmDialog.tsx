@@ -4,6 +4,7 @@
  */
 
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { BASELINE_DIALOG_CONTRACTS } from './contracts/dialog';
 
 interface LogoutConfirmDialogProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
     <>
       {/* Overlay - semi-transparent background - ABSOLUTE to stay within MobileFrame */}
       <div 
-        className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.4)] z-[9998]"
+        className={BASELINE_DIALOG_CONTRACTS.logout.backdropClass}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -33,7 +34,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm }: LogoutConfir
       <div className="absolute inset-0 flex items-center justify-center z-[9999] px-[16px]">
         {/* Dialog Box */}
         <div 
-          className="bg-[var(--uc-surface-muted)] rounded-[14px] w-full max-w-[270px] overflow-hidden"
+          className={BASELINE_DIALOG_CONTRACTS.logout.boxClass}
           style={{
             boxShadow: '0px 0px 1px rgb(var(--uc-shadow-rgb) / 0.04), 0px 2px 6px rgb(var(--uc-shadow-rgb) / 0.04), 0px 16px 24px rgb(var(--uc-shadow-rgb) / 0.06)'
           }}

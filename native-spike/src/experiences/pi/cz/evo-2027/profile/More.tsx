@@ -12,6 +12,7 @@ import { moreAssets } from './assets';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import ProfileTutorialsSheet from './TutorialsSheet';
 const keys: Record<MoreCardType, string> = {
   contacts: 'contacts',
   documents: 'documents',
@@ -26,12 +27,12 @@ export default function More(props: CzechNativeScreenProps) {
   const t = useCzechTranslation(),
     tokens = useCurrentTokens();
   const [logout, setLogout] = useState(false),
+    [tutorialsOpen, setTutorialsOpen] = useState(false),
     [width, setWidth] = useState(375);
   const navigate = (card: MoreCardType) => {
     if (card === 'contacts' || card === 'documents' || card === 'settings')
       props.onNavigate({ screen: card });
-    else if (card === 'tutorial')
-      props.onNavigate({ screen: 'support', params: { area: 'tutorials' } });
+    else if (card === 'tutorial') setTutorialsOpen(true);
   };
   return (
     <View
@@ -156,6 +157,12 @@ export default function More(props: CzechNativeScreenProps) {
           }}
           confirmLabel={t('runtime.actions.okGotIt', 'OK')}
           cancelLabel={t('runtime.dialogs.cancel', 'Cancel')}
+        />
+      ) : null}
+      {tutorialsOpen ? (
+        <ProfileTutorialsSheet
+          host={props}
+          onClose={() => setTutorialsOpen(false)}
         />
       ) : null}
     </View>

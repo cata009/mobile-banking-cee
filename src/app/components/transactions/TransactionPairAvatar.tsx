@@ -2,27 +2,14 @@ import { AppIcon } from "@/app/components/icons";
 import { CurrencyFlagRoundel } from "@/app/components/payments/CurrencyFlag";
 import type { TransactionEndpoint, TransactionTransferPair } from "@/data/accountDetails";
 import type { Currency } from "@/data/products";
+import { TRANSACTION_ENDPOINT_ICONS, TRANSACTION_ENDPOINT_STYLES, transactionEndpointLabel, resolveTransactionAvatarFrame } from '@/app/components/contracts/transactionAvatar';
 
-const ENDPOINT_ICON = {
-  current: "accounts-coins",
-  savings: "piggy-bank",
-  deposit: "piggy-bank",
-} as const;
+const ENDPOINT_ICON = TRANSACTION_ENDPOINT_ICONS;
 
-const ENDPOINT_STYLE = {
-  current: { background: "var(--uc-action-soft)", color: "var(--uc-action)" },
-  savings: { background: "#007A91", color: "var(--uc-static-white)" },
-  deposit: { background: "#52666D", color: "var(--uc-static-white)" },
-} as const;
-
-const ENDPOINT_LABEL = {
-  current: "current account",
-  savings: "savings account",
-  deposit: "term deposit",
-} as const;
+const ENDPOINT_STYLE = TRANSACTION_ENDPOINT_STYLES;
 
 function endpointLabel(endpoint: TransactionEndpoint) {
-  return endpoint.kind === "currency" ? endpoint.currency : ENDPOINT_LABEL[endpoint.account];
+  return transactionEndpointLabel(endpoint);
 }
 
 function EndpointRoundel({ endpoint, size, currency }: { endpoint: TransactionEndpoint; size: number; currency?: Currency }) {
@@ -69,8 +56,7 @@ export default function TransactionPairAvatar({
 }) {
   // Two discs at ~68% of the box, offset so each stays legible while the
   // overlap makes them read as one mark rather than two icons.
-  const discSize = Math.round(size * 0.68);
-  const offset = size - discSize;
+  const { discSize, pairOffset: offset } = resolveTransactionAvatarFrame(size);
 
   return (
     <span

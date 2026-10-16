@@ -7,6 +7,11 @@ import type { ThemeMode } from '@/app/state/demoTypes';
 import { APP_2027_THEMES, getApp2027Theme, type HomeTheme, type App2027ThemeDefinition } from '@/features/products/evoAppearance';
 export { APP_2027_THEMES, getApp2027Theme } from '@/features/products/evoAppearance';
 export type { HomeTheme, App2027ThemeDefinition } from '@/features/products/evoAppearance';
+export {
+  getStoredApp2027Theme,
+  storeApp2027Theme,
+} from '@/features/products/evoAppearancePreferences';
+export { useApp2027Theme } from '@/app/hooks/useApp2027Theme';
 
 export interface App2027ThemePickerProps {
   active: HomeTheme;
@@ -24,8 +29,6 @@ export interface App2027ThemeStudioProps {
 type HomeAppearance = ThemeMode | 'system';
 
 const APP_2027_APPEARANCE_STORAGE_KEY = 'app-2027-appearance-mode';
-const APP_2027_HOME_THEME_STORAGE_KEY = 'app-2027-home-theme';
-const APP_2027_THEME_CHANGE_EVENT = 'app-2027-theme-change';
 
 function getSystemThemeMode(): ThemeMode {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
@@ -45,31 +48,6 @@ function storeAppearance(mode: HomeAppearance) {
 function getInitialAppearance(themeMode: ThemeMode): HomeAppearance {
   const stored = getStoredAppearance(themeMode);
   return stored === 'system' && getSystemThemeMode() === themeMode ? 'system' : themeMode;
-}
-
-export function getStoredApp2027Theme(): HomeTheme {
-  if (typeof window === 'undefined') return 'standard';
-  const stored = window.localStorage.getItem(APP_2027_HOME_THEME_STORAGE_KEY);
-  return APP_2027_THEMES.some((theme) => theme.id === stored) ? stored as HomeTheme : 'standard';
-}
-
-export function storeApp2027Theme(theme: HomeTheme) {
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(APP_2027_HOME_THEME_STORAGE_KEY, theme);
-    window.dispatchEvent(new Event(APP_2027_THEME_CHANGE_EVENT));
-  }
-}
-
-export function useApp2027Theme() {
-  const [theme, setTheme] = useState<HomeTheme>(getStoredApp2027Theme);
-
-  useEffect(() => {
-    const syncTheme = () => setTheme(getStoredApp2027Theme());
-    window.addEventListener(APP_2027_THEME_CHANGE_EVENT, syncTheme);
-    return () => window.removeEventListener(APP_2027_THEME_CHANGE_EVENT, syncTheme);
-  }, []);
-
-  return theme;
 }
 
 export default function App2027ThemePicker({ active, onOpen }: App2027ThemePickerProps) {

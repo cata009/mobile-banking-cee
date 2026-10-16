@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { nativeBridgePlugin } from './scripts/native-spike/web/bridge-files.mjs'
 
 function figmaAssetResolver(): Plugin {
   return {
@@ -25,6 +26,7 @@ export default defineConfig({
   // Restrict Source dependency discovery to its own entry; native HTML has a separate Vite pipeline.
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
+    nativeBridgePlugin(__dirname),
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
     // Tailwind is not being used – do not remove them

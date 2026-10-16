@@ -1,3 +1,5 @@
+import { shopsmartOfferCardWeb } from "../contracts/marketingCardWeb";
+import { SHOPSMART_GIFT_PATH } from "../contracts/marketingCard";
 import { AppIcon } from "@/app/components/icons";
 
 export const SHOPSMART_OFFER_CARD_SOURCE = {
@@ -40,7 +42,7 @@ export interface ShopsmartOfferCardProps {
 function GiftIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" className="size-[15px] shrink-0 fill-current">
-      <path d="M3 7h10v7H3V7Zm4.35 0h1.3v7h-1.3V7ZM2 4.75A1.75 1.75 0 0 1 3.75 3H5.1A2.2 2.2 0 0 1 8 1.05 2.2 2.2 0 0 1 10.9 3h1.35A1.75 1.75 0 0 1 14 4.75V6H2V4.75ZM5.1 4.3H3.75a.45.45 0 0 0-.45.45v.05h3.2A1.4 1.4 0 0 0 5.1 4.3Zm2.25.5V3.25A.95.95 0 1 0 6.4 4.2c.34.3.73.49.95.6Zm1.3 0c.22-.11.61-.3.95-.6a.95.95 0 1 0-.95-.95V4.8Zm.85 0h3.2v-.05a.45.45 0 0 0-.45-.45H10.9a1.4 1.4 0 0 0-1.4.5Z" />
+      <path d={SHOPSMART_GIFT_PATH} />
     </svg>
   );
 }
@@ -61,12 +63,10 @@ export default function ShopsmartOfferCard({
   variant = "default",
   onClick,
 }: ShopsmartOfferCardProps) {
-  const Root = onClick ? "button" : "article";
-  const iconName = trailingIcon === "website" ? "contact-website" : "shopsmart-store";
-  const pillClass =
-    pillTone === "white"
-      ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-[0_0_4px_rgba(0,0,0,0.25)]"
-      : "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)] shadow-[0_0_4px_rgba(0,0,0,0.25)]";
+  const contract = shopsmartOfferCardWeb({ interactive: Boolean(onClick), imageHeight, variant, trailingIcon, pillTone });
+  const Root = contract.rootTag;
+  const iconName = contract.icon;
+  const pillClass = contract.pillClass;
 
   return (
     <Root

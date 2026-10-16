@@ -1,15 +1,9 @@
-import { useId, useMemo, useRef, useState, type HTMLAttributes } from "react";
+import { useId, useRef, useState, type HTMLAttributes } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 
-export type TextFieldVisualState =
-  | "empty"
-  | "on-focus"
-  | "filled"
-  | "error-filled"
-  | "error-empty"
-  | "disabled-empty"
-  | "disabled-filled"
-  | "multiple-filled";
+import type { TextFieldVisualState } from './contracts/textField';
+export type { TextFieldVisualState } from './contracts/textField';
+import { textFieldWeb } from './contracts/textFieldWeb';
 
 interface TextFieldProps {
   label: string;
@@ -84,55 +78,7 @@ export default function TextField({
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
-  const derivedState: TextFieldVisualState = useMemo(() => {
-    if (visualState) return visualState;
-    if (disabled) return value.trim().length > 0 ? "disabled-filled" : "disabled-empty";
-    if (errorText || errorText2) return value.trim().length > 0 ? "error-filled" : "error-empty";
-    if (isFocused) return "on-focus";
-    return value.trim().length > 0 ? "filled" : "empty";
-  }, [disabled, errorText, errorText2, isFocused, value, visualState]);
-
-  const isDisabled = derivedState === "disabled-empty" || derivedState === "disabled-filled";
-  const isError = derivedState === "error-filled" || derivedState === "error-empty";
-  const isActive = derivedState === "on-focus";
-  const isMultiple = derivedState === "multiple-filled";
-  const hasValue = derivedState === "filled" || derivedState === "error-filled" || derivedState === "disabled-filled" || isMultiple || value.trim().length > 0;
-  const shouldFloatLabel = forceFloatLabel || isActive || hasValue;
-
-  const labelColor = isDisabled
-    ? DISABLED_COLOR
-    : isActive
-      ? "var(--uc-action)"
-      : "var(--uc-text-muted)";
-
-  const valueColor = isDisabled ? DISABLED_COLOR : "var(--uc-text)";
-  const dividerColor = isDisabled
-    ? DISABLED_COLOR
-    : isError
-      ? "var(--uc-status-red)"
-      : isActive
-        ? "var(--uc-action)"
-        : "var(--uc-text-subtle)";
-  const helperColor = isDisabled
-    ? DISABLED_COLOR
-    : isError
-      ? "var(--uc-status-red)"
-      : "var(--uc-text-muted)";
-
-  const descriptionText1 = isError ? errorText : helperText;
-  const descriptionText2 = isError ? errorText2 : helperText2;
-  const hasFloatingTrailingIcon = trailingIconPlacement === "floating" && Boolean(trailingIconName);
-  const helperTextWidth = trailingIconName && trailingIconPlacement === "inline"
-    ? "calc(100% - 44px)"
-    : "100%";
-  const displayedMultipleValues = multipleValues?.join("; ") ?? value;
-  const effectiveMultipleCount = multipleCount ?? multipleValues?.length ?? 0;
-  const inputPlaceholder = shouldFloatLabel ? placeholder : label;
-  const placeholderColorClass = shouldFloatLabel
-    ? "placeholder:text-[var(--uc-text-subtle)]"
-    : isDisabled
-      ? "placeholder:text-[var(--uc-neutral-650)]"
-      : "placeholder:text-[var(--uc-text)]";
+  const { isDisabled, isMultiple, hasValue, shouldFloatLabel, labelColor, valueColor, dividerColor, helperColor, descriptionText1, descriptionText2, hasFloatingTrailingIcon, helperTextWidth, displayedMultipleValues, effectiveMultipleCount, inputPlaceholder, placeholderColorClass } = textFieldWeb({ label, value, helperText, helperText2, errorText, errorText2, placeholder, disabled, visualState, trailingIconName, trailingIconPlacement, multipleValues, multipleCount, forceFloatLabel, isFocused });
 
   return (
     <div
@@ -312,3 +258,4 @@ export default function TextField({
     </div>
   );
 }
+

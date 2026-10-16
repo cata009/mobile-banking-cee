@@ -21,6 +21,7 @@ import {
   buildInvestmentBuyOrderQuote,
   getInvestmentBuyOrderValidation,
   parseInvestmentOrderQuantity,
+  getValidatedInitialDraft,
 } from "./investmentBuyOrderModel";
 
 type InvestmentBuyOrderStep = "order-data" | "review" | "sign" | "success";
@@ -64,29 +65,6 @@ function formatMoney(value: number, currency: string, country: CountryId, hidden
 function compactAccountNumber(value: string) {
   if (value.length <= 8) return value;
   return `${value.slice(0, 4)} •••• ${value.slice(-4)}`;
-}
-
-function getValidatedInitialDraft(
-  initialDraft: CoAppingInvestmentBuyDraft | null | undefined,
-  security: InvestmentCatalogSecurity,
-  accounts: readonly CurrentAccount[],
-): CoAppingInvestmentBuyDraft | null {
-  if (
-    !initialDraft ||
-    initialDraft.frequency !== "one-off" ||
-    !["today", "next-business-day"].includes(initialDraft.executionTiming) ||
-    !Number.isSafeInteger(initialDraft.quantity) ||
-    initialDraft.quantity <= 0 ||
-    security.status !== "active"
-  ) {
-    return null;
-  }
-
-  const account = accounts.find((candidate) => candidate.id === initialDraft.accountId);
-  if (!account) return null;
-
-  const quote = buildInvestmentBuyOrderQuote(security, account, initialDraft.quantity);
-  return getInvestmentBuyOrderValidation(quote, account) ? null : initialDraft;
 }
 
 function formatExecutionTiming(value: CoAppingInvestmentBuyDraft["executionTiming"]) {

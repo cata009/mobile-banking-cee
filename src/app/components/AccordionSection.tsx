@@ -1,5 +1,6 @@
 import { Children, cloneElement, isValidElement, useState, type ReactNode } from 'react';
 import { AppIcon } from "@/app/components/icons";
+import { resolveAccordion } from '@/app/components/contracts/accordion';
 
 interface AccordionSectionProps {
   title: string;
@@ -33,7 +34,8 @@ export default function AccordionSection({
   }
 
   // If only one product, don't show chevron and always show content
-  const isSingleProduct = productCount === 1;
+  const state = resolveAccordion({ productCount, isOpen });
+  const isSingleProduct = state.single;
 
   // Clone children and pass isOpen state
   const childrenWithProps = Children.map(children, child => {
@@ -79,7 +81,7 @@ export default function AccordionSection({
           <div 
             className="grid place-items-center transition-transform duration-300"
             style={{
-              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transform: `rotate(${state.rotation}deg)`,
               transformOrigin: 'center',
               width: '32px',
               height: '32px'

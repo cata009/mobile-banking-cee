@@ -1,3 +1,4 @@
+import { bannerWeb } from "../contracts/bannerWeb";
 import type { CSSProperties } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -45,10 +46,12 @@ export default function HelperCard({
   className,
   style,
 }: HelperCardProps) {
+  const contract = bannerWeb({ variant: "helper", dismissible, hasAction: Boolean(actionLabel) });
+
   return (
     <div
       className={cn(
-        "relative flex w-[343px] max-w-full items-center gap-[8px] rounded-[4px] bg-[var(--uc-action)] p-[16px]",
+        contract.rootClass,
         className,
       )}
       data-component="HelperCard"

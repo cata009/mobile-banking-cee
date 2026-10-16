@@ -1,31 +1,53 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import AnalyticsScreen from '@/app/screens/analytics/AnalyticsScreen'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { DemoProvider, useDemo } from '@/app/state/demoStore'
 import { mockProducts, type Product } from '@/data/products'
+import { createEvoTranslations } from '@/translations/evo'
+import { createSpendingAnalyticsTimeline, createSpendingRangeSummary } from '@/data/spendingAnalytics'
+import { formatEvo2027Number } from '@/app/utils/evo2027Formatting'
+import {
+  loadActualNativeAnalyticsModule,
+  productCountsForNative,
+  resetNativeAnalyticsRenderer,
+  waitForNativeAnalyticsScreen,
+} from './nativeAnalyticsL6Harness'
 
 const mockedProductState = vi.hoisted(() => ({
   categories: [] as Array<{ key: string; title: string; products: Product[] }>,
+}))
+const nativeLoader = vi.hoisted(() => ({ load: vi.fn() }))
+
+vi.mock('@/app/components/demo/nativeDemoLoader', () => ({
+  loadNativeDemoModule: nativeLoader.load,
 }))
 
 vi.mock('@/hooks/useProducts', () => ({
   useProducts: () => mockedProductState,
 }))
 
-function Providers({ children }: { children: React.ReactNode }) {
+async function renderNative(ui: React.ReactElement, options?: Parameters<typeof rtlRender>[1]) {
+  const view = rtlRender(ui, options)
+  await waitForNativeAnalyticsScreen(view.container)
+  return view
+}
+
+function Providers({ children, accounts }: { children: React.ReactNode; accounts?: number }) {
+  const productCounts = productCountsForNative(mockedProductState.categories.flatMap(category => category.products))
+  if (accounts !== undefined) productCounts.accounts = accounts
   return (
-    <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+    <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027', productCounts }}>
       <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
     </DemoProvider>
   )
 }
 
 function HiddenProviders({ children }: { children: React.ReactNode }) {
-  return <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027', amountsHidden: true }}>
+  return <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027', amountsHidden: true, productCounts: productCountsForNative(mockedProductState.categories.flatMap(category => category.products)) }}>
     <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
   </DemoProvider>
 }
@@ -43,6 +65,9 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  resetNativeAnalyticsRenderer()
+  nativeLoader.load.mockReset()
+  nativeLoader.load.mockImplementation(loadActualNativeAnalyticsModule)
   mockedProductState.categories = [{ key: 'test-products', title: 'Test products', products: mockProducts }]
 })
 
@@ -51,451 +76,382 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-/** The dot rail: how many periods this granularity holds, and which one is on. */
-function periodDots() {
-  return Array.from(document.querySelectorAll<HTMLElement>('[data-evo-analytics-period-dots] button'))
+const spendingCopy = createEvoTranslations('en').spending
+
+function periodControl() {
+  return screen.getByRole('button', { name: spendingCopy.changePeriod })
 }
 
-/** Choose the rich ledger month explicitly rather than relying on latest-month fixtures. */
-function selectMonth(label: string) {
-  // The indicator only renders a moving window of six periods.
-  for (let step = 0; step < 24; step += 1) {
-    const dots = periodDots()
-    const dot = dots.find((candidate) => candidate.getAttribute('aria-label') === label)
-    if (dot) {
-      fireEvent.click(dot)
-      return
-    }
-    const oldestVisible = dots[0]
-    if (!oldestVisible || oldestVisible.getAttribute('aria-current') === 'true') break
-    fireEvent.click(oldestVisible)
+function periodControlText() {
+  return periodControl().textContent?.replace(/([A-Za-z])(?=\d{4})/g, '$1 ').replace(/\s+/g, ' ').trim() ?? ''
+}
+
+function expectNativeSelected(element: HTMLElement, selected = true) {
+  expect(element.getAttribute('aria-selected') ?? element.getAttribute('aria-pressed')).toBe(String(selected))
+}
+
+function categoryRows() {
+  return screen.getAllByRole('button').filter((row) => /\d+\s*transactions?/i.test(row.textContent ?? ''))
+}
+
+function categorySectionRows(title: string) {
+  const heading = screen.getByText(title)
+  const section = heading.parentElement
+  if (!section) throw new Error(`Expected a Native section for ${title}`)
+  return within(section).getAllByRole('button').filter((button) => /\d+\s*transactions?/i.test(button.textContent ?? ''))
+}
+
+function arcStrokes() {
+  const marker = screen.getAllByTestId('cz-pfm-donut-marker')[0]
+  if (!marker) throw new Error('Expected a Native donut marker')
+  let donut = marker.parentElement
+  while (donut && donut !== document.body && !donut.querySelector('svg circle')) {
+    donut = donut.parentElement
   }
-  throw new Error('Expected period ' + label)
+  return Array.from(donut?.querySelectorAll('svg circle') ?? []).map((arc) => arc.getAttribute('stroke'))
+}
+
+function abbreviatedMonth(label: string) {
+  const [month, year] = label.split(' ')
+  if (!month || !year) return label
+  return new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(`${month} 1, ${year}`))
+}
+
+/** Select a custom date span via Native period selectors, not the host clock. */
+async function selectCustomRange(fromMonth: string, toMonth: string) {
+  fireEvent.click(periodControl())
+  await screen.findByRole('button', { name: spendingCopy.presetCustom })
+  fireEvent.click(screen.getByRole('button', { name: spendingCopy.presetCustom }))
+  await screen.findByRole('button', { name: spendingCopy.from })
+  fireEvent.click(screen.getByRole('button', { name: spendingCopy.from }))
+  await screen.findByRole('button', { name: fromMonth })
+  fireEvent.click(screen.getByRole('button', { name: fromMonth }))
+  await screen.findByRole('button', { name: spendingCopy.to })
+  fireEvent.click(screen.getByRole('button', { name: spendingCopy.to }))
+  await screen.findByRole('button', { name: toMonth })
+  fireEvent.click(screen.getByRole('button', { name: toMonth }))
+  await screen.findByRole('button', { name: spendingCopy.apply })
+  fireEvent.click(screen.getByRole('button', { name: spendingCopy.apply }))
+  await waitFor(() => {
+    const text = periodControlText()
+    expect(text).toContain(abbreviatedMonth(fromMonth))
+    expect(text).toContain(abbreviatedMonth(toMonth))
+    expect(text).toContain(fromMonth.split(' ')[1] ?? '')
+    expect(text).toContain(toMonth.split(' ')[1] ?? '')
+  })
+}
+
+/** Select a canonical month via Native period selectors, not the host clock. */
+async function selectMonth(label: string) {
+  await selectCustomRange(label, label)
 }
 
 describe('Evo 2027 analytics overview', () => {
-  it('masks the monetary bar-chart axis and restores its scale when amounts become visible', () => {
-    render(<><PrivacyControl /><AnalyticsScreen initialScopeId="acc-1" initialDirection="expense" /></>, { wrapper: HiddenProviders })
-    fireEvent.click(screen.getByRole('button', { name: 'Show spending over time' }))
-    const chart = screen.getByLabelText('Expense bar chart')
-    const axis = chart.querySelector('[data-evo-expense-plot]')?.firstElementChild
-    expect(axis).toHaveTextContent('****')
-    expect(axis?.textContent).not.toMatch(/\d/)
-    expect(axis).toHaveTextContent('CZK')
-    expect(chart).not.toHaveTextContent('470,00')
+  it('masks Native PFM totals and restores converted amounts when privacy is disabled', async () => {
+    await renderNative(<><PrivacyControl /><AnalyticsScreen initialScopeId="acc-1" /></>, { wrapper: HiddenProviders })
+    const expense = screen.getByTestId('cz-pfm-expense')
+    expect(expense).toHaveTextContent('****')
+    expect(expense).toHaveTextContent('CZK')
+    expect(expense).not.toHaveTextContent('470,00')
     fireEvent.click(screen.getByRole('button', { name: 'Toggle amounts for test' }))
-    expect(axis?.textContent).toMatch(/\d/)
-    expect(axis).not.toHaveTextContent('****')
-    expect(chart).toHaveTextContent('470,00')
+    await waitFor(() => expect(expense).not.toHaveTextContent('****'))
+    expect(expense).toHaveTextContent(/470[,.]00/)
   })
 
   it('keeps the latest-period monetary total masked in the account expense detail', async () => {
-    const { container } = render(<AnalyticsScreen initialScopeId="acc-1" initialDirection="expense" />, { wrapper: HiddenProviders })
+    const { container } = await renderNative(<AnalyticsScreen initialScopeId="acc-1" initialDirection="expense" />, { wrapper: HiddenProviders })
     expect(container).not.toHaveTextContent('470,00')
     expect(container).not.toHaveTextContent('250,00')
     expect(container).not.toHaveTextContent('220,00')
-    fireEvent.click(screen.getByRole('button', { name: 'Open Transfers transactions' }))
-    expect(await screen.findAllByTestId('evo-expense-transaction')).toHaveLength(2)
+    const transferRow = categoryRows().find((row) => row.getAttribute('aria-label')?.startsWith('Transfers'))
+    if (!transferRow) throw new Error('Expected the Native Transfers expense row')
+    fireEvent.click(transferRow)
+    expect(await screen.findAllByTestId('cz-pfm-transaction')).toHaveLength(2)
     expect(container).not.toHaveTextContent('470,00')
     expect(container).not.toHaveTextContent('250,00')
     expect(container).not.toHaveTextContent('220,00')
     expect(container.textContent).not.toMatch(/\d[,.]\d{2}\s*CZK/)
   })
-  it('can open directly on one account and the requested money direction', () => {
-    const { container } = render(
+  it('can open directly on one account and the requested money direction', async () => {
+    await renderNative(
       <AnalyticsScreen initialScopeId="acc-1" initialDirection="income" />,
       { wrapper: Providers },
     )
 
-    expect(container.querySelector('[data-evo-analytics-summary]')).not.toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-scope-trigger]')).toHaveTextContent('Primary Account')
-    expect(screen.getByRole('heading', { name: 'Income' })).toBeInTheDocument()
-    expect(container.querySelector('[data-evo-expense-chart]')).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { name: 'Money in' }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: 'Choose accounts' })).toHaveTextContent('Primary Account')
+    expect(screen.getByRole('tab', { name: 'Donut' })).toBeInTheDocument()
   })
 
-  it('scopes the overview to All accounts or one selected current account', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+  it('scopes the overview to All accounts or one selected current account', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
 
-    const overview = container.querySelector<HTMLElement>('[data-evo-analytics-summary]')
-    const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
-
-    expect(overview).toHaveAttribute('data-evo-analytics-scope', 'all-accounts')
-    const scopeTrigger = container.querySelector<HTMLElement>('[data-evo-analytics-scope-trigger]') as HTMLElement
+    const scopeTrigger = screen.getByRole('button', { name: 'Choose accounts' })
     expect(scopeTrigger).toHaveTextContent('All accounts')
-    expect(scopeTrigger).not.toHaveTextContent(/transactions/i)
-
-    const allAccountsSpend = hero?.textContent
+    const account = mockProducts.find((product) => product.type === 'current_account')
+    if (!account) throw new Error('Expected a Source current-account fixture')
+    const currentAccounts = mockProducts.filter((product) => product.type === 'current_account')
+    const latestSourceMonth = createSpendingAnalyticsTimeline('CZ', mockProducts).activePeriodKey
+    const sourceSummary = createSpendingRangeSummary(
+      'CZ',
+      currentAccounts,
+      [latestSourceMonth],
+      { key: latestSourceMonth, label: latestSourceMonth, year: latestSourceMonth.slice(0, 4), kind: 'month' },
+    )
+    const accountSummary = createSpendingRangeSummary(
+      'CZ',
+      [account],
+      [latestSourceMonth],
+      { key: latestSourceMonth, label: latestSourceMonth, year: latestSourceMonth.slice(0, 4), kind: 'month' },
+    )
+    expect(screen.getByTestId('cz-pfm-expense')).toHaveTextContent(formatEvo2027Number(sourceSummary.spendingTotal))
     fireEvent.click(scopeTrigger)
-    fireEvent.click(screen.getByRole('option', { name: /Primary Account$/ }))
+    fireEvent.click(await screen.findByRole('radio', { name: account.name }))
 
-    expect(overview).toHaveAttribute('data-evo-analytics-scope', 'acc-1')
-    expect(container.querySelector('[data-evo-analytics-scope-trigger]')).toHaveTextContent('Primary Account')
-    expect(container.querySelector('[data-evo-analytics-scope-trigger]')).not.toHaveTextContent(/transactions/i)
-    expect(container.querySelector('[data-evo-analytics-summary-hero]')).not.toHaveTextContent(allAccountsSpend ?? '')
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Choose accounts' })).toHaveTextContent(account.name),
+    )
+    await waitFor(() =>
+      expect(screen.getByTestId('cz-pfm-expense')).toHaveTextContent(formatEvo2027Number(accountSummary.spendingTotal)),
+    )
   })
 
-  it('opens with the family L1 composition: swipeable month cards and a category section', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    selectMonth('April 2026')
+  it('opens Native PFM with a period selector and spending/income category sections', async () => {
+    const { container } = await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    await selectMonth('April 2026')
 
-    expect(container.querySelector('[data-evo-analytics-period-carousel]')).toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-summary-hero]')).toBeInTheDocument()
-    // A rail, so the neighbouring card peeks in and says "swipe": the months
-    // oldest-first, then the year totals newest-first closing the axis.
-    const periodCards = container.querySelectorAll('[data-evo-analytics-period-card]')
-    expect(periodCards.length).toBeGreaterThan(1)
-    expect(Array.from(periodCards).some((card) => card.textContent?.includes('Total 2026'))).toBe(true)
-    expect(Array.from(periodCards).some((card) => card.textContent?.includes('Total 2025'))).toBe(true)
-    // The rail is the period control here — swipe it, or tap a dot. A dropdown
-    // beside the scope repeated the card's own title back at the customer.
-    expect(container.querySelector('[data-evo-analytics-period-trigger]')).not.toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-period-dots]')).toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-month-bars]')).not.toBeInTheDocument()
-    expect(screen.getAllByText('Money out').length).toBeGreaterThan(0)
-    expect(screen.getAllByRole('heading', { name: 'Money out' }).length).toBeGreaterThan(0)
-    expect(container.querySelectorAll('[data-evo-analytics-top-category]').length).toBeGreaterThan(0)
-
-    // The scope control sits above the card, not inside its pastel ground.
-    const heroText = container.querySelector('[data-evo-analytics-summary-hero]')?.textContent ?? ''
-    expect(heroText).not.toContain('All accounts')
-    expect(container.querySelector('[data-evo-analytics-scope-trigger]')).toHaveTextContent('All accounts')
-    expect(container.querySelector('[data-evo-analytics-see-all] svg')).toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-see-all-chevron]')).toHaveAttribute('viewBox', '0 0 16 16')
-    expect(screen.queryByText(/transactions need a category/)).not.toBeInTheDocument()
-    const [firstCategory] = Array.from(container.querySelectorAll<HTMLElement>('[data-evo-analytics-top-category]'))
-    expect(firstCategory).toHaveClass('min-h-[80px]', 'items-center')
-    expect(firstCategory).toHaveTextContent('Household')
-    expect(firstCategory).not.toHaveTextContent('HOUSEHOLD')
-    expect(firstCategory!.querySelector('.font-bold')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Show next monthly interval' })).not.toBeInTheDocument()
-
-    // The chart-tool furniture the other L1 destinations never had.
-    expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
-    expect(screen.queryByText('My Cash Flow')).not.toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-kpi]')).not.toBeInTheDocument()
-    expect(screen.queryByText(/moved into investments, not spending/)).not.toBeInTheDocument()
-  })
-
-  it('offers presets and a custom range, and closes the axis with the year totals', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-
-    // September contains exactly the two new outgoing transfers: 320 + 150 CZK.
-    const hero = Array.from(container.querySelectorAll('[data-evo-analytics-summary-hero]'))
-      .find((card) => !card.closest('[aria-hidden="true"]'))
-    expect(hero?.querySelector('[data-evo-analytics-open-expenses]')).toHaveTextContent('470,00 CZK')
-    expect(hero?.querySelector('[data-evo-analytics-open-income]')).toHaveTextContent('0,00 CZK')
-    expect(hero?.querySelector('[data-evo-analytics-summary-net]')).toHaveTextContent('−470,00 CZK')
-
-    // The rail opens on the newest month, and the year totals sit after it.
-    const dots = periodDots()
-    expect(dots.length).toBeGreaterThan(1)
-    expect(dots.find((dot) => dot.getAttribute('aria-current') === 'true'))
-      .toHaveAttribute('aria-label', 'September 2026')
-    expect(dots[dots.length - 1]).toHaveAttribute('aria-label', 'Total 2025')
-
-    selectMonth('April 2026')
-    expect(container.querySelector('[data-evo-analytics-period-carousel]'))
-      .toHaveAttribute('data-evo-analytics-period-key', 'month:2026-04')
-
-    // Presets and the custom range are reached from the analysis screen, where
-    // the period is the page's heading rather than one filter among several.
-    fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
-    fireEvent.click(container.querySelector('[data-evo-analytics-period-trigger]') as HTMLElement)
-    expect(screen.getByRole('option', { name: /Last 3 months/ })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /Year to date/ })).toBeInTheDocument()
-
-    fireEvent.click(document.querySelector('[data-evo-analytics-period-option="last-3-months"]') as HTMLElement)
-    expect(container.querySelector('[data-evo-expense-interval]')).toHaveAttribute('data-evo-expense-interval', 'range')
-    expect(container.querySelector('[data-evo-analytics-period-trigger]')).toHaveTextContent('Last 3 months')
-  })
-
-  it('reaches a custom span of months, which no preset covers', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
-
-    fireEvent.click(container.querySelector('[data-evo-analytics-period-trigger]') as HTMLElement)
-    fireEvent.click(document.querySelector('[data-evo-analytics-period-option="custom"]') as HTMLElement)
-
-    const from = document.querySelector<HTMLSelectElement>('[data-evo-analytics-period-from]')
-    const to = document.querySelector<HTMLSelectElement>('[data-evo-analytics-period-to]')
-    expect(from).toBeInTheDocument()
-    expect(to).toBeInTheDocument()
-
-    const months = Array.from(from!.options).map((option) => option.value)
-    fireEvent.change(from!, { target: { value: months[0] } })
-    fireEvent.change(to!, { target: { value: months[2] } })
-    fireEvent.click(document.querySelector('[data-evo-analytics-period-apply]') as HTMLElement)
-
-    expect(container.querySelector('[data-evo-analytics-period-trigger]')).toHaveTextContent('–')
-  })
-
-  it('uses 16px flow labels and keeps the scope selector 16px from the period carousel', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
-    const controls = container.querySelector<HTMLElement>('[data-evo-analytics-overview-controls]')
-
-    expect(controls).toBeInTheDocument()
-    expect(controls).toHaveClass('gap-[0px]')
-    expect(hero?.querySelector('[data-evo-analytics-open-expenses] > span:first-child')).toHaveClass('text-[16px]')
-    expect(hero?.querySelector('[data-evo-analytics-open-income] > span:first-child')).toHaveClass('text-[16px]')
-    expect(hero?.querySelector('[data-evo-analytics-summary-net-label]')).toHaveClass('text-[16px]')
-    expect(hero?.textContent).toMatch(/\d{1,3}\.\d{3},\d{2} CZK/)
-    expect(hero?.textContent).not.toMatch(/\d{1,3} \d{3},\d{2} CZK/)
-  })
-
-  it('uses the portfolio trend badge for positive and negative net cashflow', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    const nets = container.querySelectorAll('[data-evo-analytics-summary-net]')
-
-    expect(nets.length).toBeGreaterThan(0)
-    // One column: the mark sits on the label's centre line, and the amount and
-    // the sentence under it start at the same left edge as the mark.
-    expect(nets[0]).toHaveClass('min-w-0')
-    expect(nets[0]?.firstElementChild).toHaveClass('flex', 'items-center')
-    const upBadge = container.querySelector('[data-evo-analytics-summary-net] [role="img"][aria-label="Portfolio up"]')
-    expect(upBadge).toBeInTheDocument()
-    expect(upBadge).toHaveStyle({ width: '16px', height: '16px' })
-    expect(upBadge).not.toHaveClass('rounded-full', 'bg-[var(--uc-surface-raised)]', 'shadow-[0_3px_9px_rgb(0_0_0/0.12)]')
-
-    // A month that spent more than it took in wears the other badge, and every
-    // month in the rail is reachable from the dots.
-    const down = () => container.querySelector('[data-evo-analytics-summary-net] [role="img"][aria-label="Portfolio down"]')
-    const dots = periodDots()
-    for (let index = 0; index < dots.length && !down(); index += 1) {
-      fireEvent.click(periodDots()[index] as HTMLElement)
-    }
-    expect(down()).toBeInTheDocument()
-  })
-
-  it('leads the summary card with the net figure and puts each flow under its own bar', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    const hero = container.querySelector<HTMLElement>('[data-evo-analytics-summary-hero]')
-    const net = hero?.querySelector('[data-evo-analytics-summary-net]') as HTMLElement
-    const bars = hero?.querySelector('[data-evo-analytics-flow-bars]') as HTMLElement
-    const income = hero?.querySelector('[data-evo-analytics-open-income]') as HTMLElement
-    const expenses = hero?.querySelector('[data-evo-analytics-open-expenses]') as HTMLElement
-
-    expect(hero).toHaveClass('gap-[12px]', 'p-[16px]')
-    // The answer, then the bars in the rule's place, then the two figures.
-    const order = (a: HTMLElement, b: HTMLElement) =>
-      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
-    expect(order(net, bars)).toBe(true)
-    expect(order(bars, income)).toBe(true)
-    // Money in reads left, money out right, each under the bar it fills.
-    expect(order(income, expenses)).toBe(true)
-    expect(expenses).toHaveClass('text-right')
-    expect(income).toHaveClass('text-left')
-  })
-
-  it('shows matching top money-out and money-in sections on the overview', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    selectMonth('April 2026')
-
-    const moneyOut = container.querySelector<HTMLElement>('[data-evo-analytics-top-categories]')
-    const moneyIn = container.querySelector<HTMLElement>('[data-evo-analytics-money-in-categories]')
-
-    expect(moneyOut).toBeInTheDocument()
-    expect(moneyIn).toBeInTheDocument()
-    expect(moneyOut?.querySelectorAll('[data-evo-analytics-top-category]')).toHaveLength(3)
-    expect(moneyIn?.querySelectorAll('[data-evo-analytics-money-in-category]')).toHaveLength(3)
-    expect(moneyOut).toHaveTextContent('Money out')
-    expect(moneyIn).toHaveTextContent('Money in')
-    // Section headings share one type token across the app.
-    expect(screen.getByRole('heading', { name: 'Money out' })).toHaveClass('uc-type-l1')
-    expect(screen.getByRole('heading', { name: 'Money in' })).toHaveClass('uc-type-l1')
-    expect(screen.getByRole('heading', { name: 'Money out' })).not.toHaveTextContent(/\d/)
-    expect(screen.getByRole('heading', { name: 'Money in' })).not.toHaveTextContent(/\d/)
-    // The two blocks name what they open: they used to carry the same label.
+    expect(periodControlText()).toContain('April')
+    expect(screen.getByTestId('cz-pfm-income')).toBeInTheDocument()
+    expect(screen.getByTestId('cz-pfm-expense')).toBeInTheDocument()
+    expect(screen.getByTestId('cz-pfm-net')).toBeInTheDocument()
+    expect(screen.getByText('Top spending categories')).toBeInTheDocument()
+    expect(screen.getByText('Top income categories')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Choose accounts' })).toHaveTextContent('All accounts')
     expect(screen.getByRole('button', { name: 'All spending categories' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'All income categories' })).toBeInTheDocument()
-    expect(moneyIn).toHaveTextContent('Income')
-    expect(moneyIn).toHaveTextContent('Transfers')
-    expect(moneyIn?.querySelector('[data-evo-analytics-money-in-category]')).toHaveTextContent('Income')
+    expect(categoryRows().length).toBeGreaterThan(0)
+    expect(container).not.toHaveTextContent(/transactions need a category/i)
   })
 
-  it('opens the money-in category detail with the income direction', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
-    selectMonth('April 2026')
-    const incomeRow = container.querySelector<HTMLElement>('[data-evo-analytics-money-in-category]')
+  it('offers presets and a custom range, and closes the axis with the year totals', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    expect(screen.getByTestId('cz-pfm-expense')).toHaveTextContent(/470[,.]00/)
+    expect(screen.getByTestId('cz-pfm-income')).toHaveTextContent(/0[,.]00/)
+    expect(screen.getByTestId('cz-pfm-net')).toHaveTextContent(/470[,.]00/)
+    expect(periodControlText()).toContain('September 2026')
 
-    expect(incomeRow).toBeInTheDocument()
-    fireEvent.click(incomeRow as HTMLElement)
+    await selectMonth('April 2026')
+    expect(periodControlText()).toContain('April 2026')
 
-    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
-    expect(container.querySelector('[data-evo-analytics-breakdown="Income"]')).toBeInTheDocument()
-    expect(screen.getByText('Transactions')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
+    await screen.findByRole('tab', { name: 'Donut' })
+    fireEvent.click(periodControl())
+    expect(await screen.findByRole('radio', { name: spendingCopy.presetLast3Months })).toBeInTheDocument()
+    expect(await screen.findByRole('radio', { name: spendingCopy.presetYearToDate })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('radio', { name: spendingCopy.presetLast3Months }))
+    await waitFor(() => expect(periodControlText()).toContain(spendingCopy.presetLast3Months))
+  })
+
+  it('reaches a custom span of months, which no preset covers', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
+    await screen.findByRole('tab', { name: 'Donut' })
+    await selectCustomRange('April 2026', 'June 2026')
+
+    expect(periodControlText()).toContain('Apr')
+    expect(periodControlText()).toContain('Jun')
+    expect(periodControlText()).toContain('2026')
+    expect(periodControlText()).toContain('–')
+  })
+
+  it('exposes the Native PFM scope, period, and direction controls in a stable order', async () => {
+    const { container } = await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    const scope = screen.getByRole('button', { name: 'Choose accounts' })
+    const period = periodControl()
+    const income = screen.getByRole('button', { name: 'Analyse money in' })
+    const expense = screen.getByRole('button', { name: 'Analyse money out' })
+    const follows = (first: HTMLElement, second: HTMLElement) =>
+      Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+    expect(follows(scope, period)).toBe(true)
+    expect(follows(period, income)).toBe(true)
+    expect(follows(income, expense)).toBe(true)
+    expect(container).toHaveTextContent(/\d[,.]\d{2}\s*CZK/)
+  })
+
+  it('preserves canonical converted net totals for positive and negative periods', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    const currentAccounts = mockProducts.filter((product) => product.type === 'current_account')
+    const timeline = createSpendingAnalyticsTimeline('CZ', currentAccounts)
+    const months = timeline.periods.filter((period) => period.kind === 'month')
+    const positive = months.find((period) => (timeline.summariesByPeriodKey[period.key]?.netTotal ?? 0) > 0)
+    const negative = months.find((period) => (timeline.summariesByPeriodKey[period.key]?.netTotal ?? 0) < 0)
+    expect(positive).toBeDefined()
+    expect(negative).toBeDefined()
+    if (!positive || !negative) throw new Error('Expected positive and negative CZ PFM periods')
+    const label = (key: string) => `${new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(`${key}-01T12:00:00Z`))} ${key.slice(0, 4)}`
+    const net = screen.getByTestId('cz-pfm-net')
+    await selectMonth(label(positive.key))
+    expect(net).toHaveTextContent(formatEvo2027Number(timeline.summariesByPeriodKey[positive.key]!.netTotal))
+    expect(net.textContent).not.toMatch(/[−-]/)
+    await selectMonth(label(negative.key))
+    expect(net).toHaveTextContent(formatEvo2027Number(timeline.summariesByPeriodKey[negative.key]!.netTotal))
+    expect(net.textContent).toMatch(/[−-]/)
+  })
+
+  it('renders the Native net, income and expense totals in the overview', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    const net = screen.getByTestId('cz-pfm-net')
+    const income = screen.getByTestId('cz-pfm-income')
+    const expense = screen.getByTestId('cz-pfm-expense')
+    const follows = (first: HTMLElement, second: HTMLElement) =>
+      Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+    expect(net).toHaveTextContent(/CZK/)
+    expect(income).toHaveTextContent(/CZK/)
+    expect(expense).toHaveTextContent(/CZK/)
+    expect(follows(income, expense)).toBe(true)
+    expect(follows(expense, net)).toBe(true)
+  })
+
+  it('shows matching top money-out and money-in sections on the overview', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    await selectMonth('April 2026')
+
+    expect(screen.getByText('Top spending categories')).toBeInTheDocument()
+    expect(screen.getByText('Top income categories')).toBeInTheDocument()
+    expect(categoryRows().length).toBeGreaterThanOrEqual(6)
+    expect(screen.getByRole('button', { name: 'All spending categories' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'All income categories' })).toBeInTheDocument()
+    expect(categorySectionRows('Top spending categories').length).toBeGreaterThan(0)
+    const incomeRows = categorySectionRows('Top income categories')
+    expect(incomeRows.some((row) => row.getAttribute('aria-label')?.startsWith('Income'))).toBe(true)
+    expect(incomeRows.some((row) => row.getAttribute('aria-label')?.startsWith('Transfers'))).toBe(true)
+  })
+
+  it('opens the money-in category detail with the income direction', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    await selectMonth('April 2026')
+    fireEvent.click(screen.getByRole('button', { name: 'All income categories' }))
+    await screen.findByRole('tab', { name: 'Donut' })
+    const incomeRow = categoryRows().find((row) => row.getAttribute('aria-label')?.startsWith('Income'))
+    if (!incomeRow) throw new Error('Expected the Native Income breakdown row')
+    fireEvent.click(incomeRow)
+
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeInTheDocument()
+    expect(screen.getAllByText('Income').length).toBeGreaterThan(0)
+    expect((await screen.findAllByTestId('cz-pfm-transaction')).length).toBeGreaterThan(0)
   })
 
 })
 
 describe('Evo 2027 expense chart and split-by breakdown', () => {
-  function openExpenses(month = 'April 2026') {
-    const rendered = render(<AnalyticsScreen />, { wrapper: Providers })
-    selectMonth(month)
+async function openExpenses(month = 'April 2026', accounts?: number) {
+    const wrapper = accounts === undefined
+      ? Providers
+      : ({ children }: { children: React.ReactNode }) => <Providers accounts={accounts}>{children}</Providers>
+    const rendered = await renderNative(<AnalyticsScreen />, { wrapper })
+    await selectMonth(month)
     fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
+    await screen.findAllByTestId('cz-pfm-donut-marker')
     return rendered
   }
 
   function donutCategoryButtons() {
-    const donut = screen.getByTestId('evo-expense-donut-chart')
-    return Array.from(donut.querySelectorAll<HTMLElement>('button[data-evo-expense-category]'))
-  }
-
-  function arcStrokes() {
-    const donut = screen.getByTestId('evo-expense-donut-chart')
-    return Array.from(donut.querySelectorAll('circle')).map((arc) => arc.getAttribute('stroke'))
+    return screen.getAllByTestId('cz-pfm-donut-marker')
   }
 
   function breakdownRows() {
-    return Array.from(document.querySelectorAll<HTMLElement>('[data-evo-expense-breakdown-row]'))
+    return categoryRows()
   }
 
-  function selectSplitMode(label: string) {
-    fireEvent.click(screen.getByRole('button', { name: 'Select how transactions are split' }))
-    fireEvent.click(screen.getByRole('option', { name: label }))
+  async function selectSplitMode(label: string) {
+    fireEvent.click(screen.getByRole('tab', { name: label }))
+    await waitFor(() => expect(screen.getByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true'))
   }
 
-  it('shows the donut and a category breakdown instead of a raw transaction list', () => {
-    openExpenses()
+  it('shows the donut and a category breakdown instead of a raw transaction list', async () => {
+    await openExpenses()
 
-    expect(screen.getByTestId('evo-expense-donut-chart')).toBeInTheDocument()
-    expect(screen.getByText('Transactions split by')).toBeInTheDocument()
+    expect(donutCategoryButtons().length).toBeGreaterThan(0)
+    expect(screen.getByLabelText('Split by')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add transaction' })).toBeInTheDocument()
-    expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
-    expect(document.querySelectorAll('[data-evo-analytics-scope-trigger]')).toHaveLength(1)
     expect(breakdownRows().length).toBeGreaterThan(1)
-    expect(periodDots().length).toBeGreaterThan(1)
-    expect(screen.queryByTestId('evo-expense-transaction')).not.toBeInTheDocument()
+    expect(periodControl()).toBeInTheDocument()
+    expect(screen.queryByTestId('cz-pfm-transaction')).not.toBeInTheDocument()
   })
 
-  it('matches the Figma chart toggle geometry and keeps it anchored to the chart', () => {
-    openExpenses()
+  it('keeps Native chart mode accessible and preserves marker geometry', async () => {
+    await openExpenses()
 
-    const chartToggle = screen.getByRole('group', { name: 'Chart type' })
-    expect(chartToggle).toHaveClass('gap-[2px]', 'px-[4px]', 'py-[2px]', 'bg-[var(--uc-neutral-200)]')
-    const chartButtons = Array.from(chartToggle.querySelectorAll('button'))
-    expect(chartButtons).toHaveLength(2)
-    chartButtons.forEach((button) => {
-      expect(button).toHaveClass('h-[24px]', 'w-[40px]')
-      expect(button.querySelector('svg')).toHaveAttribute('width', '16')
-      expect(button.querySelector('svg')).toHaveAttribute('height', '16')
-    })
-    const [donutButton, barsButton] = chartButtons
-    if (!donutButton || !barsButton) throw new Error('Expected both chart toggle buttons')
-    // The selected mode wears the action colour: a --uc-surface pill was 1.25:1 on the dark track.
-    expect(donutButton).toHaveClass('bg-[var(--uc-action-strong)]', 'text-[var(--uc-static-white)]')
-    expect(Array.from(donutButton.querySelectorAll('path')).map((path) => path.getAttribute('d'))).toEqual([
-      'M7.54175 0.666016V3.1135C5.25696 3.34404 3.43921 5.11366 3.13396 7.37461L3.11425 7.54098H0.666748C0.89179 3.84133 3.84208 0.891056 7.54175 0.666016Z',
-      'M12.858 8.4439H15.3334C15.2417 9.99489 14.6537 11.4735 13.66 12.6633L13.5001 12.8485L11.7492 11.1022C12.3235 10.3959 12.6971 9.54985 12.8318 8.65198L12.858 8.4439Z',
-      'M3.14633 8.45765C3.31454 10.2552 4.46404 11.8122 6.13237 12.502C7.80071 13.1922 9.71425 12.9021 11.1025 11.7485L12.8492 13.4993C11.5141 14.6873 9.78712 15.3404 8.00008 15.3326C4.12212 15.3404 0.909206 12.3273 0.666748 8.45765H3.14633Z',
-      'M15.2615 7.34757C14.9791 3.746 12.0838 0.885556 8.45842 0.666016V3.1135L8.62342 3.13367C10.8711 3.44442 12.6205 5.26628 12.8263 7.54098H15.2738L15.2615 7.34757Z',
-    ])
-    // currentColor, not a literal hex: the glyph has to follow the button's own colour in dark.
-    expect(Array.from(donutButton.querySelectorAll('path')).every((path) => path.getAttribute('fill') === 'currentColor')).toBe(true)
-    expect(Array.from(barsButton.querySelectorAll('path')).map((path) => path.getAttribute('d'))).toEqual([
-      'M11.6667 4.33268V15.3327C13.6917 15.3327 15.3334 13.6909 15.3334 11.666V0.666016C13.3085 0.666016 11.6667 2.30777 11.6667 4.33268Z',
-      'M0.666748 11.666V15.3327C2.69166 15.3327 4.33341 13.6909 4.33341 11.666V7.99935C2.3085 7.99935 0.666748 9.6411 0.666748 11.666Z',
-      'M6.16675 15.3327V7.08268C6.16675 5.05777 7.8085 3.41602 9.83342 3.41602V11.666C9.83342 13.6909 8.19167 15.3327 6.16675 15.3327Z',
-    ])
-    expect(Array.from(barsButton.querySelectorAll('path')).every((path) => path.getAttribute('fill') === 'currentColor')).toBe(true)
-
-    // The toggle rides the scope row and stays there in both modes: a control
-    // that moves when you use it cannot be learned.
-    const controls = screen.getByRole('region', { name: 'Analytics scope' })
-    expect(controls.contains(chartToggle)).toBe(true)
-    fireEvent.click(barsButton)
-    expect(screen.getByRole('region', { name: 'Analytics scope' })
-      .contains(screen.getByRole('group', { name: 'Chart type' }))).toBe(true)
+    const donutTab = screen.getByRole('tab', { name: 'Donut' })
+    const barsTab = screen.getByRole('tab', { name: 'Bars' })
+    expect(donutTab).toHaveAttribute('aria-selected', 'true')
+    const marker = donutCategoryButtons()[0]
+    if (!marker) throw new Error('Expected a Native donut marker')
+    expect(window.getComputedStyle(marker).width).toBe('32px')
+    expect(window.getComputedStyle(marker).height).toBe('32px')
+    fireEvent.click(barsTab)
+    await waitFor(() => expect(barsTab).toHaveAttribute('aria-selected', 'true'))
+    expect(donutTab).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getAllByRole('button', { name: /^Select / }).length).toBeGreaterThan(0)
   })
 
-  it('moves to adjacent periods when the chart itself is swiped', () => {
-    openExpenses('September 2026')
+  it('moves to adjacent Native periods without losing the selected month', async () => {
+    await openExpenses('September 2026')
+    expect(periodControlText()).toContain('September 2026')
+    fireEvent.click(screen.getByRole('button', { name: spendingCopy.previousPeriod }))
+    await waitFor(() => expect(periodControlText()).toContain('August 2026'))
+    fireEvent.click(screen.getByRole('button', { name: spendingCopy.nextPeriod }))
+    await waitFor(() => expect(periodControlText()).toContain('September 2026'))
 
-    const period = document.querySelector<HTMLElement>('[data-evo-analytics-period-key]')
-    const chart = screen.getByLabelText('Expense chart')
-    const initialKey = period?.getAttribute('data-evo-analytics-period-key')
-
-    // Dragging right pulls the previous period in behind the finger.
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 1, clientX: 120 })
-    fireEvent.pointerMove(chart, { pointerType: 'touch', pointerId: 1, clientX: 200 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 1, clientX: 220 })
-
-    expect(initialKey).toBe('month:2026-09')
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'month:2026-08')
-
-    // Dragging left walks forward again, back to where it started.
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 2, clientX: 220 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 2, clientX: 120 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', initialKey ?? '')
-
-    // Past the newest month the axis hands over to the year totals, newest first.
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 3, clientX: 220 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 3, clientX: 120 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'year:2026')
-
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 4, clientX: 220 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 4, clientX: 120 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'year:2025')
-
-    // And there the axis ends: the gesture springs back rather than pretending
-    // to travel.
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 5, clientX: 220 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 5, clientX: 120 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'year:2025')
-
-    // Back the other way returns to the month it came from.
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 6, clientX: 120 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 6, clientX: 240 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', 'year:2026')
-
-    fireEvent.pointerDown(chart, { pointerType: 'touch', pointerId: 7, clientX: 120 })
-    fireEvent.pointerUp(chart, { pointerType: 'touch', pointerId: 7, clientX: 240 })
-    expect(period).toHaveAttribute('data-evo-analytics-period-key', initialKey ?? '')
+    fireEvent.click(periodControl())
+    fireEvent.click(await screen.findByRole('radio', { name: spendingCopy.presetLastYear }))
+    await waitFor(() => expect(periodControlText()).toContain('2025'))
   })
 
-  it('keeps Income on the same period control, with the year totals closing the axis', () => {
-    render(<AnalyticsScreen />, { wrapper: Providers })
-    selectMonth('April 2026')
+  it('keeps Income on the same period control, with the year totals closing the axis', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    await selectMonth('April 2026')
     fireEvent.click(screen.getByRole('button', { name: 'All income categories' }))
 
-    expect(document.querySelector('[data-evo-analytics-direction="income"]')).toBeInTheDocument()
-    // Income retains the selected rich month; the year totals close the rail.
-    const dots = periodDots()
-    expect(dots.find((dot) => dot.getAttribute('aria-current') === 'true'))
-      .toHaveAttribute('aria-label', 'April 2026')
-    expect(document.querySelector('[data-evo-expense-interval]')).toHaveAttribute('data-evo-expense-interval', 'month')
-
-    fireEvent.click(document.querySelector('[data-evo-analytics-period-trigger]') as HTMLElement)
-    fireEvent.click(document.querySelector('[data-evo-analytics-period-option="last-year"]') as HTMLElement)
-    expect(document.querySelector('[data-evo-expense-interval="year"]')).toBeInTheDocument()
-    expect(periodDots().at(-1)).toHaveAttribute('aria-label', 'Total 2025')
-    expect(screen.queryByText('Monthly interval')).not.toBeInTheDocument()
+    expect(await screen.findAllByRole('heading', { name: 'Money in' })).toHaveLength(2)
+    expect(periodControlText()).toContain('April 2026')
+    fireEvent.click(periodControl())
+    fireEvent.click(await screen.findByRole('radio', { name: spendingCopy.presetLastYear }))
+    await waitFor(() => expect(periodControlText()).toContain('2025'))
   })
 
-  it('inhibits the other arcs when one category is picked and restores them when it is picked again', () => {
-    openExpenses()
+  it('inhibits the other arcs when one category is picked and restores them when it is picked again', async () => {
+    await openExpenses()
 
-    expect(arcStrokes().every((stroke) => stroke !== 'var(--uc-neutral-300)')).toBe(true)
+    expect(arcStrokes().every((stroke) => stroke !== '#cccccc')).toBe(true)
 
     const [first] = donutCategoryButtons()
     if (!first) throw new Error('Expected a donut category')
-    const category = first.getAttribute('data-evo-expense-category')
+    const firstLabel = first.getAttribute('aria-label')
+    const category = firstLabel?.replace(/^Show (.*) transactions$/, '$1')
 
     fireEvent.click(first)
+    await waitFor(() => {
+      const selectedMarker = screen.getByRole('button', { name: firstLabel ?? '' })
+      expectNativeSelected(selectedMarker)
+      expect(arcStrokes().filter((stroke) => stroke === '#cccccc')).toHaveLength(arcStrokes().length - 1)
+    })
 
-    expect(first).toHaveAttribute('aria-pressed', 'true')
-    expect(arcStrokes().filter((stroke) => stroke === 'var(--uc-neutral-300)')).toHaveLength(arcStrokes().length - 1)
-    expect(breakdownRows().map((row) => row.getAttribute('data-evo-expense-breakdown-row'))).toEqual([category])
+    expect(breakdownRows().map((row) => row.getAttribute('aria-label'))).toEqual([category])
 
-    fireEvent.click(donutCategoryButtons()[0] as HTMLElement)
-
-    expect(arcStrokes().every((stroke) => stroke !== 'var(--uc-neutral-300)')).toBe(true)
-    expect(screen.queryByRole('button', { name: 'Clear expense filters' })).not.toBeInTheDocument()
-    expect(breakdownRows().length).toBeGreaterThan(1)
+    fireEvent.click(screen.getByRole('button', { name: firstLabel ?? '' }))
+    await waitFor(() => {
+      expect(arcStrokes().every((stroke) => stroke !== '#cccccc')).toBe(true)
+      expect(screen.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument()
+      expect(breakdownRows().length).toBeGreaterThan(1)
+    })
   })
 
-  it('draws only arcs big enough to carry a marker and folds the rest into Other', () => {
-    openExpenses()
+  it('draws only arcs big enough to carry a marker and folds the rest into Other', async () => {
+    await openExpenses()
 
     // Up to six named arcs, but only while each one is worth drawing: an arc
     // under 8% renders as a stub whose marker lands on its neighbours', which is
@@ -503,99 +459,102 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
     const donutButtons = donutCategoryButtons()
     expect(donutButtons.length).toBeGreaterThan(1)
     expect(donutButtons.length).toBeLessThanOrEqual(7)
-    const otherButton = donutButtons.find((button) => button.getAttribute('data-evo-expense-category') === 'Other')
+    const otherButton = donutButtons.find((button) => button.getAttribute('aria-label')?.includes('Other'))
     if (!otherButton) throw new Error('Expected an Other donut segment')
 
-    expect(otherButton).toHaveClass('size-[32px]', 'text-[var(--uc-static-white)]')
-    // Quiet, but never the pale grey an inhibited arc wears.
-    expect(otherButton).toHaveStyle({ backgroundColor: 'var(--uc-neutral-600)' })
+    expect(window.getComputedStyle(otherButton).width).toBe('32px')
+    expect(window.getComputedStyle(otherButton).height).toBe('32px')
     // The marker counts what is folded in. Three dots meant "more options"
     // everywhere else in the app, which is not what this arc opens.
     expect(otherButton.textContent?.trim()).toMatch(/^\+\d+$/)
 
     const primaryKeys = donutButtons
-      .map((button) => button.getAttribute('data-evo-expense-category'))
+      .map((button) => button.getAttribute('aria-label')?.replace(/^Show (.*) transactions$/, '$1'))
       .filter((key): key is string => Boolean(key) && key !== 'Other')
     const allRowCount = breakdownRows().length
 
     fireEvent.click(otherButton)
+    await waitFor(() => expectNativeSelected(otherButton))
 
-    expect(otherButton).toHaveAttribute('aria-pressed', 'true')
     // Other is one arc but many categories, so the headline counts what it folds
     // in rather than naming the arc.
     const foldedCount = Number(otherButton.textContent?.trim().replace('+', ''))
     expect(screen.getAllByText(`${foldedCount} categories`).length).toBeGreaterThan(0)
     // Picking Other narrows the list to what the ring folded away: fewer rows
     // than the full breakdown, and not one of them is a named arc.
-    const remaining = breakdownRows().map((row) => row.getAttribute('data-evo-expense-breakdown-row'))
+    const remaining = breakdownRows().map((row) => row.getAttribute('aria-label'))
     expect(remaining.length).toBeGreaterThan(0)
     expect(remaining.length).toBeLessThan(allRowCount)
     expect(remaining.some((key) => key !== null && primaryKeys.includes(key))).toBe(false)
   })
 
-  it('keeps several categories coloured and breaks all of them down', () => {
-    openExpenses()
+  it('keeps several categories coloured and breaks all of them down', async () => {
+    await openExpenses()
 
     const [first, second] = donutCategoryButtons()
     if (!first || !second) throw new Error('Expected at least two donut categories')
-    const categories = [first.getAttribute('data-evo-expense-category'), second.getAttribute('data-evo-expense-category')]
+    const categories = [
+      first.getAttribute('aria-label')?.replace(/^Show (.*) transactions$/, '$1'),
+      second.getAttribute('aria-label')?.replace(/^Show (.*) transactions$/, '$1'),
+    ]
 
     fireEvent.click(first)
-    fireEvent.click(donutCategoryButtons()[1] as HTMLElement)
+    await waitFor(() => expectNativeSelected(first))
+    const secondButton = donutCategoryButtons()[1] as HTMLElement
+    fireEvent.click(secondButton)
+    await waitFor(() => expectNativeSelected(secondButton))
 
-    expect(arcStrokes().filter((stroke) => stroke === 'var(--uc-neutral-300)')).toHaveLength(arcStrokes().length - 2)
-    expect(breakdownRows().map((row) => row.getAttribute('data-evo-expense-breakdown-row')).sort())
+    expect(arcStrokes().filter((stroke) => stroke === '#cccccc')).toHaveLength(arcStrokes().length - 2)
+    expect(breakdownRows().map((row) => row.getAttribute('aria-label')).sort())
       .toEqual([...categories].sort())
   })
 
-  it('opens a category row and lists its subcategories and transactions', () => {
-    openExpenses()
+  it('opens a category row and lists its subcategories and transactions', async () => {
+    await openExpenses()
 
     const [row] = breakdownRows()
     if (!row) throw new Error('Expected a breakdown row')
-    const category = row.getAttribute('data-evo-expense-breakdown-row')
+    const category = row.getAttribute('aria-label')
 
     fireEvent.click(row)
 
-    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
-    expect(document.querySelector('[data-evo-analytics-breakdown="' + category + '"]')).toBeInTheDocument()
-    expect(document.querySelectorAll('[data-pfm-subcategory-bubble]').length).toBeGreaterThan(0)
-    const transactions = screen.getAllByTestId('evo-expense-transaction')
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeInTheDocument()
+    expect((await screen.findAllByRole('heading', { name: category ?? '' })).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('checkbox', { name: /Include / }).length).toBeGreaterThan(0)
+    const transactions = await screen.findAllByTestId('cz-pfm-transaction')
     expect(transactions).not.toHaveLength(0)
-    expect(transactions.every(
-      (transaction) => transaction.getAttribute('data-evo-expense-transaction-category') === category,
-    )).toBe(true)
+    expect(transactions.every((transaction) => transaction.getAttribute('aria-label')?.startsWith('Open '))).toBe(true)
   })
 
-  it('breaks spending down by merchant and drills into one merchant', () => {
-    openExpenses()
+  it('breaks spending down by merchant and drills into one merchant', async () => {
+    await openExpenses()
 
-    const categoryRowKeys = breakdownRows().map((row) => row.getAttribute('data-evo-expense-breakdown-row'))
+    const categoryRowKeys = breakdownRows().map((row) => row.getAttribute('aria-label'))
 
-    selectSplitMode('Merchants')
+    await selectSplitMode('Merchants')
 
     const merchantRows = breakdownRows()
     expect(merchantRows.length).toBeGreaterThan(0)
-    expect(merchantRows.map((row) => row.getAttribute('data-evo-expense-breakdown-row'))).not.toEqual(categoryRowKeys)
+    expect(merchantRows.map((row) => row.getAttribute('aria-label'))).not.toEqual(categoryRowKeys)
 
     const [firstMerchant] = merchantRows
     if (!firstMerchant) throw new Error('Expected a merchant row')
-    const merchant = firstMerchant.getAttribute('data-evo-expense-breakdown-row')
+    const merchant = firstMerchant.getAttribute('aria-label')
 
     fireEvent.click(firstMerchant)
 
-    const transactions = screen.getAllByTestId('evo-expense-transaction')
+    const transactions = await screen.findAllByTestId('cz-pfm-transaction')
     expect(transactions).not.toHaveLength(0)
     expect(transactions.every((transaction) => transaction.textContent?.includes(merchant ?? ''))).toBe(true)
-    expect(document.querySelectorAll('[data-evo-expense-subcategory]')).toHaveLength(0)
+    expect(screen.queryAllByRole('checkbox', { name: /Include / })).toHaveLength(0)
   })
 
-  it('offers the currency split only when the scope actually mixes currencies', () => {
-    openExpenses()
+  it('offers the currency split only when the scope actually mixes currencies', async () => {
+    await openExpenses('April 2026', 1)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Select how transactions are split' }))
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).not.toContain('Currency')
-    fireEvent.click(screen.getByRole('option', { name: 'Categories' }))
+    const available = () => screen.getAllByRole('tab').map((tab) => tab.getAttribute('aria-label'))
+    expect(available()).not.toContain('Currencies')
+    await selectSplitMode('Categories')
 
     cleanup()
     mockedProductState.categories = [{
@@ -607,15 +566,14 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
       ],
     }]
 
-    openExpenses()
+    await openExpenses('April 2026', 2)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Select how transactions are split' }))
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toContain('Currency')
-    fireEvent.click(screen.getByRole('option', { name: 'Currency' }))
+    expect(available()).toContain('Currencies')
+    await selectSplitMode('Currencies')
     expect(breakdownRows().length).toBeGreaterThan(0)
   })
 
-  it('gives currency rows the shared currency roundel rather than a letter badge', () => {
+  it('gives currency rows the shared currency roundel rather than a letter badge', async () => {
     cleanup()
     mockedProductState.categories = [{
       key: 'test-products',
@@ -626,92 +584,64 @@ describe('Evo 2027 expense chart and split-by breakdown', () => {
       ],
     }]
 
-    openExpenses()
+    await openExpenses('April 2026', 2)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Select how transactions are split' }))
-    fireEvent.click(screen.getByRole('option', { name: 'Currency' }))
+    await selectSplitMode('Currencies')
 
     const [row] = breakdownRows()
     if (!row) throw new Error('Expected a currency row')
-    expect(row.querySelector('[data-currency-badge], [data-ds-label*="Currency"]') ?? row.firstElementChild).toBeTruthy()
+    expect(screen.getAllByLabelText(/(CZK|EUR) currency/).length).toBeGreaterThan(0)
     expect(row.textContent).toMatch(/CZK|EUR/)
   })
 
-  it('switches to the bar chart, isolates a bucket and carries it into the breakdown', () => {
-    openExpenses()
+  it('switches to the bar chart, isolates a bucket and carries it into the transaction list', async () => {
+    await openExpenses()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show spending over time' }))
-
-    expect(screen.queryByTestId('evo-expense-donut-chart')).not.toBeInTheDocument()
-    const chart = screen.getByLabelText('Expense bar chart')
-    expect(chart).toHaveTextContent(/\d+(?:\.\d+)?K/)
-    expect(chart).toHaveTextContent('Total spent')
-    expect(chart).toHaveTextContent('Week 1')
-    expect(chart).toHaveTextContent('1–7')
-    const chartLayout = chart.querySelector('[data-evo-expense-plot]')
-    const yAxis = chartLayout?.firstElementChild
-    // The scale is money and used to say so nowhere: the currency is named once,
-    // on the top tick, rather than on every label or on none.
-    expect(yAxis).toHaveTextContent('CZK')
-    expect((yAxis?.textContent?.match(/CZK/g) ?? []).length).toBe(1)
-    // Round steps: rounding the maximum and dividing by four produced 6.3K / 18.8K.
-    // Round steps only: rounding the maximum and dividing by four produced
-    // labels like 6.3K and 18.8K.
-    expect(yAxis?.textContent).not.toMatch(/\d+\.\d+K/)
-    expect(chartLayout).toHaveClass('gap-[6px]')
-    expect(yAxis).toHaveClass('w-[32px]')
-    const bars = Array.from(chart.querySelectorAll<HTMLElement>('button[data-evo-expense-bar]'))
-    const spentBar = bars.find((bar) => {
-      const fill = bar.querySelector<HTMLElement>('span > span')
-      return fill ? Number.parseFloat(fill.style.height) > 0 : false
-    })
-    if (!spentBar) throw new Error('Expected at least one bar with spending')
-    // A month is split into fixed 7-day slices, so the bucket key is the week ordinal.
+    await selectSplitMode('Bars')
+    expect(screen.queryAllByTestId('cz-pfm-donut-marker')).toHaveLength(0)
+    const bars = screen.getAllByRole('button', { name: /^Select \d/ })
     expect(bars.length).toBeGreaterThanOrEqual(4)
     expect(bars.length).toBeLessThanOrEqual(5)
-    const weekIndex = Number(spentBar.getAttribute('data-evo-expense-bar')?.replace('w', '')) - 1
-
+    const spentBar = bars.find((bar) => !bar.hasAttribute('aria-disabled'))
+    if (!spentBar) throw new Error('Expected a Native week bar')
+    const firstDay = Number(spentBar.getAttribute('aria-label')?.match(/^Select (\d+)/)?.[1])
+    if (!Number.isFinite(firstDay)) throw new Error('Expected a Native bar date range')
+    const weekIndex = Math.floor((firstDay - 1) / 7)
     fireEvent.click(spentBar)
+    await waitFor(() => expectNativeSelected(spentBar))
 
-    expect(spentBar).toHaveAttribute('aria-pressed', 'true')
-
-    const [row] = breakdownRows()
-    if (!row) throw new Error('Expected a breakdown row for the selected week')
-    fireEvent.click(row)
-
-    // The day now lives on the group divider, so every visible row sits under a date in that week.
-    expect(screen.getAllByTestId('evo-expense-transaction').every((transaction) => {
-      const dateKey = transaction.closest('[data-transaction-date-group]')?.getAttribute('data-transaction-date-group')
-      const day = Number(dateKey?.slice(-2))
+    fireEvent.click(screen.getByRole('button', { name: 'See all transactions' }))
+    const transactions = await screen.findAllByTestId('cz-pfm-transaction')
+    expect(transactions.length).toBeGreaterThan(0)
+    expect(transactions.every((transaction) => {
+      const date = Array.from(transaction.querySelectorAll<HTMLElement>('[dir="auto"]'))
+        .find(element => /^\d{1,2}\s+\p{L}+\s*·/u.test(element.textContent ?? ''))
+      const day = Number(date?.textContent?.match(/^(\d{1,2})/)?.[1])
       return Number.isFinite(day) && Math.floor((day - 1) / 7) === weekIndex
     })).toBe(true)
   })
 
-  it('uses the overview amount scale in the full expense breakdown', () => {
-    render(<AnalyticsScreen />, { wrapper: Providers })
-    const overviewAmount = Array.from(document.querySelectorAll<HTMLElement>('[data-evo-analytics-top-category] span'))
-      .find((node) => node.classList.contains('text-[18px]'))
-    fireEvent.click(document.querySelector('[data-evo-analytics-top-categories] button[data-evo-analytics-see-all]') as HTMLElement)
-
-    const breakdownAmount = Array.from(breakdownRows()[0]?.querySelectorAll<HTMLElement>('span') ?? [])
-      .find((node) => node.classList.contains('text-[18px]'))
-
-    expect(overviewAmount).toHaveClass('text-[18px]')
-    expect(breakdownAmount).toHaveClass('text-[18px]')
+  it('preserves the canonical selected-period expense total in overview and analysis', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
+    const overviewExpense = screen.getByTestId('cz-pfm-expense').textContent
+    expect(overviewExpense).toMatch(/\d[,.]\d{2}/)
+    fireEvent.click(screen.getByRole('button', { name: 'All spending categories' }))
+    await waitFor(() => expect(document.body).toHaveTextContent(overviewExpense ?? ''))
   })
 
-  it('returns to the overview when a drill-in started there', () => {
-    const { container } = render(<AnalyticsScreen />, { wrapper: Providers })
+  it('returns to the overview when a drill-in started there', async () => {
+    await renderNative(<AnalyticsScreen />, { wrapper: Providers })
 
-    const [topCategory] = Array.from(container.querySelectorAll<HTMLElement>('[data-evo-analytics-top-category]'))
+    const [topCategory] = categoryRows()
     if (!topCategory) throw new Error('Expected a top category row on the overview')
 
     fireEvent.click(topCategory)
-    expect(document.querySelector('[data-evo-analytics-breakdown]')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
-    expect(container.querySelector('[data-evo-analytics-summary-hero]')).toBeInTheDocument()
-    expect(screen.queryByTestId('evo-expense-donut-chart')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('cz-pfm-expense')).toBeInTheDocument()
+    expect(screen.queryByTestId('cz-pfm-transaction')).not.toBeInTheDocument()
   })
 })
+

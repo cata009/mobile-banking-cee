@@ -4,11 +4,11 @@
  *
  * Extracted verbatim from czChatOrchestration.ts.
  */
-import type { Screen } from '@/app/contexts/NavigationContext'
+import type { Screen } from '@/app/navigation/screenTypes'
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig'
 import { buildCzChatTitle, buildCzChatTopic, type CzChatHelpArea } from './helpers'
 import type { Product } from '@/data/products'
-import type { CoAppingChatContext } from '../../../../package/mobile-pi-coapping-chat-package/src'
+import type { CoAppingChatContext } from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 
 export function buildCzChatHelpContext(area: CzChatHelpArea, id: string): CoAppingChatContext {
   switch (area) {

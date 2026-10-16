@@ -1,0 +1,15 @@
+export const PANEL_MENU_CONTRACT = {
+  width: 375,
+  rowHeight: 80,
+  rowPaddingHorizontal: 16,
+  rowPaddingVertical: 24,
+  rowGap: 8,
+  contentGap: 16,
+  glyphSlotSize: 32,
+  glyphSize: 20,
+  labelSize: 14,
+  lineHeight: 'normal',
+  labelColor: 'var(--uc-static-white)',
+  radius: 12,
+  rowClass: 'content-stretch flex gap-[8px] h-[80px] items-center px-[16px] py-[24px] relative shrink-0 w-[375px]',
+} as const

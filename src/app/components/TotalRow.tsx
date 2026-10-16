@@ -1,3 +1,4 @@
+import { resolveTotalRow } from '@/app/components/contracts/totalRow';
 interface TotalRowProps {
   integer: string;
   decimals: string;
@@ -17,14 +18,15 @@ export default function TotalRow({
   className = '',
   label = 'Total',
 }: TotalRowProps) {
-  if (variant === 'evolution') {
+  const state = resolveTotalRow({ variant, productStyle });
+  if (state.evolution) {
     return (
       <div
         className={`flex w-[327px] flex-col items-end gap-[4px] rounded-b-[4px] p-[16px] text-[var(--uc-text)] ${className}`}
         data-total-row-evolution
         data-product-style={productStyle}
         style={{
-          background: productStyle === 'sme' ? "var(--uc-neutral-200)" : "var(--uc-surface-raised)",
+          background: `var(${state.backgroundToken})`,
         }}
       >
         <div className="flex w-full flex-col items-start justify-center gap-[4px]">

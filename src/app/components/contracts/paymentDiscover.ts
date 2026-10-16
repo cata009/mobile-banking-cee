@@ -1,0 +1,2 @@
+/** Actual payment discovery helper, distinct from centered DS HelperCard. */
+export const PAYMENT_DISCOVER_CONTRACT={radius:4,padding:16,slotSize:32,gap:14,align:'start',closeGlyph:32,infoGlyph:20,titleFontSize:18,bodyFontSize:18,bodyMargin:4,iconMarginTop:4,backgroundToken:'--uc-action-strong',textToken:'--uc-text-inverse',dismissMode:'internal',closeLabel:'Dismiss payment help',gridClass:'grid grid-cols-[32px_1fr_32px] items-start gap-[14px]'} as const

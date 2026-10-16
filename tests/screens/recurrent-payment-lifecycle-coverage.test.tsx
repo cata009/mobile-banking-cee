@@ -1,9 +1,15 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import RecurrentPaymentsScreen from '@/app/screens/payments/RecurrentPaymentsScreen'
 import { createRecurrentPayment, getAllRecurrentPayments } from '@/data/paymentsHub'
 import { renderBankingScreen } from '../helpers/coverageProviders'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
 
 beforeEach(() => {
   localStorage.clear()
@@ -14,6 +20,7 @@ afterEach(() => {
   cleanup()
   vi.useRealTimers()
   localStorage.clear()
+  resetNativeWebRendererDiagnostics()
 })
 
 function renderScheduled(onBack = vi.fn()) {
@@ -28,6 +35,36 @@ function openDetails(name: string) {
 function changeRepeat(current: string, next: string) {
   fireEvent.click(screen.getByRole('button', { name: current }))
   fireEvent.click(within(screen.getByRole('dialog', { name: 'Repeat' })).getByRole('button', { name: next }))
+}
+
+async function pressNativeButton(name: string | RegExp) {
+  const button = await screen.findByRole('button', { name })
+  await act(async () => {
+    fireEvent.click(button)
+  })
+}
+
+async function enterNativeAmount(value: string) {
+  for (const digit of value) {
+    const input = (await screen.findByRole('textbox', { name: /Amount in/ })) as HTMLInputElement
+    const previousValue = input.value
+    await pressNativeButton(digit)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /Amount in/ })).not.toHaveValue(previousValue)
+    })
+  }
+}
+
+async function clearNativeAmount() {
+  while (true) {
+    const input = (await screen.findByRole('textbox', { name: /Amount in/ })) as HTMLInputElement
+    const previousValue = input.value
+    if (!previousValue) return
+    await pressNativeButton('Delete amount')
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: /Amount in/ })).not.toHaveValue(previousValue)
+    })
+  }
 }
 
 describe('Recurrent payments current lifecycle', () => {
@@ -78,18 +115,21 @@ describe('Recurrent payments current lifecycle', () => {
     expect(screen.getByRole('region', { name: 'Payment schedule' })).toHaveTextContent('Weekly')
   })
 
-  it('creates, edits and deletes a scheduled account transfer through the real transfer and schedule forms', () => {
+  it('creates, edits and deletes a scheduled account transfer through the real transfer and schedule forms', async () => {
     const originalIds = getAllRecurrentPayments('CZ').map(({ id }) => id)
-    renderScheduled()
+    const view = renderScheduled()
     fireEvent.click(screen.getByRole('button', { name: 'Add new' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Move money between accounts/ }))
+    await asyncNativeReady(view.container)
     expect(screen.getByRole('button', { name: 'Move money' })).toBeDisabled()
-    fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), { target: { value: '100' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Move money' }))
-    expect(screen.getAllByRole('heading', { name: 'Schedule' }).length).toBeGreaterThan(0)
-    changeRepeat('Never', 'Monthly')
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    expect(screen.getByRole('heading', { name: 'Transfer scheduled' })).toBeInTheDocument()
+    await enterNativeAmount('100')
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Move money' })).toBeEnabled())
+    await pressNativeButton('Move money')
+    expect(await screen.findByText('Start date')).toBeInTheDocument()
+    await pressNativeButton('Repeat')
+    await pressNativeButton('Monthly')
+    await pressNativeButton('Confirm')
+    expect(await screen.findByText('Transfer scheduled')).toBeInTheDocument()
     const created = getAllRecurrentPayments('CZ').find(({ id }) => !originalIds.includes(id))
     expect(created).toMatchObject({
       kind: 'internal-transfer',
@@ -99,48 +139,56 @@ describe('Recurrent payments current lifecycle', () => {
       destinationAccountName: 'Euro account',
       schedule: { startDate: '2026-10-07', repeat: 'monthly', endsOn: { type: 'never' } },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    openDetails('To Euro account')
+    await pressNativeButton('Done')
+    fireEvent.click(await screen.findByRole('button', { name: 'View scheduled payment details for To Euro account' }))
+    expect(await screen.findByRole('region', { name: 'Payment schedule' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), { target: { value: '250' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Edit transfer schedule' }))
+    await asyncNativeReady(view.container)
+    await clearNativeAmount()
+    await enterNativeAmount('250')
+    await screen.findByRole('button', { name: 'Edit transfer schedule' })
+    await pressNativeButton('Edit transfer schedule')
+    await screen.findByRole('button', { name: 'Monthly' })
     changeRepeat('Monthly', 'Weekly')
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    expect(screen.getByRole('textbox', { name: 'Amount in CZK' })).toHaveValue('250')
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    expect(screen.getByRole('region', { name: 'Payment schedule' })).toHaveTextContent('Weekly')
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }))
+    await asyncNativeReady(view.container)
+    expect(await screen.findByRole('textbox', { name: 'Amount in CZK' })).toHaveValue('250')
+    await pressNativeButton('Save changes')
+    expect(await screen.findByText('Transfer updated')).toBeInTheDocument()
+    await pressNativeButton('Done')
+    expect(await screen.findByRole('region', { name: 'Payment schedule' })).toHaveTextContent('Weekly')
     expect(getAllRecurrentPayments('CZ').find(({ id }) => id === created!.id)).toMatchObject({
       amount: 250,
       schedule: { repeat: 'weekly' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
     fireEvent.click(
-      within(screen.getByRole('dialog', { name: 'Delete scheduled payment?' })).getByRole('button', { name: 'Cancel' }),
+      within(await screen.findByRole('dialog', { name: 'Delete scheduled payment?' })).getByRole('button', { name: 'Cancel' }),
     )
     expect(getAllRecurrentPayments('CZ').some(({ id }) => id === created!.id)).toBe(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }))
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Delete' }))
     expect(
       screen.queryByRole('button', { name: 'View scheduled payment details for To Euro account' }),
     ).not.toBeInTheDocument()
     expect(getAllRecurrentPayments('CZ').map(({ id }) => id)).toEqual(originalIds)
   })
 
-  it('returns to create options when transfer entry is cancelled and can dismiss the reopened sheet', () => {
+  it('returns to create options when transfer entry is cancelled and can dismiss the reopened sheet', async () => {
     const onBack = vi.fn()
-    renderScheduled(onBack)
+    const view = renderScheduled(onBack)
     fireEvent.click(screen.getByRole('button', { name: 'Add new' }))
     const options = screen.getByRole('dialog', { name: 'Create scheduled payment' })
     expect(within(options).getByText('Standing order')).toBeInTheDocument()
     expect(within(options).getByText('Direct debit')).toBeInTheDocument()
     fireEvent.click(within(options).getByRole('button', { name: /Move money between accounts/ }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'Amount in CZK' }), { target: { value: '250' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    expect(screen.getByRole('dialog', { name: 'Create scheduled payment' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    await asyncNativeReady(view.container)
+    await enterNativeAmount('250')
+    await pressNativeButton('Back')
+    expect(await screen.findByRole('dialog', { name: 'Create scheduled payment' })).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: 'Close' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Back' }))
     expect(onBack).toHaveBeenCalledOnce()
   })
 

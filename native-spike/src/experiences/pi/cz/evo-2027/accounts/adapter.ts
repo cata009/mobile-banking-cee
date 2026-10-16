@@ -8,7 +8,7 @@ import PaymentFlow from '../payments/PaymentFlow';
 import { czechAccountsSearchEntries } from './searchEntries';
 function TransactionScreen(props: CzechNativeScreenProps) {
   return React.createElement(
-    props.route.params?.cardId ? CardScreen : AccountScreen,
+    props.transactionSelection?.source === 'card' || props.route.params?.source === 'card' || props.route.params?.cardId ? CardScreen : AccountScreen,
     props,
   );
 }
@@ -27,6 +27,9 @@ export const CZECH_ACCOUNTS_ADAPTER: CzechNativeAdapter = {
     'card-options': CardScreen,
     payments: PaymentsScreen,
     'payment-create': PaymentFlow,
+    'payment-review': PaymentFlow,
+    'payment-sign': PaymentFlow,
+    'payment-success': PaymentFlow,
   },
   searchEntries: czechAccountsSearchEntries,
 };

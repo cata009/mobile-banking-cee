@@ -1,7 +1,8 @@
 import { AppIcon } from "@/app/components/icons";
+import type { RadioButtonOptions } from '@/app/components/contracts/radioButton';
+import { radioButtonWeb } from '@/app/components/contracts/radioButtonWeb';
 
-interface RadioButtonProps {
-  selected: boolean;
+interface RadioButtonProps extends RadioButtonOptions {
   onClick: () => void;
   label: string;
   className?: string;
@@ -11,22 +12,25 @@ export default function RadioButton({
   selected, 
   onClick, 
   label,
-  className = '' 
+  className = '',
+  variant = 'standard',
 }: RadioButtonProps) {
+  const web = radioButtonWeb({ selected, variant }, className);
+  const Mark = web.markTag;
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full flex items-center gap-[8px] px-[24px] py-[20px] text-left cursor-pointer transition-opacity hover:opacity-80 ${className}`}
-      aria-label={label}
+      className={web.buttonClass}
+      aria-label={web.explicitLabel ? label : undefined}
       role="radio"
       aria-checked={selected}
     >
-      <div className="grid h-[32px] w-[32px] flex-shrink-0 place-items-center">
-        <AppIcon name={selected ? "radio-selected" : "radio-unselected"} color="var(--uc-text)" />
-      </div>
+      <Mark className={web.markClass} aria-hidden={web.markHidden}>
+        <AppIcon name={web.selectedIcon} color={`var(${web.iconToken})`} />
+      </Mark>
       
-      <span className="uc-type-n4-strong text-[var(--uc-primary-k1)]">
+      <span className={web.labelClass}>
         {label}
       </span>
     </button>

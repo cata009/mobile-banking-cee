@@ -2,10 +2,10 @@ import type { CurrentAccount } from '@/data/products'
 import {
   type CoAppingFollowUpSuggestion,
   type CoAppingRichBlock,
-} from '../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzChatFollowUp, formatCzChatMoney } from './helpers'
 import { extractInvestmentGoalDraft, getInvestmentGoalNextStep } from './investmentGoal'
-import type { CoAppingChatMessage } from '../../../../package/mobile-pi-coapping-chat-package/src'
+import type { CoAppingChatMessage } from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 import type { CzChatNormalizedContext } from './normalizedContext'
 import { normalizeCzChatInput as normalize, hasCzChatTerm as hasAny } from './matching'
 

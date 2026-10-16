@@ -1,4 +1,5 @@
-import type { CzechNativeAdapter } from '../contracts';
+import React from 'react';
+import type { CzechNativeAdapter, CzechNativeScreenProps } from '../contracts';
 import More from './More';
 import Documents from './Documents';
 import Messages from './Messages';
@@ -8,7 +9,17 @@ import Support from '../support/Support';
 import CallRequest from '../support/CallRequest';
 import Appointments from '../support/Appointments';
 import Login from '../auth/Login';
+import Prime from '../support/Prime';
+import { BaselineCoappingSession } from '../../../current/baseline/coapping/SessionScreen';
+import { czechBankingHost } from '../../../current/banking/czechHost';
 import { withCzechPreferences as withPreferences } from './PreferenceBridge';
+
+function Coapping(props: CzechNativeScreenProps) {
+  return React.createElement(BaselineCoappingSession, {
+    host: czechBankingHost(props, { screen: 'coapping' }),
+  });
+}
+
 export const CZECH_PROFILE_ADAPTER: CzechNativeAdapter = {
   id: 'pi.cz.evo-2027.profile',
   screens: {
@@ -21,7 +32,10 @@ export const CZECH_PROFILE_ADAPTER: CzechNativeAdapter = {
     support: withPreferences(Support),
     'call-request': withPreferences(CallRequest),
     appointments: withPreferences(Appointments),
-    login: withPreferences(Login),
+    prime: Prime,
+    coapping: Coapping,
+    login: Login,
+    prelogin: Login,
   },
   searchEntries: () => [
     {

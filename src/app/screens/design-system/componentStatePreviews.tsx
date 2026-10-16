@@ -10,8 +10,7 @@
 import type { ReactNode } from "react";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import StatusBar from "@/app/components/StatusBar";
-import HomeHeader from "@/app/screens/home/HomeHeader";
-import { MoreHeader } from "@/app/screens/more/MoreHeader";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import PageHeader from "@/app/components/PageHeader";
 import BottomNavigation from "@/app/components/BottomNavigation";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
@@ -59,7 +58,6 @@ import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import AccountTransactionRow from "@/app/components/accounts/AccountTransactionRow";
 import PaymentHeroCard, { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from "@/app/components/payments/PaymentHeroCard";
-import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import ProductCard from "@/app/components/ProductCard";
 import { buildFutureCzAccountCardActions } from "@/app/components/productCardFixtures";
 import ProductsList from "@/app/components/ProductsList";
@@ -131,12 +129,26 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
   "shell.home-header": {
     default: () => (
       <div className="rounded-[8px] bg-[var(--uc-app-bg)] pt-[8px]">
-        <HomeHeader onPrimeClick={() => {}} onMessagesClick={() => {}} showTitle={false} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "home-header", showTitle: false },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     ),
     "with-title": () => (
       <div className="rounded-[8px] bg-[var(--uc-app-bg)] pt-[8px]">
-        <HomeHeader onPrimeClick={() => {}} onMessagesClick={() => {}} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "home-header", showTitle: true },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     ),
   },
@@ -144,23 +156,38 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
   "shell.more-header": {
     default: () => (
       <div className="rounded-[8px] bg-[var(--uc-surface)] pt-[8px]">
-        <MoreHeader onProfile={() => {}} onMessages={() => {}} onLogout={() => {}} messageCount={0} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "more-header", actionVariant: "default", messageCount: 0 },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     ),
     unread: () => (
       <div className="rounded-[8px] bg-[var(--uc-surface)] pt-[8px]">
-        <MoreHeader onProfile={() => {}} onMessages={() => {}} onLogout={() => {}} messageCount={7} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "more-header", actionVariant: "default", messageCount: 7 },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     ),
     "contact-messages": () => (
       <div className="rounded-[8px] bg-[var(--uc-surface)] pt-[8px]">
-        <MoreHeader
-          onContactPhone={() => {}}
-          onProfile={() => {}}
-          onMessages={() => {}}
-          onLogout={() => {}}
-          actionVariant="contact-messages"
-          messageCount={2}
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            country: "BA",
+            screenTopInset: 0,
+            componentPreview: { kind: "more-header", actionVariant: "country", messageCount: 2 },
+          }}
+          onNavigate={() => true}
         />
       </div>
     ),
@@ -868,10 +895,65 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
   },
 
   "contacts.navigation-card": {
-    prime: () => <ContactsNavigationCard icon="prime" title="PRIME" hasChevron onClick={() => {}} />,
-    location: () => <ContactsNavigationCard icon="location" title="LOCATION" onClick={() => {}} />,
-    time: () => <ContactsNavigationCard icon="time" title="TIME" subtitle="Mon - Sun | 07:00 - 22:00" onClick={() => {}} />,
-    phone: () => <ContactsNavigationCard icon="phone" title="PHONE" value="+420 221 210 031" onClick={() => {}} />,
+    prime: () => (
+      <NativeScreenPreview
+        route={{ screen: "account" }}
+        snapshot={{
+          screenTopInset: 0,
+          componentPreview: {
+            kind: "contacts-navigation-card",
+            icon: "prime",
+            title: "PRIME",
+            hasChevron: true,
+          },
+        }}
+        onNavigate={() => true}
+      />
+    ),
+    location: () => (
+      <NativeScreenPreview
+        route={{ screen: "account" }}
+        snapshot={{
+          screenTopInset: 0,
+          componentPreview: {
+            kind: "contacts-navigation-card",
+            icon: "location",
+            title: "LOCATION",
+          },
+        }}
+        onNavigate={() => true}
+      />
+    ),
+    time: () => (
+      <NativeScreenPreview
+        route={{ screen: "account" }}
+        snapshot={{
+          screenTopInset: 0,
+          componentPreview: {
+            kind: "contacts-navigation-card",
+            icon: "time",
+            title: "TIME",
+            subtitle: "Mon - Sun | 07:00 - 22:00",
+          },
+        }}
+        onNavigate={() => true}
+      />
+    ),
+    phone: () => (
+      <NativeScreenPreview
+        route={{ screen: "account" }}
+        snapshot={{
+          screenTopInset: 0,
+          componentPreview: {
+            kind: "contacts-navigation-card",
+            icon: "phone",
+            title: "PHONE",
+            value: "+420 221 210 031",
+          },
+        }}
+        onNavigate={() => true}
+      />
+    ),
   },
 
   "products.product-card-list-total": {

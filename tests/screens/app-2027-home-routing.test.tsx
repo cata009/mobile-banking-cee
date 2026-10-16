@@ -1,10 +1,22 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { act, cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/app/App'
 import { storeApp2027Theme } from '@/app/screens/home/App2027ThemePicker'
+import {
+  asyncNativeReady,
+  nativeWebRendererDiagnostics,
+  resetNativeWebRendererDiagnostics,
+} from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+let originalMatchMedia: typeof window.matchMedia
 
 const EVO_2027_CZ_HOME_URL =
   '/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-evo-2027' +
@@ -13,6 +25,9 @@ const EVO_2027_CZ_HOME_URL =
   '&count_deposits=1&count_savings=1&count_loans=1&count_mortgages=1&count_investments=1'
 
 beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
   window.history.replaceState({}, '', EVO_2027_CZ_HOME_URL)
   vi.stubGlobal(
     'ResizeObserver',
@@ -30,6 +45,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
   vi.unstubAllGlobals()
   window.localStorage.removeItem('app-2027-home-theme')
   window.history.replaceState({}, '', '/')
@@ -37,34 +54,42 @@ afterEach(() => {
 
 describe('Evo 2027 Homepage routing', () => {
   it('boots Evo 2027 from a shared deep link', async () => {
-    render(<App />)
+    const view = render(<App />)
 
+    await asyncNativeReady(view.container)
     expect(await screen.findByText('Total available')).toBeInTheDocument()
-    expect(screen.getByText('Evo 2027')).toBeInTheDocument()
-    expect(document.querySelector('[data-app-2027-home]')).toBeInTheDocument()
-    expect(document.querySelector('[data-home-transformation]')).toBeInTheDocument()
+    expect(nativeWebRendererDiagnostics.snapshots[0]).toMatchObject({
+      country: 'CZ',
+      release: 'release-future-evo-2027',
+      route: { screen: 'home' },
+      productCounts: { accounts: 2, debitCards: 2, creditCards: 1, investments: 1 },
+    })
+    expect(view.container.querySelector('[data-native-current-host="true"]')).toBeInTheDocument()
   })
 
   it('retains the current Czech Evo 2027 homepage composition', async () => {
-    render(<App />)
+    const view = render(<App />)
 
-    await screen.findByText('Total available')
-    expect(screen.getByRole('tablist', { name: 'Product categories' })).toBeInTheDocument()
-    expect(document.querySelector('[data-app-2027-home]')).toBeInTheDocument()
+    await asyncNativeReady(view.container)
+    expect(await screen.findByText('Total available')).toBeInTheDocument()
+    for (const label of ['Accounts', 'Savings', 'Credits', 'Insurance']) {
+      expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
+    }
+    expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('button', { name: 'Hide amounts' })).toBeInTheDocument()
   })
 
   it('propagates an applied Evo visual theme across the app surface', async () => {
-    render(<App />)
+    const view = render(<App />)
 
-    await screen.findByText('Total available')
-    const appSurface = document.querySelector('[data-app-2027-theme-scope]') as HTMLElement
-    expect(appSurface).toHaveAttribute('data-home-theme', 'standard')
+    await asyncNativeReady(view.container)
+    expect(nativeWebRendererDiagnostics.snapshots[0]?.homeTheme).toBe('standard')
 
     act(() => {
       storeApp2027Theme('aurora')
     })
 
-    expect(appSurface).toHaveAttribute('data-home-theme', 'aurora')
+    await waitFor(() => expect(nativeWebRendererDiagnostics.snapshots.at(-1)?.homeTheme).toBe('aurora'))
   })
 
 })

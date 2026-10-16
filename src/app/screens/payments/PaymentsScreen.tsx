@@ -1,47 +1,18 @@
-import { useEffect, useState } from 'react'
-import CopyToast, { type CopyToastState } from '@/app/components/accounts/CopyToast'
+import { NativeScreenPreview } from '@/app/components/demo/NativeScreenPreview'
+import BaselineL1Header from '@/app/components/BaselineL1Header'
 import { AppIcon } from '@/app/components/icons'
-import { BottomSheet } from '@/app/components/BottomSheet'
-import BottomNavigation from '@/app/components/BottomNavigation'
 import { HeaderActionButton, HeaderActionRail } from '@/app/components/HeaderActionIcons'
 import BeneficiaryEditIcon from '@/app/components/payments/BeneficiaryEditIcon'
-import NewPaymentActionListItem from '@/app/components/payments/NewPaymentActionListItem'
-import NewPaymentDiscoverBanner from '@/app/components/payments/NewPaymentDiscoverBanner'
-import PaymentHeroCard from '@/app/components/payments/PaymentHeroCard'
-import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut'
-import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
-import Evo2027PaymentsHub, { type PaymentsHubActionId } from '@/app/screens/payments/Evo2027PaymentsHub'
-import Evo2027BeneficiaryDetailScreen from '@/app/screens/payments/Evo2027BeneficiaryDetailScreen'
-import Evo2027BeneficiaryEditScreen from '@/app/screens/payments/Evo2027BeneficiaryEditScreen'
-import ExchangeRatesScreen from '@/app/screens/payments/ExchangeRatesScreen'
-import InternalTransferScreen from '@/app/screens/payments/InternalTransferScreen'
-import PaymentTemplatesScreen from '@/app/screens/payments/PaymentTemplatesScreen'
-import RecurrentPaymentsScreen from '@/app/screens/payments/RecurrentPaymentsScreen'
 import { useLanguage } from '@/app/contexts/LanguageContext'
-import { resolveEffectiveAppContext } from '@/app/platform/effectiveAppContext'
 import { useDemo, useCountry } from '@/app/state/demoStore'
-import type { BankingActionId } from '@/app/state/demoTypes'
-import {
-  getHeroSheetForRelease,
-  getPaymentsMenuForCountry,
-  type NewPaymentAction,
-  type NewPaymentSheetConfig,
-  type PaymentHeroItem,
-  type PaymentOtherItem,
-} from '@/app/config/paymentsMenuConfig'
+import type { NativeDemoEvents, NativeDemoRoute } from '@/features/demo-native/contracts'
+import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents'
 import type { PaymentTemplateSelection } from '@/data/paymentTemplates'
-import type { FrequentBeneficiary } from '@/data/paymentsHub'
+import { getEvo2027TemplateBeneficiaryName, getPaymentTemplates, getSavedBeneficiaries } from '@/data/paymentTemplates'
+import { getFrequentBeneficiaries, type FrequentBeneficiary } from '@/data/paymentsHub'
 import type { AccountTransaction } from '@/data/accountDetails'
-import {
-  deleteFrequentBeneficiary,
-  getStoredFavoriteBeneficiaryIds,
-  saveFrequentBeneficiaryDetails,
-  storeFavoriteBeneficiaryIds,
-} from '@/data/paymentsHub'
 
-import type { NavItem } from '@/app/components/BottomNavigation'
-
-interface PaymentsScreenProps {
+export interface PaymentsScreenProps {
   onHomeClick?: () => void
   onAnalyticsClick?: () => void
   onContactsClick?: () => void
@@ -55,9 +26,11 @@ interface PaymentsScreenProps {
   onBeneficiarySelect?: (person: FrequentBeneficiary | null) => void
   onBeneficiaryTransactionClick?: (transaction: AccountTransaction) => void
   onTemplateSelect?: (selection: PaymentTemplateSelection) => void
+  paymentFlow?: NativePaymentFlow | null
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange']
+  onPaymentEntryRequest?: NativeDemoEvents['onPaymentEntryRequest']
 }
-
-function PaymentsHeader({
+export function PaymentsHeader({
   title,
   onContactsClick,
   onMessagesClick,
@@ -78,445 +51,134 @@ function PaymentsHeader({
   const handleAction = (_action: string) => {}
 
   return (
-    <div className="w-full bg-[var(--uc-app-bg)]">
-      {/* Matches the 20px gutter the payment cards below use. */}
-      <div className="px-[20px] pb-[20px]">
-        <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1 className="uc-type-h1 flex-1 min-w-0 text-[var(--uc-text)]">{title}</h1>
-
-          <HeaderActionRail>
-            {onExchangeRatesClick ? (
-              <>
+    <BaselineL1Header
+      variant="payments"
+      title={title}
+      actions={
+        <HeaderActionRail>
+          {onExchangeRatesClick ? (
+            <>
+              <button
+                type="button"
+                aria-label={t('runtime.payments.hub.actions.exchange-rates', 'Exchange rates')}
+                onClick={onExchangeRatesClick}
+                className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
+              >
+                <AppIcon name="payment-exchange-rates" size={22} color="currentColor" />
+              </button>
+              {onCustomiseClick ? (
                 <button
                   type="button"
-                  aria-label={t('runtime.payments.hub.actions.exchange-rates', 'Exchange rates')}
-                  onClick={onExchangeRatesClick}
+                  aria-label={t('runtime.payments.hub.customise', 'Customise payments')}
+                  onClick={onCustomiseClick}
                   className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
                 >
-                  <AppIcon name="payment-exchange-rates" size={22} color="currentColor" />
+                  <BeneficiaryEditIcon size={26} />
                 </button>
-                {onCustomiseClick ? (
-                  <button
-                    type="button"
-                    aria-label={t('runtime.payments.hub.customise', 'Customise payments')}
-                    onClick={onCustomiseClick}
-                    className="flex size-[32px] items-center justify-center text-[var(--uc-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
-                  >
-                    <BeneficiaryEditIcon size={26} />
-                  </button>
-                ) : null}
-              </>
-            ) : (
-              <>
-                {usesBosniaHeaderActions ? (
-                  <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
-                ) : (
-                  <HeaderActionButton
-                    icon="profile"
-                    label={t('runtime.actions.profile', 'Profile')}
-                    onClick={() => handleAction('profile')}
-                  />
-                )}
+              ) : null}
+            </>
+          ) : (
+            <>
+              {usesBosniaHeaderActions ? (
+                <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+              ) : (
                 <HeaderActionButton
-                  icon="messages"
-                  label={t('runtime.actions.messages', 'Messages')}
-                  onClick={onMessagesClick}
+                  icon="profile"
+                  label={t('runtime.actions.profile', 'Profile')}
+                  onClick={() => handleAction('profile')}
                 />
-                {onCustomiseClick ? (
-                  <HeaderActionButton
-                    icon="edit"
-                    label={t('runtime.payments.hub.customise', 'Customise payments')}
-                    onClick={onCustomiseClick}
-                  />
-                ) : usesBosniaHeaderActions ? null : (
-                  <HeaderActionButton
-                    icon="help"
-                    label={t('runtime.actions.help', 'Help')}
-                    onClick={() => handleAction('help')}
-                  />
-                )}
-              </>
-            )}
-          </HeaderActionRail>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function getActionForHeroItem(item: PaymentHeroItem): BankingActionId {
-  switch (item.id) {
-    case 'between-accounts':
-      return 'payments.exchange.create'
-    case 'manage-ebills':
-      return 'payments.ebills.manage'
-    case 'recurrent-payments':
-      return 'payments.templates.manage'
-    default:
-      return 'payments.domestic.create'
-  }
-}
-
-function PaymentHeroSheet({
-  config,
-  heroId,
-  onClose,
-  onDomesticPaymentClick,
-}: {
-  config: NewPaymentSheetConfig
-  heroId: PaymentHeroItem['id']
-  onClose: () => void
-  onDomesticPaymentClick?: () => void
-}) {
-  const { t } = useLanguage()
-  const localizedConfig: NewPaymentSheetConfig = {
-    ...config,
-    title: t(`runtime.payments.heroSheets.${heroId}.title`, config.title),
-    actions: config.actions.map((action) => ({
-      ...action,
-      title: t(
-        `runtime.payments.heroSheets.${heroId}.actions.${action.id}.title`,
-        t(`runtime.payments.newPayment.actions.${action.id}.title`, action.title),
-      ),
-      description: t(
-        `runtime.payments.heroSheets.${heroId}.actions.${action.id}.description`,
-        t(`runtime.payments.newPayment.actions.${action.id}.description`, action.description),
-      ),
-    })),
-    infoBanner: {
-      title: t(
-        `runtime.payments.heroSheets.${heroId}.infoBanner.title`,
-        config.infoBanner.translationKey === null
-          ? config.infoBanner.title
-          : t('runtime.payments.newPayment.infoBanner.title', config.infoBanner.title),
-      ),
-      description: t(
-        `runtime.payments.heroSheets.${heroId}.infoBanner.description`,
-        config.infoBanner.translationKey === null
-          ? config.infoBanner.description
-          : t('runtime.payments.newPayment.infoBanner.description', config.infoBanner.description),
-      ),
-    },
-  }
-
-  const handleActionSelect = (action: NewPaymentAction) => {
-    if (action.id === 'domestic-payment') {
-      onClose()
-      onDomesticPaymentClick?.()
-    }
-  }
-
-  return (
-    <BottomSheet title={localizedConfig.title} onClose={onClose}>
-      <div className="flex flex-col">
-        {localizedConfig.actions.map((action) => (
-          <NewPaymentActionListItem key={action.id} action={action} onSelect={handleActionSelect} />
-        ))}
-      </div>
-      <NewPaymentDiscoverBanner
-        title={localizedConfig.infoBanner.title}
-        description={localizedConfig.infoBanner.description}
-      />
-    </BottomSheet>
-  )
-}
-
-export default function PaymentsScreen({
-  onHomeClick,
-  onAnalyticsClick,
-  onContactsClick,
-  onMessagesClick,
-  onProductsClick,
-  onInvestmentsClick,
-  onMoreClick,
-  onDomesticPaymentClick,
-  onBeneficiarySendMoney,
-  selectedBeneficiary: controlledBeneficiary,
-  onBeneficiarySelect,
-  onBeneficiaryTransactionClick,
-  onTemplateSelect,
-}: PaymentsScreenProps) {
-  const demoState = useDemo()
-  const { country } = demoState
-  const { t } = useLanguage()
-  const effectiveContext = resolveEffectiveAppContext(demoState)
-  const disabledActionReasons = new Map(
-    effectiveContext.disabledActions.map((disabledAction) => [disabledAction.action, disabledAction.reason]),
-  )
-  const isEvo2027 = demoState.release === 'release-future-evo-2027'
-  const menu = getPaymentsMenuForCountry(country)
-  const localizedPrimaryItems = menu.primaryItems.map((item) => {
-    const translationKey = item.translationKey === undefined ? item.id : item.translationKey
-
-    return {
-      ...item,
-      title: translationKey ? t(`runtime.payments.primaryItems.${translationKey}.title`, item.title) : item.title,
-      description: translationKey
-        ? t(`runtime.payments.primaryItems.${translationKey}.description`, item.description)
-        : item.description,
-    }
-  })
-  const localizedOtherItems = menu.otherItems.map((item) => ({
-    ...item,
-    label:
-      item.translationKey === null
-        ? item.label
-        : t(`runtime.payments.otherItems.${item.translationKey ?? item.id}`, item.label),
-  }))
-  const otherTitle =
-    menu.otherTitleTranslationKey === null
-      ? menu.otherTitle
-      : t(menu.otherTitleTranslationKey ?? 'runtime.payments.other', menu.otherTitle)
-  const [selectedPrimaryItemId, setSelectedPrimaryItemId] = useState<PaymentHeroItem['id'] | null>(null)
-  const [hubEditOpen, setHubEditOpen] = useState(false)
-  const [localSelectedBeneficiary, setLocalSelectedBeneficiary] = useState<FrequentBeneficiary | null>(null)
-  const [isEditingBeneficiary, setIsEditingBeneficiary] = useState(false)
-  const [favoriteBeneficiaryIds, setFavoriteBeneficiaryIds] = useState<string[]>(getStoredFavoriteBeneficiaryIds)
-  const [favoriteToast, setFavoriteToast] = useState<CopyToastState | null>(null)
-  useEffect(() => {
-    if (!favoriteToast?.visible) return
-    const timeoutId = window.setTimeout(() => {
-      setFavoriteToast((current) => (current ? { ...current, visible: false } : null))
-    }, 1400)
-    return () => window.clearTimeout(timeoutId)
-  }, [favoriteToast])
-  const selectedBeneficiary = controlledBeneficiary === undefined ? localSelectedBeneficiary : controlledBeneficiary
-  const setSelectedBeneficiary = (person: FrequentBeneficiary | null) => {
-    setIsEditingBeneficiary(false)
-    if (onBeneficiarySelect) onBeneficiarySelect(person)
-    else setLocalSelectedBeneficiary(person)
-  }
-  const toggleFavoriteBeneficiary = (personId: string) => {
-    const wasFavorite = favoriteBeneficiaryIds.includes(personId)
-    setFavoriteBeneficiaryIds((current) => {
-      const next = current.includes(personId) ? current.filter((id) => id !== personId) : [...current, personId]
-      storeFavoriteBeneficiaryIds(next)
-      return next
-    })
-    setFavoriteToast({
-      message: wasFavorite ? 'Removed from favorites' : 'Added to favorites',
-      visible: true,
-    })
-  }
-  const [activeChildView, setActiveChildView] = useState<
-    'overview' | 'templates' | 'exchange-rates' | 'internal-transfer' | 'recurrent-payments'
-  >('overview')
-  const selectedHeroSheet = selectedPrimaryItemId
-    ? getHeroSheetForRelease(menu, country, selectedPrimaryItemId, { baseline: !isEvo2027 })
-    : null
-
-  const handleOtherPaymentActionClick = (item: PaymentOtherItem) => {
-    if (item.id === 'templates') {
-      setActiveChildView('templates')
-      return
-    }
-
-    if (item.id === 'exchange-rates') {
-      setActiveChildView('exchange-rates')
-      return
-    }
-  }
-
-  /**
-   * The Evo hub is one grid over the journeys that used to be split between hero
-   * cards and the OTHER rail, so it routes to both: the screens the app already
-   * has, and the hero sheets for the ones that still start with a choice.
-   */
-  const handleHubAction = (id: PaymentsHubActionId) => {
-    switch (id) {
-      case 'new-payment':
-        onDomesticPaymentClick?.()
-        return
-      case 'between-accounts':
-        setActiveChildView('internal-transfer')
-        return
-      case 'recurrent-payments':
-        setActiveChildView('recurrent-payments')
-        return
-      case 'templates':
-        setActiveChildView('templates')
-        return
-      case 'scan-pay':
-        setSelectedPrimaryItemId('scan-pay')
-        return
-      case 'manage-ebills':
-        setSelectedPrimaryItemId('manage-ebills')
-        return
-      default:
-        // Card repayment, Create QR and Foreign payment have no destination in
-        // the prototype yet; the New payment sheet is where they all begin.
-        setSelectedPrimaryItemId('new-payment')
-    }
-  }
-
-  const hubDisabledReasons = new Map<PaymentsHubActionId, string>()
-  const betweenAccountsReason = disabledActionReasons.get('payments.exchange.create')
-  if (betweenAccountsReason) hubDisabledReasons.set('between-accounts', betweenAccountsReason)
-  const domesticReason = disabledActionReasons.get('payments.domestic.create')
-  if (domesticReason) hubDisabledReasons.set('new-payment', domesticReason)
-  const recurrentReason = disabledActionReasons.get('payments.templates.manage')
-  if (recurrentReason) hubDisabledReasons.set('recurrent-payments', recurrentReason)
-
-  const handlePrimaryItemSelect = (item: PaymentHeroItem) => {
-    if (item.id === 'between-accounts' && demoState.release === 'release-future-evo-2027') {
-      setActiveChildView('internal-transfer')
-      return
-    }
-
-    setSelectedPrimaryItemId(item.id)
-  }
-
-  const handleTabChange = (tab: NavItem) => {
-    if (tab === 'home') {
-      onHomeClick?.()
-    }
-    if (tab === 'analytics') {
-      onAnalyticsClick?.()
-    }
-    if (tab === 'investments') {
-      onInvestmentsClick?.()
-    }
-    if (tab === 'more') {
-      onMoreClick?.()
-    }
-    if (tab === 'products') {
-      onProductsClick?.()
-    }
-  }
-
-  if (activeChildView === 'templates') {
-    return (
-      <PaymentTemplatesScreen
-        onBack={() => setActiveChildView('overview')}
-        onSelect={(selection) => onTemplateSelect?.(selection)}
-        isEvo2027={isEvo2027}
-        favoriteBeneficiaryIds={favoriteBeneficiaryIds}
-        onFavoriteToggle={toggleFavoriteBeneficiary}
-        onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}
-      />
-    )
-  }
-
-  if (activeChildView === 'exchange-rates') {
-    return <ExchangeRatesScreen onBack={() => setActiveChildView('overview')} />
-  }
-
-  if (activeChildView === 'internal-transfer') {
-    return <InternalTransferScreen onBack={() => setActiveChildView('overview')} />
-  }
-
-  if (activeChildView === 'recurrent-payments') {
-    return <RecurrentPaymentsScreen onBack={() => setActiveChildView('overview')} isEvo2027={isEvo2027} />
-  }
-
-  if (isEvo2027 && selectedBeneficiary && isEditingBeneficiary) {
-    return (
-      <Evo2027BeneficiaryEditScreen
-        person={selectedBeneficiary}
-        onBack={() => setIsEditingBeneficiary(false)}
-        onSave={(updatedBeneficiary) => {
-          saveFrequentBeneficiaryDetails(updatedBeneficiary)
-          setSelectedBeneficiary(updatedBeneficiary)
-        }}
-      />
-    )
-  }
-
-  if (isEvo2027 && selectedBeneficiary) {
-    return (
-      <div className="relative h-full w-full">
-        <Evo2027BeneficiaryDetailScreen
-          person={selectedBeneficiary}
-          isFavorite={favoriteBeneficiaryIds.includes(selectedBeneficiary.id)}
-          onFavoriteToggle={() => toggleFavoriteBeneficiary(selectedBeneficiary.id)}
-          onEditBeneficiary={() => setIsEditingBeneficiary(true)}
-          onDeleteBeneficiary={() => {
-            deleteFrequentBeneficiary(country, selectedBeneficiary.id);
-            setSelectedBeneficiary(null);
-          }}
-          onBack={() => setSelectedBeneficiary(null)}
-          onSendMoney={() => onBeneficiarySendMoney?.(selectedBeneficiary)}
-          onTransactionClick={(payment) => onBeneficiaryTransactionClick?.(payment)}
-          sendMoneyDisabled={Boolean(domesticReason) || !onBeneficiarySendMoney}
-        />
-        <CopyToast toast={favoriteToast} bottomOffset={106} />
-      </div>
-    )
-  }
-
-  return (
-    <div className="relative flex h-full w-full flex-col bg-[var(--uc-app-bg)] text-[var(--uc-text)]">
-      <div className="h-[54px] flex-shrink-0 bg-[var(--uc-app-bg)]" />
-      <PaymentsHeader
-        title={t('runtime.payments.title', menu.title)}
-        onContactsClick={onContactsClick}
-        onMessagesClick={onMessagesClick}
-        onCustomiseClick={isEvo2027 ? () => setHubEditOpen(true) : undefined}
-        onExchangeRatesClick={isEvo2027 ? () => setActiveChildView('exchange-rates') : undefined}
-      />
-
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-hide pb-[96px]">
-        {isEvo2027 ? (
-          <Evo2027PaymentsHub
-            disabledReasons={hubDisabledReasons}
-            favoriteBeneficiaryIds={favoriteBeneficiaryIds}
-            onAction={handleHubAction}
-            onBeneficiarySelect={setSelectedBeneficiary}
-            editOpen={hubEditOpen}
-            onEditClose={() => setHubEditOpen(false)}
-          />
-        ) : (
-        <>
-        <div className="flex flex-col gap-[13px] px-[20px] pt-[8px]">
-          {localizedPrimaryItems.map((item) => {
-            const actionId = getActionForHeroItem(item)
-            const disabledReason = disabledActionReasons.get(actionId)
-
-            return (
-              <PaymentHeroCard
-                key={item.id}
-                item={item}
-                disabled={Boolean(disabledReason)}
-                disabledReason={disabledReason}
-                onSelect={handlePrimaryItemSelect}
+              )}
+              <HeaderActionButton
+                icon="messages"
+                label={t('runtime.actions.messages', 'Messages')}
+                onClick={onMessagesClick}
               />
-            )
-          })}
-        </div>
-
-        <section className="px-[20px] pt-[16px]">
-          <SectionHeadingDivider title={otherTitle} />
-          <div className="overflow-x-auto overflow-y-hidden scrollbar-hide pt-[8px]">
-            <div className="flex w-max gap-[12px] pr-[20px]">
-              {localizedOtherItems.map((item) => (
-                <PaymentOtherShortcut
-                  key={item.id}
-                  item={item}
-                  treatment="baseline"
-                  onClick={handleOtherPaymentActionClick}
+              {onCustomiseClick ? (
+                <HeaderActionButton
+                  icon="edit"
+                  label={t('runtime.payments.hub.customise', 'Customise payments')}
+                  onClick={onCustomiseClick}
                 />
-              ))}
-            </div>
-          </div>
-        </section>
-        </>
-        )}
-      </div>
+              ) : usesBosniaHeaderActions ? null : (
+                <HeaderActionButton
+                  icon="help"
+                  label={t('runtime.actions.help', 'Help')}
+                  onClick={() => handleAction('help')}
+                />
+              )}
+            </>
+          )}
+        </HeaderActionRail>
+      }
+    />
+  )
+}
+function handlePaymentEntryRequest(
+  route: NativeDemoRoute,
+  props: PaymentsScreenProps,
+  country: ReturnType<typeof useCountry>,
+  release: string,
+) {
+  if (props.onPaymentEntryRequest) {
+    props.onPaymentEntryRequest(route)
+    return true
+  }
+  if (route.screen !== 'payment-create') return false
+  const params = route.params ?? {}
+  if (params.beneficiaryId) {
+    const beneficiary = getFrequentBeneficiaries(country).find((person) => person.id === params.beneficiaryId)
+    if (!beneficiary || !props.onBeneficiarySendMoney) return false
+    props.onBeneficiarySendMoney(beneficiary)
+    return true
+  }
+  const selectionId = params.templateId ?? params.selectionId
+  if (selectionId) {
+    const template = [...getPaymentTemplates(country), ...getSavedBeneficiaries(country, true)].find(
+      (selection) => selection.id === selectionId,
+    )
+    if (!template || !props.onTemplateSelect) return false
+    props.onTemplateSelect(
+        release === 'release-future-evo-2027'
+          ? { ...template, beneficiaryName: getEvo2027TemplateBeneficiaryName(template, country) }
+          : template,
+      )
+    return true
+  }
+  if (params.transactionId || params.entry === 'redo' || !props.onDomesticPaymentClick) return false
+  props.onDomesticPaymentClick()
+  return true
+}
 
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)]">
-        <BottomNavigation activeTab="payments" onTabChange={handleTabChange} />
-      </div>
+export default function PaymentsScreen(props: PaymentsScreenProps) {
+  const { country, release } = useDemo()
+  const onNavigate = (route: NativeDemoRoute, action: 'push' | 'back') => {
+    if (action !== 'push') return false
+    if (route.screen === 'payment-create') return handlePaymentEntryRequest(route, props, country, release)
+    const callbacks: Record<string, (() => void) | undefined> = {
+      home: props.onHomeClick,
+      analytics: props.onAnalyticsClick,
+      contacts: props.onContactsClick,
+      messages: props.onMessagesClick,
+      products: props.onProductsClick,
+      investments: props.onInvestmentsClick,
+      more: props.onMoreClick,
+      profile: props.onMoreClick,
+    }
+    const callback = callbacks[route.screen]
+    if (!callback) return false
+    callback()
+    return true
+  }
 
-      <CopyToast toast={favoriteToast} />
-
-      {selectedPrimaryItemId && selectedHeroSheet && (
-        <PaymentHeroSheet
-          config={selectedHeroSheet}
-          heroId={selectedPrimaryItemId}
-          onClose={() => setSelectedPrimaryItemId(null)}
-          onDomesticPaymentClick={onDomesticPaymentClick}
-        />
-      )}
-    </div>
+  return (
+    <NativeScreenPreview
+      route={{ screen: 'payments' }}
+      snapshot={{ paymentFlow: props.paymentFlow ?? null }}
+      events={{
+        onPaymentFlowChange: props.onPaymentFlowChange,
+      }}
+      onBack={props.onHomeClick ?? (() => {})}
+      onNavigate={onNavigate}
+    />
   )
 }

@@ -6,7 +6,7 @@ import PrimaryButton from '@/app/components/PrimaryButton'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import ToggleButton from '@/app/components/ToggleButton'
 import InvestmentDetailField from '@/app/components/investments/InvestmentDetailField'
-import InvestmentOrderDocumentsAccordion from '@/app/screens/investments/InvestmentOrderDocumentsAccordion'
+import { NativeOrderDocumentsPreview } from '@/flows/shared/investments-bulk-approval/NativeOrderDocumentsPreview'
 import StandardSignScreen from '@/app/components/flow/StandardSignScreen'
 import { AppIcon } from '@/app/components/icons'
 import { getCountryConfig } from '@/app/registry/countryConfig'
@@ -338,7 +338,7 @@ function DefaultOrderDetailScreen({
         </section>
         <section className="pt-[24px]">
           <SectionHeadingDivider title="DOCUMENTS AND TERMS" className="px-[24px]" />
-          <InvestmentOrderDocumentsAccordion currency={getCountryCurrency(country)} />
+          <NativeOrderDocumentsPreview currency={getCountryCurrency(country)} initialOpenSection={null} />
         </section>
         <div className="h-[24px]" aria-hidden="true" />
       </div>
@@ -440,7 +440,7 @@ function BulkReviewScreen({
         </section>
         <section className="pt-[16px]" data-testid="bulk-ex-ante-costs">
           <SectionHeadingDivider title="DISCLOSURES" className="px-[24px]" />
-          <InvestmentOrderDocumentsAccordion currency={getCountryCurrency(country)} initialOpenSection="ex-ante" />
+          <NativeOrderDocumentsPreview currency={getCountryCurrency(country)} initialOpenSection="ex-ante" />
         </section>
       </div>
       <div
@@ -668,7 +668,7 @@ function BulkSummaryOrderDetailScreen({
         </section>
         <section className="pt-[16px]">
           <SectionHeadingDivider title="DISCLOSURES" className="px-[24px]" />
-          <InvestmentOrderDocumentsAccordion currency={getCountryCurrency(country)} initialOpenSection="ex-ante" />
+          <NativeOrderDocumentsPreview currency={getCountryCurrency(country)} initialOpenSection="ex-ante" />
         </section>
       </div>
     </PrototypeShell>

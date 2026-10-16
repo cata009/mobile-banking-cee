@@ -1,3 +1,4 @@
+import { STACKED_PRODUCT_SHADOW } from '@/app/components/contracts/stackedProductShadow';
 export default function StackedProductShadow() {
   return (
     <div className="relative w-full h-[9px] flex justify-center">
@@ -6,14 +7,14 @@ export default function StackedProductShadow() {
         {/* Bottom rounded white element */}
         <svg 
           className="absolute top-0 left-0 w-full h-[9px]" 
-          viewBox="0 0 319 9" 
+          viewBox={STACKED_PRODUCT_SHADOW.viewBox}
           fill="none" 
           preserveAspectRatio="none"
         >
           <path 
             fillRule="evenodd" 
             clipRule="evenodd" 
-            d="M0 0H319V5C319 7.20914 317.209 9 315 9H4C1.79086 9 0 7.20914 0 5V0Z" 
+            d={STACKED_PRODUCT_SHADOW.path}
             fill="var(--uc-surface-raised)"
           />
         </svg>
@@ -21,13 +22,13 @@ export default function StackedProductShadow() {
         {/* Top line with opacity */}
         <svg 
           className="absolute top-0 left-0 w-full h-[1px]" 
-          viewBox="0 0 319 1" 
+          viewBox={STACKED_PRODUCT_SHADOW.lineViewBox}
           fill="none" 
           preserveAspectRatio="none"
         >
           <path
-            opacity="0.296317"
-            d="M0 0.5H319"
+            opacity={STACKED_PRODUCT_SHADOW.lineOpacity}
+            d={STACKED_PRODUCT_SHADOW.linePath}
             stroke="var(--uc-border-muted)"
             strokeWidth="1"
           />

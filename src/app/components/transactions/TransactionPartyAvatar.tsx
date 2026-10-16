@@ -1,4 +1,5 @@
 import { getPartyInitials, partyTint } from "@/features/accounts-payments/partyIdentity";
+import { PARTY_DIRECTION_PATHS, resolveTransactionAvatarFrame } from '@/app/components/contracts/transactionAvatar';
 export { getPartyInitials, partyTint } from "@/features/accounts-payments/partyIdentity";
 
 /** Bare arrow or plus for the corner badge — the badge itself supplies the disc. */
@@ -6,11 +7,11 @@ function DirectionGlyph({ direction, size }: { direction: "in" | "out"; size: nu
   return (
     <svg aria-hidden="true" viewBox="0 0 12 12" width={size} height={size} fill="none">
       {direction === "in" ? (
-        <path d="M6 1.5v9M1.5 6h9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d={PARTY_DIRECTION_PATHS.incoming} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       ) : (
         <>
-          <path d="M2 6h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          <path d="M6.6 2.6 10 6l-3.4 3.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={PARTY_DIRECTION_PATHS.outgoingLine} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path d={PARTY_DIRECTION_PATHS.outgoingArrow} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </>
       )}
     </svg>
@@ -33,8 +34,7 @@ interface TransactionPartyAvatarProps {
  */
 export default function TransactionPartyAvatar({ name, direction, size = 32 }: TransactionPartyAvatarProps) {
   const initials = getPartyInitials(name);
-  const badgeSize = Math.round(size * 0.44);
-  const glyphSize = Math.round(badgeSize * 0.66);
+  const { badgeSize, glyphSize } = resolveTransactionAvatarFrame(size);
 
   return (
     <span

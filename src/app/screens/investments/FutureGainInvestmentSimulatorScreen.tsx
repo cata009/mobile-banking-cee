@@ -1,3 +1,5 @@
+import { FUND_OPTIONS, STOCK_OPTIONS, INVESTMENT_CURRENCIES, INVESTMENT_DISCLAIMERS, INVESTMENT_INFO_STEPS, parseFutureGainAmount as parseAmount, getFutureGainInvestmentSuggestions as getInvestmentSuggestions, calculateFutureGainInvestmentIllustration, type SimulatorKind, type SimulatorCurrency, type SimulatorView, type FutureGainFundSimulatorState } from '@/features/investments/future-gain/smartInvestment';
+export type { SimulatorCurrency, FutureGainFundSimulatorState } from '@/features/investments/future-gain/smartInvestment';
 import { useState } from "react";
 import { useCollapsingHeader } from "@/hooks/useCollapsingHeader";
 import AmountField from "@/app/components/AmountField";
@@ -20,70 +22,6 @@ import { useProducts } from "@/hooks/useProducts";
 import currentBankIcon from "@/assets/investments/term-deposit/current-bank.svg";
 import doneCheckIcon from "@/assets/investments/smart-investment/done-check.svg";
 
-type SimulatorKind = "fund" | "stock";
-export type SimulatorCurrency = "EUR" | "RSD" | "USD";
-type SimulatorView = "calculator" | "fund-detail" | "buy-order";
-
-export interface FutureGainFundSimulatorState {
-  securityId: string;
-  amountInput: string;
-  currency: SimulatorCurrency;
-}
-
-interface InvestmentOption {
-  id: string;
-  name: string;
-  selectionRate: number;
-  estimateRate: number;
-  currency?: SimulatorCurrency;
-}
-
-const FUND_OPTIONS: readonly InvestmentOption[] = [
-  { id: "balanced-income", name: "UniCredit Balanced Income Fund", selectionRate: 1.8, estimateRate: 1.8, currency: "EUR" },
-  { id: "climate-focus", name: "onemarkets Climate Focus Fund", selectionRate: 2.21, estimateRate: 2.21, currency: "EUR" },
-  { id: "sustainable-future", name: "Sustainable Future Mixed Fund", selectionRate: 3.75, estimateRate: 3.75, currency: "USD" },
-  { id: "global-dividend", name: "Global Dividend Fund", selectionRate: 1.14, estimateRate: 1.14, currency: "EUR" },
-  { id: "global-growth", name: "Global Growth Portfolio", selectionRate: 0.72, estimateRate: 0.72, currency: "EUR" },
-];
-
-const STOCK_OPTIONS: readonly InvestmentOption[] = [
-  { id: "stoxx-600", name: "STOXX 600", selectionRate: 3.2, estimateRate: 2.31 },
-  { id: "stoxx-700", name: "STOXX 700", selectionRate: 3.1, estimateRate: 2.31 },
-  { id: "stoxx-800", name: "STOXX 800", selectionRate: 3.1, estimateRate: 2.31 },
-  { id: "stoxx-900", name: "STOXX 900", selectionRate: 3.1, estimateRate: 2.31 },
-  { id: "stoxx-310", name: "STOXX 310", selectionRate: 3.1, estimateRate: 2.31 },
-];
-
-const INVESTMENT_CURRENCIES: readonly SimulatorCurrency[] = ["EUR", "RSD", "USD"];
-const INVESTMENT_DISCLAIMERS: Record<SimulatorKind, string> = {
-  fund: "The information provided is for informational purposes only and does not constitute investment advice or a personal recommendation within the meaning of the Capital Market Law. The data presented is based on aggregated statistical data and does not take into account your investment objectives, financial situation, or experience. The rates of return and calculated returns shown are indicative and provided solely for informational purposes. Investing in investment funds involves the risk of loss of capital, and past performance is not a reliable indicator of future results. Investment funds are not a banking product and do not provide guaranteed returns. These investments are not covered by the Deposit Insurance Scheme, which applies to deposits in the Republic of Serbia. Before making an investment decision, consider the investment fund's objectives, risks, fees, and costs, as well as your own investment goals and financial circumstances.",
-  stock: "The information presented is for informational purposes only and does not constitute investment advice or a personal recommendation within the meaning of the Capital Market Law. The information displayed is based on aggregated statistical data and does not take into account your investment objectives, financial situation, or investment experience. The returns presented are historical performance indicators and are provided solely for informational purposes. Past performance is not a reliable indicator of future results. The value of investments may rise or fall, and investments in shares may result in the partial or total loss of the invested capital.",
-};
-
-const INVESTMENT_INFO_STEPS: Record<SimulatorKind, readonly { title: string; description: string }[]> = {
-  fund: [
-    { title: "CHOOSE A FUND", description: "Explore the available funds and select the one you would like to simulate." },
-    { title: "SET YOUR INVESTMENT", description: "Enter an amount or choose one of the suggested values based on your available balance." },
-    { title: "SEE THE ILLUSTRATION", description: "View the potential return, accumulated amount and the key information for the selected fund." },
-    { title: "EXPLORE THE FUND", description: "If you are interested, continue to learn more about the fund, its objectives, risks, costs and conditions before making an investment decision." },
-  ],
-  stock: [
-    { title: "CHOOSE A STOCK", description: "Explore the available stocks and select one to include in your illustration." },
-    { title: "SET YOUR INVESTMENT", description: "Enter an amount or choose one of the suggested values based on your available balance." },
-    { title: "SEE THE ILLUSTRATION", description: "Review the potential return and accumulated amount for the selected stock." },
-    { title: "EXPLORE THE STOCK", description: "If you are interested, request a callback to discuss the stock, its risks and conditions." },
-  ],
-};
-
-function parseAmount(value: string): number {
-  const normalized = value.trim().replace(/\s/g, "");
-  const decimalNormalized = normalized.includes(",")
-    ? normalized.replace(/\./g, "").replace(",", ".")
-    : normalized;
-  const amount = Number(decimalNormalized);
-  return Number.isFinite(amount) ? Math.max(0, amount) : 0;
-}
-
 function formatInputAmount(amount: number, country: ReturnType<typeof useDemo>["country"]): string {
   return formatMoneyNumber(roundMoney(amount), country);
 }
@@ -98,15 +36,6 @@ function formatInvestmentAmount(
 
 function formatSuggestionAmount(amount: number, country: ReturnType<typeof useDemo>["country"]): string {
   return formatMoneyNumber(amount, country).replace(/[,.]00$/, "");
-}
-
-function getInvestmentSuggestions(available: number, currency: SimulatorCurrency): number[] {
-  const step = currency === "RSD" ? 1_000 : 100;
-  const suggestions = [0.25, 0.5, 0.75].map((ratio) =>
-    Math.min(available, Math.floor((available * ratio) / step) * step),
-  );
-  suggestions.push(roundMoney(available));
-  return [...new Set(suggestions.filter((amount) => amount > 0))];
 }
 
 function InvestmentPickerSheet({
@@ -489,19 +418,12 @@ export default function FutureGainInvestmentSimulatorScreen({
   const [orderQuantity, setOrderQuantity] = useState(10);
 
   const amount = parseAmount(amountInput);
-  const amountError = amount <= 0
-    ? "Enter an amount to continue."
-    : amount > availableBalance
-      ? "Amount exceeds your available balance."
-      : "";
+  const { amountError, isAmountValid, annualReturnRate, potentialReturn, accumulatedAmount } =
+    calculateFutureGainInvestmentIllustration({ amount, availableBalance, option: selectedOption });
   const amountErrorDetails = amount > availableBalance
     ? `Available balance: ${formatInvestmentAmount(availableBalance, currency, country)}`
     : undefined;
-  const isAmountValid = amount > 0 && amount <= availableBalance;
   const suggestions = getInvestmentSuggestions(availableBalance, currency);
-  const annualReturnRate = selectedOption.estimateRate;
-  const potentialReturn = isAmountValid ? roundMoney(amount * annualReturnRate / 100) : 0;
-  const accumulatedAmount = roundMoney(amount + potentialReturn);
   const returnRateLabel = `${annualReturnRate.toLocaleString("sr-RS", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}%`;
 
   const openInstrumentPicker = () => {

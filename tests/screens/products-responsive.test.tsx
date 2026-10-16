@@ -3,7 +3,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { BankingContent, ShopSmartContent } from '@/app/screens/products/ProductsScreen'
+import { BankingContent, ShopSmartContent } from '@/app/screens/products/SmeProductsScreen'
 import App2027ProductsShelf from '@/app/screens/products/App2027ProductsShelf'
 import { getProductsMenuForCountry } from '@/app/config/productsMenuConfig'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
@@ -46,7 +46,7 @@ describe('Products responsive shelves', () => {
   it('keeps ShopSmart offer cards within their available screen width', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ' }}>
         <LanguageProvider initialLanguage="en">
           <ShopSmartContent summary={config.shopSmartSummary} offerCards={config.shopSmartOfferCards} />
         </LanguageProvider>
@@ -60,7 +60,7 @@ describe('Products responsive shelves', () => {
 
   it('keeps offer copy above AA contrast over bright commerce imagery', () => {
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <App2027ProductsShelf title="Products" />
         </LanguageProvider>
@@ -94,7 +94,7 @@ describe('Products responsive shelves', () => {
 
   it('derives both commerce counters from the number of offers inside', () => {
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <App2027ProductsShelf title="Products" offerCounts={{ shopsmart: 6, 'partner-offers': 6 }} />
         </LanguageProvider>
@@ -110,7 +110,7 @@ describe('Products responsive shelves', () => {
   it('hides the activated-offers summary only on the Partner offers view', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <App2027ProductsShelf
             title="Products"
@@ -140,7 +140,7 @@ describe('Products responsive shelves', () => {
   it('renders Partner offers with category chips, offer badges, and no legacy status or Filters action', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container, queryByRole } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <ShopSmartContent
             summary={config.shopSmartSummary}
@@ -160,7 +160,7 @@ describe('Products responsive shelves', () => {
   it('filters Partner offers from the category chips below Search', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container, getByRole } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <ShopSmartContent
             summary={config.shopSmartSummary}
@@ -182,7 +182,7 @@ describe('Products responsive shelves', () => {
   it('lets the Partner offers category rail be dragged horizontally like Home', () => {
     const config = getProductsMenuForCountry('CZ')
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <ShopSmartContent
             summary={config.shopSmartSummary}
@@ -203,7 +203,7 @@ describe('Products responsive shelves', () => {
 
   it('aligns the Search sticky row to the actual compact header height', () => {
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <App2027ProductsShelf title="Products" />
         </LanguageProvider>
@@ -219,7 +219,7 @@ describe('Products responsive shelves', () => {
 
   it('uses equal default padding for short product card copy', () => {
     const { container } = render(
-      <DemoProvider initialState={{ country: 'CZ', release: 'release-future-evo-2027' }}>
+      <DemoProvider initialState={{ product: 'SME', country: 'CZ', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
           <App2027ProductsShelf title="Products" />
         </LanguageProvider>

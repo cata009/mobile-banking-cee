@@ -28,7 +28,7 @@ interface AmountFieldProps {
   hideCurrencySelector?: boolean;
 }
 
-const DISABLED_COLOR = "var(--uc-neutral-650)";
+import { resolveAmountField } from './contracts/amountField';
 
 export default function AmountField({
   label,
@@ -54,9 +54,7 @@ export default function AmountField({
   onCurrencyClick,
   hideCurrencySelector = false,
 }: AmountFieldProps) {
-  const isDisabled = disabled || visualState === "disabled-empty" || visualState === "disabled-filled";
-  const currencyColor = isDisabled ? DISABLED_COLOR : "var(--uc-text)";
-  const currencyTitleColor = isDisabled ? DISABLED_COLOR : "var(--uc-text-muted)";
+  const { isDisabled, currencyColor, currencyTitleColor } = resolveAmountField({ disabled, visualState, currency, currencyLabel, hideCurrencySelector });
 
   return (
     <div className="flex w-full items-start gap-[24px]">

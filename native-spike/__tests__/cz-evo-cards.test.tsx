@@ -11,6 +11,8 @@ import {
   cardProducts,
   cardMovements,
 } from '../src/experiences/pi/cz/evo-2027/accounts/source';
+beforeEach(() => jest.useFakeTimers());
+afterEach(() => jest.useRealTimers());
 const propsFor = (): CzechNativeScreenProps => ({
   route: {
     screen: 'card',
@@ -48,39 +50,25 @@ test('search transaction route resolves the exact selected card movement and ret
       />,
     );
   });
-  expect(JSON.stringify(tree.toJSON())).toContain(
-    createTransactionDetailData(transaction, 'CZ', card).referenceNumber,
-  );
+  const detail = createTransactionDetailData(transaction, 'CZ', card);
+  expect(JSON.stringify(tree.toJSON())).toContain(transaction.label);
+  expect(JSON.stringify(tree.toJSON())).toContain(detail.bookingDate);
+  expect(JSON.stringify(tree.toJSON())).not.toContain(detail.referenceNumber);
   await act(() => press(tree, 'Back'));
   expect(props.onBack).toHaveBeenCalledTimes(1);
   await act(() => tree.unmount());
 });
 
-test('late biometric success after inactive state cannot disclose card data', async () => {
+test('Source card reveal timer is cancelled when the screen becomes inactive', async () => {
   const props = propsFor(),
     card = cardProducts(czechProducts(DEFAULT_CZECH_COUNTS))[0]!;
-  let complete!: (value: 'authenticated') => void;
-  const ports = {
-    authenticate: () =>
-      new Promise<'authenticated'>(resolve => {
-        complete = resolve;
-      }),
-    privacy: async () => true,
-  };
   let tree!: Renderer.ReactTestRenderer;
   await act(() => {
-    tree = Renderer.create(<CardScreen {...props} ports={ports} />);
+    tree = Renderer.create(<CardScreen {...props} />);
   });
-  await act(() => {
-    press(tree, 'Show card details');
-  });
-  await act(() =>
-    tree.update(<CardScreen {...props} ports={ports} isActive={false} />),
-  );
-  await act(async () => {
-    complete('authenticated');
-    await Promise.resolve();
-  });
+  await act(() => press(tree, 'Show card details'));
+  await act(() => tree.update(<CardScreen {...props} isActive={false} />));
+  await act(() => jest.advanceTimersByTime(840));
   expect(JSON.stringify(tree.toJSON())).not.toContain(card.cardNumber);
   await act(() => tree.unmount());
 });
@@ -92,7 +80,7 @@ const press = (tree: Renderer.ReactTestRenderer, label: string) =>
         n.props.accessibilityLabel === label,
     )[0]!
     .props.onPress();
-test('card secrets require successful native biometric; cancellation leaves masked card', async () => {
+test('card demo uses Source Face ID simulation without a native biometric prerequisite', async () => {
   const props = propsFor(),
     card = cardProducts(czechProducts(DEFAULT_CZECH_COUNTS))[0]!;
   const authenticate = jest.fn(async () => 'cancelled' as const),
@@ -103,29 +91,25 @@ test('card secrets require successful native biometric; cancellation leaves mask
       <CardScreen {...props} ports={{ authenticate, privacy }} />,
     );
   });
-  expect(JSON.stringify(tree.toJSON())).not.toContain(card.cardNumber);
   await act(() => press(tree, 'Show card details'));
-  expect(authenticate).toHaveBeenCalled();
-  expect(JSON.stringify(tree.toJSON())).toContain('Verification cancelled');
+  await act(() => jest.advanceTimersByTime(839));
   expect(JSON.stringify(tree.toJSON())).not.toContain(card.cardNumber);
+  await act(() => jest.advanceTimersByTime(1));
+  expect(JSON.stringify(tree.toJSON())).toContain(card.cardNumber);
+  expect(authenticate).not.toHaveBeenCalled();
   await act(() => tree.unmount());
 });
-test('successful biometric reveal is cleared when app becomes inactive', async () => {
+test('the revealed Source demo card is cleared when the screen becomes inactive', async () => {
   const props = propsFor(),
     card = cardProducts(czechProducts(DEFAULT_CZECH_COUNTS))[0]!;
-  const ports = {
-    authenticate: async () => 'authenticated' as const,
-    privacy: async () => true,
-  };
   let tree!: Renderer.ReactTestRenderer;
   await act(() => {
-    tree = Renderer.create(<CardScreen {...props} ports={ports} />);
+    tree = Renderer.create(<CardScreen {...props} />);
   });
   await act(() => press(tree, 'Show card details'));
+  await act(() => jest.advanceTimersByTime(840));
   expect(JSON.stringify(tree.toJSON())).toContain(card.cardNumber);
-  await act(() =>
-    tree.update(<CardScreen {...props} ports={ports} isActive={false} />),
-  );
+  await act(() => tree.update(<CardScreen {...props} isActive={false} />));
   expect(JSON.stringify(tree.toJSON())).not.toContain(card.cardNumber);
   await act(() => tree.unmount());
 });

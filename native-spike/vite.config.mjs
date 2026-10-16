@@ -50,7 +50,7 @@ export default defineConfig({
           ),
         ),
       },
-      { find: /^react-native$/, replacement: 'react-native-web' },
+      { find: /^react-native$/, replacement: fileURLToPath(new URL('./src/web/reactNativeWeb.jsx', import.meta.url)) },
       {
         find: /^react-native-svg$/,
         replacement: fileURLToPath(

@@ -1,33 +1,20 @@
-import { BottomSheet } from "@/app/components/BottomSheet";
-import NavigationRow from "@/app/components/NavigationRow";
+import { BottomSheet } from '@/app/components/BottomSheet'
+import NavigationRow from '@/app/components/NavigationRow'
 import {
   getProductCardSheetConfig,
   type ProductCardSheetOption,
   type ProductsCard,
-} from "@/app/config/productsMenuConfig";
-import type { CountryId } from "@/app/state/demoTypes";
+} from '@/app/config/productsMenuConfig'
+import type { CountryId } from '@/app/state/demoTypes'
 
-export interface ProductDetailSelection {
-  cardId: ProductsCard["id"];
-  categoryTitle: string;
-  optionId: string;
-  title: string;
-  /**
-   * Carried from the Evo 2027 shelf so the detail page opens on the same
-   * photograph and the same promise the customer just tapped, instead of
-   * swapping to a generic illustration.
-   */
-  heroImage?: string;
-  heroImagePosition?: string;
-  headline?: string;
-  intro?: string;
-}
+import type { ProductDetailSelection } from '@/features/products/productDetailSelection'
+export type { ProductDetailSelection } from '@/features/products/productDetailSelection'
 
 interface ProductCardBottomSheetProps {
-  card: ProductsCard;
-  country?: CountryId;
-  onClose: () => void;
-  onProductOptionClick?: (selection: ProductDetailSelection) => void;
+  card: ProductsCard
+  country?: CountryId
+  onClose: () => void
+  onProductOptionClick?: (selection: ProductDetailSelection) => void
 }
 
 export default function ProductCardBottomSheet({
@@ -36,18 +23,18 @@ export default function ProductCardBottomSheet({
   onClose,
   onProductOptionClick,
 }: ProductCardBottomSheetProps) {
-  const sheetConfig = getProductCardSheetConfig(card.id, country);
-  const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, " ");
+  const sheetConfig = getProductCardSheetConfig(card.id, country)
+  const sheetTitle = sheetConfig.title ?? card.title.replace(/\n/g, ' ')
 
   const handleOptionClick = (option: ProductCardSheetOption) => {
-    onClose();
+    onClose()
     onProductOptionClick?.({
       cardId: card.id,
       categoryTitle: sheetTitle,
       optionId: option.id,
       title: option.title,
-    });
-  };
+    })
+  }
 
   return (
     <BottomSheet
@@ -65,11 +52,11 @@ export default function ProductCardBottomSheet({
             trailingAccessory="chevron"
             className="pr-[16px]"
             titleClassName="text-[18px] leading-normal tracking-[0.3px]"
-            titleStyle={{ fontSize: "18px", lineHeight: "normal", letterSpacing: "0.3px" }}
+            titleStyle={{ fontSize: '18px', lineHeight: 'normal', letterSpacing: '0.3px' }}
             onClick={() => handleOptionClick(option)}
           />
         ))}
       </div>
     </BottomSheet>
-  );
+  )
 }

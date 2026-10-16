@@ -1,4 +1,11 @@
-import type { NavigationRoute, Screen } from "@/app/contexts/NavigationContext";
+import type { Screen } from "@/app/navigation/screenTypes";
+
+/** Only route identity is required; keep this policy independent of a UI runtime. */
+type ProductAvailabilityRoute = {
+  screen: Screen;
+  accountId?: string | null;
+  cardId?: string | null;
+};
 
 const ACCOUNT_PRODUCT_SCREENS = new Set<Screen>([
   "account-detail",
@@ -12,7 +19,7 @@ const CARD_PRODUCT_SCREENS = new Set<Screen>([
 ]);
 
 export function getUnavailableProductRouteFallback(
-  route: NavigationRoute,
+  route: ProductAvailabilityRoute,
   availableProductIds: ReadonlySet<string>,
   hasInvestments: boolean,
 ): Screen | null {

@@ -1,8 +1,9 @@
+import { resolveToast, type ToastMessageVariant } from "../contracts/toast";
 import type { HTMLAttributes } from "react";
 
 import { cn } from "@/app/components/ui/utils";
 
-export type ToastMessageVariant = "action-required" | "aware" | "google-pay";
+export type { ToastMessageVariant } from "../contracts/toast";
 
 export const TOAST_MESSAGE_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -24,11 +25,7 @@ export const TOAST_MESSAGE_SOURCE = {
   cornerRadius: 16,
 } as const;
 
-const DEFAULT_MESSAGES: Record<ToastMessageVariant, string> = {
-  "action-required": "Amount exceeds balance in your account",
-  aware: "You have pending payments",
-  "google-pay": "Added to Google Pay",
-};
+
 
 export interface ToastMessageProps extends HTMLAttributes<HTMLDivElement> {
   variant?: ToastMessageVariant;
@@ -44,9 +41,10 @@ export default function ToastMessage({
   role = "status",
   ...props
 }: ToastMessageProps) {
-  const isGooglePay = variant === "google-pay";
-  const isDark = dark ?? variant !== "action-required";
-  const displayMessage = message ?? DEFAULT_MESSAGES[variant];
+  const contract = resolveToast({ variant, message, dark });
+  const isGooglePay = contract.googlePay;
+  const isDark = contract.dark;
+  const displayMessage = contract.label;
 
   return (
     <div

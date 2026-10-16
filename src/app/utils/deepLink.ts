@@ -15,14 +15,14 @@
  *   values are dropped so a hand-edited link can never crash the app.
  */
 
-import { COUNTRIES } from "@/app/registry/demoConfig";
-import { DESIGN_SYSTEM_ORDER, PRODUCT_ORDER } from "@/app/registry/projectModel";
-import { RELEASE_ORDER, getReleaseBundle } from "@/app/registry/releaseRegistry";
-import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
-import { getAvailableLanguages, type AppLanguage } from "@/app/registry/languageByCountry";
-import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
-import type { Screen } from "@/app/contexts/NavigationContext";
-import { isRouteEligibleForProductContext, ROUTE_POLICY } from "@/app/navigation/routePolicy";
+import { COUNTRIES } from '@/app/registry/demoConfig'
+import { DESIGN_SYSTEM_ORDER, PRODUCT_ORDER } from '@/app/registry/projectModel'
+import { RELEASE_ORDER, getReleaseBundle } from '@/app/registry/releaseRegistry'
+import { BANKING_SCENARIOS } from '@/app/platform/banking/bankingScenarioRegistry'
+import { getAvailableLanguages, type AppLanguage } from '@/app/registry/languageByCountry'
+import { FLOW_PREVIEW_ORDER, type FlowPreviewId } from '@/app/registry/flowPreviewRegistry'
+import type { Screen } from '@/app/contexts/NavigationContext'
+import { isRouteEligibleForProductContext, ROUTE_POLICY } from '@/app/navigation/routePolicy'
 import type {
   BankingScenarioId,
   CountryId,
@@ -34,88 +34,88 @@ import type {
   ReleaseId,
   Scenario,
   ThemeMode,
-} from "@/app/state/demoTypes";
+} from '@/app/state/demoTypes'
 
 export interface DeepLinkState {
-  product: ProductId;
-  country: CountryId;
-  scenario: Scenario;
-  designSystem: DesignSystemId;
-  release: ReleaseId;
-  bankingScenario: BankingScenarioId;
-  themeMode: ThemeMode;
-  amountsHidden: boolean;
-  language: AppLanguage;
-  screen: Screen;
-  flowId?: FlowPreviewId | null;
-  accountId?: string | null;
-  cardId?: string | null;
-  transactionSource?: 'account' | 'card';
-  productCounts?: ProductCounts;
+  product: ProductId
+  country: CountryId
+  scenario: Scenario
+  designSystem: DesignSystemId
+  release: ReleaseId
+  bankingScenario: BankingScenarioId
+  themeMode: ThemeMode
+  amountsHidden: boolean
+  language: AppLanguage
+  screen: Screen
+  flowId?: FlowPreviewId | null
+  accountId?: string | null
+  cardId?: string | null
+  transactionSource?: 'account' | 'card'
+  productCounts?: ProductCounts
   /** Frameless "real device" mode — render the app fullscreen, no phone bezel. */
-  deviceMode?: boolean;
+  deviceMode?: boolean
 }
 
-export type ParsedDeepLink = Partial<DeepLinkState>;
+export type ParsedDeepLink = Partial<DeepLinkState>
 
 /** URL query param keys (kept short-ish but readable). */
 const PARAM = {
-  product: "product",
-  country: "country",
-  scenario: "scenario",
-  designSystem: "ds",
-  release: "release",
-  bankingScenario: "bank",
-  themeMode: "theme",
-  amountsHidden: "hidden",
-  language: "lang",
-  screen: "screen",
-  flowId: "flow",
-  accountId: "account",
-  cardId: "card",
-  frame: "frame",
-  shareAccessToken: "access_token",
-} as const;
+  product: 'product',
+  country: 'country',
+  scenario: 'scenario',
+  designSystem: 'ds',
+  release: 'release',
+  bankingScenario: 'bank',
+  themeMode: 'theme',
+  amountsHidden: 'hidden',
+  language: 'lang',
+  screen: 'screen',
+  flowId: 'flow',
+  accountId: 'account',
+  cardId: 'card',
+  frame: 'frame',
+  shareAccessToken: 'access_token',
+} as const
 
 const PRODUCT_COUNT_PARAM: Record<ProductCountKey, string> = {
-  accounts: "count_accounts",
-  debitCards: "count_debit_cards",
-  creditCards: "count_credit_cards",
-  mealCards: "count_meal_cards",
-  deposits: "count_deposits",
-  savingsAccounts: "count_savings",
-  loans: "count_loans",
-  mortgages: "count_mortgages",
-  investments: "count_investments",
-};
+  accounts: 'count_accounts',
+  debitCards: 'count_debit_cards',
+  creditCards: 'count_credit_cards',
+  mealCards: 'count_meal_cards',
+  deposits: 'count_deposits',
+  savingsAccounts: 'count_savings',
+  loans: 'count_loans',
+  mortgages: 'count_mortgages',
+  investments: 'count_investments',
+}
 
 /** Banking scenario chosen when a product is set but no scenario is supplied. */
 const DEFAULT_BANKING_SCENARIO_BY_PRODUCT: Record<ProductId, BankingScenarioId> = {
-  PI: "retail-single-account",
-  SME: "sme-owner-preview",
-  KIDS_PI: "kids-child-preview",
-};
+  PI: 'retail-single-account',
+  SME: 'sme-owner-preview',
+  KIDS_PI: 'kids-child-preview',
+}
 
 // ── Validation sets ────────────────────────────────────────────────────────
-const VALID_PRODUCTS = new Set<string>(PRODUCT_ORDER);
-const VALID_COUNTRIES = new Set<string>(COUNTRIES);
-const VALID_RELEASES = new Set<string>(RELEASE_ORDER);
-const VALID_BANKING = new Set<string>(Object.keys(BANKING_SCENARIOS));
-const VALID_SCENARIOS = new Set<string>(["active", "inactive"]);
-const VALID_DESIGN_SYSTEMS = new Set<string>(DESIGN_SYSTEM_ORDER);
-const VALID_THEMES = new Set<string>(["light", "dark"]);
-const VALID_FLOW_PREVIEWS = new Set<string>(FLOW_PREVIEW_ORDER);
+const VALID_PRODUCTS = new Set<string>(PRODUCT_ORDER)
+const VALID_COUNTRIES = new Set<string>(COUNTRIES)
+const VALID_RELEASES = new Set<string>(RELEASE_ORDER)
+const VALID_BANKING = new Set<string>(Object.keys(BANKING_SCENARIOS))
+const VALID_SCENARIOS = new Set<string>(['active', 'inactive'])
+const VALID_DESIGN_SYSTEMS = new Set<string>(DESIGN_SYSTEM_ORDER)
+const VALID_THEMES = new Set<string>(['light', 'dark'])
+const VALID_FLOW_PREVIEWS = new Set<string>(FLOW_PREVIEW_ORDER)
 
 /**
  * Map any screen to a directly restorable one. Transient screens fall back to
  * their nearest stable parent.
  */
 export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
-  if (!Object.prototype.hasOwnProperty.call(ROUTE_POLICY, screen)) return "homepage";
-  const deepLinkPolicy = ROUTE_POLICY[screen].deepLink;
-  if (deepLinkPolicy.payload === "card" && !hasCard) return "homepage";
-  if (deepLinkPolicy.restorable) return screen;
-  return hasCard && deepLinkPolicy.fallbackWithCard ? deepLinkPolicy.fallbackWithCard : deepLinkPolicy.fallback;
+  if (!Object.prototype.hasOwnProperty.call(ROUTE_POLICY, screen)) return 'homepage'
+  const deepLinkPolicy = ROUTE_POLICY[screen].deepLink
+  if (deepLinkPolicy.payload === 'card' && !hasCard) return 'homepage'
+  if (deepLinkPolicy.restorable) return screen
+  return hasCard && deepLinkPolicy.fallbackWithCard ? deepLinkPolicy.fallbackWithCard : deepLinkPolicy.fallback
 }
 
 /**
@@ -124,94 +124,100 @@ export function normalizeScreen(screen: Screen, hasCard: boolean): Screen {
  * entry — existing defaults should apply).
  */
 export function parseDeepLinkFromUrl(search: string = window.location.search): ParsedDeepLink | null {
-  const params = new URLSearchParams(search);
+  const params = new URLSearchParams(search)
 
-  const hasAnyParam = [...Object.values(PARAM), ...Object.values(PRODUCT_COUNT_PARAM)]
-    .some((key) => params.has(key));
-  if (!hasAnyParam) return null;
+  const hasAnyParam = [...Object.values(PARAM), ...Object.values(PRODUCT_COUNT_PARAM)].some((key) => params.has(key))
+  if (!hasAnyParam) return null
 
-  const parsed: ParsedDeepLink = {};
+  const parsed: ParsedDeepLink = {}
 
-  const product = params.get(PARAM.product);
-  if (product && VALID_PRODUCTS.has(product)) parsed.product = product as ProductId;
+  const product = params.get(PARAM.product)
+  if (product && VALID_PRODUCTS.has(product)) parsed.product = product as ProductId
 
-  const country = params.get(PARAM.country);
-  if (country && VALID_COUNTRIES.has(country)) parsed.country = country as CountryId;
+  const country = params.get(PARAM.country)
+  if (country && VALID_COUNTRIES.has(country)) parsed.country = country as CountryId
 
-  const scenario = params.get(PARAM.scenario);
-  if (scenario && VALID_SCENARIOS.has(scenario)) parsed.scenario = scenario as Scenario;
+  const scenario = params.get(PARAM.scenario)
+  if (scenario && VALID_SCENARIOS.has(scenario)) parsed.scenario = scenario as Scenario
 
-  const designSystem = params.get(PARAM.designSystem);
-  if (designSystem && VALID_DESIGN_SYSTEMS.has(designSystem)) parsed.designSystem = designSystem as DesignSystemId;
+  const designSystem = params.get(PARAM.designSystem)
+  if (designSystem && VALID_DESIGN_SYSTEMS.has(designSystem)) parsed.designSystem = designSystem as DesignSystemId
 
-  const release = params.get(PARAM.release);
-  if (release && VALID_RELEASES.has(release)) parsed.release = release as ReleaseId;
+  const release = params.get(PARAM.release)
+  if (release && VALID_RELEASES.has(release)) parsed.release = release as ReleaseId
 
-  const bank = params.get(PARAM.bankingScenario);
-  if (bank && VALID_BANKING.has(bank)) parsed.bankingScenario = bank as BankingScenarioId;
+  const bank = params.get(PARAM.bankingScenario)
+  if (bank && VALID_BANKING.has(bank)) parsed.bankingScenario = bank as BankingScenarioId
 
-  const theme = params.get(PARAM.themeMode);
-  if (theme && VALID_THEMES.has(theme)) parsed.themeMode = theme as ThemeMode;
+  const theme = params.get(PARAM.themeMode)
+  if (theme && VALID_THEMES.has(theme)) parsed.themeMode = theme as ThemeMode
 
   if (params.has(PARAM.amountsHidden)) {
-    parsed.amountsHidden = params.get(PARAM.amountsHidden) === "1";
+    parsed.amountsHidden = params.get(PARAM.amountsHidden) === '1'
   }
 
-  const screen = params.get(PARAM.screen);
+  const screen = params.get(PARAM.screen)
   if (screen) {
-    const hasCard = Boolean(params.get(PARAM.cardId));
-    parsed.screen = normalizeScreen(screen as Screen, hasCard);
+    const hasCard = Boolean(params.get(PARAM.cardId))
+    parsed.screen = normalizeScreen(screen as Screen, hasCard)
   }
 
-  const flowId = params.get(PARAM.flowId);
-  if (flowId && VALID_FLOW_PREVIEWS.has(flowId)) parsed.flowId = flowId as FlowPreviewId;
+  const flowId = params.get(PARAM.flowId)
+  if (flowId && VALID_FLOW_PREVIEWS.has(flowId)) parsed.flowId = flowId as FlowPreviewId
 
   // Language is validated against the resolved country (falls back to en).
-  const language = params.get(PARAM.language);
+  const language = params.get(PARAM.language)
   if (language) {
-    const forCountry = parsed.country ?? "RO";
+    const forCountry = parsed.country ?? 'RO'
     if (getAvailableLanguages(forCountry).includes(language as AppLanguage)) {
-      parsed.language = language as AppLanguage;
+      parsed.language = language as AppLanguage
     }
   }
 
-  const accountId = params.get(PARAM.accountId);
-  if (accountId) parsed.accountId = accountId;
+  const accountId = params.get(PARAM.accountId)
+  if (accountId) parsed.accountId = accountId
 
-  const cardId = params.get(PARAM.cardId);
-  if (cardId) parsed.cardId = cardId;
+  const cardId = params.get(PARAM.cardId)
+  if (cardId) parsed.cardId = cardId
 
-  const productCountEntries = Object.entries(PRODUCT_COUNT_PARAM) as Array<[ProductCountKey, string]>;
+  const productCountEntries = Object.entries(PRODUCT_COUNT_PARAM) as Array<[ProductCountKey, string]>
   if (productCountEntries.every(([, param]) => params.has(param))) {
-    parsed.productCounts = Object.fromEntries(productCountEntries.map(([key, param]) => {
-      const value = Number(params.get(param));
-      const normalized = Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0;
-      return [key, normalized];
-    })) as ProductCounts;
+    parsed.productCounts = Object.fromEntries(
+      productCountEntries.map(([key, param]) => {
+        const value = Number(params.get(param))
+        const normalized = Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0
+        return [key, normalized]
+      }),
+    ) as ProductCounts
   }
 
   // frame=0 → frameless "real device" mode.
-  if (params.get(PARAM.frame) === "0") parsed.deviceMode = true;
+  if (params.get(PARAM.frame) === '0') parsed.deviceMode = true
 
-  if (parsed.country === "IT" && (parsed.product ?? "PI") === "PI") {
-    parsed.product = "PI";
-    parsed.designSystem = "mobile-first";
-    parsed.scenario = "active";
-    parsed.release = "release-current";
-    if (parsed.bankingScenario === "kids-child-preview" || parsed.bankingScenario === "sme-owner-preview") {
-      parsed.bankingScenario = "retail-single-account";
+  if (parsed.country === 'IT' && (parsed.product ?? 'PI') === 'PI') {
+    parsed.product = 'PI'
+    parsed.designSystem = 'mobile-first'
+    parsed.scenario = 'active'
+    parsed.release = 'release-current'
+    if (parsed.bankingScenario === 'kids-child-preview' || parsed.bankingScenario === 'sme-owner-preview') {
+      parsed.bankingScenario = 'retail-single-account'
     }
-    if (!parsed.screen || !isRouteEligibleForProductContext(parsed.screen, {
-      product: "PI", country: "IT", designSystem: "mobile-first",
-    })) {
-      parsed.screen = "homepage";
-      delete parsed.accountId;
-      delete parsed.cardId;
-      delete parsed.flowId;
+    if (
+      !parsed.screen ||
+      !isRouteEligibleForProductContext(parsed.screen, {
+        product: 'PI',
+        country: 'IT',
+        designSystem: 'mobile-first',
+      })
+    ) {
+      parsed.screen = 'homepage'
+      delete parsed.accountId
+      delete parsed.cardId
+      delete parsed.flowId
     }
   }
 
-  return parsed;
+  return parsed
 }
 
 /**
@@ -220,31 +226,31 @@ export function parseDeepLinkFromUrl(search: string = window.location.search): P
  * same); banking scenario defaults per product when not supplied.
  */
 export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Partial<DemoState> {
-  if (!parsed) return {};
+  if (!parsed) return {}
 
-  const init: Partial<DemoState> = {};
+  const init: Partial<DemoState> = {}
 
-  if (parsed.product) init.product = parsed.product;
-  if (parsed.country) init.country = parsed.country;
-  if (parsed.scenario) init.scenario = parsed.scenario;
-  if (parsed.designSystem) init.designSystem = parsed.designSystem;
+  if (parsed.product) init.product = parsed.product
+  if (parsed.country) init.country = parsed.country
+  if (parsed.scenario) init.scenario = parsed.scenario
+  if (parsed.designSystem) init.designSystem = parsed.designSystem
 
   if (parsed.release) {
-    init.release = parsed.release;
-    init.baseline = getReleaseBundle(parsed.release).baseline;
+    init.release = parsed.release
+    init.baseline = getReleaseBundle(parsed.release).baseline
   }
 
   if (parsed.bankingScenario) {
-    init.bankingScenario = parsed.bankingScenario;
+    init.bankingScenario = parsed.bankingScenario
   } else if (parsed.product) {
-    init.bankingScenario = DEFAULT_BANKING_SCENARIO_BY_PRODUCT[parsed.product];
+    init.bankingScenario = DEFAULT_BANKING_SCENARIO_BY_PRODUCT[parsed.product]
   }
 
-  if (parsed.themeMode) init.themeMode = parsed.themeMode;
-  if (parsed.amountsHidden !== undefined) init.amountsHidden = parsed.amountsHidden;
-  if (parsed.productCounts) init.productCounts = parsed.productCounts;
+  if (parsed.themeMode) init.themeMode = parsed.themeMode
+  if (parsed.amountsHidden !== undefined) init.amountsHidden = parsed.amountsHidden
+  if (parsed.productCounts) init.productCounts = parsed.productCounts
 
-  return init;
+  return init
 }
 
 /**
@@ -253,65 +259,73 @@ export function deepLinkToDemoInitialState(parsed: ParsedDeepLink | null): Parti
  * preserved only for the Design System (which uses it for section navigation).
  */
 export function buildDeepLinkUrl(state: DeepLinkState): string {
-  const hasCardParent = state.screen === 'transaction-detail' && state.transactionSource === 'account'
-    ? false : Boolean(state.cardId);
-  const stableScreen = normalizeScreen(state.screen, hasCardParent);
-  const isItalyMobileFirst = state.product === "PI" && state.country === "IT";
-  const normalizedScreen = isItalyMobileFirst && !isRouteEligibleForProductContext(stableScreen, {
-    ...state, designSystem: "mobile-first",
-  }) ? "homepage" : stableScreen;
-  const payloadPolicy = ROUTE_POLICY[normalizedScreen].deepLink.payload;
-  const params = new URLSearchParams();
+  const hasCardParent =
+    state.screen === 'transaction-detail' && state.transactionSource === 'account' ? false : Boolean(state.cardId)
+  const stableScreen = normalizeScreen(state.screen, hasCardParent)
+  const isItalyMobileFirst = state.product === 'PI' && state.country === 'IT'
+  const normalizedScreen =
+    isItalyMobileFirst &&
+    !isRouteEligibleForProductContext(stableScreen, {
+      ...state,
+      designSystem: 'mobile-first',
+    })
+      ? 'homepage'
+      : stableScreen
+  const payloadPolicy = ROUTE_POLICY[normalizedScreen].deepLink.payload
+  const params = new URLSearchParams()
 
-  params.set(PARAM.product, state.product);
-  params.set(PARAM.country, state.country);
-  params.set(PARAM.scenario, isItalyMobileFirst ? "active" : state.scenario);
-  params.set(PARAM.designSystem, isItalyMobileFirst ? "mobile-first" : state.designSystem);
-  params.set(PARAM.release, isItalyMobileFirst ? "release-current" : state.release);
-  params.set(PARAM.bankingScenario, state.bankingScenario);
-  params.set(PARAM.themeMode, state.themeMode);
-  params.set(PARAM.language, state.language);
-  params.set(PARAM.screen, normalizedScreen);
+  params.set(PARAM.product, state.product)
+  params.set(PARAM.country, state.country)
+  params.set(PARAM.scenario, isItalyMobileFirst ? 'active' : state.scenario)
+  params.set(PARAM.designSystem, isItalyMobileFirst ? 'mobile-first' : state.designSystem)
+  params.set(PARAM.release, isItalyMobileFirst ? 'release-current' : state.release)
+  params.set(PARAM.bankingScenario, state.bankingScenario)
+  params.set(PARAM.themeMode, state.themeMode)
+  params.set(PARAM.language, state.language)
+  params.set(PARAM.screen, normalizedScreen)
 
   if (state.productCounts) {
     for (const [key, param] of Object.entries(PRODUCT_COUNT_PARAM) as Array<[ProductCountKey, string]>) {
-      params.set(param, String(Math.max(0, Math.min(9, Math.trunc(state.productCounts[key])))));
+      params.set(param, String(Math.max(0, Math.min(9, Math.trunc(state.productCounts[key])))))
     }
   }
 
-  if (state.amountsHidden) params.set(PARAM.amountsHidden, "1");
+  if (state.amountsHidden) params.set(PARAM.amountsHidden, '1')
 
-  if (state.flowId && payloadPolicy === "flow") {
-    params.set(PARAM.flowId, state.flowId);
+  if (state.flowId && payloadPolicy === 'flow') {
+    params.set(PARAM.flowId, state.flowId)
   }
 
-  if (state.accountId && payloadPolicy === "account") {
-    params.set(PARAM.accountId, state.accountId);
+  if (state.accountId && payloadPolicy === 'account') {
+    params.set(PARAM.accountId, state.accountId)
   }
-  if (state.cardId && payloadPolicy === "card") {
-    params.set(PARAM.cardId, state.cardId);
+  if (state.cardId && payloadPolicy === 'card') {
+    params.set(PARAM.cardId, state.cardId)
   }
 
   // CZ Robo goal details live inside the Investments screen rather than in
   // the top-level route, so preserve their refresh-resume context while the
   // global deep-link synchronizer rebuilds the rest of the URL.
-  if (normalizedScreen === "investments") {
-    const currentParams = new URLSearchParams(window.location.search);
-    const roboView = currentParams.get("robo_view");
-    const roboGoalId = currentParams.get("robo_goal");
-    if (roboView === "goals") {
-      params.set("robo_view", roboView);
-    } else if (roboView === "detail" && roboGoalId) {
-      params.set("robo_view", roboView);
-      params.set("robo_goal", roboGoalId);
+  if (normalizedScreen === 'investments') {
+    const currentParams = new URLSearchParams(window.location.search)
+    const roboView = currentParams.get('robo_view')
+    const roboGoalId = currentParams.get('robo_goal')
+    if (roboView === 'goals') {
+      params.set('robo_view', roboView)
+    } else if (roboView === 'detail' && roboGoalId) {
+      params.set('robo_view', roboView)
+      params.set('robo_goal', roboGoalId)
     }
   }
 
-  if (state.deviceMode) params.set(PARAM.frame, "0");
+  if (state.deviceMode) params.set(PARAM.frame, '0')
+  // Keep paired comparison modes while the shell normalizes or navigates a URL.
+  const renderer = new URLSearchParams(window.location.search).get('renderer')
+  if (renderer === 'reference' || renderer === 'candidate') params.set('renderer', renderer)
 
-  const { origin, pathname } = window.location;
-  const hash = normalizedScreen === "design-system" ? window.location.hash : "";
-  return `${origin}${pathname}?${params.toString()}${hash}`;
+  const { origin, pathname } = window.location
+  const hash = normalizedScreen === 'design-system' ? window.location.hash : ''
+  return `${origin}${pathname}?${params.toString()}${hash}`
 }
 
 /**
@@ -321,11 +335,11 @@ export function buildDeepLinkUrl(state: DeepLinkState): string {
  */
 export function withFramelessParam(url: string): string {
   try {
-    const parsedUrl = new URL(url);
-    parsedUrl.searchParams.set(PARAM.frame, "0");
-    return parsedUrl.toString();
+    const parsedUrl = new URL(url)
+    parsedUrl.searchParams.set(PARAM.frame, '0')
+    return parsedUrl.toString()
   } catch {
-    return url;
+    return url
   }
 }
 
@@ -336,10 +350,10 @@ export function withFramelessParam(url: string): string {
  */
 export function withShareAccessTokenParam(url: string, token: string): string {
   try {
-    const parsedUrl = new URL(url);
-    parsedUrl.searchParams.set(PARAM.shareAccessToken, token);
-    return parsedUrl.toString();
+    const parsedUrl = new URL(url)
+    parsedUrl.searchParams.set(PARAM.shareAccessToken, token)
+    return parsedUrl.toString()
   } catch {
-    return url;
+    return url
   }
 }

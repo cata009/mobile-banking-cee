@@ -1,6 +1,18 @@
 {
   "headers": [
     {
+      "source": "/native-demo/manifest.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/native-demo/current-host.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/native-demo/current-host.css",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
       "source": "/",
       "headers": [
         {

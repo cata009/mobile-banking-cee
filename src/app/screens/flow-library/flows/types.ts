@@ -22,124 +22,134 @@
  * the export layer, and tests without pulling in the preview components.
  */
 
-import type { CountryId } from "@/app/state/demoTypes";
+import type { CountryId } from '@/app/state/demoTypes'
 
 /** Stable ids for the flows shipped in the library. */
 export type FlowPreviewId =
-  | "ro-round-up"
-  | "ro-card-pin"
-  | "ro-genius-my-car"
-  | "mobile-pi-ethoca"
-  | "rs-property-insurance"
-  | "investments-bulk-approval";
+  | 'ro-round-up'
+  | 'ro-card-pin'
+  | 'ro-genius-my-car'
+  | 'mobile-pi-ethoca'
+  | 'rs-property-insurance'
+  | 'rs-disposable-cards'
+  | 'investments-bulk-approval'
 
 /**
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
  * `../components/flowPreviews.tsx`. Adding a screen = add a kind here + a case there.
  */
 export type RoundUpScreenKind =
-  | "home-entry"
-  | "products-round-up"
-  | "round-up-info"
-  | "open-savings"
-  | "setup-form"
-  | "sign"
-  | "success-active"
-  | "accounts-active"
-  | "manage"
-  | "confirm-deactivate"
-  | "success-deactivated";
+  | 'home-entry'
+  | 'products-round-up'
+  | 'round-up-info'
+  | 'open-savings'
+  | 'setup-form'
+  | 'sign'
+  | 'success-active'
+  | 'accounts-active'
+  | 'manage'
+  | 'confirm-deactivate'
+  | 'success-deactivated'
 
 export type CardPinScreenKind =
-  | "cards-credit"
-  | "cards-debit"
-  | "card-options-credit"
-  | "card-options-debit"
-  | "pin-faceid-credit"
-  | "pin-faceid-debit"
-  | "pin-reveal-credit-hidden"
-  | "pin-reveal-credit-visible"
-  | "pin-reveal-debit-hidden"
-  | "pin-reveal-debit-visible"
-  | "set-pin-credit-empty"
-  | "set-pin-credit-filled"
-  | "set-pin-debit-empty"
-  | "set-pin-debit-filled"
-  | "pin-sign"
-  | "pin-success"
-  | "pin-not-eligible-credit"
-  | "pin-not-eligible-debit";
+  | 'cards-credit'
+  | 'cards-debit'
+  | 'card-options-credit'
+  | 'card-options-debit'
+  | 'pin-faceid-credit'
+  | 'pin-faceid-debit'
+  | 'pin-reveal-credit-hidden'
+  | 'pin-reveal-credit-visible'
+  | 'pin-reveal-debit-hidden'
+  | 'pin-reveal-debit-visible'
+  | 'set-pin-credit-empty'
+  | 'set-pin-credit-filled'
+  | 'set-pin-debit-empty'
+  | 'set-pin-debit-filled'
+  | 'pin-sign'
+  | 'pin-success'
+  | 'pin-not-eligible-credit'
+  | 'pin-not-eligible-debit'
 
 /** Global card-transaction enrichment states sourced from Mastercard Ethoca. */
 export type EthocaScreenKind =
-  | "ethoca-list-merchant-logo"
-  | "ethoca-account-list-merchant-logo"
-  | "ethoca-list-pending-merchant-logo"
-  | "ethoca-account-list-pending-merchant-logo"
-  | "ethoca-detail-pending-merchant-logo"
-  | "ethoca-list-pfm-fallback"
-  | "ethoca-detail-partial-data"
-  | "ethoca-detail-in-store"
-  | "ethoca-detail-online"
-  | "ethoca-detail-logo-unavailable";
+  | 'ethoca-list-merchant-logo'
+  | 'ethoca-account-list-merchant-logo'
+  | 'ethoca-list-pending-merchant-logo'
+  | 'ethoca-account-list-pending-merchant-logo'
+  | 'ethoca-detail-pending-merchant-logo'
+  | 'ethoca-list-pfm-fallback'
+  | 'ethoca-detail-partial-data'
+  | 'ethoca-detail-in-store'
+  | 'ethoca-detail-online'
+  | 'ethoca-detail-logo-unavailable'
 
 /**
  * Serbia property-insurance purchase (Generali "Osiguranje domacinstva") started
  * from the Mobile PI Baseline product shelf and settled with a domestic payment.
  */
 export type RsPropertyInsuranceScreenKind =
-  | "rs-pi-products"
-  | "rs-pi-insurance-sheet"
-  | "rs-pi-life-insurance"
-  | "rs-pi-balance-precheck"
-  | "rs-pi-api-unavailable"
-  | "rs-pi-product-cover"
-  | "rs-pi-package-select"
-  | "rs-pi-package-must-read"
-  | "rs-pi-risk-info"
-  | "rs-pi-package-blocked"
-  | "rs-pi-duration-premium"
-  | "rs-pi-important-info"
-  | "rs-pi-emergency-addon"
-  | "rs-pi-insured-object"
-  | "rs-pi-policyholder"
-  | "rs-pi-policyholder-errors"
-  | "rs-pi-review"
-  | "rs-pi-review-addon"
-  | "rs-pi-terms-consent"
-  | "rs-pi-insufficient-funds"
-  | "rs-pi-submit-failed"
-  | "rs-pi-payment-create"
-  | "rs-pi-payment-review"
-  | "rs-pi-payment-sign"
-  | "rs-pi-payment-success"
-  | "rs-pi-payment-cancelled"
-  | "rs-pi-abandon-confirm";
+  | 'rs-pi-products'
+  | 'rs-pi-insurance-sheet'
+  | 'rs-pi-life-insurance'
+  | 'rs-pi-balance-precheck'
+  | 'rs-pi-api-unavailable'
+  | 'rs-pi-product-cover'
+  | 'rs-pi-package-select'
+  | 'rs-pi-package-must-read'
+  | 'rs-pi-risk-info'
+  | 'rs-pi-package-blocked'
+  | 'rs-pi-duration-premium'
+  | 'rs-pi-important-info'
+  | 'rs-pi-emergency-addon'
+  | 'rs-pi-insured-object'
+  | 'rs-pi-policyholder'
+  | 'rs-pi-policyholder-errors'
+  | 'rs-pi-review'
+  | 'rs-pi-review-addon'
+  | 'rs-pi-terms-consent'
+  | 'rs-pi-insufficient-funds'
+  | 'rs-pi-submit-failed'
+  | 'rs-pi-payment-create'
+  | 'rs-pi-payment-review'
+  | 'rs-pi-payment-sign'
+  | 'rs-pi-payment-success'
+  | 'rs-pi-payment-cancelled'
+  | 'rs-pi-abandon-confirm'
+
+/** Serbia-only full card screen and the two detail routes selected from its sheet. */
+export type RsDisposableCardsScreenKind =
+  | 'rs-disposable-cards-screen'
+  | 'rs-disposable-cards-details-sheet'
+  | 'rs-disposable-cards-face-id-normal'
+  | 'rs-disposable-cards-face-id-disposable'
+  | 'rs-disposable-cards-normal-details'
+  | 'rs-disposable-cards-disposable-details'
 
 /** Romania-only Genius My Car entry, vehicle registration and RCA/CASCO purchase previews. */
 export type GeniusMyCarScreenKind =
-  | "genius-my-car-products"
-  | "genius-my-car-insurance-sheet"
-  | "genius-my-car-car-cover"
-  | "genius-my-car-vehicles"
-  | "genius-my-car-vehicles-attention"
-  | "genius-my-car-vehicles-uninsured"
-  | "genius-my-car-owner"
-  | "genius-my-car-vehicle-details"
-  | "genius-my-car-period"
-  | "genius-my-car-offer"
-  | "genius-my-car-terms"
-  | "genius-my-car-payment"
-  | "genius-my-car-success"
-  | "genius-my-car-add-owner"
-  | "genius-my-car-add-vehicle-details"
-  | "genius-my-car-casco-owner"
-  | "genius-my-car-casco-vehicle-details"
-  | "genius-my-car-casco-period"
-  | "genius-my-car-casco-offer"
-  | "genius-my-car-casco-terms"
-  | "genius-my-car-casco-payment"
-  | "genius-my-car-casco-success";
+  | 'genius-my-car-products'
+  | 'genius-my-car-insurance-sheet'
+  | 'genius-my-car-car-cover'
+  | 'genius-my-car-vehicles'
+  | 'genius-my-car-vehicles-attention'
+  | 'genius-my-car-vehicles-uninsured'
+  | 'genius-my-car-owner'
+  | 'genius-my-car-vehicle-details'
+  | 'genius-my-car-period'
+  | 'genius-my-car-offer'
+  | 'genius-my-car-terms'
+  | 'genius-my-car-payment'
+  | 'genius-my-car-success'
+  | 'genius-my-car-add-owner'
+  | 'genius-my-car-add-vehicle-details'
+  | 'genius-my-car-casco-owner'
+  | 'genius-my-car-casco-vehicle-details'
+  | 'genius-my-car-casco-period'
+  | 'genius-my-car-casco-offer'
+  | 'genius-my-car-casco-terms'
+  | 'genius-my-car-casco-payment'
+  | 'genius-my-car-casco-success'
 
 /**
  * All-country Flow Library prototype for approving several investment drafts with
@@ -147,44 +157,45 @@ export type GeniusMyCarScreenKind =
  * Investments routes.
  */
 export type InvestmentsBulkApprovalScreenKind =
-  | "investments-bulk-prototype"
-  | "investments-bulk-selection"
-  | "investments-bulk-review-first"
-  | "investments-bulk-review-last"
-  | "investments-bulk-summary-blocked"
-  | "investments-bulk-summary-ready"
-  | "investments-bulk-sign"
-  | "investments-bulk-confirmation"
-  | "investments-bulk-failure";
+  | 'investments-bulk-prototype'
+  | 'investments-bulk-selection'
+  | 'investments-bulk-review-first'
+  | 'investments-bulk-review-last'
+  | 'investments-bulk-summary-blocked'
+  | 'investments-bulk-summary-ready'
+  | 'investments-bulk-sign'
+  | 'investments-bulk-confirmation'
+  | 'investments-bulk-failure'
 
 export type FlowScreenKind =
   | RoundUpScreenKind
   | CardPinScreenKind
   | EthocaScreenKind
   | RsPropertyInsuranceScreenKind
+  | RsDisposableCardsScreenKind
   | GeniusMyCarScreenKind
-  | InvestmentsBulkApprovalScreenKind;
+  | InvestmentsBulkApprovalScreenKind
 
 /** Where a flow sits on the road to production. Drives the status chip + filtering. */
-export type FlowStatus = "future-release-preview" | "in-review" | "baseline-candidate";
+export type FlowStatus = 'future-release-preview' | 'in-review' | 'baseline-candidate'
 
-export type FlowScenarioKind = "happy" | "alternate" | "error";
+export type FlowScenarioKind = 'happy' | 'alternate' | 'error'
 
 /** A single input/data point on a screen — the rows of a BA field table. */
 export interface FlowFieldSpec {
-  name: string;
-  type: string;
-  required?: boolean;
-  validation?: string;
-  notes?: string;
+  name: string
+  type: string
+  required?: boolean
+  validation?: string
+  notes?: string
 }
 
 /** One CTA / control and what activating it does. */
 export interface FlowActionSpec {
-  label: string;
-  result: string;
+  label: string
+  result: string
   /** Id of the rule (`overview.rules`) that governs this control, when one does. */
-  rule?: string;
+  rule?: string
 }
 
 /**
@@ -193,24 +204,24 @@ export interface FlowActionSpec {
  */
 export interface FlowScreenSpec {
   /** Canonical screen name, the same on every tab and in every export. */
-  title?: string;
+  title?: string
   /** Ids of the rules (`overview.rules`) that govern this screen. Cited, never restated. */
-  rules?: readonly string[];
-  purpose: string;
+  rules?: readonly string[]
+  purpose: string
   /** Explicit first-render contract: visible data, default values and CTA availability. */
-  defaultState?: string;
+  defaultState?: string
   /** UI states / variants the screen can show. */
-  states?: string[];
+  states?: string[]
   /** Fields / data points rendered or captured. */
-  fields?: FlowFieldSpec[];
+  fields?: FlowFieldSpec[]
   /** Primary + secondary actions and their outcome/routing. */
-  actions?: FlowActionSpec[];
+  actions?: FlowActionSpec[]
   /** What the back / dismiss control does. */
-  back?: string;
+  back?: string
   /** Non-happy-path situations to design for. */
-  edgeCases?: string[];
+  edgeCases?: string[]
   /** Testable acceptance criteria. */
-  acceptance?: string[];
+  acceptance?: string[]
 }
 
 /**
@@ -218,8 +229,8 @@ export interface FlowScreenSpec {
  * it lands them.
  */
 export interface FlowPrototypeTransition {
-  label: string;
-  to: FlowScreenKind;
+  label: string
+  to: FlowScreenKind
 }
 
 /**
@@ -229,16 +240,16 @@ export interface FlowPrototypeTransition {
  * clicking through.
  */
 export interface FlowPrototypeNode {
-  primary?: FlowPrototypeTransition;
-  secondary?: FlowPrototypeTransition;
-  back?: FlowScreenKind;
+  primary?: FlowPrototypeTransition
+  secondary?: FlowPrototypeTransition
+  back?: FlowScreenKind
   /**
    * Where the header X goes. Its presence is what puts the X on the screen, so a
    * screen outside the abandonable part of a journey simply omits it; screens that
    * already hold entered data point it at their confirmation rather than the exit.
    */
-  close?: FlowScreenKind;
-  extra?: readonly FlowPrototypeTransition[];
+  close?: FlowScreenKind
+  extra?: readonly FlowPrototypeTransition[]
 }
 
 /**
@@ -247,67 +258,67 @@ export interface FlowPrototypeNode {
  * Prototype tab.
  */
 export interface FlowPrototypeSpec {
-  start: FlowScreenKind;
+  start: FlowScreenKind
   /** Screens grouped for the jump list, in the order a reviewer thinks about them. */
-  groups: ReadonlyArray<{ title: string; screens: readonly FlowScreenKind[] }>;
-  nodes: Partial<Record<FlowScreenKind, FlowPrototypeNode>>;
+  groups: ReadonlyArray<{ title: string; screens: readonly FlowScreenKind[] }>
+  nodes: Partial<Record<FlowScreenKind, FlowPrototypeNode>>
 }
 
 /** A step in a scenario: a labelled stop that renders one screen. */
 export interface FlowStep {
-  id: string;
-  title: string;
-  description: string;
-  screen: FlowScreenKind;
+  id: string
+  title: string
+  description: string
+  screen: FlowScreenKind
 }
 
 /** A concrete path through the flow (happy path, an alternate, or an error path). */
 export interface FlowScenario {
-  id: string;
-  label: string;
-  description: string;
-  kind: FlowScenarioKind;
-  steps: FlowStep[];
+  id: string
+  label: string
+  description: string
+  kind: FlowScenarioKind
+  steps: FlowStep[]
 }
 
 /** A named entry point into the flow and the user intent it serves. */
 export interface FlowEntryPoint {
-  label: string;
-  intent: string;
+  label: string
+  intent: string
 }
 
 /** Long-form analyst prose, preserved from the original UX write-ups. */
 export interface FlowNote {
-  title: string;
-  body: string;
+  title: string
+  body: string
 }
 
 /** A concise fact rendered in the BA-style General information section. */
 export interface FlowAnalysisFact {
-  label: string;
-  value: string;
+  label: string
+  value: string
 }
 
 /** A concise entry for the BA-style document history. */
 export interface FlowAnalysisVersion {
-  version: string;
-  date: string;
-  detail: string;
+  version: string
+  date: string
+  detail: string
 }
 
 /** An open BA decision with the familiar reference and review status. */
 export interface FlowAnalysisOpenIssue {
-  reference: string;
-  status: "Open" | "Info";
-  title: string;
-  detail: string;
+  reference: string
+  status: 'Open' | 'Info'
+  title: string
+  detail: string
 }
 
 /** A named BA subsection, replacing duplicated scenario-specific spec tabs. */
 export interface FlowAnalysisSection {
-  title: string;
-  description?: string;
-  items: readonly string[];
+  title: string
+  description?: string
+  items: readonly string[]
 }
 
 /**
@@ -315,14 +326,14 @@ export interface FlowAnalysisSection {
  * exposing implementation credentials, service names, or live production data.
  */
 export interface FlowBusinessAnalysisSpec {
-  generalInformation: readonly FlowAnalysisFact[];
-  versionContext: string;
-  versionHistory: readonly FlowAnalysisVersion[];
-  openIssues: readonly FlowAnalysisOpenIssue[];
-  requirements: readonly FlowAnalysisSection[];
-  currentStatus: readonly FlowAnalysisSection[];
-  proposedSolution: readonly FlowAnalysisSection[];
-  nonFunctionalRequirements: readonly FlowAnalysisSection[];
+  generalInformation: readonly FlowAnalysisFact[]
+  versionContext: string
+  versionHistory: readonly FlowAnalysisVersion[]
+  openIssues: readonly FlowAnalysisOpenIssue[]
+  requirements: readonly FlowAnalysisSection[]
+  currentStatus: readonly FlowAnalysisSection[]
+  proposedSolution: readonly FlowAnalysisSection[]
+  nonFunctionalRequirements: readonly FlowAnalysisSection[]
 }
 
 /**
@@ -330,41 +341,41 @@ export interface FlowBusinessAnalysisSpec {
  * other surface cites the id (see `flows/rules.ts`).
  */
 export interface FlowRule {
-  id: string;
-  group: string;
-  statement: string;
+  id: string
+  group: string
+  statement: string
 }
 
 /** The state the flow carries between screens — owned by no single screen. */
 export interface FlowSessionModel {
-  name: string;
+  name: string
   /** A TypeScript type literal, shown verbatim and shipped in the reference package. */
-  shape: string;
-  description: string;
+  shape: string
+  description: string
 }
 
 /** The executable form of one or more rules, and the test that proves it. */
 export interface FlowGuardSpec {
-  name: string;
-  signature: string;
-  rules: readonly string[];
-  enforcedOn: readonly FlowScreenKind[];
-  test: string;
+  name: string
+  signature: string
+  rules: readonly string[]
+  enforcedOn: readonly FlowScreenKind[]
+  test: string
 }
 
 /** One call across the integration boundary, and what is still undecided about it. */
 export interface FlowOperationSpec {
-  name: string;
-  signature: string;
-  calledFrom: FlowScreenKind;
-  purpose: string;
-  unresolved?: string;
+  name: string
+  signature: string
+  calledFrom: FlowScreenKind
+  purpose: string
+  unresolved?: string
 }
 
 export interface FlowAnalyticsMapping {
-  event: string;
-  trigger: string;
-  screen?: FlowScreenKind;
+  event: string
+  trigger: string
+  screen?: FlowScreenKind
 }
 
 /**
@@ -374,20 +385,20 @@ export interface FlowAnalyticsMapping {
  * `screenSpecs`, so they cannot drift.
  */
 export interface FlowImplementationSpec {
-  sessionModel: FlowSessionModel;
-  guards: readonly FlowGuardSpec[];
-  operations: readonly FlowOperationSpec[];
-  analytics?: readonly FlowAnalyticsMapping[];
-  openTechnicalQuestions: readonly string[];
+  sessionModel: FlowSessionModel
+  guards: readonly FlowGuardSpec[]
+  operations: readonly FlowOperationSpec[]
+  analytics?: readonly FlowAnalyticsMapping[]
+  openTechnicalQuestions: readonly string[]
   /**
    * Which component function in the flow's preview module renders each screen,
    * plus the stateful shell that wires them. Names only: the code itself is read
    * from the module source (`components/screenSources.ts`).
    */
   screenSource?: {
-    screens: Partial<Record<FlowScreenKind, string>>;
-    shell?: string;
-  };
+    screens: Partial<Record<FlowScreenKind, string>>
+    shell?: string
+  }
 }
 
 /**
@@ -395,38 +406,38 @@ export interface FlowImplementationSpec {
  * Concise structured fields up top; rich narrative preserved in `notes`.
  */
 export interface FlowOverviewSpec {
-  purpose: string;
-  scopeNote: string;
+  purpose: string
+  scopeNote: string
   /** BA-aligned handoff document shared by the screen and export presentations. */
-  businessAnalysis: FlowBusinessAnalysisSpec;
-  entryPoints: FlowEntryPoint[];
-  preconditions: string[];
+  businessAnalysis: FlowBusinessAnalysisSpec
+  entryPoints: FlowEntryPoint[]
+  preconditions: string[]
   /** The canonical, id-carrying rule set. When present, `businessRules` is derived from it. */
-  rules?: readonly FlowRule[];
+  rules?: readonly FlowRule[]
   /** One paragraph per rule group. Authored directly only by flows without `rules`. */
-  businessRules: string[];
+  businessRules: string[]
   /** Present only for flows that require an explicit signing step. */
-  signing?: string;
-  successDestinations: string[];
-  analyticsEvents: string[];
-  openQuestions: string[];
-  notes: FlowNote[];
+  signing?: string
+  successDestinations: string[]
+  analyticsEvents: string[]
+  openQuestions: string[]
+  notes: FlowNote[]
 }
 
 /** The single source of truth for one flow. */
 export interface FlowDefinition {
-  id: FlowPreviewId;
-  title: string;
-  label: string;
-  summary: string;
+  id: FlowPreviewId
+  title: string
+  label: string
+  summary: string
   /** Product domain used for grouping/filtering (e.g. "Savings", "Cards"). */
-  domain: string;
-  countryScope: readonly CountryId[];
-  status: FlowStatus;
-  figmaFile: string;
-  figmaNodeId: string;
-  sourceUrl: string;
-  overview: FlowOverviewSpec;
+  domain: string
+  countryScope: readonly CountryId[]
+  status: FlowStatus
+  figmaFile: string
+  figmaNodeId: string
+  sourceUrl: string
+  overview: FlowOverviewSpec
   /**
    * How the Spec tab and the export present a flow that carries a BA document.
    *
@@ -438,13 +449,13 @@ export interface FlowDefinition {
    * Every registered flow carries a BA document; the layout only controls whether
    * screen-level specs are shown below that document.
    */
-  specLayout?: "document-only" | "document-and-screens";
+  specLayout?: 'document-only' | 'document-and-screens'
   /** Optional clickable map; when present the detail view gains a Prototype tab. */
-  prototype?: FlowPrototypeSpec;
+  prototype?: FlowPrototypeSpec
   /** Optional build surface; when present the detail view gains an Implementation tab. */
-  implementation?: FlowImplementationSpec;
+  implementation?: FlowImplementationSpec
   /** Per-screen specs, keyed by screen kind (documented once, reused across scenarios). */
-  screenSpecs: Partial<Record<FlowScreenKind, FlowScreenSpec>>;
-  defaultScenarioId: string;
-  scenarios: FlowScenario[];
+  screenSpecs: Partial<Record<FlowScreenKind, FlowScreenSpec>>
+  defaultScenarioId: string
+  scenarios: FlowScenario[]
 }

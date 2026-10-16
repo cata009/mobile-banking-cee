@@ -29,6 +29,7 @@ import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import { PerformanceChart } from '../investments/Charts';
 import {
   Copy,
+  czInvestmentTokens,
   Notice,
   Page,
   Row,
@@ -38,7 +39,7 @@ import { RoboHelp } from './Help';
 import { ActionRail } from '../investments/ActionRail';
 import { PeriodChips } from '../investments/PeriodChips';
 import { SortChips } from '../investments/SortChips';
-import { ProductRow } from '../investments/ProductRow';
+import { CzRoboSecurityRow } from '../../../current/investments/baseline/overview/CzRoboOverview';
 
 export function GoalDetail({
   goal,
@@ -257,10 +258,14 @@ export function GoalDetail({
             )
             .map(product =>
               product.security && onOpenSecurity ? (
-                <ProductRow
+                <CzRoboSecurityRow
                   key={product.id}
+                  host={{
+                    country: 'CZ',
+                    tokens: czInvestmentTokens,
+                    amountsHidden,
+                  }}
                   security={product.security}
-                  hidden={amountsHidden}
                   onPress={() => onOpenSecurity(product.security!)}
                 />
               ) : (

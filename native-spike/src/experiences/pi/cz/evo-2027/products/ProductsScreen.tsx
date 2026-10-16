@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
   Pressable,
@@ -61,6 +61,19 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
   const [offerCategory, setOfferCategory] = useState<
     'popular' | ShopSmartOfferCategory
   >('popular');
+  const focusRequestId = host.productsShelfFocusRequest?.requestId;
+  const focusRequestRef = useRef(host.productsShelfFocusRequest);
+  focusRequestRef.current = host.productsShelfFocusRequest;
+  const lastHandledFocusRequestId = useRef<number | null>(null);
+  const onNavigateRef = useRef(host.onNavigate);
+  onNavigateRef.current = host.onNavigate;
+  const focusHandledRef = useRef(host.onProductsShelfFocusHandled);
+  focusHandledRef.current = host.onProductsShelfFocusHandled;
+  const heroCollapsedChangeRef = useRef(
+    host.onProductsShelfHeroCollapsedChange,
+  );
+  heroCollapsedChangeRef.current = host.onProductsShelfHeroCollapsedChange;
+  const shelfIsActive = host.isActive !== false && view !== 'prime';
   const config = getProductsMenuForCountry('CZ');
   const category = getProductShelfCategory(categoryId);
   useEffect(() => {
@@ -83,6 +96,34 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
     });
     return () => listener.remove();
   }, [host.isActive, view]);
+  useEffect(() => {
+    const request = focusRequestRef.current;
+    if (
+      host.isActive === false ||
+      request == null ||
+      request.requestId === lastHandledFocusRequestId.current
+    )
+      return;
+
+    lastHandledFocusRequestId.current = request.requestId;
+    const target = request.cardId
+      ? PRODUCT_SHELF_CATEGORIES.flatMap(
+          itemCategory => itemCategory.items,
+        ).find(item => item.cardId === request.cardId)
+      : undefined;
+    if (target)
+      onNavigateRef.current({
+        screen: 'product-detail',
+        params: { itemId: target.id },
+      });
+    focusHandledRef.current?.();
+  }, [focusRequestId, host.isActive]);
+  useEffect(() => {
+    if (!shelfIsActive) return;
+    // Source's Evo shelf reports its light status-bar surface as collapsed while mounted.
+    heroCollapsedChangeRef.current?.(true);
+    return () => heroCollapsedChangeRef.current?.(false);
+  }, [shelfIsActive]);
   const back = () => {
     if (view === 'shelf') host.onBack();
     else {
@@ -316,7 +357,12 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
               ]}
             />
             {offers.map(offer => (
-              <View key={offer.id} style={s.offer}>
+              <Pressable
+                key={offer.id}
+                accessibilityRole="button"
+                onPress={() => {}}
+                style={s.offer}
+              >
                 <SourcePhoto asset={offer.imageSrc} height={130} />
                 <View style={s.cardCopy}>
                   <Text style={[t.body, t.strong]}>{offer.merchant}</Text>
@@ -333,7 +379,7 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                     <Text style={[t.body, t.muted]}>{offer.distance}</Text>
                   )}
                 </View>
-              </View>
+              </Pressable>
             ))}
             {offers.length === 0 && (
               <Text style={[t.body, t.muted]}>No offers found</Text>

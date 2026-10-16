@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { formatInvestmentAmountParts } from '@/app/utils/investmentAmountFormatting';
@@ -35,9 +36,10 @@ export function Amount({
   scale?: Scale;
   signed?: boolean;
 }) {
+  const market = useInvestmentMarket();
   const parts = formatInvestmentAmountParts(
       value,
-      'CZ',
+      market.country,
       currency,
       hidden,
       signed,

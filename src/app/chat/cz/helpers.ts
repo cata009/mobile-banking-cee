@@ -4,10 +4,10 @@
  *
  * Extracted verbatim from czChatOrchestration.ts.
  */
-import type { Screen } from '@/app/contexts/NavigationContext'
+import type { Screen } from '@/app/navigation/screenTypes'
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig'
 import { getProductCardSheetConfig, type ProductsCardId } from '@/app/config/productsMenuConfig'
-import type { ProductDetailSelection } from '@/app/components/products/ProductCardBottomSheet'
+import type { ProductDetailSelection } from '@/features/products/productDetailSelection'
 import { getDocumentsConfigForCountry } from '@/app/config/documentsConfig'
 import { formatMoneyNumber } from '@/app/registry/countryConfig'
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber'
@@ -19,7 +19,7 @@ import type {
   CoAppingFollowUpSuggestion,
   CoAppingOpportunity,
   CoAppingSuggestedTopic,
-} from '../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 
 export type CzChatHelpArea = 'documents' | 'account' | 'card' | 'savings' | 'loan' | 'mortgage'
 export type CzChatLauncherVariant = 'bubble' | 'edge-tab'
@@ -30,10 +30,7 @@ export const CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX = 'open-products-shelf-ca
 
 export const CZ_CHAT_PRODUCT_DETAIL_ACTION_PREFIX = 'open-product-detail-'
 
-export type ProductsShelfFocusRequest = {
-  requestId: number
-  cardId?: ProductsCardId | null
-}
+export type { ProductsShelfFocusRequest } from '@/features/products/shelfFocus'
 
 export function buildCzChatTitle(copy: string): string {
   return `${CZ_CHAT_USER_NAME}, ${copy}`

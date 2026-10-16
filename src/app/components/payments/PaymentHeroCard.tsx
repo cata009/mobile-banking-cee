@@ -1,3 +1,4 @@
+import { resolvePaymentHero } from "../contracts/paymentHero";
 import { AppIcon } from "@/app/components/icons";
 import type { PaymentHeroIllustration, PaymentHeroImageVariant, PaymentHeroItem } from "@/app/config/paymentsMenuConfig";
 import paymentHeroImage1 from "../../../../screenshots/payments1.png";
@@ -189,7 +190,8 @@ export default function PaymentHeroCard({
   const imagePreset = imageVariant ? PAYMENT_HERO_CARD_IMAGE_PRESETS[imageVariant] : undefined;
   const resolvedImageSrc = imageSrc ?? imagePreset?.src;
   const resolvedImageClassName = imagePreset?.imageClassName ?? "bottom-0 right-0 h-full w-[120px]";
-  const hasMultilineTitle = item.title.includes("\n");
+  const contract = resolvePaymentHero({ title: item.title, imageVariant, disabled });
+  const hasMultilineTitle = contract.titleLineHeight !== "normal";
 
   const handleClick = () => {
     if (disabled) {
@@ -218,7 +220,7 @@ export default function PaymentHeroCard({
       <div className="relative z-10 flex h-full w-full flex-col px-[20px] pt-[16px]">
         <h2
           className="uc-type-l1 whitespace-pre-line text-[var(--uc-text)]"
-          style={{ lineHeight: hasMultilineTitle ? "26px" : "normal" }}
+          style={{ lineHeight: typeof contract.titleLineHeight === "number" ? `${contract.titleLineHeight}px` : contract.titleLineHeight }}
         >
           {item.title}
         </h2>

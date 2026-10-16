@@ -5,7 +5,7 @@ import {
 import {
   type CoAppingFollowUpSuggestion,
   type CoAppingReplyResult,
-} from '../../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzChatFollowUp, buildCzNavigateFollowUp, formatCzChatMoney } from '../helpers'
 import {
   buildInvestmentCommercialFollowUp,

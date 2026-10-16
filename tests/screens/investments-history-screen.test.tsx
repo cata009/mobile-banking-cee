@@ -1,12 +1,18 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import type { PropsWithChildren } from 'react'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import type { PropsWithChildren, ReactElement } from 'react'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import InvestmentsHistoryScreen from '@/app/screens/investments/InvestmentsHistoryScreen'
 import { DemoProvider, useDemo } from '@/app/state/demoStore'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const renderer = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: renderer.loadNativeDemoModuleForWebTest }
+})
 
 function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -26,23 +32,41 @@ function CountryControl() {
   )
 }
 
-function renderHistory() {
-  return render(
+async function renderNative(ui: ReactElement) {
+  const view = render(ui, { wrapper: AppProviders })
+  await asyncNativeReady(view.container)
+  return view
+}
+
+async function renderHistory() {
+  return renderNative(
     <>
       <InvestmentsHistoryScreen onBack={() => undefined} />
       <CountryControl />
     </>,
-    { wrapper: AppProviders },
   )
 }
 
 function getHistoryRows(container: HTMLElement, kind: 'transaction' | 'order') {
-  return Array.from(container.querySelectorAll<HTMLButtonElement>(`[data-investment-history-row="${kind}"]`))
+  const activeTab = container
+    .querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+    ?.getAttribute('aria-label')
+  if (activeTab !== (kind === 'transaction' ? 'TRANSACTIONS' : 'ORDERS')) return []
+  return Array.from(
+    container.querySelectorAll<HTMLButtonElement>('[data-testid^="baseline-history-row-"]'),
+  )
 }
 
-function openOrdersTab() {
+function exactText(expected: string) {
+  return (_content: string, element: Element | null) =>
+    element?.textContent?.replace(/\s+/g, ' ').trim() === expected
+}
+
+async function openOrdersTab() {
   fireEvent.click(screen.getByRole('tab', { name: 'ORDERS' }))
-  expect(screen.getByRole('tab', { name: 'ORDERS' })).toHaveAttribute('aria-selected', 'true')
+  await waitFor(() =>
+    expect(screen.getByRole('tab', { name: 'ORDERS' })).toHaveAttribute('aria-selected', 'true'),
+  )
 }
 
 beforeAll(() => {
@@ -52,34 +76,38 @@ beforeAll(() => {
   })
 })
 
-afterEach(cleanup)
+beforeEach(() => resetNativeWebRendererDiagnostics())
+
+afterEach(() => {
+  cleanup()
+  resetNativeWebRendererDiagnostics()
+})
 
 describe('InvestmentsHistoryScreen details', () => {
-  it('omits All time for goal history and starts with an available date preset', () => {
-    render(<InvestmentsHistoryScreen onBack={() => undefined} hideAllTimeDateOption allDatesByDefault />, { wrapper: AppProviders })
+  it('omits All time for goal history and starts with an available date preset', async () => {
+    await renderNative(<InvestmentsHistoryScreen onBack={() => undefined} hideAllTimeDateOption allDatesByDefault />)
     fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
+    expect(await screen.findByRole('button', { name: 'Last year' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('button', { name: 'All time' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Last year' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: 'Define' })).toBeInTheDocument()
   })
 
-  it('ignores an invalid incoming title filter instead of crashing the history list', () => {
+  it('ignores an invalid incoming title filter instead of crashing the history list', async () => {
     const invalidClickPayload = { type: 'click' }
 
-    render(
+    await renderNative(
       <InvestmentsHistoryScreen
         onBack={() => undefined}
         historyFilterByTitle={invalidClickPayload as unknown as string}
       />,
-      { wrapper: AppProviders },
     )
 
     expect(screen.getByRole('tab', { name: 'TRANSACTIONS' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('')
   })
 
-  it('keeps a transaction detail signed and transaction-specific', () => {
-    const { container } = renderHistory()
+  it('keeps a transaction detail signed and transaction-specific', async () => {
+    const { container } = await renderHistory()
     const transaction = getHistoryRows(container, 'transaction')[0]
     if (!transaction) throw new Error('The seeded portfolio must expose a transaction')
 
@@ -87,20 +115,18 @@ describe('InvestmentsHistoryScreen details', () => {
     expect(transaction.textContent).toMatch(/\+\d/)
     fireEvent.click(transaction)
 
-    const detail = container.querySelector<HTMLElement>('[data-investment-history-detail="transaction"]')
-    if (!detail) throw new Error('Transaction detail did not open')
-    expect(detail).toHaveTextContent('Transaction details')
-    expect(detail).toHaveTextContent('COUPON')
-    expect(detail.textContent).toMatch(/\+\d/)
-    expect(detail).not.toHaveTextContent(/EXECUTED|PENDING|REJECTED/)
-    expect(within(detail).queryByText(/More\s+details/)).not.toBeInTheDocument()
-    expect(within(detail).queryByText(/Ex-Ante\s+cost/)).not.toBeInTheDocument()
-    expect(within(detail).queryByText('Documents')).not.toBeInTheDocument()
+    expect((await screen.findAllByText(exactText('Transaction details'))).length).toBeGreaterThan(0)
+    expect(screen.getByText('COUPON')).toBeInTheDocument()
+    expect(container.textContent).toMatch(/\+\d/)
+    expect(container.textContent).not.toMatch(/EXECUTED|PENDING|REJECTED/)
+    expect(screen.queryByText(/More\s+details/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Ex-Ante\s+cost/)).not.toBeInTheDocument()
+    expect(screen.queryByText('Documents')).not.toBeInTheDocument()
   })
 
-  it('keeps BUY and SELL order details signed with seeded status and order-only actions', () => {
-    const { container } = renderHistory()
-    openOrdersTab()
+  it('keeps BUY and SELL order details signed with seeded status and order-only actions', async () => {
+    const { container } = await renderHistory()
+    await openOrdersTab()
     const orders = getHistoryRows(container, 'order')
     const buyOrder = orders[0]
     const sellOrder = orders[2]
@@ -110,41 +136,45 @@ describe('InvestmentsHistoryScreen details', () => {
     expect(buyOrder.textContent).toMatch(/\+\d/)
     fireEvent.click(buyOrder)
 
-    const buyDetail = container.querySelector<HTMLElement>('[data-investment-history-detail="order"]')
-    if (!buyDetail) throw new Error('BUY order detail did not open')
-    expect(buyDetail).toHaveTextContent('Order details')
-    expect(buyDetail).toHaveTextContent('BUY')
-    expect(buyDetail).toHaveTextContent('EXECUTED')
-    expect(buyDetail.textContent).toMatch(/\+\d/)
-    expect(within(buyDetail).getByText(/More\s+details/)).toBeInTheDocument()
-    expect(within(buyDetail).getByText(/Ex-Ante\s+cost/)).toBeInTheDocument()
-    expect(within(buyDetail).getByText('Documents')).toBeInTheDocument()
+    expect((await screen.findAllByText(exactText('Order details'))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(exactText('BUY'))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(exactText('EXECUTED'))).length).toBeGreaterThan(0)
+    expect(container.textContent).toMatch(/\+\d/)
+    expect(screen.getAllByText(/More\s+details/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Ex-Ante\s+cost/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Documents').length).toBeGreaterThan(0)
 
-    fireEvent.click(within(buyDetail).getByRole('button', { name: 'Back' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    await waitFor(() => expect(getHistoryRows(container, 'order').length).toBeGreaterThan(2))
     const refreshedSellOrder = getHistoryRows(container, 'order')[2]
     if (!refreshedSellOrder) throw new Error('The seeded portfolio must retain its SELL order')
     fireEvent.click(refreshedSellOrder)
 
-    const sellDetail = container.querySelector<HTMLElement>('[data-investment-history-detail="order"]')
-    if (!sellDetail) throw new Error('SELL order detail did not open')
-    expect(sellDetail).toHaveTextContent('SELL')
-    expect(sellDetail).toHaveTextContent('EXECUTED')
-    expect(sellDetail.textContent).toMatch(/\u2212\d/)
-    expect(within(sellDetail).getByText(/More\s+details/)).toBeInTheDocument()
+    expect((await screen.findAllByText(exactText('Order details'))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(exactText('SELL'))).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(exactText('EXECUTED'))).length).toBeGreaterThan(0)
+    expect(container.textContent).toMatch(/\u2212\d/)
+    expect(screen.getAllByText(/More\s+details/).length).toBeGreaterThan(0)
   })
 })
 
 describe('InvestmentsHistoryScreen country and tab state', () => {
-  it('keeps Orders active while a country change clears search, filters, and an open detail', () => {
-    const { container } = renderHistory()
-    openOrdersTab()
+  it('keeps Orders active while a country change clears search, filters, and an open detail', async () => {
+    const { container } = await renderHistory()
+    await openOrdersTab()
 
     fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
-    fireEvent.click(screen.getByText('By status').closest('button') ?? screen.getByText('By status'))
-    fireEvent.click(screen.getByRole('button', { name: 'CLEAR' }))
+    fireEvent.click(await screen.findByRole('button', { name: /By status/ }))
+    fireEvent.click(await screen.findByRole('button', { name: 'CLEAR' }))
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'PENDING' })).toHaveAttribute('aria-selected', 'false'),
+    )
     fireEvent.click(screen.getByRole('button', { name: 'PENDING' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
-    expect(container.querySelector('[data-investment-history-filter-summary="true"]')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'PENDING' })).toHaveAttribute('aria-selected', 'true'),
+    )
+    fireEvent.click(await screen.findByRole('button', { name: 'Apply' }))
+    expect(await screen.findByRole('button', { name: 'Remove PENDING filter' })).toBeInTheDocument()
 
     const search = screen.getByRole('searchbox', { name: 'Search' })
     fireEvent.change(search, { target: { value: 'Climate' } })
@@ -152,56 +182,59 @@ describe('InvestmentsHistoryScreen country and tab state', () => {
     const pendingOrder = getHistoryRows(container, 'order')[0]
     if (!pendingOrder) throw new Error('The seeded PENDING filter must expose an order')
     fireEvent.click(pendingOrder)
-    expect(container.querySelector('[data-investment-history-detail="order"]')).toBeInTheDocument()
+    expect((await screen.findAllByText(exactText('Order details'))).length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch country' }))
-
-    expect(container.querySelector('[data-investment-history-detail]')).not.toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'ORDERS' })).toHaveAttribute('aria-selected', 'true')
+    await waitFor(() => {
+      expect(screen.queryAllByText(exactText('Order details'))).toHaveLength(0)
+      expect(screen.getByRole('tab', { name: 'ORDERS' })).toHaveAttribute('aria-selected', 'true')
+    })
     expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('')
-    expect(container.querySelector('[data-investment-history-filter-summary="true"]')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Remove .* filter/ })).not.toBeInTheDocument()
   })
 
   it.each([
     ['filter', 'Apply filters', () => fireEvent.click(screen.getByRole('button', { name: 'Filters' }))],
     ['info', 'Status of orders', () => fireEvent.click(screen.getByRole('button', { name: 'Help' }))],
-  ] as const)('closes a transient %s view after a country change', (_mode, heading, openTransient) => {
-    const { container } = renderHistory()
-    openOrdersTab()
+  ] as const)('closes a transient %s view after a country change', async (_mode, heading, openTransient) => {
+    await renderHistory()
+    await openOrdersTab()
     openTransient()
-    expect(screen.getAllByText(heading).length).toBeGreaterThan(0)
+    expect(await screen.findAllByText(heading)).not.toHaveLength(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch country' }))
-
-    expect(screen.getByRole('tab', { name: 'ORDERS' })).toHaveAttribute('aria-selected', 'true')
-    expect(container.querySelector('[data-investment-filter-screen]')).not.toBeInTheDocument()
-    expect(screen.queryAllByText(heading)).toHaveLength(0)
+    await waitFor(() => {
+      expect(screen.queryAllByText(exactText('Apply filters'))).toHaveLength(0)
+      expect(screen.queryAllByText(heading)).toHaveLength(0)
+    })
   })
 
-  it('does not treat a tab-only change as a country reset', () => {
-    renderHistory()
+  it('does not treat a tab-only change as a country reset', async () => {
+    await renderHistory()
     const search = screen.getByRole('searchbox', { name: 'Search' })
     fireEvent.change(search, { target: { value: 'Climate' } })
 
-    openOrdersTab()
+    await openOrdersTab()
 
     expect(screen.getByRole('searchbox', { name: 'Search' })).toHaveValue('Climate')
   })
 })
 
 describe('InvestmentsHistoryScreen custom date range', () => {
-  it('parses and confirms the valid seeded YYYY-MM-DD range without rollover', () => {
-    const { container } = renderHistory()
+  it('parses and confirms the valid seeded YYYY-MM-DD range without rollover', async () => {
+    await renderHistory()
     fireEvent.click(screen.getByRole('button', { name: 'Filters' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Define' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Define' }))
 
-    expect(screen.getByText('01.09.2025')).toBeInTheDocument()
+    expect(await screen.findByText('01.09.2025')).toBeInTheDocument()
     expect(screen.getByText('30.06.2026')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Apply' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Apply' }))
 
-    expect(container.querySelector('[data-investment-history-filter-summary="true"]')).toHaveTextContent(
-      '01.09.2025 - 30.06.2026',
-    )
+    expect(
+      await screen.findByRole('button', {
+        name: 'Remove 01.09.2025 - 30.06.2026 filter',
+      }),
+    ).toBeInTheDocument()
   })
 })

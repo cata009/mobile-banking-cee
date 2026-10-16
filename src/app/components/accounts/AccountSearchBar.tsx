@@ -3,20 +3,8 @@ import type { ChangeEvent, FocusEvent } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 
-export const ACCOUNT_SEARCH_BAR_SOURCE = {
-  schema: "codex-figma-component-spec/v1",
-  sourceNodeIds: {
-    activeRemoveFilters: "1517:12655",
-  },
-  dimensions: {
-    activeRemoveFilters: {
-      width: 375,
-      height: 63,
-      searchHeight: 36,
-      iconSlot: 32,
-    },
-  },
-} as const;
+export { ACCOUNT_SEARCH_BAR_SOURCE } from '@/app/components/contracts/searchBar';
+import { searchBarWeb } from '@/app/components/contracts/searchBarWeb';
 
 interface AccountSearchBarProps {
   placeholder?: string;
@@ -70,9 +58,7 @@ export default function AccountSearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const [internalValue, setInternalValue] = useState("");
   const searchValue = value ?? internalValue;
-  const hasSearchValue = searchValue.trim().length > 0;
-  const showRemoveFilters = showRemoveFiltersAction && filtersActive && !hasSearchValue;
-  const paddedField = fieldPadding === "8" && !showRemoveFilters;
+  const { hasSearchValue, showRemoveFilters, paddedField, comfortableField, fieldGround, innerFieldGround, fieldHeight } = searchBarWeb({ searchValue, filtersActive, showRemoveFiltersAction, showTrailingAction, fieldSurface, fieldSize, fieldPadding, trailingIcon });
 
   const updateSearchValue = (nextValue: string) => {
     if (value === undefined) {
@@ -96,14 +82,6 @@ export default function AccountSearchBar({
     inputRef.current?.focus();
   };
 
-  const fieldGround = fieldSurface === "raised"
-    ? "bg-[var(--uc-surface)] shadow-[inset_0_0_0_1px_var(--uc-border-muted)]"
-    : "bg-[var(--uc-app-bg)]";
-  // The padded Evo field owns the single outer stroke. Reapplying the raised
-  // surface to the inner row creates a second inset stroke inside the search.
-  const innerFieldGround = paddedField ? "bg-transparent" : fieldGround;
-  const comfortableField = fieldSize === "comfortable";
-  const fieldHeight = comfortableField ? "h-[40px]" : "h-[32px]";
 
   return (
     <div

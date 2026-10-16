@@ -4,6 +4,7 @@ import { BottomSheet } from "@/app/components/BottomSheet";
 import { AppIcon } from "@/app/components/icons";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import TextField from "@/app/components/TextField";
+import RadioButton from '@/app/components/common/RadioButton';
 
 import { hasAccountTransactionFilters, type AccountTransactionDateFilter, type AccountTransactionFilterState } from '@/features/accounts-payments/evoTransactionFilters';
 export { EMPTY_ACCOUNT_TRANSACTION_FILTERS, hasAccountTransactionFilters } from '@/features/accounts-payments/evoTransactionFilters';
@@ -165,18 +166,7 @@ function DateFilterRow({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-[80px] w-full items-center gap-[8px] bg-[var(--uc-surface)] px-[16px] text-left"
-      role="radio"
-      aria-checked={selected}
-    >
-      <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-        <AppIcon name={selected ? "radio-selected" : "radio-unselected"} color="var(--uc-text)" />
-      </span>
-      <span className="text-[14px] font-bold leading-[18px] text-[var(--uc-text)]">{label}</span>
-    </button>
+    <RadioButton variant="date-filter" label={label} selected={selected} onClick={onClick} />
   );
 }
 

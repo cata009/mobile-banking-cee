@@ -7,7 +7,8 @@ import PrimaryButton from '@/app/components/PrimaryButton'
 import { CurrencyFlagRoundel } from '@/app/components/payments/CurrencyFlag'
 import SelectedMark from '@/app/components/payments/SelectedMark'
 import ScheduledTransferSetupPage from '@/app/screens/payments/ScheduledTransferSetupPage'
-import { useCountry } from '@/app/state/demoStore'
+import { NativeScreenPreview } from '@/app/components/demo/NativeScreenPreview'
+import { useCountry, useDemo } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
 import { formatMoneyNumber, getCountryConfig } from '@/app/registry/countryConfig'
 import { useProducts } from '@/hooks/useProducts'
@@ -20,6 +21,10 @@ import {
   type InternalTransferAccount,
   type InternalTransferDraft,
 } from '@/app/screens/payments/internalTransferState'
+import type {
+  NativeInternalTransferEvent,
+  NativeInternalTransferPreview,
+} from '@/features/demo-native/internalTransferPreview'
 
 interface InternalTransferScreenProps {
   onBack: (draft?: InternalTransferDraft) => void
@@ -442,7 +447,7 @@ function AmountKeypad({
   )
 }
 
-export default function InternalTransferScreen({
+function LegacyInternalTransferScreen({
   onBack,
   onDone,
   initialSchedule,
@@ -886,5 +891,49 @@ export default function InternalTransferScreen({
         />
       ) : null}
     </div>
+  )
+}
+
+export default function InternalTransferScreen(props: InternalTransferScreenProps) {
+  const { product, country, designSystem } = useDemo()
+  const useNativeTransfer = product === 'PI' && designSystem === 'current' && country !== 'IT'
+
+  if (!useNativeTransfer) return <LegacyInternalTransferScreen {...props} />
+
+  const componentPreview: NativeInternalTransferPreview = {
+    kind: 'internal-transfer',
+    ...(props.initialDraft ? { initialDraft: props.initialDraft } : {}),
+    ...(props.initialSchedule === undefined ? {} : { initialSchedule: props.initialSchedule }),
+    ...(props.requireSchedule === undefined ? {} : { requireSchedule: props.requireSchedule }),
+    ...(props.isEditing === undefined ? {} : { isEditing: props.isEditing }),
+    ...(props.submitLabel === undefined ? {} : { submitLabel: props.submitLabel }),
+    ...(props.onDone ? { onDoneAvailable: true } : {}),
+    ...(props.onEditSchedule ? { onEditScheduleAvailable: true } : {}),
+  }
+
+  const onInternalTransferEvent = (event: NativeInternalTransferEvent) => {
+    switch (event.type) {
+      case 'back':
+        props.onBack(event.draft)
+        return
+      case 'done':
+        props.onDone?.()
+        return
+      case 'edit-schedule':
+        props.onEditSchedule?.(event.draft)
+        return
+      case 'complete':
+        props.onComplete?.(event.receipt)
+        return
+    }
+  }
+
+  return (
+    <NativeScreenPreview
+      route={{ screen: 'payments' }}
+      snapshot={{ componentPreview }}
+      events={{ onInternalTransferEvent }}
+      onBack={() => props.onBack()}
+    />
   )
 }

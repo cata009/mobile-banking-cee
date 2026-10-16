@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useInvestmentBack } from './Runtime';
 import { PendingOrders } from './PendingOrders';
@@ -23,6 +23,10 @@ import {
 import type { InvestmentBasketFund } from '@/app/config/investmentBasketFundsConfig';
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures';
 import type { RoboExistingGoal } from '@/features/investments/robo/types';
+import {
+  getValidatedInitialDraft,
+  type CoAppingInvestmentBuyDraft,
+} from '@/features/investments/orders/buyOrder';
 import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import { shareDemoFile } from '../../../../../platform/nativeFiles';
 import { CzRoboFlow, CzGoalsScreen } from '../robo';
@@ -55,6 +59,8 @@ import { Amount } from './Amount';
 import { ProductRow } from './ProductRow';
 import { Select } from '../../../../../universal/Select';
 import { czInvestmentTokens } from './Primitives';
+import type { CzechNativeScreenProps } from '../contracts';
+import { ClassicPortfolio } from './ClassicPortfolio';
 
 type ViewRoute =
   | {
@@ -77,6 +83,7 @@ type ViewRoute =
       kind: 'instrument' | 'buy' | 'sell';
       security: InvestmentCatalogSecurity;
       hideBuy?: boolean;
+      initialDraft?: CoAppingInvestmentBuyDraft | null;
     }
   | { kind: 'basket'; basket: InvestmentBasketFund }
   | { kind: 'collection'; collection: InvestmentFundCollectionId }
@@ -89,6 +96,8 @@ type ViewRoute =
 
 export interface CzInvestmentsScreenProps {
   snapshot: CzInvestmentSnapshot;
+  /** Source host from the Czech adapter for the classic PI investment routes. */
+  classicHost?: CzechNativeScreenProps;
   onBack: () => void;
   amountsHidden?: boolean;
   initialView?:
@@ -97,24 +106,55 @@ export interface CzInvestmentsScreenProps {
     | 'history'
     | 'create'
     | 'approvals'
-    | 'bulk-approval';
+    | 'bulk-approval'
+    | 'catalog'
+    | 'funds'
+    | 'buy';
   initialGoal?: RoboExistingGoal;
   initialSecurityId?: string;
+  initialBuyDraft?: CoAppingInvestmentBuyDraft | null;
+  initialCollection?: InvestmentFundCollectionId;
   goals?: readonly RoboExistingGoal[];
   onGoalUpdated?: (goal: RoboExistingGoal) => void;
+  onRoboResumeStateChange?: CzechNativeScreenProps['onRoboResumeStateChange'];
   state?: 'ready' | 'loading' | 'error';
   onRetry?: () => void;
   persistenceMessage?: string;
 }
-export function CzInvestmentsScreen({
+export function CzInvestmentsScreen(props: CzInvestmentsScreenProps) {
+  const keepRoboComposition =
+    props.classicHost?.route.screen === 'robo' ||
+    Boolean(props.initialGoal) ||
+    props.initialView === 'goals' ||
+    props.initialView === 'create' ||
+    props.initialView === 'bulk-approval';
+  if (
+    props.classicHost &&
+    !keepRoboComposition &&
+    (props.state ?? 'ready') === 'ready'
+  ) {
+    return (
+      <ClassicPortfolio
+        host={props.classicHost}
+        initialDraft={props.initialBuyDraft}
+      />
+    );
+  }
+  return <CzInvestmentsComposition {...props} />;
+}
+
+function CzInvestmentsComposition({
   snapshot,
   onBack,
   amountsHidden = false,
   initialView = 'portfolio',
   initialGoal,
   initialSecurityId,
+  initialBuyDraft,
+  initialCollection,
   goals: suppliedGoals,
   onGoalUpdated,
+  onRoboResumeStateChange,
   state = 'ready',
   onRetry,
   persistenceMessage,
@@ -128,9 +168,21 @@ export function CzInvestmentsScreen({
   const [stack, setStack] = useState<ViewRoute[]>(() => [
     initialGoal
       ? { kind: 'goal', goalId: initialGoal.id }
+      : initialView === 'funds'
+      ? initialCollection
+        ? { kind: 'collection', collection: initialCollection }
+        : { kind: 'funds' }
       : initialSecurity
-      ? { kind: 'instrument', security: initialSecurity }
-      : { kind: initialView },
+      ? {
+          kind: initialView === 'buy' ? 'buy' : 'instrument',
+          security: initialSecurity,
+          initialDraft: getValidatedInitialDraft(
+            initialBuyDraft,
+            initialSecurity,
+            snapshot.accounts,
+          ),
+        }
+      : { kind: initialView === 'buy' ? 'portfolio' : initialView },
   ]);
   const [tab, setTab] = useState<InvestmentPortfolioTabId>('performance'),
     [period, setPeriod] = useState<InvestmentPeriodId>('3y'),
@@ -138,6 +190,26 @@ export function CzInvestmentsScreen({
   const [message, setMessage] = useState(''),
     [reportBusy, setReportBusy] = useState(false);
   const route = stack.at(-1)!;
+  const lastRoboResumeKey = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const roboRoute = [...stack]
+      .reverse()
+      .find(item => item.kind === 'goal' || item.kind === 'goals' || item.kind === 'create');
+    const resumeState =
+      roboRoute?.kind === 'goal'
+        ? { view: 'detail' as const, goalId: roboRoute.goalId }
+        : roboRoute
+          ? { view: 'goals' as const }
+          : null;
+    const resumeKey = resumeState
+      ? resumeState.view === 'detail'
+        ? `detail:${resumeState.goalId}`
+        : 'goals'
+      : null;
+    if (lastRoboResumeKey.current === resumeKey) return;
+    lastRoboResumeKey.current = resumeKey;
+    onRoboResumeStateChange?.(resumeState);
+  }, [onRoboResumeStateChange, stack]);
   useEffect(() => {
     if (suppliedGoals) setGoals(suppliedGoals);
   }, [suppliedGoals]);
@@ -149,7 +221,9 @@ export function CzInvestmentsScreen({
       route.kind === 'sell' ||
       route.kind === 'history' ||
       route.kind === 'approvals' ||
-      route.kind === 'bulk-approval'
+      route.kind === 'bulk-approval' ||
+      route.kind === 'funds' ||
+      route.kind === 'collection'
     )
       return false;
     if (stack.length <= 1) return false;
@@ -159,7 +233,11 @@ export function CzInvestmentsScreen({
   const push = (next: ViewRoute) => setStack(previous => [...previous, next]);
   const back = () => {
     if (stack.length > 1) setStack(previous => previous.slice(0, -1));
-    else onBack();
+    else {
+      lastRoboResumeKey.current = null;
+      onRoboResumeStateChange?.(null);
+      onBack();
+    }
   };
   const home = () => setStack([{ kind: 'portfolio' }]);
   const showGoals = () =>
@@ -288,6 +366,7 @@ export function CzInvestmentsScreen({
     return (
       <BuyOrder
         security={route.security}
+        initialDraft={route.initialDraft}
         accounts={snapshot.accounts}
         onBack={back}
         onComplete={home}

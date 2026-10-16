@@ -5,9 +5,17 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { readdirSync, readFileSync } from 'node:fs'
 import postcss from 'postcss'
 import { dirname, join, relative } from 'node:path'
-import { afterEach, describe, expect, it } from 'vitest'
-import InvestmentProductCard from '@/app/components/investments/InvestmentProductCard'
-import type { InvestmentSecurity } from '@/app/config/investmentsPortfolioConfig'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import App from '@/app/App'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+const NATIVE_CZ_ROBO_HOME_URL =
+  '/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-robo' +
+  '&bank=retail-single-account&theme=dark&lang=en&screen=home'
 
 const INVESTMENT_ROOTS = [
   join(process.cwd(), 'src/app/components/investments'),
@@ -24,7 +32,7 @@ const FORBIDDEN_STRUCTURAL_LITERALS = [
   '#F5F5F5',
 ] as const
 
-// Reviewed exact exceptions preserve authored pixels pending a separate palette change.
+// Keep the source literal audit exact; migrated surfaces now use semantic tokens instead of these retired literals.
 const INTENTIONAL_LITERAL_EXCEPTIONS = [
   { path: 'src/app/components/investments/InvestmentActionBar.tsx', literal: 'rgba(0,0,0,0.15)', count: 1, reason: 'Authored action-bar shadow alpha' },
   { path: 'src/app/components/investments/InvestmentDistributionChart.tsx', literal: '#F2F2F2', count: 1, reason: 'Authored chart separator geometry' },
@@ -34,22 +42,11 @@ const INTENTIONAL_LITERAL_EXCEPTIONS = [
   { path: 'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx', literal: '#5BC199', count: 1, reason: 'Distinct document-chart series identity' },
   { path: 'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx', literal: '#885BC1', count: 1, reason: 'Distinct document-chart series identity' },
   { path: 'src/app/screens/investments/InvestmentOrderDocumentsAccordion.tsx', literal: '#D6579C', count: 1, reason: 'Distinct document-chart series identity' },
-  { path: 'src/app/screens/investments/InvestmentsHistoryScreen.tsx', literal: 'rgba(0,0,0,0.28)', count: 1, reason: 'Authored interval modal overlay alpha' },
-  { path: 'src/app/screens/investments/InvestmentsHistoryScreen.tsx', literal: 'rgba(0,0,0,0.51)', count: 1, reason: 'Authored filter modal overlay alpha' },
   { path: 'src/app/screens/investments/CzRoboLevelOneShell.tsx', literal: 'rgba(0,0,0,0.045)', count: 1, reason: 'Authored level-one shell shadow alpha' },
-  { path: 'src/app/screens/investments/InvestmentsPortfolioScreen.tsx', literal: 'rgba(0,0,0,0.045)', count: 1, reason: 'Authored portfolio shell shadow alpha' },
   { path: 'src/app/screens/investments/FutureGainInvestmentSimulatorScreen.tsx', literal: 'rgba(153,153,153,0.35)', count: 1, reason: 'Fixed information-sheet separator; theme borders differ' },
   { path: 'src/app/screens/investments/FutureGainTermDepositScreen.tsx', literal: 'rgba(153,153,153,0.35)', count: 2, reason: 'Fixed information-sheet separators; theme borders differ' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: 'rgba(153,153,153,0.35)', count: 2, reason: 'Fixed information-sheet separators; theme borders differ' },
   { path: 'src/app/screens/investments/FutureGainInvestmentSimulatorScreen.tsx', literal: '#d9d9d9', count: 1, reason: 'Authored fund-history chart grid' },
   { path: 'src/app/screens/investments/FutureGainInvestmentSimulatorScreen.tsx', literal: '#0098a6', count: 1, reason: 'Authored fund-history chart series' },
-  { path: 'src/app/screens/investments/InvestmentsPortfolioScreen.tsx', literal: '#E30000', count: 2, reason: 'Authored negative-trend SVG paths; semantic reds differ' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: 'rgba(94,111,115,0.1)', count: 1, reason: 'Authored low-risk badge background' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: '#007a6b', count: 1, reason: 'Authored low-risk badge foreground' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: 'rgba(163,54,148,0.1)', count: 1, reason: 'Authored medium-risk badge background' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: '#a33694', count: 1, reason: 'Authored medium-risk badge foreground' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: 'rgba(61,31,171,0.1)', count: 1, reason: 'Authored high-risk badge background' },
-  { path: 'src/app/screens/investments/SmartInvestmentScreen.tsx', literal: '#3d1fab', count: 1, reason: 'Authored high-risk badge foreground' },
 ] as const
 
 function sourceFiles(root: string): string[] {
@@ -68,43 +65,72 @@ function investmentSources() {
   }))
 }
 
-const SECURITY: InvestmentSecurity = {
-  id: 'security-1',
-  title: 'Balanced fund',
-  sourceProductName: 'Investment account',
-  status: 'active',
-  contributionType: 'RECURRENT',
-  value: 10_000,
-  currency: 'EUR',
-  instrumentCurrency: 'EUR',
-  localValue: 10_000,
-  localCurrency: 'EUR',
-  securityAccountId: 'account-1',
-  securityAccountName: 'Investments',
-  securityAccountCurrency: 'EUR',
-  productType: 'Fund',
-  assetClass: 'Balanced',
-  marketPrice: 100,
-  quantity: 100,
-  performanceAmount: 420,
-  performancePercent: 4.2,
+async function renderNativeInvestmentHome() {
+  window.history.replaceState({}, '', NATIVE_CZ_ROBO_HOME_URL)
+  const result = render(<App />)
+  const { asyncNativeReady } = await import('../helpers/nativeWebRenderer')
+  await asyncNativeReady(result.container)
+  return result
 }
 
-function renderProductCard(performancePercent: number) {
-  return render(
-    <div data-uc-theme="dark">
-      <InvestmentProductCard
-        security={{ ...SECURITY, performancePercent }}
-        valueParts={{ integer: '10 000', decimal: ',00', currency: 'EUR' }}
-        performanceParts={{ integer: '420', decimal: ',00', currency: 'EUR' }}
-        valueLabel="Portfolio value"
-        performanceLabel="Performance amount"
-      />
-    </div>,
-  )
+function themeTokenValue(element: HTMLElement, token: string, resolving = new Set<string>()): string {
+  if (resolving.has(token)) return ''
+  resolving.add(token)
+  let current: HTMLElement | null = element
+  let tokenValue = ''
+  while (current && !tokenValue) {
+    tokenValue = getComputedStyle(current).getPropertyValue(token).trim()
+    current = current.parentElement
+  }
+  if (!tokenValue) tokenValue = getComputedStyle(document.documentElement).getPropertyValue(token).trim()
+  const reference = /^var\((--[\w-]+)(?:,\s*([^)]*))?\)$/.exec(tokenValue)
+  if (reference) return themeTokenValue(element, reference[1]!, resolving) || reference[2]?.trim() || ''
+  return tokenValue
 }
 
-afterEach(cleanup)
+function expectThemeTokenStyle(element: HTMLElement, property: 'background-color' | 'color', token: string) {
+  const tokenValue = themeTokenValue(element, token)
+  if (!tokenValue) throw new Error(`Missing shipped theme token ${token}`)
+
+  const probe = document.createElement('span')
+  probe.style.setProperty(property, tokenValue)
+  ;(element.parentElement ?? document.body).append(probe)
+  const expected = getComputedStyle(probe).getPropertyValue(property)
+  const actual = getComputedStyle(element).getPropertyValue(property)
+  probe.remove()
+
+  expect(expected).not.toBe('')
+  expect(expected).not.toContain('var(')
+  expect(actual).not.toBe('')
+  expect(actual).toBe(expected)
+}
+
+function expectThemeSurfaceOnControlOrAncestor(element: HTMLElement, token: string) {
+  const tokenValue = themeTokenValue(element, token)
+  if (!tokenValue) throw new Error(`Missing shipped theme token ${token}`)
+
+  const probe = document.createElement('span')
+  probe.style.setProperty('background-color', tokenValue)
+  ;(element.parentElement ?? document.body).append(probe)
+  const expected = getComputedStyle(probe).getPropertyValue('background-color')
+  probe.remove()
+  expect(expected).not.toBe('')
+  expect(expected).not.toContain('var(')
+
+  let current: HTMLElement | null = element
+  while (current && getComputedStyle(current).backgroundColor !== expected) current = current.parentElement
+  expect(current).not.toBeNull()
+}
+
+beforeEach(async () => {
+  const { resetNativeWebRendererDiagnostics } = await import('../helpers/nativeWebRenderer')
+  resetNativeWebRendererDiagnostics()
+})
+
+afterEach(() => {
+  cleanup()
+  window.history.replaceState({}, '', '/')
+})
 
 describe('investment semantic color source contract', () => {
   it('contains no unreferenced structural, status, or action color literals', () => {
@@ -131,18 +157,22 @@ describe('investment semantic color source contract', () => {
 })
 
 describe('investment semantic color runtime contract', () => {
-  it('renders structural and positive colors through theme-adaptive semantic tokens', () => {
-    renderProductCard(4.2)
+  it('renders the investment destination and portfolio card through Native semantics', async () => {
+    await renderNativeInvestmentHome()
 
-    expect(screen.getByRole('button')).toHaveClass('bg-[var(--uc-surface)]')
-    expect(screen.getByText('Balanced fund')).toHaveClass('text-[var(--uc-text)]')
-    expect(screen.getByText('+4,2%')).toHaveStyle({ color: 'var(--uc-green-olive)' })
+    expect(await screen.findByRole('button', { name: 'Investment' })).toBeInTheDocument()
+    const portfolio = await screen.findByRole('button', { name: /Security Portfolio/ })
+    expect(portfolio).toHaveTextContent('Security Portfolio')
+    expect(portfolio).toHaveTextContent(/42\s*500\.00\s*CZK/)
+    // React Native Web pressables stay transparent; the composed Native surface owns the theme fill.
+    expectThemeSurfaceOnControlOrAncestor(portfolio, '--uc-surface-raised')
+    expectThemeTokenStyle(screen.getByText('Security Portfolio'), 'color', '--uc-text')
   })
 
-  it('renders negative performance through the semantic status token', () => {
-    renderProductCard(-4.2)
-
-    expect(screen.getByText(/4,2%$/)).toHaveStyle({ color: 'var(--uc-status-red)' })
+  it('keeps positive and negative investment status tokens in the shipped CSS graph', () => {
+    const styles = configuredStyles().join('\n')
+    expect(styles).toContain('--uc-green-olive')
+    expect(styles).toContain('--uc-status-red')
   })
 })
 

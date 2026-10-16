@@ -26,42 +26,8 @@ interface AccountCarouselIndicatorProps {
   onSelect?: (index: number) => void;
 }
 
-type IndicatorItem =
-  | { type: "item"; index: number }
-  | { type: "mini"; key: string };
-
-function getIndicatorItems(count: number, activeIndex: number, windowSize: number): IndicatorItem[] {
-  if (count <= windowSize) {
-    return Array.from({ length: count }, (_, index) => ({ type: "item", index }));
-  }
-
-  if (activeIndex <= 1) {
-    return [
-      ...Array.from({ length: windowSize }, (_, index) => ({ type: "item" as const, index })),
-      { type: "mini", key: "end" },
-    ];
-  }
-
-  if (activeIndex >= count - 2) {
-    return [
-      { type: "mini", key: "start" },
-      ...Array.from({ length: windowSize }, (_, index) => ({
-        type: "item" as const,
-        index: count - windowSize + index,
-      })),
-    ];
-  }
-
-  return [
-    { type: "mini", key: "start" },
-    { type: "item", index: activeIndex - 2 },
-    { type: "item", index: activeIndex - 1 },
-    { type: "item", index: activeIndex },
-    { type: "item", index: activeIndex + 1 },
-    { type: "item", index: activeIndex + 2 },
-    { type: "mini", key: "end" },
-  ];
-}
+import { carouselIndicatorWeb } from '../contracts/carouselIndicatorWeb';
+import { nearestIndicatorIndex } from '../contracts/carouselIndicator';
 
 export default function AccountCarouselIndicator({
   count,
@@ -73,15 +39,14 @@ export default function AccountCarouselIndicator({
   windowSize = 4,
   onSelect,
 }: AccountCarouselIndicatorProps) {
-  const items = getIndicatorItems(count, activeIndex, windowSize);
-  const inactiveClass =
-    tone === "inverse" ? "bg-[rgb(var(--uc-static-white-rgb)_/_0.55)]" : "bg-[var(--uc-text-muted)]";
+  const web = carouselIndicatorWeb({ count, activeIndex, windowSize, tone, withBackdropBlur });
+  const { items, inactiveClass } = web;
 
   return (
     <div
       className="flex h-[32px] items-center justify-center"
       data-ds-label="AccountCarouselIndicator 32px"
-      style={withBackdropBlur ? { backdropFilter: "blur(13.591408729553223px)" } : undefined}
+      style={web.backdropStyle}
     >
       <div className="inline-flex items-center gap-[6px]" data-ds-label="Carousel dots gap 6px">
         {items.map((item) => {
@@ -101,7 +66,17 @@ export default function AccountCarouselIndicator({
             <button
               key={item.index}
               type="button"
-              onClick={() => onSelect?.(item.index)}
+              onClick={(event) => {
+                if (!onSelect) return;
+                if (event.detail === 0) { onSelect(item.index); return; }
+                const visibleIndexes = items.flatMap((entry) => entry.type === 'item' ? [entry.index] : []);
+                const buttons = Array.from(event.currentTarget.parentElement?.querySelectorAll('button') ?? []);
+                const centers = buttons.map((button, position) => {
+                  const rect = button.getBoundingClientRect();
+                  return { index: visibleIndexes[position] ?? item.index, center: rect.left + rect.width / 2 };
+                });
+                onSelect(nearestIndicatorIndex(event.clientX, centers, item.index));
+              }}
               /* Each button is exactly its own ink, so the rail's 6px gap is the
                  gap you see. A 24px box with -9px inline margins cancelled the
                  slack around a 6px dot, but the active pill is 30px wide and has

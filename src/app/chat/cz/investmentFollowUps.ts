@@ -8,7 +8,7 @@
  */
 
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig'
-import type { CoAppingFollowUpSuggestion } from '../../../../package/mobile-pi-coapping-chat-package/src'
+import type { CoAppingFollowUpSuggestion } from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzChatFollowUp } from './helpers'
 
 export const buildInvestmentCommercialFollowUp = (security: InvestmentCatalogSecurity): CoAppingFollowUpSuggestion => {

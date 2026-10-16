@@ -1,3 +1,4 @@
+import { bannerWeb } from "../contracts/bannerWeb";
 import type { CSSProperties } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -44,10 +45,12 @@ export default function InfoBanner({
   className,
   style,
 }: InfoBannerProps) {
+  const contract = bannerWeb({ variant: "info", hasAction: Boolean(actionLabel) });
+
   return (
     <div
       className={cn(
-        "flex w-[327px] max-w-full items-start gap-[8px] rounded-[8px] border border-solid border-[var(--uc-text)] bg-transparent p-[16px]",
+        contract.rootClass,
         className,
       )}
       data-component="InfoBanner"

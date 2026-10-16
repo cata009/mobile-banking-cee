@@ -17,7 +17,13 @@ import {
 import {
   createSpendingRangeSummary,
   listSpendingMonthKeys,
+  type SpendingAnalyticsTransaction,
 } from '@/data/spendingAnalytics';
+import {
+  PFM_CATEGORIES,
+  type PfmCategoryName,
+  type PfmCategorySelection,
+} from '@/data/pfmCategories';
 import {
   createEvoAnalyticsState,
   evoAnalyticsReducer,
@@ -29,14 +35,18 @@ import {
   type ExpenseBreakdownRow,
 } from '@/features/analytics/evo/selectors';
 import {
+  buildCustomSelection,
   buildPeriodRail,
   buildPresetSelection,
+  buildYearSelection,
   stepSelection,
+  type SpendingPeriodSelection,
 } from '@/app/screens/analytics/evoSpendingPeriods';
+import { getEvoAnalyticsCategoryDisplayLabel } from '@/app/screens/analytics/analyticsCategoryLabels';
 import { createEvoTranslations } from '@/translations/evo';
 import type { Currency } from '@/data/products';
 import type { CzechNativeScreenProps } from '../contracts';
-import { createHomeProducts } from '../home/model';
+import { czechProducts } from '../accounts/source';
 import { Glyph, IconAction, Money, textStyles as t } from '../home/Primitives';
 import { evoTokens as tokens } from '../home/tokens';
 import { Bars, Donut } from './Charts';
@@ -44,6 +54,88 @@ import { CategoryMark } from './CategoryMark';
 import { CurrencyMark } from '../home/CurrencyMark';
 import MovementAvatar from '../accounts/MovementAvatar';
 import { PeriodSheet, getPresetLabels } from './PeriodSheet';
+
+const EMPTY_CATEGORY_OVERRIDES: Readonly<
+  Record<string, PfmCategorySelection>
+> = Object.freeze({});
+
+function periodFromRoute(
+  periodKey: string | undefined,
+  months: readonly string[],
+  presetLabels: ReturnType<typeof getPresetLabels>,
+) {
+  const latestMonth = months[months.length - 1] ?? '';
+  const fallback = buildPresetSelection(
+    'this-month',
+    latestMonth,
+    months,
+    'en-US',
+    presetLabels,
+  );
+  if (!periodKey) return fallback;
+
+  const monthKey = periodKey.match(/^(?:month:)?(\d{4}-\d{2})$/)?.[1];
+  if (monthKey && months.includes(monthKey)) {
+    return buildPresetSelection(
+      'this-month',
+      monthKey,
+      months,
+      'en-US',
+      presetLabels,
+    );
+  }
+
+  const year = periodKey.match(/^year[:-](\d{4})$/)?.[1];
+  if (year) {
+    return buildYearSelection(year, months, presetLabels.lastYear, 'en-US');
+  }
+
+  const range = periodKey.match(/^range:(\d{4}-\d{2})\.\.(\d{4}-\d{2})$/);
+  if (range?.[1] && range[2]) {
+    return {
+      ...buildCustomSelection(range[1], range[2], months, 'en-US'),
+      id: periodKey,
+    };
+  }
+
+  const yearToDate = periodKey.match(/^range:ytd-(\d{4})$/)?.[1];
+  if (yearToDate) {
+    const yearMonths = months.filter(month => month.startsWith(`${yearToDate}-`));
+    const endMonth = yearMonths[yearMonths.length - 1] ?? latestMonth;
+    return {
+      ...buildPresetSelection(
+        'year-to-date',
+        endMonth,
+        months,
+        'en-US',
+        presetLabels,
+      ),
+      id: periodKey,
+    };
+  }
+
+  return fallback;
+}
+
+function categoryFromRoute(value: string | undefined): PfmCategoryName | null {
+  return PFM_CATEGORIES.find(category => category.name === value)?.name ?? null;
+}
+
+function AddTransaction({ onPress }: { onPress: () => void }) {
+  return (
+    <Pressable
+      testID="cz-pfm-add-transaction"
+      accessibilityRole="button"
+      accessibilityLabel="Add transaction"
+      onPress={onPress}
+      style={s.link}
+    >
+      <Text style={[t.body, t.strong, { color: tokens.accent }]}>
+        Add transaction
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function PfmScreen(host: CzechNativeScreenProps) {
   const copy = createEvoTranslations(host.language ?? 'en');
@@ -55,10 +147,13 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     onProfile,
     screenTopInset = 0,
   } = host;
-  const { products } = useMemo(
-    () => createHomeProducts(host.productCounts),
-    [host.productCounts],
+  const products = useMemo(
+    () => czechProducts(host.productCounts, host.bankingPresentation),
+    [host.productCounts, host.bankingPresentation],
   );
+  const categoryOverrides =
+    host.bankingPresentation?.transactionCategoryOverrides ??
+    EMPTY_CATEGORY_OVERRIDES;
   const scopes = useMemo<AnalyticsScope[]>(() => {
     const accounts = products.filter(p => p.type === 'current_account');
     return [
@@ -71,27 +166,46 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     ];
   }, [products]);
   const months = useMemo(
-    () => listSpendingMonthKeys('CZ', products),
-    [products],
+    () => listSpendingMonthKeys('CZ', products, categoryOverrides),
+    [categoryOverrides, products],
   );
   const direction =
     host.route.params?.direction === 'income' ||
     host.route.params?.direction === 'expense'
       ? host.route.params.direction
+      : host.route.params?.direction === 'in'
+      ? 'income'
+      : host.route.params?.direction === 'out'
+      ? 'expense'
       : undefined;
+  const initialCategory = categoryFromRoute(host.route.params?.category);
+  const externalDetail = host.route.params?.externalDetail === 'true';
   const [state, dispatch] = useReducer(
     evoAnalyticsReducer,
-    createEvoAnalyticsState(
-      host.route.params?.scopeId,
-      direction,
-      buildPresetSelection(
-        'this-month',
-        months[months.length - 1] ?? '',
-        months,
-        'en-US',
-        presetLabels,
-      ),
-    ),
+    undefined,
+    () => {
+      const initial = createEvoAnalyticsState(
+        host.route.params?.scopeId,
+        direction,
+        periodFromRoute(
+          host.route.params?.periodKey,
+          months,
+          presetLabels,
+        ),
+      );
+      if (initialCategory) {
+        initial.view = 'breakdown';
+        initial.analysisDirection = direction ?? 'expense';
+        initial.openBreakdownRow = {
+          key: initialCategory,
+          label: getEvoAnalyticsCategoryDisplayLabel(initialCategory),
+          total: 0,
+          transactionCount: 0,
+          category: initialCategory,
+        };
+      }
+      return initial;
+    },
   );
   const scope = scopes.find(s => s.id === state.selectedScopeId) ?? scopes[0];
   useEffect(() => {
@@ -114,10 +228,10 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
           year: state.period.monthKeys[0]?.split('-')[0] ?? '',
           kind: state.period.kind === 'month' ? 'month' : 'year',
         },
-        {},
+        categoryOverrides,
         { includeOwnTransfers: state.includeOwnTransfers },
       ),
-    [scope.products, state.period, state.includeOwnTransfers],
+    [categoryOverrides, scope.products, state.period, state.includeOwnTransfers],
   );
   const view = selectEvoAnalyticsView(state, summary, products, scope);
   const currency = summary.currency as Currency;
@@ -126,7 +240,8 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     scroll.current?.scrollTo({ y: 0, animated: false });
   }, [state.view, state.analysisDirection, state.openBreakdownRow?.key]);
   const back = () => {
-    if (state.view === 'breakdown') dispatch({ type: 'close-breakdown' });
+    if (state.view === 'breakdown' && externalDetail) onBack();
+    else if (state.view === 'breakdown') dispatch({ type: 'close-breakdown' });
     else if (state.view === 'analysis') dispatch({ type: 'back-overview' });
     else onBack();
   };
@@ -138,13 +253,18 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
       else if (state.scopeSheetOpen)
         dispatch({ type: 'set-field', field: 'scopeSheetOpen', value: false });
       else if (state.view !== 'overview') {
-        if (state.view === 'breakdown') dispatch({ type: 'close-breakdown' });
+        if (state.view === 'breakdown' && externalDetail) onBack();
+        else if (state.view === 'breakdown') dispatch({ type: 'close-breakdown' });
         else dispatch({ type: 'back-overview' });
       } else return false;
       return true;
     });
     return () => listener.remove();
-  }, [host.isActive, state.view, state.periodSheetOpen, state.scopeSheetOpen]);
+  }, [externalDetail, host.isActive, onBack, state.view, state.periodSheetOpen, state.scopeSheetOpen]);
+  const selectPeriod = (period: SpendingPeriodSelection) => {
+    dispatch({ type: 'select-period', period });
+    host.onAnalyticsPeriodChange?.(period.id);
+  };
   const step = (delta: -1 | 1) => {
     const period = stepSelection(
       state.period,
@@ -153,7 +273,35 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
       'en-US',
       presetLabels.lastYear,
     );
-    if (period) dispatch({ type: 'select-period', period });
+    if (period) selectPeriod(period);
+  };
+  const addTransaction = () => {
+    if (host.onAddTransaction) host.onAddTransaction();
+    else onNavigate({ screen: 'pfm', params: { intent: 'add-transaction' } });
+  };
+  const openTransaction = (transaction: SpendingAnalyticsTransaction) => {
+    const product = products.find(item => item.id === transaction.sourceProductId);
+    if (host.onTransactionSelected && product) {
+      const source =
+        product.type === 'credit_card' || product.type === 'debit_card'
+          ? 'card'
+          : 'account';
+      host.onTransactionSelected({
+        transaction,
+        productId: product.id,
+        source,
+      });
+      return;
+    }
+    onNavigate({
+      screen: 'transaction',
+      params: {
+        productId: transaction.sourceProductId,
+        accountId: transaction.sourceProductId,
+        transactionId: transaction.id,
+        analyticsTransaction: JSON.stringify(transaction),
+      },
+    });
   };
   const openBreakdown = (
     row?: ExpenseBreakdownRow,
@@ -493,6 +641,7 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                   See all transactions
                 </Text>
               </Pressable>
+              <AddTransaction onPress={addTransaction} />
             </View>
           </>
         ) : (
@@ -546,21 +695,14 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
               </ScrollView>
             ) : null}
             <View style={s.rows}>
+              <AddTransaction onPress={addTransaction} />
               {transactions.map(transaction => (
                 <Pressable
                   key={`${transaction.sourceProductId}:${transaction.id}`}
                   testID="cz-pfm-transaction"
                   accessibilityRole="button"
                   accessibilityLabel={`Open ${transaction.label} transaction`}
-                  onPress={() =>
-                    onNavigate({
-                      screen: 'transaction',
-                      params: {
-                        productId: transaction.sourceProductId,
-                        transactionId: transaction.id,
-                      },
-                    })
-                  }
+                  onPress={() => openTransaction(transaction)}
                   style={s.transaction}
                 >
                   <CategoryMark category={transaction.pfmCategory} />
@@ -612,7 +754,7 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
           language={host.language}
           months={months}
           current={state.period}
-          onPick={period => dispatch({ type: 'select-period', period })}
+          onPick={selectPeriod}
           onClose={() =>
             dispatch({
               type: 'set-field',

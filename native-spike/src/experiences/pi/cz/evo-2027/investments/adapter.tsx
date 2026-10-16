@@ -31,8 +31,10 @@ function InvestmentsAdapterScreen(props: CzechNativeScreenProps) {
         snapshot={snapshot}
         onBack={props.onBack}
         amountsHidden={props.amountsHidden}
+        classicHost={props.route.screen === 'robo' ? undefined : props}
         goals={goals}
         persistenceMessage={getCzRoboPersistenceError()}
+        onRoboResumeStateChange={props.onRoboResumeStateChange}
         initialSecurityId={
           props.route.screen === 'investment-detail'
             ? props.route.params?.securityId

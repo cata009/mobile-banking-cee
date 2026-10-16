@@ -31,6 +31,8 @@ async function fixture(run) {
     await put('native-spike/assets/fonts/UniCredit-regular.ttf', Buffer.from([0, 1, 2, 3]))
     await put('native-spike/assets/fonts/UniCredit-bold.ttf', Buffer.from([0, 1, 2, 4]))
     await put('src/app/components/BottomSheet.tsx')
+    await put('src/app/components/contracts/bottomSheet.ts')
+    await put('src/app/components/contracts/bottomSheetWeb.ts')
     await put('src/app/components/ui/ScrollableRegion.tsx')
     await put('src/app/components/ui/keyboardActivation.ts')
     const capture = () =>
@@ -181,4 +183,51 @@ test('domain-specific search UI retains its mapped area while header Search belo
     const manifest = await capture()
     assert.deepEqual(manifest.references.find((entry) => entry.path === investmentSearch).areas, ['investments'])
     assert.deepEqual(manifest.references.find((entry) => entry.path === headerSearch).areas, ['home'])
+  }))
+
+const bottomSheetContracts = [
+  'src/app/components/contracts/bottomSheet.ts',
+  'src/app/components/contracts/bottomSheetWeb.ts',
+]
+
+test('reviewed BottomSheet extraction freezes both canonical contracts across all reference areas', async () =>
+  fixture(async ({ capture }) => {
+    const manifest = await capture()
+    for (const contract of bottomSheetContracts) {
+      const reference = manifest.references.find((entry) => entry.path === contract)
+      assert.ok(reference, `Missing extracted BottomSheet authority: ${contract}`)
+      assert.equal(reference.kind, 'ui')
+      assert.equal(reference.hashMode, 'lf-text')
+      assert.deepEqual(reference.areas, referenceAreas)
+    }
+    assert.equal(manifest.visualAccepted, false)
+  }))
+
+test('BottomSheet geometry and Web class contract drift fail closed even when its component is unchanged', async () =>
+  fixture(async ({ root, put, capture }) => {
+    const manifest = await capture()
+    await put(bottomSheetContracts[0], 'changed close delay and geometry\n')
+    await put(bottomSheetContracts[1], 'changed panel CSS and sizing\n')
+    const result = await checkReference({ root, manifest })
+    assert.equal(result.ok, false)
+    assert.deepEqual(
+      result.stale.map((entry) => entry.path),
+      bottomSheetContracts,
+    )
+    for (const stale of result.stale) assert.deepEqual(stale.areas, referenceAreas)
+  }))
+
+test('manifests that omit the extracted BottomSheet authorities cannot pass the shared selection guard', async () =>
+  fixture(async ({ root, capture }) => {
+    const valid = await capture()
+    const manifest = {
+      ...valid,
+      references: valid.references.filter((entry) => !bottomSheetContracts.includes(entry.path)),
+    }
+    const result = await checkReference({ root, manifest })
+    assert.equal(result.ok, false)
+    assert.deepEqual(
+      result.added.map((entry) => entry.path),
+      bottomSheetContracts,
+    )
   }))

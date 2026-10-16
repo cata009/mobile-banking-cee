@@ -1,6 +1,6 @@
 import { createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics'
 import { isInternalTransferCategory } from '@/data/pfmCategories'
-import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import {
   buildCzNavigateAction,
   formatCzChatMoney,

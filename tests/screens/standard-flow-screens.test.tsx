@@ -2,17 +2,24 @@
 
 import "@testing-library/jest-dom/vitest";
 import type { ReactNode } from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import StandardSignScreen from "@/app/components/flow/StandardSignScreen";
 import StandardSuccessScreen from "@/app/components/flow/StandardSuccessScreen";
 import { LanguageProvider } from "@/app/contexts/LanguageContext";
 import { PaymentSignScreen, PaymentSuccessScreen } from "@/app/screens/payments/DomesticPaymentFlowScreens";
 import { DemoProvider } from "@/app/state/demoStore";
+import { createEmptyDomesticPaymentDraft } from "@/data/paymentFlow";
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from "../helpers/nativeWebRenderer";
+
+vi.mock("@/app/components/demo/nativeDemoLoader", async () => {
+  const { loadNativeDemoModuleForWebTest } = await import("../helpers/nativeWebRenderer");
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest };
+});
 
 function PaymentProviders({ children }: { children: ReactNode }) {
   return (
-    <DemoProvider initialState={{ country: "RO" }}>
+    <DemoProvider initialState={{ country: "CZ", product: "PI", release: "release-future-evo-2027" }}>
       <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
     </DemoProvider>
   );
@@ -21,6 +28,7 @@ function PaymentProviders({ children }: { children: ReactNode }) {
 afterEach(() => {
   vi.useRealTimers();
   cleanup();
+  resetNativeWebRendererDiagnostics();
 });
 
 describe("standard flow screens", () => {
@@ -74,27 +82,39 @@ describe("standard flow screens", () => {
 });
 
 describe("payment wrappers", () => {
-  it("preserves the existing payment sign copy", () => {
-    render(
+  it("preserves the Native payment sign copy", async () => {
+    const view = render(
       <PaymentProviders>
-        <PaymentSignScreen onBack={() => undefined} onSign={() => undefined} />
+        <PaymentSignScreen
+          paymentFlow={{ draft: createEmptyDomesticPaymentDraft("CZ"), step: "sign" }}
+          onBack={() => undefined}
+          onSign={() => undefined}
+        />
       </PaymentProviders>,
     );
 
-    expect(screen.getAllByRole("heading", { name: "Sign" })).not.toHaveLength(0);
+    await asyncNativeReady(view.container);
+    expect(screen.getByRole("button", { name: "Sign" })).toBeInTheDocument();
     expect(screen.getByText("Enter pin code")).toBeInTheDocument();
     expect(screen.getByText("Be sure that nobody is watching you")).toBeInTheDocument();
   });
 
-  it("preserves the existing payment success copy", () => {
-    render(
+  it("shows the Native payment receipt and completes the flow", async () => {
+    const onDone = vi.fn();
+    const view = render(
       <PaymentProviders>
-        <PaymentSuccessScreen onDone={() => undefined} />
+        <PaymentSuccessScreen
+          paymentFlow={{ draft: createEmptyDomesticPaymentDraft("CZ"), step: "success" }}
+          onDone={onDone}
+        />
       </PaymentProviders>,
     );
 
-    expect(screen.getByRole("heading", { name: "Successful payment" })).toBeInTheDocument();
-    expect(screen.getByText("Your payment has been successfully sent to the bank")).toBeInTheDocument();
+    await asyncNativeReady(view.container);
+    expect(screen.getAllByText("Successful payment", { exact: true })).not.toHaveLength(0);
+    expect(screen.getByText("Your demo payment has been completed.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ok, got it" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ok, got it" }));
+    await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
   });
 });

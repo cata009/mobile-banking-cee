@@ -4,6 +4,7 @@
  * Extracted verbatim from DesignSystemPage.tsx.
  */
 import { useState } from "react";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import { COUNTRIES, COUNTRY_META } from "@/app/registry/demoConfig";
 import { getProductsForCountry } from "@/app/config/productConfig";
 import { type MoreCardType } from "@/app/config/moreCardsConfig";
@@ -32,15 +33,6 @@ import AccountTransactionRow from "@/app/components/accounts/AccountTransactionR
 import AccountTransactionMonthDivider from "@/app/components/accounts/AccountTransactionMonthDivider";
 import AccountSearchBar from "@/app/components/accounts/AccountSearchBar";
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
-import { ContactsCard } from "@/app/screens/more/cards/ContactsCard";
-import { DocumentsCard } from "@/app/screens/more/cards/DocumentsCard";
-import { SettingsCard } from "@/app/screens/more/cards/SettingsCard";
-import { GdprConsentCard } from "@/app/screens/more/cards/GdprConsentCard";
-import { ThirdPartyConsentCard } from "@/app/screens/more/cards/ThirdPartyConsentCard";
-import { DigitalActivitiesCard } from "@/app/screens/more/cards/DigitalActivitiesCard";
-import { MyRequestsCard } from "@/app/screens/more/cards/MyRequestsCard";
-import { TutorialCard } from "@/app/screens/more/cards/TutorialCard";
-import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import avatarPhotoSample from "@/assets/kids/woman-profile.png";
 import { getAccountIdentity } from "@/data/accountDetails";
 import { noop } from "../inspect/MeasurementSurface";
@@ -175,26 +167,22 @@ export function ProductCardListTotalRowEvolutionSpecimen() {
 }
 
 function MoreCardPreview({ type }: { type: MoreCardType }) {
-  switch (type) {
-    case "contacts":
-      return <ContactsCard onClick={noop} />;
-    case "documents":
-      return <DocumentsCard onClick={noop} badgeCount={getDocumentsCountForCountry("RO")} />;
-    case "settings":
-      return <SettingsCard onClick={noop} />;
-    case "gdpr-consent":
-      return <GdprConsentCard onClick={noop} />;
-    case "third-party-consent":
-      return <ThirdPartyConsentCard onClick={noop} />;
-    case "digital-activities":
-      return <DigitalActivitiesCard onClick={noop} />;
-    case "my-requests":
-      return <MyRequestsCard onClick={noop} />;
-    case "tutorial":
-      return <TutorialCard onClick={noop} />;
-    default:
-      return null;
-  }
+  return (
+    <NativeScreenPreview
+      route={{ screen: "account" }}
+      snapshot={{
+        screenTopInset: 0,
+        componentPreview: {
+          kind: "more-card",
+          card: type,
+          title: moreCardLabels[type],
+          width: 164,
+          badgeCount: type === "documents" ? getDocumentsCountForCountry("RO") : undefined,
+        },
+      }}
+      onNavigate={() => true}
+    />
+  );
 }
 
 export function TextFieldSpecimens({ withChevron }: { withChevron: boolean }) {
@@ -1003,13 +991,20 @@ export function ContactsNavigationCardVariantSpecimen() {
       />
       <div className="w-[375px]">
         <SectionHeadingDivider title="BANK CONTACTS" />
-        <ContactsNavigationCard
-          icon={icon}
-          title={icon.toUpperCase()}
-          value={icon === "phone" ? "+420 221 210 031" : undefined}
-          subtitle={icon === "time" ? "Mon - Sun | 07:00 - 22:00" : undefined}
-          hasChevron={icon === "prime"}
-          onClick={noop}
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: {
+              kind: "contacts-navigation-card",
+              icon,
+              title: icon.toUpperCase(),
+              value: icon === "phone" ? "+420 221 210 031" : undefined,
+              subtitle: icon === "time" ? "Mon - Sun | 07:00 - 22:00" : undefined,
+              hasChevron: icon === "prime",
+            },
+          }}
+          onNavigate={() => true}
         />
       </div>
     </div>

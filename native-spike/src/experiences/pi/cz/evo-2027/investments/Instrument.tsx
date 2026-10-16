@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -65,10 +66,16 @@ export function InvestmentInstrument({
   hideBuy?: boolean;
   transactions?: readonly InvestmentHistoryTransaction[];
 }) {
+  const market = useInvestmentMarket();
   const [period, setPeriod] = useState<InvestmentPeriodId>('3y'),
     [kidOpen, setKidOpen] = useState(false);
   const money = (value: number) =>
-    formatInvestmentMoney(value, 'CZ', security.instrumentCurrency, hidden);
+    formatInvestmentMoney(
+      value,
+      market.country,
+      security.instrumentCurrency,
+      hidden,
+    );
   const hasPosition = security.owned && security.quantity > 0;
   const canBuy = !hideBuy && security.status === 'active',
     canSell = hasPosition && security.status === 'active' && !!onSell;

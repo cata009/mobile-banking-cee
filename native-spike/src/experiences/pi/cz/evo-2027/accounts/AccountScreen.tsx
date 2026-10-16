@@ -1,9 +1,11 @@
+import {
+  BankingCopyToast,
+  useBankingCopy,
+} from '../../../current/banking/CopyToast';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import {
-  ACCOUNT_OPTION_ITEMS,
-  type AccountTransaction,
-} from '@/data/accountDetails';
+import { type AccountTransaction } from '@/data/accountDetails';
+import type { DebitCard } from '@/data/products';
 import {
   EMPTY_EVO_TRANSACTION_FILTERS,
   filterEvoTransactions,
@@ -11,7 +13,7 @@ import {
 } from '@/features/accounts-payments/evoTransactionFilters';
 import type { CzechNativeScreenProps } from '../contracts';
 import { accountProducts, czechProducts, accountMovements } from './source';
-import { tokens, s, Page, Copy, Row, IconButton, Glyph } from './Primitives';
+import { tokens, s, Page, Copy, IconButton, Glyph } from './Primitives';
 import { MovementDetail, MovementRows } from './Movements';
 import SavingsAddMoney from '../payments/SavingsAddMoney';
 import AccountInfo from './AccountInfo';
@@ -20,11 +22,12 @@ import BalanceCard from './BalanceCard';
 import Indicator from './Indicator';
 import LedgerSearch from './LedgerSearch';
 import Filters from './Filters';
-import { copyDemoText } from '../../../../../platform/nativeFiles';
 import {
   getBeneficiaryPaymentHistory,
   getFrequentBeneficiaries,
 } from '@/data/paymentsHub';
+import { AccountOptionsScreen } from '../../../current/banking/Accounts';
+import { czechBankingHost } from '../../../current/banking/czechHost';
 export default function AccountScreen(props: CzechNativeScreenProps) {
   const {
     route,
@@ -35,7 +38,7 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
     isActive,
     screenTopInset,
   } = props;
-  const products = czechProducts(productCounts),
+  const products = czechProducts(productCounts, props.bankingPresentation),
     accounts = accountProducts(products);
   const requested = route.params?.productId ?? route.params?.accountId;
   const [id, setId] = useState(requested ?? accounts[0]?.id);
@@ -56,7 +59,7 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
   const [transactionId, setTransactionId] = useState(
       route.params?.transactionId,
     ),
-    [notice, setNotice] = useState('');
+    { copy: copyBanking, toast } = useBankingCopy();
   useEffect(() => {
     if (requested) setId(requested);
     setTransactionId(route.params?.transactionId);
@@ -70,8 +73,30 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
         : 'main',
     );
   }, [requested, route.screen, route.params?.transactionId]);
-  const product = accounts.find(p => p.id === id),
-    ledger = product ? accountMovements(product, products) : [];
+  const product = accounts.find(p => p.id === id);
+  const sourceRows =
+    product &&
+    props.bankingPresentation?.productId === product.id &&
+    props.bankingPresentation.rows !== undefined
+      ? props.bankingPresentation.rows
+      : undefined;
+  const nativeLedger = sourceRows
+    ? sourceRows.map(row => row.transaction)
+    : product
+      ? accountMovements(product, products)
+      : [];
+  const ledger = nativeLedger.map(transaction => {
+    const override =
+      props.bankingPresentation?.transactionCategoryOverrides?.[transaction.id];
+    return override
+      ? {
+          ...transaction,
+          category: override.groupLabel,
+          pfmCategory: override.category,
+          pfmSubcategory: override.subcategory,
+        }
+      : transaction;
+  });
   const transactions = filterEvoTransactions({
     transactions: ledger,
     search: query,
@@ -89,10 +114,15 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
       ? getBeneficiaryPaymentHistory(beneficiary, 'CZ')
       : []
     : ledger;
-  const selected = detailLedger.find(tx => tx.id === transactionId);
+  const selected = props.transactionSelection && props.transactionSelection.productId === product?.id
+    ? props.transactionSelection.transaction
+    : detailLedger.find(tx => tx.id === transactionId);
   const openMovement = (tx: AccountTransaction) => {
-    setTransactionId(tx.id);
-    setView('movement');
+    if (props.onTransactionSelected && product) {
+      props.onTransactionSelected({ productId: product.id, source: 'account', transaction: tx });
+      return;
+    }
+    onNavigate({screen:'transaction',params:{productId:product!.id,accountId:product!.id,transactionId:tx.id}});
   };
   const closeSubview = () => {
     if (
@@ -116,19 +146,25 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
     ) : null;
   if (!product)
     return (
-      <Page title="Accounts" onBack={onBack} topInset={screenTopInset}>
-        <View style={s.alert}>
-          <Copy>Account not found</Copy>
-        </View>
-      </Page>
+      <View style={copyStyles.root}>
+        <Page title="Accounts" onBack={onBack} topInset={screenTopInset}>
+          <View style={s.alert}>
+            <Copy>Account not found</Copy>
+          </View>
+        </Page>
+        <BankingCopyToast toast={toast} font={tokens.strongFont} />
+      </View>
     );
   if (view === 'movement' && !selected)
     return (
-      <Page title="Transaction" onBack={closeSubview}>
-        <View style={s.alert}>
-          <Copy>Transaction not found</Copy>
-        </View>
-      </Page>
+      <View style={copyStyles.root}>
+        <Page title="Transaction" onBack={closeSubview}>
+          <View style={s.alert}>
+            <Copy>Transaction not found</Copy>
+          </View>
+        </Page>
+        <BankingCopyToast toast={toast} font={tokens.strongFont} />
+      </View>
     );
   return (
     <View style={s.page}>
@@ -145,9 +181,9 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
           topInset={screenTopInset}
           trailing={
             <IconButton
-              label={amountsHidden ? 'Show amounts' : 'Hide amounts'}
-              name={amountsHidden ? 'show' : 'hide'}
-              onPress={props.onAmountsToggle}
+              label="Help"
+              name="help-circle"
+              onPress={() => {}}
             />
           }
         >
@@ -163,30 +199,29 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
                 products={products}
                 hidden={amountsHidden}
                 onCopy={() => {
-                  copyDemoText(account.accountNumber).then(
-                    () => setNotice('Account number copied'),
-                    () => setNotice('Copy unavailable'),
-                  );
+                  copyBanking(account.accountNumber, 'Account number');
                 }}
               />
             )}
           />
-          <Indicator
-            ids={accounts.map(account => account.id)}
-            selectedId={product.id}
-            onSelect={setId}
-          />
+          <View style={parityStyles.item0}>
+            <Indicator
+              ids={accounts.map(account => account.id)}
+              selectedId={product.id}
+              onSelect={setId}
+            />
+          </View>
           <View style={a.actions}>
             {[
               {
                 label: 'Details',
                 icon: 'account-details',
-                run: () => setView('info'),
+                run: () => onNavigate({screen:'account-info',params:{productId:product.id}}),
               },
               {
                 label: 'Options',
                 icon: 'account-options',
-                run: () => setView('options'),
+                run: () => onNavigate({screen:'account-options',params:{productId:product.id}}),
                 hidden:
                   product.type === 'term_deposit' ||
                   product.type === 'loan' ||
@@ -213,9 +248,17 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
                 run: () => {},
                 disabled: true,
               },
-            ]
-              .filter(action => !action.hidden)
-              .map(action => (
+            ].map(action =>
+              action.hidden ? (
+                <View
+                  key={action.label}
+                  testID={`account-action-slot-${
+                    action.icon === 'account-options' ? 'options' : 'add-money'
+                  }`}
+                  style={[a.action, parityStyles.item1]}
+                  pointerEvents="none"
+                />
+              ) : (
                 <Pressable
                   key={action.label}
                   accessibilityRole="button"
@@ -234,7 +277,8 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
                     {action.label}
                   </Copy>
                 </Pressable>
-              ))}
+              ),
+            )}
           </View>
           {product.type !== 'term_deposit' && (
             <View style={extractedStyles.item4}>
@@ -258,14 +302,11 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
               )}
             </View>
           )}
-          {Boolean(notice) && (
-            <View style={s.inset}>
-              <Copy>{notice}</Copy>
-            </View>
-          )}
+          {null}
           {product.type !== 'term_deposit' && (
             <MovementRows
               transactions={transactions}
+              presentationRows={sourceRows}
               hidden={amountsHidden}
               currency={product.currency}
               monthlyReports={
@@ -297,29 +338,29 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
       </View>
       {view === 'info' && renderInfo()}
       {view === 'options' && (
-        <Page
-          title="Account options"
-          onBack={closeSubview}
-          active={isActive}
-          topInset={screenTopInset}
-        >
-          <View style={s.panel}>
-            {ACCOUNT_OPTION_ITEMS.map(option => (
-              <Row
-                key={option.id}
-                title={option.title}
-                subtitle={option.description}
-                disabled
-                onPress={() => {}}
-              />
-            ))}
-          </View>
-        </Page>
+        <AccountOptionsScreen
+          {...czechBankingHost(
+            {
+              ...props,
+              onBack: closeSubview,
+            },
+            {
+              screen: 'account-options',
+              params: {
+                productId: product.id,
+              },
+            },
+          )}
+        />
       )}
       {view === 'movement' && selected && (
         <MovementDetail
           transaction={selected}
           product={product}
+          onTransactionCategoryChange={props.onTransactionCategoryChange}
+          cardUsed={product.type === 'current_account' && selected.source === 'card'
+            ? products.find((candidate): candidate is DebitCard => candidate.type === 'debit_card' && candidate.linkedAccountId === product.id)
+            : undefined}
           hidden={amountsHidden}
           active={isActive}
           topInset={screenTopInset}
@@ -362,6 +403,9 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
           }}
         />
       )}
+      {view === 'main' && (
+        <BankingCopyToast toast={toast} font={tokens.strongFont} />
+      )}
     </View>
   );
 }
@@ -401,6 +445,10 @@ const ACCOUNT_GEOMETRY: CarouselGeometry = {
   gap: 16,
   gutter: 16,
   inactiveScale: 165 / 197,
+  inactiveOpacity: 0.86 * 0.95,
+  inactiveFilter: 'saturate(0.96) brightness(0.99)',
+  paddingTop: 16,
+  paddingBottom: 34,
 };
 const extractedStyles = StyleSheet.create({
   item0: {
@@ -428,5 +476,18 @@ const extractedStyles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 16,
     paddingBottom: 16,
+  },
+});
+const parityStyles = StyleSheet.create({
+  item0: {
+    marginTop: -16,
+  },
+  item1: {
+    opacity: 0,
+  },
+});
+const copyStyles = StyleSheet.create({
+  root: {
+    flex: 1,
   },
 });

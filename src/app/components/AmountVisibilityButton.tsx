@@ -1,4 +1,5 @@
 import { AppIcon } from "@/app/components/icons";
+import { resolveAmountVisibility } from '@/app/components/contracts/amountVisibility';
 
 interface AmountVisibilityButtonProps {
   hidden: boolean;
@@ -6,18 +7,19 @@ interface AmountVisibilityButtonProps {
 }
 
 export default function AmountVisibilityButton({ hidden, onToggle }: AmountVisibilityButtonProps) {
+  const state = resolveAmountVisibility(hidden);
   return (
     <button
       type="button"
       className="flex h-[32px] w-[32px] items-center justify-center cursor-pointer hover:opacity-70"
       onClick={onToggle}
       aria-pressed={hidden}
-      aria-label={hidden ? "Show amounts" : "Hide amounts"}
+      aria-label={state.label}
     >
       {hidden ? (
-        <AppIcon name="amount-show" color="var(--uc-icon)" />
+        <AppIcon name={state.icon} color="var(--uc-icon)" />
       ) : (
-        <AppIcon name="amount-hide" color="var(--uc-icon)" />
+        <AppIcon name={state.icon} color="var(--uc-icon)" />
       )}
     </button>
   );

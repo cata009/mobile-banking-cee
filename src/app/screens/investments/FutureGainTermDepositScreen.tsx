@@ -1,3 +1,4 @@
+import { DEPOSIT_CURRENCIES, TENOR_OPTIONS, EXTERNAL_LIMITS, TERM_DEPOSIT_DISCLAIMER, SIMULATOR_STEPS, parseFutureGainAmount as parseAmount, getFutureGainDepositSuggestions as getQuickAmounts, calculateFutureGainDepositQuote, type DepositCurrency, type FundingSource, type TenorMonths } from '@/features/investments/future-gain/smartInvestment';
 import { useState } from "react";
 import { BottomSheet } from "@/app/components/BottomSheet";
 import AutoGrowTextArea from "@/app/components/AutoGrowTextArea";
@@ -19,67 +20,9 @@ import currentBankIcon from "@/assets/investments/term-deposit/current-bank.svg"
 import externalBankIcon from "@/assets/investments/term-deposit/external-bank.svg";
 import requestContactIcon from "@/assets/investments/term-deposit/request-contact-icon.svg";
 
-type DepositCurrency = "EUR" | "RSD" | "USD";
-type FundingSource = "current" | "external";
-type TenorMonths = 3 | 6 | 12;
-type SelectionType = "currency" | null;
-type InfoType = "simulator" | "opportunity" | "nks" | "eks" | null;
-type RequestStep = "calculator" | "contact" | "callback" | "success";
-
-const DEPOSIT_CURRENCIES: readonly DepositCurrency[] = ["EUR", "RSD", "USD"];
-const TENOR_OPTIONS: readonly TenorMonths[] = [12, 6, 3];
-const EXTERNAL_LIMITS: Record<DepositCurrency, number> = {
-  EUR: 100_000,
-  RSD: 1_000_000,
-  USD: 100_000,
-};
-
-// Illustrative RS average of funds left uninvested after monthly expenses; this is not the customer's current account balance.
-const AVERAGE_UNINVESTED_FUNDS_RSD = 1_500_000;
-
-const RATES: Record<FundingSource, Record<DepositCurrency, { nominal: number; effective: number; tax: number }>> = {
-  current: {
-    EUR: { nominal: 2.3, effective: 1.98, tax: 15 },
-    RSD: { nominal: 3.6, effective: 3.65, tax: 0 },
-    USD: { nominal: 2.3, effective: 1.98, tax: 15 },
-  },
-  external: {
-    EUR: { nominal: 3.2, effective: 2.72, tax: 15 },
-    RSD: { nominal: 4.5, effective: 4.5, tax: 0 },
-    USD: { nominal: 4, effective: 4, tax: 15 },
-  },
-};
-
-const TERM_DEPOSIT_DISCLAIMER =
-  "The information presented is for informational purposes and does not take into account your individual financial needs, circumstances, or investment experience. The displayed interest rates and expected returns are indicative in nature and do not constitute a binding offer. The final terms and conditions of a term deposit, as well as the applicable interest rates, shall be defined in the agreement concluded between the Bank and the client. The Bank reserves the right to amend the terms and conditions in accordance with its business policy and prevailing market conditions. The Bank participates in the mandatory deposit insurance scheme established in the Republic of Serbia.";
-
-const SIMULATOR_STEPS = [
-  {
-    title: "CHOOSE YOUR FUNDS",
-    description: "Select whether you want to use money from your UniCredit account or funds from another bank.",
-  },
-  {
-    title: "ADJUST YOUR DEPOSIT",
-    description: "Change the amount, currency and term to compare different scenarios.",
-  },
-  {
-    title: "SEE YOUR ESTIMATE",
-    description: "The calculation updates automatically to show the applicable interest rate and estimated return.",
-  },
-  {
-    title: "REQUEST AN OFFER",
-    description: "If you find an option that suits you, you can submit a request to the bank. The simulation itself does not open a deposit.",
-  },
-] as const;
-
-function parseAmount(value: string): number {
-  const normalized = value.trim().replace(/\s/g, "");
-  const decimalNormalized = normalized.includes(",")
-    ? normalized.replace(/\./g, "").replace(",", ".")
-    : normalized;
-  const amount = Number(decimalNormalized);
-  return Number.isFinite(amount) ? Math.max(0, amount) : 0;
-}
+type SelectionType = 'currency' | null;
+type InfoType = 'simulator' | 'opportunity' | 'nks' | 'eks' | null;
+type RequestStep = 'calculator' | 'contact' | 'callback' | 'success';
 
 function formatInputAmount(amount: number, country: ReturnType<typeof useDemo>["country"]): string {
   return formatMoneyNumber(roundMoney(amount), country);
@@ -137,16 +80,6 @@ function OpportunityAmount({
 
 function formatSuggestionAmount(amount: number, country: ReturnType<typeof useDemo>["country"]): string {
   return formatMoneyNumber(amount, country).replace(/[,.]00$/, "");
-}
-
-function getQuickAmounts(maximum: number, currency: DepositCurrency, source: FundingSource): number[] {
-  const ratios = source === "current" ? [0.25, 0.5, 0.75, 1] : [0.2, 0.5, 0.7, 1];
-  const roundingStep = currency === "RSD" ? 1_000 : 100;
-  const suggestions = ratios.map((ratio) => {
-    if (ratio === 1) return roundMoney(maximum);
-    return Math.min(maximum, Math.floor((maximum * ratio) / roundingStep) * roundingStep);
-  });
-  return [...new Set(suggestions.filter((amount) => amount > 0))];
 }
 
 function DepositSourceCard({
@@ -536,7 +469,6 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   const totalAvailable = calculateTotalAvailableAmount();
   const [currency, setCurrency] = useState<DepositCurrency>("EUR");
   const availableBalance = roundMoney(convertCurrency(totalAvailable, sourceCurrency, currency));
-  const averageUninvestedFunds = roundMoney(convertCurrency(AVERAGE_UNINVESTED_FUNDS_RSD, "RSD", currency));
   const initialAmount = Math.min(5_000, availableBalance);
   const [fundingSource, setFundingSource] = useState<FundingSource>("current");
   const [amountInput, setAmountInput] = useState(() => formatInputAmount(initialAmount, country));
@@ -550,19 +482,10 @@ export default function FutureGainTermDepositScreen({ onBack }: { onBack: () => 
   const externalMaximum = EXTERNAL_LIMITS[currency];
   const suggestionBaseAmount = fundingSource === "current" ? availableBalance : externalMaximum;
   const amount = parseAmount(amountInput);
-  const rates = RATES[fundingSource][currency];
-  const opportunityRates = RATES.current[currency];
-  const isAmountValid = amount > 0;
+  const { rates, isAmountValid, grossMaturity, tax, netMaturity, averageUninvestedFunds, potentialYield } =
+    calculateFutureGainDepositQuote({ amount, currency, fundingSource, tenor });
   const amountError = amount <= 0 ? "Enter an amount to continue." : "";
   const quickAmounts = getQuickAmounts(suggestionBaseAmount, currency, fundingSource);
-  const annualizedDayFactor = fundingSource === "external" && currency === "RSD" ? 1 : 365 / 360;
-  const grossInterest = isAmountValid
-    ? roundMoney(amount * (rates.nominal / 100) * (tenor / 12) * annualizedDayFactor)
-    : 0;
-  const grossMaturity = roundMoney(amount + grossInterest);
-  const tax = roundMoney(grossInterest * (rates.tax / 100));
-  const netMaturity = roundMoney(grossMaturity - tax);
-  const potentialYield = roundMoney(averageUninvestedFunds * (opportunityRates.nominal / 100) * (365 / 360));
   const opportunityAmountFontSize = getOpportunityAmountFontSize([averageUninvestedFunds, potentialYield], country);
 
   const handleCurrencyConfirm = () => {

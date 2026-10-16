@@ -2,6 +2,7 @@ import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
 import { TextInput } from 'react-native';
+import { ActionButton } from '../src/universal/ActionButton';
 import { CzRoboFlow } from '../src/experiences/pi/cz/evo-2027/robo';
 import { DEFAULT_ROBO_DEMO_CLOCK } from '@/features/investments/robo/demoClock';
 import type { RoboExistingGoal } from '@/features/investments/robo/types';
@@ -30,6 +31,38 @@ function input(
 }
 
 describe('CZ Evo native Robo', () => {
+  it('keeps the Source Edit data text affordance at Source sizing without adding an action', () => {
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CzRoboFlow onBack={jest.fn()} onExit={jest.fn()} />,
+      );
+    });
+
+    press(tree, 'Create Goal');
+    const editData = tree.root
+      .findAllByType(ActionButton)
+      .find(button => button.props.label === 'Edit data');
+    expect(editData).toBeDefined();
+    expect(editData!.props.secondary).toBe(true);
+    expect(editData!.props.containerStyle).toEqual(
+      expect.objectContaining({
+        minHeight: 44,
+        width: '100%',
+        borderRadius: 4,
+      }),
+    );
+    expect(editData!.props.labelStyle).toEqual(
+      expect.objectContaining({ fontSize: 16, lineHeight: 22 }),
+    );
+
+    press(tree, 'Edit data');
+    expect(
+      tree.root.findByProps({ testID: 'cz-personal-data-confirmation' }),
+    ).toBeDefined();
+    act(() => tree.unmount());
+  });
+
   it('creates a zero-valued goal through consent/signing and submits a pending top-up without inventing holdings', async () => {
     jest.useFakeTimers();
     const published: RoboExistingGoal[] = [];

@@ -6,6 +6,7 @@ import { renderInvestmentsBulkApprovalPreview } from '@/flows/shared/investments
 import { renderRoundUpPreview } from '@/flows/ro/round-up/preview'
 import { renderCardPinPreview } from '@/flows/ro/card-pin/preview'
 import { renderEthocaPreview } from '@/flows/shared/ethoca/preview'
+import { renderRsDisposableCardsPreview } from '@/flows/rs/disposable-cards/preview'
 
 const PREVIEW_RENDERERS = {
   'home-entry': () => renderRoundUpPreview('home-entry'),
@@ -96,6 +97,14 @@ const PREVIEW_RENDERERS = {
   'rs-pi-payment-success': () => renderRsPropertyInsurancePreview('rs-pi-payment-success'),
   'rs-pi-payment-cancelled': () => renderRsPropertyInsurancePreview('rs-pi-payment-cancelled'),
   'rs-pi-abandon-confirm': () => renderRsPropertyInsurancePreview('rs-pi-abandon-confirm'),
+  'rs-disposable-cards-screen': () => renderRsDisposableCardsPreview('rs-disposable-cards-screen'),
+  'rs-disposable-cards-details-sheet': () => renderRsDisposableCardsPreview('rs-disposable-cards-details-sheet'),
+  'rs-disposable-cards-face-id-normal': () => renderRsDisposableCardsPreview('rs-disposable-cards-face-id-normal'),
+  'rs-disposable-cards-face-id-disposable': () =>
+    renderRsDisposableCardsPreview('rs-disposable-cards-face-id-disposable'),
+  'rs-disposable-cards-normal-details': () => renderRsDisposableCardsPreview('rs-disposable-cards-normal-details'),
+  'rs-disposable-cards-disposable-details': () =>
+    renderRsDisposableCardsPreview('rs-disposable-cards-disposable-details'),
   'investments-bulk-prototype': () => renderInvestmentsBulkApprovalPreview('investments-bulk-prototype'),
   'investments-bulk-selection': () => renderInvestmentsBulkApprovalPreview('investments-bulk-selection'),
   'investments-bulk-review-first': () => renderInvestmentsBulkApprovalPreview('investments-bulk-review-first'),

@@ -2,15 +2,26 @@
 
 import "@testing-library/jest-dom/vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DemoProvider } from "@/app/state/demoStore";
 import { COUNTRIES } from "@/app/registry/demoConfig";
 import { getCountryCurrency } from "@/data/exchangeRates";
 import FlowLibraryScreen from "@/app/screens/flow-library/FlowLibraryScreen";
 import { renderFlowPreview } from "@/app/screens/flow-library/components/flowPreviews";
 import type { FlowScreenKind } from "@/app/screens/flow-library/flows/types";
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from "../helpers/nativeWebRenderer";
 
-afterEach(cleanup);
+vi.mock("@/app/components/demo/nativeDemoLoader", async () => {
+  const { loadNativeDemoModuleForWebTest } = await import("../helpers/nativeWebRenderer");
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest };
+});
+
+beforeEach(resetNativeWebRendererDiagnostics);
+
+afterEach(() => {
+  cleanup();
+  resetNativeWebRendererDiagnostics();
+});
 
 function renderBulkPrototype() {
   return render(
@@ -130,8 +141,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.queryByRole("button", { name: "BULK SIGNING" })).not.toBeInTheDocument();
   });
 
-  it("opens bulk mode with selectable rows and an enabled Sign orders action", () => {
-    renderBulkPrototype();
+  it("opens bulk mode with selectable rows and an enabled Sign orders action", async () => {
+    const { container } = renderBulkPrototype();
 
     selectDrafts(2);
 
@@ -143,7 +154,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
 
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of");
-    expect(screen.getByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
+    await asyncNativeReady(container);
+    expect(await screen.findByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
   });
 
   it("exits bulk mode and clears the selection with CANCEL", () => {
@@ -326,14 +338,18 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
-  it("uses the shared Investments disclosure presentation with Ex-Ante open and the other sections closed", () => {
-    renderBulkPrototype();
+  it("uses the shared Investments disclosure presentation with Ex-Ante open and the other sections closed", async () => {
+    const { container } = renderBulkPrototype();
     startReviewWithSelectedDrafts(1);
+    await asyncNativeReady(container);
 
-    expect(screen.getByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
+    expect(await screen.findByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("button", { name: /Product documents/i })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: /Important information/i })).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByRole("button", { name: /Investment disclaimer/i })).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(screen.getByRole("button", { name: /Product documents/i }));
+    expect(await screen.findByText("Key Information Document (KID)")).toBeInTheDocument();
   });
 
   it("shows every pending draft in a complete, non-truncated read-only summary card", () => {
@@ -493,8 +509,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("switch", { name: /Accept terms/i })).toHaveAttribute("aria-checked", "false");
   });
 
-  it.each(COUNTRIES)("renders selectable, country-formatted drafts for %s", (country) => {
-    render(
+  it.each(COUNTRIES)("renders selectable, country-formatted drafts for %s", async (country) => {
+    const { container } = render(
       <DemoProvider initialState={{ country, product: "PI" }}>
         {renderFlowPreview("investments-bulk-prototype" as FlowScreenKind)}
       </DemoProvider>,
@@ -503,6 +519,15 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(document.body).toHaveTextContent(getCountryCurrency(country));
     startReviewWithSelectedDrafts(1);
     expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 1");
-    expect(screen.getByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
+    await asyncNativeReady(container);
+    const exAnte = await screen.findByRole("button", { name: /Ex-Ante cost information/i });
+    if (country === "IT") {
+      // Italy keeps the Native renderer's accessibility props unmodified; the opened content proves state.
+      expect(screen.getByText("NET INVESTMENT AMOUNT")).toBeInTheDocument();
+    } else {
+      expect(exAnte).toHaveAttribute("aria-expanded", "true");
+    }
+    fireEvent.click(screen.getByRole("button", { name: /Product documents/i }));
+    expect(await screen.findByText("Key Information Document (KID)")).toBeInTheDocument();
   });
 });

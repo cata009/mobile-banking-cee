@@ -5,6 +5,7 @@
  */
 
 import type { ReactNode } from "react";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import PageHeader from "@/app/components/PageHeader";
 import NavigationRow from "@/app/components/NavigationRow";
@@ -17,7 +18,6 @@ import UserEventCard from "@/app/components/cards/UserEventCard";
 import ProductMenuCard from "@/app/components/products/ProductMenuCard";
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
 import PaymentHeroCard from "@/app/components/payments/PaymentHeroCard";
-import { ContactsNavigationCard } from "@/app/screens/contacts/ContactsNavigationCard";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import type { ProductsCard } from "@/app/config/productsMenuConfig";
 import productCardAccountImage from "../../../../screenshots/account.png";
@@ -303,13 +303,20 @@ export const TESTABLE_COMPONENTS: readonly TestableComponentMeta[] = [
       { id: "value", label: "Value", defaultText: "+40 21 200 2020" },
     ],
     render: (texts) => (
-      <ContactsNavigationCard
-        icon="phone"
-        title={texts.title ?? ""}
-        subtitle={texts.subtitle || undefined}
-        value={texts.value || undefined}
-        hasChevron
-        onClick={noop}
+      <NativeScreenPreview
+        route={{ screen: "account" }}
+        snapshot={{
+          screenTopInset: 0,
+          componentPreview: {
+            kind: "contacts-navigation-card",
+            icon: "phone",
+            title: texts.title ?? "",
+            subtitle: texts.subtitle || undefined,
+            value: texts.value || undefined,
+            hasChevron: true,
+          },
+        }}
+        onNavigate={() => true}
       />
     ),
   },
