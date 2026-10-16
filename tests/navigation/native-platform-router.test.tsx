@@ -19,8 +19,13 @@ vi.mock('@/app/screens/flow-library/FlowLibraryScreen', () => ({
     onFlowChange: (id: string) => void
     onViewChange: (view: string) => void
   }) => (
-    <section data-testid="flow-library-route" data-flow={props.initialFlowId} data-view={props.initialView} data-selected={props.selectedFlowId}>
-      <button onClick={() => props.onFlowChange('ro-round-up')}>Select flow</button>
+    <section
+      data-testid="flow-library-route"
+      data-flow={props.initialFlowId}
+      data-view={props.initialView}
+      data-selected={props.selectedFlowId}
+    >
+      <button onClick={() => props.onFlowChange('investments-bulk-approval')}>Select flow</button>
       <button onClick={() => props.onViewChange('detail')}>Open detail</button>
     </section>
   ),
@@ -33,7 +38,7 @@ function coordinators(currentScreen: string, flowId?: string): AppCoordinators {
       parsedDeepLink: flowId ? { flowId } : null,
     },
     flowLibrary: {
-      view: { flowLibraryEntryView: 'detail', selectedFlowPreviewId: 'ro-round-up' },
+      view: { flowLibraryEntryView: 'detail', selectedFlowPreviewId: 'investments-bulk-approval' },
       actions: { selectFlow: vi.fn(), changeView: vi.fn() },
     },
   } as unknown as AppCoordinators
@@ -54,10 +59,10 @@ describe('NativePlatformRouter', () => {
     const route = screen.getByTestId('flow-library-route')
     expect(route).toHaveAttribute('data-flow', 'investments-bulk-approval')
     expect(route).toHaveAttribute('data-view', 'detail')
-    expect(route).toHaveAttribute('data-selected', 'ro-round-up')
+    expect(route).toHaveAttribute('data-selected', 'investments-bulk-approval')
     fireEvent.click(screen.getByText('Select flow'))
     fireEvent.click(screen.getByText('Open detail'))
-    expect(ctx.flowLibrary.actions.selectFlow).toHaveBeenCalledWith('ro-round-up')
+    expect(ctx.flowLibrary.actions.selectFlow).toHaveBeenCalledWith('investments-bulk-approval')
     expect(ctx.flowLibrary.actions.changeView).toHaveBeenCalledWith('detail')
   })
 
@@ -66,5 +71,3 @@ describe('NativePlatformRouter', () => {
     expect(container).toBeEmptyDOMElement()
   })
 })
-
-

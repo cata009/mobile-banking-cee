@@ -27,7 +27,7 @@ interface FlowLibraryScreenProps {
 type LibraryView = "index" | "detail";
 
 export default function FlowLibraryScreen({
-  initialFlowId = "ro-round-up",
+  initialFlowId = "investments-bulk-approval",
   initialView = "detail",
   selectedFlowId: controlledFlowId,
   onFlowChange,

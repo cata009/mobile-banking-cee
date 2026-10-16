@@ -7,7 +7,7 @@ export function useFlowLibraryCoordinator({
 }: Pick<CoordinatorInput, 'navigation' | 'parsedDeepLink'>) {
   const { currentRoute, replaceCurrentRoute } = navigation
   const [selectedFlowPreviewId, setSelectedFlowPreviewId] = useState<FlowPreviewId>(
-    parsedDeepLink?.flowId ?? 'ro-round-up',
+    parsedDeepLink?.flowId ?? 'investments-bulk-approval',
   )
   const [flowLibraryEntryView, setFlowLibraryEntryView] = useState<'index' | 'detail'>(
     parsedDeepLink?.flowId ? 'detail' : 'index',

@@ -16,14 +16,11 @@ import { getCountryCurrency } from '@/data/exchangeRates'
 import {
   canSignBulkSummary,
   BULK_DRAFTS,
-  DEFAULT_SELECTED_IDS,
   STATIC_REVIEW_SELECTED_IDS,
   getSummaryOrderStatus,
   getSummaryStatusLabel,
   getSelectedDrafts,
   getSelectableDraftIds,
-  toggleSelectedDraftIds,
-  toggleAllDraftIds,
   type BulkDraft,
   type SummaryOrderStatus,
 } from '@/features/investments/bulk-approval/model'
@@ -100,7 +97,7 @@ function FlowBulkSelectionCheckbox({
       disabled={disabled}
       onClick={onToggle}
       data-flow-bulk-checkbox="true"
-      className="relative grid size-[24px] shrink-0 place-items-center rounded-[4px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] disabled:cursor-not-allowed disabled:opacity-45"
+      className="relative grid size-[24px] shrink-0 place-items-center rounded-[4px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] disabled:cursor-not-allowed disabled:opacity-100"
     >
       <span
         className="absolute inset-[1px] rounded-[4px] border border-[var(--uc-text)] bg-[var(--uc-surface)]"
@@ -119,8 +116,6 @@ function BulkSelectionScreen({
   bulkMode,
   selectedIds,
   rejectedIds,
-  onToggle,
-  onToggleAll,
   onSignOrders,
   onEnterBulk,
   onCancelBulk,
@@ -130,8 +125,6 @@ function BulkSelectionScreen({
   bulkMode: boolean
   selectedIds: readonly string[]
   rejectedIds: readonly string[]
-  onToggle: (id: string) => void
-  onToggleAll: () => void
   onSignOrders: () => void
   onEnterBulk: () => void
   onCancelBulk: () => void
@@ -141,7 +134,6 @@ function BulkSelectionScreen({
   const { country } = useDemo()
   const selectedCount = selectedIds.length
   const selectableDrafts = BULK_DRAFTS.filter((draft) => !rejectedIds.includes(draft.id))
-  const allSelected = selectableDrafts.length > 0 && selectableDrafts.every((draft) => selectedIds.includes(draft.id))
   const groups = [
     { title: 'ADVISORY ORDERS', drafts: BULK_DRAFTS.slice(0, 5) },
     { title: 'NON ADVISORY ORDERS', drafts: BULK_DRAFTS.slice(5) },
@@ -215,8 +207,9 @@ function BulkSelectionScreen({
                 <div key={draft.id} className={rowClassName}>
                   <FlowBulkSelectionCheckbox
                     checked={selected}
-                    onToggle={() => onToggle(draft.id)}
-                    label={`Select ${draft.name}`}
+                    disabled
+                    onToggle={() => undefined}
+                    label={`Selected: ${draft.name}`}
                   />
                   {details}
                 </div>
@@ -238,9 +231,8 @@ function BulkSelectionScreen({
       {bulkMode ? (
         <div className="border-t border-[var(--uc-border)] bg-[var(--uc-surface)] px-[16px] pb-[28px] pt-[16px]">
           <div className="flex items-center gap-[10px]">
-            <FlowBulkSelectionCheckbox checked={allSelected} onToggle={onToggleAll} label="Select all orders" />
             <p
-              className="w-[112px] shrink-0 text-[18px] leading-[24px] text-[var(--uc-text)]"
+              className="flex-1 text-[18px] leading-[24px] text-[var(--uc-text)]"
               data-testid="bulk-selected-count"
               aria-live="polite"
             >
@@ -367,7 +359,6 @@ function BulkReviewScreen({
   onNext,
   onSummary,
   onBackToSelection,
-  onDeselect,
   onReadCurrent,
   onTermsToggle,
   staticPreview = false,
@@ -380,7 +371,6 @@ function BulkReviewScreen({
   onNext: () => void
   onSummary: () => void
   onBackToSelection: () => void
-  onDeselect: () => void
   onReadCurrent: () => void
   onTermsToggle: () => void
   staticPreview?: boolean
@@ -452,11 +442,6 @@ function BulkReviewScreen({
           className="border-t border-[var(--uc-border)] px-[16px] py-[12px]"
         >
           <div className="flex min-h-[32px] items-center gap-[10px]">
-            <FlowBulkSelectionCheckbox
-              checked
-              onToggle={onDeselect}
-              label={`Selected: ${draft.name}. Activate to deselect.`}
-            />
             <div className="min-w-0">
               <p className="truncate uc-type-n5-strong text-[var(--uc-text)]">{draft.name}</p>
               <p className="uc-type-p2 text-[var(--uc-text-muted)]">
@@ -573,7 +558,8 @@ function BulkSummaryScreen({
       <PageHeader title="Orders summary" onBack={onBack} includeSafeArea showHelp={false} />
       <div className="min-h-0 flex-1 overflow-y-auto px-[16px] pb-[16px] scrollbar-hide">
         <p className="pt-[10px] uc-type-n4 text-[var(--uc-text)]">
-          {selectedIds.length} marked orders. This is a read-only summary; return to review to change selection.
+          {selectedIds.length} marked orders. This is a read-only summary; return to review without changing the marked
+          set.
         </p>
         <div className="mt-[16px] space-y-[8px]" role="list" aria-label="Pending draft summary">
           {BULK_DRAFTS.map((draft) => {
@@ -737,7 +723,7 @@ function BulkApprovalPrototype() {
     'list' | 'detail' | 'review' | 'summary' | 'summary-detail' | 'sign' | 'confirmation' | 'failure'
   >('list')
   const [bulkMode, setBulkMode] = useState(false)
-  const [selectedIds, setSelectedIds] = useState<string[]>([...DEFAULT_SELECTED_IDS])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [rejectedIds, setRejectedIds] = useState<string[]>([])
   const [reviewedIds, setReviewedIds] = useState<string[]>([])
   const [readDraftIds, setReadDraftIds] = useState<string[]>([])
@@ -750,17 +736,8 @@ function BulkApprovalPrototype() {
   const selectedDrafts = useMemo(() => getSelectedDrafts(selectedIds, rejectedIds), [rejectedIds, selectedIds])
   const selectableDraftIds = useMemo(() => getSelectableDraftIds(rejectedIds), [rejectedIds])
 
-  const toggleSelection = (id: string) => {
-    const draft = BULK_DRAFTS.find((candidate) => candidate.id === id)
-    if (!draft || rejectedIds.includes(draft.id)) return
-    setSelectedIds((current) => toggleSelectedDraftIds(current, id))
-    setReviewedIds((current) => current.filter((candidate) => candidate !== id))
-    setReadDraftIds((current) => current.filter((candidate) => candidate !== id))
-    setTermsAccepted(false)
-  }
-
-  const toggleAll = () => {
-    setSelectedIds((current) => toggleAllDraftIds(current, selectableDraftIds))
+  const enterBulkMode = () => {
+    setSelectedIds(selectableDraftIds)
     setReviewedIds([])
     setReadDraftIds([])
     setTermsAccepted(false)
@@ -796,28 +773,6 @@ function BulkApprovalPrototype() {
     setReviewedIds((current) => (current.includes(next.id) ? current : [...current, next.id]))
   }
 
-  const deselectCurrent = () => {
-    const current = selectedDrafts[reviewIndex]
-    if (!current) return
-    const nextIds = selectedIds.filter((id) => id !== current.id)
-    const remainingDrafts = selectedDrafts.filter((draft) => draft.id !== current.id)
-    const replacement = remainingDrafts[Math.min(reviewIndex, remainingDrafts.length - 1)]
-    setSelectedIds(nextIds)
-    setReviewedIds((ids) => {
-      const withoutCurrent = ids.filter((id) => id !== current.id)
-      return replacement && !withoutCurrent.includes(replacement.id)
-        ? [...withoutCurrent, replacement.id]
-        : withoutCurrent
-    })
-    setReadDraftIds((ids) => ids.filter((id) => id !== current.id))
-    setTermsAccepted(false)
-    if (nextIds.length === 0) {
-      setView('list')
-      return
-    }
-    setReviewIndex((currentIndex) => Math.min(currentIndex, nextIds.length - 1))
-  }
-
   if (view === 'list')
     return (
       <>
@@ -825,10 +780,11 @@ function BulkApprovalPrototype() {
           bulkMode={bulkMode}
           selectedIds={selectedIds}
           rejectedIds={rejectedIds}
-          onToggle={toggleSelection}
-          onToggleAll={toggleAll}
           onSignOrders={startReview}
-          onEnterBulk={() => setBulkMode(true)}
+          onEnterBulk={() => {
+            enterBulkMode()
+            setBulkMode(true)
+          }}
           onCancelBulk={() => {
             setSelectedIds([])
             setReviewedIds([])
@@ -892,7 +848,6 @@ function BulkApprovalPrototype() {
         onNext={() => moveTo(reviewIndex + 1)}
         onSummary={() => setView('summary')}
         onBackToSelection={() => setView('list')}
-        onDeselect={deselectCurrent}
         onReadCurrent={() =>
           setReadDraftIds((current) =>
             current.includes(selectedDrafts[reviewIndex]!.id) ? current : [...current, selectedDrafts[reviewIndex]!.id],
@@ -941,10 +896,13 @@ function BulkApprovalPrototype() {
 }
 
 export function renderInvestmentsBulkApprovalPreview(kind: string) {
-  const staticSelected: readonly string[] = []
+  const staticSelected: readonly string[] = BULK_DRAFTS.map((draft) => draft.id)
   const staticReviewSelected: readonly string[] = STATIC_REVIEW_SELECTED_IDS
   const staticReviewDrafts = BULK_DRAFTS.filter((draft) => staticReviewSelected.includes(draft.id))
   const staticRejected: readonly string[] = ['draft-10']
+  const staticSummarySelected = BULK_DRAFTS.filter((draft) => !staticRejected.includes(draft.id)).map(
+    (draft) => draft.id,
+  )
   const noop = () => undefined
 
   switch (kind) {
@@ -956,8 +914,6 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
           bulkMode
           selectedIds={staticSelected}
           rejectedIds={[]}
-          onToggle={noop}
-          onToggleAll={noop}
           onSignOrders={noop}
           onEnterBulk={noop}
           onCancelBulk={noop}
@@ -976,7 +932,6 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
           onNext={noop}
           onSummary={noop}
           onBackToSelection={noop}
-          onDeselect={noop}
           onReadCurrent={noop}
           onTermsToggle={noop}
           staticPreview
@@ -993,7 +948,6 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
           onNext={noop}
           onSummary={noop}
           onBackToSelection={noop}
-          onDeselect={noop}
           onReadCurrent={noop}
           onTermsToggle={noop}
           staticPreview
@@ -1002,9 +956,9 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
     case 'investments-bulk-summary-blocked':
       return (
         <BulkSummaryScreen
-          selectedIds={STATIC_REVIEW_SELECTED_IDS}
+          selectedIds={staticSummarySelected}
           rejectedIds={staticRejected}
-          reviewedIds={[STATIC_REVIEW_SELECTED_IDS[0]!]}
+          reviewedIds={[staticSummarySelected[0]!]}
           termsAccepted={false}
           onBack={noop}
           onConfirm={noop}
@@ -1015,9 +969,9 @@ export function renderInvestmentsBulkApprovalPreview(kind: string) {
     case 'investments-bulk-summary-ready':
       return (
         <BulkSummaryScreen
-          selectedIds={STATIC_REVIEW_SELECTED_IDS}
+          selectedIds={staticSummarySelected}
           rejectedIds={staticRejected}
-          reviewedIds={STATIC_REVIEW_SELECTED_IDS}
+          reviewedIds={staticSummarySelected}
           termsAccepted
           onBack={noop}
           onConfirm={noop}

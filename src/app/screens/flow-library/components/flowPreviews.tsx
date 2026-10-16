@@ -3,41 +3,10 @@ import type { FlowScreenKind } from '../flows/types'
 import { renderGeniusMyCarPreview } from '@/flows/ro/genius-my-car/preview'
 import { renderRsPropertyInsurancePreview } from '@/flows/rs/property-insurance/preview'
 import { renderInvestmentsBulkApprovalPreview } from '@/flows/shared/investments-bulk-approval/preview'
-import { renderRoundUpPreview } from '@/flows/ro/round-up/preview'
-import { renderCardPinPreview } from '@/flows/ro/card-pin/preview'
 import { renderEthocaPreview } from '@/flows/shared/ethoca/preview'
 import { renderRsDisposableCardsPreview } from '@/flows/rs/disposable-cards/preview'
 
 const PREVIEW_RENDERERS = {
-  'home-entry': () => renderRoundUpPreview('home-entry'),
-  'products-round-up': () => renderRoundUpPreview('products-round-up'),
-  'round-up-info': () => renderRoundUpPreview('round-up-info'),
-  'open-savings': () => renderRoundUpPreview('open-savings'),
-  'setup-form': () => renderRoundUpPreview('setup-form'),
-  sign: () => renderRoundUpPreview('sign'),
-  'success-active': () => renderRoundUpPreview('success-active'),
-  'accounts-active': () => renderRoundUpPreview('accounts-active'),
-  manage: () => renderRoundUpPreview('manage'),
-  'confirm-deactivate': () => renderRoundUpPreview('confirm-deactivate'),
-  'success-deactivated': () => renderRoundUpPreview('success-deactivated'),
-  'cards-credit': () => renderCardPinPreview('cards-credit'),
-  'cards-debit': () => renderCardPinPreview('cards-debit'),
-  'card-options-credit': () => renderCardPinPreview('card-options-credit'),
-  'card-options-debit': () => renderCardPinPreview('card-options-debit'),
-  'pin-faceid-credit': () => renderCardPinPreview('pin-faceid-credit'),
-  'pin-faceid-debit': () => renderCardPinPreview('pin-faceid-debit'),
-  'pin-reveal-credit-hidden': () => renderCardPinPreview('pin-reveal-credit-hidden'),
-  'pin-reveal-credit-visible': () => renderCardPinPreview('pin-reveal-credit-visible'),
-  'pin-reveal-debit-hidden': () => renderCardPinPreview('pin-reveal-debit-hidden'),
-  'pin-reveal-debit-visible': () => renderCardPinPreview('pin-reveal-debit-visible'),
-  'set-pin-credit-empty': () => renderCardPinPreview('set-pin-credit-empty'),
-  'set-pin-credit-filled': () => renderCardPinPreview('set-pin-credit-filled'),
-  'set-pin-debit-empty': () => renderCardPinPreview('set-pin-debit-empty'),
-  'set-pin-debit-filled': () => renderCardPinPreview('set-pin-debit-filled'),
-  'pin-sign': () => renderCardPinPreview('pin-sign'),
-  'pin-success': () => renderCardPinPreview('pin-success'),
-  'pin-not-eligible-credit': () => renderCardPinPreview('pin-not-eligible-credit'),
-  'pin-not-eligible-debit': () => renderCardPinPreview('pin-not-eligible-debit'),
   'ethoca-list-merchant-logo': () => renderEthocaPreview('ethoca-list-merchant-logo'),
   'ethoca-account-list-merchant-logo': () => renderEthocaPreview('ethoca-account-list-merchant-logo'),
   'ethoca-list-pending-merchant-logo': () => renderEthocaPreview('ethoca-list-pending-merchant-logo'),
