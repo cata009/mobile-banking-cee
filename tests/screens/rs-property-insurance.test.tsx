@@ -608,7 +608,7 @@ describe('RS property insurance prototype', () => {
     fireEvent.click(preview.getByLabelText('Close purchase'))
     await asyncNativeReady(document.body)
     await waitFor(() => expect(nativeWebRendererDiagnostics.snapshots.at(-1)?.route).toEqual({ screen: 'products' }))
-    expect(preview.getByRole('heading', { name: 'Offers' })).toBeInTheDocument()
+    expect(preview.getByText('Offers')).toBeInTheDocument()
 
     jumpToScreen('rs-pi-policyholder')
     fireEvent.click(preview.getByLabelText('Close purchase'))

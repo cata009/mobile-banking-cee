@@ -1,16 +1,12 @@
-import { CARD_PIN_FLOW } from '@/flows/ro/card-pin'
 import { ETHOCA_FLOW } from '@/flows/shared/ethoca'
 import { GENIUS_MY_CAR_FLOW } from '@/flows/ro/genius-my-car'
 import { INVESTMENTS_BULK_APPROVAL_FLOW } from '@/flows/shared/investments-bulk-approval'
-import { ROUND_UP_FLOW } from '@/flows/ro/round-up'
 import { RS_PROPERTY_INSURANCE_FLOW } from '@/flows/rs/property-insurance'
 import { RS_DISPOSABLE_CARDS_FLOW } from '@/flows/rs/disposable-cards/definition'
 import type { FlowDefinition, FlowPreviewId, FlowScenario } from './types'
 
 /** Single source of truth for the flows shipped in the library. */
 export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
-  'ro-round-up': ROUND_UP_FLOW,
-  'ro-card-pin': CARD_PIN_FLOW,
   'ro-genius-my-car': GENIUS_MY_CAR_FLOW,
   'mobile-pi-ethoca': ETHOCA_FLOW,
   'rs-property-insurance': RS_PROPERTY_INSURANCE_FLOW,
@@ -25,8 +21,6 @@ export const FLOW_ORDER: readonly FlowPreviewId[] = [
   'rs-disposable-cards',
   'ro-genius-my-car',
   'mobile-pi-ethoca',
-  'ro-round-up',
-  'ro-card-pin',
 ]
 
 export function getFlowDefinition(id: FlowPreviewId): FlowDefinition {
