@@ -1,11 +1,10 @@
-import { useEffect, type MouseEvent, type ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import NavigationRow from '@/app/components/NavigationRow'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import { AppIcon } from '@/app/components/icons'
-import ProductsScreen from '@/app/screens/products/ProductsScreen'
 import { DemoProvider } from '@/app/state/demoStore'
 import geniusMyCarHero from '@/assets/products/detail/genius-my-car-hero.png'
 import { useFlowNav } from '@/app/screens/flow-library/components/prototypeNav'
@@ -21,6 +20,7 @@ import {
 import { GeniusMyCarSessionProvider, useMyCarSession } from '@/flows/ro/genius-my-car/geniusMyCarSession'
 import { PreviewScreen, PreviewBody, VehicleBrandLogo } from '@/flows/ro/genius-my-car/geniusMyCarUi'
 import { renderMyCarPurchase } from '@/flows/ro/genius-my-car/geniusMyCarPurchase'
+import { TemplateProductsScreen } from '@/app/components/templates/TemplateProductsPreview'
 
 const INSURANCE_OPTIONS = [
   { id: 'genius-protect', title: 'GENIUS PROTECT' },
@@ -33,14 +33,6 @@ const INSURANCE_OPTIONS = [
 
 function ProductsPreview({ sheet = false }: { sheet?: boolean }) {
   const nav = useFlowNav()
-  const routeInsuranceCard = (event: MouseEvent<HTMLDivElement>) => {
-    if (!nav.active || sheet) return
-    const card = (event.target as HTMLElement).closest('button')
-    if (!card || card.innerText.trim() !== 'Insurance') return
-    event.preventDefault()
-    event.stopPropagation()
-    nav.primary()
-  }
 
   return (
     <DemoProvider
@@ -51,8 +43,13 @@ function ProductsPreview({ sheet = false }: { sheet?: boolean }) {
         bankingScenario: 'retail-multi-account-card',
       }}
     >
-      <div className="relative h-full w-full" onClickCapture={routeInsuranceCard}>
-        <ProductsScreen />
+      <div className="relative h-full w-full">
+        <TemplateProductsScreen
+          offersTitle="Offers"
+          onProductCardClick={(card) => {
+            if (nav.active && !sheet && card.id === 'insurance') nav.primary()
+          }}
+        />
         {sheet ? <InsuranceSheet /> : null}
       </div>
     </DemoProvider>

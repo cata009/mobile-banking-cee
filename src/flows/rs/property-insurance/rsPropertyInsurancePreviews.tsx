@@ -1,6 +1,6 @@
 import { rsdSum, groupCoverage, type CoverageGroup } from '@/features/insurance/property/model'
 import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation'
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useDragCarousel } from '@/hooks/useDragCarousel'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import NavigationRow from '@/app/components/NavigationRow'
@@ -22,13 +22,13 @@ import {
   type RsPayerAccountId,
 } from '@/flows/rs/property-insurance/rsPurchaseStore'
 import { useCollapsingHeader } from '@/hooks/useCollapsingHeader'
-import ProductsScreen from '@/app/screens/products/ProductsScreen'
 import { getProductCardSheetConfig } from '@/app/config/productsMenuConfig'
 import { DemoProvider } from '@/app/state/demoStore'
 import heroHouseAtDusk from '@/assets/products/shelf/hero-house-dusk.png'
 import lifeInsuranceUmbrella from '@/assets/app2027/home-summary-insurance-umbrella.png'
 import { FLOW_DEMO } from '@/app/screens/flow-library/flows/demoData'
 import type { RsPropertyInsuranceScreenKind } from '@/app/screens/flow-library/flows/types'
+import { TemplateProductsScreen } from '@/app/components/templates/TemplateProductsPreview'
 
 /**
  * RS Property Insurance previews — the Generali household-insurance purchase
@@ -324,7 +324,7 @@ function CoverGroup({ group, packageId }: { group: CoverageGroup; packageId: Pac
 /**
  * The design system's acknowledgement row: the label and a toggle, nothing else.
  * Turning it on opens the text on its own page, and the step's primary action
- * stays disabled until it is on — the same shape Round Up uses for its terms.
+ * stays disabled until it is on — matching the required-consent control pattern.
  */
 function MandatoryRead({
   title,
@@ -711,25 +711,15 @@ function ProductsPreview({ sheet = false }: { sheet?: boolean }) {
     if (!sheet) resetRsPurchase()
   }, [sheet])
 
-  /**
-   * The real Products screen opens its own Insurances sheet, which does not carry
-   * the row this flow proposes. So in the prototype the tap on the Insurance card
-   * is caught here and routed to the sheet screen that does. Outside the
-   * prototype nav is inert and the real screen behaves exactly as it always does.
-   */
-  const routeInsuranceCard = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!nav.active || sheet) return
-    const card = (event.target as HTMLElement).closest('button')
-    if (!card || card.innerText.trim() !== 'Insurance') return
-    event.preventDefault()
-    event.stopPropagation()
-    nav.primary()
-  }
-
   return (
     <RsBaselineFixture>
-      <div className="relative h-full w-full" onClickCapture={routeInsuranceCard}>
-        <ProductsScreen />
+      <div className="relative h-full w-full">
+        <TemplateProductsScreen
+          offersTitle="Offers"
+          onProductCardClick={(card) => {
+            if (nav.active && !sheet && card.id === 'insurance') nav.primary()
+          }}
+        />
         {sheet ? <InsuranceSheetOverlay /> : null}
       </div>
     </RsBaselineFixture>

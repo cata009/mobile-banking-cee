@@ -91,10 +91,10 @@ describe('persistent feature route payloads', () => {
     const { result } = setup()
     act(() => result.current.context.navigateTo('flow-library'))
     const historyLength = result.current.navigation.history.length
-    act(() => result.current.flowLibrary.actions.selectFlow('ro-round-up'))
+    act(() => result.current.flowLibrary.actions.selectFlow('investments-bulk-approval'))
     expect(result.current.context.currentRoute).toEqual({
       screen: 'flow-library',
-      flowId: 'ro-round-up',
+      flowId: 'investments-bulk-approval',
       view: 'detail',
     })
     expect(result.current.navigation.history.length).toBe(historyLength)
@@ -163,22 +163,26 @@ it('preserves a newly selected flow when the screen reports selection and view i
   const { result } = setup()
   act(() => result.current.context.navigateTo('flow-library'))
   act(() => {
-    result.current.flowLibrary.actions.selectFlow('ro-card-pin')
+    result.current.flowLibrary.actions.selectFlow('investments-bulk-approval')
     result.current.flowLibrary.actions.changeView('detail')
   })
-  expect(result.current.flowLibrary.view.selectedFlowPreviewId).toBe('ro-card-pin')
-  expect(result.current.context.currentRoute).toEqual({ screen: 'flow-library', flowId: 'ro-card-pin', view: 'detail' })
+  expect(result.current.flowLibrary.view.selectedFlowPreviewId).toBe('investments-bulk-approval')
+  expect(result.current.context.currentRoute).toEqual({
+    screen: 'flow-library',
+    flowId: 'investments-bulk-approval',
+    view: 'detail',
+  })
 })
 // Window events originate in global controls. They update library selection,
 // including off-screen memory, without taking the operator away from a screen.
 it('keeps external flow events on their current screen and restores library memory on entry', () => {
   const { result } = setup()
-  act(() => window.dispatchEvent(new CustomEvent('flow-preview-select', { detail: 'ro-card-pin' })))
+  act(() => window.dispatchEvent(new CustomEvent('flow-preview-select', { detail: 'investments-bulk-approval' })))
   expect(result.current.context.currentScreen).toBe('homepage')
   expect(result.current.navigation.history).toHaveLength(1)
   act(() => result.current.context.navigateTo('flow-library'))
   expect(result.current.flowLibrary.view).toEqual({
-    selectedFlowPreviewId: 'ro-card-pin',
+    selectedFlowPreviewId: 'investments-bulk-approval',
     flowLibraryEntryView: 'detail',
   })
   act(() => window.dispatchEvent(new Event('flow-library-open-index')))

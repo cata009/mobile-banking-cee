@@ -93,6 +93,7 @@ export const BULK_DRAFTS: readonly BulkDraft[] = [
   },
 ] as const
 
+/** Retained for source and reference-package compatibility; live bulk mode selects on entry. */
 export const DEFAULT_SELECTED_IDS: readonly string[] = []
 export const STATIC_REVIEW_SELECTED_IDS = ['draft-01', 'draft-02', 'draft-03'] as const
 
@@ -104,6 +105,7 @@ export function getSelectableDraftIds(rejectedIds: readonly string[]): string[] 
   return BULK_DRAFTS.filter((draft) => !rejectedIds.includes(draft.id)).map((draft) => draft.id)
 }
 
+/** Legacy selection helpers remain exported for compatibility; the flow UI no longer calls them. */
 export function toggleSelectedDraftIds(current: readonly string[], id: string): string[] {
   return current.includes(id) ? current.filter((candidate) => candidate !== id) : [...current, id]
 }

@@ -4,11 +4,7 @@ import FlowLibraryScreen from '@/app/screens/flow-library/FlowLibraryScreen'
 import ToolsScreen from '@/app/screens/tools/ToolsScreen'
 
 /** Platform surfaces remain Web-owned while customer PI screens move to Native. */
-export default function NativePlatformRouter({
-  coordinators,
-}: {
-  coordinators: AppCoordinators
-}) {
+export default function NativePlatformRouter({ coordinators }: { coordinators: AppCoordinators }) {
   const { currentScreen, parsedDeepLink } = coordinators.context
 
   if (currentScreen === 'design-system') return <DesignSystemPage />
@@ -19,7 +15,7 @@ export default function NativePlatformRouter({
   const { selectFlow, changeView } = coordinators.flowLibrary.actions
   return (
     <FlowLibraryScreen
-      initialFlowId={parsedDeepLink?.flowId ?? 'ro-round-up'}
+      initialFlowId={parsedDeepLink?.flowId ?? 'investments-bulk-approval'}
       initialView={flowLibraryEntryView}
       selectedFlowId={selectedFlowPreviewId}
       onFlowChange={selectFlow}
@@ -27,4 +23,3 @@ export default function NativePlatformRouter({
     />
   )
 }
-

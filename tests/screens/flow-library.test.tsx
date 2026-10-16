@@ -49,10 +49,10 @@ function renderFlowLibraryInKidsHungary() {
 }
 
 describe('flow-library scenario resolution', () => {
-  const flow = FLOW_DEFINITIONS['ro-round-up']
+  const flow = FLOW_DEFINITIONS['investments-bulk-approval']
 
   it('resolves requested, default and empty scenarios coherently', () => {
-    expect(resolveScenario(flow, 'deactivate').scenario.label).toBe('Deactivate')
+    expect(resolveScenario(flow, flow.scenarios[0]!.id).scenario).toBe(flow.scenarios[0])
     expect(resolveScenario(flow, 'missing')).toMatchObject({ scenarioId: flow.defaultScenarioId })
 
     const emptyFlow = { ...flow, scenarios: [], defaultScenarioId: 'missing' }
@@ -67,34 +67,46 @@ describe('flow definitions integrity', () => {
   it('registers the all-country Investments bulk approval prototype', () => {
     expect(FLOW_ORDER).toContain('investments-bulk-approval')
     expect(FLOW_DEFINITIONS).toHaveProperty('investments-bulk-approval')
+    expect(FLOW_ORDER).not.toContain('ro-round-up')
+    expect(FLOW_ORDER).not.toContain('ro-card-pin')
+    expect(FLOW_DEFINITIONS).not.toHaveProperty('ro-round-up')
+    expect(FLOW_DEFINITIONS).not.toHaveProperty('ro-card-pin')
   })
 
   it('makes the bulk selected count a canonical, implementation-ready selection rule', () => {
     const selectionSpec = FLOW_DEFINITIONS['investments-bulk-approval'].screenSpecs['investments-bulk-selection']
     expect(selectionSpec).toBeDefined()
     if (!selectionSpec) throw new Error('Bulk selection screen spec is required')
-    const countField = selectionSpec.fields?.find((field) => field.name === 'Selected count / Select all')
+    const countField = selectionSpec.fields?.find((field) => field.name === 'Selected count')
 
-    expect(countField?.notes).toMatch(/Counts selected eligible IDs/i)
-    expect(countField?.notes).toMatch(/Selected 0/i)
-    expect(countField?.notes).toMatch(/Sign orders disabled/i)
-    expect(selectionSpec.actions?.find((action) => action.label === 'Select all')?.result).toMatch(
-      /Selected count immediately/i,
+    expect(countField?.notes).toMatch(/every eligible ID selected on bulk entry/i)
+    expect(countField?.notes).toMatch(/marked set remains fixed/i)
+    expect(selectionSpec.actions?.find((action) => action.label === 'Selected draft indicator')?.result).toMatch(
+      /checked and disabled/i,
     )
   })
 
   it('records a canonical visible default for every declared bulk-approval prototype state', () => {
     const specs = FLOW_DEFINITIONS['investments-bulk-approval'].screenSpecs
     const expectedDefaults = {
-      'investments-bulk-prototype': 'Orders to approve: 10 pending drafts, row-level details, BULK SIGNING enabled; no selection, checkboxes, selected count, or sticky signing footer.',
-      'investments-bulk-selection': 'Bulk mode: 10 eligible drafts and all checkboxes clear; CANCEL, Select all, and a Selected 0 footer are visible; Sign orders is disabled.',
-      'investments-bulk-review-first': 'Three marked drafts: Order 1 of 3 has a checked current-order checkbox, Ex-Ante Costs expanded, optional disclosures closed, View summary and Next enabled, no Terms, and a Back spacer.',
-      'investments-bulk-review-last': 'Three marked drafts: Order 3 of 3 has a checked current-order checkbox, Ex-Ante Costs expanded, optional disclosures closed, Terms unchecked, Previous enabled, Continue disabled, and the caught-up status.',
-      'investments-bulk-summary-blocked': 'Ten-draft summary: three marked to sign, one rejected, and the rest not signed; header Back and card inspection are available, the prerequisite notice is visible, and Confirm and sign ALL marked ORDERS is disabled.',
-      'investments-bulk-summary-ready': 'Ten-draft summary: three marked to sign, one rejected, and the rest not signed; header Back and card inspection are available, all marked drafts are reviewed, Terms are accepted, and Confirm and sign ALL marked ORDERS is enabled.',
-      'investments-bulk-sign': 'Standard signature: a focused masked six-digit PIN and helper are visible, Sign order is enabled, no authentication animation is shown, and Back returns to the ready summary.',
-      'investments-bulk-confirmation': 'Success tile: Signing successful and the prototype-only helper are visible; Back to Orders to approve is enabled and there is no failure shortcut.',
-      'investments-bulk-failure': 'Signing result: red Failed to send, onemarkets Climate Focus Fund · LU1953188835, and prototype-only explanatory copy are visible; header Back returns to summary.',
+      'investments-bulk-prototype':
+        'Orders to approve: 10 pending drafts, row-level details, BULK SIGNING enabled; no selection, checkboxes, selected count, or sticky signing footer.',
+      'investments-bulk-selection':
+        'Bulk mode: all 10 eligible drafts are selected; read-only checked indicators, CANCEL, Selected 10, and enabled Sign orders are visible.',
+      'investments-bulk-review-first':
+        'Three marked drafts: Order 1 of 3 shows read-only order details, Ex-Ante Costs expanded, optional disclosures closed, View summary and Next enabled, no Terms, and a Back spacer.',
+      'investments-bulk-review-last':
+        'Three marked drafts: Order 3 of 3 shows read-only order details, Ex-Ante Costs expanded, optional disclosures closed, Terms unchecked, Previous enabled, Continue disabled, and the caught-up status.',
+      'investments-bulk-summary-blocked':
+        'Ten-draft summary: nine marked to sign and one rejected; header Back and card inspection are available, the prerequisite notice is visible, and Confirm and sign ALL marked ORDERS is disabled.',
+      'investments-bulk-summary-ready':
+        'Ten-draft summary: nine marked to sign and one rejected; header Back and card inspection are available, all marked drafts are reviewed, Terms are accepted, and Confirm and sign ALL marked ORDERS is enabled.',
+      'investments-bulk-sign':
+        'Standard signature: a focused masked six-digit PIN and helper are visible, Sign order is enabled, no authentication animation is shown, and Back returns to the ready summary.',
+      'investments-bulk-confirmation':
+        'Success tile: Signing successful and the prototype-only helper are visible; Back to Orders to approve is enabled and there is no failure shortcut.',
+      'investments-bulk-failure':
+        'Signing result: red Failed to send, onemarkets Climate Focus Fund · LU1953188835, and prototype-only explanatory copy are visible; header Back returns to summary.',
     } as const
 
     expect(Object.keys(expectedDefaults)).toHaveLength(9)
@@ -109,9 +121,7 @@ describe('flow definitions integrity', () => {
     expect(overview.businessRules).toHaveLength(4)
     // One paragraph per group is derived from the id-carrying rules, never authored twice.
     expect(overview.businessRules[0]).toMatch(/^Selection: /)
-    expect(overview.rules?.map((rule) => rule.id)).toEqual(
-      Array.from({ length: 12 }, (_, index) => `R${index + 1}`),
-    )
+    expect(overview.rules?.map((rule) => rule.id)).toEqual(Array.from({ length: 12 }, (_, index) => `R${index + 1}`))
     expect(overview.openQuestions).toEqual([])
     expect(overview.notes).toEqual([])
     expect(overview.businessAnalysis.requirements).toEqual([])
@@ -236,11 +246,11 @@ describe('flow-library screen', () => {
   })
 
   it('opens on the selected flow and exposes capturable step screens', () => {
-    renderFlowLibrary('ro-round-up')
+    renderFlowLibrary('investments-bulk-approval')
 
     // Flow detail header. The Journey tab is the landing tab, and its previews
     // carry headings of their own, so this looks in the header specifically.
-    expect(screen.getByTestId('flow-detail-header')).toHaveTextContent('Round Up')
+    expect(screen.getByTestId('flow-detail-header')).toHaveTextContent('Bulk approval of investment orders')
 
     // The off-screen capture strip renders capturable phone screens up-front so
     // export works regardless of the active tab.
@@ -248,7 +258,7 @@ describe('flow-library screen', () => {
 
     // Tabs use real tab semantics; the Journey tab surfaces the scenarios.
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    expect(screen.getByText('Create: existing account')).toBeInTheDocument()
+    expect(screen.getByText('Review and sign marked orders')).toBeInTheDocument()
   })
 
   it('registers ETHOCA as a global Mobile PI card-transaction specification', () => {
@@ -296,7 +306,7 @@ describe('flow-library screen', () => {
   })
 
   it('shows the Figma, PDF, Word and Confluence header actions without handoff copy', () => {
-    renderFlowLibrary('ro-round-up')
+    renderFlowLibrary('investments-bulk-approval')
 
     expect(screen.getByRole('link', { name: 'Open Figma source' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Export flow as PDF' })).toBeInTheDocument()
@@ -309,7 +319,7 @@ describe('flow-library screen', () => {
   })
 
   it('keeps navigation outside the detail card and condenses flow metadata', () => {
-    renderFlowLibrary('ro-round-up')
+    renderFlowLibrary('investments-bulk-approval')
 
     const detailHeader = screen.getByTestId('flow-detail-header')
     const libraryBack = screen.getByRole('button', { name: /flow library/i })
@@ -321,7 +331,7 @@ describe('flow-library screen', () => {
   })
 
   it('keeps the library index focused on flow discovery rather than release statuses', () => {
-    renderFlowLibrary('ro-round-up')
+    renderFlowLibrary('investments-bulk-approval')
 
     fireEvent.click(screen.getByRole('button', { name: /flow library/i }))
 
@@ -331,6 +341,8 @@ describe('flow-library screen', () => {
     expect(screen.queryByText('in review')).not.toBeInTheDocument()
     expect(screen.queryByText('future release preview')).not.toBeInTheDocument()
     expect(screen.getByText(/Explore each journey visually/i)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Round Up' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'View / Reset PIN' })).not.toBeInTheDocument()
   })
 
   it('opens a flow on its journey, with no separate overview tab to step through first', () => {
@@ -382,7 +394,9 @@ describe('flow-library screen', () => {
     expect(within(list).getByText('R11')).toBeInTheDocument()
     // R10 and R11 both apply to the two summary screens; read it off R11's own row.
     const r11 = list.querySelector('#rule-R11') as HTMLElement
-    expect(within(r11).getByText(/Applies to: Summary - not ready to sign · Summary - ready to sign/)).toBeInTheDocument()
+    expect(
+      within(r11).getByText(/Applies to: Summary - not ready to sign · Summary - ready to sign/),
+    ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '5. All-drafts summary' }))
     expect(screen.getAllByRole('button', { name: 'R11' }).length).toBeGreaterThan(0)
@@ -526,15 +540,6 @@ describe('flow-library screen', () => {
     // The title now appears twice: once in the jump strip, once on the block.
     expect(screen.getAllByText('Key decision rules').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Questions to close').length).toBeGreaterThan(0)
-  })
-
-  it('navigates to the library index and back', () => {
-    renderFlowLibrary('ro-card-pin')
-
-    expect(screen.getByRole('heading', { name: 'View / Reset PIN' })).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /flow library/i }))
-    expect(screen.getByRole('heading', { name: /future flows/i })).toBeInTheDocument()
   })
 
   it('renders the ETHOCA flow with its real-demo merchant scenarios', async () => {

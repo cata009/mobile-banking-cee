@@ -14,7 +14,7 @@ const { rules: RULES, businessRules: BUSINESS_RULES } = defineRules([
     rules: [
       'The ordinary list opens read-only order detail; it never selects or signs.',
       'BULK SIGNING appears only while at least two eligible drafts remain.',
-      'Bulk mode adds checkboxes, Select all, the Selected count and Sign orders; Sign orders is enabled only with one or more selected drafts.',
+      'Entering bulk mode selects every currently eligible draft; checked order indicators are read-only, and the Selected count and Sign orders reflect the complete eligible set.',
       'CANCEL clears the local selection and restores the ordinary list; it never rejects or signs an order.',
       'Reject is confirmed only from individual order detail and becomes a local Rejected status in the summary.',
     ],
@@ -24,14 +24,14 @@ const { rules: RULES, businessRules: BUSINESS_RULES } = defineRules([
     rules: [
       'Marked orders are reviewed one at a time, with position, details and disclosures.',
       'Ex-Ante Costs starts open; the other disclosures start closed.',
-      'View summary, Back/Forward and deselection stay available without any scroll or disclosure gate.',
+      'View summary and Back/Forward stay available without any scroll or disclosure gate; the marked set cannot be changed during review.',
     ],
   },
   {
     group: 'Finalization',
     rules: [
       'Terms & Conditions appears only on the last selected order.',
-      'The summary is immutable and shows marked, unselected and rejected drafts.',
+      'The summary is immutable and shows every marked and rejected draft.',
       'Confirm and sign ALL marked ORDERS is enabled only after every marked draft was presented and Terms is accepted.',
     ],
   },
@@ -66,7 +66,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
   specLayout: 'document-and-screens',
   overview: {
     purpose:
-      'Let a customer efficiently approve a selected set of banker-created investment drafts while keeping every marked order visible in a sequential, read-only review before a single final authorization.',
+      'Let a customer efficiently approve all eligible banker-created investment drafts while keeping every marked order visible in a sequential, read-only review before a single final authorization.',
     scopeNote:
       'Flow Library prototype only. It uses local presentation state and representative investment data; it does not sign, send, reject, or update an order in a backend. The disclosure treatment is a product/prototype assumption awaiting country compliance confirmation, not a statement of legal sufficiency.',
     businessAnalysis: {
@@ -79,6 +79,12 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       versionContext:
         'In-review Flow Library prototype. It models selection, review, one final authorization and local outcomes; it is not a production signing or compliance decision.',
       versionHistory: [
+        {
+          version: '0.5',
+          date: '2026-10-16',
+          detail:
+            'Bulk signing now starts with every eligible draft selected and locks the marked set through review; selection and current-order deselection controls were removed.',
+        },
         {
           version: '0.4',
           date: '2026-08-20',
@@ -163,7 +169,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
     entryPoints: [
       {
         label: 'Investments › Orders to approve',
-        intent: 'Select one or more pending banker-created orders for a single review and authorization session.',
+        intent: 'Enter one review and authorization session for every eligible pending banker-created order.',
       },
     ],
     preconditions: [
@@ -178,7 +184,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       'Prototype failure summary that identifies a draft with Failed to sign or Failed to send, without inferring a production processing outcome.',
     ],
     analyticsEvents: [
-      'investments_bulk_selection_changed',
+      'investments_bulk_selection_initialized',
       'investments_bulk_review_order_presented',
       'investments_bulk_ex_ante_presented',
       'investments_bulk_terms_changed',
@@ -254,7 +260,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       name: 'ReviewSession',
       shape: `type ReviewSession = {
   mode: 'list' | 'bulk' | 'review' | 'summary' | 'sign' | 'result'
-  selectedIds: string[]     // R3  - drives the Selected count and Sign orders
+  selectedIds: string[]     // R3  - all eligible IDs, fixed from bulk entry through final authorization
   presentedIds: string[]    // R11 - every marked draft must have been presented
   rejectedIds: string[]     // R5  - local Rejected status only, never a backend call
   termsAccepted: boolean    // R9, R11 - only the final review page can set it
@@ -276,7 +282,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         signature: '(session: ReviewSession) => boolean',
         rules: ['R3'],
         enforcedOn: ['investments-bulk-selection'],
-        test: 'guards.test.ts › enables Sign orders only with at least one selected draft',
+        test: 'guards.test.ts › enables Sign orders for the automatically selected eligible set',
       },
       {
         name: 'isFinalReview',
@@ -325,8 +331,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
     ],
     analytics: [
       {
-        event: 'investments_bulk_selection_changed',
-        trigger: 'Any change to selectedIds',
+        event: 'investments_bulk_selection_initialized',
+        trigger: 'BULK SIGNING initializes selectedIds with every eligible draft',
         screen: 'investments-bulk-selection',
       },
       {
@@ -410,13 +416,12 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       title: 'Bulk selection',
       rules: ['R2', 'R3', 'R4', 'R5'],
       purpose:
-        'Select a compact set of pending drafts only after the customer has intentionally chosen BULK SIGNING from the ordinary list; this entry is absent when one order remains.',
+        'Review the complete set of eligible drafts after the customer intentionally chooses BULK SIGNING from the ordinary list; this entry is absent when one order remains.',
       defaultState:
-        'Bulk mode: 10 eligible drafts and all checkboxes clear; CANCEL, Select all, and a Selected 0 footer are visible; Sign orders is disabled.',
+        'Bulk mode: all 10 eligible drafts are selected; read-only checked indicators, CANCEL, Selected 10, and enabled Sign orders are visible.',
       states: [
-        'Bulk mode entered / none selected / Sign orders disabled',
-        'One or more selected / Sign orders enabled',
-        'All selectable orders selected',
+        'Bulk mode entered / all eligible drafts selected / Sign orders enabled',
+        'Read-only checked indicators remain fixed through order review',
         'Conceptual batch size up to 99',
       ],
       fields: [
@@ -427,24 +432,18 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           notes: 'Product, order type, identifier and country-formatted amount.',
         },
         {
-          name: 'Selected count / Select all',
-          type: 'Footer checkbox + live status',
+          name: 'Selected count',
+          type: 'Live status',
           required: true,
           notes:
-            'Counts selected eligible IDs (local selected-ID set). Select/deselect/Select all update it immediately. 0 = Selected 0 + Sign orders disabled; >0 enables it. Persists into review; CANCEL or final deselection resets to 0.',
+            'Counts every eligible ID selected on bulk entry. The marked set remains fixed through review; CANCEL abandons the local selection and restores the ordinary list.',
         },
       ],
       actions: [
         {
-          label: 'Select / deselect draft',
-          result:
-            'Adds/removes that draft ID from local selection, immediately updates Selected count, and enables/disables Sign orders at the 0/1 boundary.',
+          label: 'Selected draft indicator',
+          result: 'Shows each automatically selected draft as checked and disabled; it cannot change the marked set.',
           rule: 'R3',
-        },
-        {
-          label: 'Select all',
-          result:
-            'Selects every current selectable draft, or clears the whole current selection; Selected count immediately becomes the eligible total or 0.',
         },
         {
           label: 'CANCEL',
@@ -452,18 +451,22 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
             'Appears in the top-right position occupied by BULK SIGNING on the ordinary list. Clears unsubmitted local selection and returns to the ordinary list.',
           rule: 'R4',
         },
-        { label: 'Sign orders', result: 'Opens the first selected draft; disabled with no selection.', rule: 'R3' },
+        {
+          label: 'Sign orders',
+          result: 'Opens the first eligible draft; enabled while the eligible set is non-empty.',
+          rule: 'R3',
+        },
       ],
       edgeCases: [
-        'A customer can leave any order unselected.',
+        'Every currently eligible draft is selected on entry; a draft rejected before entry is excluded from the marked set.',
         'The bulk list does not expose REJECT. Rejection is available only from an ordinary-list order detail; once confirmed, that draft leaves both the ordinary and bulk lists while its Rejected status remains visible in the read-only summary.',
         'CANCEL never rejects or signs an order; it only abandons the current local bulk selection and restores the ordinary list.',
-        'If the final marked order is deselected, the Sign orders CTA becomes unavailable and focus remains on the selection list.',
-        'Long product names, identifiers and 10–20 order lists must not hide the checkbox label or selected count.',
+        'The marked set remains unchanged when navigating to the review list or summary; the current-order row has no selection control.',
+        'Long product names, identifiers and 10–20 order lists must not hide the checked indicator or selected count.',
       ],
       acceptance: [
         'Selection uses the Figma 24px outlined checkbox presentation with semantic checkbox roles, not a nested button inside a clickable row.',
-        'The selected count, Select all and Sign orders CTA remain discoverable for keyboard and screen-reader users.',
+        'Checked indicators are exposed as disabled checked checkboxes; the selected count and Sign orders CTA remain discoverable for keyboard and screen-reader users.',
       ],
     },
     'investments-bulk-review-first': {
@@ -472,7 +475,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       purpose:
         'Present one non-final marked order in a sequential, read-only review with its Ex-Ante Costs visibly expanded on entry.',
       defaultState:
-        'Three marked drafts: Order 1 of 3 has a checked current-order checkbox, Ex-Ante Costs expanded, optional disclosures closed, View summary and Next enabled, no Terms, and a Back spacer.',
+        'Three marked drafts: Order 1 of 3 shows read-only order details, Ex-Ante Costs expanded, optional disclosures closed, View summary and Next enabled, no Terms, and a Back spacer.',
       states: [
         'Order 1 of n or 2 of n',
         'Ex-Ante Costs open',
@@ -520,15 +523,14 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           rule: 'R8',
         },
         {
-          label: 'Selected current-order checkbox',
-          result:
-            'Shows the current product/order beside a checked Figma-style control; activating it removes only this draft and recalculates position/count.',
+          label: 'Current order details',
+          result: 'Shows the current product/order as read-only context without a selection control.',
         },
       ],
       back: 'Returns to the selected-orders list without changing pending-order data.',
       edgeCases: [
         'No forced scroll-to-bottom or opening of the optional disclosures is required to move next/previous.',
-        'After removing the current order, focus moves to the next available order heading, otherwise the previous one, otherwise the selection list.',
+        'Back to the order list preserves the complete marked set; no order can be removed from the queue during review.',
       ],
       acceptance: [
         'Terms & Conditions is absent on every non-final review page.',
@@ -541,7 +543,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       purpose:
         'Present the final marked order with the same complete read-only detail structure and the one Terms & Conditions control that precedes summary/signing.',
       defaultState:
-        'Three marked drafts: Order 3 of 3 has a checked current-order checkbox, Ex-Ante Costs expanded, optional disclosures closed, Terms unchecked, Previous enabled, Continue disabled, and the caught-up status.',
+        'Three marked drafts: Order 3 of 3 shows read-only order details, Ex-Ante Costs expanded, optional disclosures closed, Terms unchecked, Previous enabled, Continue disabled, and the caught-up status.',
       states: [
         'Order n of n',
         'Ex-Ante Costs open',
@@ -573,7 +575,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           type: 'Switch',
           required: true,
           validation:
-            'Shown only on this final selected-order page in its own separated sticky row with 12px vertical padding, immediately after the selected-current-draft row and before the sticky navigator.',
+            'Shown only on this final selected-order page in its own separated sticky row with 12px vertical padding, immediately after the current-order details row and before the sticky navigator.',
         },
       ],
       actions: [
@@ -585,9 +587,8 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           rule: 'R9',
         },
         {
-          label: 'Selected current-order checkbox',
-          result:
-            'Updates local selection; if another becomes final, its page becomes the only page with Terms & Conditions.',
+          label: 'Current order details',
+          result: 'Shows the current product/order as read-only context; the marked set cannot change.',
         },
       ],
       acceptance: [
@@ -601,7 +602,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       purpose:
         'Show the read-only all-drafts summary before the local prototype conditions for one final sign entry have been completed.',
       defaultState:
-        'Ten-draft summary: three marked to sign, one rejected, and the rest not signed; header Back and card inspection are available, the prerequisite notice is visible, and Confirm and sign ALL marked ORDERS is disabled.',
+        'Ten-draft summary: nine marked to sign and one rejected; header Back and card inspection are available, the prerequisite notice is visible, and Confirm and sign ALL marked ORDERS is disabled.',
       states: ['Some marked drafts not yet presented', 'Last-order terms not accepted', 'Final sign action disabled'],
       fields: [
         {
@@ -609,7 +610,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           type: 'Read-only status cards',
           required: true,
           notes:
-            'Each distinct multi-line card shows a leading status marker, full status label, full product/order name, order type, ISIN and amount without truncation.',
+            'Each distinct multi-line card shows a leading status marker, full status label, full product/order name, order type, ISIN and amount without truncation; every eligible draft is marked and rejected drafts remain excluded.',
         },
         { name: 'Selected total', type: 'Read-only count', required: true },
         {
@@ -627,7 +628,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         {
           label: 'Header Back',
           result:
-            'Returns to the current review queue position so selection/terms can be changed; no duplicate footer back action is shown.',
+            'Returns to the current review queue position without changing the marked set; no duplicate footer back action is shown.',
         },
         {
           label: 'Confirm and sign ALL marked ORDERS',
@@ -637,7 +638,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       ],
       edgeCases: [
         'The summary never offers inline selection editing; changes return to review/list controls.',
-        "Opening a marked, unselected or rejected card preserves that card's existing status and never silently selects or mutates it.",
+        "Opening a marked or rejected card preserves that card's existing status and never mutates it.",
         'Long product/order names and status labels wrap within their own card rather than being truncated or visually merged with another draft.',
         'Rejected drafts are read-only status rows here, not a bulk rejection action.',
       ],
@@ -652,7 +653,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       purpose:
         'Provide the immutable final all-drafts summary and the single enabled batch-sign entry once the local review and terms conditions are met.',
       defaultState:
-        'Ten-draft summary: three marked to sign, one rejected, and the rest not signed; header Back and card inspection are available, all marked drafts are reviewed, Terms are accepted, and Confirm and sign ALL marked ORDERS is enabled.',
+        'Ten-draft summary: nine marked to sign and one rejected; header Back and card inspection are available, all marked drafts are reviewed, Terms are accepted, and Confirm and sign ALL marked ORDERS is enabled.',
       states: ['Every marked order presented', 'Final-page Terms & Conditions accepted', 'Final action enabled'],
       fields: [
         {
@@ -660,7 +661,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
           type: 'Read-only status cards',
           required: true,
           notes:
-            'Distinct multi-line cards preserve the full product/order name, status, type, ISIN and amount for every marked, unselected or rejected draft.',
+            'Distinct multi-line cards preserve the full product/order name, status, type, ISIN and amount for every marked or rejected draft.',
         },
         { name: 'Selected total', type: 'Read-only count', required: true },
       ],
@@ -682,7 +683,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       ],
       acceptance: [
         'The exact final action label is Confirm and sign ALL marked ORDERS.',
-        'The summary remains non-editable and makes unselected/rejected drafts visible rather than silently omitting them.',
+        'The summary remains non-editable and shows all marked drafts plus rejected drafts.',
       ],
     },
     'investments-bulk-sign': {
@@ -779,7 +780,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
       label: 'Review and sign marked orders',
       kind: 'happy',
       description:
-        'The main prototype journey: select drafts, review marked orders sequentially, accept Terms & Conditions only on the last order, inspect the immutable summary, then enter one standard signature step.',
+        'The main prototype journey: mark every eligible draft on bulk entry, review all orders sequentially, accept Terms & Conditions only on the last order, inspect the immutable summary, then enter one standard signature step.',
       steps: [
         {
           id: 'entry',
@@ -810,8 +811,7 @@ export const INVESTMENTS_BULK_APPROVAL_FLOW: FlowDefinition = {
         {
           id: 'summary',
           title: 'All-drafts summary',
-          description:
-            'Read-only multi-line marked, unselected and rejected draft cards with the enabled final sign entry.',
+          description: 'Read-only multi-line marked and rejected draft cards with the enabled final sign entry.',
           screen: 'investments-bulk-summary-ready',
         },
         {

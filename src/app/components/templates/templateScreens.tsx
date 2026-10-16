@@ -21,14 +21,14 @@ import { getMoreCardsForCountry } from "@/app/config/moreCardsConfig";
 import { getPaymentsMenuForCountry } from "@/app/config/paymentsMenuConfig";
 import { getProductsMenuForCountry } from "@/app/config/productsMenuConfig";
 import { useLanguage } from "@/app/contexts/LanguageContext";
-import ProductDetailScreen from "@/app/screens/products/ProductDetailScreen";
+import { TemplateProductDetailPreview } from "./TemplateProductsPreview";
 import {
-  BankingContent,
-  ProductsHeader,
-  ProductsTabs,
-  ShopSmartContent,
-  getProductsCardTranslationId,
-} from "@/app/screens/products/ProductsScreen";
+  TemplateBankingContent as BankingContent,
+  TemplateProductsHeader as ProductsHeader,
+  TemplateProductsTabs as ProductsTabs,
+  TemplateShopSmartContent as ShopSmartContent,
+  getTemplateProductsCardTranslationId as getProductsCardTranslationId,
+} from "./TemplateProductsPreview";
 import { ACCOUNT_OPTION_ITEMS, ACCOUNT_PRODUCT_OPTIONS } from "@/data/accountDetails";
 import {
   accountTransactionTemplateRows,
@@ -830,12 +830,7 @@ export function LogoutConfirmationTemplate({ interactive }: { interactive: boole
 export function ProductDetailTemplate({ interactive }: { interactive: boolean }) {
   return (
     <TemplatePhoneSurface>
-      <ProductDetailScreen
-        title="Product name"
-        cardId="account"
-        optionId="current-account"
-        actionLabel="Button"
-        includeSafeArea={false}
+      <TemplateProductDetailPreview
         onBack={() => undefined}
         onActionClick={interactive ? () => undefined : undefined}
       />

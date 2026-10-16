@@ -32,23 +32,17 @@ function renderBulkPrototype() {
 }
 
 function enterBulkSigning() {
-  if (!screen.queryByRole("checkbox", { name: "Select all orders" })) {
+  if (!screen.queryByTestId("bulk-selected-count")) {
     fireEvent.click(screen.getByRole("button", { name: "BULK SIGNING" }));
   }
 }
 
-function selectDrafts(count = 3) {
+function selectDrafts(_count = 3) {
   enterBulkSigning();
-  screen.getAllByRole("checkbox").filter((checkbox) => !checkbox.hasAttribute("disabled")).slice(0, count).forEach((checkbox) => {
-    fireEvent.click(checkbox);
-  });
 }
 
-function selectNamedDrafts(...names: string[]) {
+function selectNamedDrafts(..._names: string[]) {
   enterBulkSigning();
-  names.forEach((name) => {
-    fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
-  });
 }
 
 function startReviewWithSelectedDrafts(count = 3) {
@@ -58,6 +52,10 @@ function startReviewWithSelectedDrafts(count = 3) {
 
 function nextOrderFromBottom() {
   fireEvent.click(screen.getByRole("button", { name: "Next draft" }));
+}
+
+function moveToLastOrder() {
+  while (screen.queryByRole("button", { name: "Next draft" })) nextOrderFromBottom();
 }
 
 function openSummaryFromBottom() {
@@ -141,13 +139,14 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.queryByRole("button", { name: "BULK SIGNING" })).not.toBeInTheDocument();
   });
 
-  it("opens bulk mode with selectable rows and an enabled Sign orders action", async () => {
+  it("selects every eligible draft on bulk entry and keeps the selection fixed", async () => {
     const { container } = renderBulkPrototype();
 
     selectDrafts(2);
 
-    expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 2");
-    expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(2);
+    expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 10");
+    expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(10);
+    expect(screen.getAllByRole("checkbox").every((checkbox) => checkbox.hasAttribute("disabled"))).toBe(true);
     expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign orders" })).toBeEnabled();
 
@@ -169,7 +168,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "BULK SIGNING" })).toBeInTheDocument();
   });
 
-  it("keeps the exact named draft identities through selection, review, summary, rejection and deselection", () => {
+  it("keeps every eligible draft selected through review and summary", () => {
     renderBulkPrototype();
 
     selectNamedDrafts("UniCredit Balanced Income Fund", "onemarkets Climate Focus Fund", "Sustainable Future Mixed Fund");
@@ -177,16 +176,15 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-review-current-draft-row")).toHaveTextContent("UniCredit Balanced Income Fund");
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
 
-    ["UniCredit Balanced Income Fund", "onemarkets Climate Focus Fund", "Sustainable Future Mixed Fund"].forEach((name) => {
-      expect(screen.getByTestId(`bulk-summary-draft-draft-${name === "UniCredit Balanced Income Fund" ? "01" : name === "onemarkets Climate Focus Fund" ? "02" : "03"}`)).toHaveTextContent("Marked to sign");
+    ["draft-01", "draft-02", "draft-03", "draft-04", "draft-10"].forEach((id) => {
+      expect(screen.getByTestId(`bulk-summary-draft-${id}`)).toHaveTextContent("Marked to sign");
     });
     expect(screen.getByTestId("bulk-summary-status-marker-draft-02")).toHaveClass("bg-[var(--uc-green-olive)]");
-    expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Not selected to be signed");
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund. Activate to deselect." }));
+    expect(screen.queryByRole("checkbox", { name: /Activate to deselect/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
-    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Marked to sign");
     expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Marked to sign");
   });
 
@@ -203,9 +201,9 @@ describe("Investments bulk approval Flow Library prototype", () => {
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
 
     expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Rejected");
-    expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Marked to sign");
     expect(screen.getByTestId("bulk-summary-draft-draft-03")).toHaveTextContent("Marked to sign");
-    expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Marked to sign");
   });
 
   it("renders the Figma row logo in a 32px slot", () => {
@@ -215,12 +213,14 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(logo).toHaveStyle({ width: "32px", height: "32px" });
   });
 
-  it("uses the exact selection checkmark and leaves group-ending rows without a trailing divider", () => {
+  it("shows the fixed selection checkmark and leaves group-ending rows without a trailing divider", () => {
     renderBulkPrototype();
 
     enterBulkSigning();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select UniCredit Balanced Income Fund" }));
-    expect(screen.getByTestId("flow-bulk-selection-checkmark")).toHaveAttribute("width", "14");
+    expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund" })).toBeDisabled();
+    expect(screen.getAllByTestId("flow-bulk-selection-checkmark")).toHaveLength(10);
+    expect(screen.getAllByTestId("flow-bulk-selection-checkmark")[0]).toHaveAttribute("width", "14");
     expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
 
     const lastAdvisoryRow = screen.getByText("CEE Government Bond Fund").closest("div.flex");
@@ -229,14 +229,12 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(lastOrderRow).not.toHaveClass("border-b");
   });
 
-  it("selects every current selectable draft from the Select all control", () => {
+  it("enters bulk mode with every eligible draft already selected", () => {
     renderBulkPrototype();
 
     enterBulkSigning();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select all orders" }));
-
     expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 10");
-    expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(11);
+    expect(screen.getAllByRole("checkbox", { checked: true })).toHaveLength(10);
     expect(screen.getByRole("button", { name: "Sign orders" })).toBeEnabled();
   });
 
@@ -296,7 +294,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.queryByRole("button", { name: "Previous draft" })).not.toBeInTheDocument();
     expect(screen.getByTestId("bulk-review-back-spacer")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByRole("button", { name: "Next draft" })).toBeEnabled();
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 3");
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 10");
     expect(screen.queryByRole("button", { name: "Previous" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next order" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Continue" })).not.toBeInTheDocument();
@@ -304,16 +302,16 @@ describe("Investments bulk approval Flow Library prototype", () => {
     const currentDraftRow = screen.getByTestId("bulk-review-current-draft-row");
     expect(currentDraftRow).toHaveTextContent("UniCredit Balanced Income Fund");
     expect(currentDraftRow).toHaveClass("py-[12px]");
-    expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund. Activate to deselect." })).toBeChecked();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch", { name: /Accept terms/i })).not.toBeInTheDocument();
 
     nextOrderFromBottom();
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 2 of 3");
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 2 of 10");
     expect(screen.getByRole("button", { name: "Previous draft" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Next draft" })).toBeEnabled();
-    nextOrderFromBottom();
+    moveToLastOrder();
 
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 3 of 3");
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 10 of 10");
     expect(screen.getByRole("switch", { name: /Accept terms/i })).toBeInTheDocument();
     expect(screen.getByTestId("bulk-review-read-status")).toHaveTextContent("Scroll down for all the details");
     const termsRow = screen.getByTestId("bulk-review-terms-row");
@@ -333,7 +331,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
       "!h-[32px]",
     );
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 3 of 3");
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 10 of 10");
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
@@ -369,11 +367,11 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(markedCard).not.toHaveTextContent("Ex-Ante Costs shown");
     expect(markedCard.querySelector(".uc-type-n5-strong")).toBeTruthy();
 
-    const unselectedCard = screen.getByTestId("bulk-summary-draft-draft-02");
-    expect(unselectedCard).toHaveTextContent("Not selected to be signed");
-    expect(unselectedCard).toHaveTextContent("onemarkets Climate Focus Fund");
-    expect(unselectedCard).toHaveTextContent("SELL · LU1953188835");
-    expect(unselectedCard).toHaveTextContent(/3[.,]200,00 RON/);
+    const nextMarkedCard = screen.getByTestId("bulk-summary-draft-draft-02");
+    expect(nextMarkedCard).toHaveTextContent("Marked to sign");
+    expect(nextMarkedCard).toHaveTextContent("onemarkets Climate Focus Fund");
+    expect(nextMarkedCard).toHaveTextContent("SELL · LU1953188835");
+    expect(nextMarkedCard).toHaveTextContent(/3[.,]200,00 RON/);
 
     expect(screen.queryByRole("button", { name: "Back to review" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toHaveClass("!w-full");
@@ -386,7 +384,6 @@ describe("Investments bulk approval Flow Library prototype", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
     fireEvent.click(screen.getByRole("button", { name: "Yes, reject the order" }));
     enterBulkSigning();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Select onemarkets Climate Focus Fund" }));
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
 
@@ -397,7 +394,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getAllByRole("heading", { name: "Orders summary" })).not.toHaveLength(0);
 
     fireEvent.click(screen.getByRole("button", { name: "View Sustainable Future Mixed Fund order details" }));
-    expect(screen.getByText("Not signed")).toBeInTheDocument();
+    expect(screen.getByText("Marked to sign")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
     fireEvent.click(screen.getByRole("button", { name: "View UniCredit Balanced Income Fund order details" }));
@@ -458,8 +455,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
-    nextOrderFromBottom();
-    nextOrderFromBottom();
+    moveToLastOrder();
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
     openSummaryFromBottom();
 
@@ -470,8 +466,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
     renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
-    nextOrderFromBottom();
-    nextOrderFromBottom();
+    moveToLastOrder();
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
     openSummaryFromBottom();
     fireEvent.click(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" }));
@@ -480,33 +475,31 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Sign order" })).toBeInTheDocument();
   });
 
-  it("uses the checked current-draft row to deselect and preserves its Not signed summary state", () => {
+  it("keeps every order marked and removes the current-order deselection control", () => {
     renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund. Activate to deselect." }));
-
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 2");
-    nextOrderFromBottom();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    moveToLastOrder();
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 10 of 10");
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
     openSummaryFromBottom();
 
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toBeEnabled();
-    expect(screen.getByText("UniCredit Balanced Income Fund").parentElement).toHaveTextContent("Not selected to be signed");
+    expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Marked to sign");
   });
 
-  it("resets accepted terms when deselection changes the reviewed batch", () => {
+  it("preserves the complete marked set while moving back from the final review page", () => {
     renderBulkPrototype();
     startReviewWithSelectedDrafts();
-    nextOrderFromBottom();
-    nextOrderFromBottom();
+    moveToLastOrder();
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
     expect(screen.getByRole("switch", { name: /Accept terms/i })).toHaveAttribute("aria-checked", "true");
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Selected: Sustainable Future Mixed Fund. Activate to deselect." }));
-
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 2 of 2");
-    expect(screen.getByRole("switch", { name: /Accept terms/i })).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(screen.getByRole("button", { name: "Previous draft" }));
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 9 of 10");
+    fireEvent.click(screen.getByRole("button", { name: "View summary" }));
+    expect(screen.getByTestId("bulk-summary-draft-draft-10")).toHaveTextContent("Marked to sign");
   });
 
   it.each(COUNTRIES)("renders selectable, country-formatted drafts for %s", async (country) => {
@@ -518,7 +511,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
 
     expect(document.body).toHaveTextContent(getCountryCurrency(country));
     startReviewWithSelectedDrafts(1);
-    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 1");
+    expect(screen.getByTestId("bulk-review-progress")).toHaveTextContent("Order 1 of 10");
     await asyncNativeReady(container);
     const exAnte = await screen.findByRole("button", { name: /Ex-Ante cost information/i });
     if (country === "IT") {
