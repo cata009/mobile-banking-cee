@@ -6,17 +6,17 @@ import {
 } from "@/app/screens/flow-library/flowExport";
 
 const META: FlowExportMeta = {
-  flowTitle: "Round Up",
-  flowLabel: "RO Round Up",
-  scenarioLabel: "Create & activate",
-  scenarioDescription: "User activates Round Up with an existing savings account.",
+  flowTitle: "Example Flow",
+  flowLabel: "Sample Flow",
+  scenarioLabel: "Complete example",
+  scenarioDescription: "User completes the example flow.",
   countryScope: "RO",
   figmaFile: "RO Enablers",
   sourceUrl: "https://www.figma.com/design/example",
 };
 
 const STEPS: CapturedFlowStep[] = [
-  { title: "Home <entry>", description: 'Promo card with "Round Up"', pngBase64: "AAAABBBB" },
+  { title: "Home <entry>", description: 'Example screen for "Sample Flow"', pngBase64: "AAAABBBB" },
   { title: "Sign", description: "Standard signing screen", pngBase64: "CCCCDDDD" },
 ];
 
@@ -28,9 +28,9 @@ describe("flow export document", () => {
       autoPrint: false,
     });
 
-    expect(html).toContain("Round Up");
+    expect(html).toContain("Example Flow");
     expect(html).toContain("Home &lt;entry&gt;");
-    expect(html).toContain("Promo card with &quot;Round Up&quot;");
+    expect(html).toContain("Example screen for &quot;Sample Flow&quot;");
     expect(html).toContain('src="step-1.png"');
     expect(html).toContain('src="step-2.png"');
     expect(html).toContain("Step 2 of 2");

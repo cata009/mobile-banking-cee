@@ -26,8 +26,6 @@ import type { CountryId } from '@/app/state/demoTypes'
 
 /** Stable ids for the flows shipped in the library. */
 export type FlowPreviewId =
-  | 'ro-round-up'
-  | 'ro-card-pin'
   | 'ro-genius-my-car'
   | 'mobile-pi-ethoca'
   | 'rs-property-insurance'
@@ -38,39 +36,6 @@ export type FlowPreviewId =
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
  * `../components/flowPreviews.tsx`. Adding a screen = add a kind here + a case there.
  */
-export type RoundUpScreenKind =
-  | 'home-entry'
-  | 'products-round-up'
-  | 'round-up-info'
-  | 'open-savings'
-  | 'setup-form'
-  | 'sign'
-  | 'success-active'
-  | 'accounts-active'
-  | 'manage'
-  | 'confirm-deactivate'
-  | 'success-deactivated'
-
-export type CardPinScreenKind =
-  | 'cards-credit'
-  | 'cards-debit'
-  | 'card-options-credit'
-  | 'card-options-debit'
-  | 'pin-faceid-credit'
-  | 'pin-faceid-debit'
-  | 'pin-reveal-credit-hidden'
-  | 'pin-reveal-credit-visible'
-  | 'pin-reveal-debit-hidden'
-  | 'pin-reveal-debit-visible'
-  | 'set-pin-credit-empty'
-  | 'set-pin-credit-filled'
-  | 'set-pin-debit-empty'
-  | 'set-pin-debit-filled'
-  | 'pin-sign'
-  | 'pin-success'
-  | 'pin-not-eligible-credit'
-  | 'pin-not-eligible-debit'
-
 /** Global card-transaction enrichment states sourced from Mastercard Ethoca. */
 export type EthocaScreenKind =
   | 'ethoca-list-merchant-logo'
@@ -168,8 +133,6 @@ export type InvestmentsBulkApprovalScreenKind =
   | 'investments-bulk-failure'
 
 export type FlowScreenKind =
-  | RoundUpScreenKind
-  | CardPinScreenKind
   | EthocaScreenKind
   | RsPropertyInsuranceScreenKind
   | RsDisposableCardsScreenKind
