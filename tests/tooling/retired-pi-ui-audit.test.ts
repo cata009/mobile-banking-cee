@@ -115,7 +115,7 @@ afterEach(() => {
 })
 
 it('emits a real PI retirement manifest with consumer categories kept separate', () => {
-  const manifestPath = resolve(repositoryRoot, '.codex-temp/pi-wide-migration/luna-15/legacy-pi-consumer-manifest.json')
+  const manifestPath = resolve(repositoryRoot, 'scripts/native-spike/pi-retirement-source.json')
   const result = runAudit(repositoryRoot, manifestPath)
 
   expect(result.status).toBe(0)
@@ -133,6 +133,7 @@ it('emits a real PI retirement manifest with consumer categories kept separate',
     'tests/features/native-baseline-completeness.test.ts',
   ]))
   expect(typeof result.manifest.normalProductionGraphGuard.passed).toBe('boolean')
+  expect(result.manifest.normalProductionGraphGuard.passed).toBe(true)
   expect(result.manifest.normalProductionGraphGuard.roots).toEqual(expect.arrayContaining(['src/main.tsx', 'src/app/App.tsx']))
   expect(result.manifest.normalProductionGraphGuard.passed).toBe(
     result.manifest.normalProductionGraphGuard.reachableRetiredPiUi.length === 0 &&

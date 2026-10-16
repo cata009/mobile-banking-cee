@@ -28,8 +28,9 @@
     "audit:assets": "node scripts/audit-assets.mjs",
     "audit:modules": "node scripts/audit-module-boundaries.mjs",
     "agent:scope": "node scripts/check-agent-scope.mjs",
-    "audit:all": "npm run audit:card-details && npm run audit:investments && npm run audit:figma-bridge && npm run audit:templates && npm run audit:platform && npm run audit:assets && npm run audit:modules",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run audit:all && npm run build"
+    "audit:all": "npm run audit:card-details && npm run audit:investments && npm run audit:figma-bridge && npm run audit:templates && npm run audit:platform && npm run audit:assets && npm run audit:modules && npm run audit:retired-pi",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run audit:all && npm run build",
+    "audit:retired-pi": "node scripts/native-spike/audit-retired-pi-ui.mjs --check --output .codex-temp/pi-retirement-audit.json"
   },
   "dependencies": {
     "@popperjs/core": "2.11.8",

@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Immutable reference inputs for the strict PI UI retirement audit. No customer UI imports this data or the historical router text.",
+  "baseCommit": "d338f7cfb92435bb8edc8817afbdd47031fb18e3",
+  "routerArchive": {
+    "source": "src/app/AppScreenRouter.tsx",
+    "copy": "scripts/native-spike/reference/AppScreenRouter.before.txt",
+    "sha256": "BA1DD762E5E462C05DE974B6F91984DE94203D37DAC4952CCC87E599CC43ACA0",
+    "bytes": 23158,
+    "copyVerified": true,
+    "externalArchiveBuildConfig": "Separate private reference build; not part of the customer build"
+  },
+  "oldScreenRouteBranches": [
+    {
+      "disposition": "Old Source customer route modules; retain files for archive, metadata and direct tests; remove imports from normal PI router after archive proof.",
+      "routes": [
+        "homepage",
+        "analytics",
+        "messages",
+        "transactions",
+        "account-detail",
+        "transaction-detail",
+        "account-details-info",
+        "account-options",
+        "card-detail",
+        "card-details-info",
+        "card-options",
+        "prime",
+        "appointments",
+        "request-call",
+        "more",
+        "documents",
+        "settings",
+        "payments",
+        "domestic-payment",
+        "payment-review",
+        "payment-sign",
+        "payment-success",
+        "products",
+        "product-detail",
+        "my-banker",
+        "investments",
+        "investments-history",
+        "investment-orders-to-approve",
+        "smart-investment",
+        "future-gain-peer-insights",
+        "contacts"
+      ],
+      "specifierModules": [
+        "@/app/screens/home/HomeScreen",
+        "@/app/screens/analytics/AnalyticsScreen",
+        "@/app/screens/messages/MessagesScreen",
+        "@/app/screens/accounts/AccountDetailScreen",
+        "@/app/screens/accounts/TransactionsScreen",
+        "@/app/screens/accounts/AccountDetailsInfoScreen",
+        "@/app/screens/accounts/AccountOptionsScreen",
+        "@/app/screens/cards/CardDetailScreen",
+        "@/app/screens/cards/CardDetailsInfoScreen",
+        "@/app/screens/cards/CardOptionsScreen",
+        "@/app/screens/cards/CreditLimitOfferFlow",
+        "@/app/screens/prime/PrimeScreen",
+        "@/app/screens/appointments/AppointmentScreen",
+        "@/app/screens/appointments/RequestCallScreen",
+        "@/app/screens/more/MoreScreen",
+        "@/app/screens/documents/DocumentsScreen",
+        "@/app/screens/settings/SettingsScreen",
+        "@/app/screens/payments/PaymentsScreen",
+        "@/app/screens/payments/DomesticPaymentFlowScreens",
+        "@/app/screens/payments/Evo2027DomesticPaymentFlow",
+        "@/app/screens/products/ProductsScreen",
+        "@/app/screens/products/ProductDetailScreen",
+        "@/app/screens/my-banker/MyBankerScreen",
+        "@/app/screens/my-banker/MyBankerEntryCard",
+        "@/app/screens/investments/InvestmentsPortfolioScreen",
+        "@/app/screens/investments/InvestmentsHistoryScreen",
+        "@/app/screens/investments/OrdersToApproveScreen",
+        "@/app/screens/investments/SmartInvestmentScreen",
+        "@/app/screens/investments/FutureGainPeerInsightsScreen",
+        "@/app/screens/contacts/ContactsScreen"
+      ]
+    },
+    {
+      "disposition": "Shared/guarded Source routes; preserve for excluded Source contexts and unsupported demo selections.",
+      "routes": [
+        "prelogin-inactive",
+        "prelogin-active",
+        "language-selector",
+        "co-apping-session",
+        "unsupported-runtime-context"
+      ],
+      "specifierModules": [
+        "@/app/components/LanguageSelector",
+        "@/app/components/PreLoginActiveScreen",
+        "@/app/components/PreLoginScreen",
+        "@/app/components/CoAppingSessionScreen",
+        "@/app/components/UnsupportedContextScreen"
+      ]
+    },
+    {
+      "disposition": "Excluded product KIDS_PI; keep.",
+      "routes": ["Kids-market-home"],
+      "specifierModules": ["@/app/screens/kids/KidsMarketHomeApp", "@/data/kidsMarketHomeConcepts"]
+    },
+    {
+      "disposition": "Excluded PI Italy experience; keep.",
+      "routes": ["PI/IT/mobile-first/homepage"],
+      "specifierModules": ["@/experiences/pi/it/mobile-first/MobileFirstHome"]
+    },
+    {
+      "disposition": "Platform controls; keep in normal platform routing.",
+      "routes": ["design-system", "flow-library", "tools"],
+      "specifierModules": [
+        "@/app/screens/design-system/DesignSystemPage",
+        "@/app/screens/flow-library/FlowLibraryScreen",
+        "@/app/screens/tools/ToolsScreen"
+      ]
+    }
+  ],
+  "retainedSharedAndExcluded": [
+    {
+      "reason": "Shared route surface explicitly retained for SME/Italy/cross-context compatibility; defer branch-specific split rather than deleting.",
+      "path": "src/app/screens/home/HomeScreen.tsx"
+    },
+    {
+      "reason": "Source route used by non-native/excluded contexts; retain until consumer proof.",
+      "path": "src/app/screens/payments/PaymentsScreen.tsx"
+    },
+    {
+      "reason": "Product UI has PI/SME package/component metadata; retain shared path.",
+      "path": "src/app/screens/products/ProductsScreen.tsx"
+    },
+    {
+      "reason": "Product UI has PI/SME package/component metadata; retain shared path.",
+      "path": "src/app/screens/products/ProductDetailScreen.tsx"
+    },
+    {
+      "reason": "Shared Source route surface; retain until context proof.",
+      "path": "src/app/screens/contacts/ContactsScreen.tsx"
+    }
+  ],
+  "testConsumers": {
+    "directAppScreenRouterTests": [],
+    "AppIntegrationTests": [
+      {
+        "sourceConsumption": "Renders App; mocks HomeScreen and InvestmentsPortfolioScreen plus the CZ chat launcher; asserts Source AppShell/AppScreenRouter path, coordinator navigation, local screen state, investment requests and chat actions.",
+        "path": "tests/navigation/app-orchestration.test.tsx"
+      },
+      {
+        "sourceConsumption": "Renders App; mocks Source Home/Card/credit-offer screens; asserts product selection, transaction identity, coordinator context and Back.",
+        "path": "tests/navigation/app-context-regressions.test.tsx"
+      }
+    ],
+    "SourceChatIntegrationTest": {
+      "sourceConsumption": "Source CZ orchestrator/App shell wiring; does not import AppScreenRouter directly.",
+      "path": "tests/chat/cz-chat-app-orchestration.test.ts"
+    },
+    "NativeRouteAndBridgeTests": [
+      "tests/features/pi-wide-native-closure.test.ts",
+      "tests/features/native-baseline-completeness.test.ts",
+      "tests/features/native-demo-policy.test.ts",
+      "tests/features/native-baseline-eligibility.test.ts",
+      "tests/features/native-investment-route-policy.test.ts",
+      "tests/components/native-demo-surface.test.tsx",
+      "tests/utils/deep-link.test.ts"
+    ],
+    "DirectAppScreenPathTests": [
+      "tests/performance/more-card-image-preloading.test.tsx",
+      "tests/tooling/module-boundaries.test.mjs",
+      "tests/components/baseline-catalog.test.ts",
+      "tests/components/baseline-header-compositions-web.test.tsx",
+      "tests/screens/account-details-info.test.tsx",
+      "tests/navigation/app-orchestration.test.tsx",
+      "tests/navigation/app-context-regressions.test.tsx",
+      "tests/screens/app-2027-homepage.test.tsx",
+      "tests/screens/app-2027-home-routing.test.tsx",
+      "tests/components/baseline-marketing-contract-web.test.tsx",
+      "tests/components/baseline-selection-controls-dom.test.tsx",
+      "tests/screens/card-detail-boundaries.test.tsx",
+      "tests/screens/appointment-flow-coverage.test.tsx",
+      "tests/screens/bulk-approval-module.test.ts",
+      "tests/screens/component-implementation-package.test.tsx",
+      "tests/screens/cz-future-robo-advisor-flow.test.tsx",
+      "tests/screens/component-implementation-package-coverage.test.tsx",
+      "tests/screens/credit-limit-offer-flow.test.tsx",
+      "tests/components/hu-money-labels.test.tsx",
+      "tests/screens/design-system-specimens.test.tsx",
+      "tests/screens/disposable-cards-flow.test.tsx",
+      "tests/screens/domestic-payment-footer.test.tsx",
+      "tests/components/investment-semantic-colors.test.tsx",
+      "tests/screens/evo-analytics-drilldown-state.test.ts",
+      "tests/screens/evo-2027-analytics.test.tsx",
+      "tests/screens/cz-future-robo-advisor-model.test.ts",
+      "tests/screens/cz-robo/creation-success.test.tsx",
+      "tests/screens/evo-analytics-state.test.ts",
+      "tests/screens/cz-robo/empty-investments.test.tsx",
+      "tests/screens/cz-robo/empty-goal-progress.test.tsx",
+      "tests/screens/evo-destination-surfaces.test.tsx",
+      "tests/screens/cz-robo/suggestion-layout.test.tsx",
+      "tests/screens/evo-credit-progress-privacy.test.tsx",
+      "tests/screens/cz-robo/sold-goal-history.test.tsx",
+      "tests/screens/cz-robo/goal-detail-help.test.tsx",
+      "tests/screens/flow-library.test.tsx",
+      "tests/screens/cz-robo/goals-help.test.tsx",
+      "tests/screens/flow-handoff.test.ts",
+      "tests/screens/cz-robo/empty-withdraw.test.tsx",
+      "tests/screens/flow-module-ownership-dispatch.test.tsx",
+      "tests/screens/flow-export.test.ts",
+      "tests/screens/evo-payment-review-options.test.tsx",
+      "tests/screens/flow-module-ownership-source.test.ts",
+      "tests/screens/flow-module-ownership-insurance.test.ts",
+      "tests/screens/flow-module-ownership-keyboard.test.tsx",
+      "tests/screens/future-gain-simulator-coverage.test.tsx",
+      "tests/screens/future-gain-term-deposit-coverage.test.tsx",
+      "tests/screens/flow-module-ownership.test.ts",
+      "tests/components/radio-button-pilot.test.tsx",
+      "tests/screens/genius-my-car-vehicles.test.ts",
+      "tests/components/ro-amount-label.test.tsx",
+      "tests/screens/home-account-summary-evolution.test.tsx",
+      "tests/screens/hu-goal-detail-state.test.ts",
+      "tests/screens/hu-goals-dom.test.tsx",
+      "tests/screens/hu-kids-domain-boundaries.test.ts",
+      "tests/screens/hu-goals-state.test.ts",
+      "tests/screens/hu-schedule-state.test.ts",
+      "tests/components/toggle-button-pilot.test.tsx",
+      "tests/screens/internal-transfer-screen.test.tsx",
+      "tests/screens/internal-transfer-state.test.ts",
+      "tests/screens/investment-basket-funds.test.tsx",
+      "tests/screens/investment-buy-order-flow.test.tsx",
+      "tests/screens/investment-buy-order-model.test.ts",
+      "tests/screens/investment-funds-window.test.tsx",
+      "tests/screens/investment-order-documents-accordion.test.tsx",
+      "tests/screens/investment-product-chat-context.test.tsx",
+      "tests/screens/investment-sell-order-flow.test.tsx",
+      "tests/screens/investments-bulk-approval-flow.test.tsx",
+      "tests/screens/investments-history-screen.test.tsx",
+      "tests/screens/lint-preserved-behavior-controls.test.tsx",
+      "tests/screens/kids-market-home.test.tsx",
+      "tests/screens/lint-preserved-behavior-effects.test.tsx",
+      "tests/screens/my-banker-screen.test.tsx",
+      "tests/screens/my-banker-state.test.ts",
+      "tests/screens/payment-shortcuts.test.tsx",
+      "tests/screens/my-car-context-cache.test.tsx",
+      "tests/screens/orders-to-approve-screen.test.tsx",
+      "tests/screens/pfm-transaction-recategorization.test.tsx",
+      "tests/screens/prelogin-picture-crop.test.ts",
+      "tests/screens/pfm-spending-category-details.test.tsx",
+      "tests/screens/prelogin-picture-tester.test.tsx",
+      "tests/screens/prelogin-simulator.test.ts",
+      "tests/screens/products-responsive.test.tsx",
+      "tests/screens/recurrent-payment-lifecycle-coverage.test.tsx",
+      "tests/screens/request-call-flow-coverage.test.tsx",
+      "tests/screens/robo-advisor-flow-state.test.ts",
+      "tests/screens/robo-demo-clock.test.ts",
+      "tests/screens/robo-funding-clock.test.tsx",
+      "tests/screens/robo-incoming-goal.test.tsx",
+      "tests/screens/rs-property-insurance.test.tsx",
+      "tests/screens/saving-account-add-money.test.tsx",
+      "tests/screens/settings.test.tsx",
+      "tests/screens/sk-kids-tree.test.tsx",
+      "tests/screens/small-screen-guards.test.tsx",
+      "tests/screens/standard-flow-screens.test.tsx",
+      "tests/screens/tools-divergence-signoff.test.tsx",
+      "tests/screens/transactions-screen.test.tsx",
+      "tests/screens/tools-screen.test.tsx"
+    ],
+    "ownership": "Root authorized Luna 15 to update the two AppIntegrationTests for the Native-host contract while retaining financial/coordinator assertions; route/policy/shared Native tests remain Root-coordinated. Direct screen-unit tests are characterization, not AppScreenRouter callers."
+  },
+  "flowSourceZip": {
+    "AppRouterPlatformRoute": "currentScreen=flow-library -> FlowLibraryScreen; preserve route",
+    "screenSourceRegistry": "src/app/screens/flow-library/components/screenSources.ts",
+    "generatedSourceInput": [
+      "src/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx?raw",
+      "src/features/investments/bulk-approval/model.ts?raw"
+    ],
+    "packageBuilder": [
+      "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+      "src/app/screens/flow-library/handoff/referencePackage.ts",
+      "src/app/screens/flow-library/handoff/sourceSlices.ts",
+      "src/app/screens/flow-library/handoff/zip.ts",
+      "src/app/screens/flow-library/flowExport.ts"
+    ],
+    "tests": [
+      "tests/screens/flow-library.test.tsx",
+      "tests/screens/flow-export.test.ts",
+      "tests/screens/flow-module-ownership-source.test.ts",
+      "tests/screens/bulk-approval-module.test.ts"
+    ],
+    "compatibility": "Flow ZIP uses FLOW_SCREEN_SOURCES/FlowDefinition and bundled ?raw sources directly; it does not consume AppScreenRouter or old PI route modules. Preserve these source paths and the Flow Library platform entry."
+  }
+}
