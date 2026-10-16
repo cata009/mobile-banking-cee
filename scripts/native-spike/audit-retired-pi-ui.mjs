@@ -31,8 +31,8 @@ const RESOLVABLE_EXTENSIONS = [
   '.woff2',
 ]
 const EXCLUDED_DIRECTORIES = new Set(['.git', '.codex-temp', 'node_modules', 'dist', 'build', 'coverage', 'android', 'ios', '.expo'])
-const DEFAULT_SOURCE_MANIFEST = '.codex-temp/pi-wide-migration/luna-15/legacy-pi-consumer-manifest.json'
-const DEFAULT_ADAPTER_CANDIDATES = '.codex-temp/pi-wide-migration/luna-4/native-adapter-candidates.json'
+const DEFAULT_SOURCE_MANIFEST = 'scripts/native-spike/pi-retirement-source.json'
+const DEFAULT_ADAPTER_CANDIDATES = 'scripts/native-spike/pi-native-adapter-candidates.json'
 const DEFAULT_ADAPTER_APPROVALS = 'scripts/native-spike/pi-native-compat-adapters.json'
 const DEFAULT_OUTPUT = '.codex-temp/pi-wide-migration/luna-4/retired-pi-ui-manifest.json'
 const NATIVE_EQUIVALENT_EVIDENCE = [

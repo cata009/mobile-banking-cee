@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "status": "versioned-candidate-inventory",
+  "rootApproval": {
+    "status": "reviewed-by-canonical-allowlist",
+    "reviewer": "Root",
+    "approvalSource": "scripts/native-spike/pi-native-compat-adapters.json",
+    "note": "This inventory is descriptive. Runtime approval requires exact hashes, owners and tests in scripts/native-spike/pi-native-compat-adapters.json."
+  },
+  "adapterContract": "Source compatibility wrapper delegates to NativeScreenPreview while preserving Source route props and callbacks.",
+  "candidates": [
+    {
+      "path": "src/app/screens/home/HomeScreen.tsx",
+      "nativeRoute": "home",
+      "contractTest": "tests/screens/source-native-home-products-adapters.test.tsx",
+      "evidence": "Tests Native home mounting and Source callback compatibility; the module also retains the SME Source branch."
+    },
+    {
+      "path": "src/app/screens/products/ProductsScreen.tsx",
+      "nativeRoute": "products",
+      "contractTest": "tests/screens/source-native-home-products-adapters.test.tsx",
+      "evidence": "Tests Native products preview and preserves the SME Source branch and BankingContent export."
+    },
+    {
+      "path": "src/app/screens/products/ProductDetailScreen.tsx",
+      "nativeRoute": "product-detail",
+      "contractTest": "tests/screens/source-native-home-products-adapters.test.tsx",
+      "evidence": "Tests Native product detail preview while retaining Source-compatible props."
+    },
+    {
+      "path": "src/app/screens/accounts/AccountDetailsInfoScreen.tsx",
+      "nativeRoute": "account-info",
+      "contractTest": "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+      "evidence": "Focused wrapper contract test preserves account info props and maps the Native route."
+    },
+    {
+      "path": "src/app/screens/accounts/AccountOptionsScreen.tsx",
+      "nativeRoute": "account-options",
+      "contractTest": "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+      "evidence": "Focused wrapper contract test preserves account options props and maps the Native route."
+    },
+    {
+      "path": "src/app/screens/cards/CardDetailsInfoScreen.tsx",
+      "nativeRoute": "card-info",
+      "contractTest": "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+      "evidence": "Focused wrapper contract test preserves card info props and maps the Native route."
+    },
+    {
+      "path": "src/app/screens/cards/CardOptionsScreen.tsx",
+      "nativeRoute": "card-options",
+      "contractTest": "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+      "evidence": "Focused wrapper contract test preserves card options props and maps the Native route."
+    },
+    {
+      "path": "src/app/screens/investments/InvestmentsPortfolioScreen.tsx",
+      "nativeRoute": "investments",
+      "contractTest": "tests/screens/investments-native-compat-adapters.test.tsx",
+      "evidence": "Tests portfolio route adaptation and forwards investment requests and events."
+    },
+    {
+      "path": "src/app/screens/investments/InvestmentsHistoryScreen.tsx",
+      "nativeRoute": "investments/history",
+      "contractTest": "tests/screens/investments-native-compat-adapters.test.tsx",
+      "evidence": "Tests history route adaptation and Source override compatibility."
+    },
+    {
+      "path": "src/app/screens/investments/OrdersToApproveScreen.tsx",
+      "nativeRoute": "investments/approvals",
+      "contractTest": "tests/screens/investments-native-compat-adapters.test.tsx",
+      "evidence": "Tests approvals route adaptation and its parent portfolio dependency remains a separate retirement blocker."
+    },
+    {
+      "path": "src/app/screens/investments/SmartInvestmentScreen.tsx",
+      "nativeRoute": "smart-investment",
+      "contractTest": "tests/screens/investments-native-compat-adapters.test.tsx",
+      "evidence": "Tests smart investment route adaptation."
+    },
+    {
+      "path": "src/app/screens/investments/FutureGainPeerInsightsScreen.tsx",
+      "nativeRoute": "peer-insights",
+      "contractTest": "tests/screens/investments-native-compat-adapters.test.tsx",
+      "evidence": "Tests peer insights route adaptation."
+    }
+  ]
+}
