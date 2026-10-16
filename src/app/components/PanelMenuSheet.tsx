@@ -1,6 +1,7 @@
 import { AppIcon } from "@/app/components/icons";
 import type { IconName } from "@/app/components/icons";
 import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation';
+import { PANEL_MENU_CONTRACT } from './contracts/panelMenuSheet';
 
 export interface PanelMenuSheetProps {
   aboutSmartBanking: string;
@@ -72,7 +73,7 @@ function PanelMenuRow({ icon, iconDataName, label, onClick, interactive = false 
 
   return (
     <div
-      className={`content-stretch flex gap-[8px] h-[80px] items-center px-[16px] py-[24px] relative shrink-0 w-[375px]${interactionClasses}`}
+      className={`${PANEL_MENU_CONTRACT.rowClass}${interactionClasses}`}
       data-name="Light Restyle/Navigation"
       onClick={onClick}
       role={onClick ? 'button' : undefined}

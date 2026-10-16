@@ -1,4 +1,5 @@
 import { useLanguage } from '@/app/contexts/LanguageContext';
+import { BASELINE_DIALOG_CONTRACTS } from './contracts/dialog';
 
 interface TerminateSessionPopupProps {
   onCancel: () => void;
@@ -15,13 +16,13 @@ export default function TerminateSessionPopup({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-[rgb(var(--uc-static-black-rgb)_/_0.5)] backdrop-blur-sm"
+        className={BASELINE_DIALOG_CONTRACTS.terminate.backdropClass}
         onClick={onCancel}
         aria-hidden="true"
       />
 
       {/* Popup */}
-      <div className="relative bg-[var(--uc-surface)] rounded-[12px] w-[327px] mx-auto overflow-hidden shadow-xl">
+      <div className={BASELINE_DIALOG_CONTRACTS.terminate.boxClass}>
         {/* Content */}
         <div className="px-6 py-8 flex flex-col items-center gap-4">
           <h2 className="text-[18px] font-['UniCredit:Bold',sans-serif] text-[var(--uc-text)] text-center">

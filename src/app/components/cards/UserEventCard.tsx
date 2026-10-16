@@ -1,3 +1,4 @@
+import { bannerWeb } from "../contracts/bannerWeb";
 import type { CSSProperties, ReactNode } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -56,10 +57,12 @@ export default function UserEventCard({
 }: UserEventCardProps) {
   const hasAction = Boolean(actionLabel);
 
+  const contract = bannerWeb({ variant: "user-event", hasAction: Boolean(actionLabel), showOptions });
+
   return (
     <div
       className={cn(
-        "flex w-[343px] max-w-full gap-[8px] rounded-[8px] bg-[var(--uc-surface)] p-[16px] shadow-[0_4px_16px_rgba(0,0,0,0.08)]",
+        contract.rootClass,
         hasAction ? "items-start" : "items-center",
         className,
       )}

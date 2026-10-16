@@ -2,7 +2,7 @@ import type {
   CoAppingChatMessage,
   CoAppingInvestmentFundCollectionId,
   CoAppingRichBlock,
-} from '../../../../package/mobile-pi-coapping-chat-package/src'
+} from '../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { parseMoneyAmount } from '../nlu'
 
 export type InvestmentGoalPurpose = 'grow-savings' | 'future-purchase' | 'long-term-reserve'

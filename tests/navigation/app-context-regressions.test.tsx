@@ -7,13 +7,22 @@ import { useDemo } from '@/app/state/demoStore'
 import { useNavigationContext } from '@/app/contexts/NavigationContext'
 import { useProducts } from '@/hooks/useProducts'
 import { getAccountTransactions } from '@/data/accountDetails'
-import type { Product, CreditCard } from '@/data/products'
-import type { AccountTransaction } from '@/data/accountDetails'
+import type { NativeDemoEvents, NativeDemoSnapshot } from '@/features/demo-native/contracts'
+import type { CoAppingChatAction } from '../../package/mobile-pi-coapping-chat-package/src'
 
 let controls: ReturnType<typeof useDemo>
 let navigation: ReturnType<typeof useNavigationContext>
 let toolsBroken = false
 let toolsMounts = 0
+type NativeSurfaceTestProps = Pick<
+  NativeDemoEvents,
+  | 'onTransactionSelected'
+  | 'onCreditLimitOfferComplete'
+  | 'onCreditLimitOfferCancel'
+  | 'onCoAppingChatRequest'
+  | 'onCoAppingChatAction'
+> &
+  Pick<NativeDemoSnapshot, 'creditLimitOffer' | 'creditLimitOverrides' | 'coAppingContext'>
 
 // Keep orchestration, providers, product derivation and URL sync real. The
 // presentation doubles expose the callbacks/props at App's feature boundaries.
@@ -37,89 +46,111 @@ vi.mock('@/app/components/PanelOverlay', () => ({ default: () => null }))
 vi.mock('@/app/components/PreLoginActiveScreen', () => ({
   default: ({ onLoginClick }: { onLoginClick: () => void }) => <button onClick={onLoginClick}>Login</button>,
 }))
-vi.mock('@/app/screens/home/HomeScreen', () => ({
-  default: ({ onAccountClick }: { onAccountClick: (product: Product) => void }) => {
-    const { categories } = useProducts()
-    return (
-      <div>
-        Home
-        {categories
-          .flatMap((category) => category.products)
-          .map((product) => (
-            <button key={product.id} onClick={() => onAccountClick(product)}>
-              Open {product.id}
-            </button>
-          ))}
-      </div>
-    )
-  },
-}))
-vi.mock('@/app/screens/cards/CardDetailScreen', () => ({
-  default: ({
-    selectedCardId,
-    creditLimitOverrides,
-    onTransactionClick,
-  }: {
-    selectedCardId?: string | null
-    creditLimitOverrides: Record<string, number>
-    onTransactionClick: (transaction: AccountTransaction, product: Product) => void
-  }) => {
+vi.mock('@/app/components/demo/NativeDemoSurface', () => ({
+  NativeDemoSurface: (props: NativeSurfaceTestProps) => {
     const { country } = useDemo()
+    const { currentRoute, navigateTo } = useNavigationContext()
     const { categories } = useProducts()
     const products = categories.flatMap((category) => category.products)
     const card =
-      products.find((product) => product.id === selectedCardId) ??
+      products.find((product) => product.id === ('cardId' in currentRoute ? currentRoute.cardId : null)) ??
       products.find((product) => product.type === 'credit_card' || product.type === 'debit_card')
-    if (!card) return <span>No card available</span>
-    const transaction = getAccountTransactions(country, 0, card.currency)[0]!
-    return (
-      <>
-        <output aria-label="Current credit limit">
-          {creditLimitOverrides[card.id] ?? ('creditLimit' in card ? card.creditLimit : 0)} {card.currency} {country}
+    const account =
+      products.find((product) => product.id === ('accountId' in currentRoute ? currentRoute.accountId : null)) ??
+      products.find((product) => product.type === 'current_account')
+
+    if (currentRoute.screen === 'homepage') {
+      return (
+        <div>
+          Home
+          {products.map((product) => (
+            <button
+              key={product.id}
+              onClick={() =>
+                navigateTo(
+                  product.type === 'current_account'
+                    ? { screen: 'account-detail', accountId: product.id }
+                    : { screen: 'card-detail', cardId: product.id },
+                )
+              }
+            >
+              Open {product.id}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    if (currentRoute.screen === 'prelogin-active') {
+      return <button onClick={() => navigateTo('homepage')}>Login</button>
+    }
+
+    if (currentRoute.screen === 'card-detail' && card) {
+      const transaction = getAccountTransactions(country, 0, card.currency)[0]!
+      return (
+        <>
+          <output aria-label="Current credit limit">
+            {props.creditLimitOverrides?.[card.id] ?? ('creditLimit' in card ? card.creditLimit : 0)} {card.currency} {country}
+          </output>
+          <output aria-label="Current card">{card.id}</output>
+          <button onClick={() => props.onTransactionSelected?.({ productId: card.id, source: 'card', transaction })}>
+            Open card transaction
+          </button>
+          <button onClick={() => props.onCoAppingChatRequest?.({ kind: 'launcher' })}>Open CZ - Chatbot</button>
+          <button onClick={() => props.onCoAppingChatRequest?.({ kind: 'for-you' })}>For you</button>
+          <button>I'm interested</button>
+          <button
+            onClick={() =>
+              props.onCoAppingChatAction?.(
+                { type: 'navigate', target: 'credit-limit-review' } as CoAppingChatAction,
+              )
+            }
+          >
+            Review offer
+          </button>
+          {props.creditLimitOffer && (
+            <button
+              onClick={() =>
+                props.onCreditLimitOfferComplete?.(
+                  props.creditLimitOffer!.id,
+                  props.creditLimitOffer!.creditLimit + 5000,
+                )
+              }
+            >
+              Accept credit offer
+            </button>
+          )}
+        </>
+      )
+    }
+
+    if (currentRoute.screen === 'account-detail' && account) {
+      const transaction = getAccountTransactions(country, 0, account.currency)[0]!
+      return (
+        <>
+          <button
+            onClick={() => props.onTransactionSelected?.({ productId: account.id, source: 'account', transaction })}
+          >
+            Open account transaction
+          </button>
+          <button onClick={() => navigateTo({ screen: 'analytics', scopeId: account.id, direction: 'expense' })}>
+            Open account spending
+          </button>
+        </>
+      )
+    }
+
+    if (currentRoute.screen === 'analytics') {
+      return (
+        <output aria-label="Analytics entry">
+          {currentRoute.scopeId ?? 'all'}:{currentRoute.direction ?? 'both'}
         </output>
-        <output aria-label="Current card">{card.id}</output>
-        <button onClick={() => onTransactionClick(transaction, card)}>Open card transaction</button>
-      </>
-    )
+      )
+    }
+
+    if (currentRoute.screen === 'transaction-detail') return <div>Transaction detail</div>
+    return <div>Native screen: {currentRoute.screen}</div>
   },
-}))
-vi.mock('@/app/screens/cards/CreditLimitOfferFlow', () => ({
-  default: ({ card, onComplete }: { card: CreditCard; onComplete: (id: string, limit: number) => void }) => (
-    <button onClick={() => onComplete(card.id, card.creditLimit + 5000)}>Accept credit offer</button>
-  ),
-}))
-vi.mock('@/app/screens/accounts/AccountDetailScreen', () => ({
-  default: ({
-    onTransactionClick,
-    onOpenSpending,
-  }: {
-    onTransactionClick: (transaction: AccountTransaction, product: Product) => void
-    onOpenSpending: () => void
-  }) => {
-    const { country } = useDemo()
-    const { categories } = useProducts()
-    const account = categories
-      .flatMap((category) => category.products)
-      .find((product) => product.type === 'current_account')!
-    const transaction = getAccountTransactions(country, 0, account.currency)[0]!
-    return (
-      <>
-        <button onClick={() => onTransactionClick(transaction, account)}>Open account transaction</button>
-        <button onClick={onOpenSpending}>Open account spending</button>
-      </>
-    )
-  },
-}))
-vi.mock('@/app/screens/payments/DomesticPaymentFlowScreens', () => ({
-  DomesticPaymentCreateScreen: () => null,
-  PaymentReviewScreen: () => null,
-  PaymentSignScreen: () => null,
-  PaymentSuccessScreen: () => null,
-  TransactionDetailScreen: () => <div>Transaction detail</div>,
-}))
-vi.mock('@/app/screens/payments/Evo2027DomesticPaymentFlow', () => ({
-  Evo2027DomesticPaymentCreateScreen: () => null,
-  Evo2027PaymentReviewScreen: () => null,
 }))
 vi.mock('@/app/screens/tools/ToolsScreen', () => ({
   default: () => {
@@ -271,14 +302,6 @@ it.each(['baseline', 'scenario', 'flags'] as const)(
     expect(navigation.currentScreen).toBe('tools')
   },
 )
-
-vi.mock('@/app/screens/analytics/AnalyticsScreen', () => ({
-  default: ({ initialScopeId, initialDirection }: { initialScopeId?: string; initialDirection?: string }) => (
-    <output aria-label="Analytics entry">
-      {initialScopeId ?? 'all'}:{initialDirection ?? 'both'}
-    </output>
-  ),
-}))
 
 it('stores an account analytics entry on its route for back restoration', async () => {
   window.history.replaceState({}, '', '/?product=PI&country=RO&screen=homepage')

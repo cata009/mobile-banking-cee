@@ -1,5 +1,5 @@
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber'
-import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { formatCzChatMoney, type CzChatSmartReplyOptions } from '../helpers'
 import type { buildCzProfileChatContext } from './profileContext'
 /** Domain-owned derivation used once when a chat resolver snapshots its input. */

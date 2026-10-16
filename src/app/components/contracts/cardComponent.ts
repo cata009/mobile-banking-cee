@@ -1,0 +1,3 @@
+/** Static DS composition metadata and actual art layout, not the runtime carousel controller. */
+export const CARD_COMPONENT_CONTRACT={specimenWidth:375,specimenHeight:448,fixedHeight:undefined,slotWidth:219,slotHeight:138,slotRadius:5.67,gap:24,paddingLeft:1,holderFontSize:14,numberFontSize:18,rootGap:12,headerGap:8,rootClass:'flex w-full flex-col gap-[12px] overflow-hidden bg-[#F5F5F5]'} as const
+export const CARD_COMPONENT_DEFAULT_CARDS=[{id:'card-credit',ariaLabel:'Credit card ending in 4007',variant:'mc-credit-partner-standard'},{id:'card-debit',ariaLabel:'Debit card',variant:'mc-debit-standard'}] as const

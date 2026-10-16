@@ -1,4 +1,4 @@
-import type { ProductDetailSelection } from '@/app/components/products/ProductCardBottomSheet'
+import type { ProductDetailSelection } from '@/features/products/productDetailSelection'
 import type { FlowPreviewId } from '@/app/registry/flowPreviewRegistry'
 /**
  * NavigationContext

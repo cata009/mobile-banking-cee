@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import {
@@ -26,6 +27,7 @@ import {
 } from './Primitives';
 
 import { investmentAssets, investmentImageSource } from './assets';
+import { useInvestmentBack } from './Runtime';
 export function FundBanner({
   id,
   onPress,
@@ -65,6 +67,7 @@ export function InvestmentCatalog({
   onSelectBasket,
   hidden = false,
   footer,
+  initialProductType = 'all',
 }: {
   securities: readonly InvestmentCatalogSecurity[];
   onBack: () => void;
@@ -72,9 +75,11 @@ export function InvestmentCatalog({
   onSelectBasket: (basket: InvestmentBasketFund) => void;
   hidden?: boolean;
   footer?: React.ReactNode;
+  initialProductType?: string;
 }) {
+  const market = useInvestmentMarket();
   const [query, setQuery] = useState(''),
-    [type, setType] = useState('all');
+    [type, setType] = useState(initialProductType);
   const [currency, setCurrency] = useState('all'),
     [plan, setPlan] = useState('all'),
     [owned, setOwned] = useState('all');
@@ -177,7 +182,7 @@ export function InvestmentCatalog({
             subtitle={`${security.productId} · ${security.productType} · ${security.instrumentCurrency}`}
             value={formatInvestmentMoney(
               security.marketPrice,
-              'CZ',
+              market.country,
               security.instrumentCurrency,
               hidden,
             )}
@@ -203,14 +208,23 @@ export function FundsScreen({
   hidden?: boolean;
   initialCollection?: InvestmentFundCollectionId;
 }) {
+  const market = useInvestmentMarket();
   const [collectionId, setCollectionId] =
     useState<InvestmentFundCollectionId | null>(initialCollection ?? null);
+  const back = () => {
+    if (collectionId) setCollectionId(null);
+    else onBack();
+  };
+  useInvestmentBack(() => {
+    back();
+    return true;
+  });
   if (!collectionId)
     return (
       <Page
         kind="funds"
         title="Investment funds"
-        onBack={onBack}
+        onBack={back}
         gutter={16}
         contentTop={16}
       >
@@ -230,7 +244,7 @@ export function FundsScreen({
       kind="fund-collection"
       title={collection.title}
       description={collection.heroSubtitle}
-      onBack={initialCollection ? onBack : () => setCollectionId(null)}
+      onBack={back}
       gutter={16}
       contentTop={16}
     >
@@ -247,7 +261,7 @@ export function FundsScreen({
           subtitle={security.productId}
           value={formatInvestmentMoney(
             security.marketPrice,
-            'CZ',
+            market.country,
             security.instrumentCurrency,
             hidden,
           )}

@@ -2,13 +2,13 @@ import type { KeyboardEventHandler } from "react";
 import type { AccountIdentity } from "@/data/accountDetails";
 import type { ProductType } from "@/data/products";
 import { AppIcon } from "@/app/components/icons";
+import { CAROUSEL_CARD_SHADOW, resolveAccountBalanceCard } from '@/app/components/contracts/accountBalanceCard';
 
 /**
  * The lift on a swipeable carousel card. Exported because the Evo spending statement card
  * rides the same rail pattern and has to read as the same object.
  */
-export const CAROUSEL_CARD_SHADOW =
-  "0 16px 32px rgb(var(--uc-shadow-rgb) / 0.08), 0 3px 10px rgb(var(--uc-shadow-rgb) / 0.05)";
+export { CAROUSEL_CARD_SHADOW } from '@/app/components/contracts/accountBalanceCard';
 
 export interface AccountBalanceCardProps {
   account: AccountIdentity;
@@ -26,21 +26,6 @@ export interface AccountBalanceCardProps {
   showCopy?: boolean;
 }
 
-function resolveBalanceLabels(productType?: ProductType) {
-  switch (productType) {
-    case "saving_account":
-      return { availableLabel: "Available funds", showCurrent: false, currentLabel: "" };
-    case "term_deposit":
-      return { availableLabel: "Deposit amount", showCurrent: true, currentLabel: "Maturity amount" };
-    case "loan":
-    case "mortgage":
-      return { availableLabel: "Remaining loan amount", showCurrent: true, currentLabel: "Next installment" };
-    case "current_account":
-    default:
-      return { availableLabel: "Available balance", showCurrent: true, currentLabel: "Current balance" };
-  }
-}
-
 export default function AccountBalanceCard({
   account,
   availableInteger,
@@ -56,8 +41,8 @@ export default function AccountBalanceCard({
   progressLabel = "Product progress",
   showCopy = true,
 }: AccountBalanceCardProps) {
-  const hasSubAccount = showSubAccount && Boolean(account.subAccount);
-  const { availableLabel, showCurrent, currentLabel } = resolveBalanceLabels(productType);
+  const state = resolveAccountBalanceCard({ productType, progress, active, hasSubAccount: Boolean(account.subAccount), showSubAccount, showCopy });
+  const { hasSubAccount, availableLabel, showCurrent, currentLabel } = state;
   const handleKeyDown: KeyboardEventHandler<HTMLElement> = (event) => {
     if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
 
@@ -139,13 +124,13 @@ export default function AccountBalanceCard({
             aria-label={progressLabel}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={Math.round(Math.min(1, Math.max(0, progress)) * 100)}
+            aria-valuenow={state.progressPercent}
             className="h-[4px] w-[279px] shrink-0 overflow-hidden rounded-full bg-[var(--uc-border)]"
           >
             <div
               aria-hidden="true"
               className="h-full rounded-full bg-[var(--uc-action)]"
-              style={{ width: `${Math.min(1, Math.max(0, progress)) * 100}%` }}
+              style={{ width: `${(state.progressFraction ?? 0) * 100}%` }}
             />
           </div>
         ) : (

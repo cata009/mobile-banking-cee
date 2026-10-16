@@ -1,4 +1,7 @@
-import type { CoAppingReplyResult, CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import type {
+  CoAppingReplyResult,
+  CoAppingRichBlock,
+} from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import { buildCzChatFollowUp, buildCzNavigateFollowUp } from '../helpers'
 
 export type CzCardHandlerContext = {

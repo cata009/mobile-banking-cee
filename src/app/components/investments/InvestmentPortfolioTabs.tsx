@@ -3,6 +3,8 @@ import type { InvestmentPortfolioTabOption, InvestmentPortfolioTabId } from "@/a
 import MessagesMailboxTabs from "@/app/components/messages/MessagesMailboxTabs";
 import { useDragCarousel } from "@/hooks/useDragCarousel";
 
+import { resolvePortfolioTabs, portfolioScrollBehavior } from '../contracts/portfolioTabs';
+
 interface InvestmentPortfolioTabsProps {
   tabs: readonly InvestmentPortfolioTabOption[];
   selectedTabId: InvestmentPortfolioTabId;
@@ -16,6 +18,7 @@ export default function InvestmentPortfolioTabs({
   onChange,
   variant = "underline",
 }: InvestmentPortfolioTabsProps) {
+  const contract = resolvePortfolioTabs({ variant });
   const chipRailRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef(new Map<InvestmentPortfolioTabId, HTMLButtonElement>());
   const hasSettledChipRailRef = useRef(false);
@@ -37,13 +40,13 @@ export default function InvestmentPortfolioTabs({
     }
 
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    const behavior: ScrollBehavior = hasSettledChipRailRef.current && !reduceMotion ? "smooth" : "auto";
+    const behavior: ScrollBehavior = portfolioScrollBehavior(hasSettledChipRailRef.current, reduceMotion);
     hasSettledChipRailRef.current = true;
     if (typeof rail.scrollTo === "function") rail.scrollTo({ left: nextScrollLeft, behavior });
     else rail.scrollLeft = nextScrollLeft;
   }, [selectedTabId, tabs, variant]);
 
-  if (variant === "chips") {
+  if (contract.chips) {
     return (
       <div
         ref={chipRailRef}
@@ -86,11 +89,11 @@ export default function InvestmentPortfolioTabs({
       tabs={tabs}
       activeTabId={selectedTabId}
       onChange={(tabId) => onChange(tabId as InvestmentPortfolioTabId)}
-      layout="scrollable"
-      minTabWidth={150}
-      ariaLabel="Investments portfolio tabs"
-      withTopMargin={false}
-      className="bg-[var(--uc-surface)]"
+      layout={contract.underlineLayout}
+      minTabWidth={contract.underlineMinTabWidth}
+      ariaLabel={contract.underlineAriaLabel}
+      withTopMargin={contract.underlineTopMargin}
+      className={contract.underlineClass}
     />
   );
 }

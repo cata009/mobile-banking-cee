@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
-
-type HeaderActionIconName = "profile" | "messages" | "help" | "search" | "logout" | "contact-phone" | "edit" | "spending";
+import { resolveHeaderAction, type HeaderActionIconName } from "./contracts/headerActions";
 
 interface HeaderActionButtonProps {
   icon: HeaderActionIconName;
@@ -12,16 +11,7 @@ interface HeaderActionButtonProps {
 }
 
 export function HeaderActionIcon({ icon }: { icon: HeaderActionIconName }) {
-  if (icon === "profile") return <AppIcon name="header-profile" color="var(--uc-icon)" />;
-  if (icon === "messages") return <AppIcon name="header-messages" color="var(--uc-icon)" />;
-  if (icon === "logout") return <AppIcon name="logout" color="var(--uc-icon)" />;
-  if (icon === "contact-phone") return <AppIcon name="contact-phone" color="var(--uc-icon)" />;
-  if (icon === "search") return <AppIcon name="search" color="var(--uc-icon)" />;
-  if (icon === "edit") return <AppIcon name="edit-pencil" color="var(--uc-icon)" />;
-  // The same mark the bottom bar uses for Spending, so the shortcut and the
-  // destination it opens carry one glyph.
-  if (icon === "spending") return <AppIcon name="nav-analytics" color="var(--uc-icon)" />;
-  return <AppIcon name="help-circle" color="var(--uc-icon)" />;
+  return <AppIcon name={resolveHeaderAction(icon).icon} color="var(--uc-icon)" />;
 }
 
 export function HeaderActionRail({
@@ -45,6 +35,7 @@ export function HeaderActionButton({
   className = "size-[32px]",
   badgeCount = 0,
 }: HeaderActionButtonProps) {
+  const contract = resolveHeaderAction(icon, badgeCount);
   return (
     <button
       type="button"
@@ -53,9 +44,9 @@ export function HeaderActionButton({
       aria-label={label}
     >
       <HeaderActionIcon icon={icon} />
-      {badgeCount > 0 && (
+      {contract.badgeText !== null && (
         <span className="uc-type-n5-strong absolute right-0 top-0 grid size-[20px] place-items-center rounded-full bg-[var(--uc-brand)] leading-none tracking-[0.35px] text-[var(--uc-static-white)]">
-          {badgeCount > 99 ? "99+" : badgeCount}
+          {contract.badgeText}
         </span>
       )}
     </button>

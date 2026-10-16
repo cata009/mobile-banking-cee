@@ -3,7 +3,8 @@ import PfmCategoryIcon, { type PfmCategoryIconVariant } from "@/app/components/p
 import TransactionPairAvatar from "@/app/components/transactions/TransactionPairAvatar";
 import TransactionPartyAvatar from "@/app/components/transactions/TransactionPartyAvatar";
 import type { AccountTransaction } from "@/data/accountDetails";
-import { isNonMerchantCounterparty, resolveTransactionMerchant } from "@/data/merchantDirectory";
+import { resolveTransactionAvatarIdentity } from '@/features/accounts-payments/transactionAvatarIdentity';
+import { resolveTransactionAvatarFrame } from '@/app/components/contracts/transactionAvatar';
 
 /**
  * Which question the leading visual answers.
@@ -70,38 +71,10 @@ export default function TransactionAvatar({
   pfmVariant = "category-circle",
   elevated = false,
 }: TransactionAvatarProps) {
-  if (presentation === "category") {
-    return <PfmFallback transaction={transaction} size={size} pfmVariant={pfmVariant} />;
-  }
-
-  // Every identity mark is a filled roundel — a merchant, a party, a pair of
-  // accounts. A bare category glyph next to them reads as a different system,
-  // so the identity presentation always uses the circled category variant.
-  const identityPfmVariant: PfmCategoryIconVariant = "category-circle";
-
-  if (transaction.transferPair) {
-    return <TransactionPairAvatar pair={transaction.transferPair} size={size} currency={transaction.currency} />;
-  }
-
-  const merchant = resolveTransactionMerchant(transaction);
-  if (merchant) {
-    return <MerchantLogo merchant={merchant} size={size} elevated={elevated} />;
-  }
-
-  // A card purchase we cannot brand keeps the category icon rather than
-  // inventing a counterparty out of a processor descriptor.
-  const hasCounterparty =
-    transaction.source !== "card" && !isNonMerchantCounterparty(transaction.label);
-
-  if (hasCounterparty) {
-    return (
-      <TransactionPartyAvatar
-        name={transaction.label}
-        direction={transaction.type === "credit" ? "in" : "out"}
-        size={size}
-      />
-    );
-  }
-
-  return <PfmFallback transaction={transaction} size={size} pfmVariant={identityPfmVariant} />;
+  const identity = resolveTransactionAvatarIdentity(transaction, { presentation, pfmVariant });
+  const frame = resolveTransactionAvatarFrame(size);
+  if (identity.kind === 'category') return <PfmFallback transaction={transaction} size={frame.size} pfmVariant={identity.pfmVariant} />;
+  if (identity.kind === 'pair') return <TransactionPairAvatar pair={identity.pair} size={frame.size} currency={identity.currency} />;
+  if (identity.kind === 'merchant') return <MerchantLogo merchant={identity.merchant} size={frame.size} elevated={elevated} />;
+  return <TransactionPartyAvatar name={identity.name} direction={identity.direction} size={frame.size} />;
 }

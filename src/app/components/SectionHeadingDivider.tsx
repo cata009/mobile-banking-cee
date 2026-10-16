@@ -1,3 +1,7 @@
+import type { SectionHeadingDividerVariant } from "@/app/components/contracts/sectionDivider";
+import { sectionDividerWeb } from "@/app/components/contracts/sectionDividerWeb";
+export type { SectionHeadingDividerVariant } from "@/app/components/contracts/sectionDivider";
+
 export const SECTION_HEADING_DIVIDER_SOURCE = {
   schema: "codex-figma-component-spec/v1",
   sourceNodeIds: {
@@ -22,22 +26,6 @@ export const SECTION_HEADING_DIVIDER_SOURCE = {
     lineHeight: 1,
   },
 } as const;
-
-export type SectionHeadingDividerVariant =
-  | "section"
-  | "small-title-data"
-  | "small-two-line-title-data"
-  | "medium-title"
-  | "with-counter"
-  | "medium-two-line-title"
-  | "large-title"
-  | "large-two-line-title"
-  | "action-date"
-  | "name-action"
-  | "action-date-checkbox"
-  | "light-title"
-  | "light-date"
-  | "light-small-title-data";
 
 interface SectionHeadingDividerProps {
   title: string;
@@ -68,7 +56,7 @@ export default function SectionHeadingDivider({
     );
   }
 
-  const alignCountToEnd = countAlign === "end";
+  const { alignCountToEnd } = sectionDividerWeb({ countAlign });
 
   return (
     <div className={className} data-ds-label="SectionHeadingDivider">
@@ -116,12 +104,11 @@ function MenigaDivider({
   variant: Exclude<SectionHeadingDividerVariant, "section">;
   className?: string;
 }) {
-  const isLight = variant.startsWith("light-");
-  const isLarge = variant === "large-title" || variant === "large-two-line-title";
-  const hasLine = !isLarge;
+  const state = sectionDividerWeb({ variant, count, secondaryText });
+  const { light: isLight, large: isLarge, hasLine } = state;
   const line = <div className="h-px w-full bg-[var(--uc-border)]" aria-hidden="true" />;
 
-  if (variant === "large-title" || variant === "large-two-line-title") {
+  if (isLarge) {
     return (
       <div
         className={className}
@@ -144,8 +131,7 @@ function MenigaDivider({
   }
 
   if (isLight) {
-    const titleTone = variant === "light-date" ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]";
-    const rowHeight = variant === "light-small-title-data" ? "h-[20px]" : "h-[24px]";
+    const { titleTone, rowHeight } = state;
 
     return (
       <div
@@ -175,22 +161,7 @@ function MenigaDivider({
     );
   }
 
-  const twoLine =
-    variant === "small-two-line-title-data" ||
-    variant === "medium-two-line-title" ||
-    variant === "action-date-checkbox";
-  const textTone =
-    variant === "small-title-data" || variant === "small-two-line-title-data"
-      ? "text-[var(--uc-text-muted)]"
-      : variant === "action-date"
-        ? "text-[var(--uc-action)]"
-        : "text-[var(--uc-text)]";
-  const rightText =
-    variant === "with-counter" && typeof count === "number"
-      ? String(count)
-      : secondaryText;
-  const horizontalPadding = variant === "with-counter" ? "px-[16px]" : "px-[24px]";
-  const containerHeight = twoLine ? "min-h-[51px]" : "min-h-[36px]";
+  const { titleTone: textTone, rightText, horizontalPadding, containerHeight } = state;
 
   return (
     <div
@@ -201,7 +172,7 @@ function MenigaDivider({
       <div className={`flex w-[375px] flex-col gap-[4px] bg-[var(--uc-surface)] py-[8px] ${horizontalPadding} ${containerHeight}`}>
         <div className="flex min-h-[14px] items-center justify-between gap-[8px]">
           <div className="flex min-w-0 items-center gap-[4px]">
-            {variant === "action-date-checkbox" ? (
+            {state.checkbox ? (
               <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
                 <span className="size-[22px] rounded-[4px] border border-[var(--uc-text)] bg-[var(--uc-surface)]" />
               </span>

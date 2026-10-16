@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, type ViewStyle } from 'react-native';
 export interface CarouselGeometry {
   width: number;
   height: number;
@@ -7,7 +7,9 @@ export interface CarouselGeometry {
   gutter: number;
   inactiveScale: number;
   inactiveOpacity?: number;
+  inactiveFilter?: ViewStyle['filter'];
   paddingBottom?: number;
+  paddingTop?: number;
 }
 /** Source center/clamp geometry, in layout points, independent of DOM transforms. */
 export function carouselOffsets(
@@ -94,6 +96,7 @@ export default function Carousel<
           paddingHorizontal: geometry.gutter,
           gap: geometry.gap,
           paddingBottom: geometry.paddingBottom ?? 18,
+          paddingTop: geometry.paddingTop ?? 8,
         },
       ]}
       onMomentumScrollEnd={event => {
@@ -127,6 +130,7 @@ export default function Carousel<
             {
               width: geometry.width,
               height: geometry.height,
+              filter:item.id===selectedId ? undefined : geometry.inactiveFilter,
               transform: [
                 {
                   scaleY: item.id === selectedId ? 1 : geometry.inactiveScale,

@@ -1,6 +1,7 @@
 import { ReactNode, Children } from 'react';
 import StackedProductShadow from '@/app/components/StackedProductShadow';
 import TotalRow from '@/app/components/TotalRow';
+import { resolveProductsList } from '@/app/components/contracts/productsList';
 
 interface ProductsListProps {
   children: ReactNode;
@@ -27,10 +28,11 @@ export default function ProductsList({
 }: ProductsListProps) {
   const childrenArray = Children.toArray(children);
   const productCount = childrenArray.length;
-  const isEvolution = variant === 'evolution';
+  const state = resolveProductsList({ productCount, isOpen, variant, showTotal, hasTotalData: Boolean(totalData) });
+  const isEvolution = state.evolution;
 
   // If single product, always show it fully (no total shown even if showTotal is true)
-  if (productCount === 1) {
+  if (state.single) {
     return (
       <div className="px-[24px]">
         {children}
@@ -57,9 +59,9 @@ export default function ProductsList({
         <div
           className="overflow-hidden px-[24px] transition-all duration-300 ease-in-out"
           style={{
-            maxHeight: isOpen ? '2000px' : '0px',
-            opacity: isOpen ? 1 : 0,
-            paddingTop: isOpen ? (isEvolution ? '0px' : '2px') : '0px',
+            maxHeight: `${state.maxHeight}px`,
+            opacity: state.opacity,
+            paddingTop: `${state.paddingTop}px`,
           }}
           aria-hidden={!isOpen}
         >
@@ -70,7 +72,7 @@ export default function ProductsList({
               </div>
             ))}
 
-            {showTotal && totalData && productCount >= 2 && (
+            {state.showTotal && totalData && (
               isEvolution ? (
                 <TotalRow
                   variant="evolution"

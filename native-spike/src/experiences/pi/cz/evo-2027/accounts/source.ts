@@ -1,4 +1,4 @@
-import { deriveProductCategories } from '@/features/products/selectors';
+import { createCurrentProducts } from '../../../current/context';
 import type { ProductCounts } from '@/app/state/demoTypes';
 import {
   getAccountTransactions,
@@ -12,12 +12,14 @@ import {
   type Product,
 } from '@/data/products';
 import { getApp2027ActivityTransactions } from '@/features/products/evoAccountActivity';
-export const czechProducts = (counts: ProductCounts): Product[] =>
-  deriveProductCategories({
+import type { NativeBankingPresentation } from '@/features/demo-native/bankingPresentation';
+export const czechProducts = (counts: ProductCounts, presentation?: NativeBankingPresentation): Product[] =>
+  createCurrentProducts({
     country: 'CZ',
     release: 'release-future-evo-2027',
-    resolvedProductCounts: counts,
-  }).flatMap(c => c.products);
+    productCounts: counts,
+    bankingPresentation: presentation,
+  }).products;
 export const accountProducts = (products: Product[]) =>
   products.filter(isAccountDetailProduct);
 export const cardProducts = (products: Product[]): (DebitCard | CreditCard)[] =>

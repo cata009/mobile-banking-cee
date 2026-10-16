@@ -1,4 +1,4 @@
-import { type CoAppingReplyResult } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import { type CoAppingReplyResult } from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import {
   buildCzChatFollowUp,
   buildCzNavigateFollowUp,

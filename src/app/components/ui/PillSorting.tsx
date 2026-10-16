@@ -1,3 +1,4 @@
+import { SORTING_OPTIONS, type PillSortingValue } from "../contracts/pill";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/app/components/ui/utils";
 
@@ -9,7 +10,7 @@ export const PILL_SORTING_SOURCE = {
   chipHeight: 24,
 } as const;
 
-export type PillSortingValue = "max-value" | "min-value" | "max-percent" | "min-percent";
+export type { PillSortingValue } from "../contracts/pill";
 
 type PillSortingProps = {
   selectedValue?: PillSortingValue | null;
@@ -17,12 +18,7 @@ type PillSortingProps = {
   className?: string;
 };
 
-const SORTING_OPTIONS: Array<{ value: PillSortingValue; label: string }> = [
-  { value: "max-value", label: "MAX VALUE" },
-  { value: "min-value", label: "MIN VALUE" },
-  { value: "max-percent", label: "MAX %" },
-  { value: "min-percent", label: "MIN %" },
-];
+
 
 function PillSortingChip({
   selected,

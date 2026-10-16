@@ -5,6 +5,8 @@ import NavigationRow from "@/app/components/NavigationRow";
 import PageHeader from "@/app/components/PageHeader";
 import SectionHeadingDivider from "@/app/components/SectionHeadingDivider";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { useDemo } from "@/app/state/demoStore";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import { SETTINGS_SECTIONS } from "@/app/config/settingsConfig";
 import {
   App2027ThemeStudio,
@@ -17,7 +19,7 @@ interface SettingsScreenProps {
   onBack: () => void;
 }
 
-export default function SettingsScreen({ onBack }: SettingsScreenProps) {
+function KidsSourceSettingsScreen({ onBack }: SettingsScreenProps) {
   const { t } = useLanguage();
   const { progress: headerProgress, onScroll: handleScroll } = useCollapsingHeader(64);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
@@ -95,4 +97,21 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
       </main>
     </div>
   );
+}
+
+export default function SettingsScreen(props: SettingsScreenProps) {
+  const { product } = useDemo();
+  if (product === "KIDS_PI") return <KidsSourceSettingsScreen {...props} />;
+
+  return (
+    <NativeScreenPreview
+      route={{ screen: 'settings' }}
+      onBack={props.onBack}
+      onNavigate={(_, action) => {
+        if (action !== 'back') return false
+        props.onBack()
+        return true
+      }}
+    />
+  )
 }

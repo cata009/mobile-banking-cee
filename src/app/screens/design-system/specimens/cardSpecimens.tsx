@@ -6,8 +6,7 @@
 import { useState } from "react";
 import PageHeader from "@/app/components/PageHeader";
 import BottomNavigation from "@/app/components/BottomNavigation";
-import HomeHeader from "@/app/screens/home/HomeHeader";
-import { MoreHeader } from "@/app/screens/more/MoreHeader";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import PrimaryButton from "@/app/components/PrimaryButton";
 import Bar, { type BarStatus } from "@/app/components/ui/Bar";
 import DateFilter, { type DateFilterType } from "@/app/components/ui/DateFilter";
@@ -555,7 +554,19 @@ export function HomeHeaderSpecimen() {
     <Specimen name="Home" detailsHref="#component/shell.home-header">
       <HeaderPreviewFrame tone="app">
         <div className="pt-[24px]">
-          <HomeHeader onPrimeClick={noop} onMessagesClick={noop} />
+          <NativeScreenPreview
+            route={{ screen: "account" }}
+            snapshot={{
+              screenTopInset: 0,
+              componentPreview: {
+                kind: "home-header",
+                title: "Your Homepage",
+                showActions: true,
+                showTitle: true,
+              },
+            }}
+            onNavigate={() => true}
+          />
         </div>
       </HeaderPreviewFrame>
     </Specimen>
@@ -567,7 +578,18 @@ export function MoreHeaderSpecimen() {
     <Specimen name="More" detailsHref="#component/shell.more-header">
       <HeaderPreviewFrame tone="surface">
         <div className="pt-[24px]">
-          <MoreHeader onProfile={noop} onMessages={noop} onLogout={noop} messageCount={7} />
+          <NativeScreenPreview
+            route={{ screen: "account" }}
+            snapshot={{
+              screenTopInset: 0,
+              componentPreview: {
+                kind: "more-header",
+                actionVariant: "default",
+                messageCount: 7,
+              },
+            }}
+            onNavigate={() => true}
+          />
         </div>
       </HeaderPreviewFrame>
     </Specimen>

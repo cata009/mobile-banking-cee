@@ -1,11 +1,26 @@
+import {
+  BankingCopyToast,
+  useBankingCopy,
+} from '../../../current/banking/CopyToast';
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import {
   getLoanDetails,
   getTermDepositDetails,
 } from '@/data/accountProductDetails';
 import type { Product } from '@/data/products';
-import { Page, s, FieldValue, Copy, Row, infoMoney } from './Primitives';
+import {
+  Page,
+  s,
+  FieldValue,
+  Copy,
+  infoMoney,
+  tokens,
+  IconButton,
+  Glyph,
+} from './Primitives';
+import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
+import { CardArt } from '../../../current/banking/CardArt';
 export default function AccountInfo({
   product,
   products,
@@ -21,6 +36,7 @@ export default function AccountInfo({
   active?: boolean;
   topInset?: number;
 }) {
+  const { copy: copyBanking, toast } = useBankingCopy();
   const format = (amount: number) => infoMoney(amount, 'CZK', hidden),
     title = product.type.replace(/_/g, ' ').toUpperCase(),
     fields: [string, string][] = [];
@@ -38,13 +54,13 @@ export default function AccountInfo({
       ['Rollover', detail.rollover],
       accountTitle,
       ['Account owner', detail.accountOwner],
-      ['Deposit amount', format(detail.depositAmount)],
-      ['Start value date', detail.startValueDate],
+      ['Deposit Amount', format(detail.depositAmount)],
+      ['Start/Value Date', detail.startValueDate],
       ['Maturity period', detail.maturityPeriod],
-      ['Interest rate per year', detail.interestRatePerYear],
+      ['Interest rate/year', detail.interestRatePerYear],
       ['Current account number', detail.currentAccountNumber],
       ['Decrease amount by', format(detail.decreaseAmountBy)],
-      ['Reinvest interest', detail.reinvestInterest],
+      ['Reinvest the interest', detail.reinvestInterest],
     );
   } else if (product.type === 'loan' || product.type === 'mortgage') {
     const detail = getLoanDetails(product);
@@ -54,6 +70,7 @@ export default function AccountInfo({
       ['Interest rate', detail.interestRate],
       ['Overdue amount', format(detail.overdueAmount)],
       ['Overdue interest rate', detail.overdueInterestRate],
+      ['Owned amount', format(detail.ownedAmount)],
       ['Original amount', format(detail.originalAmount)],
       accountTitle,
       ['IBAN', detail.iban],
@@ -91,30 +108,112 @@ export default function AccountInfo({
         )
       : undefined;
   return (
-    <Page
-      title="Account Details"
-      onBack={onBack}
-      active={active}
-      topInset={topInset}
-    >
-      <View style={s.inset}>
-        {fields.map(([label, value]) => (
-          <FieldValue key={label} label={label} value={value} />
-        ))}
-      </View>
-      {connected && (
-        <>
-          <View style={s.section}>
-            <Copy strong>CONNECTED CARDS</Copy>
-          </View>
-          <Row
-            title={connected.name}
-            subtitle={connected.accountNumber}
+    <View style={copyStyles.root}>
+      <Page
+        title="Account Details"
+        onBack={onBack}
+        active={active}
+        topInset={topInset}
+        style={{
+          backgroundColor: tokens.surface,
+        }}
+        trailing={
+          <IconButton
+            label="Share account details"
+            name="share-filled"
             onPress={() => {}}
-            disabled
           />
-        </>
-      )}
-    </Page>
+        }
+      >
+        <View style={[s.inset, parityStyles.item0]}>
+          {fields.map(([label, value]) => (
+            <FieldValue
+              information
+              key={label}
+              label={label}
+              value={value}
+              trailing={
+                label === 'Account number' || label === 'IBAN' ? (
+                  <IconButton
+                    label={
+                      label === 'IBAN' ? 'Copy IBAN' : 'Copy account number'
+                    }
+                    name="copy-documents"
+                    onPress={() => {
+                      copyBanking(
+                        value,
+                        label === 'IBAN' ? 'IBAN' : 'Account number',
+                      );
+                    }}
+                  />
+                ) : undefined
+              }
+            />
+          ))}
+          {null}
+          {connected && (
+            <>
+              <View style={parityStyles.item1}>
+                <Copy strong color={tokens.accent}>
+                  SHOW LESS
+                </Copy>
+              </View>
+              <View
+                style={[
+                  parityStyles.item2,
+                  {
+                    borderColor: tokens.border,
+                  },
+                ]}
+              >
+                <Copy strong>CONNECTED CARDS</Copy>
+              </View>
+              {connected.type === 'debit_card' ? (
+                <View style={parityStyles.item3}>
+                  <CardArt card={connected} width={64} />
+                  <View style={parityStyles.item4}>
+                    <Copy strong>Mastercard Standard Debit</Copy>
+                    <Copy muted size={14} lineHeight={15}>
+                      {formatMaskedCardNumber(connected.cardNumber)}
+                    </Copy>
+                  </View>
+                  <Glyph name="chevron-link" />
+                </View>
+              ) : null}
+            </>
+          )}
+        </View>
+      </Page>
+      <BankingCopyToast toast={toast} font={tokens.strongFont} />
+    </View>
   );
 }
+const parityStyles = StyleSheet.create({
+  item0: {
+    paddingTop: 46,
+    paddingBottom: 40,
+  },
+  item1: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  item2: {
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+  },
+  item3: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 18,
+  },
+  item4: {
+    flex: 1,
+    gap: 2,
+  },
+});
+const copyStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

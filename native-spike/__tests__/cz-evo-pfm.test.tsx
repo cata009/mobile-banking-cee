@@ -112,6 +112,73 @@ test('breakdown opens real Source transactions with product/transaction IDs and 
   });
   expect(JSON.stringify(tree.toJSON())).not.toContain('Budget rimanente');
 });
+test('category routes open directly into detail and preserve add, transaction, and period callbacks', async () => {
+  const products = createHomeProducts(DEFAULT_CZECH_COUNTS).products;
+  const months = listSpendingMonthKeys('CZ', products);
+  const periodKey = [...months].reverse().find(month => {
+    const summary = createSpendingRangeSummary(
+      'CZ',
+      products,
+      [month],
+      { key: month, label: month, year: month.split('-')[0], kind: 'month' },
+    );
+    return summary.sourceTransactions.some(
+      transaction =>
+        transaction.pfmCategory === 'Shopping' && transaction.amount < 0,
+    );
+  });
+  if (!periodKey) throw new Error('No Czech Shopping month is available.');
+  const onAddTransaction = jest.fn();
+  const onAnalyticsPeriodChange = jest.fn();
+  const onTransactionSelected = jest.fn();
+  const { tree } = await render({
+    route: {
+      screen: 'pfm',
+      params: {
+        category: 'Shopping',
+        direction: 'out',
+        periodKey,
+        externalDetail: 'true',
+      },
+    },
+    onAddTransaction,
+    onAnalyticsPeriodChange,
+    onTransactionSelected,
+  });
+
+  expect(
+    tree.root.findAll(
+      node => node.props.testID === 'cz-pfm-transaction',
+    ).length,
+  ).toBeGreaterThan(0);
+  await act(() => button(tree, 'Add transaction').props.onPress());
+  expect(onAddTransaction).toHaveBeenCalledTimes(1);
+
+  const transaction = tree.root.findAll(
+    node =>
+      node.props.testID === 'cz-pfm-transaction' &&
+      typeof node.props.onPress === 'function',
+  )[0]!;
+  await act(() => transaction.props.onPress());
+  expect(onTransactionSelected).toHaveBeenCalledWith(
+    expect.objectContaining({
+      productId: expect.any(String),
+      source: expect.stringMatching(/^(account|card)$/),
+      transaction: expect.objectContaining({ id: expect.any(String) }),
+    }),
+  );
+
+  await act(() =>
+    button(
+      tree,
+      createEvoTranslations('en').spending.changePeriod,
+    ).props.onPress(),
+  );
+  await act(() => button(tree, 'Last 3 months').props.onPress());
+  expect(onAnalyticsPeriodChange).toHaveBeenCalledWith(
+    expect.stringMatching(/^range:/),
+  );
+});
 test('visibility masks overview and analysis money while retaining accessible chart controls', async () => {
   const { tree } = await render({ amountsHidden: true });
   expect(JSON.stringify(tree.toJSON())).toContain('****');

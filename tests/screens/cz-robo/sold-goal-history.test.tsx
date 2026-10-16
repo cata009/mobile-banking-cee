@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CzFutureRoboAdvisorFlow from '@/app/screens/investments/CzFutureRoboAdvisorFlow'
 import { GoalDetail } from '@/app/screens/investments/robo/GoalDetail'
 import InvestmentPortfolioChart from '@/app/components/investments/InvestmentPortfolioChart'
@@ -11,6 +11,20 @@ import { getRoboGoalCurrentValue } from '@/features/investments/robo/goalModel'
 import { getRoboPortfolioForGoal } from '@/features/investments/robo/model'
 import { buildInvestmentSecurityCatalog } from '@/app/config/investmentsPortfolioConfig'
 import { renderBankingScreen } from '../../helpers/coverageProviders'
+import type { NativeScreenPreviewProps } from '@/app/components/demo/NativeScreenPreview'
+
+const nativePreview = vi.hoisted(() => ({ calls: [] as unknown[] }))
+
+vi.mock('@/app/components/demo/NativeScreenPreview', () => ({
+  NativeScreenPreview: (props: unknown) => {
+    nativePreview.calls.push(props)
+    return null
+  },
+}))
+
+beforeEach(() => {
+  nativePreview.calls = []
+})
 
 afterEach(cleanup)
 
@@ -33,7 +47,8 @@ describe('Fully sold active default Robo goal', () => {
     }
   })
 
-  it('opens the active zero-value goal and exposes its executed transactions and orders in History', () => {
+  // Source goal management owns the DTO; baseline-investments-history proves Native row rendering.
+  it('sends the active zero-value goal transactions and orders to Native History', () => {
     const goal = INITIAL_CZ_ROBO_GOALS[4]!
     renderBankingScreen(
       <CzFutureRoboAdvisorFlow initialGoal={goal} onBack={() => undefined} onExit={() => undefined} />,
@@ -43,11 +58,17 @@ describe('Fully sold active default Robo goal', () => {
     expect(screen.getByTestId('goal-detail-progress-badge')).toHaveTextContent(/^0%$/)
     expect(screen.queryByRole('heading', { name: 'Portfolio allocation' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'History' }))
-    expect(document.querySelectorAll('[data-investment-history-row="transaction"]')).toHaveLength(4)
-    expect(screen.getAllByText('SELL')).toHaveLength(2)
-    fireEvent.click(screen.getByRole('tab', { name: /orders/i }))
-    expect(document.querySelectorAll('[data-investment-history-row="order"]')).toHaveLength(4)
-    expect(screen.getAllByText('EXECUTED')).toHaveLength(4)
+    const adapter = nativePreview.calls.at(-1) as NativeScreenPreviewProps
+    expect(adapter.route).toEqual({
+      screen: 'investments',
+      params: { entry: 'history', tab: 'transactions' },
+    })
+    const overrides = adapter.snapshot?.investmentHistoryOverrides
+    expect(overrides?.transactions).toHaveLength(4)
+    expect(overrides?.transactions?.filter((transaction) => transaction.type === 'SELL')).toHaveLength(2)
+    expect(overrides?.orders).toHaveLength(4)
+    expect(overrides?.orders?.every((order) => order.status === 'EXECUTED')).toBe(true)
+    expect(adapter.events?.onInvestmentHistoryTabChange).toEqual(expect.any(Function))
   })
 
   it.each([

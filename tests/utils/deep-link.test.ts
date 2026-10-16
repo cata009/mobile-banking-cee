@@ -45,10 +45,25 @@ describe('deep-link screen normalization', () => {
 })
 
 describe('deep-link parse and build contracts', () => {
+  it('preserves only the explicit frozen renderer reference across URL normalization', () => {
+    window.history.replaceState({}, '', '/mobile-banking?renderer=reference')
+    expect(new URL(buildDeepLinkUrl(baseState)).searchParams.get('renderer')).toBe('reference')
+    window.history.replaceState({}, '', '/mobile-banking?renderer=candidate')
+    expect(new URL(buildDeepLinkUrl(baseState)).searchParams.get('renderer')).toBe('candidate')
+    window.history.replaceState({}, '', '/mobile-banking?renderer=unrecognized')
+    expect(new URL(buildDeepLinkUrl(baseState)).searchParams.has('renderer')).toBe(false)
+  })
   it('round trips all nine product-count overrides', () => {
     const productCounts = {
-      accounts: 9, debitCards: 8, creditCards: 7, mealCards: 6, deposits: 5,
-      savingsAccounts: 4, loans: 3, mortgages: 2, investments: 1,
+      accounts: 9,
+      debitCards: 8,
+      creditCards: 7,
+      mealCards: 6,
+      deposits: 5,
+      savingsAccounts: 4,
+      loans: 3,
+      mortgages: 2,
+      investments: 1,
     }
     const url = new URL(buildDeepLinkUrl({ ...baseState, productCounts }))
     const parsed = parseDeepLinkFromUrl(url.search)
@@ -81,37 +96,45 @@ describe('deep-link parse and build contracts', () => {
   })
 
   it('builds stable account and card links with only their matching context IDs', () => {
-    const accountUrl = new URL(buildDeepLinkUrl({
-      ...baseState,
-      screen: 'account-detail',
-      accountId: 'acc-1',
-      cardId: 'card-ignored',
-    }))
+    const accountUrl = new URL(
+      buildDeepLinkUrl({
+        ...baseState,
+        screen: 'account-detail',
+        accountId: 'acc-1',
+        cardId: 'card-ignored',
+      }),
+    )
     expect(accountUrl.searchParams.get('screen')).toBe('account-detail')
     expect(accountUrl.searchParams.get('account')).toBe('acc-1')
     expect(accountUrl.searchParams.has('card')).toBe(false)
 
-    const cardUrl = new URL(buildDeepLinkUrl({
-      ...baseState,
-      screen: 'card-detail',
-      accountId: 'account-ignored',
-      cardId: 'card-1',
-    }))
+    const cardUrl = new URL(
+      buildDeepLinkUrl({
+        ...baseState,
+        screen: 'card-detail',
+        accountId: 'account-ignored',
+        cardId: 'card-1',
+      }),
+    )
     expect(cardUrl.searchParams.get('screen')).toBe('card-detail')
     expect(cardUrl.searchParams.get('card')).toBe('card-1')
     expect(cardUrl.searchParams.has('account')).toBe(false)
   })
 
   it('builds transient screens as their current stable parents', () => {
-    const withCard = new URL(buildDeepLinkUrl({
-      ...baseState,
-      screen: 'transaction-detail',
-      cardId: 'card-1',
-    }))
-    const withoutCard = new URL(buildDeepLinkUrl({
-      ...baseState,
-      screen: 'transaction-detail',
-    }))
+    const withCard = new URL(
+      buildDeepLinkUrl({
+        ...baseState,
+        screen: 'transaction-detail',
+        cardId: 'card-1',
+      }),
+    )
+    const withoutCard = new URL(
+      buildDeepLinkUrl({
+        ...baseState,
+        screen: 'transaction-detail',
+      }),
+    )
 
     expect(withCard.searchParams.get('screen')).toBe('card-detail')
     expect(withCard.searchParams.get('card')).toBe('card-1')

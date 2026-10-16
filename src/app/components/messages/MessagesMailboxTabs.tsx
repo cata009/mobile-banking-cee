@@ -1,12 +1,9 @@
 import { useEffect, useRef, type PointerEvent } from "react";
 
-export type MessagesMailboxTabId = string;
-
-export interface MessagesMailboxTab {
-  id: MessagesMailboxTabId;
-  label: string;
-  hasNewItems?: boolean;
-}
+import type { MessagesMailboxTabId, MessagesMailboxTab } from '../contracts/mailboxTabs';
+export type { MessagesMailboxTabId, MessagesMailboxTab } from '../contracts/mailboxTabs';
+import { centeredMailboxScroll } from '../contracts/mailboxTabs';
+import { mailboxTabsWeb } from '../contracts/mailboxTabsWeb';
 
 interface MessagesMailboxTabsProps {
   tabs: readonly MessagesMailboxTab[];
@@ -29,7 +26,8 @@ export default function MessagesMailboxTabs({
   withTopMargin = true,
   className = "",
 }: MessagesMailboxTabsProps) {
-  const isScrollable = layout === "scrollable";
+  const web = mailboxTabsWeb({ layout, minTabWidth, withTopMargin }, className);
+  const { isScrollable, dragThreshold } = web;
   const tabListRef = useRef<HTMLDivElement | null>(null);
   const activeTabRef = useRef<HTMLButtonElement | null>(null);
   const dragStateRef = useRef({
@@ -39,7 +37,7 @@ export default function MessagesMailboxTabs({
     moved: false,
     pointerId: null as number | null,
   });
-  const dragThreshold = 10;
+
 
   useEffect(() => {
     if (!isScrollable) return;
@@ -52,9 +50,7 @@ export default function MessagesMailboxTabs({
     // Element.scrollIntoView(), which walks every scrollable ancestor
     // (including ones with overflow:hidden) and can drag unrelated
     // parents sideways if they happen to have stray content overflow.
-    const target = tab.offsetLeft - (list.clientWidth - tab.offsetWidth) / 2;
-    const maxScrollLeft = list.scrollWidth - list.clientWidth;
-    const clamped = Math.max(0, Math.min(target, maxScrollLeft));
+    const clamped = centeredMailboxScroll(tab.offsetLeft, list.clientWidth, tab.offsetWidth, list.scrollWidth);
     list.scrollTo({
       left: clamped,
       behavior: "smooth",
@@ -114,9 +110,7 @@ export default function MessagesMailboxTabs({
   return (
     <div
       ref={tabListRef}
-      className={`relative ${withTopMargin ? "mt-[22px]" : "mt-0"} h-[48px] shrink-0 border-b border-[var(--uc-border)] ${
-        isScrollable ? "flex cursor-grab touch-pan-x select-none overflow-x-auto overscroll-x-contain scrollbar-hide active:cursor-grabbing" : "grid grid-cols-2"
-      } ${className}`}
+      className={web.rootClass}
       role="tablist"
       aria-label={ariaLabel}
       onPointerDown={handlePointerDown}
@@ -145,7 +139,7 @@ export default function MessagesMailboxTabs({
             }}
             role="tab"
             aria-selected={isActive}
-            className="uc-type-n4-strong relative flex h-full shrink-0 items-center justify-center px-[16px] text-[var(--uc-text)]"
+            className={web.tabClass}
             style={isScrollable ? { minWidth: minTabWidth } : undefined}
           >
             {tab.hasNewItems ? (

@@ -1,14 +1,11 @@
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import AccountDetailScreen from '@/app/screens/accounts/AccountDetailScreen'
 import CardDetailScreen from '@/app/screens/cards/CardDetailScreen'
 import { TransactionDetailScreen } from '@/app/screens/payments/DomesticPaymentFlowScreens'
-import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
-import { HuMerchantLogoMark } from '@/app/screens/kids/hu/merchantLogos'
 import { DemoProvider } from '@/app/state/demoStore'
 import { getAccountTransactions, type AccountTransaction } from '@/data/accountDetails'
 import { mockProducts, type CurrentAccount, type DebitCard } from '@/data/products'
-import carrefourOfficialLogo from '@/assets/ethoca/carrefour-official.svg'
-import emagOfficialLogo from '@/assets/ethoca/emag-official.svg'
+import type { NativeTransactionLeadingVisual } from '@/features/demo-native/bankingPresentation'
 import type { EthocaScreenKind } from '@/app/screens/flow-library/flows/types'
 import { noop } from '@/flows/shared/previewPrimitives'
 const ETHOCA_DEBIT_CARD = mockProducts.find((product): product is DebitCard => product.type === 'debit_card')!
@@ -27,78 +24,17 @@ function demoTransaction(label: string, status?: AccountTransaction['status']): 
 
 type EthocaMerchantId = 'youtube' | 'carrefour' | 'emag'
 
-/** Existing merchant-logo asset reused from the current Mobile PI Kids implementation. */
-function ExistingMerchantLogo({ merchant, size = 32 }: { merchant: 'youtube' | 'netflix'; size?: 32 | 64 }) {
-  const scale = size / 34
-  return (
-    <div
-      className="grid shrink-0 place-items-center overflow-visible"
-      data-ethoca-visual="merchant-logo"
-      style={{ width: size, height: size }}
-    >
-      <div style={{ transform: `scale(${scale})` }}>
-        <HuMerchantLogoMark merchant={merchant} />
-      </div>
-    </div>
-  )
+function merchantVisual(merchant: EthocaMerchantId, size: 32 | 64 = 32): NativeTransactionLeadingVisual {
+  return { kind: 'merchant-logo', merchant, size }
 }
 
-/**
- * ETHOCA uses a merchant-supplied brand asset, never a letter-based stand-in.
- * The assets are bundled with the demo rather than requested from merchant CDNs
- * at runtime, so corporate firewalls cannot blank the transaction presentation.
- */
-function EthocaMerchantLogo({
-  merchant,
-  transaction,
-  size = 32,
-}: {
-  merchant: EthocaMerchantId
-  transaction: AccountTransaction
-  size?: 32 | 64
-}) {
-  const [imageFailed, setImageFailed] = useState(false)
-  const [imageReady, setImageReady] = useState(false)
-  if (merchant === 'youtube') return <ExistingMerchantLogo merchant="youtube" size={size} />
-  if (imageFailed) return <ExistingPfmFallback transaction={transaction} />
-
-  const config =
-    merchant === 'carrefour'
-      ? {
-          label: 'Carrefour',
-          source: 'bundled-official-carrefour',
-          src: carrefourOfficialLogo,
-        }
-      : {
-          label: 'eMAG',
-          source: 'bundled-official-emag',
-          src: emagOfficialLogo,
-        }
-
-  return (
-    <span
-      aria-label={`${config.label} merchant logo`}
-      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--uc-static-white)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--uc-static-black)_12%,transparent)]"
-      data-ethoca-visual="merchant-logo"
-      data-ethoca-logo-source={config.source}
-      data-testid={`merchant-logo-${merchant}`}
-      role="img"
-      style={{ width: size, height: size }}
-    >
-      {!imageReady ? (
-        <span className="grid h-full w-full place-items-center rounded-full bg-[#F5F5F5]" aria-hidden="true">
-          <PfmCategoryIcon category={transaction.pfmCategory} size={32} variant="category-circle" />
-        </span>
-      ) : null}
-      <img
-        alt=""
-        className={`absolute h-full w-full object-contain p-[12%] ${imageReady ? 'opacity-100' : 'opacity-0'}`}
-        onLoad={() => setImageReady(true)}
-        onError={() => setImageFailed(true)}
-        src={config.src}
-      />
-    </span>
-  )
+function pfmVisual(transaction: AccountTransaction): NativeTransactionLeadingVisual {
+  return {
+    kind: 'pfm',
+    category: transaction.pfmCategory,
+    variant: 'category-circle',
+    size: 32,
+  }
 }
 
 /**
@@ -120,23 +56,10 @@ function EthocaRoFixture({ children }: { children: ReactNode }) {
   )
 }
 
-function ExistingPfmFallback({ transaction }: { transaction: AccountTransaction }) {
-  return (
-    <span
-      className="grid size-[32px] shrink-0 place-items-center"
-      aria-label="PFM category fallback"
-      data-ethoca-visual="pfm-fallback"
-    >
-      <PfmCategoryIcon category={transaction.pfmCategory} size={32} variant="category-circle" />
-    </span>
-  )
-}
-
-function merchantLogoFor(transaction: AccountTransaction) {
-  if (transaction.label === 'YouTube Premium')
-    return <EthocaMerchantLogo merchant="youtube" transaction={transaction} />
-  if (transaction.label === 'Carrefour') return <EthocaMerchantLogo merchant="carrefour" transaction={transaction} />
-  if (transaction.label === 'eMAG') return <EthocaMerchantLogo merchant="emag" transaction={transaction} />
+function merchantVisualFor(transaction: AccountTransaction): NativeTransactionLeadingVisual | undefined {
+  if (transaction.label === 'YouTube Premium') return merchantVisual('youtube')
+  if (transaction.label === 'Carrefour') return merchantVisual('carrefour')
+  if (transaction.label === 'eMAG') return merchantVisual('emag')
   return undefined
 }
 
@@ -159,9 +82,9 @@ function EthocaListPreview({ state }: { state: 'available' | 'pending' | 'fallba
         transactionRowPresentation={{
           displayLabel: (transaction) => transaction.label,
           transactionFilter,
-          leadingVisual: (transaction) => {
-            if (state === 'fallback') return <ExistingPfmFallback transaction={transaction} />
-            return merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />
+          nativeLeadingVisual: (transaction) => {
+            if (state === 'fallback') return pfmVisual(transaction)
+            return merchantVisualFor(transaction) ?? pfmVisual(transaction)
           },
         }}
       />
@@ -188,12 +111,10 @@ function EthocaAccountListPreview({ state }: { state: 'available' | 'pending' })
         transactionRowPresentation={{
           displayLabel: (transaction) => transaction.label,
           transactionFilter,
-          leadingVisual: (transaction) =>
-            transaction.source === 'card' ? (
-              (merchantLogoFor(transaction) ?? <ExistingPfmFallback transaction={transaction} />)
-            ) : (
-              <ExistingPfmFallback transaction={transaction} />
-            ),
+          nativeLeadingVisual: (transaction) =>
+            transaction.source === 'card'
+              ? (merchantVisualFor(transaction) ?? pfmVisual(transaction))
+              : pfmVisual(transaction),
         }}
       />
     </EthocaRoFixture>
@@ -217,7 +138,6 @@ function EthocaTransactionDetailPreview({
     mode === 'in-store'
       ? {
           cleanMerchantName: 'Carrefour',
-          merchantLogo: <EthocaMerchantLogo merchant="carrefour" transaction={transaction} size={64} />,
           location: {
             label: 'Merchant location',
             address: 'Carrefour Băneasa · Șos. București-Ploiești 42D, Bucharest',
@@ -227,13 +147,11 @@ function EthocaTransactionDetailPreview({
       : mode === 'online'
         ? {
             cleanMerchantName: 'YouTube Premium',
-            merchantLogo: <EthocaMerchantLogo merchant="youtube" transaction={transaction} size={64} />,
             mcc: '4899 · Cable, satellite and other pay television',
           }
         : mode === 'pending'
           ? {
               cleanMerchantName: 'eMAG',
-              merchantLogo: <EthocaMerchantLogo merchant="emag" transaction={transaction} size={64} />,
             }
           : mode === 'partial-data'
             ? {
@@ -241,6 +159,14 @@ function EthocaTransactionDetailPreview({
                 mcc: '5411 · Grocery stores, supermarkets',
               }
             : undefined
+  const nativeMerchantVisual =
+    mode === 'in-store'
+      ? merchantVisual('carrefour', 64)
+      : mode === 'online'
+        ? merchantVisual('youtube', 64)
+        : mode === 'pending'
+          ? merchantVisual('emag', 64)
+          : undefined
 
   return (
     <TransactionDetailScreen
@@ -248,6 +174,7 @@ function EthocaTransactionDetailPreview({
       product={ETHOCA_DEBIT_CARD}
       transaction={transaction}
       merchantEnrichment={enrichment}
+      nativeMerchantVisual={nativeMerchantVisual}
       onBack={noop}
       onRedoPayment={noop}
       onCategoryChange={noop}

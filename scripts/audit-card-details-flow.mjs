@@ -1,27 +1,78 @@
-import { readFile } from "node:fs/promises";
-import assert from "node:assert/strict";
+import { readFile } from 'node:fs/promises'
+import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const [cardDetailSource, cardDetailsSource, sensitiveCardDetailsSource] = await Promise.all([
-  readFile(new URL("../src/app/screens/cards/CardDetailScreen.tsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/app/screens/cards/CardDetailsInfoScreen.tsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/app/screens/cards/CardSensitiveDetailsScreen.tsx", import.meta.url), "utf8"),
-]);
+export function auditCardDetailsFlow({ entry, infoEntry, card, info, faceId }) {
+  assert.match(entry, /NativeScreenPreview/, 'The compatibility entry must consume Native UI')
+  assert.match(infoEntry, /screen: 'card-info'/, 'Direct information must consume the Native information route')
+  assert.match(
+    card,
+    /import \{ FaceIdOverlay \} from '\.\/FaceIdOverlay'/,
+    'Reveal must use the shared Face ID overlay',
+  )
+  assert.match(card, /onPress=\{requestCardDetails\}/, 'Show Card Details must start the reveal request')
+  assert.match(card, /setAuthCard\(card\.id\)/, 'Reveal must enter authentication for the selected card')
+  assert.match(
+    card,
+    /host\.isActive && authCard === card\.id \? \([\s\S]*?<FaceIdOverlay/,
+    'Only the active matching card may authenticate',
+  )
+  assert.match(
+    card,
+    /onComplete=\{\(\) => \{\s*if \(active\.current && authCard === card\.id\) \{\s*setAuthCard\(null\);\s*setSensitiveCard\(card\.id\);/,
+    'Completion must gate reveal by the current active card',
+  )
+  assert.equal(
+    (card.match(/setSensitiveCard\(card\.id\)/g) ?? []).length,
+    1,
+    'No second path may bypass the completion gate',
+  )
+  assert.match(
+    card,
+    /if \(host\.isActive && sensitiveCard === card\.id\)[\s\S]*?<BaselineSensitiveCard/,
+    'Sensitive details must require authenticated active selection',
+  )
+  assert.match(faceId, /complete\.current\(\)/, 'The shared overlay must complete the authentication sequence')
+  assert.match(card, /screen: 'card-info'/, 'The non-sensitive quick action must open its information route directly')
+  assert.match(card, /testID="ro-card-carousel"/, 'The carousel must retain its visual regression boundary')
+  assert.match(
+    card,
+    /carousel: \{ marginBottom: -20, zIndex: 10 \}/,
+    'The carousel must retain the raised 20px shadow lane',
+  )
+  const shadowPadding = /rail: \{[^}]*paddingBottom: (\d+)/.exec(card)
+  assert.ok(shadowPadding && Number(shadowPadding[1]) >= 20, 'The carousel must reserve at least 20px below its cards')
+  assert.match(info, /Card product/, 'Direct Card Details must describe the product')
+  assert.match(info, /Card status/, 'Direct Card Details must expose non-sensitive status')
+  assert.doesNotMatch(info, /Card CVV2\/CVC2/, 'Direct Card Details must not expose CVV/CVC')
+  assert.match(card, /useBankingCopy\(\)/, 'Sensitive details must consume shared clipboard behavior')
+  assert.match(card, /<BankingCopyToast toast=\{toast\}/, 'Sensitive details must show the shared copy toast')
+  assert.match(card, /copyCard\(card\.cardNumber, 'Card number'\)/, 'Copy must use the unmasked number')
+  for (const label of ['Card CVV2/CVC2', 'Card holder', 'Card validity']) {
+    assert.ok(card.includes(`'${label}'`), `Sensitive details must display ${label}`)
+  }
+}
 
-assert.match(cardDetailSource, /FaceIdAnimation/, "SHOW CARD DETAILS must require the shared Face ID overlay");
-assert.match(cardDetailSource, /onClick={handleShowCardDetails}/, "The Show Card Details CTA must start the Face ID reveal");
-assert.match(cardDetailSource, /onClick: \(\) => onCardDetailsClick\?\.\(activeCard\)/, "The Card Details quick action must open its non-sensitive route directly");
-assert.match(cardDetailSource, /FaceIdAnimation onComplete={completeCardDetailsFaceId}/, "Face ID completion must gate the route transition");
-assert.match(cardDetailSource, /setIsSensitiveCardDetailsVisible\(true\)/, "Face ID completion must reveal the sensitive card-details surface");
-assert.match(cardDetailSource, /data-card-carousel/, "The card carousel must expose its visual regression boundary");
-assert.match(cardDetailSource, /z-10 -mb-\[20px\].*pb-\[20px\]/, "The card carousel must reserve a raised 20px shadow lane");
-assert.match(cardDetailsSource, /Card product/, "Direct Card Details must describe the card product");
-assert.match(cardDetailsSource, /Card status/, "Direct Card Details must expose the non-sensitive status");
-assert.doesNotMatch(cardDetailsSource, /Card CVV2\/CVC2/, "Direct Card Details must not expose the CVV/CVC field");
-assert.match(sensitiveCardDetailsSource, /useCopyToClipboard/, "Sensitive card details must use the shared clipboard behavior");
-assert.match(sensitiveCardDetailsSource, /CopyToast/, "Sensitive card details must display the shared copy toast");
-assert.match(sensitiveCardDetailsSource, /copyToClipboard\(card\.cardNumber, "Card number"\)/, "Card number copy must use the unmasked value");
-assert.match(sensitiveCardDetailsSource, /Card CVV2\/CVC2/, "Sensitive card details must display the CVV/CVC field");
-assert.match(sensitiveCardDetailsSource, /Card holder/, "Sensitive card details must display the holder field");
-assert.match(sensitiveCardDetailsSource, /Card validity/, "Sensitive card details must display the validity field");
+export async function readCardDetailsAuditSources() {
+  const paths = {
+    entry: 'src/app/screens/cards/CardDetailScreen.tsx',
+    infoEntry: 'src/app/screens/cards/CardDetailsInfoScreen.tsx',
+    card: 'native-spike/src/experiences/pi/current/baseline/Card.tsx',
+    info: 'native-spike/src/experiences/pi/current/baseline/CardInfo.tsx',
+    faceId: 'native-spike/src/experiences/pi/current/baseline/FaceIdOverlay.tsx',
+  }
+  return Object.fromEntries(
+    await Promise.all(
+      Object.entries(paths).map(async ([key, path]) => [
+        key,
+        await readFile(new URL(`../${path}`, import.meta.url), 'utf8'),
+      ]),
+    ),
+  )
+}
 
-console.log("card details flow audit ok");
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  auditCardDetailsFlow(await readCardDetailsAuditSources())
+  console.log('card details Native flow audit ok')
+}

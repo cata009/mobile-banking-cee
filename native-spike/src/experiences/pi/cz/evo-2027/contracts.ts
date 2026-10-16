@@ -1,5 +1,15 @@
 import type { ComponentType } from 'react';
-import type { ProductCounts, Scenario } from '@/app/state/demoTypes';
+import type {
+  BankingScenarioId,
+  ProductCounts,
+  Scenario,
+} from '@/app/state/demoTypes';
+import type {
+  NativeInvestmentRequests,
+  NativeDemoEvents,
+} from '@/features/demo-native/contracts';
+import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents';
+import type { NativeTransactionPayload } from '@/features/demo-native/transactionIntents';
 
 /** CZ Evo is a release of current, never an alias for mobile-first. */
 export const CZECH_NATIVE_CONTEXT = {
@@ -12,6 +22,8 @@ export const CZECH_NATIVE_CONTEXT = {
 
 export type CzechNativeScreen =
   | 'home'
+  | 'prime'
+  | 'coapping'
   | 'pfm'
   | 'products'
   | 'product-detail'
@@ -58,6 +70,8 @@ export interface CzechNativeChrome {
   barStyle: 'light-content' | 'dark-content';
 }
 export interface CzechNativeScreenProps {
+  activeFeatures?: import('@/features/demo-native/contracts').NativeDemoControl['activeFeatures'];
+  bankingScenario?: BankingScenarioId;
   route: CzechNativeRoute;
   scenario: Scenario;
   language?: 'en' | 'cs';
@@ -77,6 +91,41 @@ export interface CzechNativeScreenProps {
   screenTopInset?: number;
   isActive?: boolean;
   onChromeChange?: (chrome?: CzechNativeChrome) => void;
+  onPrimaryNavigationChange?: (visible: boolean) => void;
+  onBackHandlerChange?: (handler: (() => boolean) | null) => void;
+  investmentRequests?: NativeInvestmentRequests;
+  onInvestmentBuyRequestConsumed?: NativeDemoEvents['onInvestmentBuyRequestConsumed'];
+  onInvestmentSecuritySelected?: NativeDemoEvents['onInvestmentSecuritySelected'];
+  onInvestmentReturnToSimulator?: NativeDemoEvents['onInvestmentReturnToSimulator'];
+  paymentFlow?: NativePaymentFlow | null;
+  onPaymentFlowChange?: NativeDemoEvents['onPaymentFlowChange'];
+  transactionSelection?: NativeTransactionPayload | null;
+  transactionPresentation?: import('@/features/demo-native/contracts').NativeDemoControl['transactionPresentation'];
+  onTransactionSelected?: NativeDemoEvents['onTransactionSelected'];
+  onAddTransaction?: NativeDemoEvents['onAddTransaction'];
+  onAnalyticsPeriodChange?: NativeDemoEvents['onAnalyticsPeriodChange'];
+  onRoboResumeStateChange?: NativeDemoEvents['onRoboResumeStateChange'];
+  onTransactionCategoryChange?: NativeDemoEvents['onTransactionCategoryChange'];
+  coAppingContext?:
+    | import('@/features/demo-native/contracts').NativeCoAppingContext
+    | null;
+  onContinueCoapping?: NativeDemoEvents['onContinueCoapping'];
+  onCoAppingSessionEnd?: NativeDemoEvents['onCoAppingSessionEnd'];
+  investmentHistoryOverrides?: import('@/features/demo-native/contracts').NativeInvestmentHistoryOverrides;
+  onInvestmentHistoryTabChange?: NativeDemoEvents['onInvestmentHistoryTabChange'];
+  onInvestmentHistoryToApprove?: NativeDemoEvents['onInvestmentHistoryToApprove'];
+  investmentPresentation?: import('@/features/demo-native/contracts').NativeInvestmentPresentation;
+  productsShelfFocusRequest?: import('@/features/demo-native/contracts').NativeDemoControl['productsShelfFocusRequest'];
+  productDetailPresentation?: import('@/features/demo-native/contracts').NativeDemoControl['productDetailPresentation'];
+  onProductsShelfFocusHandled?: NativeDemoEvents['onProductsShelfFocusHandled'];
+  onProductsShelfHeroCollapsedChange?: NativeDemoEvents['onProductsShelfHeroCollapsedChange'];
+  onProductDetailAction?: NativeDemoEvents['onProductDetailAction'];
+  bankingPresentation?: import('@/features/demo-native/contracts').NativeDemoControl['bankingPresentation'];
+  onActiveCardChange?: NativeDemoEvents['onActiveCardChange'];
+  onShowCardDetailsRequest?: NativeDemoEvents['onShowCardDetailsRequest'];
+  onShowCardDetails?: NativeDemoEvents['onShowCardDetails'];
+  onAiOpportunityClick?: NativeDemoEvents['onAiOpportunityClick'];
+  onHelpRequest?: NativeDemoEvents['onHelpRequest'];
 }
 export interface CzechNativeSearchEntry {
   id: string;

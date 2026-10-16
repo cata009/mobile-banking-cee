@@ -1,25 +1,11 @@
 import { useId, type CSSProperties, type HTMLAttributes } from "react";
 
 import { cn } from "@/app/components/ui/utils";
-import logoSvgPaths from "@/imports/svg-pn3y56bdut";
+import { CARD_SOURCE, CARD_ARTWORK, resolveCardArtwork, type CardTone, type CardVariant, type CardSize } from "@/app/components/contracts/cardArtwork";
+export { CARD_SOURCE, CARD_VARIANTS } from "@/app/components/contracts/cardArtwork";
+export type { CardVariant, CardSize } from "@/app/components/contracts/cardArtwork";
 
-export const CARD_SOURCE = {
-  schema: "figma-meniga-harmonization-icons/v1",
-  figmaComponentName: "Card",
-  sourceNodeIds: {
-    mcDebitGoldSmall: "3039:30713",
-    mcCreditPremiumGold: "3039:7485",
-    mcCreditPartnerStandard: "3039:8064",
-    mcDebitStandard: "4161:9198",
-    mcVirtualStandardViolet: "3039:12315",
-    mcVirtualStandardOrange: "3039:12380",
-  },
-  width: 64,
-  height: 40,
-  cornerRadius: 4,
-} as const;
-
-const CARD_ARROW_PATH = "M10.3 0 31.4 20 10.3 40c-2.4-2.7-3-6.2-1.6-9.7.45-1.1 1.2-2.05 2.05-2.9L18.6 20l-7.85-7.4C9.9 11.8 9.15 10.8 8.7 9.7 7.3 6.2 7.9 2.7 10.3 0Z";
+const CARD_ARROW_PATH = CARD_ARTWORK.arrowPath;
 
 /** Reusable UniCredit double-arrow mark for campaign photography overlays. */
 export function CardArrowMark({ color = "var(--uc-brand)", className }: { color?: string; className?: string }) {
@@ -37,143 +23,6 @@ export function CardArrowMark({ color = "var(--uc-brand)", className }: { color?
   );
 }
 
-export type CardVariant =
-  | "mc-debit-gold"
-  | "mc-credit-premium-gold"
-  | "mc-credit-partner-standard"
-  | "mc-debit-standard"
-  | "mc-virtual-standard-violet"
-  | "mc-virtual-standard-orange";
-
-export type CardSize = "figma" | "medium" | "large";
-
-type CardTone = {
-  label: string;
-  network: string;
-  typeLabel: "debit" | "credit";
-  sourceNodeId: string;
-  background: string;
-  backgroundEnd?: string;
-  pattern: string;
-  patternEnd?: string;
-  logoText: string;
-  brandMark: string;
-  labelColor: string;
-  mastercardStroke: string;
-  mastercardRed: string;
-  mastercardYellow: string;
-  mastercardCenter: string;
-  shadowOpacity?: number;
-};
-
-export const CARD_VARIANTS: Record<CardVariant, CardTone> = {
-  "mc-debit-gold": {
-    label: "MC Debit Gold",
-    network: "Mastercard",
-    typeLabel: "debit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcDebitGoldSmall,
-    background: "#F9F9FA",
-    pattern: "#B1A06F",
-    patternEnd: "#D9D1BD",
-    logoText: "#111111",
-    brandMark: "#E30613",
-    labelColor: "#8E8E8E",
-    mastercardStroke: "transparent",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-  },
-  "mc-credit-premium-gold": {
-    label: "MC Credit Premium Gold",
-    network: "Mastercard",
-    typeLabel: "credit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcCreditPremiumGold,
-    background: "#CF0612",
-    backgroundEnd: "#7C0F0D",
-    pattern: "#B1A06F",
-    patternEnd: "#D9D1BD",
-    logoText: "#FFFFFF",
-    brandMark: "#E30613",
-    labelColor: "#FFFFFF",
-    mastercardStroke: "#FFFFFF",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-    shadowOpacity: 0.16,
-  },
-  "mc-credit-partner-standard": {
-    label: "MC Credit Partner Standard",
-    network: "Mastercard",
-    typeLabel: "credit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcCreditPartnerStandard,
-    background: "#CF0612",
-    backgroundEnd: "#7C0F0D",
-    pattern: "#E30613",
-    patternEnd: "#B80E19",
-    logoText: "#FFFFFF",
-    brandMark: "#E30613",
-    labelColor: "#FFFFFF",
-    mastercardStroke: "#FFFFFF",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-    shadowOpacity: 0.16,
-  },
-  "mc-debit-standard": {
-    label: "MC Debit Standard",
-    network: "Mastercard",
-    typeLabel: "debit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcDebitStandard,
-    background: "#F9F9FA",
-    pattern: "#E30613",
-    logoText: "#111111",
-    brandMark: "#E30613",
-    labelColor: "#8E8E8E",
-    mastercardStroke: "transparent",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-  },
-  "mc-virtual-standard-violet": {
-    label: "MC Virtual Standard Electric Violet",
-    network: "Mastercard",
-    typeLabel: "debit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcVirtualStandardViolet,
-    background: "#772B8B",
-    pattern: "#AD80B9",
-    logoText: "#FFFFFF",
-    brandMark: "#E30613",
-    labelColor: "#FFFFFF",
-    mastercardStroke: "transparent",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-    shadowOpacity: 0.1,
-  },
-  "mc-virtual-standard-orange": {
-    label: "MC Virtual Standard Vibrant Orange",
-    network: "Mastercard",
-    typeLabel: "debit",
-    sourceNodeId: CARD_SOURCE.sourceNodeIds.mcVirtualStandardOrange,
-    background: "#F78F20",
-    pattern: "#FABC79",
-    logoText: "#FFFFFF",
-    brandMark: "#E30613",
-    labelColor: "#FFFFFF",
-    mastercardStroke: "#FFFFFF",
-    mastercardRed: "#EB001B",
-    mastercardYellow: "#F79E1B",
-    mastercardCenter: "#FF5F00",
-    shadowOpacity: 0.1,
-  },
-};
-
-const CARD_SIZES: Record<CardSize, { width: number; height: number }> = {
-  figma: { width: 64, height: 40 },
-  medium: { width: 96, height: 60 },
-  large: { width: 160, height: 100 },
-};
-
 export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   ariaLabel?: string;
   size?: CardSize;
@@ -188,8 +37,8 @@ export default function Card({
   variant = "mc-debit-gold",
   ...props
 }: CardProps) {
-  const tone = CARD_VARIANTS[variant];
-  const dimensions = CARD_SIZES[size];
+  const dimensions = resolveCardArtwork({ variant, size });
+  const { tone } = dimensions;
   const svgId = useId().replace(/:/g, "");
   const cardBackground = tone.backgroundEnd
     ? `linear-gradient(135deg, ${tone.background} 0%, ${tone.backgroundEnd} 100%)`
@@ -253,16 +102,16 @@ function CardSvg({ tone, uniqueId }: { tone: CardTone; uniqueId: string }) {
       <g>
         <rect width="64" height="40" fill={backgroundFill} />
         <path
-          d="M-10 4 6.3 20-10 36v-9.8L-3.7 20-10 13.8V4Z"
+          d={CARD_ARTWORK.edgeArrowPath}
           fill={patternFill}
           opacity={tone.shadowOpacity ? 0.96 : 1}
         />
         <path
-          d="M10.3 0 31.4 20 10.3 40c-2.4-2.7-3-6.2-1.6-9.7.45-1.1 1.2-2.05 2.05-2.9L18.6 20l-7.85-7.4C9.9 11.8 9.15 10.8 8.7 9.7 7.3 6.2 7.9 2.7 10.3 0Z"
+          d={CARD_ARTWORK.arrowPath}
           fill={patternFill}
           opacity={tone.shadowOpacity ? 0.88 : 1}
         />
-        <path d="M10.3 0 31.4 20 10.3 40" fill="none" stroke="#FFFFFF" strokeOpacity="0.1" strokeWidth="0.4" />
+        <path d={CARD_ARTWORK.detailPath} fill="none" stroke="#FFFFFF" strokeOpacity="0.1" strokeWidth="0.4" />
 
         <UniCreditCardLogo brandColor={tone.brandMark} textColor={tone.logoText} />
 
@@ -284,7 +133,7 @@ function CardSvg({ tone, uniqueId }: { tone: CardTone; uniqueId: string }) {
             strokeWidth={tone.mastercardStroke === "transparent" ? 0 : 0.42}
           />
           <path
-            d="M6.6.82a4.1 4.1 0 0 1 0 6.56 4.1 4.1 0 0 1 0-6.56Z"
+            d={CARD_ARTWORK.networkCenterPath}
             fill={tone.mastercardCenter}
             opacity="0.92"
           />
@@ -312,18 +161,18 @@ function UniCreditCardLogo({ brandColor, textColor }: { brandColor: string; text
 
   return (
     <g transform={`translate(42.15 2.05) scale(${scale})`}>
-      <path clipRule="evenodd" d={logoSvgPaths.p2cef6600} fill={brandColor} fillRule="evenodd" />
-      <path clipRule="evenodd" d={logoSvgPaths.p27e9da00} fill={brandColor} fillRule="evenodd" />
-      <path clipRule="evenodd" d={logoSvgPaths.p2e662b0} fill="#FFFFFF" fillRule="evenodd" />
-      <path d={logoSvgPaths.p3d56e1f0} fill={textColor} />
-      <path d={logoSvgPaths.p18a76220} fill={textColor} />
-      <path d={logoSvgPaths.p2205fa00} fill={textColor} />
-      <path d={logoSvgPaths.p4138200} fill={textColor} />
-      <path d={logoSvgPaths.p120fd332} fill={textColor} />
-      <path d={logoSvgPaths.p3558cb00} fill={textColor} />
-      <path d={logoSvgPaths.p29646d00} fill={textColor} />
-      <path d={logoSvgPaths.p3ed7ba20} fill={textColor} />
-      <path d={logoSvgPaths.p4240280} fill={textColor} />
+      <path clipRule="evenodd" d={CARD_ARTWORK.logoPaths.p2cef6600} fill={brandColor} fillRule="evenodd" />
+      <path clipRule="evenodd" d={CARD_ARTWORK.logoPaths.p27e9da00} fill={brandColor} fillRule="evenodd" />
+      <path clipRule="evenodd" d={CARD_ARTWORK.logoPaths.p2e662b0} fill="#FFFFFF" fillRule="evenodd" />
+      <path d={CARD_ARTWORK.logoPaths.p3d56e1f0} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p18a76220} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p2205fa00} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p4138200} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p120fd332} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p3558cb00} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p29646d00} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p3ed7ba20} fill={textColor} />
+      <path d={CARD_ARTWORK.logoPaths.p4240280} fill={textColor} />
     </g>
   );
 }

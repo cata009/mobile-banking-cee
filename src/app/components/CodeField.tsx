@@ -1,7 +1,10 @@
-import { useId, useMemo, useRef } from "react";
+import { useId, useRef } from "react";
 import { cn } from "@/app/components/ui/utils";
 
-export type CodeFieldVisualState = "empty" | "filled" | "error" | "disabled";
+import type { CodeFieldVisualState } from './contracts/codeField';
+export type { CodeFieldVisualState } from './contracts/codeField';
+import { updateCodeSlot, backspaceCodeSlot } from './contracts/codeField';
+import { codeFieldWeb } from './contracts/codeFieldWeb';
 
 interface CodeFieldProps {
   value: string;
@@ -13,15 +16,6 @@ interface CodeFieldProps {
   visualState?: CodeFieldVisualState;
   ariaLabel?: string;
   className?: string;
-}
-
-const CODE_SLOT_SIZE = {
-  width: 44,
-  height: 64,
-} as const;
-
-function normalizeCode(value: string, length: number) {
-  return value.replace(/\D/g, "").slice(0, length);
 }
 
 export default function CodeField({
@@ -37,64 +31,20 @@ export default function CodeField({
 }: CodeFieldProps) {
   const generatedId = useId();
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const normalizedValue = normalizeCode(value, length);
-  const slots = useMemo(
-    () => Array.from({ length }, (_, index) => normalizedValue[index] ?? ""),
-    [length, normalizedValue],
-  );
-  const isDisabled = disabled || visualState === "disabled";
-  const isError = Boolean(errorText || errorText2) || visualState === "error";
+  const web = codeFieldWeb({ value, length, disabled, visualState, errorText, errorText2 });
+  const { slots, isDisabled, isError, slotBorder, slotText } = web;
   const helperId = isError ? `${generatedId}-message` : undefined;
 
   const updateSlot = (slotIndex: number, nextValue: string) => {
-    if (isDisabled) return;
-
-    const digits = normalizeCode(nextValue, length);
-    const nextSlots = [...slots];
-
-    if (digits.length > 1) {
-      digits.split("").forEach((digit, offset) => {
-        const index = slotIndex + offset;
-        if (index < length) {
-          nextSlots[index] = digit;
-        }
-      });
-      onChange?.(nextSlots.join(""));
-      inputRefs.current[Math.min(slotIndex + digits.length, length - 1)]?.focus();
-      return;
-    }
-
-    nextSlots[slotIndex] = digits;
-    onChange?.(nextSlots.join(""));
-
-    if (digits && slotIndex < length - 1) {
-      inputRefs.current[slotIndex + 1]?.focus();
-    }
+    const update = updateCodeSlot(slots, slotIndex, nextValue, length, isDisabled);
+    if (update.value !== undefined) onChange?.(update.value);
+    if (update.focusIndex !== undefined) inputRefs.current[update.focusIndex]?.focus();
   };
-
   const handleBackspace = (slotIndex: number) => {
-    if (isDisabled) return;
-
-    const nextSlots = [...slots];
-    if (nextSlots[slotIndex]) {
-      nextSlots[slotIndex] = "";
-      onChange?.(nextSlots.join(""));
-      return;
-    }
-
-    if (slotIndex > 0) {
-      nextSlots[slotIndex - 1] = "";
-      onChange?.(nextSlots.join(""));
-      inputRefs.current[slotIndex - 1]?.focus();
-    }
+    const update = backspaceCodeSlot(slots, slotIndex, isDisabled);
+    if (update.value !== undefined) onChange?.(update.value);
+    if (update.focusIndex !== undefined) inputRefs.current[update.focusIndex]?.focus();
   };
-
-  const slotBorder = isDisabled
-    ? "border-[var(--uc-neutral-650)]"
-    : isError
-      ? "border-[var(--uc-status-red)]"
-      : "border-[var(--uc-neutral-700)]";
-  const slotText = isDisabled ? "text-[var(--uc-neutral-650)]" : "text-[var(--uc-text)]";
 
   return (
     <div
@@ -126,7 +76,7 @@ export default function CodeField({
               slotBorder,
               slotText,
             )}
-            style={CODE_SLOT_SIZE}
+            style={web.slotSize}
             onChange={(event) => updateSlot(index, event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Backspace") {

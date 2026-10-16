@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { AccountTransaction } from "@/data/accountDetails";
 import TransactionAvatar, { type TransactionAvatarPresentation } from "@/app/components/transactions/TransactionAvatar";
 import { type PfmCategoryIconVariant } from "@/app/components/pfm/PfmCategoryIcon";
+import { transactionRowWeb } from '@/app/components/contracts/transactionRowWeb';
 
 interface AccountTransactionRowProps {
   transaction: AccountTransaction;
@@ -43,19 +44,6 @@ interface AccountTransactionRowProps {
   compact?: boolean;
 }
 
-function splitAmount(value: string) {
-  const match = value.match(/^(.+?)([,.])(\d{2})$/);
-  if (!match) {
-    return { integer: value, separator: "", decimals: "" };
-  }
-
-  return {
-    integer: match[1],
-    separator: match[2],
-    decimals: match[3],
-  };
-}
-
 export default function AccountTransactionRow({
   transaction,
   formattedAmount,
@@ -77,12 +65,13 @@ export default function AccountTransactionRow({
   compact = false,
 }: AccountTransactionRowProps) {
   const isPending = transaction.status === "Pending";
+  const state = transactionRowWeb({ pending: isPending, evo2027, compact, amount: transaction.amount, type: transaction.type, formattedAmount, hasLeading: Boolean(leadingVisual), avatarPresentation });
   const amountClassName = isPending
     ? "text-[var(--uc-text-muted)]"
     : transaction.type === "credit" ? positiveAmountClassName : "text-[var(--uc-text)]";
-  const sign = transaction.amount < 0 ? "-" : "+";
+  const sign = state.sign;
   const detailsLine = detailsLabel ?? transaction.details;
-  const amountParts = splitAmount(formattedAmount);
+  const amountParts = state.parts;
 
   const date = showDate ? (
     <div className="flex flex-col items-center gap-[2px]" data-transaction-date>
@@ -150,7 +139,7 @@ export default function AccountTransactionRow({
       <span className="uc-type-n5 uppercase tracking-[0.3px]">{amountParts.separator}{amountParts.decimals} {currency}</span>
     </p>
   );
-  const evoRowSizing = compact ? "min-h-[64px] py-[8px]" : isPending ? "min-h-[92px] py-[16px]" : "min-h-[80px] py-[16px]";
+  const evoRowSizing = state.evoSizing;
 
   if (evo2027) {
     const leading = !isPending || leadingVisual || avatarPresentation === "identity" ? (

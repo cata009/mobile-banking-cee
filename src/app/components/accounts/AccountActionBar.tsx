@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import ActionIconBubble from "@/app/components/ActionIconBubble";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
+import { ACCOUNT_ACTION_ALIGNMENT, resolveAccountActions } from '@/app/components/contracts/accountActions';
 
 interface AccountActionBarProps {
   items?: readonly AccountActionBarItem[];
@@ -57,7 +58,7 @@ function AccountActionItem({
   hidden?: boolean;
   iconTreatment: AccountActionIconTreatment;
 }) {
-  const normalizedLabel = label.replace(/\s+/g, " ").trim();
+  const { normalizedLabel } = resolveAccountActions({ label, iconTreatment, hidden, pressed });
 
   return (
     <button
@@ -105,12 +106,7 @@ function AccountActionItem({
   );
 }
 
-const ALIGNMENT_CLASS: Record<AccountActionBarAlignment, string> = {
-  start: "justify-start",
-  center: "justify-center",
-  end: "justify-end",
-  between: "justify-between",
-};
+const ALIGNMENT_CLASS = ACCOUNT_ACTION_ALIGNMENT;
 
 export default function AccountActionBar({
   items,
@@ -128,8 +124,9 @@ export default function AccountActionBar({
     { id: "add-money", iconName: "add-money" as const, label: t("runtime.accounts.actions.addMoney", "Add money") },
     { id: "mcash", iconName: "mcash" as const, label: t("runtime.accounts.actions.mCash", "mCash") },
   ];
-  const actionItems = (items ?? defaultActions).slice(0, 4);
-  const stretchItems = align === "between";
+  const state = resolveAccountActions({ align, iconTreatment });
+  const actionItems = (items ?? defaultActions).slice(0, state.actionLimit);
+  const stretchItems = state.stretch;
 
   return (
     <div

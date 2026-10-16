@@ -1,13 +1,6 @@
 import ProductOfferCard from "@/app/components/products/ProductOfferCard";
-import type { ProductsOffer } from "@/app/config/productsMenuConfig";
-
-export const FUTURE_GAIN_SMART_INVESTMENT_OFFER: ProductsOffer = {
-  id: "future-gain-smart-investment",
-  title: "Check smart\ninvestment",
-  description: "Explore investment opportunities",
-  colorFamily: "yellow",
-  lightVersion: false,
-};
+import { FUTURE_GAIN_SMART_INVESTMENT_OFFER } from "@/features/investments/future-gain/offers";
+export { FUTURE_GAIN_SMART_INVESTMENT_OFFER } from "@/features/investments/future-gain/offers";
 
 export default function FutureGainSmartInvestmentBanner({ onClick }: { onClick: () => void }) {
   return (

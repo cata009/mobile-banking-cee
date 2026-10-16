@@ -1,5 +1,5 @@
 import NavigationCardArt from "@/app/components/cards/NavigationCardArt";
-import { type CardVariant } from "@/app/components/cards/Card";
+import { resolveCardNavigationRow } from "@/app/components/contracts/cardNavigationRow";
 import { AppIcon } from "@/app/components/icons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
 import { formatMaskedCardNumber } from "@/app/utils/cardNumber";
@@ -11,35 +11,23 @@ interface CardNavigationRowProps {
   card?: PhysicalCard | null;
 }
 
-function getCardVariant(card?: PhysicalCard | null): CardVariant {
-  if (card?.type === "credit_card") {
-    return "mc-credit-partner-standard";
-  }
-
-  if (card?.type === "debit_card" && (card.id.endsWith("-2") || card.id === "card-3")) {
-    return "mc-debit-standard";
-  }
-
-  return "mc-debit-gold";
-}
-
 /** The compact card navigation row used for a connected card and card-originated transaction. */
 export default function CardNavigationRow({ card }: CardNavigationRowProps) {
   const { t } = useLanguage();
-  const isCreditCard = card?.type === "credit_card";
-  const cardLabel = isCreditCard
+  const state = resolveCardNavigationRow(card);
+  const cardLabel = state.credit
     ? t("runtime.cardUsed.mastercardStandardCredit", "Mastercard Standard Credit")
     : t("runtime.accounts.detailsInfo.mastercardStandardDebit", "Mastercard Standard Debit");
-  const maskedNumber = card ? formatMaskedCardNumber(card.cardNumber) : "5545 XXXX XXXX 3250";
+  const maskedNumber = card ? formatMaskedCardNumber(card.cardNumber) : state.fallbackMaskedNumber;
 
   return (
     <button
       type="button"
-      className="grid w-full grid-cols-[64px_1fr_24px] items-center gap-[16px] py-[18px] text-left"
+      className={state.rootClass}
       aria-label={`${cardLabel} ${maskedNumber}`}
       data-card-navigation-row
     >
-      <NavigationCardArt variant={getCardVariant(card)} />
+      <NavigationCardArt variant={state.artVariant} />
       <div className="min-w-0">
         <p className="uc-type-n4-strong leading-[20px] text-[var(--uc-text)]">
           {cardLabel}

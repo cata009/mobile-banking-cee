@@ -4,14 +4,10 @@ import { AppIcon, type IconName } from "@/app/components/icons";
 import App2027PrimaryNavigation from "@/app/components/navigation/App2027PrimaryNavigation";
 import { useDemo } from "@/app/state/demoStore";
 import { getFeatureFlags } from "@/app/state/featureHelpers";
+import { type NavItem, resolveNavigationSelection } from "./contracts/bottomNavigation";
+import { bottomNavigationWeb } from "./contracts/bottomNavigationWeb";
 
-export type NavItem = "home" | "analytics" | "investments" | "payments" | "products" | "more";
-
-/** The five tabs every market has shown so far. */
-export const DEFAULT_NAV_ITEMS: readonly NavItem[] = ["home", "analytics", "payments", "products", "more"];
-
-/** My Banker gives Investments a tab and moves Spending into the header rail. */
-export const MY_BANKER_NAV_ITEMS: readonly NavItem[] = ["home", "investments", "payments", "products", "more"];
+export { DEFAULT_NAV_ITEMS, MY_BANKER_NAV_ITEMS, type NavItem } from "./contracts/bottomNavigation";
 
 interface BottomNavigationProps {
   activeTab?: NavItem;
@@ -21,20 +17,6 @@ interface BottomNavigationProps {
   labelOverrides?: Partial<Record<NavItem, string>>;
   onTabChange?: (tab: NavItem) => void;
 }
-
-const NAV_ITEMS: Array<{
-  id: NavItem;
-  labelKey: string;
-  icon: IconName;
-  iconBoxClassName?: string;
-}> = [
-  { id: "home", labelKey: "navigation.home", icon: "nav-home" },
-  { id: "analytics", labelKey: "navigation.analytics", icon: "nav-analytics" },
-  { id: "investments", labelKey: "runtime.myBanker.nav.investments", icon: "investment-trend-up" },
-  { id: "payments", labelKey: "navigation.payments", icon: "nav-payments" },
-  { id: "products", labelKey: "navigation.products", icon: "nav-products" },
-  { id: "more", labelKey: "navigation.more", icon: "nav-more", iconBoxClassName: "grid size-[32px] place-items-center" },
-];
 
 export default function BottomNavigation({
   activeTab: controlledActiveTab,
@@ -49,16 +31,17 @@ export default function BottomNavigation({
   const activeTab = controlledActiveTab ?? internalActiveTab;
 
   const handleTabClick = (tab: NavItem) => {
+    const selection = resolveNavigationSelection(internalActiveTab, tab, Boolean(onTabChange));
     if (onTabChange) {
       onTabChange(tab);
       return;
     }
 
-    setInternalActiveTab(tab);
+    setInternalActiveTab(selection.internalTab);
   };
 
   const featureFlags = getFeatureFlags(demoState);
-  const resolvedItems = items ?? (featureFlags.myBanker ? MY_BANKER_NAV_ITEMS : DEFAULT_NAV_ITEMS);
+  const resolvedItems = bottomNavigationWeb({ items, myBanker: featureFlags.myBanker });
 
   if (featureFlags.evo2027Homepage) {
     return (
@@ -77,7 +60,7 @@ export default function BottomNavigation({
       className="flex h-[54px] w-[375px] items-start gap-[8px] px-[24px] pb-[5px]"
       data-phone-bottom-navigation="true"
     >
-      {NAV_ITEMS.filter((item) => resolvedItems.includes(item.id)).map((item) => {
+      {resolvedItems.map((item) => {
         const isActive = activeTab === item.id;
         const color = isActive ? "var(--uc-action)" : "var(--uc-icon-muted)";
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { ActionButton } from '../../../../../universal/ActionButton';
 import { FormField } from '../../../../../universal/FormField';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
 import {
@@ -201,10 +202,26 @@ export function CreationScreens({
         title={"First of all,\nlet's check your data"}
         description="Please confirm or update your data before continuing with your investment account request."
         footer={
-          <Button
-            label="I confirm these data"
-            onPress={() => navigate('profile')}
-          />
+          <>
+            <Button
+              label="I confirm these data"
+              onPress={() => navigate('profile')}
+            />
+            <ActionButton
+              tokens={czInvestmentTokens}
+              label="Edit data"
+              onPress={() => undefined}
+              secondary
+              containerStyle={{
+                minHeight: 44,
+                width: '100%',
+                borderRadius: 4,
+                paddingHorizontal: 0,
+                paddingVertical: 0,
+              }}
+              labelStyle={{ fontSize: 16, lineHeight: 22 }}
+            />
+          </>
         }
       >
         <Row title="PHONE NUMBER" value="+420 777 123 456" />

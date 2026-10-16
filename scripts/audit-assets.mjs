@@ -127,7 +127,7 @@ export function buildAssetAudit({ trackedFiles, readFile, readAssetFile = readFi
 }
 
 export function collectAuditedRepositoryFiles(trackedFiles, pendingFiles) {
-  const applicationFiles = pendingFiles.filter((path) => /^(?:src|public|package|api)\//.test(normalizePath(path)) && (isTrackedAssetPath(path) || isCodeReferencePath(path)));
+  const applicationFiles = pendingFiles.filter((path) => /^(?:src|public|package|api|native-spike)\//.test(normalizePath(path)) && (isTrackedAssetPath(path) || isCodeReferencePath(path)));
   return [...new Set([...trackedFiles, ...applicationFiles].map(normalizePath))].sort();
 }
 
@@ -137,9 +137,16 @@ export function auditTrackedAssets(root = process.cwd(), includePendingApplicati
     encoding: "utf8",
   }).split("\0").filter(Boolean);
 
+  const deletedFiles = new Set(execFileSync("git", ["ls-files", "--deleted", "-z"], {
+    cwd: root,
+    encoding: "utf8",
+  }).split("\0").filter(Boolean));
+  // Retired code is absent from the working tree; missing assets must still fail.
+  const currentTrackedFiles = trackedFiles.filter((path) =>
+    !deletedFiles.has(path) || isTrackedAssetPath(path));
   const pendingFiles = includePendingApplicationFiles ? execFileSync('git', ['ls-files', '--others', '--exclude-standard', '-z'], {cwd:root,encoding:'utf8'}).split('\0').filter(Boolean) : [];
   return buildAssetAudit({
-    trackedFiles: collectAuditedRepositoryFiles(trackedFiles, pendingFiles),
+    trackedFiles: collectAuditedRepositoryFiles(currentTrackedFiles, pendingFiles),
     readFile: (path) => readFileSync(resolve(root, path)),
     readAssetFile: (path) => {
       const objectId = execFileSync(

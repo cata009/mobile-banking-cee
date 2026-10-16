@@ -2,18 +2,37 @@
 
 import '@testing-library/jest-dom/vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/app/App'
 import { DemoTopBar } from '@/app/components/demo/DemoTopBar'
 import { NavigationProvider } from '@/app/contexts/NavigationContext'
 import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DemoProvider } from '@/app/state/demoStore'
 import type { CountryId } from '@/app/state/demoTypes'
+import {
+  asyncNativeReady,
+  nativeWebRendererDiagnostics,
+  resetNativeWebRendererDiagnostics,
+} from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
 
 const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
+let originalMatchMedia: typeof window.matchMedia
+
+beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
+})
 
 afterEach(() => {
   cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
   vi.unstubAllGlobals()
   vi.unstubAllEnvs()
   if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard)
@@ -131,11 +150,17 @@ describe('DemoTopBar app and country selector', () => {
       '',
       '/?product=PI&country=RS&scenario=active&ds=current&release=release-current&bank=retail-multi-account-card&lang=en&screen=homepage',
     )
-    render(<App />)
+    const view = render(<App />)
+    await asyncNativeReady(view.container)
     fireEvent.click(screen.getByRole('button', { name: 'Baseline App' }))
     fireEvent.click(screen.getByRole('button', { name: 'Future App' }))
     expect(await screen.findByRole('button', { name: 'Future Gain' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /My Banker/ })).not.toBeInTheDocument()
+    await waitFor(() => expect(nativeWebRendererDiagnostics.snapshots.at(-1)).toMatchObject({
+      country: 'RS',
+      release: 'release-future-rs-future-gain',
+      route: { screen: 'prelogin' },
+    }))
     // Changing the preview returns to its login entry before customer navigation.
     fireEvent.click(await screen.findByRole('button', { name: 'Log in' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Offers' }))
@@ -143,7 +168,7 @@ describe('DemoTopBar app and country selector', () => {
     expect(new URLSearchParams(window.location.search).get('release')).toBe('release-future-rs-future-gain')
     fireEvent.click(await screen.findByRole('button', { name: /Check smart/ }))
     expect((await screen.findAllByRole('heading', { name: 'Smart investment' })).length).toBeGreaterThan(0)
-    expect(document.querySelector('[data-smart-investment-screen="true"]')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back' }).closest('[data-native-current-host="true"]')).toBeInTheDocument()
     // The simulator is transient; shared links retain its stable homepage parent.
     await waitFor(() => expect(new URLSearchParams(window.location.search).get('screen')).toBe('homepage'))
     expect(screen.queryByRole('heading', { name: 'My Banker' })).not.toBeInTheDocument()

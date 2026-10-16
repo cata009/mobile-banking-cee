@@ -7,6 +7,8 @@ import {
   DEFAULT_CZECH_COUNTS,
   type CzechNativeScreenProps,
 } from '../src/experiences/pi/cz/evo-2027/contracts';
+import { FaceIdOverlay } from '../src/experiences/pi/current/baseline/FaceIdOverlay';
+import { BaselineTextField } from '../src/universal/BaselineTextField';
 import {
   PRODUCT_SHELF_CATEGORIES,
   getProductShelfEntry,
@@ -95,28 +97,35 @@ test('category and deep-linked campaigns share the same real product content', a
     expect(text).toContain(paragraph);
   expect(button(tree, 'Start application')).toBeDefined();
 });
-test('Source accepts demo PIN text and unavailable biometrics requires explicit demo continuation', async () => {
+test('CZ Evo product detail uses the Source PIN and Face ID mock flow', async () => {
+  jest.useFakeTimers();
   const { tree, input } = await render(ProductDetail, {
     route: { screen: 'product-detail', params: { itemId: 'current-account' } },
   });
-  await act(async () => {
-    button(tree, 'Start application').props.onPress();
-  });
-  const field = tree.root
-    .findAllByType(TextInput)
-    .find(n => n.props.accessibilityLabel === 'Mobile banking PIN')!;
-  expect(field.props.secureTextEntry).toBe(true);
-  expect(field.props.value).toBe('******');
-  await act(() => field.props.onChangeText('demo text'));
-  await act(async () => {
-    await button(tree, 'Send request').props.onPress();
-  });
-  expect(JSON.stringify(tree.toJSON())).toContain('Demo authorization');
-  expect(JSON.stringify(tree.toJSON())).not.toContain('Request sent');
-  await act(() => button(tree, 'Continue demo').props.onPress());
-  expect(JSON.stringify(tree.toJSON())).toContain('Request sent');
-  await act(() => button(tree, 'Back to products').props.onPress());
-  expect(input.onBack).toHaveBeenCalled();
+  try {
+    await act(async () => {
+      button(tree, 'Start application').props.onPress();
+    });
+    const field = tree.root.findByType(BaselineTextField);
+    expect(field.props.label).toBe('Mobile banking PIN');
+    expect(field.props.value).toBe('******');
+    await act(() => field.props.onChange('demo text'));
+    expect(tree.root.findByType(BaselineTextField).props.value).toBe(
+      'demo text',
+    );
+    await act(async () => {
+      button(tree, 'Send request').props.onPress();
+    });
+    expect(tree.root.findAllByType(FaceIdOverlay)).toHaveLength(1);
+    await act(() => jest.advanceTimersByTime(839));
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Request sent');
+    await act(() => jest.advanceTimersByTime(1));
+    expect(JSON.stringify(tree.toJSON())).toContain('Request sent');
+    await act(() => button(tree, 'Back to products').props.onPress());
+    expect(input.onBack).toHaveBeenCalled();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 test('invalid catalogue IDs show an honest unavailable state without an application button', async () => {
   const { tree } = await render(ProductDetail, {

@@ -1,0 +1,30 @@
+import React from 'react';
+import Renderer,{act} from 'react-test-renderer';
+import {StyleSheet} from 'react-native';
+import Pfm from '../src/experiences/pi/current/analytics/Pfm';
+import {SourceBubbles} from '../src/experiences/pi/current/analytics/SourceCharts';
+import {BaselineSubcategoryBubbles} from '../src/experiences/pi/current/baseline/spending/charts';
+import {currentTokens,createCurrentTranslator} from '../src/experiences/pi/current/context';
+import {DEFAULT_VISIBLE_PRODUCT_OVERRIDES} from '@/app/platform/banking/productDataAuthority';
+import type {CurrentScreenProps} from '../src/experiences/pi/current/contracts';
+const host:CurrentScreenProps={country:'RO',release:'release-current',scenario:'active',language:'en',productCounts:DEFAULT_VISIBLE_PRODUCT_OVERRIDES,route:{screen:'pfm'},tokens:currentTokens(),t:createCurrentTranslator('RO','en'),amountsHidden:false,screenTopInset:12,isActive:true,onNavigate:jest.fn(),onBack:jest.fn(),onProfile:jest.fn(),onSearch:jest.fn(),onAmountsToggle:jest.fn(),onChanged:jest.fn(),onLanguageChange:jest.fn(),mode:'light',onModeChange:jest.fn(),onPrimaryNavigationChange:jest.fn()};
+test('Source category details use bubbles and transactions together, hide primary dock and return locally',async()=>{
+ let tree!:Renderer.ReactTestRenderer;await act(async()=>{tree=Renderer.create(<Pfm {...host}/>)});
+ const open=tree.root.findAll(n=>typeof n.props.onPress==='function'&&typeof n.props.accessibilityLabel==='string'&&n.props.accessibilityLabel.startsWith('Open category details:')).at(-1)!;
+ await act(async()=>open.props.onPress());
+ expect(host.onPrimaryNavigationChange).toHaveBeenLastCalledWith(false);
+ expect(tree.root.findAllByType(BaselineSubcategoryBubbles).length).toBeGreaterThan(0);
+ expect(tree.root.findAll(n=>n.props.accessibilityLabel==='Categories')).toHaveLength(0);
+ const back=tree.root.findAll(n=>n.props.accessibilityLabel==='Back'&&typeof n.props.onPress==='function').at(-1)!;
+ await act(async()=>back.props.onPress());
+ expect(host.onPrimaryNavigationChange).toHaveBeenLastCalledWith(true);
+ expect(host.onNavigate).not.toHaveBeenCalled();await act(async()=>tree.unmount());
+});
+test('Source bubbles preserve one active subcategory and original diameter sizing',async()=>{
+ const toggle=jest.fn();let tree!:Renderer.ReactTestRenderer;
+ await act(async()=>{tree=Renderer.create(<SourceBubbles host={host} colorVar="--uc-pfm-finance" subcategories={[{label:'A',total:100,transactionCount:1},{label:'B',total:25,transactionCount:1}]} inactive={new Set(['A'])} onToggle={toggle}/>)});
+ const b=tree.root.findAll(n=>n.props.testID==='source-pfm-bubble-B'&&n.props.disabled!==undefined)[0];
+ expect(b.props.disabled).toBe(true);expect(StyleSheet.flatten(b.props.style).width).toBe(123);
+ const a=tree.root.findAll(n=>n.props.testID==='source-pfm-bubble-A'&&typeof n.props.onPress==='function')[0];
+ await act(async()=>a.props.onPress());expect(toggle).toHaveBeenCalledWith('A');await act(async()=>tree.unmount());
+});

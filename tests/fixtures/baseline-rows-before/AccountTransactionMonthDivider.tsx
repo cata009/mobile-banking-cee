@@ -1,0 +1,38 @@
+interface AccountTransactionMonthDividerProps {
+  title: string;
+  total?: string;
+  currency: string;
+  dateSeparator?: boolean;
+}
+
+export default function AccountTransactionMonthDivider({
+  title,
+  total,
+  currency,
+  dateSeparator = false,
+}: AccountTransactionMonthDividerProps) {
+  return (
+    <div
+      className="flex flex-col items-start gap-[4px] px-[16px] py-[8px]"
+      data-ds-label="AccountTransactionMonthDivider"
+      data-transaction-month-separator={!dateSeparator ? "true" : undefined}
+      data-transaction-date-separator={dateSeparator ? "true" : undefined}
+    >
+      <div className="flex items-center justify-between self-stretch">
+        <h2 className={`${dateSeparator ? "uc-type-n5-strong" : "uc-type-n4-strong"} uppercase text-[var(--uc-text-muted)]`}>
+          {title}
+        </h2>
+        {total ? (
+          <p className="uc-type-n5-strong text-right uppercase text-[var(--uc-text)]">
+            {total} {currency}
+          </p>
+        ) : null}
+      </div>
+      {!dateSeparator ? (
+        <div className="flex flex-col items-center gap-[10px] self-stretch">
+          <div className="h-px w-full bg-[var(--uc-border)]" />
+        </div>
+      ) : null}
+    </div>
+  );
+}

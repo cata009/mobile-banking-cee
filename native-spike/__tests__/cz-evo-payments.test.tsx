@@ -1,6 +1,7 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
 import { TextInput } from 'react-native';
+import * as biometrics from '../src/platform/biometrics';
 import {
   DEFAULT_CZECH_COUNTS,
   type CzechNativeScreenProps,
@@ -17,6 +18,11 @@ import {
 } from '../src/experiences/pi/cz/evo-2027/accounts/source';
 import { getFrequentBeneficiaries } from '@/data/paymentsHub';
 import { Select } from '../src/universal/Select';
+import { FaceIdOverlay } from '../src/experiences/pi/current/baseline/FaceIdOverlay';
+import {
+  getEligibleTransferAccounts,
+  getInternalTransferQuote,
+} from '@/app/screens/payments/internalTransferState';
 const propsFor = (
   screen: CzechNativeScreenProps['route']['screen'],
   params?: Record<string, string>,
@@ -149,30 +155,46 @@ test.each(['US', 'CN'])(
     await act(() => tree.unmount());
   },
 );
-test('signing unavailable biometric cannot complete or emit demo payment receipt', async () => {
+test('Evo payment signing uses Source demo Face ID and never calls OS biometrics', async () => {
   const person = getFrequentBeneficiaries('CZ')[0]!,
-    complete = jest.fn();
+    complete = jest.fn(),
+    authenticate = jest.spyOn(biometrics, 'authenticateNativeBiometric');
+  jest.useFakeTimers();
   let tree!: Renderer.ReactTestRenderer;
-  await act(() => {
-    tree = Renderer.create(
-      <PaymentFlow
-        {...propsFor('payment-create', { beneficiaryId: person.id })}
-        ports={{ authenticate: async () => 'unavailable' }}
-        onDemoPayment={complete}
-      />,
+  try {
+    await act(() => {
+      tree = Renderer.create(
+        <PaymentFlow
+          {...propsFor('payment-create', { beneficiaryId: person.id })}
+          onDemoPayment={complete}
+        />,
+      );
+    });
+    await act(() => input(tree, 'Amount').props.onChangeText('100'));
+    await act(() => press(tree, 'Review transfer'));
+    await act(() => press(tree, 'Continue to sign'));
+    await act(() => press(tree, 'Sign'));
+
+    expect(tree.root.findAllByType(FaceIdOverlay)).toHaveLength(1);
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(complete).not.toHaveBeenCalled();
+    await act(() => jest.advanceTimersByTime(839));
+    expect(complete).not.toHaveBeenCalled();
+    await act(() => jest.advanceTimersByTime(1));
+    expect(complete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draft: expect.objectContaining({ amount: '100' }),
+        demo: true,
+      }),
     );
-  });
-  await act(() => input(tree, 'Amount').props.onChangeText('100'));
-  await act(() => press(tree, 'Review transfer'));
-  await act(() => press(tree, 'Continue to sign'));
-  await act(() => press(tree, 'Sign'));
-  expect(JSON.stringify(tree.toJSON())).toContain(
-    'Biometric verification unavailable',
-  );
-  expect(complete).not.toHaveBeenCalled();
-  await act(() => tree.unmount());
+    expect(JSON.stringify(tree.toJSON())).toContain('Successful payment');
+  } finally {
+    if (tree) await act(() => tree.unmount());
+    authenticate.mockRestore();
+    jest.useRealTimers();
+  }
 });
-test('internal transfer swaps canonical FX quote and retains native amount input', async () => {
+test('internal transfer retains its physical CZK calculator and emits the inverse canonical FX quote after swapping roles', async () => {
   const products = czechProducts(DEFAULT_CZECH_COUNTS),
     source = products.find(
       p => p.type === 'current_account' && p.currency === 'CZK',
@@ -180,6 +202,14 @@ test('internal transfer swaps canonical FX quote and retains native amount input
     destination = products.find(
       p => p.type === 'current_account' && p.currency === 'EUR',
     )!;
+  const onDemoTransfer = jest.fn();
+  const accounts = getEligibleTransferAccounts(products);
+  const quote = getInternalTransferQuote({
+    amountText: '2428,40',
+    sourceAccount: accounts.find(account => account.id === destination.id)!,
+    destinationAccount: accounts.find(account => account.id === source.id)!,
+    inputSide: 'destination',
+  });
   let tree!: Renderer.ReactTestRenderer;
   await act(() => {
     tree = Renderer.create(
@@ -188,13 +218,47 @@ test('internal transfer swaps canonical FX quote and retains native amount input
           sourceAccountId: source.id,
           destinationAccountId: destination.id,
         })}
+        onDemoTransfer={onDemoTransfer}
       />,
     );
   });
-  await act(() => input(tree, 'Amount').props.onChangeText('2428,40'));
+  expect(input(tree, 'Amount in CZK').props.inputMode).toBe('none');
+  expect(input(tree, 'Amount in CZK').props.showSoftInputOnFocus).toBe(false);
+  await act(() => input(tree, 'Amount in CZK').props.onChangeText('2428,40'));
   await act(() => press(tree, 'Swap accounts'));
-  expect(input(tree, 'Amount').props.value).toBe('100');
-  expect(input(tree, 'Amount').props.keyboardType).toBe('decimal-pad');
+  expect(input(tree, 'Amount in CZK').props.value).toBe('2428,40');
+  expect(input(tree, 'Amount in CZK').props.inputMode).toBe('none');
+  expect(input(tree, 'Amount in CZK').props.showSoftInputOnFocus).toBe(false);
+  expect(quote.sourceAmount).toBe(100);
+  expect(quote.destinationAmount).toBe(2428.4);
+  expect(quote.error).toBeNull();
+  expect(
+    tree.root.findAll(
+      node =>
+        typeof node.props.accessibilityLabel === 'string' &&
+        node.props.accessibilityLabel.startsWith(`To account ${source.name}`),
+    ).length,
+  ).toBeGreaterThan(0);
+  expect(
+    tree.root.findAll(
+      node =>
+        typeof node.props.accessibilityLabel === 'string' &&
+        node.props.accessibilityLabel.startsWith(
+          `From account ${destination.name}`,
+        ),
+    ).length,
+  ).toBeGreaterThan(0);
+  await act(() => press(tree, 'Move money'));
+  expect(onDemoTransfer).toHaveBeenCalledWith(
+    expect.objectContaining({
+      sourceAccountId: destination.id,
+      destinationAccountId: source.id,
+      amount: quote.sourceAmount,
+      currency: destination.currency,
+      schedule: null,
+    }),
+  );
+  expect(JSON.stringify(tree.toJSON())).toContain('Money moved');
   await act(() => tree.unmount());
 });
 test('saving Add money retains Source demo completion without changing owned balances', async () => {

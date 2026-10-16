@@ -1,4 +1,5 @@
 import { AppIcon } from "@/app/components/icons";
+import { BACK_BUTTON_CONTRACT } from "../contracts/backButton";
 
 interface BackButtonProps {
   onClick: () => void;
@@ -9,10 +10,10 @@ export default function BackButton({ onClick, className = '' }: BackButtonProps)
   return (
     <button
       onClick={onClick}
-      className={`w-[32px] h-[32px] flex items-center justify-center cursor-pointer ${className}`}
-      aria-label="Go back"
+      className={`${BACK_BUTTON_CONTRACT.webClass} ${className}`}
+      aria-label={BACK_BUTTON_CONTRACT.label}
     >
-      <AppIcon name="back-line" />
+      <AppIcon name={BACK_BUTTON_CONTRACT.icon} />
     </button>
   );
 }

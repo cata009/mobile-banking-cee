@@ -5,6 +5,7 @@ import { getAvailableLanguages, getLanguageDisplayName } from '@/app/registry/la
 import { getTranslations } from '@/translations';
 import { RadioButton } from '@/app/components/common';
 import PageHeader from '@/app/components/PageHeader';
+import PrimaryButton from '@/app/components/PrimaryButton';
 
 interface LanguageSelectorProps {
   onBack: () => void;
@@ -76,14 +77,9 @@ export default function LanguageSelector({ onBack }: LanguageSelectorProps) {
         
         {/* Save button */}
         <div className="mt-auto px-[24px]">
-          <button
-            onClick={handleSave}
-            className="w-full h-[48px] bg-[var(--uc-action)] rounded-[4px] flex items-center justify-center cursor-pointer transition-opacity hover:opacity-90"
-          >
-            <span className="uc-type-h2 text-[var(--uc-static-white)]">
-              {tempT('languageSelector.save')}
-            </span>
-          </button>
+          <PrimaryButton variant="language-save" onClick={handleSave}>
+            {tempT('languageSelector.save')}
+          </PrimaryButton>
         </div>
       </div>
     </div>

@@ -1,8 +1,10 @@
 import { ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
+import { BOTTOM_SHEET_CONTRACT } from './contracts/bottomSheet';
+import { BOTTOM_SHEET_WEB, bottomSheetSize } from './contracts/bottomSheetWeb';
 
-const ANIMATED_BOTTOM_SHEET_DURATION_MS = 360;
+const ANIMATED_BOTTOM_SHEET_DURATION_MS = BOTTOM_SHEET_CONTRACT.closeDurationMs;
 
 interface BottomSheetProps {
   title?: string;
@@ -31,7 +33,7 @@ export function BottomSheet({
   meta,
   children,
   footer,
-  maxHeightOffsetPx = 54,
+  maxHeightOffsetPx = BOTTOM_SHEET_CONTRACT.defaultMaxHeightOffset,
   fillHeight = false,
   className,
   headerClassName,
@@ -141,7 +143,7 @@ export function BottomSheet({
   return (
     <div
       className={cn(
-        "absolute inset-0 z-50 flex items-end bg-[var(--uc-overlay)]",
+        BOTTOM_SHEET_WEB.backdrop,
         animated && "transition-opacity duration-[260ms] ease-out motion-reduce:transition-none",
         animated && !isVisible ? "opacity-0 motion-reduce:opacity-100" : "opacity-100",
       )}
@@ -156,7 +158,7 @@ export function BottomSheet({
         aria-labelledby={title ? titleId : undefined}
         aria-modal="true"
         className={cn(
-          "relative w-full overflow-y-auto rounded-t-[12px] bg-[var(--uc-sheet-bg)] p-[16px] shadow-[0_-8px_24px_rgb(var(--uc-shadow-rgb)_/_0.18)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          BOTTOM_SHEET_WEB.panel,
           fillHeight && "flex flex-col overflow-hidden",
           animated && "transition-[translate,opacity] duration-[360ms] ease-[cubic-bezier(0,0,0.2,1)] motion-reduce:transition-none",
           animated && !isVisible
@@ -166,7 +168,7 @@ export function BottomSheet({
         )}
         ref={dialogRef}
         role="dialog"
-        style={{ [fillHeight ? "height" : "maxHeight"]: `calc(100% - ${maxHeightOffsetPx}px)` }}
+        style={bottomSheetSize(fillHeight, maxHeightOffsetPx)}
         tabIndex={-1}
       >
         {showDragHandle ? (

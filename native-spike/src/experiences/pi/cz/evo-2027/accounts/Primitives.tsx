@@ -21,6 +21,7 @@ import { icons } from '../../../../../icons';
 import { formatEvo2027Number } from '@/app/utils/evo2027Formatting';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import { formatMoneyNumber } from '@/app/registry/countryConfig';
+import { nativeModalVisibility } from '../../../../../platform/nativeModalVisibility';
 
 /** Current design system, Source theme.css; independent of Italy mobile-first. */
 export const tokens: ControlTokens = {
@@ -102,15 +103,21 @@ export function Copy({
           : {
               color: tokens.text,
             },
-        {
-          fontSize: size,
-          lineHeight: lineHeight ?? size + 4,
-          ...(color
-            ? {
-                color,
-              }
-            : {}),
-        },
+        [
+          {
+            fontSize: size,
+          },
+          {
+            lineHeight: lineHeight ?? size + 4,
+          },
+          {
+            ...(color
+              ? {
+                  color,
+                }
+              : {}),
+          },
+        ],
       ]}
     >
       {children}
@@ -167,15 +174,41 @@ export function Row({
     />
   );
 }
-export function FieldValue({ label, value }: { label: string; value: string }) {
+export function FieldValue({
+  label,
+  value,
+  information = false,
+  trailing,
+}: {
+  label: string;
+  value: string;
+  information?: boolean;
+  trailing?: React.ReactNode;
+}) {
   return (
-    <View style={s.fieldValue}>
-      <Copy muted size={14}>
-        {label}
-      </Copy>
-      <Copy strong size={18}>
-        {value}
-      </Copy>
+    <View style={information ? parityStyles.item0 : s.fieldValue}>
+      <View
+        style={[
+          parityStyles.item1,
+          information ? parityStyles.item2 : parityStyles.item3,
+        ]}
+      >
+        <Copy
+          muted={!information}
+          size={information ? 16 : 14}
+          lineHeight={information ? 20 : undefined}
+        >
+          {information ? label.toUpperCase() : label}
+        </Copy>
+        <Copy
+          strong
+          size={information ? 16 : 18}
+          lineHeight={information ? 20 : undefined}
+        >
+          {value}
+        </Copy>
+      </View>
+      {trailing}
     </View>
   );
 }
@@ -212,7 +245,21 @@ export function Page({
 }) {
   const [offset, setOffset] = useState(0);
   useEffect(() => {
-    if (!active || Platform.OS === 'web') return;
+    if (!active) return;
+    if (Platform.OS === 'web') {
+      const escape = (event: KeyboardEvent) => {
+        if (
+          event.key === 'Escape' &&
+          !event.defaultPrevented &&
+          !nativeModalVisibility.getSnapshot()
+        ) {
+          event.preventDefault();
+          onBack();
+        }
+      };
+      globalThis.addEventListener('keydown', escape);
+      return () => globalThis.removeEventListener('keydown', escape);
+    }
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();
       return true;
@@ -297,7 +344,7 @@ export const s = StyleSheet.create({
     color: tokens.text,
     marginHorizontal: 16,
     marginTop: 8,
-    marginBottom: 15,
+    marginBottom: 8,
   },
   inset: {
     paddingHorizontal: 24,
@@ -337,5 +384,22 @@ export const s = StyleSheet.create({
   },
   alert: {
     padding: 24,
+  },
+});
+const parityStyles = StyleSheet.create({
+  item0: {
+    height: 80,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  item1: {
+    flex: 1,
+  },
+  item2: {
+    gap: 4,
+  },
+  item3: {
+    gap: 8,
   },
 });

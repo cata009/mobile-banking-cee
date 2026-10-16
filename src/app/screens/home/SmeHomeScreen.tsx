@@ -1,0 +1,170 @@
+/**
+ * HomeScreen - Main home screen with account summary and optional unplanned banner
+ */
+
+import AccountSummary from "./AccountSummary";
+import App2027HomeScreen from "./App2027HomeScreen";
+import FutureGainSmartInvestmentBanner from "@/app/components/investments/FutureGainSmartInvestmentBanner";
+import HomeHeader from "./HomeHeader";
+import InactiveState from "./InactiveState";
+import UnplannedBanner from "./UnplannedBanner";
+import BottomNavigation, { type NavItem } from "@/app/components/BottomNavigation";
+import { useDemo } from "@/app/state/demoStore";
+import { getFeatureFlags } from "@/app/state/featureHelpers";
+import type { Product } from "@/data/products";
+import type { AccountTransaction } from "@/data/accountDetails";
+import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+
+export interface HomeScreenProps {
+  onPrimeClick?: () => void;
+  onAnalyticsClick?: () => void;
+  onSeeAllTransactionsClick?: () => void;
+  onMessagesClick?: () => void;
+  onPaymentsClick?: () => void;
+  onDomesticPaymentClick?: () => void;
+  onProductsClick?: () => void;
+  onOfferOpen?: (shelfItemId: string) => void;
+  onMoreClick?: () => void;
+  onAccountClick?: (product: Product) => void;
+  onAccountInfoClick?: (product: Product) => void;
+  onCardDetailsClick?: (product: Product) => void;
+  onCardOptionsClick?: (product: Product) => void;
+  onInvestmentsClick?: () => void;
+  onInvestmentGoalsClick?: () => void;
+  onSmartInvestmentOpen?: () => void;
+  onTransactionClick?: (
+    transaction: AccountTransaction,
+    product: Product,
+    merchantEnrichment?: CardTransactionMerchantEnrichment,
+  ) => void;
+}
+
+export default function SmeHomeScreen({
+  onPrimeClick,
+  onAnalyticsClick,
+  onSeeAllTransactionsClick,
+  onMessagesClick,
+  onPaymentsClick,
+  onDomesticPaymentClick,
+  onProductsClick,
+  onOfferOpen,
+  onMoreClick,
+  onAccountClick,
+  onAccountInfoClick,
+  onCardDetailsClick,
+  onCardOptionsClick,
+  onInvestmentsClick,
+  onInvestmentGoalsClick,
+  onSmartInvestmentOpen,
+  onTransactionClick,
+}: HomeScreenProps) {
+  const demoState = useDemo();
+  const { scenario, product, country, release } = demoState;
+
+  // Get all feature flags from centralized helper
+  const features = getFeatureFlags(demoState);
+  const isFutureGainSmartInvestment =
+    product === "PI" && country === "RS" && release === "release-future-rs-future-gain";
+
+  // Handler for bottom navigation tab changes
+  const handleTabChange = (tab: NavItem) => {
+    if (tab === 'more' && onMoreClick) {
+      onMoreClick();
+    }
+    if (tab === 'analytics' && onAnalyticsClick) {
+      onAnalyticsClick();
+    }
+    if (tab === 'investments' && onInvestmentsClick) {
+      onInvestmentsClick();
+    }
+    if (tab === 'payments' && onPaymentsClick) {
+      onPaymentsClick();
+    }
+    if (tab === 'products' && onProductsClick) {
+      onProductsClick();
+    }
+    // Future: handle other tabs
+  };
+
+  // If scenario is inactive, show inactive state only
+  if (scenario === "inactive") {
+    return <InactiveState />;
+  }
+
+  if (features.evo2027Homepage) {
+    return (
+      <App2027HomeScreen
+        onPrimeClick={onPrimeClick}
+        onAnalyticsClick={onAnalyticsClick}
+        onSeeAllTransactionsClick={onSeeAllTransactionsClick}
+        onMessagesClick={onMessagesClick}
+        onPaymentsClick={onPaymentsClick}
+        onDomesticPaymentClick={onDomesticPaymentClick}
+        onProductsClick={onProductsClick}
+        onOfferOpen={onOfferOpen}
+        onMoreClick={onMoreClick}
+        onAccountClick={onAccountClick}
+        onAccountInfoClick={onAccountInfoClick}
+        onCardDetailsClick={onCardDetailsClick}
+        onCardOptionsClick={onCardOptionsClick}
+        onInvestmentsClick={onInvestmentsClick}
+        onInvestmentGoalsClick={onInvestmentGoalsClick}
+        onTransactionClick={onTransactionClick}
+        useCzRoboAccountCards={features.evo2027Homepage}
+      />
+    );
+  }
+
+  // Active state - compose all sections
+  return (
+    <div className="w-full h-full relative bg-[var(--uc-app-bg)] flex flex-col text-[var(--uc-text)]">
+      {/* Status Bar Space */}
+      <div className="h-[var(--uc-phone-top-reserve,54px)] flex-shrink-0 bg-[var(--uc-app-bg)]" />
+
+      {/* STICKY Top Bar - Prime Badge + Icons - FIXED */}
+      <div className="sticky top-0 z-10 bg-[var(--uc-app-bg)] flex-shrink-0">
+        <HomeHeader
+          onPrimeClick={onPrimeClick}
+          onMessagesClick={onMessagesClick}
+          onSpendingClick={features.myBanker ? onAnalyticsClick : undefined}
+          showTitle={false}
+        />
+      </div>
+
+      {/* Scrollable Content */}
+      <div
+        className={`flex-1 overflow-y-auto scrollbar-hide ${isFutureGainSmartInvestment ? "" : "pb-[80px]"}`}
+        style={isFutureGainSmartInvestment
+          ? { paddingBottom: "calc(40px + var(--uc-phone-bottom-reserve, 34px))" }
+          : undefined}
+      >
+        {/* Title - SCROLLABLE */}
+        <HomeHeader showActions={false} />
+
+        {/* Account Summary */}
+        <AccountSummary
+          showRedesign={features.cardsRedesign}
+          investmentBanner={
+            isFutureGainSmartInvestment && onSmartInvestmentOpen ? (
+              <FutureGainSmartInvestmentBanner onClick={onSmartInvestmentOpen} />
+            ) : undefined
+          }
+          onAccountClick={onAccountClick}
+          onInvestmentsClick={onInvestmentsClick}
+          onInvestmentGoalsClick={onInvestmentGoalsClick}
+          onDomesticPaymentClick={onDomesticPaymentClick}
+          onAccountInfoClick={onAccountInfoClick}
+          excludeCategoryKeys={features.myBanker ? ['investments'] : undefined}
+        />
+
+        {/* Unplanned Banner (conditional) */}
+        {features.unplannedBanner && <UnplannedBanner />}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)] flex items-center justify-center">
+        <BottomNavigation onTabChange={handleTabChange} />
+      </div>
+    </div>
+  );
+}

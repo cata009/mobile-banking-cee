@@ -1,3 +1,4 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useRef, useState } from 'react';
 import {
   getInvestmentSellOrderValidation,
@@ -41,6 +42,7 @@ export function SellOrder({
   onComplete: (execution: NativeSellExecution) => void;
   hidden?: boolean;
 }) {
+  const market = useInvestmentMarket();
   const [step, setStep] = useState<
     'order-data' | 'review' | 'sign' | 'success'
   >('order-data');
@@ -78,7 +80,7 @@ export function SellOrder({
     });
   };
   const money = (value: number, currency: string) =>
-    formatInvestmentMoney(value, 'CZ', currency, hidden);
+    formatInvestmentMoney(value, market.country, currency, hidden);
   if (step === 'sign')
     return (
       <Signing

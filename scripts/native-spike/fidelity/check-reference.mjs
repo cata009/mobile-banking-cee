@@ -24,6 +24,8 @@ export const requiredUiEntries = referenceAreas.map((area, index) => ({
 }))
 const shared = [
   ['src/app/components/BottomSheet.tsx', 'ui'],
+  ['src/app/components/contracts/bottomSheet.ts', 'ui'],
+  ['src/app/components/contracts/bottomSheetWeb.ts', 'ui'],
   ['src/app/components/ui/ScrollableRegion.tsx', 'ui'],
   ['src/app/components/ui/keyboardActivation.ts', 'ui'],
   ['native-spike/assets/fonts/UniCredit-regular.ttf', 'font'],

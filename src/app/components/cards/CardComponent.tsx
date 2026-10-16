@@ -1,3 +1,4 @@
+import { CARD_COMPONENT_CONTRACT, CARD_COMPONENT_DEFAULT_CARDS } from "../contracts/cardComponent";
 /**
  * CardComponent
  * Figma source: codex-figma-component-spec/v1 node 9133:3831 "Card component"
@@ -36,18 +37,7 @@ export interface CardComponentProps extends HTMLAttributes<HTMLDivElement> {
   cards?: CardArtItem[];
 }
 
-const DEFAULT_CARDS: CardArtItem[] = [
-  {
-    id: "card-credit",
-    ariaLabel: "Credit card ending in 4007",
-    variant: "mc-credit-partner-standard",
-  },
-  {
-    id: "card-debit",
-    ariaLabel: "Debit card",
-    variant: "mc-debit-standard",
-  },
-];
+const DEFAULT_CARDS: CardArtItem[] = CARD_COMPONENT_DEFAULT_CARDS.map((card) => ({ ...card }));
 
 export default function CardComponent({
   cardHolderName = "PETER JAGODIC",
@@ -59,7 +49,7 @@ export default function CardComponent({
   return (
     <div
       {...props}
-      className={cn("flex w-full flex-col gap-[12px] overflow-hidden bg-[#F5F5F5]", className)}
+      className={cn(CARD_COMPONENT_CONTRACT.rootClass, className)}
       data-component="CardComponent"
       data-figma-schema={CARD_COMPONENT_SOURCE.schema}
       data-figma-node={CARD_COMPONENT_SOURCE.sourceNodeId}
@@ -86,8 +76,8 @@ export default function CardComponent({
           style={{
             width: 351,
             height: 140,
-            gap: 24,
-            paddingLeft: 1,
+            gap: CARD_COMPONENT_CONTRACT.gap,
+            paddingLeft: CARD_COMPONENT_CONTRACT.paddingLeft,
             scrollbarWidth: "none",
             msOverflowStyle: "none",
           }}
@@ -110,9 +100,9 @@ function CardArtSlot({ card }: CardArtSlotProps) {
     <div
       className="shrink-0 overflow-hidden"
       style={{
-        width: 219,
-        height: 138,
-        borderRadius: 5.67,
+        width: CARD_COMPONENT_CONTRACT.slotWidth,
+        height: CARD_COMPONENT_CONTRACT.slotHeight,
+        borderRadius: CARD_COMPONENT_CONTRACT.slotRadius,
         boxShadow: "0 11.265px 11.265px rgba(0,0,0,0.2)",
       }}
     >
@@ -121,9 +111,9 @@ function CardArtSlot({ card }: CardArtSlotProps) {
         size="large"
         variant={card.variant}
         style={{
-          width: 219,
-          height: 138,
-          borderRadius: 5.67,
+          width: CARD_COMPONENT_CONTRACT.slotWidth,
+          height: CARD_COMPONENT_CONTRACT.slotHeight,
+          borderRadius: CARD_COMPONENT_CONTRACT.slotRadius,
         }}
       />
     </div>

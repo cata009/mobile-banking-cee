@@ -1,3 +1,4 @@
+import { bannerWeb } from "../contracts/bannerWeb";
 import type { CSSProperties } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -48,13 +49,15 @@ export default function GhostBanner({
   const interactive = typeof onClick === "function";
   const Root = interactive ? "button" : "div";
 
+  const contract = bannerWeb({ variant: "ghost", interactive, layout });
+
   return (
     <Root
       type={interactive ? "button" : undefined}
       onClick={onClick}
       aria-label={interactive ? (ariaLabel ?? title) : ariaLabel}
       className={cn(
-        "flex w-[327px] max-w-full flex-col gap-[10px] rounded-[8px] border border-dashed border-[var(--uc-text)] bg-transparent p-[16px]",
+        contract.rootClass,
         layout === "stacked" ? "items-center text-center" : "items-start text-left",
         interactive && "cursor-pointer",
         className,

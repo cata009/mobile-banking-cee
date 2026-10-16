@@ -1,7 +1,8 @@
+import { resolvePill, PILL_SUCCESS_PATH, type PillVariant } from "../contracts/pill";
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/app/components/ui/utils";
 
-export type PillVariant = "primary" | "secondary" | "active-counter" | "loading-counter" | "activated";
+export type { PillVariant } from "../contracts/pill";
 
 type PillProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: PillVariant;
@@ -17,7 +18,7 @@ function PillSuccessIcon() {
     >
       <svg viewBox="0 0 16 16" className="size-[10px]" fill="none">
         <path
-          d="M4.5 8.1 6.7 10.3 11.5 5.5"
+          d={PILL_SUCCESS_PATH}
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
@@ -46,11 +47,11 @@ export default function Pill({
   disabled,
   ...props
 }: PillProps) {
-  const isPrimary = variant === "primary";
-  const isLoading = variant === "loading-counter";
-  const isActivated = variant === "activated";
-  const displayLabel =
-    label ?? (variant === "secondary" ? "Secondary" : isLoading ? "Activate" : isActivated ? "Activated" : isPrimary ? "Primary" : counterText);
+  const contract = resolvePill({ variant, label, counterText, disabled });
+  const isPrimary = contract.primary;
+  const isLoading = contract.loading;
+  const isActivated = contract.activated;
+  const displayLabel = contract.label;
 
   return (
     <button
@@ -63,7 +64,7 @@ export default function Pill({
         className,
       )}
       type={type}
-      disabled={disabled || isLoading}
+      disabled={contract.disabled}
       aria-busy={isLoading || undefined}
       {...props}
     >

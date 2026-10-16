@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Switch, View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
@@ -21,6 +21,7 @@ import {
   type FrequentBeneficiary,
   getBeneficiaryBankIdForCode,
 } from '@/data/paymentsHub';
+import type { AccountTransaction } from '@/data/accountDetails';
 import {
   getPaymentTemplates,
   getSavedBeneficiaries,
@@ -37,6 +38,10 @@ import {
   formatScheduleDateAbsolute,
   formatScheduleSummary,
 } from '@/app/utils/scheduleFormatting';
+import {
+  formatEvo2027Amount,
+  formatEvo2027Number,
+} from '@/app/utils/evo2027Formatting';
 import type { Currency } from '@/data/products';
 import {
   isValidEvoBeneficiaryEdit,
@@ -55,10 +60,11 @@ import {
   IconButton,
   Glyph,
 } from '../accounts/Primitives';
-import { MovementRows } from '../accounts/Movements';
 import Transfer from './Transfer';
 import Schedule from './Schedule';
 import BankAvatar from './BankAvatar';
+import { disabledBankingActions } from '../../../current/banking/model';
+import { sourceColor } from '../../../../../universal/sourceColor';
 const actions = [
   {
     id: 'new-payment',
@@ -107,6 +113,13 @@ const actions = [
   },
 ] as const;
 type ActionId = (typeof actions)[number]['id'];
+const DEFAULT_LAYOUT = actions.slice(0, 6).map(a => a.id);
+const CUSTOMISABLE_SLOTS = 7;
+const moreActionDescriptions: Partial<Record<ActionId, string>> = {
+  'create-qr-code': 'Let someone pay you by scanning a code',
+  'foreign-payment': 'Send foreign or SEPA payment',
+  'manage-ebills': 'Contract e-bills and pay them in one tap',
+};
 function loadLayout(): ActionId[] {
   try {
     const saved: unknown = JSON.parse(
@@ -116,15 +129,40 @@ function loadLayout(): ActionId[] {
     if (Array.isArray(saved)) {
       const layout = saved
         .filter((id): id is ActionId => actions.some(a => a.id === id))
-        .slice(0, 7);
+        .slice(0, CUSTOMISABLE_SLOTS);
       if (layout.length) return layout;
     }
   } catch {
     /* Source keeps usable session when storage unavailable. */
   }
-  return actions.slice(0, 6).map(a => a.id);
+  return [...DEFAULT_LAYOUT];
+}
+function formatBeneficiaryPaymentDate(payment: AccountTransaction) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(`${payment.monthKey}-${payment.day}T12:00:00`));
 }
 export default function PaymentsScreen(props: CzechNativeScreenProps) {
+  const [gridWidth, setGridWidth] = useState(335);
+  const disabledActions = disabledBankingActions({
+    country: 'CZ',
+    release: 'release-future-evo-2027',
+    scenario: props.scenario,
+    productCounts: props.productCounts,
+    bankingScenario: props.bankingScenario,
+  });
+  const actionDisabled = (id: ActionId) =>
+    disabledActions.has(
+      id === 'new-payment'
+        ? 'payments.domestic.create'
+        : id === 'between-accounts'
+        ? 'payments.exchange.create'
+        : id === 'recurrent-payments'
+        ? 'payments.templates.manage'
+        : 'accounts.view',
+    ) && ['new-payment', 'between-accounts', 'recurrent-payments'].includes(id);
   const [query, setQuery] = useState(''),
     [layout, setLayout] = useState(loadLayout),
     [draftLayout, setDraftLayout] = useState<ActionId[]>([]),
@@ -143,6 +181,11 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
   const [personId, setPersonId] = useState(props.route.params?.beneficiaryId),
     [templateId, setTemplateId] = useState(props.route.params?.templateId),
     [paymentId, setPaymentId] = useState(props.route.params?.paymentId);
+  const onPrimaryNavigationChange = props.onPrimaryNavigationChange;
+  useEffect(() => {
+    onPrimaryNavigationChange?.(view === 'hub');
+    return () => onPrimaryNavigationChange?.(true);
+  }, [view, onPrimaryNavigationChange]);
   const [favoriteIds, setFavorites] = useState(getStoredFavoriteBeneficiaryIds),
     [revision, setRevision] = useState(0),
     [deleteOpen, setDeleteOpen] = useState(false),
@@ -152,6 +195,15 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
     [fxAmount, setFxAmount] = useState('100');
   const people = getFrequentBeneficiaries('CZ'),
     person = people.find(p => p.id === personId),
+    beneficiaryTransactions = person
+      ? getBeneficiaryPaymentHistory(person, 'CZ')
+      : [],
+    totalSent = beneficiaryTransactions
+      .filter(transaction => transaction.type === 'debit')
+      .reduce((total, transaction) => total + Math.abs(transaction.amount), 0),
+    totalReceived = beneficiaryTransactions
+      .filter(transaction => transaction.type === 'credit')
+      .reduce((total, transaction) => total + transaction.amount, 0),
     templates = [
       ...getPaymentTemplates('CZ'),
       ...getSavedBeneficiaries('CZ', true),
@@ -175,6 +227,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       props.onBack();
   };
   const handle = (id: ActionId) => {
+    if (actionDisabled(id)) return;
     setMore(false);
     if (id === 'new-payment') {
       props.onNavigate({
@@ -201,7 +254,9 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         .includes(query.trim().toLocaleLowerCase()),
     )
     .sort((a, b) => (b.lastPaidAt ?? '').localeCompare(a.lastPaidAt ?? ''));
-  const beneficiaryRow = (p: FrequentBeneficiary, index: number) => (
+  const beneficiaryRow = (p: FrequentBeneficiary, index: number) => {
+    const amount = formatEvo2027Amount(p.lastAmount, p.currency);
+    return (
     <Pressable
       key={p.id}
       accessibilityRole="button"
@@ -216,7 +271,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       <View style={extractedStyles.item1}>
         <Copy strong>{p.name}</Copy>
         <Copy muted size={14} lineHeight={18}>
-          You sent {money(p.lastAmount, p.currency, props.amountsHidden)}
+          You sent {amount.integer}{amount.decimals} {amount.currency}
         </Copy>
       </View>
       <View style={hubStyles.lastPaid}>
@@ -233,7 +288,8 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         )}
       </View>
     </Pressable>
-  );
+    );
+  };
   const subPage = (
     title: string,
     children: React.ReactNode,
@@ -307,20 +363,99 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         secondary
         onPress={() => setDeleteOpen(true)}
       />
-      <MovementRows
-        transactions={getBeneficiaryPaymentHistory(person, 'CZ')}
-        hidden={props.amountsHidden}
-        currency={person.currency}
-        onSelect={tx =>
-          props.onNavigate({
-            screen: 'transaction',
-            params: {
-              transactionId: tx.id,
-              beneficiaryId: person.id,
-            },
-          })
-        }
-      />
+      {beneficiaryTransactions.length > 0 ? (
+        <View
+          accessibilityLabel="Beneficiary transactions"
+          style={beneficiaryStyles.section}
+        >
+          <Copy strong size={22} lineHeight={26}>
+            Transactions
+          </Copy>
+          <View style={beneficiaryStyles.transactionCard}>
+            <View style={beneficiaryStyles.summaryRow}>
+              <Copy muted size={14} lineHeight={18}>
+                Total sent
+              </Copy>
+              <Copy strong size={14} lineHeight={18}>
+                {formatEvo2027Number(totalSent)} {person.currency}
+              </Copy>
+            </View>
+            <View style={[beneficiaryStyles.summaryRow, beneficiaryStyles.divider]}>
+              <Copy muted size={14} lineHeight={18}>
+                Total received
+              </Copy>
+              <Copy
+                strong
+                size={14}
+                lineHeight={18}
+                color={sourceColor('var(--uc-green-olive)')}
+              >
+                {formatEvo2027Number(totalReceived)} {person.currency}
+              </Copy>
+            </View>
+            {beneficiaryTransactions.slice(0, 4).map((transaction, index) => (
+              <Pressable
+                key={transaction.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${transaction.type === 'credit' ? 'View receipt from' : 'View payment to'} ${person.name} on ${formatBeneficiaryPaymentDate(transaction)}`}
+                onPress={() =>
+                  props.onNavigate({
+                    screen: 'transaction',
+                    params: {
+                      transactionId: transaction.id,
+                      beneficiaryId: person.id,
+                    },
+                  })
+                }
+                style={[
+                  beneficiaryStyles.transactionRow,
+                  index > 0 && beneficiaryStyles.divider,
+                ]}
+              >
+                <BankAvatar name={person.name} bank={person.bank} size={40} />
+                <View style={beneficiaryStyles.transactionCopy}>
+                  <Copy strong size={14} lineHeight={18}>
+                    {person.name}
+                  </Copy>
+                  <Copy size={12} lineHeight={16}>
+                    {transaction.details ?? `Payment to ${person.name}`}
+                  </Copy>
+                  <Copy muted size={12} lineHeight={16}>
+                    {formatBeneficiaryPaymentDate(transaction)}
+                  </Copy>
+                </View>
+                <Copy
+                  strong
+                  size={14}
+                  lineHeight={18}
+                  color={
+                    transaction.type === 'credit'
+                      ? sourceColor('var(--uc-green-olive)')
+                      : tokens.text
+                  }
+                >
+                  {transaction.type === 'credit' ? '+' : '−'}
+                  {formatEvo2027Number(Math.abs(transaction.amount))}{' '}
+                  {person.currency}
+                </Copy>
+              </Pressable>
+            ))}
+          </View>
+          {beneficiaryTransactions.length > 4 ? (
+            <View style={beneficiaryStyles.seeMore}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`See all transactions for ${person.name}`}
+                onPress={() => {}}
+              >
+                <Copy strong size={14} lineHeight={18} color={tokens.accent}>
+                  See more transactions
+                </Copy>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      ) : null}
     </>
   ) : (
     <View style={s.alert}>
@@ -332,12 +467,10 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       <View
         style={[extractedStyles.item3, view !== 'hub' && extractedStyles.item4]}
       >
-        <View
-          style={[s.page, { paddingTop: 54 + (props.screenTopInset ?? 0) }]}
-        >
+        <View style={[s.page, hubStyles.reserve]}>
           <MainNavigationHeader
             tokens={tokens}
-            brand={<Text style={hubStyles.title}>Payments</Text>}
+            brand={<Text accessibilityRole="header" style={hubStyles.title}>Payments</Text>}
             items={[]}
             value="payments"
             onChange={() => {}}
@@ -371,12 +504,13 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
           />
           <ScrollView
             keyboardShouldPersistTaps="handled"
+            stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={hubStyles.hubContent}
           >
             <View style={extractedStyles.item5}>
               <SearchField
-                tokens={tokens}
+                tokens={{ ...tokens, text: tokens.muted }}
                 label="Search beneficiaries"
                 placeholder="Name, account, IBAN"
                 value={query}
@@ -385,7 +519,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                 onClear={() => setQuery('')}
                 icon={
                   <View style={hubStyles.searchIcon}>
-                    <Glyph name="search" size={20} />
+                    <Glyph name="search" size={24} />
                   </View>
                 }
                 containerStyle={hubStyles.searchField}
@@ -399,7 +533,10 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                 }
               />
             </View>
-            <View style={extractedStyles.item6}>
+            <View
+              style={extractedStyles.item6}
+              onLayout={event => setGridWidth(event.nativeEvent.layout.width)}
+            >
               {layout
                 .map(id => actions.find(a => a.id === id)!)
                 .map(a => (
@@ -407,8 +544,19 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                     key={a.id}
                     accessibilityRole="button"
                     accessibilityLabel={a.label.replace('\n', ' ')}
+                    disabled={actionDisabled(a.id)}
                     onPress={() => handle(a.id)}
-                    style={extractedStyles.item7}
+                    style={[
+                      extractedStyles.item7,
+                      [
+                        {
+                          width: Math.max(0, (gridWidth - 24) / 4),
+                        },
+                        actionDisabled(a.id)
+                          ? parityStyles.item0
+                          : parityStyles.item1,
+                      ],
+                    ]}
                   >
                     <View
                       style={[
@@ -427,7 +575,12 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                 accessibilityRole="button"
                 accessibilityLabel="More payments"
                 onPress={() => setMore(true)}
-                style={extractedStyles.item9}
+                style={[
+                  extractedStyles.item9,
+                  {
+                    width: Math.max(0, (gridWidth - 24) / 4),
+                  },
+                ]}
               >
                 <View
                   style={[
@@ -791,6 +944,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
               <Row
                 key={a.id}
                 title={a.label.replace('\n', ' ')}
+                subtitle={moreActionDescriptions[a.id]}
                 icon={a.icon}
                 onPress={() => handle(a.id)}
               />
@@ -804,25 +958,69 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
           visible
           onClose={() => setEditor(false)}
         >
-          {actions.map(a => (
-            <View key={a.id} style={[s.horizontal, extractedStyles.item11]}>
-              <Copy>{a.label.replace('\n', ' ')}</Copy>
-              <Switch
-                accessibilityLabel={`Show ${a.id}`}
-                value={draftLayout.includes(a.id)}
-                disabled={
-                  !draftLayout.includes(a.id) && draftLayout.length >= 7
-                }
-                onValueChange={checked =>
-                  setDraftLayout(current =>
-                    checked
-                      ? [...current, a.id]
-                      : current.filter(id => id !== a.id),
-                  )
-                }
-              />
-            </View>
-          ))}
+          {[
+            ...draftLayout.flatMap(id => {
+              const action = actions.find(a => a.id === id);
+              return action ? [action] : [];
+            }),
+            ...actions.filter(a => !draftLayout.includes(a.id)),
+          ].map(a => {
+            const position = draftLayout.indexOf(a.id);
+            const selected = position !== -1;
+            const move = (direction: -1 | 1) =>
+              setDraftLayout(current => {
+                const index = current.indexOf(a.id);
+                const target = index + direction;
+                if (index < 0 || target < 0 || target >= current.length)
+                  return current;
+                const next = [...current];
+                const [moved] = next.splice(index, 1);
+                next.splice(target, 0, moved!);
+                return next;
+              });
+            return (
+              <View key={a.id} style={[s.horizontal, extractedStyles.item11]}>
+                <Copy>{a.label.replace('\n', ' ')}</Copy>
+                {selected ? (
+                  <View style={hubStyles.reorderControls}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Move up"
+                      disabled={position === 0}
+                      onPress={() => move(-1)}
+                      style={hubStyles.reorderButton}
+                    >
+                      <Glyph name="chevron-up" size={20} />
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Move down"
+                      disabled={position === draftLayout.length - 1}
+                      onPress={() => move(1)}
+                      style={hubStyles.reorderButton}
+                    >
+                      <Glyph name="chevron-down" size={20} />
+                    </Pressable>
+                  </View>
+                ) : null}
+                <Switch
+                  accessibilityLabel={`Show ${a.id}`}
+                  value={selected}
+                  disabled={!selected && draftLayout.length >= CUSTOMISABLE_SLOTS}
+                  onValueChange={checked =>
+                    setDraftLayout(current => {
+                      if (checked) {
+                        if (current.includes(a.id) || current.length >= CUSTOMISABLE_SLOTS)
+                          return current;
+                        return [...current, a.id];
+                      }
+                      return current.filter(id => id !== a.id);
+                    })
+                  }
+                />
+              </View>
+            );
+          })}
           <Button
             label="Save layout"
             onPress={() => {
@@ -837,6 +1035,11 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
               }
               setEditor(false);
             }}
+          />
+          <Button
+            label="Reset to default"
+            secondary
+            onPress={() => setDraftLayout([...DEFAULT_LAYOUT])}
           />
         </ModalPanel>
       )}
@@ -1154,6 +1357,7 @@ const extractedStyles = StyleSheet.create({
   },
 });
 const hubStyles = StyleSheet.create({
+  reserve: { paddingTop: 54 },
   title: {
     fontFamily: tokens.strongFont,
     fontSize: 28,
@@ -1166,17 +1370,38 @@ const hubStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  hubContent: { paddingTop: 20, paddingBottom: 96 },
+  reorderControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  reorderButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hubContent: {
+    paddingTop: 20,
+    paddingBottom: 96,
+  },
   searchField: {
     height: 40,
     minHeight: 40,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e5e5e5',
-    paddingHorizontal: 8,
-    gap: 0,
+    paddingHorizontal: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    gap: 8,
   },
-  searchInput: { fontFamily: tokens.strongFont, fontSize: 14, lineHeight: 18 },
+  searchInput: {
+    fontFamily: tokens.strongFont,
+    fontSize: 14,
+    lineHeight: 18,
+    color: tokens.text,
+  },
   searchIcon: {
     width: 40,
     height: 40,
@@ -1192,7 +1417,10 @@ const hubStyles = StyleSheet.create({
     lineHeight: 16,
     color: tokens.text,
   },
-  recipients: { marginTop: 24, marginHorizontal: 20 },
+  recipients: {
+    marginTop: 24,
+    marginHorizontal: 20,
+  },
   group: {
     marginTop: 12,
     marginBottom: 4,
@@ -1200,6 +1428,61 @@ const hubStyles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
   },
-  divider: { borderTopWidth: 1, borderTopColor: '#e5e5e5' },
-  lastPaid: { alignItems: 'flex-end', gap: 3 },
+  divider: {
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
+  },
+  lastPaid: {
+    alignItems: 'flex-end',
+    gap: 3,
+  },
+});
+const beneficiaryStyles = StyleSheet.create({
+  section: {
+    marginTop: 28,
+    marginHorizontal: 20,
+  },
+  transactionCard: {
+    marginTop: 12,
+    borderRadius: 16,
+    backgroundColor: tokens.surface,
+    overflow: 'hidden',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 15,
+  },
+  divider: {
+    borderTopWidth: 1,
+    borderTopColor: sourceColor('var(--uc-border-muted)'),
+  },
+  transactionRow: {
+    minHeight: 84,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  transactionCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  seeMore: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+  },
+});
+const parityStyles = StyleSheet.create({
+  item0: {
+    opacity: 0.55,
+  },
+  item1: {
+    opacity: 1,
+  },
 });

@@ -1,8 +1,8 @@
-import {
-  type CoAppingReplyResolver,
-  type CoAppingReplyResult,
-  defaultReplyResolver,
-} from '../../../package/mobile-pi-coapping-chat-package/src'
+import type {
+  CoAppingReplyResolver,
+  CoAppingReplyResult,
+} from '../../../package/mobile-pi-coapping-chat-package/src/types'
+import { defaultReplyResolver } from '../../../package/mobile-pi-coapping-chat-package/src/defaults'
 import { resolveIntent, type IntentMatch } from './nlu'
 import { buildCzChatFollowUp, type CzChatSmartReplyOptions } from './cz/helpers'
 import { buildCzChatNormalizedContext } from './cz/normalizedContext'

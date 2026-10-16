@@ -1,9 +1,12 @@
+import { useInvestmentMarket } from '../../../current/investments/Market';
 import React, { useState } from 'react';
 import {
   buildInvestmentBuyOrderQuote,
   getInvestmentBuyOrderValidation,
   parseInvestmentOrderQuantity,
-} from '@/app/screens/investments/investmentBuyOrderModel';
+  getValidatedInitialDraft,
+  type CoAppingInvestmentBuyDraft,
+} from '@/features/investments/orders/buyOrder';
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig';
 import type { CurrentAccount } from '@/data/products';
 import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
@@ -29,16 +32,29 @@ export function BuyOrder({
   onBack,
   onComplete,
   amountsHidden = false,
+  initialDraft,
 }: {
   security: InvestmentCatalogSecurity;
   accounts: readonly CurrentAccount[];
   onBack: () => void;
   onComplete: () => void;
   amountsHidden?: boolean;
+  initialDraft?: CoAppingInvestmentBuyDraft | null;
 }) {
+  const market = useInvestmentMarket();
+  const validatedInitialDraft = getValidatedInitialDraft(
+    initialDraft,
+    security,
+    accounts,
+  );
   const [step, setStep] = useState<
     'order-data' | 'review' | 'sign' | 'success'
-  >('order-data');
+  >(validatedInitialDraft ? 'review' : 'order-data');
+  const [executionTiming] = useState(
+    validatedInitialDraft?.executionTiming ?? 'today',
+  );
+  const executionLabel =
+    executionTiming === 'next-business-day' ? 'Next business day' : 'Today';
   const [terms, setTerms] = useState(false);
   useInvestmentBack(() => {
     if (step === 'sign') return false;
@@ -48,8 +64,12 @@ export function BuyOrder({
     } else onBack();
     return true;
   });
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? ''),
-    [quantityText, setQuantityText] = useState('');
+  const [accountId, setAccountId] = useState(
+      validatedInitialDraft?.accountId ?? accounts[0]?.id ?? '',
+    ),
+    [quantityText, setQuantityText] = useState(
+      validatedInitialDraft ? String(validatedInitialDraft.quantity) : '',
+    );
   const account =
     accounts.find(candidate => candidate.id === accountId) ?? null;
   const quantity = parseInvestmentOrderQuantity(quantityText);
@@ -61,12 +81,12 @@ export function BuyOrder({
     quote && account
       ? getInvestmentBuyOrderValidation(quote, account)
       : quantityText && !quantity
-      ? 'Enter a positive whole number of units.'
-      : null;
+        ? 'Enter a positive whole number of units.'
+        : null;
   const canReview =
     !!quote && !!account && !error && security.status === 'active';
   const money = (value: number, currency: string) =>
-    formatInvestmentMoney(value, 'CZ', currency, amountsHidden);
+    formatInvestmentMoney(value, market.country, currency, amountsHidden);
   if (step === 'sign')
     return (
       <Signing
@@ -125,6 +145,8 @@ export function BuyOrder({
           value={money(quote.debitAmount, quote.accountCurrency)}
         />
         <Row title="Cash account" subtitle={account.name} />
+        <Row title="Frequency" value="One off" />
+        <Row title="Execution" value={executionLabel} />
         <OrderDocuments security={security} />
         <Choice
           title="I have read and accept the terms and conditions."
@@ -196,7 +218,7 @@ export function BuyOrder({
         <Notice error text="No cash account is available." />
       ) : null}
       <Row title="Frequency" value="One off" />
-      <Row title="Execution" value="Today" />
+      <Row title="Execution" value={executionLabel} />
       {quote ? (
         <Row
           title="Estimated debit"

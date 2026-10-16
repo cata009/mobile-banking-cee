@@ -1,3 +1,5 @@
+import { PRODUCT_OFFER_CHEVRON_PATH } from "../contracts/marketingCard";
+import { productOfferCardWeb } from "../contracts/marketingCardWeb";
 import { getProductBannerTone, type ProductBannerColorFamily } from "@/app/config/productBannerVariants";
 import type { ProductsOffer } from "@/app/config/productsMenuConfig";
 
@@ -25,7 +27,7 @@ function ProductOfferChevronBackground({ fillColor }: { fillColor: string }) {
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M41.828 -36L160.486 78L41.828 192C24.9191 176.767 24.9191 152.064 41.828 136.824L103.055 78L41.828 19.176C24.9191 3.9356 24.9191 -20.7596 41.828 -36ZM-65.9884 -36L52.6697 78L-65.9884 192C-82.8971 176.767 -82.8971 152.064 -65.9884 136.824L-4.76076 78L-65.9884 19.176C-82.8971 3.9356 -82.8971 -20.7596 -65.9884 -36Z"
+        d={PRODUCT_OFFER_CHEVRON_PATH}
         fill={fillColor}
       />
     </svg>
@@ -40,7 +42,8 @@ export default function ProductOfferCard({
   variant = "standard",
 }: ProductOfferCardProps) {
   const tone = getProductBannerTone(colorFamily, lightVersion);
-  const isCompact = variant === "compact";
+  const contract = productOfferCardWeb({ variant, caption: offer.caption });
+  const isCompact = contract.compact;
 
   return (
     <button
@@ -64,7 +67,7 @@ export default function ProductOfferCard({
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[8px]">
           <h3
             className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-bold [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-            style={{ color: tone.textColor, fontSize: isCompact ? "20px" : "22px", lineHeight: "normal" }}
+            style={{ color: tone.textColor, fontSize: `${contract.titleFontSize}px`, lineHeight: "normal" }}
           >
             {offer.title}
           </h3>
@@ -76,7 +79,7 @@ export default function ProductOfferCard({
           >
             {offer.description}
           </p>
-          {isCompact && offer.caption ? (
+          {contract.showCaption ? (
             <p
               className="uc-type-p2 block w-full overflow-hidden text-ellipsis whitespace-nowrap"
               style={{ color: tone.textColor }}

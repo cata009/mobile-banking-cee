@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reviewed Native-only compatibility bridges, not approval to remove tests or excluded UI",
+  "reviewedBy": "/root integration",
+  "baseCommit": "d338f7cfb92435bb8edc8817afbdd47031fb18e3",
+  "approvedAdapters": [
+    {
+      "path": "src/app/screens/accounts/AccountDetailsInfoScreen.tsx",
+      "reviewedSha256": "7D0B0A2405CDABBCFBEB56317B04667E5EE13243C2C28624F88ACE72313E22BE",
+      "requiredTests": [
+        "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+        "native-spike/__tests__/ro-baseline-details-shell.test.tsx"
+      ],
+      "nativeOnly": true,
+      "excludedProductBranches": []
+    },
+    {
+      "path": "src/app/screens/accounts/AccountOptionsScreen.tsx",
+      "reviewedSha256": "43C0492A8DF4FBBD4342983C645AC31347C777BC21E9F7279D0E3545C8761CCC",
+      "requiredTests": [
+        "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+        "native-spike/__tests__/ro-baseline-details-shell.test.tsx"
+      ],
+      "nativeOnly": true,
+      "excludedProductBranches": []
+    },
+    {
+      "path": "src/app/screens/cards/CardDetailsInfoScreen.tsx",
+      "reviewedSha256": "E7AE5087C69C25C25BFBC7EFD98876AE5A4BCA7DD8FE91C9D53D2DDA42F477C2",
+      "requiredTests": [
+        "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+        "native-spike/__tests__/ro-baseline-details-shell.test.tsx"
+      ],
+      "nativeOnly": true,
+      "excludedProductBranches": []
+    },
+    {
+      "path": "src/app/screens/cards/CardOptionsScreen.tsx",
+      "reviewedSha256": "11BD69D7EEE52540954C5633488FDA5AAF44B136BD0F0A8D32212F0972E51480",
+      "requiredTests": [
+        "tests/screens/source-native-detail-wrapper-adapters.test.tsx",
+        "native-spike/__tests__/ro-baseline-details-shell.test.tsx"
+      ],
+      "nativeOnly": true,
+      "excludedProductBranches": []
+    },
+    {
+      "reviewedSha256": "3AE52DF0A5D141A6E0818678275F2CD9F4F6C0808B34A4FFB901BB14F9BBA24C",
+      "nativeOnly": true,
+      "excludedProductBranches": [],
+      "requiredTests": [
+        "tests/screens/source-account-card-native-adapters.test.tsx",
+        "tests/flows/ethoca-native-visual-boundary.test.tsx",
+        "native-spike/__tests__/pi-native-transaction-preview.test.tsx"
+      ],
+      "path": "src/app/screens/accounts/AccountDetailScreen.tsx"
+    },
+    {
+      "reviewedSha256": "F294A081BCC27D636BF2896E252441B6F717AEFBF0E78AC3C2958056919E9B89",
+      "nativeOnly": true,
+      "excludedProductBranches": [],
+      "requiredTests": [
+        "tests/screens/source-account-card-native-adapters.test.tsx",
+        "tests/flows/ethoca-native-visual-boundary.test.tsx",
+        "native-spike/__tests__/pi-native-transaction-preview.test.tsx"
+      ],
+      "path": "src/app/screens/cards/CardDetailScreen.tsx"
+    }
+  ],
+  "scopedNativeBridges": [
+    {
+      "conditionalSourceBranches": [
+        {
+          "functionName": "ProductsHeader",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "thenJsxTargets": [
+            "SourceProductsHeader"
+          ],
+          "elseJsxTargets": []
+        },
+        {
+          "functionName": "ProductsTabs",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "thenJsxTargets": [
+            "SmeProductsTabs"
+          ],
+          "elseJsxTargets": []
+        },
+        {
+          "functionName": "BankingContent",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "thenJsxTargets": [
+            "SmeBankingContent"
+          ],
+          "elseJsxTargets": []
+        },
+        {
+          "functionName": "ShopSmartContent",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "thenJsxTargets": [
+            "SmeShopSmartContent"
+          ],
+          "elseJsxTargets": []
+        },
+        {
+          "functionName": "ProductsScreen",
+          "guardExpression": "demo.product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "demo",
+              "initializer": "useDemo()"
+            }
+          ],
+          "thenJsxTargets": [
+            "SmeProductsScreen"
+          ],
+          "elseJsxTargets": []
+        }
+      ],
+      "nativeContextTests": [
+        "tests/screens/pi-native-products-scope-boundary.test.tsx"
+      ],
+      "nativePreviewRoutes": [
+        {
+          "functionName": "ProductsPreviewRegion",
+          "routeExpression": null,
+          "routeScreen": null
+        },
+        {
+          "functionName": "ProductsScreen",
+          "routeExpression": "route",
+          "routeScreen": "products"
+        }
+      ],
+      "excludedSourceBranches": [
+        {
+          "functionName": "ProductsHeader",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "jsxTargets": [
+            "SourceProductsHeader"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/ProductsHeader.tsx",
+              "specifier": "@/app/screens/products/ProductsHeader",
+              "from": "src/app/screens/products/ProductsScreen.tsx"
+            }
+          ]
+        },
+        {
+          "functionName": "ProductsTabs",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "jsxTargets": [
+            "SmeProductsTabs"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/SmeProductsScreen.tsx",
+              "specifier": "./SmeProductsScreen",
+              "from": "src/app/screens/products/ProductsScreen.tsx"
+            }
+          ]
+        },
+        {
+          "functionName": "BankingContent",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "jsxTargets": [
+            "SmeBankingContent"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/SmeProductsScreen.tsx",
+              "specifier": "./SmeProductsScreen",
+              "from": "src/app/screens/products/ProductsScreen.tsx"
+            }
+          ]
+        },
+        {
+          "functionName": "ShopSmartContent",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "jsxTargets": [
+            "SmeShopSmartContent"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/SmeProductsScreen.tsx",
+              "specifier": "./SmeProductsScreen",
+              "from": "src/app/screens/products/ProductsScreen.tsx"
+            }
+          ]
+        },
+        {
+          "functionName": "ProductsScreen",
+          "guardExpression": "demo.product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "demo",
+              "initializer": "useDemo()"
+            }
+          ],
+          "jsxTargets": [
+            "SmeProductsScreen"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/SmeProductsScreen.tsx",
+              "specifier": "./SmeProductsScreen",
+              "from": "src/app/screens/products/ProductsScreen.tsx"
+            }
+          ]
+        }
+      ],
+      "exactRuntimeConsumers": [
+        {
+          "path": "src/app/components/templates/templateScreens.tsx",
+          "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
+          "scope": "design-system-platform"
+        },
+        {
+          "path": "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx",
+          "reviewedSha256": "4A601831471E3372C761D6D33421ADC5026053CC2B407A1F9EB012544908A513",
+          "scope": "flow-owned-prototype"
+        },
+        {
+          "path": "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx",
+          "reviewedSha256": "AAD95AA2C3B2795E415DBEA9344E44A7016348B5B99594DA158D43E85F47E276",
+          "scope": "flow-owned-prototype"
+        }
+      ],
+      "nativeOnly": true,
+      "excludedContextTests": [
+        {
+          "owner": "SME",
+          "path": "tests/screens/pi-native-products-scope-boundary.test.tsx"
+        }
+      ],
+      "requiredTests": [
+        "tests/screens/pi-native-products-scope-boundary.test.tsx",
+        "tests/screens/source-native-home-products-adapters.test.tsx",
+        "tests/components/template-previews.test.tsx",
+        "tests/tooling/retired-pi-ui-audit.test.ts"
+      ],
+      "includedScope": {
+        "releases": "all",
+        "product": "PI"
+      },
+      "reviewedSha256": "143A08011A9FA50EBF4640AECA93FC750603E232CECFF186278C024CCF685AC9",
+      "path": "src/app/screens/products/ProductsScreen.tsx"
+    },
+    {
+      "conditionalSourceBranches": [
+        {
+          "functionName": "ProductDetailScreen",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "thenJsxTargets": [
+            "SmeProductDetailScreen"
+          ],
+          "elseJsxTargets": []
+        }
+      ],
+      "nativeContextTests": [
+        "tests/screens/pi-native-products-scope-boundary.test.tsx"
+      ],
+      "nativePreviewRoutes": [
+        {
+          "functionName": "ProductDetailScreen",
+          "routeExpression": "{ screen: 'product-detail', params }",
+          "routeScreen": "product-detail"
+        }
+      ],
+      "excludedSourceBranches": [
+        {
+          "functionName": "ProductDetailScreen",
+          "guardExpression": "product === 'SME'",
+          "guardBindings": [
+            {
+              "name": "product",
+              "initializer": "useDemo().product"
+            }
+          ],
+          "jsxTargets": [
+            "SmeProductDetailScreen"
+          ],
+          "owner": "SME",
+          "excludedRuntimeEdges": [
+            {
+              "to": "src/app/screens/products/SmeProductDetailScreen.tsx",
+              "specifier": "./SmeProductDetailScreen",
+              "from": "src/app/screens/products/ProductDetailScreen.tsx"
+            }
+          ]
+        }
+      ],
+      "exactRuntimeConsumers": [
+        {
+          "path": "src/app/components/templates/templateScreens.tsx",
+          "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
+          "scope": "design-system-platform"
+        }
+      ],
+      "nativeOnly": true,
+      "excludedContextTests": [
+        {
+          "owner": "SME",
+          "path": "tests/screens/pi-native-products-scope-boundary.test.tsx"
+        }
+      ],
+      "requiredTests": [
+        "tests/screens/pi-native-products-scope-boundary.test.tsx",
+        "tests/screens/source-native-home-products-adapters.test.tsx",
+        "tests/components/template-previews.test.tsx",
+        "tests/tooling/retired-pi-ui-audit.test.ts"
+      ],
+      "includedScope": {
+        "releases": "all",
+        "product": "PI"
+      },
+      "reviewedSha256": "FFBB2E5851CFC689143A3FB1C33F30CD7065EBDA633B71B37B13FA21521B9BE0",
+      "path": "src/app/screens/products/ProductDetailScreen.tsx"
+    },
+    {
+      "conditionalSourceBranches": [
+        {
+          "functionName": "TransactionDetailScreen",
+          "guardExpression": "!useNativeTransactionDetail",
+          "guardBindings": [
+            {
+              "name": "useNativeTransactionDetail",
+              "initializer": "demoProduct === 'PI' &&\n    designSystem === 'current' &&\n    demoCountry !== 'IT' &&\n    props.country !== 'IT'"
+            }
+          ],
+          "thenJsxTargets": [
+            "LegacySourceTransactionDetailBody"
+          ],
+          "elseJsxTargets": []
+        }
+      ],
+      "path": "src/app/screens/payments/DomesticPaymentFlowScreens.tsx",
+      "requiredTests": [
+        "tests/screens/transaction-detail-native-eligibility.test.tsx",
+        "tests/features/native-baseline-eligibility.test.ts",
+        "tests/screens/pfm-transaction-recategorization.test.tsx",
+        "tests/screens/flow-library.test.tsx"
+      ],
+      "nativeContextTests": [
+        "tests/screens/transaction-detail-native-eligibility.test.tsx"
+      ],
+      "nativeOnly": true,
+      "reviewedSha256": "49A2918B5020219D9F24B24F31C4D55CD767942B2C7E86547587CD675EB5425C",
+      "includedScope": {
+        "product": "PI",
+        "countries": [
+          "RO",
+          "HU",
+          "RS",
+          "SI",
+          "CZ",
+          "SK",
+          "BA",
+          "BA_BL"
+        ],
+        "designSystem": "current",
+        "releases": "all"
+      },
+      "excludedContextTests": [
+        {
+          "owner": "SME",
+          "path": "tests/screens/transaction-detail-native-eligibility.test.tsx"
+        },
+        {
+          "owner": "KIDS HU",
+          "path": "tests/screens/transaction-detail-native-eligibility.test.tsx"
+        },
+        {
+          "owner": "PI Italy",
+          "path": "tests/screens/transaction-detail-native-eligibility.test.tsx"
+        }
+      ],
+      "excludedSourceBranches": [
+        {
+          "functionName": "TransactionDetailScreen",
+          "guardExpression": "!useNativeTransactionDetail",
+          "guardBindings": [
+            {
+              "name": "useNativeTransactionDetail",
+              "initializer": "demoProduct === 'PI' &&\n    designSystem === 'current' &&\n    demoCountry !== 'IT' &&\n    props.country !== 'IT'"
+            }
+          ],
+          "jsxTargets": [
+            "LegacySourceTransactionDetailBody"
+          ],
+          "owner": "SME",
+          "owners": [
+            "SME",
+            "KIDS HU",
+            "PI Italy"
+          ],
+          "excludedRuntimeEdges": []
+        }
+      ],
+      "nativePreviewRoutes": [
+        {
+          "functionName": "PaymentFlowPreview",
+          "routeExpression": "route",
+          "routeScreen": null
+        },
+        {
+          "functionName": "TransactionDetailScreen",
+          "routeExpression": "{ screen: 'transaction', params: { productId, transactionId: transaction.id, source } }",
+          "routeScreen": "transaction"
+        }
+      ],
+      "reviewNote": "All included PI releases use designSystem=current. The Native branch has no release gate. The local Source body is reachable only for excluded products, Italy or a design-system axis outside this PI mandate; all included/excluded branch contexts are characterized in the eligibility proof.",
+      "exactRuntimeConsumers": [
+        {
+          "path": "src/experiences/kids-pi/hu/baseline/composition.tsx",
+          "reviewedSha256": "F3EF59CF2661F0009391BE53862DE4F428214E699B10F7A35AA19D1490E40A76",
+          "scope": "excluded-owner"
+        },
+        {
+          "path": "src/flows/shared/ethoca/ethocaPreviews.tsx",
+          "reviewedSha256": "86B19BB275F684BE96DED4D8C9023C8E8FEE3B0D9840245C714497E7F16CF969",
+          "scope": "flow-owned-prototype"
+        }
+      ]
+    }
+  ]
+}

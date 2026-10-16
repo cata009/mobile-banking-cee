@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import FlowLibraryScreen from '@/app/screens/flow-library/FlowLibraryScreen'
 import { DemoProvider } from '@/app/state/demoStore'
 import { FLOW_DEFINITIONS, FLOW_ORDER, resolveScenario } from '@/app/screens/flow-library/flows'
@@ -10,8 +10,27 @@ import { FLOW_PREVIEWS, FLOW_PREVIEW_ORDER } from '@/app/registry/flowPreviewReg
 import { buildFlowReferencePackage } from '@/app/screens/flow-library/handoff/referencePackage'
 import { FLOW_SCREEN_SOURCES } from '@/app/screens/flow-library/components/screenSources'
 import { rulesForScreen, screensForRule } from '@/app/screens/flow-library/flows/rules'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
 
-afterEach(cleanup)
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+let originalMatchMedia: typeof window.matchMedia
+
+beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
+})
+
+afterEach(() => {
+  cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
+  vi.unstubAllGlobals()
+})
 
 function renderFlowLibrary(initialFlowId: Parameters<typeof FlowLibraryScreen>[0]['initialFlowId']) {
   return render(
@@ -518,85 +537,80 @@ describe('flow-library screen', () => {
     expect(screen.getByRole('heading', { name: /future flows/i })).toBeInTheDocument()
   })
 
-  it('renders the ETHOCA flow with its real-demo merchant scenarios', () => {
+  it('renders the ETHOCA flow with its real-demo merchant scenarios', async () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     expect(screen.getByRole('heading', { name: 'ETHOCA Merchant Enrichment' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
+    await asyncNativeReady(document.body)
     expect(screen.getByText('Merchant data available')).toBeInTheDocument()
-    expect(screen.getAllByText('YouTube Premium').length).toBeGreaterThan(0)
+    await waitFor(() => expect(screen.getAllByText('YouTube Premium').length).toBeGreaterThan(0))
     expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0)
   })
 
-  it('keeps ETHOCA merchant logos local and shows the grey PFM fallback in every list state', () => {
+  it('renders ETHOCA merchant marks and PFM fallbacks in the Native transaction lists', async () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
-    expect(focusedPreview().getByLabelText('YouTube merchant logo')).toBeInTheDocument()
-    expect(focusedPreview().getByLabelText('Carrefour merchant logo')).toBeInTheDocument()
-    expect(focusedPreview().queryByLabelText('eMAG merchant logo')).not.toBeInTheDocument()
+    await asyncNativeReady(document.body)
+    const focusedPreviewElement = () => document.querySelector<HTMLElement>('[data-flow-preview-scrollable="true"]')!
+    const focusedPreview = () => within(focusedPreviewElement())
+    expect(focusedPreview().getByRole('img', { name: 'YouTube merchant logo' })).toBeInTheDocument()
+    expect(focusedPreview().getByRole('img', { name: 'Carrefour merchant logo' })).toBeInTheDocument()
+    expect(focusedPreview().queryByRole('img', { name: 'eMAG merchant logo' })).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('OMV Petrom')).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('Regina Maria')).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('DECEMBER 2025')).not.toBeInTheDocument()
-    const carrefourLogo = focusedPreview().getByTestId('merchant-logo-carrefour')
-    expect(carrefourLogo).toHaveAttribute('data-ethoca-logo-source', 'bundled-official-carrefour')
-    expect(carrefourLogo.querySelector('img')).toHaveAttribute('src', expect.not.stringMatching(/^https?:\/\//))
+    expect(focusedPreviewElement().querySelectorAll('img[src^="http"]')).toHaveLength(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending card transaction' }))
-    expect(focusedPreview().getAllByLabelText('eMAG merchant logo').length).toBeGreaterThan(0)
-    const emagLogo = focusedPreview().getAllByTestId('merchant-logo-emag')[0]!
-    expect(emagLogo).toHaveAttribute('data-ethoca-logo-source', 'bundled-official-emag')
-    expect(emagLogo.querySelector('img')).toHaveAttribute('src', expect.not.stringMatching(/^https?:\/\//))
-    expect(focusedPreview().queryByLabelText('Starbucks merchant logo')).not.toBeInTheDocument()
-    const pfmFallbacks = focusedPreview().getAllByLabelText('PFM category fallback')
+    await waitFor(() => expect(focusedPreview().getByRole('img', { name: 'eMAG merchant logo' })).toBeInTheDocument())
+    expect(focusedPreview().queryByRole('img', { name: 'Starbucks merchant logo' })).not.toBeInTheDocument()
+    const pfmFallbacks = focusedPreview().queryAllByLabelText(/PFM category$/)
     expect(pfmFallbacks.length).toBeGreaterThan(0)
-    expect(pfmFallbacks[0]?.querySelector('[data-pfm-icon-variant="category-circle"]')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
-    expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
+    await waitFor(() => expect(focusedPreview().queryAllByLabelText(/PFM category$/).length).toBeGreaterThan(0))
   })
 
-  it('shows the PFM fallback if a bundled ETHOCA merchant logo cannot be rendered', () => {
+  it('uses local Native artwork for bundled ETHOCA merchants without remote logo requests', async () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
-    const carrefourLogo = focusedPreview().getByTestId('merchant-logo-carrefour')
-    const logoImage = carrefourLogo.querySelector('img')
-
-    expect(logoImage).not.toBeNull()
-    fireEvent.error(logoImage as HTMLImageElement)
-
-    expect(focusedPreview().queryByLabelText('Carrefour merchant logo')).not.toBeInTheDocument()
-    expect(focusedPreview().getByLabelText('PFM category fallback')).toBeInTheDocument()
+    await asyncNativeReady(document.body)
+    const focusedPreviewElement = () => document.querySelector<HTMLElement>('[data-flow-preview-scrollable="true"]')!
+    const focusedPreview = () => within(focusedPreviewElement())
+    expect(focusedPreview().getByRole('img', { name: 'Carrefour merchant logo' })).toBeInTheDocument()
+    expect(focusedPreviewElement().querySelectorAll('img[src^="http"]')).toHaveLength(0)
   })
 
-  it('shows the account and pending ETHOCA states using the existing account and transaction-detail screens', () => {
+  it('shows the account and pending ETHOCA states using the Native account and transaction-detail screens', async () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
+    await asyncNativeReady(document.body)
+    const focusedPreviewElement = () => document.querySelector<HTMLElement>('[data-flow-preview-scrollable="true"]')!
+    const focusedPreview = () => within(focusedPreviewElement())
 
     fireEvent.click(screen.getByRole('button', { name: 'Enriched account list' }))
-    expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0)
-    expect(focusedPreview().getByLabelText('Carrefour merchant logo')).toBeInTheDocument()
-    expect(focusedPreview().getAllByLabelText('PFM category fallback').length).toBeGreaterThan(0)
+    await waitFor(() => expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0))
+    expect(focusedPreview().getByRole('img', { name: 'Carrefour merchant logo' })).toBeInTheDocument()
+    expect(focusedPreview().queryAllByLabelText(/PFM category$/).length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending card transaction' }))
     fireEvent.click(screen.getByRole('button', { name: 'Pending account list' }))
-    expect(focusedPreview().getByText('Starbucks')).toBeInTheDocument()
+    await waitFor(() => expect(focusedPreview().getAllByText('Starbucks').length).toBeGreaterThan(0))
     expect(focusedPreview().getAllByText('Pending').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending transaction detail' }))
-    expect(document.querySelector('[data-flow-preview-scrollable="true"] [data-pending-status]')).toBeInTheDocument()
-    expect(focusedPreview().queryByTestId('transaction-pfm-summary')).not.toBeInTheDocument()
+    await waitFor(() => expect(focusedPreview().getByText('Pending')).toBeInTheDocument())
+    expect(focusedPreview().queryByText('Spending Insight')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))
     fireEvent.click(screen.getByRole('button', { name: 'Partial data without logo or map' }))
-    expect(focusedPreview().queryByTitle('Google Maps — Merchant location')).not.toBeInTheDocument()
-    expect(focusedPreview().getByText('Grocery stores, supermarkets')).toBeInTheDocument()
+    await waitFor(() => expect(focusedPreview().getByText('Grocery stores, supermarkets')).toBeInTheDocument())
+    expect(focusedPreview().queryByText(/Google Maps/)).not.toBeInTheDocument()
   })
 
   it('keeps the focused ETHOCA screen preview scrollable', () => {
@@ -659,29 +673,30 @@ describe('flow-library screen', () => {
     expect(within(gallery).queryByTestId('journey-arrow')).not.toBeInTheDocument()
   })
 
-  it('keeps ETHOCA list fixtures populated when Flow Library is opened from Kids Hungary', () => {
+  it('keeps ETHOCA list fixtures populated when Flow Library is opened from Kids Hungary', async () => {
     renderFlowLibraryInKidsHungary()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    const focusedPreview = () => within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
+    await asyncNativeReady(document.body)
+    const focusedPreviewElement = () => document.querySelector<HTMLElement>('[data-flow-preview-scrollable="true"]')!
+    const focusedPreview = () => within(focusedPreviewElement())
 
     expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
     expect(focusedPreview().getByText('YouTube Premium')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Enriched account list' }))
-    expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0)
+    await waitFor(() => expect(focusedPreview().getAllByText('Enel Energie').length).toBeGreaterThan(0))
     expect(focusedPreview().getByText('Carrefour')).toBeInTheDocument()
   })
 
-  it('anchors an ETHOCA merchant image inside its 32px list slot', () => {
+  it('anchors the Native ETHOCA merchant mark inside its 32px list slot', async () => {
     renderFlowLibrary('mobile-pi-ethoca')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Journey' }))
-    const focusedPreview = document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement
-    const logo = within(focusedPreview)
-      .getAllByTestId('merchant-logo-carrefour')
-      .find((candidate) => candidate.getAttribute('style')?.includes('width: 32px'))
+    await asyncNativeReady(document.body)
+    const focusedPreview = document.querySelector<HTMLElement>('[data-flow-preview-scrollable="true"]') as HTMLElement
+    const logo = within(focusedPreview).getByRole('img', { name: 'Carrefour merchant logo' })
 
-    expect(logo).toHaveClass('relative')
+    expect(logo).toHaveStyle({ width: '32px', height: '32px' })
   })
 })

@@ -1,5 +1,6 @@
 import { ReactNode, type MouseEvent } from 'react';
 import { activateOnKeyboard } from '@/app/components/ui/keyboardActivation';
+import { productCardWeb } from '@/app/components/contracts/productCardWeb';
 
 export const PRODUCT_CARD_EVOLUTION_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -59,18 +60,13 @@ export default function ProductCard({
   footer,
   onClick
 }: ProductCardProps) {
-  if (variant === 'evolution') {
+  const state = productCardWeb({ variant, productStyle, stackRole, leadingVisual, actionCount: actions?.length, hasFooter: Boolean(footer), interactive: Boolean(onClick) });
+  if (state.evolution) {
     const isSme = productStyle === 'sme';
-    const visibleActions = actions?.slice(0, 4) ?? [];
+    const visibleActions = actions?.slice(0, state.actionLimit) ?? [];
     const radiusClass =
-      stackRole === 'first'
-        ? 'rounded-t-[8px]'
-        : stackRole === 'last'
-          ? 'rounded-b-[8px]'
-          : stackRole === 'middle'
-            ? 'rounded-none'
-          : 'rounded-[8px]';
-    const hasSeparator = stackRole === 'middle' || stackRole === 'last';
+      state.radiusClass;
+    const hasSeparator = state.hasSeparator;
 
     return (
       <div

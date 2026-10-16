@@ -4,19 +4,17 @@ import { authenticateNativeBiometric } from '../../../../../platform/biometrics'
 import { setNativeScreenshotsAllowed } from '../../../../../platform/screenPrivacy';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import type { AccountTransaction } from '@/data/accountDetails';
+import { creditLimitOpportunityNudge } from '@/features/cards/credit-limit/opportunityNudge';
 import type { CzechNativeScreenProps } from '../contracts';
 import { czechProducts, cardProducts, cardMovements } from '../accounts/source';
 import {
   s,
   Page,
   Copy,
-  FieldValue,
   money,
   tokens,
   IconButton,
-  Row,
   Glyph,
-  infoMoney,
 } from '../accounts/Primitives';
 import { MovementRows, MovementDetail } from '../accounts/Movements';
 import Carousel, { type CarouselGeometry } from '../accounts/Carousel';
@@ -24,6 +22,15 @@ import Indicator from '../accounts/Indicator';
 import LedgerSearch from '../accounts/LedgerSearch';
 import { SoftShadow } from '../../../../../universal/SoftShadow';
 import CardArt from './CardArt';
+import { FaceIdOverlay } from '../../../current/banking/FaceIdOverlay';
+import {
+  CardInfoScreen,
+  CardOptionsScreen,
+  CardSensitiveDetailsScreen,
+} from '../../../current/banking/Cards';
+import { czechBankingHost } from '../../../current/banking/czechHost';
+import { assistantAvailable } from '../../../current/coapping/model';
+import { openCurrentForYou } from '../../../current/coapping/contextHelp';
 export interface CzechCardPorts {
   authenticate: typeof authenticateNativeBiometric;
   privacy: typeof setNativeScreenshotsAllowed;
@@ -39,6 +46,7 @@ const CARD_GEOMETRY: CarouselGeometry = {
   gutter: 24,
   inactiveScale: 114 / 138,
   inactiveOpacity: 0.72,
+  inactiveFilter: 'saturate(0.7) brightness(0.92)',
   paddingBottom: 8,
 };
 const cardArtwork = StyleSheet.create({
@@ -98,12 +106,16 @@ export default function CardScreen(
     amountsHidden,
     onBack,
     isActive = true,
+    onActiveCardChange,
     screenTopInset,
     ports = defaultPorts,
   } = props;
-  const products = useMemo(() => czechProducts(productCounts), [productCounts]);
+  const products = useMemo(
+    () => czechProducts(productCounts, props.bankingPresentation),
+    [productCounts, props.bankingPresentation],
+  );
   const cards = useMemo(() => cardProducts(products), [products]);
-  const requested = route.params?.cardId;
+  const requested = route.params?.cardId ?? route.params?.productId;
   const [id, setId] = useState(requested ?? cards[0]?.id),
     [query, setQuery] = useState(''),
     [message, setMessage] = useState('');
@@ -116,20 +128,96 @@ export default function CardScreen(
   );
   const [movement, setMovement] = useState<AccountTransaction | null>(null),
     [verified, setVerified] = useState(false),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [opportunityDismissed, setOpportunityDismissed] = useState(false);
   const generation = useRef(0),
-    active = useRef(isActive);
+    active = useRef(isActive),
+    reportedActiveCard = useRef<string | null>(null);
   const card = cards.find(c => c.id === id),
-    ledger = card ? cardMovements(card, products) : [];
+    sourceRows =
+      card &&
+      props.bankingPresentation?.productId === card.id &&
+      props.bankingPresentation.rows !== undefined
+        ? props.bankingPresentation.rows
+        : undefined,
+    ledgerSource =
+      sourceRows !== undefined
+        ? sourceRows.map(row => row.transaction)
+        : card
+        ? cardMovements(card, products)
+        : [],
+    ledger = ledgerSource.map(transaction => {
+      const override =
+        props.bankingPresentation?.transactionCategoryOverrides?.[
+          transaction.id
+        ];
+      return override
+        ? {
+            ...transaction,
+            category: override.groupLabel,
+            pfmCategory: override.category,
+            pfmSubcategory: override.subcategory,
+          }
+        : transaction;
+    });
+  const cardId = card?.id;
+  useEffect(() => {
+    if (!isActive || !cardId || !onActiveCardChange) return;
+    if (reportedActiveCard.current === cardId) return;
+    reportedActiveCard.current = cardId;
+    onActiveCardChange(cardId);
+  }, [cardId, isActive, onActiveCardChange]);
+  const currentHost = czechBankingHost(props, {
+    screen: 'card',
+    params: card ? { productId: card.id } : undefined,
+  });
+  const explicitNudge = props.bankingPresentation?.aiOpportunityNudge;
+  const opportunityNudge =
+    explicitNudge !== undefined
+      ? explicitNudge
+      : creditLimitOpportunityNudge(assistantAvailable(currentHost), card, {});
+  const onOpportunityClick =
+    props.onAiOpportunityClick ?? (() => openCurrentForYou(currentHost));
+  useEffect(() => {
+    setOpportunityDismissed(false);
+  }, [card?.id, opportunityNudge?.title]);
   useEffect(() => {
     if (requested) setId(requested);
     const entryCard = cards.find(candidate => candidate.id === requested);
     if (route.screen === 'transaction' && entryCard) {
-      setMovement(
-        cardMovements(entryCard, products).find(
-          tx => tx.id === route.params?.transactionId,
-        ) ?? null,
-      );
+      const selection = props.transactionSelection;
+      const entryRows =
+        props.bankingPresentation?.productId === entryCard.id &&
+        props.bankingPresentation.rows !== undefined
+          ? props.bankingPresentation.rows
+          : undefined;
+      const entryLedger = (
+        entryRows !== undefined
+          ? entryRows.map(row => row.transaction)
+          : cardMovements(entryCard, products)
+      ).map(transaction => {
+        const override =
+          props.bankingPresentation?.transactionCategoryOverrides?.[
+            transaction.id
+          ];
+        return override
+          ? {
+              ...transaction,
+              category: override.groupLabel,
+              pfmCategory: override.category,
+              pfmSubcategory: override.subcategory,
+            }
+          : transaction;
+      });
+      const selectedTransaction =
+        route.params?.source === 'card' &&
+        selection?.productId === entryCard.id &&
+        selection.source === 'card' &&
+        selection.transaction.id === route.params?.transactionId
+          ? selection.transaction
+          : entryLedger.find(tx => tx.id === route.params?.transactionId) ??
+            null;
+      setMovement(selectedTransaction);
     }
     setView(
       route.screen === 'transaction'
@@ -142,7 +230,16 @@ export default function CardScreen(
     );
     setVerified(false);
     generation.current++;
-  }, [requested, route.screen, route.params?.transactionId, cards, products]);
+  }, [
+    requested,
+    route.screen,
+    route.params?.source,
+    route.params?.transactionId,
+    props.transactionSelection,
+    props.bankingPresentation,
+    cards,
+    products,
+  ]);
   useEffect(() => {
     active.current = isActive;
     if (!isActive) {
@@ -173,34 +270,14 @@ export default function CardScreen(
       ports.privacy(true).catch(() => {});
     };
   }, [verified, ports]);
-  const reveal = async () => {
+  const reveal = () => {
     if (busy || !active.current) return;
-    const ticket = ++generation.current;
+    if (card && props.onShowCardDetailsRequest) {
+      props.onShowCardDetailsRequest(card.id);
+      return;
+    }
     setBusy(true);
     setMessage('');
-    try {
-      const result = await ports.authenticate('Show card details');
-      if (ticket !== generation.current || !active.current) return;
-      if (result === 'authenticated') {
-        await ports.privacy(false);
-        if (ticket !== generation.current || !active.current) {
-          ports.privacy(true).catch(() => {});
-          return;
-        }
-        setVerified(true);
-        setView('sensitive');
-      } else
-        setMessage(
-          result === 'cancelled'
-            ? 'Verification cancelled'
-            : 'Biometric verification unavailable',
-        );
-    } catch {
-      if (ticket === generation.current && active.current)
-        setMessage('Biometric verification unavailable');
-    } finally {
-      if (ticket === generation.current && active.current) setBusy(false);
-    }
   };
   const back = () => {
     generation.current++;
@@ -269,9 +346,9 @@ export default function CardScreen(
           topInset={screenTopInset}
           trailing={
             <IconButton
-              label={amountsHidden ? 'Show amounts' : 'Hide amounts'}
-              name={amountsHidden ? 'show' : 'hide'}
-              onPress={props.onAmountsToggle}
+              label="Help"
+              name="help-circle"
+              onPress={() => props.onHelpRequest?.()}
             />
           }
         >
@@ -346,33 +423,39 @@ export default function CardScreen(
               {
                 label: 'Card Details',
                 icon: 'account-details',
-                run: () => setView('info'),
+                run: () =>
+                  props.onNavigate({
+                    screen: 'card-info',
+                    params: { cardId: card.id, productId: card.id },
+                  }),
               },
               {
                 label: 'Options',
                 icon: 'account-options',
-                run: () => setView('options'),
+                run: () =>
+                  props.onNavigate({
+                    screen: 'card-options',
+                    params: { cardId: card.id, productId: card.id },
+                  }),
               },
               {
                 label: 'Block Card',
                 icon: 'block-card',
                 run: () => {},
-                disabled: true,
               },
               {
                 label: 'View PIN',
                 icon: 'view-pin',
                 run: () => {},
-                disabled: true,
               },
             ].map(action => (
               <Pressable
                 key={action.label}
                 accessibilityRole="button"
                 accessibilityLabel={action.label}
-                disabled={busy || action.disabled}
+                disabled={busy}
                 accessibilityState={{
-                  disabled: busy || action.disabled || false,
+                  disabled: busy,
                 }}
                 onPress={action.run}
                 style={extractedStyles.item5}
@@ -398,8 +481,41 @@ export default function CardScreen(
               onChange={setQuery}
             />
           </View>
+          {opportunityNudge && !opportunityDismissed ? (
+            <View
+              testID="evo-card-opportunity"
+              style={{
+                marginHorizontal: 16,
+                marginBottom: 12,
+                padding: 16,
+                borderRadius: 8,
+                backgroundColor: tokens.surface,
+                gap: 8,
+              }}
+            >
+              <Copy strong>{opportunityNudge.title}</Copy>
+              <Copy muted>{opportunityNudge.body}</Copy>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={opportunityNudge.ctaLabel}
+                onPress={onOpportunityClick}
+              >
+                <Copy strong color={tokens.accent}>
+                  {opportunityNudge.ctaLabel}
+                </Copy>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="More options"
+                onPress={() => setOpportunityDismissed(true)}
+              >
+                <Copy muted>More options</Copy>
+              </Pressable>
+            </View>
+          ) : null}
           <MovementRows
             transactions={filtered}
+            presentationRows={sourceRows}
             hidden={amountsHidden}
             pending={
               card.type === 'debit_card' &&
@@ -408,128 +524,50 @@ export default function CardScreen(
                 products.find(p => p.type === 'current_account')?.id
             }
             onSelect={tx => {
-              setMovement(tx);
-              setView('movement');
+              if (props.onTransactionSelected) {
+                props.onTransactionSelected({
+                  productId: card.id,
+                  source: 'card',
+                  transaction: tx,
+                });
+              } else {
+                props.onNavigate({
+                  screen: 'transaction',
+                  params: {
+                    cardId: card.id,
+                    productId: card.id,
+                    transactionId: tx.id,
+                  },
+                });
+              }
             }}
           />
         </Page>
       </View>
       {view === 'info' && (
-        <Page
-          title="Card details"
-          onBack={back}
-          active={isActive}
-          topInset={screenTopInset}
-        >
-          <View style={s.inset}>
-            <FieldValue
-              label="Card product"
-              value={`${card.cardType} ${
-                card.type === 'credit_card' ? 'Credit card' : 'Debit card'
-              }`}
-            />
-            <FieldValue label="Card status" value="Active" />
-            <FieldValue
-              label="Card reference"
-              value={`•••• ${card.cardNumber.slice(-4)}`}
-            />
-            <FieldValue
-              label="Available to spend"
-              value={infoMoney(available, card.currency, amountsHidden)}
-            />
-            {card.type === 'credit_card' ? (
-              <FieldValue
-                label="Credit limit"
-                value={infoMoney(
-                  card.creditLimit,
-                  card.currency,
-                  amountsHidden,
-                )}
-              />
-            ) : (
-              <FieldValue label="Linked account" value={card.linkedAccountId} />
-            )}
-          </View>
-        </Page>
+        <CardInfoScreen
+          {...czechBankingHost(
+            { ...props, onBack: back },
+            { screen: 'card-info', params: { productId: card.id } },
+          )}
+        />
       )}
       {view === 'sensitive' && verified && isActive && (
-        <Page
-          title="Card details"
-          onBack={back}
-          active={isActive}
-          topInset={screenTopInset}
-        >
-          <View style={s.inset}>
-            <FieldValue label="Card number" value={card.cardNumber} />
-            <FieldValue
-              label="Card CVV2/CVC2"
-              value={card.securityCode ?? '990'}
-            />
-            <FieldValue
-              label="Card holder"
-              value={card.cardHolderName ?? 'PETER JAGODIĆ'}
-            />
-            <FieldValue label="Card validity" value={card.expiryDate} />
-          </View>
-        </Page>
+        <CardSensitiveDetailsScreen
+          host={czechBankingHost(
+            { ...props, onBack: back },
+            { screen: 'card-info', params: { productId: card.id } },
+          )}
+          card={card}
+        />
       )}
       {view === 'options' && (
-        <Page
-          title="Card options"
-          onBack={back}
-          active={isActive}
-          topInset={screenTopInset}
-        >
-          <View style={s.panel}>
-            {[
-              ['APPLE PAY', 'Active'],
-              [
-                'MASTERCARD PRICELESS',
-                'Discover all the advantages of the program',
-              ],
-              ['CARD REGISTRATIONS', 'Subscriptions and saved card'],
-            ].map(([title, subtitle]) => (
-              <Row
-                key={title}
-                title={title!}
-                subtitle={subtitle}
-                disabled
-                onPress={() => {}}
-              />
-            ))}
-          </View>
-          <View style={s.section}>
-            <Copy strong>GENERAL SETTINGS</Copy>
-          </View>
-          <View style={s.panel}>
-            {[
-              ['VIEW PIN', 'View or change your card’s PIN'],
-              ['CARD LIMITS', 'Manage your card limits'],
-              ['PUSH NOTIFICATIONS', 'Manage app notifications'],
-              ...(card.type === 'credit_card'
-                ? [
-                    ['CREDIT CARD STATEMENT', 'View your statement'],
-                    ['CHANGE CARD NAME', 'Name your card'],
-                    ['SHARE DETAILS', 'Send the card details through email'],
-                  ]
-                : [
-                    [
-                      'CARD DELIVERY ADDRESS',
-                      'Select the address to deliver the card',
-                    ],
-                    ['REISSUE CARD', 'Request the reissue of this card'],
-                  ]),
-            ].map(([title, subtitle]) => (
-              <Row
-                key={title}
-                title={title!}
-                subtitle={subtitle}
-                disabled
-                onPress={() => {}}
-              />
-            ))}
-          </View>
-        </Page>
+        <CardOptionsScreen
+          {...czechBankingHost(
+            { ...props, onBack: back },
+            { screen: 'card-options', params: { productId: card.id } },
+          )}
+        />
       )}
       {view === 'movement' && movement && (
         <MovementDetail
@@ -539,6 +577,18 @@ export default function CardScreen(
           onBack={back}
           active={isActive}
           topInset={screenTopInset}
+        />
+      )}
+      {busy && isActive && (
+        <FaceIdOverlay
+          onComplete={() => {
+            if (!active.current) return;
+            setBusy(false);
+            setVerified(true);
+            setView('sensitive');
+            if (card) props.onShowCardDetails?.(card.id);
+            ports.privacy(false).catch(() => {});
+          }}
         />
       )}
     </View>

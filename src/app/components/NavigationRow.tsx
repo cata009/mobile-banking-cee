@@ -2,6 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import ToggleButton from "@/app/components/ToggleButton";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { cn } from "@/app/components/ui/utils";
+import { navigationRowWeb } from "@/app/components/contracts/navigationRowWeb";
+import type { NavigationRowAccessory, NavigationRowHeight } from "@/app/components/contracts/navigationRow";
 
 export const NAVIGATION_ROW_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -41,9 +43,6 @@ export const NAVIGATION_ROW_SOURCE = {
     },
   },
 } as const;
-
-type NavigationRowAccessory = "none" | "chevron" | "toggle";
-type NavigationRowHeight = 64 | 80;
 
 export interface NavigationRowProps {
   title: string;
@@ -87,7 +86,7 @@ function NavigationRowContent({
   descriptionClassName,
 }: Omit<NavigationRowProps, "onClick" | "ariaLabel" | "className" | "rowHeight">) {
   const hasTrailing = trailingAccessory !== "none" || trailing;
-  const titleColor = titleTone === "action" ? "text-[var(--uc-action)]" : "text-[var(--uc-text)]";
+  const { titleColor } = navigationRowWeb({ titleTone });
 
   return (
     <>
@@ -170,22 +169,17 @@ export default function NavigationRow({
   titleStyle,
   descriptionClassName,
 }: NavigationRowProps) {
-  const hasLeadingIcon = Boolean(leadingIconName || leadingVisual);
+  const state = navigationRowWeb({
+    trailingAccessory, rowHeight, centerContent, titleTone, toggleChecked,
+    hasLeading: Boolean(leadingIconName || leadingVisual), hasTrailing: Boolean(trailing),
+    hasOnClick: Boolean(onClick), hasOnLinkClick: Boolean(onLinkClick),
+  });
   const rootClassName = cn(
-    "flex w-full items-center gap-[16px] bg-[var(--uc-surface)]",
-    centerContent ? "justify-center text-center" : "text-left",
-    rowHeight === 64 ? "h-[64px]" : "h-[80px]",
-    centerContent
-      ? "px-[24px]"
-      : rowHeight === 64
-        ? "px-[16px]"
-        : hasLeadingIcon
-          ? "pl-[16px] pr-[12px]"
-          : "pl-[24px] pr-[12px]",
+    state.rootClass, state.alignmentClass, state.heightClass, state.paddingClass,
     className,
   );
 
-  if (onClick && !onLinkClick && trailingAccessory !== "toggle" && !trailing) {
+  if (state.rootKind === "button") {
     return (
       <button
         type="button"

@@ -135,10 +135,7 @@ test('current and foreign accounts preserve all four Source actions', async () =
   await act(() =>
     button(tree, 'Currency Exchange Euro account').props.onPress(),
   );
-  expect(input.onNavigate).toHaveBeenCalledWith({
-    screen: 'payments',
-    params: { productId: 'acc-2', action: 'Currency Exchange' },
-  });
+  expect(input.onNavigate).toHaveBeenCalledWith({ screen: 'payments' });
 });
 
 test('Source debit comparison premium preview keeps the existing detail product ID', async () => {

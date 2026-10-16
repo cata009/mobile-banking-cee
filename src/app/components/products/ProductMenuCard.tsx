@@ -1,3 +1,4 @@
+import { productMenuCardWeb } from "../contracts/marketingCardWeb";
 import type { ProductsCard, ProductsCardIllustration } from "@/app/config/productsMenuConfig";
 import { AppIcon } from "@/app/components/icons";
 import imgCoinsLeaves from "figma:asset/612ac7960c2d43bfdada538aae6f3cf27be44d99.png";
@@ -68,42 +69,9 @@ function CardIllustration({ type }: { type: ProductsCardIllustration }) {
 
 export default function ProductMenuCard({ card, variant = "standard", badgeCount, onClick }: ProductMenuCardProps) {
   const cardImageSrc = card.imageSrc;
-  const isCompact = variant === "compact";
-  const imageClassByCardId: Partial<Record<ProductsCard["id"], { standard: string; compact: string }>> = {
-    account: {
-      standard: "bottom-[-2px] right-0 h-[92px] w-[72px]",
-      compact: "bottom-[-2px] right-0 h-[60px] w-[48px]",
-    },
-    cards: {
-      standard: "bottom-0 right-0 h-[70px] w-[78px]",
-      compact: "bottom-0 right-0 h-[48px] w-[64px]",
-    },
-    "mortgages-loans": {
-      standard: "bottom-0 right-0 h-[74px] w-[78px]",
-      compact: "bottom-0 right-0 h-[48px] w-[56px]",
-    },
-    insurance: {
-      standard: "bottom-[-2px] right-[-2px] h-[76px] w-[72px]",
-      compact: "bottom-[-2px] right-[-2px] h-[50px] w-[54px]",
-    },
-    "investments-savings": {
-      standard: "bottom-[-2px] right-0 h-[100px] w-[58px]",
-      compact: "bottom-[-2px] right-0 h-[66px] w-[44px]",
-    },
-    "market-hedging": {
-      standard: "bottom-[-1px] right-0 h-[74px] w-[76px]",
-      compact: "bottom-[-1px] right-0 h-[50px] w-[58px]",
-    },
-    shopsmart: {
-      standard: "bottom-[-1px] right-0 h-[74px] w-[74px]",
-      compact: "bottom-[-1px] right-0 h-[50px] w-[58px]",
-    },
-    "partner-offers": {
-      standard: "bottom-[-1px] right-0 h-[78px] w-[70px]",
-      compact: "bottom-[-1px] right-0 h-[52px] w-[56px]",
-    },
-  };
-  const imagePlacement = imageClassByCardId[card.id]?.[variant] ?? (isCompact ? "bottom-0 right-0 h-[50px] w-[58px]" : "bottom-0 right-0 h-[74px] w-[78px]");
+  const contract = productMenuCardWeb({ id: card.id, variant, badgeCount });
+  const isCompact = contract.compact;
+  const imagePlacement = contract.imagePlacement;
 
   return (
     <button
@@ -114,9 +82,9 @@ export default function ProductMenuCard({ card, variant = "standard", badgeCount
       style={{
         display: "flex",
         width: "100%",
-        height: isCompact ? "72px" : "120px",
-        maxHeight: isCompact ? "72px" : "120px",
-        padding: isCompact ? "12px" : "16px",
+        height: `${contract.height}px`,
+        maxHeight: `${contract.height}px`,
+        padding: `${contract.padding}px`,
         alignItems: "flex-start",
         gap: "10px",
         background: `var(--pi-product-card-bg, ${card.background})`,
@@ -131,12 +99,12 @@ export default function ProductMenuCard({ card, variant = "standard", badgeCount
       >
         {card.title}
       </span>
-      {typeof badgeCount === "number" && badgeCount > 0 ? (
+      {contract.badgeText !== null ? (
         <span
           className="relative z-10 shrink-0 rounded-[2px] bg-[var(--uc-brand)] p-[2px] text-[14px] font-bold leading-[14px] text-[var(--uc-static-white)]"
           data-product-menu-card-badge
         >
-          {badgeCount > 99 ? "99+" : badgeCount}
+          {contract.badgeText}
         </span>
       ) : null}
       {cardImageSrc ? (

@@ -1,0 +1,6 @@
+/** Exact existing gallery/auxiliary banner variants; Figma heights are not applied to auto-height roots. */
+export type BannerVariant='helper'|'ghost'|'info'|'pending'|'user-event'
+export function resolveBanner({variant,interactive=false,layout='horizontal',hasAction=false,dismissible=false,showOptions=false}: {variant:BannerVariant;interactive?:boolean;layout?:'horizontal'|'stacked';hasAction?:boolean;dismissible?:boolean;showOptions?:boolean}) {
+ const helper=variant==='helper',user=variant==='user-event',pending=variant==='pending',stacked=variant==='ghost'&&layout==='stacked'
+ return {variant,rootTag:(variant==='ghost'||pending)&&interactive?'button':'div',width:helper||user?343:327,height:pending?157:undefined,radius:helper?4:8,gap:8,padding:pending?24:16,align:helper||user&&!hasAction?'center':'start',slotSize:user?48:32,iconSize:user?24:20,titleFontSize:user?14:stacked?12:pending?24:18,titleLineHeight:user?15:stacked?16:pending?26:20,bodyFontSize:helper||pending?18:user?14:16,bodyLineHeight:helper?20:pending?22:user?15:18,hasAction,dismissible,showOptions,closeSlot:24,closeGlyph:12,dismissMode:'external',pendingGradient:'linear-gradient(90deg, #007A91 0%, #44909E 100%)'} as const
+}

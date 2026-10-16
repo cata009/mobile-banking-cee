@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, Switch, View, StyleSheet } from 'react-native';
+import { AppState, Pressable, View, StyleSheet } from 'react-native';
 import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
-import { authenticateNativeBiometric } from '../../../../../platform/biometrics';
+import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
+import { ToggleButton } from '../../../../../universal/ToggleButton';
+import { FaceIdOverlay } from '../../../current/baseline/FaceIdOverlay';
+import type { authenticateNativeBiometric } from '../../../../../platform/biometrics';
 import {
   createEmptyDomesticPaymentDraft,
   createTemplateDomesticPaymentDraft,
@@ -28,6 +31,7 @@ import { getCzechPaymentBankName } from '@/data/czechDomesticAccount';
 import { AmountControls } from './AmountControls';
 import { toIsoDateOnly } from '@/app/utils/scheduleFormatting';
 import type { CzechNativeScreenProps } from '../contracts';
+import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents';
 import {
   czechProducts,
   accountMovements,
@@ -49,9 +53,53 @@ export interface CzechPaymentReceipt {
   draft: DomesticPaymentDraft;
   demo: true;
 }
-const nativePorts: CzechPaymentPorts = {
-  authenticate: authenticateNativeBiometric,
+type ControlledPaymentFlow = NativePaymentFlow & {
+  entryId?: number;
+  initialStep?: 'recipient' | 'amount';
 };
+type CzechPaymentScreenProps = CzechNativeScreenProps & {
+  ports?: CzechPaymentPorts;
+  onDemoPayment?: (value: CzechPaymentReceipt) => void;
+};
+function internalStepForFlow(
+  flow: ControlledPaymentFlow,
+): 'recipient' | 'amount' | 'review' | 'sign' | 'success' {
+  if (flow.step !== 'create') return flow.step;
+  return flow.initialStep === 'amount' || flow.draft.amount
+    ? 'amount'
+    : 'recipient';
+}
+
+function controlledFlowKey(flow: ControlledPaymentFlow | null): string {
+  return flow
+    ? `${flow.entryId ?? ''}:${flow.step}:${
+        flow.initialStep ?? ''
+      }:${JSON.stringify(flow.draft)}`
+    : 'null';
+}
+
+function paymentDateDisplay(value: string): string {
+  if (!value) return 'Today';
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? value
+    : value.replace(/^(\d{2})\.(\d{2})\.(\d{4})$/, '$3-$2-$1');
+  if (iso === toIsoDateOnly(new Date())) return 'Today';
+  const date = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('en', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }).format(date);
+}
+
+function nameParts(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.length > 1
+    ? { firstNames: parts.slice(0, -1).join(' '), lastName: parts.at(-1) ?? '' }
+    : { firstNames: parts[0] ?? '', lastName: '' };
+}
 export function initialPaymentDraft(props: CzechNativeScreenProps) {
   const products = czechProducts(props.productCounts),
     params = props.route.params;
@@ -133,41 +181,41 @@ export function initialPaymentDraft(props: CzechNativeScreenProps) {
   };
   return draft;
 }
-export default function PaymentFlow(
-  props: CzechNativeScreenProps & {
-    ports?: CzechPaymentPorts;
-    onDemoPayment?: (value: CzechPaymentReceipt) => void;
-  },
-) {
-  const [initial] = useState(() => initialPaymentDraft(props));
+function PaymentFlowContent(props: CzechPaymentScreenProps) {
+  const controlled = props.paymentFlow !== undefined;
+  const controlledFlow =
+    (props.paymentFlow as ControlledPaymentFlow | null | undefined) ?? null;
+  const [initial] = useState(() =>
+    controlled ? controlledFlow?.draft ?? null : initialPaymentDraft(props),
+  );
   const [draft, setDraft] = useState(
     initial ?? createEmptyDomesticPaymentDraft('CZ'),
   );
   const [amountExpression, setAmountExpression] = useState(
     initial?.amount.replace('.', ',') ?? '',
   );
-  const nameParts =
-    initial?.beneficiaryName.trim().split(/\s+/).filter(Boolean) ?? [];
-  const [firstNames, setFirstNames] = useState(
-      nameParts.length > 1
-        ? nameParts.slice(0, -1).join(' ')
-        : nameParts[0] ?? '',
-    ),
-    [lastName, setLastName] = useState(
-      nameParts.length > 1 ? nameParts.at(-1) ?? '' : '',
-    );
+  const initialNames = nameParts(initial?.beneficiaryName ?? '');
+  const [firstNames, setFirstNames] = useState(initialNames.firstNames),
+    [lastName, setLastName] = useState(initialNames.lastName);
   const [step, setStep] = useState<
     'recipient' | 'amount' | 'review' | 'sign' | 'success'
   >(
-    props.route.params?.beneficiaryId || initial?.amount
+    controlledFlow
+      ? internalStepForFlow(controlledFlow)
+      : props.route.params?.beneficiaryId || initial?.amount
       ? 'amount'
       : 'recipient',
   );
   const [pin, setPin] = useState(''),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState('');
+    [error, setError] = useState(''),
+    [scheduleOpen, setScheduleOpen] = useState(false),
+    [editField, setEditField] = useState<'reference' | 'note' | null>(null),
+    [editValue, setEditValue] = useState(''),
+    [faceIdOpen, setFaceIdOpen] = useState(false);
   const generation = useRef(0),
-    active = useRef(props.isActive !== false);
+    active = useRef(props.isActive !== false),
+    signTicket = useRef(0);
   const products = czechProducts(props.productCounts),
     accounts = products.filter(p => p.type === 'current_account');
   const payer = accounts.find(
@@ -184,20 +232,60 @@ export default function PaymentFlow(
     active.current = props.isActive !== false;
     if (!active.current) {
       generation.current++;
+      signTicket.current = 0;
       setPin('');
       setBusy(false);
+      setFaceIdOpen(false);
     }
     return () => {
       generation.current = generation.current + 1;
       active.current = false;
     };
   }, [props.isActive]);
+  const previousControlledStep = useRef(controlledFlow?.step);
+  const previousPaymentEntryId = useRef(controlledFlow?.entryId);
+  const previousControlledFlowKey = useRef(
+    controlled ? controlledFlowKey(controlledFlow) : null,
+  );
+  useEffect(() => {
+    if (!controlled) return;
+    const nextFlow =
+      (props.paymentFlow as ControlledPaymentFlow | null | undefined) ?? null;
+    const previousStep = previousControlledStep.current;
+    const entryChanged = previousPaymentEntryId.current !== nextFlow?.entryId;
+    previousControlledStep.current = nextFlow?.step;
+    previousPaymentEntryId.current = nextFlow?.entryId;
+    const nextFlowKey = controlledFlowKey(nextFlow);
+    const flowChanged = previousControlledFlowKey.current !== nextFlowKey;
+    previousControlledFlowKey.current = nextFlowKey;
+    if (
+      entryChanged ||
+      (previousStep === 'sign' && nextFlow?.step !== 'sign')
+    ) {
+      generation.current++;
+      setPin('');
+      setBusy(false);
+      setError('');
+      signTicket.current = 0;
+      setFaceIdOpen(false);
+    }
+    if (!flowChanged) return;
+    if (!nextFlow) return;
+    setDraft(nextFlow.draft);
+    setAmountExpression(nextFlow.draft.amount.replace('.', ','));
+    const names = nameParts(nextFlow.draft.beneficiaryName);
+    setFirstNames(names.firstNames);
+    setLastName(names.lastName);
+    setStep(internalStepForFlow(nextFlow));
+  }, [controlled, props.paymentFlow]);
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => {
       if (state !== 'active') {
         generation.current++;
+        signTicket.current = 0;
         setPin('');
         setBusy(false);
+        setFaceIdOpen(false);
       }
     });
     return () => sub.remove();
@@ -207,50 +295,104 @@ export default function PaymentFlow(
       ...current,
       ...patch,
     }));
+  const emitControlledFlow = (nextFlow: NativePaymentFlow | null) => {
+    if (controlled) props.onPaymentFlowChange?.(nextFlow);
+  };
+  const commitDraft = (nextDraft: DomesticPaymentDraft) => {
+    setDraft(nextDraft);
+    if (controlled && props.paymentFlow) {
+      emitControlledFlow({ ...props.paymentFlow, draft: nextDraft });
+    }
+  };
+  const openEditor = (fieldName: 'reference' | 'note') => {
+    setEditValue(
+      fieldName === 'reference'
+        ? draft.informationForBeneficiary
+        : draft.informationForMe,
+    );
+    setEditField(fieldName);
+  };
+  const saveEditor = () => {
+    if (!editField) return;
+    const field =
+      editField === 'reference'
+        ? 'informationForBeneficiary'
+        : 'informationForMe';
+    commitDraft({
+      ...draft,
+      [field]: editValue.trim(),
+    });
+    setEditField(null);
+  };
+  const changeFlowStep = (
+    nextStep: NativePaymentFlow['step'],
+    nextDraft: DomesticPaymentDraft = draft,
+  ) => {
+    if (controlled) {
+      if (!props.paymentFlow) return;
+      const nextFlow: ControlledPaymentFlow = {
+        ...(props.paymentFlow as ControlledPaymentFlow),
+        draft: nextDraft,
+        step: nextStep,
+      };
+      emitControlledFlow(nextFlow);
+      setDraft(nextDraft);
+      setStep(internalStepForFlow(nextFlow));
+      return;
+    }
+    setDraft(nextDraft);
+    setStep(nextStep === 'create' ? 'recipient' : nextStep);
+  };
   const back = () => {
     generation.current++;
+    signTicket.current = 0;
     setBusy(false);
     setError('');
     setPin('');
-    if (step === 'success' || step === 'recipient') props.onBack();
-    else
-      setStep(
-        step === 'sign' ? 'review' : step === 'review' ? 'amount' : 'recipient',
-      );
+    setFaceIdOpen(false);
+    setScheduleOpen(false);
+    setEditField(null);
+    if (step === 'success') {
+      if (controlled) emitControlledFlow(null);
+      else props.onBack();
+      return;
+    }
+    if (step === 'recipient') {
+      if (controlled) emitControlledFlow(null);
+      else props.onBack();
+      return;
+    }
+    if (step === 'amount') {
+      setStep('recipient');
+      return;
+    }
+    if (controlled) {
+      const nextStep = step === 'sign' ? 'review' : 'create';
+      changeFlowStep(nextStep);
+      return;
+    }
+    setStep(step === 'sign' ? 'review' : 'amount');
   };
-  const sign = async () => {
+  const sign = () => {
     if (busy || !active.current) return;
-    const ticket = ++generation.current;
+    signTicket.current = ++generation.current;
     setBusy(true);
     setError('');
-    try {
-      const result = await (props.ports ?? nativePorts).authenticate(
-        'Sign payment',
-      );
-      if (ticket !== generation.current || !active.current) return;
-      if (result === 'authenticated') {
-        setPin('');
-        props.onDemoPayment?.({
-          draft: {
-            ...draft,
-          },
-          demo: true,
-        });
-        setStep('success');
-      } else
-        setError(
-          result === 'cancelled'
-            ? 'Verification cancelled'
-            : 'Biometric verification unavailable',
-        );
-    } catch {
-      if (ticket === generation.current && active.current)
-        setError('Biometric verification unavailable');
-    } finally {
-      if (ticket === generation.current && active.current) setBusy(false);
-    }
+    setFaceIdOpen(true);
   };
-  if (!initial)
+  const completeSign = () => {
+    const ticket = signTicket.current;
+    if (!ticket || ticket !== generation.current || !active.current) return;
+    signTicket.current = 0;
+    setFaceIdOpen(false);
+    setPin('');
+    const signedDraft = { ...draft };
+    props.onDemoPayment?.({ draft: signedDraft, demo: true });
+    if (controlled) changeFlowStep('success', signedDraft);
+    else setStep('success');
+    setBusy(false);
+  };
+  if (!(controlled ? props.paymentFlow?.draft : initial))
     return (
       <Page title="New Payment" onBack={props.onBack}>
         <View style={s.alert}>
@@ -598,36 +740,26 @@ export default function PaymentFlow(
                 )}
               />
             )}
-            <View style={[s.horizontal, extractedStyles.item1]}>
-              <Copy>Instant Payment</Copy>
-              <Switch
-                accessibilityLabel="Instant Payment"
-                disabled={!readiness.canUseInstantPayment}
-                value={draft.instantPayment && readiness.canUseInstantPayment}
-                onValueChange={instantPayment =>
-                  update({
-                    instantPayment,
-                  })
-                }
-              />
-            </View>
-            {(!draft.instantPayment || !readiness.canUseInstantPayment) && (
-              <DateField
-                tokens={tokens}
-                label="Due date"
-                value={draft.dueDate.replace(
-                  /^(\d{2})\.(\d{2})\.(\d{4})$/,
-                  '$3-$2-$1',
-                )}
-                min={toIsoDateOnly(new Date())}
-                locale="en-GB"
-                onChange={dueDate =>
-                  update({
-                    dueDate,
-                  })
-                }
-              />
-            )}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Payment date: ${
+                readiness.canUseInstantPayment && draft.instantPayment
+                  ? 'Instant payment'
+                  : paymentDateDisplay(draft.dueDate)
+              }`}
+              onPress={() => setScheduleOpen(true)}
+              style={extractedStyles.paymentDateRow}
+            >
+              <View style={extractedStyles.paymentDateCopy}>
+                <Copy muted>Payment date</Copy>
+                <Copy strong>
+                  {readiness.canUseInstantPayment && draft.instantPayment
+                    ? 'Instant payment'
+                    : paymentDateDisplay(draft.dueDate)}
+                </Copy>
+              </View>
+              <Copy muted>›</Copy>
+            </Pressable>
             {field('Reference', 'informationForBeneficiary')}
             {field('Note for me', 'informationForMe')}
           </View>
@@ -640,12 +772,13 @@ export default function PaymentFlow(
             label="Review transfer"
             disabled={!readiness.recipientValid || !readiness.amountValid}
             onPress={() => {
-              update({
+              const nextDraft = {
+                ...draft,
                 amount: String(readiness.amount).replace('.', ','),
                 instantPayment:
                   draft.instantPayment && readiness.canUseInstantPayment,
-              });
-              setStep('review');
+              };
+              changeFlowStep('review', nextDraft);
             }}
           />
         </>
@@ -693,17 +826,49 @@ export default function PaymentFlow(
                 />
               </>
             )}
-            <FieldValue label="Due date" value={draft.dueDate} />
             <FieldValue
-              label="Instant Payment"
+              label="Payment date"
               value={
-                draft.instantPayment && readiness.canUseInstantPayment
-                  ? 'Yes'
-                  : 'No'
+                readiness.canUseInstantPayment && draft.instantPayment
+                  ? 'Instant'
+                  : paymentDateDisplay(draft.dueDate)
               }
             />
-            {field('Reference', 'informationForBeneficiary')}
-            {field('Note for me', 'informationForMe')}
+            <View style={extractedStyles.reviewOptions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Reference for recipient ${
+                  draft.informationForBeneficiary || 'Add a reference'
+                }`}
+                onPress={() => openEditor('reference')}
+                style={extractedStyles.reviewOption}
+              >
+                <View style={extractedStyles.paymentDateCopy}>
+                  <Copy muted>Reference for recipient</Copy>
+                  <Copy>
+                    {draft.informationForBeneficiary || 'Add a reference'}
+                  </Copy>
+                </View>
+                <Copy muted>›</Copy>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Note for me ${
+                  draft.informationForMe || 'Add a private note'
+                }`}
+                onPress={() => openEditor('note')}
+                style={[
+                  extractedStyles.reviewOption,
+                  extractedStyles.reviewOptionDivider,
+                ]}
+              >
+                <View style={extractedStyles.paymentDateCopy}>
+                  <Copy muted>Note for me</Copy>
+                  <Copy>{draft.informationForMe || 'Add a private note'}</Copy>
+                </View>
+                <Copy muted>›</Copy>
+              </Pressable>
+            </View>
             {!canSign && (
               <Copy>
                 Bank quote required before this payment can be signed.
@@ -713,7 +878,7 @@ export default function PaymentFlow(
           <Button
             label="Continue to sign"
             disabled={!canSign}
-            onPress={() => setStep('sign')}
+            onPress={() => changeFlowStep('sign')}
           />
         </>
       )}
@@ -745,12 +910,113 @@ export default function PaymentFlow(
             </Copy>
             <Copy>Your demo payment has been completed.</Copy>
           </View>
-          <Button label="Ok, got it" onPress={props.onBack} />
+          <Button
+            label="Ok, got it"
+            onPress={() => {
+              if (controlled) emitControlledFlow(null);
+              else props.onBack();
+            }}
+          />
         </>
       )}
+      {scheduleOpen && step === 'amount' ? (
+        <SourceBottomSheet
+          title="Payment date"
+          onClose={() => setScheduleOpen(false)}
+        >
+          <View style={extractedStyles.sheetContent}>
+            {readiness.canUseInstantPayment ? (
+              <View style={extractedStyles.instantPaymentRow}>
+                <View style={extractedStyles.paymentDateCopy}>
+                  <Copy strong>Instant payment</Copy>
+                  <Copy muted>Send as soon as the payment is confirmed.</Copy>
+                </View>
+                <ToggleButton
+                  ariaLabel="Instant payment"
+                  checked={draft.instantPayment}
+                  onToggle={instantPayment =>
+                    update({
+                      instantPayment,
+                      dueDate: instantPayment
+                        ? toIsoDateOnly(new Date())
+                        : draft.dueDate,
+                    })
+                  }
+                />
+              </View>
+            ) : null}
+            {readiness.canUseInstantPayment && draft.instantPayment ? (
+              <Copy muted>This payment will be sent immediately.</Copy>
+            ) : (
+              <View style={extractedStyles.dateField}>
+                <Copy muted>Choose when to submit this payment.</Copy>
+                <DateField
+                  tokens={tokens}
+                  label="Payment date"
+                  value={draft.dueDate.replace(
+                    /^(\d{2})\.(\d{2})\.(\d{4})$/,
+                    '$3-$2-$1',
+                  )}
+                  min={toIsoDateOnly(new Date())}
+                  locale="en-GB"
+                  onChange={dueDate =>
+                    update({
+                      dueDate,
+                      instantPayment: false,
+                    })
+                  }
+                />
+              </View>
+            )}
+            <Button
+              label="Done"
+              onPress={() => {
+                commitDraft(draft);
+                setScheduleOpen(false);
+              }}
+            />
+          </View>
+        </SourceBottomSheet>
+      ) : null}
+      {editField && step === 'review' ? (
+        <SourceBottomSheet
+          title={
+            editField === 'reference'
+              ? 'Reference for recipient'
+              : 'Note for me'
+          }
+          onClose={() => setEditField(null)}
+        >
+          <View style={extractedStyles.sheetContent}>
+            <FormField
+              tokens={tokens}
+              label={
+                editField === 'reference'
+                  ? 'Reference for recipient'
+                  : 'Note for me (optional)'
+              }
+              value={editValue}
+              onChange={setEditValue}
+              inputProps={{
+                placeholder:
+                  editField === 'reference'
+                    ? 'What is this payment for?'
+                    : 'Only you can see this note',
+              }}
+            />
+            <Button label="Save" onPress={saveEditor} />
+          </View>
+        </SourceBottomSheet>
+      ) : null}
+      {faceIdOpen ? <FaceIdOverlay onComplete={completeSign} /> : null}
     </Page>
   );
 }
+
+export default function PaymentFlow(props: CzechPaymentScreenProps) {
+  return <PaymentFlowContent key={props.paymentFlow?.entryId} {...props} />;
+}
+
 const extractedStyles = StyleSheet.create({
   formField: { marginBottom: 20 },
   formLabel: { color: tokens.text, fontSize: 16, lineHeight: 20 },
@@ -773,5 +1039,61 @@ const extractedStyles = StyleSheet.create({
   },
   item2: {
     marginTop: 110,
+  },
+  paymentDateRow: {
+    minHeight: 64,
+    marginVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: tokens.border,
+    borderRadius: 18,
+    backgroundColor: tokens.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  paymentDateCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  sheetContent: {
+    gap: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+  },
+  instantPaymentRow: {
+    minHeight: 68,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: tokens.background,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  dateField: {
+    gap: 8,
+  },
+  reviewOptions: {
+    marginTop: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
+  },
+  reviewOption: {
+    minHeight: 64,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  reviewOptionDivider: {
+    borderTopWidth: 1,
+    borderTopColor: tokens.border,
   },
 });

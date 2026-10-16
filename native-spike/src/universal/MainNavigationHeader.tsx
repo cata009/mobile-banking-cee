@@ -17,6 +17,7 @@ export function MainNavigationHeader<T extends string>({
   actionsRowHeight = 40,
   actionsPaddingHorizontal = 16,
   actionsAlignItems = 'center',
+  tabJustifyContent = 'flex-start',
 }: Themed & {
   brand: React.ReactNode;
   actions: React.ReactNode;
@@ -29,6 +30,7 @@ export function MainNavigationHeader<T extends string>({
   actionsRowHeight?: number;
   actionsPaddingHorizontal?: number;
   actionsAlignItems?: import('react-native').ViewStyle['alignItems'];
+  tabJustifyContent?: import('react-native').ViewStyle['justifyContent'];
 }) {
   return (
     <View style={[s.root, { backgroundColor: tokens.background }]}>
@@ -59,7 +61,7 @@ export function MainNavigationHeader<T extends string>({
               accessibilityState={{ selected: item.value === value }}
               aria-selected={item.value === value}
               onPress={() => onChange(item.value)}
-              style={s.tab}
+              style={[s.tab, { justifyContent: tabJustifyContent }]}
             >
               <Text
                 style={[

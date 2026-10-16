@@ -1,3 +1,4 @@
+import BaselineL1Header from "@/app/components/BaselineL1Header";
 import type { ReactNode } from "react";
 import { HeaderActionButton, HeaderActionRail } from "@/app/components/HeaderActionIcons";
 import { useLanguage } from "@/app/contexts/LanguageContext";
@@ -13,51 +14,57 @@ export function ProductsHeader({
   onContactsClick,
   onMessagesClick,
   actions,
-  gutterClassName = "px-[24px]",
+  gutterClassName = 'px-[24px]',
 }: {
-  title: string;
-  onContactsClick?: () => void;
-  onMessagesClick?: () => void;
+  title: string
+  onContactsClick?: () => void
+  onMessagesClick?: () => void
   /** Replaces the servicing rail entirely — the shelf carries search alone. */
-  actions?: ReactNode;
+  actions?: ReactNode
   /** Left edge of the title, matched to the gutter the page's own content uses. */
-  gutterClassName?: string;
+  gutterClassName?: string
 }) {
-  const country = useCountry();
-  const { t } = useLanguage();
-  const usesBosniaHeaderActions = country === "BA" || country === "BA_BL";
-  const handleAction = (_action: string) => {
-  };
+  const country = useCountry()
+  const { t } = useLanguage()
+  const usesBosniaHeaderActions = country === 'BA' || country === 'BA_BL'
+  const handleAction = (_action: string) => {}
 
   return (
-    <div className="w-full bg-[var(--uc-app-bg)]">
-      <div className={`${gutterClassName} pb-[22px]`}>
-        <div className="flex min-h-[32px] items-start gap-[8px]">
-          <h1
-            className="uc-type-n1 flex-1 min-w-0 text-[var(--uc-text)]"
-            style={{ fontSize: "28px", lineHeight: "36px" }}
-          >
-            {title}
-          </h1>
-          <HeaderActionRail>
-            {actions ?? (
-              <>
-                {usesBosniaHeaderActions ? (
-                  <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
-                ) : (
-                  <HeaderActionButton icon="profile" label={t("runtime.actions.profile", "Profile")} onClick={() => handleAction("profile")} />
-                )}
-                <HeaderActionButton icon="messages" label={t("runtime.actions.messages", "Messages")} onClick={onMessagesClick} />
-                {usesBosniaHeaderActions ? null : (
-                  <HeaderActionButton icon="help" label={t("runtime.actions.help", "Help")} onClick={() => handleAction("help")} />
-                )}
-              </>
-            )}
-          </HeaderActionRail>
-        </div>
-      </div>
-    </div>
-  );
+    <BaselineL1Header
+      variant="products"
+      title={title}
+      gutterClassName={gutterClassName}
+      actions={
+        <HeaderActionRail>
+          {actions ?? (
+            <>
+              {usesBosniaHeaderActions ? (
+                <HeaderActionButton icon="contact-phone" label="Contact phone" onClick={onContactsClick} />
+              ) : (
+                <HeaderActionButton
+                  icon="profile"
+                  label={t('runtime.actions.profile', 'Profile')}
+                  onClick={() => handleAction('profile')}
+                />
+              )}
+              <HeaderActionButton
+                icon="messages"
+                label={t('runtime.actions.messages', 'Messages')}
+                onClick={onMessagesClick}
+              />
+              {usesBosniaHeaderActions ? null : (
+                <HeaderActionButton
+                  icon="help"
+                  label={t('runtime.actions.help', 'Help')}
+                  onClick={() => handleAction('help')}
+                />
+              )}
+            </>
+          )}
+        </HeaderActionRail>
+      }
+    />
+  )
 }
 
 export default ProductsHeader;

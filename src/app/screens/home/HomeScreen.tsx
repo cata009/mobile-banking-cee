@@ -1,170 +1,106 @@
-/**
- * HomeScreen - Main home screen with account summary and optional unplanned banner
- */
+import { useMemo } from 'react'
+import { NativeScreenPreview } from '@/app/components/demo/NativeScreenPreview'
+import { useDemo, useProductData } from '@/app/state/demoStore'
+import { deriveProductCategories } from '@/features/products/selectors'
+import type { NativeDemoRoute } from '@/features/demo-native/contracts'
+import type { NativeTransactionPayload } from '@/features/demo-native/transactionIntents'
+import SmeHomeScreen from './SmeHomeScreen'
+import type { HomeScreenProps } from './SmeHomeScreen'
 
-import AccountSummary from "./AccountSummary";
-import App2027HomeScreen from "./App2027HomeScreen";
-import FutureGainSmartInvestmentBanner from "@/app/components/investments/FutureGainSmartInvestmentBanner";
-import HomeHeader from "./HomeHeader";
-import InactiveState from "./InactiveState";
-import UnplannedBanner from "./UnplannedBanner";
-import BottomNavigation, { type NavItem } from "@/app/components/BottomNavigation";
-import { useDemo } from "@/app/state/demoStore";
-import { getFeatureFlags } from "@/app/state/featureHelpers";
-import type { Product } from "@/data/products";
-import type { AccountTransaction } from "@/data/accountDetails";
-import type { CardTransactionMerchantEnrichment } from "@/app/screens/payments/DomesticPaymentFlowScreens";
+export type { HomeScreenProps } from './SmeHomeScreen'
 
-export interface HomeScreenProps {
-  onPrimeClick?: () => void;
-  onAnalyticsClick?: () => void;
-  onSeeAllTransactionsClick?: () => void;
-  onMessagesClick?: () => void;
-  onPaymentsClick?: () => void;
-  onDomesticPaymentClick?: () => void;
-  onProductsClick?: () => void;
-  onOfferOpen?: (shelfItemId: string) => void;
-  onMoreClick?: () => void;
-  onAccountClick?: (product: Product) => void;
-  onAccountInfoClick?: (product: Product) => void;
-  onCardDetailsClick?: (product: Product) => void;
-  onCardOptionsClick?: (product: Product) => void;
-  onInvestmentsClick?: () => void;
-  onInvestmentGoalsClick?: () => void;
-  onSmartInvestmentOpen?: () => void;
-  onTransactionClick?: (
-    transaction: AccountTransaction,
-    product: Product,
-    merchantEnrichment?: CardTransactionMerchantEnrichment,
-  ) => void;
-}
+export default function HomeScreen(props: HomeScreenProps) {
+  const { product } = useDemo()
+  const productData = useProductData()
+  const productsById = useMemo(() => {
+    const categories = deriveProductCategories({
+      country: productData.country,
+      release: productData.release,
+      resolvedProductCounts: productData.resolvedProductCounts,
+    })
+    return new Map(categories.flatMap((category) => category.products.map((item) => [item.id, item] as const)))
+  }, [productData])
 
-export default function HomeScreen({
-  onPrimeClick,
-  onAnalyticsClick,
-  onSeeAllTransactionsClick,
-  onMessagesClick,
-  onPaymentsClick,
-  onDomesticPaymentClick,
-  onProductsClick,
-  onOfferOpen,
-  onMoreClick,
-  onAccountClick,
-  onAccountInfoClick,
-  onCardDetailsClick,
-  onCardOptionsClick,
-  onInvestmentsClick,
-  onInvestmentGoalsClick,
-  onSmartInvestmentOpen,
-  onTransactionClick,
-}: HomeScreenProps) {
-  const demoState = useDemo();
-  const { scenario, product, country, release } = demoState;
+  if (product === 'SME') return <SmeHomeScreen {...props} />
 
-  // Get all feature flags from centralized helper
-  const features = getFeatureFlags(demoState);
-  const isFutureGainSmartInvestment =
-    product === "PI" && country === "RS" && release === "release-future-rs-future-gain";
+  const onNavigate = (route: NativeDemoRoute, action: 'push' | 'back') => {
+    if (action === 'back') return true
 
-  // Handler for bottom navigation tab changes
-  const handleTabChange = (tab: NavItem) => {
-    if (tab === 'more' && onMoreClick) {
-      onMoreClick();
+    const productId = route.params?.productId ?? route.params?.accountId ?? route.params?.cardId
+    const selectedProduct = productId ? productsById.get(productId) : undefined
+
+    switch (route.screen) {
+      case 'prime':
+        props.onPrimeClick?.()
+        break
+      case 'pfm':
+        props.onAnalyticsClick?.()
+        break
+      case 'transactions':
+        props.onSeeAllTransactionsClick?.()
+        break
+      case 'messages':
+        props.onMessagesClick?.()
+        break
+      case 'payments':
+        props.onPaymentsClick?.()
+        break
+      case 'payment-create':
+        props.onDomesticPaymentClick?.()
+        break
+      case 'products':
+        props.onProductsClick?.()
+        break
+      case 'profile':
+        props.onMoreClick?.()
+        break
+      case 'account':
+        if (selectedProduct) props.onAccountClick?.(selectedProduct)
+        break
+      case 'account-info':
+        if (selectedProduct) props.onAccountInfoClick?.(selectedProduct)
+        break
+      case 'card':
+      case 'card-info':
+        if (selectedProduct) props.onCardDetailsClick?.(selectedProduct)
+        break
+      case 'card-options':
+        if (selectedProduct) props.onCardOptionsClick?.(selectedProduct)
+        break
+      case 'investments':
+        if (route.params?.entry === 'goals' || route.params?.view === 'goals') props.onInvestmentGoalsClick?.()
+        else props.onInvestmentsClick?.()
+        break
+      case 'smart-investment':
+        props.onSmartInvestmentOpen?.()
+        break
+      case 'product-detail':
+        if (route.params?.itemId) props.onOfferOpen?.(route.params.itemId)
+        break
+      default:
+        break
     }
-    if (tab === 'analytics' && onAnalyticsClick) {
-      onAnalyticsClick();
-    }
-    if (tab === 'investments' && onInvestmentsClick) {
-      onInvestmentsClick();
-    }
-    if (tab === 'payments' && onPaymentsClick) {
-      onPaymentsClick();
-    }
-    if (tab === 'products' && onProductsClick) {
-      onProductsClick();
-    }
-    // Future: handle other tabs
-  };
 
-  // If scenario is inactive, show inactive state only
-  if (scenario === "inactive") {
-    return <InactiveState />;
+    // Source-owned callbacks that were not supplied are intentionally inert.
+    // Never let this adapter fall back to Native's local route stack.
+    return true
   }
 
-  if (features.evo2027Homepage) {
-    return (
-      <App2027HomeScreen
-        onPrimeClick={onPrimeClick}
-        onAnalyticsClick={onAnalyticsClick}
-        onSeeAllTransactionsClick={onSeeAllTransactionsClick}
-        onMessagesClick={onMessagesClick}
-        onPaymentsClick={onPaymentsClick}
-        onDomesticPaymentClick={onDomesticPaymentClick}
-        onProductsClick={onProductsClick}
-        onOfferOpen={onOfferOpen}
-        onMoreClick={onMoreClick}
-        onAccountClick={onAccountClick}
-        onAccountInfoClick={onAccountInfoClick}
-        onCardDetailsClick={onCardDetailsClick}
-        onCardOptionsClick={onCardOptionsClick}
-        onInvestmentsClick={onInvestmentsClick}
-        onInvestmentGoalsClick={onInvestmentGoalsClick}
-        onTransactionClick={onTransactionClick}
-        useCzRoboAccountCards={features.evo2027Homepage}
-      />
-    );
+  const onTransactionSelected = (selection: NativeTransactionPayload) => {
+    const selectedProduct = productsById.get(selection.productId)
+    if (selectedProduct) props.onTransactionClick?.(selection.transaction, selectedProduct)
   }
 
-  // Active state - compose all sections
   return (
-    <div className="w-full h-full relative bg-[var(--uc-app-bg)] flex flex-col text-[var(--uc-text)]">
-      {/* Status Bar Space */}
-      <div className="h-[var(--uc-phone-top-reserve,54px)] flex-shrink-0 bg-[var(--uc-app-bg)]" />
-
-      {/* STICKY Top Bar - Prime Badge + Icons - FIXED */}
-      <div className="sticky top-0 z-10 bg-[var(--uc-app-bg)] flex-shrink-0">
-        <HomeHeader
-          onPrimeClick={onPrimeClick}
-          onMessagesClick={onMessagesClick}
-          onSpendingClick={features.myBanker ? onAnalyticsClick : undefined}
-          showTitle={false}
-        />
-      </div>
-
-      {/* Scrollable Content */}
-      <div
-        className={`flex-1 overflow-y-auto scrollbar-hide ${isFutureGainSmartInvestment ? "" : "pb-[80px]"}`}
-        style={isFutureGainSmartInvestment
-          ? { paddingBottom: "calc(40px + var(--uc-phone-bottom-reserve, 34px))" }
-          : undefined}
-      >
-        {/* Title - SCROLLABLE */}
-        <HomeHeader showActions={false} />
-
-        {/* Account Summary */}
-        <AccountSummary
-          showRedesign={features.cardsRedesign}
-          investmentBanner={
-            isFutureGainSmartInvestment && onSmartInvestmentOpen ? (
-              <FutureGainSmartInvestmentBanner onClick={onSmartInvestmentOpen} />
-            ) : undefined
-          }
-          onAccountClick={onAccountClick}
-          onInvestmentsClick={onInvestmentsClick}
-          onInvestmentGoalsClick={onInvestmentGoalsClick}
-          onDomesticPaymentClick={onDomesticPaymentClick}
-          onAccountInfoClick={onAccountInfoClick}
-          excludeCategoryKeys={features.myBanker ? ['investments'] : undefined}
-        />
-
-        {/* Unplanned Banner (conditional) */}
-        {features.unplannedBanner && <UnplannedBanner />}
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 border-t border-[var(--uc-border-muted)] bg-[var(--uc-bottom-bar-bg)] flex items-center justify-center">
-        <BottomNavigation onTabChange={handleTabChange} />
-      </div>
-    </div>
-  );
+    <NativeScreenPreview
+      route={{ screen: 'home' }}
+      onNavigate={onNavigate}
+      events={{
+        onPaymentEntryRequest: (route) => {
+          if (route.screen === 'payment-create') props.onDomesticPaymentClick?.()
+        },
+        onTransactionSelected,
+      }}
+    />
+  )
 }

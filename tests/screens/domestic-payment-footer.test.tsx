@@ -7,21 +7,32 @@ import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { DomesticPaymentCreateScreen } from '@/app/screens/payments/DomesticPaymentFlowScreens'
 import { DemoProvider } from '@/app/state/demoStore'
 import { createEmptyDomesticPaymentDraft } from '@/data/paymentFlow'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
 
-afterEach(cleanup)
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+afterEach(() => {
+  cleanup()
+  resetNativeWebRendererDiagnostics()
+})
 
 describe('Domestic payment footer', () => {
-  it('uses the full footer width for the Next action', () => {
-    const { container } = render(
+  it('keeps the Native create action disabled until recipient data is valid', async () => {
+    const onNext = vi.fn()
+    const view = render(
       <DemoProvider initialState={{ country: 'CZ', product: 'PI', release: 'release-future-evo-2027' }}>
         <LanguageProvider initialLanguage="en">
-          <DomesticPaymentCreateScreen draft={createEmptyDomesticPaymentDraft('CZ')} onBack={vi.fn()} onNext={vi.fn()} />
+          <DomesticPaymentCreateScreen draft={createEmptyDomesticPaymentDraft('CZ')} onBack={vi.fn()} onNext={onNext} />
         </LanguageProvider>
       </DemoProvider>,
     )
 
-    const footer = container.querySelector('[data-domestic-payment-footer]')
-    expect(footer).toHaveClass('w-full')
-    expect(screen.getByRole('button', { name: 'Next' })).toHaveClass('!w-full')
+    await asyncNativeReady(view.container)
+    const continueButton = screen.getByRole('button', { name: 'Continue' })
+    expect(continueButton).toBeDisabled()
+    expect(onNext).not.toHaveBeenCalled()
   })
 })

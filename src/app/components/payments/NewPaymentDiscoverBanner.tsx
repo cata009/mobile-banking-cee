@@ -1,3 +1,4 @@
+import { PAYMENT_DISCOVER_CONTRACT } from "../contracts/paymentDiscover";
 import { useState } from "react";
 import { AppIcon } from "@/app/components/icons";
 
@@ -16,7 +17,7 @@ export default function NewPaymentDiscoverBanner({
 
   return (
     <div className={`${className} rounded-[4px] bg-[var(--uc-action-strong)] p-[16px] text-[var(--uc-static-white)]`}>
-      <div className="grid grid-cols-[32px_1fr_32px] items-start gap-[14px]">
+      <div className={PAYMENT_DISCOVER_CONTRACT.gridClass}>
         <span className="mt-[4px] flex h-[32px] w-[32px] shrink-0 items-center justify-center">
           <AppIcon name="info-circle" color="var(--uc-text-inverse)" />
         </span>
@@ -29,7 +30,7 @@ export default function NewPaymentDiscoverBanner({
           </p>
         </div>
         <button
-          aria-label="Dismiss payment help"
+          aria-label={PAYMENT_DISCOVER_CONTRACT.closeLabel}
           className="grid h-[32px] w-[32px] shrink-0 place-items-center"
           onClick={() => setIsVisible(false)}
           type="button"

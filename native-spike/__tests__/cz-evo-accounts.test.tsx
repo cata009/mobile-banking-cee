@@ -161,36 +161,36 @@ test('pooled transaction Back retains the account scope and search draft', async
   ).toBe('Marie');
   await act(() => tree.unmount());
 });
-test('local movement Back preserves query and opens the exact canonical movement', async () => {
+test('account movements push the exact Source transaction route and a remounted account resets search', async () => {
   const products = czechProducts(DEFAULT_CZECH_COUNTS),
     product = products.find(p => p.type === 'current_account')!;
   const movement = accountMovements(product, products).find(
     t => t.status === 'Booked',
   )!;
-  const tree = await renderScreen(
-    <AccountScreen {...propsFor('account', { productId: product.id })} />,
-  );
+  const props = propsFor('account', { productId: product.id });
+  const tree = await renderScreen(<AccountScreen {...props} />);
   const input = tree.root
     .findAllByType(TextInput)
     .find(n => n.props.accessibilityLabel === 'Search transactions')!;
   await act(() => input.props.onChangeText(movement.label));
   await act(() => press(tree, `Transaction ${movement.id}`));
-  expect(JSON.stringify(tree.toJSON())).toContain(movement.label);
-  await act(() => press(tree, 'Back'));
+  expect(props.onNavigate).toHaveBeenCalledWith({
+    screen: 'transaction',
+    params: {
+      productId: product.id,
+      accountId: product.id,
+      transactionId: movement.id,
+    },
+  });
+  await act(() => tree.unmount());
+  const returned = await renderScreen(<AccountScreen {...props} />);
   expect(
-    tree.root
-      .findAllByType(TextInput)
-      .find(
-        n => n.props.accessibilityLabel === 'Search transactions' && visible(n),
-      ),
-  ).toBeDefined();
-  expect(
-    tree.root
+    returned.root
       .findAllByType(TextInput)
       .find(n => n.props.accessibilityLabel === 'Search transactions')!.props
       .value,
-  ).toBe(movement.label);
-  await act(() => tree.unmount());
+  ).toBe('');
+  await act(() => returned.unmount());
 });
 
 test('cancelled filter draft never changes the committed transaction result set', async () => {

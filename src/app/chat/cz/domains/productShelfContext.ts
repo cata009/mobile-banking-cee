@@ -1,5 +1,5 @@
 import { getProductCardSheetConfig, getProductsMenuForCountry } from '@/app/config/productsMenuConfig'
-import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src'
+import { type CoAppingRichBlock } from '../../../../../package/mobile-pi-coapping-chat-package/src/types'
 import {
   CZ_CHAT_PRODUCTS_SHELF_CARD_ACTION_PREFIX,
   buildCzNavigateAction,

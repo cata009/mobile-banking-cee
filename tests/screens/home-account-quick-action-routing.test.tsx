@@ -4,6 +4,14 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/app/App'
+import { asyncNativeReady, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
+
+vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
+  const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
+  return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
+})
+
+let originalMatchMedia: typeof window.matchMedia
 
 const FUTURE_CZ_HOME_URL =
   '/?product=PI&country=CZ&scenario=active&ds=current&release=release-future-cz-robo' +
@@ -12,6 +20,9 @@ const FUTURE_CZ_HOME_URL =
   '&count_deposits=0&count_savings=0&count_loans=0&count_mortgages=0&count_investments=0'
 
 beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  originalMatchMedia = window.matchMedia
+  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
   window.history.replaceState({}, '', FUTURE_CZ_HOME_URL)
   vi.stubGlobal(
     'ResizeObserver',
@@ -29,13 +40,16 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  resetNativeWebRendererDiagnostics()
+  window.matchMedia = originalMatchMedia
   vi.unstubAllGlobals()
   window.history.replaceState({}, '', '/')
 })
 
 describe('Future CZ Homepage account quick-action routing', () => {
   it('opens the empty Domestic payment form directly from New payment', async () => {
-    render(<App />)
+    const view = render(<App />)
+    await asyncNativeReady(view.container)
 
     fireEvent.click(await screen.findByRole('button', { name: 'New payment' }))
 
@@ -44,7 +58,8 @@ describe('Future CZ Homepage account quick-action routing', () => {
   })
 
   it('opens Account Details for the selected account directly from Account info', async () => {
-    render(<App />)
+    const view = render(<App />)
+    await asyncNativeReady(view.container)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Account info' }))
 

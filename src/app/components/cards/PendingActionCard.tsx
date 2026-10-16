@@ -1,3 +1,4 @@
+import { bannerWeb } from "../contracts/bannerWeb";
 import type { CSSProperties } from "react";
 
 import { AppIcon } from "@/app/components/icons";
@@ -12,7 +13,6 @@ export const PENDING_ACTION_CARD_SOURCE = {
   cornerRadius: 8,
 } as const;
 
-const PENDING_ACTION_GRADIENT = "linear-gradient(90deg, #007A91 0%, #44909E 100%)";
 
 export interface PendingActionCardProps {
   title: string;
@@ -44,19 +44,21 @@ export default function PendingActionCard({
   const interactive = typeof onClick === "function";
   const Root = interactive ? "button" : "div";
 
+  const contract = bannerWeb({ variant: "pending", interactive });
+
   return (
     <Root
       type={interactive ? "button" : undefined}
       onClick={onClick}
       aria-label={interactive ? (ariaLabel ?? title) : ariaLabel}
       className={cn(
-        "flex h-[157px] w-[327px] max-w-full flex-col gap-[8px] overflow-hidden rounded-[8px] p-[24px] text-left",
+        contract.rootClass,
         interactive && "cursor-pointer",
         className,
       )}
       data-component="PendingActionCard"
       data-figma-schema={PENDING_ACTION_CARD_SOURCE.schema}
-      style={{ background: PENDING_ACTION_GRADIENT, ...style }}
+      style={{ background: contract.pendingGradient, ...style }}
     >
       <span className="uc-type-l1 leading-[26px] text-[var(--uc-static-white)]">
         {title}

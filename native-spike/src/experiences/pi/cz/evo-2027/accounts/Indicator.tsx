@@ -7,11 +7,13 @@ export default function Indicator({
   selectedId,
   onSelect,
   label = 'account',
+  controlTokens = tokens,
 }: {
   ids: readonly string[];
   selectedId: string;
   onSelect: (id: string) => void;
   label?: string;
+  controlTokens?: Pick<typeof tokens, 'accent' | 'muted'>;
 }) {
   const index = ids.indexOf(selectedId),
     windowSize = 4,
@@ -29,7 +31,9 @@ export default function Indicator({
       : start + windowSize;
   return (
     <View style={i.rail}>
-      {hasWindow && start > 0 && <View style={i.mini} />}
+      {hasWindow && start > 0 && (
+        <View style={[i.mini, { backgroundColor: controlTokens.muted }]} />
+      )}
       {ids.slice(start, end).map((id, localIndex) => (
         <Pressable
           key={id}
@@ -40,10 +44,22 @@ export default function Indicator({
           }}
           onPress={() => onSelect(id)}
         >
-          <View style={id === selectedId ? i.active : i.dot} />
+          <View
+            style={[
+              id === selectedId ? i.active : i.dot,
+              {
+                backgroundColor:
+                  id === selectedId
+                    ? controlTokens.accent
+                    : controlTokens.muted,
+              },
+            ]}
+          />
         </Pressable>
       ))}
-      {hasWindow && end < ids.length && <View style={i.mini} />}
+      {hasWindow && end < ids.length && (
+        <View style={[i.mini, { backgroundColor: controlTokens.muted }]} />
+      )}
     </View>
   );
 }
