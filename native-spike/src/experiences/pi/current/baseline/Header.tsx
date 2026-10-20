@@ -17,11 +17,13 @@ export function BaselineHomeHeader({
   title = 'Your Homepage',
   showActions = true,
   showTitle = false,
+  primeEntry,
 }: {
   host: CurrentScreenProps;
   title?: string;
   showActions?: boolean;
   showTitle?: boolean;
+  primeEntry?: React.ReactNode;
 }) {
   const [hovered, setHovered] = useState(false);
   const dark = host.tokens.background === '#121212';
@@ -35,7 +37,7 @@ export function BaselineHomeHeader({
       dark={dark}
       actions={
         <>
-          <Pressable
+          {primeEntry ?? <Pressable
             accessibilityRole="button"
             accessibilityLabel="Prime"
             onPress={() => host.onNavigate({ screen: 'prime' })}
@@ -52,7 +54,7 @@ export function BaselineHomeHeader({
               />
             </View>
             <Text style={styles.primeLabel}>Prime</Text>
-          </Pressable>
+          </Pressable>}
           <BaselineHeaderActionRail>
             <BaselineAmountVisibility
               hidden={host.amountsHidden}

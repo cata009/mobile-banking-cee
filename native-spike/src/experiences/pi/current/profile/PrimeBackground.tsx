@@ -10,10 +10,13 @@ import Svg, {
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { primeBackground } from './assets';
 import { useSourceColors } from './Primitives';
-export default function PrimeBackground() {
+export default function PrimeBackground({ variant = 'prime', badge = false }: { variant?: 'prime' | 'private'; badge?: boolean } = {}) {
+  const isPrivate = variant === 'private';
+  const affineBadge = isPrivate && badge;
   const color = useSourceColors(),
-    { width, height } = useDemoViewport();
-  const angle = (209.194 * Math.PI) / 180,
+    viewport = useDemoViewport();
+  const width = badge ? 141 : viewport.width, height = badge ? 32 : viewport.height;
+  const angle = ((isPrivate ? badge ? 186.335 : 206 : 209.194) * Math.PI) / 180,
     dx = Math.sin(angle),
     dy = -Math.cos(angle),
     length = Math.abs(width * dx) + Math.abs(height * dy);
@@ -23,14 +26,15 @@ export default function PrimeBackground() {
         <Defs>
           <LinearGradient
             id="prime-base"
-            gradientUnits="userSpaceOnUse"
-            x1={(width - dx * length) / 2}
-            y1={(height - dy * length) / 2}
-            x2={(width + dx * length) / 2}
-            y2={(height + dy * length) / 2}
+            gradientUnits={affineBadge ? 'objectBoundingBox' : 'userSpaceOnUse'}
+            gradientTransform={affineBadge ? 'matrix(-0.526367514782241 1.3352048089244397 -1.2778686852150096 -0.6251349915717538 1.6666351523424976 -0.38534921231275354)' : undefined}
+            x1={affineBadge ? 0 : (width - dx * length) / 2 + (isPrivate ? dx * length * -0.4726 : 0)}
+            y1={affineBadge ? 0.5 : (height - dy * length) / 2 + (isPrivate ? dy * length * -0.4726 : 0)}
+            x2={affineBadge ? 1 : isPrivate ? (width - dx * length) / 2 + dx * length * 0.5918 : (width + dx * length) / 2}
+            y2={affineBadge ? 0.5 : isPrivate ? (height - dy * length) / 2 + dy * length * 0.5918 : (height + dy * length) / 2}
           >
-            <Stop offset="32.305%" stopColor={color('--uc-product-blue')} />
-            <Stop offset="60.005%" stopColor={color('--uc-static-black')} />
+            <Stop offset={isPrivate ? affineBadge ? '0.4807692486792803%' : '0%' : '32.305%'} stopColor={isPrivate ? '#ffffff' : color('--uc-product-blue')} />
+            <Stop offset={isPrivate ? '100%' : '60.005%'} stopColor={isPrivate ? '#222222' : color('--uc-static-black')} />
           </LinearGradient>
           <RadialGradient
             id="prime-deep"
@@ -41,7 +45,7 @@ export default function PrimeBackground() {
           >
             <Stop
               offset="0"
-              stopColor={color('--uc-product-blue-deep')}
+              stopColor={isPrivate ? '#fee2aa' : color('--uc-product-blue-deep')}
               stopOpacity={0.2}
             />
             <Stop offset="1" stopColor="black" stopOpacity={0.2} />

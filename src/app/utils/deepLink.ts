@@ -323,6 +323,13 @@ export function buildDeepLinkUrl(state: DeepLinkState): string {
   const renderer = new URLSearchParams(window.location.search).get('renderer')
   if (renderer === 'reference' || renderer === 'candidate') params.set('renderer', renderer)
 
+  // Keep the dedicated PRIME presentation entry while its flow loads and the
+  // shell normalizes the URL; other flows and unknown markers stay excluded.
+  if (normalizedScreen === 'flow-library' && state.flowId === 'pi-prime') {
+    const presentation = new URLSearchParams(window.location.search).get('presentation')
+    if (presentation === 'prime') params.set('presentation', presentation)
+  }
+
   const { origin, pathname } = window.location
   const hash = normalizedScreen === 'design-system' ? window.location.hash : ''
   return `${origin}${pathname}?${params.toString()}${hash}`

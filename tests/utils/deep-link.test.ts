@@ -45,6 +45,34 @@ describe('deep-link screen normalization', () => {
 })
 
 describe('deep-link parse and build contracts', () => {
+  it.each([
+    ['prime', 'flow-library', 'pi-prime', 'prime'],
+    ['other', 'flow-library', 'pi-prime', null],
+    ['Prime', 'flow-library', 'pi-prime', null],
+    ['prime', 'flow-library', 'mobile-pi-ethoca', null],
+    ['prime', 'flow-library', null, null],
+    ['prime', 'homepage', 'pi-prime', null],
+    ['prime', 'payment-review', 'pi-prime', null],
+  ] as const)(
+    'preserves presentation=%s only for the PRIME flow (%s, %s)',
+    (presentation, screen, flowId, expected) => {
+      window.history.replaceState({}, '', `/mobile-banking?presentation=${presentation}&unrecognized=discard`)
+      const url = new URL(buildDeepLinkUrl({ ...baseState, screen, flowId }))
+      expect(url.searchParams.get('presentation')).toBe(expected)
+      expect(url.searchParams.has('unrecognized')).toBe(false)
+    },
+  )
+
+  it('retains the PRIME presentation marker across restore and repeated initial URL synchronization', () => {
+    window.history.replaceState({}, '', '/mobile-banking?screen=flow-library&flow=pi-prime&presentation=prime')
+    const restored = parseDeepLinkFromUrl()
+    expect(restored).toMatchObject({ screen: 'flow-library', flowId: 'pi-prime' })
+    const state = { ...baseState, ...restored }
+    const normalized = buildDeepLinkUrl(state)
+    window.history.replaceState(window.history.state, '', normalized)
+    expect(new URL(buildDeepLinkUrl(state)).searchParams.get('presentation')).toBe('prime')
+  })
+
   it('preserves only the explicit frozen renderer reference across URL normalization', () => {
     window.history.replaceState({}, '', '/mobile-banking?renderer=reference')
     expect(new URL(buildDeepLinkUrl(baseState)).searchParams.get('renderer')).toBe('reference')
