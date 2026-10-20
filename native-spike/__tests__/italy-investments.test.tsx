@@ -1202,7 +1202,7 @@ test('securities order detail uses its exact order and source cancellation confi
   ).toEqual(before);
 });
 
-test('fund KID opens the exact source document leaf and survives inactive profile overlay without mutation', async () => {
+test('fund KID exposes Source help and survives inactive host state without mutation', async () => {
   const { tree, props } = await render({
     area: 'funds',
     view: 'fund',
@@ -1211,8 +1211,11 @@ test('fund KID opens the exact source document leaf and survives inactive profil
   await act(() => press(tree, 'kid').props.onPress());
   expect(text(tree)).toContain('Key information document (KID)');
   expect(text(tree)).toContain('Società prodotto');
-  await act(() => press(tree, 'Profilo').props.onPress());
-  expect(props.onProfile).toHaveBeenCalledTimes(1);
+  await act(() => press(tree, 'Aiuto').props.onPress());
+  expect(text(tree)).toContain(
+    'Controlla i dati dell’operazione prima di confermare.',
+  );
+  await act(() => press(tree, 'Aiuto').props.onPress());
   await act(() =>
     tree.update(<InvestmentsScreen {...props} isActive={false} />),
   );

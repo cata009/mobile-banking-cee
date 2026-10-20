@@ -693,6 +693,18 @@ export function BottomNavigationVariantSpecimen() {
   );
 }
 
+const PAYMENT_HERO_SPECIMEN_DESCRIPTIONS = {
+  'payments-1': 'Send money to a saved\nor new recipient.',
+  'payments-2': 'Move money between\nyour accounts.',
+  'payments-3': 'Pay bills or\nsupport a cause.',
+  'payments-4': 'Scan a payment code\nto get started.',
+  'payments-5': 'Set up a regular\npayment schedule.',
+  'payments-6': 'Review the details\nbefore you approve.',
+  'payments-7': 'Send a payment to\nanother country.',
+  'payments-8': 'Explore payments\nwith your wearable.',
+  'payments-9': 'Confirm an action with\nyour mobile token.',
+} satisfies Record<PaymentHeroImageVariant, string>;
+
 export function PaymentHeroCardVariantSpecimen() {
   const [selectedVariantId, setSelectedVariantId] = useState<PaymentHeroImageVariant>(PAYMENT_HERO_CARD_IMAGE_VARIANTS[0].id);
   const selectedVariant =
@@ -701,7 +713,7 @@ export function PaymentHeroCardVariantSpecimen() {
   const selectedItem: PaymentHeroItem = {
     id: "new-payment",
     title: selectedVariant.title,
-    description: selectedVariant.description,
+    description: PAYMENT_HERO_SPECIMEN_DESCRIPTIONS[selectedVariant.id],
     illustration: "wallet",
     imageVariant: selectedVariant.id,
   };

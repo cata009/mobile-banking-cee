@@ -10,11 +10,15 @@
  * lookalike.
  */
 import { useState } from "react";
+import PaymentOtherShortcut from '@/app/components/payments/PaymentOtherShortcut';
+import bubbleTemplate from '@/assets/design-system/bubble-template.svg';
+import bubbleRecurrent from '@/assets/design-system/bubble-recurrent.svg';
 import type { ReactNode } from "react";
+import { getNativeDesignSystemPreview } from '@/features/demo-native/designSystemPreview';
+import { NativeDesignSystemPreview } from './NativeDesignSystemPreview';
 import StatusBar from "@/app/components/StatusBar";
 import DynamicIsland from "@/app/components/DynamicIsland";
-import HomeHeader from "@/app/screens/home/HomeHeader";
-import { MoreHeader } from "@/app/screens/more/MoreHeader";
+import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
 import LanguageSelectorButton from "@/app/components/ui/LanguageSelectorButton";
 import NavigationLink from "@/app/components/ui/NavigationLink";
 import PreLoginHeading from "@/app/components/ui/PreLoginHeading";
@@ -89,7 +93,16 @@ function LogoutConfirmDialogPreview() {
   );
 }
 
+function BubblePreview() {
+  const [variant, setVariant] = useState('default');
+  return <div className="flex flex-col gap-4">
+    <label className="ds-figma-select-label">Variant<select aria-label="Bubble variant" value={variant} onChange={event => setVariant(event.target.value)}><option value="default">Default / Selected</option><option value="payments">Payments</option></select></label>
+    <PaymentOtherShortcut presentation="bubble" treatment="baseline" iconVisual={<img src={variant === 'default' ? bubbleTemplate : bubbleRecurrent} width={32} height={32} alt="" />} item={{ id: variant === 'default' ? 'templates' : 'standing-order', icon: variant === 'default' ? 'templates' : 'standing', label: variant === 'default' ? 'CLOTHING\nAND SHOES' : 'STANDING\nORDER' }} />
+  </div>;
+}
+
 const LIVE_PREVIEW_BUILDERS: Record<string, (themeMode: "light" | "dark") => ReactNode> = {
+  'payments.other-shortcut': () => <BubblePreview />,
   "shell.status-bar": (themeMode) => (
     <HeaderPreviewFrame tone="surface" height={54}>
       <StatusBar variant={themeMode === "dark" ? "dark" : "light"} isCoAppingActive={themeMode === "dark"} />
@@ -99,14 +112,28 @@ const LIVE_PREVIEW_BUILDERS: Record<string, (themeMode: "light" | "dark") => Rea
   "shell.home-header": () => (
     <HeaderPreviewFrame tone="app">
       <div className="pt-[24px]">
-        <HomeHeader onPrimeClick={noop} onMessagesClick={noop} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "home-header", title: "Your Homepage", showActions: true, showTitle: true },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     </HeaderPreviewFrame>
   ),
   "shell.more-header": () => (
     <HeaderPreviewFrame tone="surface">
       <div className="pt-[24px]">
-        <MoreHeader onProfile={noop} onMessages={noop} onLogout={noop} messageCount={7} />
+        <NativeScreenPreview
+          route={{ screen: "account" }}
+          snapshot={{
+            screenTopInset: 0,
+            componentPreview: { kind: "more-header", actionVariant: "default", messageCount: 7 },
+          }}
+          onNavigate={() => true}
+        />
       </div>
     </HeaderPreviewFrame>
   ),
@@ -213,6 +240,7 @@ const LIVE_PREVIEW_BUILDERS: Record<string, (themeMode: "light" | "dark") => Rea
  * preview has been wired for it yet.
  */
 export function getComponentLivePreview(componentId: string, themeMode: "light" | "dark"): ReactNode | null {
+  if (getNativeDesignSystemPreview(componentId)) return <NativeDesignSystemPreview componentId={componentId} themeMode={themeMode} />;
   const build = LIVE_PREVIEW_BUILDERS[componentId];
   return build ? build(themeMode) : null;
 }

@@ -8,6 +8,7 @@ import {
 import { Text } from './Typography';
 import { sourceColor } from './sourceColor';
 import { SourceCustomIcon } from './SourceCustomIcon';
+import { BaselinePill } from './BaselinePill';
 
 export function BaselineShopsmartOfferCard({
   merchant,
@@ -107,6 +108,8 @@ export function BaselineShopsmartOfferCard({
       dark,
     ),
     boxShadow: '0 0 4px rgba(0,0,0,.25)',
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   };
   const pillTextStyle = {
     fontFamily: 'UniCredit-bold',
@@ -202,9 +205,14 @@ export function BaselineShopsmartOfferCard({
         </View>
       )}
       {pillLabel && (
-        <View style={pillStyle}>
-          <Text style={pillTextStyle}>{pillLabel}</Text>
-        </View>
+        <BaselinePill
+          interactive={false}
+          label={pillLabel}
+          variant={pillTone === 'white' ? 'active-counter' : 'primary'}
+          dark={dark}
+          style={pillStyle}
+          labelStyle={pillTextStyle}
+        />
       )}
       <View style={bodyStyle}>
         <View>

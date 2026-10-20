@@ -1,0 +1,786 @@
+{
+  "fileKey": "FKbbStgBIP9bFAMl3DPKHF",
+  "capturedOn": "2026-10-20",
+  "entries": [
+    {
+      "id": "brand.canonical-marks",
+      "implementations": [
+        {
+          "id": "brand.canonical-marks",
+          "sourcePaths": ["native-spike/src/universal/BaselineCanonicalIcon.tsx"]
+        }
+      ],
+      "familyIds": ["10141:39872", "10141:40230", "10183:65507"]
+    },
+    {
+      "id": "brand.unicredit-logo",
+      "implementations": [
+        {
+          "id": "brand.unicredit-logo",
+          "sourcePaths": ["src/app/components/UniCreditLogo.tsx"]
+        }
+      ],
+      "familyIds": ["10141:40145", "147:6091", "0:6233"]
+    },
+    {
+      "id": "ui.canonical-icon",
+      "implementations": [
+        {
+          "id": "ui.canonical-icon",
+          "sourcePaths": ["native-spike/src/universal/BaselineCanonicalIcon.tsx"]
+        }
+      ],
+      "familyIds": [
+        "10183:65551",
+        "10183:65561",
+        "10183:65572",
+        "10183:65582",
+        "10183:65593",
+        "10183:65603",
+        "10183:65614",
+        "10183:65624",
+        "10183:65635",
+        "10183:65645",
+        "10183:65656",
+        "10183:65666",
+        "10183:65677",
+        "10183:65687",
+        "10183:65698",
+        "10183:65717",
+        "10183:65737",
+        "10183:65747",
+        "10183:65758",
+        "10183:65768",
+        "10183:65779",
+        "10183:65789",
+        "10183:65800",
+        "10183:65810",
+        "10183:65821",
+        "10183:65855",
+        "10183:65890",
+        "10183:65900",
+        "10183:65911",
+        "10183:65930",
+        "10183:65950",
+        "10183:65960",
+        "10183:65971",
+        "10183:65990",
+        "10183:66010",
+        "10183:66020",
+        "10183:66031",
+        "10183:66041",
+        "10183:66052",
+        "10183:66077",
+        "10183:66103",
+        "10183:66131",
+        "10183:60918",
+        "10183:60931",
+        "10183:61011",
+        "10183:62781",
+        "10183:62962",
+        "10183:62886",
+        "10183:62944"
+      ]
+    },
+    {
+      "id": "shell.page-header",
+      "implementations": [
+        {
+          "id": "shell.page-header",
+          "sourcePaths": ["src/app/components/PageHeader.tsx"]
+        },
+        {
+          "id": "shell.more-header",
+          "sourcePaths": ["src/app/screens/more/MoreHeader.tsx"]
+        }
+      ],
+      "familyIds": ["362:8463"]
+    },
+    {
+      "id": "ui.profile-avatar",
+      "implementations": [
+        {
+          "id": "ui.profile-avatar",
+          "sourcePaths": ["src/app/components/ProfileAvatar.tsx"]
+        }
+      ],
+      "familyIds": ["10141:38860"]
+    },
+    {
+      "id": "ui.navigation-row",
+      "implementations": [
+        {
+          "id": "ui.navigation-row",
+          "sourcePaths": ["src/app/components/NavigationRow.tsx"]
+        }
+      ],
+      "familyIds": ["1515:1995"]
+    },
+    {
+      "id": "shell.bottom-navigation",
+      "implementations": [
+        {
+          "id": "shell.bottom-navigation",
+          "sourcePaths": ["src/app/components/BottomNavigation.tsx"]
+        }
+      ],
+      "familyIds": ["715:6381"]
+    },
+    {
+      "id": "accounts.carousel-indicator",
+      "implementations": [
+        {
+          "id": "accounts.carousel-indicator",
+          "sourcePaths": ["src/app/components/accounts/AccountCarouselIndicator.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12663"]
+    },
+    {
+      "id": "ui.primary-button",
+      "implementations": [
+        {
+          "id": "ui.primary-button",
+          "sourcePaths": ["src/app/components/PrimaryButton.tsx"]
+        }
+      ],
+      "familyIds": ["715:6238", "1483:4051", "7146:302"]
+    },
+    {
+      "id": "ui.pill",
+      "implementations": [
+        {
+          "id": "ui.pill",
+          "sourcePaths": ["src/app/components/ui/Pill.tsx"]
+        }
+      ],
+      "familyIds": ["1057:21187"]
+    },
+    {
+      "id": "brand.prime-advisory",
+      "implementations": [
+        {
+          "id": "brand.prime-advisory",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["7467:13095"]
+    },
+    {
+      "id": "payments.other-shortcut",
+      "implementations": [
+        {
+          "id": "payments.other-shortcut",
+          "sourcePaths": ["src/app/components/payments/PaymentOtherShortcut.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12627"]
+    },
+    {
+      "id": "accounts.action-bar",
+      "implementations": [
+        {
+          "id": "accounts.action-bar",
+          "sourcePaths": ["src/app/components/accounts/AccountActionBar.tsx"]
+        }
+      ],
+      "familyIds": ["297:18112"]
+    },
+    {
+      "id": "ui.navigation-chip",
+      "implementations": [
+        {
+          "id": "ui.navigation-chip",
+          "sourcePaths": ["native-spike/src/universal/BaselinePill.tsx"]
+        }
+      ],
+      "familyIds": ["10320:379"]
+    },
+    {
+      "id": "ui.text-button-primary",
+      "implementations": [
+        {
+          "id": "ui.text-button-primary",
+          "sourcePaths": ["native-spike/src/universal/BaselineNavigationLink.tsx"]
+        }
+      ],
+      "familyIds": ["10320:62270"]
+    },
+    {
+      "id": "accounts.transaction-row",
+      "implementations": [
+        {
+          "id": "accounts.transaction-row",
+          "sourcePaths": ["src/app/components/accounts/AccountTransactionRow.tsx"]
+        }
+      ],
+      "familyIds": ["1057:21468"]
+    },
+    {
+      "id": "ui.mobile-code",
+      "implementations": [
+        {
+          "id": "ui.mobile-code",
+          "sourcePaths": ["native-spike/src/universal/BaselineMobileCode.tsx"]
+        }
+      ],
+      "familyIds": ["10175:21282", "10175:21291", "10175:21400", "10175:21475", "10175:21476"]
+    },
+    {
+      "id": "prelogin.other-panel",
+      "implementations": [
+        {
+          "id": "prelogin.other-panel",
+          "sourcePaths": ["src/app/components/PanelWithTranslations.tsx"]
+        },
+        {
+          "id": "prelogin.other-panel-basic",
+          "sourcePaths": ["src/app/components/PanelWithoutCoAppingTranslations.tsx"]
+        }
+      ],
+      "familyIds": ["81:11456"]
+    },
+    {
+      "id": "products.selection-panel",
+      "implementations": [
+        {
+          "id": "products.selection-panel",
+          "sourcePaths": ["native-spike/src/universal/BaselinePanelMenuSheet.tsx"]
+        }
+      ],
+      "familyIds": ["10320:63365"]
+    },
+    {
+      "id": "ui.radio-button",
+      "implementations": [
+        {
+          "id": "ui.radio-button",
+          "sourcePaths": ["src/app/components/common/RadioButton.tsx"]
+        }
+      ],
+      "familyIds": ["10141:33691"]
+    },
+    {
+      "id": "ui.checkbox",
+      "implementations": [
+        {
+          "id": "ui.checkbox",
+          "sourcePaths": ["native-spike/src/universal/BaselineCheckbox.tsx"]
+        }
+      ],
+      "familyIds": ["10141:33701"]
+    },
+    {
+      "id": "messages.mailbox-tabs",
+      "implementations": [
+        {
+          "id": "messages.mailbox-tabs",
+          "sourcePaths": ["src/app/components/messages/MessagesMailboxTabs.tsx"]
+        }
+      ],
+      "familyIds": ["715:6866"]
+    },
+    {
+      "id": "ui.new-tag",
+      "implementations": [
+        {
+          "id": "ui.new-tag",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["10164:350"]
+    },
+    {
+      "id": "ui.positive-balance-tag",
+      "implementations": [
+        {
+          "id": "ui.positive-balance-tag",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["10164:361"]
+    },
+    {
+      "id": "ui.status-label",
+      "implementations": [
+        {
+          "id": "ui.status-label",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["265:4080"]
+    },
+    {
+      "id": "ui.category-tag",
+      "implementations": [
+        {
+          "id": "ui.category-tag",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["10320:35"]
+    },
+    {
+      "id": "ui.success-status",
+      "implementations": [
+        {
+          "id": "ui.success-status",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["10320:62098"]
+    },
+    {
+      "id": "ui.notification-counter",
+      "implementations": [
+        {
+          "id": "ui.notification-counter",
+          "sourcePaths": ["native-spike/src/universal/BaselineTag.tsx"]
+        }
+      ],
+      "familyIds": ["10333:38"]
+    },
+    {
+      "id": "ui.dropdown-field",
+      "implementations": [
+        {
+          "id": "ui.dropdown-field",
+          "sourcePaths": ["native-spike/src/universal/BaselineDropdownField.tsx"]
+        }
+      ],
+      "familyIds": ["715:9631"]
+    },
+    {
+      "id": "ui.text-field",
+      "implementations": [
+        {
+          "id": "ui.text-field",
+          "sourcePaths": ["src/app/components/TextField.tsx"]
+        },
+        {
+          "id": "ui.amount-field",
+          "sourcePaths": ["src/app/components/AmountField.tsx"]
+        }
+      ],
+      "familyIds": ["10183:68496"]
+    },
+    {
+      "id": "ui.code-field",
+      "implementations": [
+        {
+          "id": "ui.code-field",
+          "sourcePaths": ["src/app/components/CodeField.tsx"]
+        }
+      ],
+      "familyIds": ["10236:787"]
+    },
+    {
+      "id": "ui.toggle-button",
+      "implementations": [
+        {
+          "id": "ui.toggle-button",
+          "sourcePaths": ["src/app/components/ToggleButton.tsx"]
+        }
+      ],
+      "familyIds": ["1026:6761"]
+    },
+    {
+      "id": "ui.section-heading-divider",
+      "implementations": [
+        {
+          "id": "ui.section-heading-divider",
+          "sourcePaths": ["src/app/components/SectionHeadingDivider.tsx"]
+        }
+      ],
+      "familyIds": ["1058:22303"]
+    },
+    {
+      "id": "ui.divider-hairline",
+      "implementations": [
+        {
+          "id": "ui.divider-hairline",
+          "sourcePaths": ["native-spike/src/universal/BaselineSectionDivider.tsx"]
+        }
+      ],
+      "familyIds": ["10321:911"]
+    },
+    {
+      "id": "images.payment-art",
+      "implementations": [
+        {
+          "id": "images.payment-art",
+          "sourcePaths": ["native-spike/src/universal/BaselinePaymentImage.tsx"]
+        }
+      ],
+      "familyIds": ["280:11473"]
+    },
+    {
+      "id": "images.card-art",
+      "implementations": [
+        {
+          "id": "images.card-art",
+          "sourcePaths": ["native-spike/src/universal/BaselineCardArt.tsx"]
+        }
+      ],
+      "familyIds": ["1272:8695"]
+    },
+    {
+      "id": "images.card-type14",
+      "implementations": [
+        {
+          "id": "images.card-type14",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["8038:6624"]
+    },
+    {
+      "id": "cards.card",
+      "implementations": [
+        {
+          "id": "cards.card",
+          "sourcePaths": ["src/app/components/cards/Card.tsx"]
+        }
+      ],
+      "familyIds": ["0:9261"]
+    },
+    {
+      "id": "products.company-selection",
+      "implementations": [
+        {
+          "id": "products.company-selection",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["1517:13080"]
+    },
+    {
+      "id": "products.service-icon",
+      "implementations": [
+        {
+          "id": "products.service-icon",
+          "sourcePaths": ["native-spike/src/universal/BaselineCanonicalIcon.tsx"]
+        }
+      ],
+      "familyIds": ["9382:18740"]
+    },
+    {
+      "id": "products.product-card-list-total",
+      "implementations": [
+        {
+          "id": "products.product-card-list-total",
+          "sourcePaths": [
+            "src/app/components/ProductCard.tsx",
+            "src/app/components/ProductsList.tsx",
+            "src/app/components/TotalRow.tsx"
+          ]
+        }
+      ],
+      "familyIds": ["1517:12713", "8724:1885"]
+    },
+    {
+      "id": "cards.pending-action-card",
+      "implementations": [
+        {
+          "id": "cards.pending-action-card",
+          "sourcePaths": ["src/app/components/cards/PendingActionCard.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12788"]
+    },
+    {
+      "id": "payments.card-payment",
+      "implementations": [
+        {
+          "id": "payments.card-payment",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12815"]
+    },
+    {
+      "id": "products.product-card",
+      "implementations": [
+        {
+          "id": "products.product-card",
+          "sourcePaths": ["src/app/components/products/ProductMenuCard.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12832", "1518:3498"]
+    },
+    {
+      "id": "more.card-grid",
+      "implementations": [
+        {
+          "id": "more.card-grid",
+          "sourcePaths": ["src/app/screens/more/MoreScreen.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12876"]
+    },
+    {
+      "id": "products.offer-card",
+      "implementations": [
+        {
+          "id": "products.offer-card",
+          "sourcePaths": ["src/app/components/products/ProductOfferCard.tsx"]
+        }
+      ],
+      "familyIds": ["1057:21199"]
+    },
+    {
+      "id": "cards.card-component",
+      "implementations": [
+        {
+          "id": "cards.card-component",
+          "sourcePaths": ["src/app/components/cards/CardComponent.tsx"]
+        }
+      ],
+      "familyIds": ["1266:2957"]
+    },
+    {
+      "id": "ui.wallet-button",
+      "implementations": [
+        {
+          "id": "ui.wallet-button",
+          "sourcePaths": ["src/app/components/ui/WalletButton.tsx"]
+        }
+      ],
+      "familyIds": ["7464:1768", "7464:1858", "7464:1912"]
+    },
+    {
+      "id": "cards.ghost-banner",
+      "implementations": [
+        {
+          "id": "cards.ghost-banner",
+          "sourcePaths": ["src/app/components/cards/GhostBanner.tsx"]
+        },
+        {
+          "id": "cards.info-banner",
+          "sourcePaths": ["src/app/components/cards/InfoBanner.tsx"]
+        }
+      ],
+      "familyIds": ["1517:13357"]
+    },
+    {
+      "id": "cards.helper-card",
+      "implementations": [
+        {
+          "id": "cards.helper-card",
+          "sourcePaths": ["src/app/components/cards/HelperCard.tsx"]
+        }
+      ],
+      "familyIds": ["715:6940"]
+    },
+    {
+      "id": "cards.user-event-card",
+      "implementations": [
+        {
+          "id": "cards.user-event-card",
+          "sourcePaths": ["src/app/components/cards/UserEventCard.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12696"]
+    },
+    {
+      "id": "ui.toast-message",
+      "implementations": [
+        {
+          "id": "ui.toast-message",
+          "sourcePaths": ["src/app/components/ui/ToastMessage.tsx"]
+        }
+      ],
+      "familyIds": ["178:15386"]
+    },
+    {
+      "id": "ui.feedback-info",
+      "implementations": [
+        {
+          "id": "ui.feedback-info",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["178:15151"]
+    },
+    {
+      "id": "ui.feedback-skeleton",
+      "implementations": [
+        {
+          "id": "ui.feedback-skeleton",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["179:15689"]
+    },
+    {
+      "id": "ui.feedback-output",
+      "implementations": [
+        {
+          "id": "ui.feedback-output",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["2117:1413"]
+    },
+    {
+      "id": "ui.feedback-slider",
+      "implementations": [
+        {
+          "id": "ui.feedback-slider",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["2142:1825"]
+    },
+    {
+      "id": "ui.feedback-linear",
+      "implementations": [
+        {
+          "id": "ui.feedback-linear",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["2292:4808"]
+    },
+    {
+      "id": "ui.feedback-nps",
+      "implementations": [
+        {
+          "id": "ui.feedback-nps",
+          "sourcePaths": ["native-spike/src/universal/BaselineFeedbackProgress.tsx"]
+        }
+      ],
+      "familyIds": ["2449:7800"]
+    },
+    {
+      "id": "ui.bar",
+      "implementations": [
+        {
+          "id": "ui.bar",
+          "sourcePaths": ["src/app/components/ui/Bar.tsx"]
+        }
+      ],
+      "familyIds": ["1058:22155"]
+    },
+    {
+      "id": "pfm.source-graph",
+      "implementations": [
+        {
+          "id": "pfm.source-graph",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["715:8102"]
+    },
+    {
+      "id": "ui.timeline-atom",
+      "implementations": [
+        {
+          "id": "ui.timeline-atom",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["243:8097"]
+    },
+    {
+      "id": "accounts.transaction-search",
+      "implementations": [
+        {
+          "id": "accounts.transaction-search",
+          "sourcePaths": ["src/app/components/accounts/AccountSearchBar.tsx"]
+        }
+      ],
+      "familyIds": ["1517:12640"]
+    },
+    {
+      "id": "investments.source-list",
+      "implementations": [
+        {
+          "id": "investments.source-list",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["310:9061"]
+    },
+    {
+      "id": "ui.date-filter",
+      "implementations": [
+        {
+          "id": "ui.date-filter",
+          "sourcePaths": ["src/app/components/ui/DateFilter.tsx"]
+        }
+      ],
+      "familyIds": ["290:14520"]
+    },
+    {
+      "id": "ui.pill-sorting",
+      "implementations": [
+        {
+          "id": "ui.pill-sorting",
+          "sourcePaths": ["src/app/components/ui/PillSorting.tsx"]
+        }
+      ],
+      "familyIds": ["290:14610"]
+    },
+    {
+      "id": "investments.source-action-bar",
+      "implementations": [
+        {
+          "id": "investments.source-action-bar",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["290:13357"]
+    },
+    {
+      "id": "investments.source-campaign",
+      "implementations": [
+        {
+          "id": "investments.source-campaign",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["804:4923"]
+    },
+    {
+      "id": "investments.fund-banner",
+      "implementations": [
+        {
+          "id": "investments.fund-banner",
+          "sourcePaths": ["src/app/components/investments/InvestmentsFundBanner.tsx"]
+        }
+      ],
+      "familyIds": ["1559:1424"]
+    },
+    {
+      "id": "shell.status-bar",
+      "implementations": [
+        {
+          "id": "shell.status-bar",
+          "sourcePaths": ["src/app/components/StatusBar.tsx"]
+        }
+      ],
+      "familyIds": ["70:4846"]
+    },
+    {
+      "id": "marketing.source-campaign",
+      "implementations": [
+        {
+          "id": "marketing.source-campaign",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["8889:203", "1093:8624", "9365:16187", "1250:5955", "1287:6540"]
+    },
+    {
+      "id": "marketing.source-sticky",
+      "implementations": [
+        {
+          "id": "marketing.source-sticky",
+          "sourcePaths": ["native-spike/src/universal/BaselineCatalogCompositions.tsx"]
+        }
+      ],
+      "familyIds": ["1923:1532"]
+    }
+  ]
+}

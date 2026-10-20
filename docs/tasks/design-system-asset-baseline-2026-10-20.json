@@ -1,0 +1,1371 @@
+{
+  "originalCount": 1214,
+  "originalAggregate": "c0e40427f2c219020ac7bfbe357df4686529be222cb352a0f65d3d683a1f50a1",
+  "preservation": "Every prior Git-normalized path/blob pair is unchanged.",
+  "addedCount": 271,
+  "added": [
+    {
+      "path": "src/assets/design-system/bubble-recurrent.svg",
+      "bytes": 2851,
+      "sha256": "eebb6f528e79c556497c2515520fb09bbb80f97895c00b0f754a31743700ce35"
+    },
+    {
+      "path": "src/assets/design-system/bubble-template.svg",
+      "bytes": 483,
+      "sha256": "dcb63d98fe8c95ac68da0388f44105f621095918332eebbf189d6105ec9d9f75"
+    },
+    {
+      "path": "src/assets/design-system/category-shopping.svg",
+      "bytes": 1106,
+      "sha256": "302000b487eef0200029767eb786e4b000b1f5d95058091f96ffe274426b36b7"
+    },
+    {
+      "path": "src/assets/design-system/checkbox-mark.svg",
+      "bytes": 469,
+      "sha256": "8508a4f6bd5da4c342367b79ef1fa68b6ed7cc8765dc13d8f407d9839872d380"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-243-8097-0.svg",
+      "bytes": 953,
+      "sha256": "da966b2d8c8ec3dede8d7f9e5a5746924c27356f579052786e8b23bfd767cd90"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-243-8097-1.svg",
+      "bytes": 1205,
+      "sha256": "57638af5f65f3d619e46b8680aeb8d159fd786fefef089b68922098c3feaae85"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-1.svg",
+      "bytes": 1023,
+      "sha256": "c539cdc602d14732ef475c1dc27fd37d536a32fedd2cbdb30384028e4ce4f2ff"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-12.svg",
+      "bytes": 990,
+      "sha256": "613000c3f29a119269b8419bc8706c2b8aeb42faf7ffd91925d6049234650d26"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-2.svg",
+      "bytes": 1057,
+      "sha256": "4d6f79b98b0376a626bfe7a05287b3a695b397bbe87f34957d03c701c0e77889"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-3.svg",
+      "bytes": 523,
+      "sha256": "609bb6cab0e4186ec47f205e042f904c02324a055ed1af50b8d69f85ece29208"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-4.svg",
+      "bytes": 224,
+      "sha256": "492458a46c73db8449523afad4ff5802fbf973dd7ec7e90e5d3725e67ab4ddd2"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-5.svg",
+      "bytes": 1033,
+      "sha256": "29d66f02e26f3435636b5d49964b91e88df96db1e5f5cbf57a8e684780c7d458"
+    },
+    {
+      "path": "src/assets/design-system/compositions/family-310-9061-6.svg",
+      "bytes": 935,
+      "sha256": "1206f826fa069b0bfefad3e24242f68f656931c7a485852c38f19b33e0fe30e5"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/062388f55867b58a1549c579e0f837b94ffc925c.png",
+      "bytes": 447821,
+      "sha256": "2a6dd8a7e4485b8585a9069f79e409c565f875c5818f2f204ad9c7df0bedbcfa"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/075bb08e86f2145ad6e9192c37d9c4d24de7f168.png",
+      "bytes": 94395,
+      "sha256": "9670aebd837472a99bd2bd1ef1539c06ef30f8b54e763b2333e08be58ba22141"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/0f85ac34904b2dd13edbaf72e1c056c0185899a5.jpg",
+      "bytes": 16816203,
+      "sha256": "c24427a6e9f093cd5771082c977a5db6f2452e5a3301352075f26fab625575dd"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/1522f33794c134d83d662fd2fbb4c9f195e5f44e.png",
+      "bytes": 1012180,
+      "sha256": "3bcc079d6a4905adba3a6667da1cde5af41198c6c9cdd11548e31bff551fba50"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/52f0b74fc5514876138a58023ca6c8710d0db3a8.png",
+      "bytes": 823544,
+      "sha256": "b7c2ec1fc3cc3d6d2d4e1a925fedcab70e5d4c41a5b417330e0bd2dce80e791b"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/7c9ccbb5be7f4058f6af8d50ced765919f64c000.png",
+      "bytes": 6419996,
+      "sha256": "8fb12715f8245d6b9f99277388bf67cd96001a25cda72cb9d04cdb4d10d1a07d"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/888c0b8f6db8e2ed47fb230a3e319945852d803c.png",
+      "bytes": 21674168,
+      "sha256": "ebaac91e55425dbc8fd416b137b307f8fcf2d17c29ea5a9c9131076a7c436904"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/8bf47e8592cbf7929143b9a8033355e0430fc1c8.png",
+      "bytes": 1109283,
+      "sha256": "847f16fd81102a8d1ffe0b131dc79b473d0896e4e5af36f7eec75604b8d5a71a"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/97420d93298e277c42046cfc4a87bcf25be5d8ea.png",
+      "bytes": 381267,
+      "sha256": "dcbf4e0c7d848548adc209634a1a13741cc20a48454c47a464f4b834365adf8a"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/a1100374f41efc6eebb88a42a630ae11d11d46b7.png",
+      "bytes": 292991,
+      "sha256": "e1dafbf3a7ebaf8f1f51b70af130f668ad94b90cebbf83491e0fb7619f417cc6"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/b7cf1d8f79545e151d558b270b41e7ce9bfb932b.png",
+      "bytes": 95452,
+      "sha256": "b0881a06665556258d4b5521bcff3511e8fca9a8513c888b4a985cc16d2db2b8"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/d052c13c7d88ebd85c61f0cff801a6b025924292.png",
+      "bytes": 20308591,
+      "sha256": "fa1bf6e42b1fca915372a1b8c606a86862a9854b8e4447f597ef9774b201e104"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/e400269e12a467c40d1e214740e78c2d5efa9a73.png",
+      "bytes": 31831581,
+      "sha256": "8db2adec264448d8984508d9b87ac2f4aa49b6a6e3a921bfa4929c760dbd7da2"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/e94cd17b3ad327cd430fe6319a1d583b7ed93ed8.png",
+      "bytes": 16000533,
+      "sha256": "1d9f3fa22fc7f6a72414e6c273a1674392bcb50ee45723acb287b1b14c3603e1"
+    },
+    {
+      "path": "src/assets/design-system/compositions/photos/edcba91c37adb05deb0a05f3a303fabf60cfa09f.png",
+      "bytes": 4492407,
+      "sha256": "c3c39a970303654edfe2ca08e53aed6ca31d348cccec8a25bc1fc34e944f18cb"
+    },
+    {
+      "path": "src/assets/design-system/compositions/row-303-24358-0.svg",
+      "bytes": 275,
+      "sha256": "3bb886c16261c236189fdc62df3991bd1ab259d7c18a2dbb47bde18b2deb7fed"
+    },
+    {
+      "path": "src/assets/design-system/compositions/row-303-24378-0.svg",
+      "bytes": 307,
+      "sha256": "51d23edfa1a94f69bf0d78fe698b01fdb5b2a08c2b7639f819d33dbc0b51866d"
+    },
+    {
+      "path": "src/assets/design-system/compositions/row-303-24408-1.svg",
+      "bytes": 307,
+      "sha256": "96d52fb254ef390344781c1837e2721d06e6e31f8a0536ff669a3b97ce839620"
+    },
+    {
+      "path": "src/assets/design-system/compositions/row-310-8985-0.svg",
+      "bytes": 1023,
+      "sha256": "74bd96d2eee30afd79511a84ffe626da80969ef4db5b4a23512d2fd8590419ab"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-1093-8625-0.svg",
+      "bytes": 1792,
+      "sha256": "152cd7a839f9759b9d091c58ded56287af320d8321fddc210db52d5e5d8c3b1f"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-1923-1532-0.svg",
+      "bytes": 2228,
+      "sha256": "72e9ca17c6764473be688f3a385663164dccb0368331a49c1a7718bb0e757c4c"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-1923-1532-1.svg",
+      "bytes": 851,
+      "sha256": "9c4496bb4d4a11835429abe359edc1a6beb2ecd6080281c98a91e8c3be4deb64"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-1923-1532-3.svg",
+      "bytes": 816,
+      "sha256": "6d029bfc8bd4c70f27a77a8cef6f9c88f51846e21603848f794d92427705a6cf"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-290-13357-0.svg",
+      "bytes": 980,
+      "sha256": "6601d89f12027a9474db6f2c2ba6ca3c6152947623b714c78c8174f28610c4ae"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-290-13357-1.svg",
+      "bytes": 597,
+      "sha256": "a675a4bdbd08adaf128dcfc0b7b6d24075a9a67f58503dd0b9df70cafbf31752"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-290-13357-2.svg",
+      "bytes": 1803,
+      "sha256": "b4946ab55b0c56d779df5662a02662de269f7ff646c1e0736c49b94fc0459366"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-290-13357-3.svg",
+      "bytes": 582,
+      "sha256": "a37ee742b7f7a21164a22cdbbbb633bb276511d6c0c7424d7cebd7ce348b68aa"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-303-24751-0.svg",
+      "bytes": 2557,
+      "sha256": "d34e53dfad7c5ff23e7a8ac1698490778b8a1bd36b82588994dd305086a48133"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-7467-13122-0.svg",
+      "bytes": 509,
+      "sha256": "ba30d165b4d4af568c6d3da5317b403b3d2a47837bd95063967aea7deb83033f"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-8038-6624-1.svg",
+      "bytes": 2009,
+      "sha256": "474a81b043244a8b63e6c9ec22ed8bff21a9a19c26f6f28b3239fd5e292207b0"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-8038-6624-2.svg",
+      "bytes": 1821,
+      "sha256": "e1f2cc495752f6b30667246418c15374097805e91154a0526a6400dc835b989a"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-8038-6624-3.svg",
+      "bytes": 865988,
+      "sha256": "1d0141d66161c565f03260b6c969f87539d83ed575a53e4af96cef4b36486d4f"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-8038-6624-4.svg",
+      "bytes": 6259,
+      "sha256": "314fb5a5a2700ccdcb56622a4993c85eb86a0924663220b0a946ec3f8041d3b6"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-8889-204-0.svg",
+      "bytes": 1788,
+      "sha256": "4e1c73fec5c2d694bd7efd454d78ac3fcbe1983e9aac3bea2b9393a81956d8d5"
+    },
+    {
+      "path": "src/assets/design-system/compositions/source-9365-16188-0.svg",
+      "bytes": 1792,
+      "sha256": "e7b94581da5e2a5307f54b5e7dfbe64f78dd897645abc5b1f112e4073533d292"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-1093-8672-0.svg",
+      "bytes": 1792,
+      "sha256": "58f2c5feb5a2a6842e27aa17bb2ea26fc3f3b6462ec7e6fcccd13f9015ace5e3"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-1518-3435-0.svg",
+      "bytes": 234,
+      "sha256": "6739f647927320a9e068a7c73a59bc0a141a43a647d81c15fd6027cfd0181357"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-1518-3435-1.svg",
+      "bytes": 1056,
+      "sha256": "184136eed1ef325f87a4af00d2e8cf0d33dacc06b935a00b61c7b46ca9205350"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-815-5402-0.svg",
+      "bytes": 482,
+      "sha256": "2d26e63c225bae7cfbc5b210f0aae7d8bb05afd85cfcb4bb39aaaf23e885e72e"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-825-5493-0.svg",
+      "bytes": 482,
+      "sha256": "409a2c72670fb24b10debcdbc2c43fbbbe991955ffe5774e1d89e0c9157601da"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-8889-251-0.svg",
+      "bytes": 1788,
+      "sha256": "64dbffa754c9279ccf3bc0a683b243bf35bff8bab032d38c24236c0d76c41c35"
+    },
+    {
+      "path": "src/assets/design-system/compositions/variant-9365-16235-0.svg",
+      "bytes": 1792,
+      "sha256": "52bcbe38120d3029372e984e845007f94556fbc3af30c3057137eede284309ae"
+    },
+    {
+      "path": "src/assets/design-system/feedback/decrement.svg",
+      "bytes": 466,
+      "sha256": "9742b966777a5da2a4a7a9588c3d40a3496190dc722bc98cd31b75a249570d5f"
+    },
+    {
+      "path": "src/assets/design-system/feedback/increment.svg",
+      "bytes": 527,
+      "sha256": "3b6946597bd295a1ea57ca3f93aca10181810b882918e8cdb38a117cd5c30ba1"
+    },
+    {
+      "path": "src/assets/design-system/feedback/nps-empty.svg",
+      "bytes": 4532,
+      "sha256": "e6175afade27f6c79041a45b8e80548edd95acfc2b99ee455b1c4e8d33cd5c69"
+    },
+    {
+      "path": "src/assets/design-system/feedback/nps-selected.svg",
+      "bytes": 764,
+      "sha256": "5ba7bf615ac5adb8195a04dc359b2047c26787d1073f5583509d856b152eec02"
+    },
+    {
+      "path": "src/assets/design-system/feedback/placeholder-label.svg",
+      "bytes": 8657,
+      "sha256": "66141d3d48a0be26a659caf24b4b23a13337c4b0d92572ac2f13cc0e2fe10872"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-0.svg",
+      "bytes": 1231,
+      "sha256": "365876169eb63fcb5b46840bbffaf1c5f8d723295ebb9d490e8001d85b0164d2"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-1.svg",
+      "bytes": 1713,
+      "sha256": "0a2f44368fcf6e682e39645d48b6066c26593539c706e3588f2d687ead07a8e4"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-10.svg",
+      "bytes": 667,
+      "sha256": "0dd27f2cc1818a6739d29923e86a225b63b3665fc5cb44374709ca3fd56aa5f8"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-11.svg",
+      "bytes": 693,
+      "sha256": "69281a5637096ecd3c4bddc89d0a343dfa4dc8eb9f9309449d3cb609e4f11956"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-12.svg",
+      "bytes": 513,
+      "sha256": "6840a0202c3c2cf847de5e981e984998a9ca4dc02784d6ba968b150894b836c1"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-13.svg",
+      "bytes": 563,
+      "sha256": "b421f08dcbf8afd821202425b005d815d7d04e72935f2ffd7b90d9f6ef88dfa6"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-14.svg",
+      "bytes": 10589,
+      "sha256": "e89a3a4d78acd66de4ac7b5967b278fa2346b11db688f87eb794f78232fc3e5b"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-15.svg",
+      "bytes": 1875,
+      "sha256": "64ea47d6f1fd1234ed4f8a7cc63f892ee67b6bc93f1ac271f0b910ec7c873a92"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-2.svg",
+      "bytes": 1723,
+      "sha256": "114dc270fa1976fcebc8d65cec7815a1fdaaf72d3ba3fe888fdc05b8afbabdc7"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-3.svg",
+      "bytes": 1952,
+      "sha256": "8130fd27828880ae237cadba0b9d3122c925a503d41fd77e057429f6284ae60e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-4.svg",
+      "bytes": 2453,
+      "sha256": "574c257c7ef8f876d3e8295a454da40a9557328595d6f36aac94fea8552a8a6b"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-5.svg",
+      "bytes": 547,
+      "sha256": "5c70778ae8e75680a92c5865992b175e0dfc13ddb0aa2f062e562a23bec7ca55"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-6.svg",
+      "bytes": 539,
+      "sha256": "dcecebaa01f08adc071137880b53d37ed0a876b57965f23ad4ccf773f9a69365"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-7.svg",
+      "bytes": 513,
+      "sha256": "45ed46ca8008455a5d5f3491f556b9b1e6f6ac89f79b7af3819b6b9cf1d1fc95"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-8.svg",
+      "bytes": 612,
+      "sha256": "045c70236faf74062c832f493522ec2aa720d5b9dc0b01e3409683e8940a96f1"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39886-9.svg",
+      "bytes": 449,
+      "sha256": "d8f6c10b59b0f635626bb01db3ecf705b6c1673c8b11e09758eb2a47ec315157"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39899-0.svg",
+      "bytes": 6085,
+      "sha256": "064c14db7604bc481da9e585cbe0ebf50764f425e687cfe3767c49d1aefbf460"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39924-0.svg",
+      "bytes": 6103,
+      "sha256": "b1b42989b5f8bf08bfb9512d7e9b524f4b98680be7bad78d20a648f47f680fc4"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39949-0.svg",
+      "bytes": 6100,
+      "sha256": "ecee85ffcce5ef2219c3abf6fb6429ae6ae5d15c05ecd798bf38156c0bc95152"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39949-1.svg",
+      "bytes": 1614,
+      "sha256": "95566098e231fb44ff33f6f0f3f3603fbecb49b3d26e9a3b7d7d7e8a58e98f9f"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39967-0.svg",
+      "bytes": 6118,
+      "sha256": "10350d195870dff45a8486d436ce28c753dc3b046d412ecd059e38d78f322a76"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39967-1.svg",
+      "bytes": 1616,
+      "sha256": "2b6233f5b556f179bb0703c6b065bae442829529d4aa40ca1f20ef8a6205eef9"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-0.svg",
+      "bytes": 1254,
+      "sha256": "4dcc9f3b997adf1a6f0e0e1247d413d99d054bdd9eaede9375bf0c78d1cb6b5e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-1.svg",
+      "bytes": 1734,
+      "sha256": "b79ac2a763b4fb6cf53ed2ef904ab8bdfbe5236b2439df0abfc5503fb8c0fcfd"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-10.svg",
+      "bytes": 715,
+      "sha256": "c2591cf041d355a10a5ecb98cffc38ec678499069ca93e097c7ea3f231e12043"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-11.svg",
+      "bytes": 746,
+      "sha256": "03615b7275f2f479118f2376f6be3af57365dc06519bf10d51775f3797aa8280"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-12.svg",
+      "bytes": 527,
+      "sha256": "7ddbf66dbb3600540f159b3670b863532e2d64fefa4b253d74c50e1ac33f4cc3"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-13.svg",
+      "bytes": 592,
+      "sha256": "67dcd42d40a0f143b49a7e01a0f4ab9322a5c1b5739093983b7a8119400f104d"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-14.svg",
+      "bytes": 10724,
+      "sha256": "0a3fffc97be5c55f5c50339d4b47cadb877a77ac114af0e0b8601959011265d6"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-15.svg",
+      "bytes": 1869,
+      "sha256": "9b821e5b8a5edd5c07dfc0610d0e3274f5915ff8165c1084dabc648d11b728b6"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-2.svg",
+      "bytes": 1738,
+      "sha256": "1a2d45b435e4f82c29fcfdb8ea9739ce8ee2ecc8806c23ac6c8b9f7e58ce5401"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-3.svg",
+      "bytes": 1996,
+      "sha256": "bcef83b2ffa831f634682de933e70318f5bd3e9e60abaad3ff603f93dc30021e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-4.svg",
+      "bytes": 2609,
+      "sha256": "75f4f992849edcaac752d73badf0b63c73f057e68991c8c7325e2d1f3c83d44b"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-5.svg",
+      "bytes": 563,
+      "sha256": "98bf2a7bb0e4ed51dcc631c160c91aa8d600b5ad2bdbb3502c0d5f0b72c2d479"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-6.svg",
+      "bytes": 588,
+      "sha256": "466a83f7ffd806a078402962b216267e1bf39675c6e7ec95eaafd49b967fd9b8"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-7.svg",
+      "bytes": 528,
+      "sha256": "d051e5b29c45bbf81c99db963a5930edeb13a8d0a0b8379a2680f7a3096f0842"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-8.svg",
+      "bytes": 641,
+      "sha256": "c54c3b607942a9c36e7a62e830aedab8f13f338beb4d27e950c9b353669eb1a1"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-39985-9.svg",
+      "bytes": 476,
+      "sha256": "541fc2aba52f97136f49ebea203b89081a47bc0b5fbe391c66e6174bcef9933d"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40013-0.svg",
+      "bytes": 6182,
+      "sha256": "d2038555e968b126feb3e478b4f9ce403d85c63dbafa47633cf1863cfc0c3045"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40013-1.svg",
+      "bytes": 1738,
+      "sha256": "976860ef5dc059518f5a661be9416af9f8121069467060c9409fd03c9fe08747"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-0.svg",
+      "bytes": 2528,
+      "sha256": "f59350ac46f3e9ded536ac3ceb3e4e1d1aa52ba975f20fbbc6f6ce631bea0f71"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-1.svg",
+      "bytes": 549,
+      "sha256": "de53325768b4f5f7da329eca4ba1041142fd8163c417a99ebf1dd7964efe9f87"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-2.svg",
+      "bytes": 546,
+      "sha256": "15827e46df802007c264d73ee0d5ec27304955b34dcd859c8656dab378486bee"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-3.svg",
+      "bytes": 526,
+      "sha256": "f74111834c1c17427f31fabd3eba940de5ceabd2fbf72df0db53886a7a011bfd"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-4.svg",
+      "bytes": 622,
+      "sha256": "2255b4988abee88605940d9507292887316ae013c2f56d0e8a6824cfe77a0170"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-5.svg",
+      "bytes": 454,
+      "sha256": "ebc9b0ce96cd25c60389506b26f73471341afb7b82de2b211566c5c2e8b56424"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-6.svg",
+      "bytes": 680,
+      "sha256": "213dc9f1010129e45e6dcb320342caed2153473eac72b02e9f4b48bd65121f91"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-7.svg",
+      "bytes": 705,
+      "sha256": "bdd81e2a376f7875d15a3cc18dc4b9136feb01e44b3f8fd65266bef96f9e2461"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-8.svg",
+      "bytes": 526,
+      "sha256": "421ab48f5634d17435e7439c03d488257f1099b6310059a0c9899122a6596e22"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40063-9.svg",
+      "bytes": 571,
+      "sha256": "7657cb4cfecf63086961abbf3f86b562f711e4690180bee1904c3e7f6cff3995"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-0.svg",
+      "bytes": 1236,
+      "sha256": "30f5c37fd59c051e5e1422983e4bd7d0856c5bc0fc8e9084fff435a5b5dc9e7b"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-1.svg",
+      "bytes": 1723,
+      "sha256": "7677998eedfa45592c3f7c9c06e90115c43e3b985840d81ab9d6c1d89c54862a"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-10.svg",
+      "bytes": 680,
+      "sha256": "ed3f94b438fcb139d46981713978bd5c0af1ca520074bd82c64a29f5b06154ab"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-11.svg",
+      "bytes": 700,
+      "sha256": "b842868a2d7aee08e237b3c22f7b86ad7e1979e7d247ea33658b53d82cc778dd"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-12.svg",
+      "bytes": 514,
+      "sha256": "94f5df68060f72c570c1f889b7e53ad6e6755d1f3fa6e64df55682bb351412bc"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-13.svg",
+      "bytes": 582,
+      "sha256": "622a8ea97d866295c147b39b197ebcec93e8164946bf0e9d3063d5756840ef85"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-14.svg",
+      "bytes": 10634,
+      "sha256": "18d0beed6267bda6b679e045e08d12dfebc9e7212785f27ad3751faab855e9f9"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-15.svg",
+      "bytes": 1876,
+      "sha256": "e884b3c4e3727838a9e852c0a52aac0df28f9bd7a0b90a112755fac51f573d90"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-2.svg",
+      "bytes": 1728,
+      "sha256": "ca2be07a3b68602df9ee074c8476118827ba7e1b3ef913727b990859baf019f6"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-3.svg",
+      "bytes": 1954,
+      "sha256": "c974cfcbbb5ce378e0e3b3a179835fdb644dcf7e97cb4349bf102d9fe2e00fb8"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-4.svg",
+      "bytes": 2520,
+      "sha256": "ad47a6d049513801da29cd875ac676ac1c1805656b27b5f5365c6fb7ddb924bc"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-5.svg",
+      "bytes": 551,
+      "sha256": "bdb5f6b37ceae8b33f8e9748ef63d2bab85d5f165271842da6f0c4edf44d5457"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-6.svg",
+      "bytes": 570,
+      "sha256": "eb61ed376f2a994a961629a08ecaf242149c43adab763c05c1f7bed165c5775e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-7.svg",
+      "bytes": 519,
+      "sha256": "3019ad3c5cb4e7a817e40b1594ac65ef89466cbfb8c9ba7cb2acee5ebb38b564"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-8.svg",
+      "bytes": 624,
+      "sha256": "05f0b53ac36aae23af46604f3f680db18df1975862d4ef803178150e15cc238f"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40095-9.svg",
+      "bytes": 466,
+      "sha256": "d9d5eeecbf5db4a72a360e5ab36aa6666faa79bf657b46b59bca48e7f515fb55"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-0.svg",
+      "bytes": 2444,
+      "sha256": "166cd99ac6e1a8c6ef8b2b306a2c08e84aedc590faa94ebca291ee71652e6bab"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-1.svg",
+      "bytes": 526,
+      "sha256": "2ff89585ff39400928a384052c7cc2aacea09da720801a1116150d8bea814d76"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-10.svg",
+      "bytes": 1881,
+      "sha256": "adb679795f6c563f36a550f6c62305ab8db64c368631a001c22335229cb71bfb"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-2.svg",
+      "bytes": 546,
+      "sha256": "3a4506c4a0ef89ec14dfa562f753aa2562897fb385ae973f6a5de9c10d97f89c"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-3.svg",
+      "bytes": 507,
+      "sha256": "51cddbc4cbe17fa1d1d9fc091606b6505ce0d10893a66527644058ca1c0fe910"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-4.svg",
+      "bytes": 610,
+      "sha256": "6a33e78a9e796b0695dfdd62f4df16fa23b647aa305ac84e8042d3a31ab61fc7"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-5.svg",
+      "bytes": 455,
+      "sha256": "ddc76a225f301988b65d680350599c196f5f981bb084b28fff1255410c70f095"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-6.svg",
+      "bytes": 661,
+      "sha256": "e7e819aa96732954767f077d18f3627f80a8167c55ced2e25160eef80dee7a7b"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-7.svg",
+      "bytes": 689,
+      "sha256": "fca1f77db4c5f21b63723f99cdff7c89b11cad95367b33ca859b3c1bfb00a5b3"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-8.svg",
+      "bytes": 506,
+      "sha256": "c8a67921fb31517187145e472c093c9903eebe19857ef953d8605b248d6a011e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40109-9.svg",
+      "bytes": 563,
+      "sha256": "9898c4fa2816ebafaeac58274afaf3a136af5b1e66ea98af0b9fb6ab77442d81"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-0.svg",
+      "bytes": 2394,
+      "sha256": "7e56817374733ad3a3987a8a750173231d2290eccb8cbcb6aa3215144469ced4"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-1.svg",
+      "bytes": 541,
+      "sha256": "e093ecb7833eea3333fc066dce3cb1702f58f862b318685b0e8836288c8be2f1"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-2.svg",
+      "bytes": 533,
+      "sha256": "d0530743d298b7e4e612d2d4401673d516de4195145107046afa3b3c3ad2aba2"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-3.svg",
+      "bytes": 500,
+      "sha256": "9a631822f53b1044527f5bbf09f2cad2c738b79bacea13b778868187095d49a3"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-4.svg",
+      "bytes": 610,
+      "sha256": "f901731ce43fa1156a1fa922c966c99d725f039ed4c92ced5354da493687042c"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-5.svg",
+      "bytes": 438,
+      "sha256": "80b6bfe87707752643b7440aa8efe4360b0dbb912020c4f3a92e904ee0d1c899"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-6.svg",
+      "bytes": 661,
+      "sha256": "ba97ccd5139d5f3d9374a479e3e0070bd728313c1eec987c4fdd4b2799a69d9e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-7.svg",
+      "bytes": 695,
+      "sha256": "07397051ab0481a02f95b293c6da6d4c7b24180a181faeef3d013c4160595414"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-8.svg",
+      "bytes": 499,
+      "sha256": "202556909e0003aedc4e986571dd17852ff8e0157605bbe6acb5c4281c0f8632"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40127-9.svg",
+      "bytes": 557,
+      "sha256": "3a4c2e9cc03e3910f12169b4f553372e1569ff05778fbd5f6aec855abc63a98e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40233-0.svg",
+      "bytes": 1611,
+      "sha256": "8c7b84ce26146b1d7632e11605358fa310cf72ef35ba4f87c43b0a833ab7076e"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10183-65516-0.svg",
+      "bytes": 2417,
+      "sha256": "6275f6ad8a83f775f75a91ad78e2d0fe95c75238e449cd78942fe67c7c389547"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10183-65523-0.svg",
+      "bytes": 851,
+      "sha256": "1804ec8b05ee978b915b0866efdee5e11443c66a911fd9b205d44770bb8c6dc9"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-9382-18707-0.svg",
+      "bytes": 1491,
+      "sha256": "455dc37fbcde7b8d0307a047f845e2015d721a7e215c15d2e6740f56d8328346"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-9382-18711-1.svg",
+      "bytes": 417,
+      "sha256": "34ce28e535d311b79d766ff21335bd50348c0a1f596977a044f2ea2b512af32f"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-9382-18718-0.svg",
+      "bytes": 1689,
+      "sha256": "99482c88f22fa28fdfe1dbf49297c543198f6091ef0ee5428e79dc3bab39cb25"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-9382-18722-1.svg",
+      "bytes": 417,
+      "sha256": "0a97dc5862a08aec0039303a9bfb8269e275b18a2982c321e631cb8e76463bd5"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-9382-18729-0.svg",
+      "bytes": 1655,
+      "sha256": "fcb0fd782d1ea4a0773c0029107ebbcd94d17a10c4aef6267e961bac896534d4"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-60919.svg",
+      "bytes": 1094,
+      "sha256": "d019bee24e11faedeb929180a530af939598a9da3f71df243af96fe2346c7921"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-60923.svg",
+      "bytes": 1733,
+      "sha256": "c7c45a5f5de60bac5723210171d1e2f4a79d4955e0b72e5f32f101d82015c768"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-60927.svg",
+      "bytes": 1450,
+      "sha256": "a3a070469a38a5c5c9a30eecee68110525533d6dbe6b028674033450d6e03c6d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62782.svg",
+      "bytes": 4086,
+      "sha256": "0892ff540f5526eeab485e0ce1afae0757818323f98369f216d28bd9ed6c2491"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62790.svg",
+      "bytes": 4113,
+      "sha256": "7203115fd5ce7759d00dd39c57caa2d027952e240e46d7d9cddbc69df2aabd67"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62799.svg",
+      "bytes": 2212,
+      "sha256": "3e79a83fd8e3f470fffa2c9a4f10d82bda1c8d1f131feb5f6c56e49328b9f95b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62807.svg",
+      "bytes": 2212,
+      "sha256": "9a3776ff5bfe8ee615d4b3ec9ae920e80b81d10708d5af674e823289ca68ff8b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62815-layer-0.svg",
+      "bytes": 600,
+      "sha256": "bed33df61bc444b81f6e4276774a415f4b57259dd93d5b3ea6e836006dd5ce93"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62815-layer-1.svg",
+      "bytes": 1086,
+      "sha256": "09112da4f5c0d656176c23682eb46995638ed5a65ca7b610b01e56203f8b8080"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62823.svg",
+      "bytes": 493,
+      "sha256": "381feb58235322b5a01e599b440d144fda4d3a2e2657175d62be061832c53692"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62886.svg",
+      "bytes": 2102,
+      "sha256": "f28b846d849b284230b58c05c9566259a86ba5a21770b3a44018e572d7ffa936"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62944.svg",
+      "bytes": 1330,
+      "sha256": "59ad6a63d9fa990a97f670bee829e25bee213303e801c4f76426b444cddd3858"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62963.svg",
+      "bytes": 4151,
+      "sha256": "a24b60a7260c7bb44782ab3cbc4568ea31aae4466b43ea5a51997303ea803e45"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62979-layer-1.svg",
+      "bytes": 460,
+      "sha256": "a782aedc0a02cea4013d8e42ec02e481f7cddca873f22cab24d361a96939b1db"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-62979-layer-2.svg",
+      "bytes": 1214,
+      "sha256": "64f747781dc9359f6179fe630f1d909b3bd7a2d8ff4b1c393ff224d2181dcdae"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65552.svg",
+      "bytes": 1728,
+      "sha256": "4825b7593cfa44b2cb0e9bf0ce6f8956d70eddb847b60f8e6cbc848ec2e46ff0"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65555.svg",
+      "bytes": 1728,
+      "sha256": "11cb08f97db296391b87f8a4f4813759b133a2b921580266c2e3fed8ef0bb11e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65558.svg",
+      "bytes": 1728,
+      "sha256": "5b4558d451a7455fb835e94b7aa433eff77570759f3443953bf1aa66f94713db"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65565.svg",
+      "bytes": 1728,
+      "sha256": "a43edfa17988fea4cd78a6d14cdad55af7a221d8d62103b8c1600c834ed4094b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65568.svg",
+      "bytes": 1726,
+      "sha256": "822999284a3be1c19b762d8d97716719c9292c7902dd13078b5deebf6c219652"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65573.svg",
+      "bytes": 895,
+      "sha256": "ceb95e1d94927ad446adb153a4577c0ce0d7473be68e3375bb361e9249ce112d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65576.svg",
+      "bytes": 895,
+      "sha256": "bcb7c589117f65a343fd45f51136d7699610fa2715d3ddc8386c63efdc07f2ab"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65579.svg",
+      "bytes": 895,
+      "sha256": "e83474da9d18632d3273bd9a416909d9c087a092cf19d43f967eabb4955b2a87"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65586.svg",
+      "bytes": 895,
+      "sha256": "f6735cb5ebaa613253c999884ee7aff495724c21622e75aed72f21df59bd6c28"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65589.svg",
+      "bytes": 891,
+      "sha256": "785d1a4c2deb9b9e1d84341aa4645861e9e4c9e04ef748232e05256c4597e2a0"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65594.svg",
+      "bytes": 553,
+      "sha256": "ec5bee3c2e8066e79c3597add24803a13151f593f5a58ee1ae450fc42bc2ff6e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65597.svg",
+      "bytes": 553,
+      "sha256": "92325465c8bf70eab73575893f956febcc2118f690d7b9e6d9691e9019d94b79"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65600.svg",
+      "bytes": 553,
+      "sha256": "bd3f3082cc8c52fb19fea1479f59cb82869cc6225e6a59cd29e54fe2d4351160"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65604.svg",
+      "bytes": 551,
+      "sha256": "5ed7b4319225b99f8d1ef88efd4b7c8788409d91e5e935b782fd0edcea510ca8"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65607.svg",
+      "bytes": 553,
+      "sha256": "2f81eeaaf69e61213c8177f5dca65d9ab1db4d87133a120e303ccb0a2dc2d6c2"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65615.svg",
+      "bytes": 493,
+      "sha256": "d90a30c48f8deeffcb17a7e6152ceb4c2bbd3288c2460eb2e57ee3bb3107b122"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65618.svg",
+      "bytes": 493,
+      "sha256": "acad7b6d8298c69e72e4d27c9e159c77b4807c2d7a6efe617c8dd0227745138d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65621.svg",
+      "bytes": 493,
+      "sha256": "d7aab8b23fde5fdac8b4da81d7bfe56d0cfa4d6461fe97a5341c5380d0801bb3"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65628.svg",
+      "bytes": 493,
+      "sha256": "eb7728dcd2fd6a4571f7ec18b26959c833fb702922a6e0c5fcb424d5eae670c1"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65631.svg",
+      "bytes": 491,
+      "sha256": "761293130818569ef8a46d972ef2078b4023601b8858e92a0ada7df262d50ed8"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65636.svg",
+      "bytes": 591,
+      "sha256": "32bcea6036fc3a837cab05d5aef4f60c9b008c8c021c28a51c7abea331a77d82"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65639.svg",
+      "bytes": 591,
+      "sha256": "8e4db71e98c9324d13a884b0f2267cb6d0cd0900272a0d2fc7c64ef15598e82b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65642.svg",
+      "bytes": 591,
+      "sha256": "c69531ed195645a831ebeb643cb6e1d16b8a500275f9b5699ce407cf87409f54"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65646.svg",
+      "bytes": 589,
+      "sha256": "055ca9033667016fe6a3ae953be223179d3897b49eb6cc8a56e83146700e6571"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65649.svg",
+      "bytes": 591,
+      "sha256": "802b975a6d064c36ed75fac718dc7bddec73ff961d908ec125c171a9d1850192"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65657.svg",
+      "bytes": 1486,
+      "sha256": "d2bc44228aa7676ef7b43bf2cf5194f53892454077edf3cfcdf9e77a574e1df9"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65660.svg",
+      "bytes": 1486,
+      "sha256": "0a1ea209ce99debdeb0e8c36088a77001c7375e3983850ab29f1451132dd8636"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65663.svg",
+      "bytes": 1486,
+      "sha256": "7f9fcaa81bdcf10099fdd30a9b054d9ab52a603487d17e19f2c622761a972d8e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65670.svg",
+      "bytes": 1486,
+      "sha256": "badd48a84dea1afddaf50082dc03886d99036e9bc1dcc7f801cae80b3d7dc5fd"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65673.svg",
+      "bytes": 1480,
+      "sha256": "07dcde8b24d13f3a8b4a35b68b6043b158217337c1a46c1c2290c4eeed0b02b5"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65678.svg",
+      "bytes": 1121,
+      "sha256": "60ac2a32a030106260b12239e04c6d120b10efc5f3884d5fba8350aa69ffe734"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65681.svg",
+      "bytes": 1121,
+      "sha256": "eec0404c7c44dc06fe17bc8cc0e7a8179ebede1f1fc1cc81c53c6959062587cb"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65684.svg",
+      "bytes": 1121,
+      "sha256": "d3e87bf075fc59cf352688b3b7db9e0b15b03ebe95323ad868c536025318938b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65688.svg",
+      "bytes": 1113,
+      "sha256": "5e7787163196b5e9b21a722368cb261df147c53a9eed68bb1233c11aa44e3f72"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65691.svg",
+      "bytes": 1121,
+      "sha256": "3a95dbf8ba47aed86304bd186f3f8364350820422af70fae94da78beb8d23f4c"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65699.svg",
+      "bytes": 1612,
+      "sha256": "0f577de3d1ef81d500ad3391fb96809d25bc22efb6e097057c04c9f928ede20f"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65705.svg",
+      "bytes": 1612,
+      "sha256": "a9687c99b4d87773034b20d991c818afc8db395ecff3e5e0e8832ecbf57ef7e2"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65711.svg",
+      "bytes": 1612,
+      "sha256": "64dcca0615ec7dd47c9205a87d61d0541e04413c6946dc2c5c87658454a022be"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65724.svg",
+      "bytes": 1612,
+      "sha256": "0fd3d2819f2cd5adfea24c8cba9e9dc6c8285022ea431f0cfb1b09ed17b08cf6"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65730.svg",
+      "bytes": 1610,
+      "sha256": "0cd09b1228236613c4e5d4fd60fd86a7d8f7682edd27392afd2e28c30912bdf6"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65759.svg",
+      "bytes": 1100,
+      "sha256": "525822eebe36cb0a18400626117e5a6f8289324cd88dc47d744ac536a3298160"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65762.svg",
+      "bytes": 1100,
+      "sha256": "4974fafeb1f2e9fec4e0f82a2062ec8e88487ea76e1858754076c40e061f2cca"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65765.svg",
+      "bytes": 1100,
+      "sha256": "4d9963d2d8a84b62e77d2b36d20d63d9f1c20ba084fed2b51ff10e246e104bf0"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65772.svg",
+      "bytes": 1100,
+      "sha256": "5195b082cbf62b4e8735d2571d35f5fab905367c51b6cbc5dd2a2ea45493175e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65775.svg",
+      "bytes": 1098,
+      "sha256": "21a6af077b26daa06546649efdc655412ac8f0ac58ee72af5135589b645039bc"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65780.svg",
+      "bytes": 504,
+      "sha256": "764ff86b394e88e7dd5b23995b0446b34ccbd337e7e46f546fea67d9f9f08a84"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65783.svg",
+      "bytes": 504,
+      "sha256": "e705e05ee448b3472836357bc144562869dd48e50b72818dcbdc8fe18a1beccd"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65786.svg",
+      "bytes": 504,
+      "sha256": "d8257bd18a29016c537fd01c3566baf18c1d9a9b58b463ec8d1b96b601e828e0"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65790.svg",
+      "bytes": 498,
+      "sha256": "3519bdde19256d7b5ab225d900e82f121fff8c399010d2fcbb3f69e8de4b9a26"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65793.svg",
+      "bytes": 504,
+      "sha256": "0c22b49458162f62ea4aa0e694576908a8197bbf2a9e09d69ee450aa925b427d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65801.svg",
+      "bytes": 1029,
+      "sha256": "6129b931f68ea8ba2fa59ed89503791dc4b4e9053c61b4df051beeab7acca714"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65804.svg",
+      "bytes": 1029,
+      "sha256": "253dba7465073aab5aaa59229b6d53cf82a25f32e4d4db2ad227b58359bd18b8"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65807.svg",
+      "bytes": 1029,
+      "sha256": "49439109d12a3125bc5a0fe49c10de5504bac0b6feafc669df75e143d592fd12"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65811.svg",
+      "bytes": 1025,
+      "sha256": "c9af8aacf9b43db5f998c8d2325a3d4436471a89d5951564c185f4ae2c7c164d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65814.svg",
+      "bytes": 1029,
+      "sha256": "96ec4e2318a4c63a13245230d6169ddc6fd0e03bdd2d66bd5eabee2214392524"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65822.svg",
+      "bytes": 4305,
+      "sha256": "0d79e5ed496591eadcc5e71d34490b20452620b4fda0cb7327401f27f228b952"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65833.svg",
+      "bytes": 4305,
+      "sha256": "2ad77d0356025af58edc40d707951afa50b189cc40d79efe681743120b4a55af"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65844.svg",
+      "bytes": 4305,
+      "sha256": "ce29bc890c0d7e23a904f5bc17e8874d4997840fba15046c5abda79552860b2b"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65856.svg",
+      "bytes": 4303,
+      "sha256": "feecd3304a1b11e14b33d8489d4cec6e523b31a4e7ce95d1b43c400c85427fa6"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65867.svg",
+      "bytes": 4305,
+      "sha256": "9da32dd3c8c49c950485508c9bdbe7af776cd3cfcda241a938435011aa2ee64e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65891.svg",
+      "bytes": 661,
+      "sha256": "8fb6973a0c56575c9fb57d7ec20a30d384e24a8d6e9feb55043759bcd658682a"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65894.svg",
+      "bytes": 661,
+      "sha256": "6691bbb28d415625c40dbb66a3e992e19e22e9876672a9f04096b312415a21ea"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65897.svg",
+      "bytes": 661,
+      "sha256": "f80cbcc75ec19f87c505f5a0f135fd48c9ad6d8d43a15a981c0dc46a74646a9f"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65901.svg",
+      "bytes": 659,
+      "sha256": "10b0658e8db2e8fa5ae8c64e4377d17d3e9c7b50da930205ee3e797f768d5f18"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65904.svg",
+      "bytes": 661,
+      "sha256": "e9e57f5258d428aac97e0172f69b680c45f2145de5ea5d6a0061d9ce800973e4"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65912.svg",
+      "bytes": 1311,
+      "sha256": "be2fdbecb98e22eba101c5fa64c67cc4ba90455a0c813b62b7035a7e5c69b396"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65918.svg",
+      "bytes": 1311,
+      "sha256": "006c9ea8cdf4ff1768ac2257e43872506b8ba9cfd10b06ea7b46d6763d561140"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65924.svg",
+      "bytes": 1311,
+      "sha256": "4628bf7744591541cce8e34f97e78dd63ef8d15afaecf9ae51f25d6f55c57f8a"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65931.svg",
+      "bytes": 1309,
+      "sha256": "b5563da5990e11ebec53e4059bcd2b0db579b508aca4e5ef652555688b24be42"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65937.svg",
+      "bytes": 1311,
+      "sha256": "437a47da52a30c84d222d319233e4bca181c2ee8c8ae64659946171609a1394c"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65951.svg",
+      "bytes": 704,
+      "sha256": "683eaea249fc51665d796572f8329e4bbca15b1c5ee997af2a480df92a559a1f"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65954.svg",
+      "bytes": 704,
+      "sha256": "8ee2191130687736f6ca067f22048ddbf0700234b4481f9c80168aff11e623b7"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65957.svg",
+      "bytes": 704,
+      "sha256": "daf879a4bfa47cce464ad58d955ee1bdcb5d869c495c2ed41ec7d0fdbe2003fd"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65961.svg",
+      "bytes": 700,
+      "sha256": "9d1ca689e7f959bb1a477fae24de72904978e26f8c9e1640a1a565bab6827554"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65964.svg",
+      "bytes": 704,
+      "sha256": "90786b60331fc2d3e7aa4e4d163bb5a4db32d7e87798e519ad3d8bd059bb712d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65972.svg",
+      "bytes": 756,
+      "sha256": "42ff80ff6beb56cb0dba7b31d8fd8fab39f1db865b77728071781f0d52feda5a"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65978.svg",
+      "bytes": 756,
+      "sha256": "a598b84b936c28dedb870c343c6ffabab3757d0be5f33cc84d6b61da4f03a2dd"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65984.svg",
+      "bytes": 756,
+      "sha256": "793e71c04b5f93b3b754ca5d3d7ecb2abe026276c66b4022ceafcf4d2e7e9954"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-65997.svg",
+      "bytes": 756,
+      "sha256": "2c9de80a7e0ec6ebd39a9d9cf1335a7999589c881e536810961f19bb0428f709"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66003.svg",
+      "bytes": 754,
+      "sha256": "2aa6ec58bc21cdb351023f003b993329ade767c139d18c20f16ea86feb5db768"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66011.svg",
+      "bytes": 1051,
+      "sha256": "711eb5d814fb18b98effbbc69fecf9f98eafabc57b6da14f48f3bc8c9e922c6d"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66014.svg",
+      "bytes": 1051,
+      "sha256": "a531e159c8b42069c58322275f83db51a09905e1316d887ee9db4bf17ed60046"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66017.svg",
+      "bytes": 1051,
+      "sha256": "e3e6718b7c3182a41adf8d17e136af59d0b8fb8858748ada506ed9e19b396054"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66021.svg",
+      "bytes": 1045,
+      "sha256": "d1f8a55ae340ef525b21ce1e9ffa67238855bbf1025889271d01b3b58f300893"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66024.svg",
+      "bytes": 1051,
+      "sha256": "15862f6e2dde138ab025d09d7d4b7b30ed1808e7459aff4d0360c8da9d23f06e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66032.svg",
+      "bytes": 1004,
+      "sha256": "8c2cdd111b7d5b3d0afe6edfae651aa60806679e3c3d1ecbe013a949b3d15d3e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66035.svg",
+      "bytes": 1004,
+      "sha256": "87ca61bbc62b4d6da10fb38912a371dba2bd7f94b1c8826bbd461c572610155e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66038.svg",
+      "bytes": 1004,
+      "sha256": "241b64b7a16199a8a4fff35116a7d889f91b260b2a6085257c6597d6a6c2dd8c"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66042.svg",
+      "bytes": 1000,
+      "sha256": "d323717c45bc04c06a179a6e9ab54f9f881e3ce963d75728602af0629e546d69"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66045.svg",
+      "bytes": 1004,
+      "sha256": "6112aec4a0cbcb86a1d62b8e06fe7739660ca6c6ef6f7f2bbc69d8df2e95d09e"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66053.svg",
+      "bytes": 1052,
+      "sha256": "b936c21c9c60931c648e64cbed9314c75758dddb475745ed4c063bb770d097a7"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66061.svg",
+      "bytes": 1052,
+      "sha256": "2ec147b408af18014aa86438820ec92c4acce528d79ea3018e80e538a9624128"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66069.svg",
+      "bytes": 1052,
+      "sha256": "5edc8c1a06a8b2e2ce33058c3dc7550fcfd7e95d34bfbab0be4a3755327398b5"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66086.svg",
+      "bytes": 1052,
+      "sha256": "96b03537c82f8f1c3b871262229eac9bfd4b237c3171227ddb110482262e43e5"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66094.svg",
+      "bytes": 1050,
+      "sha256": "20c427d9949dd63678a5773847bb1ed1f07a545c4a980568c380c9c10ae75463"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66104.svg",
+      "bytes": 3101,
+      "sha256": "d8b8f2599869ccccb8132b19cac3b0891b66cb88ab6d82650def17c29f8dd50a"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66113.svg",
+      "bytes": 3101,
+      "sha256": "dc1b575b47abeb106f239bb6474ffd4871b8a23ba0e0a70181da911fec10f646"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66132.svg",
+      "bytes": 3077,
+      "sha256": "aa660cd167f135c0a2ffde3233ededcf68e27e1005d809b5a03a7a90204d65e3"
+    },
+    {
+      "path": "src/assets/design-system/icons/variant-10183-66141.svg",
+      "bytes": 3101,
+      "sha256": "720bfc5285d8279d0a6321aa1ea801771c62b07da82877a83d1defb473924602"
+    },
+    {
+      "path": "src/assets/design-system/mobile-code/fingerprint.svg",
+      "bytes": 3176,
+      "sha256": "286a70c129ed8d244540924d0c4ea4b26d6922dcaddb2df6a6ca1926ec141b29"
+    },
+    {
+      "path": "src/assets/design-system/status-action-required.svg",
+      "bytes": 435,
+      "sha256": "dabe766545f87f2f9467d28de5d79d99555082ccb89ef7f890d207864d414ce0"
+    }
+  ],
+  "addedDuplicates": [],
+  "currentCount": 1485,
+  "currentAggregate": "9e9f6bbe7d7ed54093598b793661e5c637d716d2938a7638a835365569f93533",
+  "normalization": "The Git batch method was first checked against the official audit aggregate before consolidating the one identical task-created SVG copy.",
+  "reusedInsteadOfCopy": {
+    "source": "src/assets/design-system/icons/brand-10141-40231-0.svg",
+    "existing": "src/assets/mobile-first/it/profile/token-imgVector.svg"
+  }
+}

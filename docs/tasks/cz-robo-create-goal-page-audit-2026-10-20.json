@@ -1,0 +1,196 @@
+{
+  "owner": "/root",
+  "checkout": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "date": "2026-10-20",
+  "status": "complete",
+  "figmaFileKey": "Lteu53v7vtyt7UqM64HuMq",
+  "designSystemFileKey": "FKbbStgBIP9bFAMl3DPKHF",
+  "pages": [
+    {
+      "name": "intro",
+      "nodeId": "12928:236953",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "contact",
+      "nodeId": "14832:60408",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "profile",
+      "nodeId": "14207:90269",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "purpose",
+      "nodeId": "12928:237120",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "name",
+      "nodeId": "12928:237135",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "target",
+      "nodeId": "12928:238885",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "portfolio",
+      "nodeId": "14832:65592",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "basket",
+      "nodeId": "14832:68696",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "product",
+      "nodeId": "14832:76151",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "review",
+      "nodeId": "14225:8249",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "contract",
+      "nodeId": "15060:70046",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "sign",
+      "nodeId": "12928:238850",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "processing",
+      "nodeId": "12928:238874",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "success",
+      "nodeId": "12928:238858",
+      "checked": true,
+      "method": "Figma reference, native source and browser journey"
+    },
+    {
+      "name": "failure",
+      "nodeId": "12928:238866",
+      "checked": true,
+      "method": "Figma reference and mocked failure regression"
+    }
+  ],
+  "corrections": [
+    "Intro: original photo retained, three original shared icons added, exact subtitle/risk disclaimer/legal note and spacing restored; sticky close retained.",
+    "Creation CTAs: canonical PrimaryButton; description typography aligned with Figma; contact FAQ glyph corrected.",
+    "Name/target/custom horizon: canonical BaselineTextField and BaselineAmountField; amount gains opt-in fixed currency suffix with no inert selector; numeric validation retained.",
+    "Suggestion and amount chips: approved BaselinePill presentation with Figma padding/gaps; all three amounts visible.",
+    "Portfolio: 217px basket cards, original bold titles, 12px performance caption, 82px product rows in basket detail; card/dot/holding selection preserved.",
+    "Product documents: holding details open from basket detail as well as carousel; KID affordance opens executable demo document preview.",
+    "Review: source typography/spacing, original 60x30 ToggleButton, contract read gate retained.",
+    "Contract: shared BaselineBottomSheet gains optional padding/contentBleed; 24px header/footer insets, edge-to-edge document area and sticky actions; defaults unchanged.",
+    "Signing: title inset24; PIN label measured at logical y281 = Figma y247 plus modern safe-area delta34; other signing defaults unchanged.",
+    "Processing: 100px original Figma SVG with gray track, animated via existing Loading; source title/body layout.",
+    "Success/error: source artwork dimensions, body emphasis/spacing, canonical actions and header affordances; draft-preserving retry unchanged."
+  ],
+  "components": [
+    {
+      "id": "ui.primary-button",
+      "nodeId": "715:6238",
+      "native": "native-spike/src/universal/PrimaryButton.tsx"
+    },
+    {
+      "id": "ui.text-field",
+      "nodeId": "10183:68496",
+      "native": "native-spike/src/universal/BaselineTextField.tsx"
+    },
+    {
+      "id": "ui.amount-field",
+      "nodeId": "10183:68496",
+      "native": "native-spike/src/universal/BaselineAmountField.tsx"
+    },
+    {
+      "id": "ui.pill",
+      "native": "native-spike/src/universal/BaselinePill.tsx"
+    },
+    {
+      "id": "toggle",
+      "native": "native-spike/src/universal/ToggleButton.tsx"
+    },
+    {
+      "id": "bottom-sheet",
+      "native": "native-spike/src/universal/BaselineBottomSheet.tsx"
+    },
+    {
+      "id": "navigation-link",
+      "native": "native-spike/src/universal/BaselineNavigationLink.tsx"
+    }
+  ],
+  "asset": {
+    "path": "src/assets/investments/robo/goal-creation-progress.svg",
+    "sourceNodeId": "11446:28822",
+    "screenNodeId": "12928:238874",
+    "width": 100,
+    "height": 100,
+    "bytes": 1568,
+    "sha256": "c3aa2f3faeb1f14f5d6df7fdeacd4456568cfd22a36df835a333ef292f2416e7",
+    "conversion": false,
+    "baselineOwner": "01a15345-c256-7ac2-bed4-9d92e47e63aa"
+  },
+  "verification": {
+    "affectedSuites": 12,
+    "affectedTests": 80,
+    "affectedTestsStatus": "passed",
+    "nativeTypecheckExitCode": 0,
+    "scopedLintExitCode": 0,
+    "scopedLintMaxWarnings": 0,
+    "browser": "RN Web in real workbench on localhost:4004, iPhone16 viewport",
+    "flow": "intro through Face ID, processing and success; contract reading and KID checked",
+    "fieldFocus": "no browser outline; approved 1px teal focus divider",
+    "proofDirectory": ".codex-temp/robo-page-audit-20261020/proof",
+    "combinedVerify": {
+      "command": "npm run verify",
+      "status": "passed",
+      "exitCode": 0,
+      "testFiles": 327,
+      "testsPassed": 3835,
+      "testsFailed": 0,
+      "auditsPassed": 8,
+      "build": "passed",
+      "completedAt": "2026-10-20T13:38:43.596Z",
+      "log": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/final-verify.log",
+      "summary": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/final-gate-summary.json"
+    },
+    "processingAssetRuntime": "Original SVG from final bundle inspected in browser: width100, height100, viewBox0 0 100 100; SHA-256 unchanged."
+  },
+  "preserved": [
+    "PI/CZ/current/release-future-cz-robo axes and all flow/screen IDs",
+    "business reducer, validation, real-device authorization and default authorization presentations",
+    "portfolio data, dates, original active photographs and SVGs",
+    "current native status bar and approved DS header geometry; no baked Figma system-bar image",
+    "earlier user override: selected goal border/title teal, icon unchanged"
+  ],
+  "demoStateChange": "The real-browser end-to-end check created one local zero-value goal named Bright future; existing goals were preserved.",
+  "limits": [
+    "KID is an executable demo preview; the source scenario does not provide a real PDF attachment.",
+    "Error recovery was verified with the existing mocked creation-failure regression; no production failure was induced."
+  ]
+}

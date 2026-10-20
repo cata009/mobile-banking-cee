@@ -7,6 +7,10 @@
 import { useState } from "react";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
 import { AppIcon } from "@/app/components/icons";
+import { getNativeDesignSystemPreview } from '@/features/demo-native/designSystemPreview';
+import { NativeDesignSystemPreview } from './NativeDesignSystemPreview';
+import { getComponentMeta } from '@/app/registry/componentRegistry';
+import type { ComponentId } from '@/app/state/demoTypes';
 
 export type SelectorOption<Value extends string = string> = {
   id: Value;
@@ -22,10 +26,10 @@ export function Section({ id, title, description, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-28 pb-8 pt-0">
-      <div className="mb-6 flex flex-col gap-2">
-        <h2 className="font-['UniCredit:Bold',sans-serif] text-[28px] text-[var(--uc-text)]">{title}</h2>
-        <p className="max-w-[860px] font-['UniCredit:Regular',sans-serif] text-[15px] leading-6 text-[var(--uc-text-muted)]">
+    <section id={id} className="ds-section">
+      <div className="ds-section-heading">
+        <h2>{title}</h2>
+        <p>
           {description}
         </p>
       </div>
@@ -46,10 +50,11 @@ export function InventorySearchField({
   label: string;
 }) {
   return (
-    <label className="mb-4 flex h-[44px] items-center gap-2 rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-3">
+    <label className="mb-4 flex h-[48px] items-center gap-3 rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-4 focus-within:border-[var(--uc-action)]">
       <AppIcon name="search" color="var(--uc-text-muted)" />
       <span className="sr-only">{label}</span>
       <input
+        aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
@@ -84,7 +89,7 @@ export function InventoryStatGrid({ items }: { items: Array<[string, React.React
 
 export type ThemeMode = "light" | "dark";
 
-export function Specimen({ name, children, tone = "light", showThemeControl = false, detailsHref }: {
+export function Specimen({ name, source, children, tone = "light", showThemeControl = false, detailsHref, previewNote }: {
   name: string;
   source?: string;
   note?: string;
@@ -98,39 +103,47 @@ export function Specimen({ name, children, tone = "light", showThemeControl = fa
    * to the component detail page (hash: `#component/<id>`).
    */
   detailsHref?: string;
+  previewNote?: string;
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>("light");
   const isDark = themeMode === "dark";
   const bg = tone === "dark" ? "bg-[var(--uc-static-black)]" : "bg-transparent";
-  const renderedChildren = typeof children === "function" ? children(themeMode) : children;
+  const componentId = detailsHref?.startsWith('#component/') ? detailsHref.slice('#component/'.length) : undefined;
+  const nativeDefinition = componentId ? getNativeDesignSystemPreview(componentId) : undefined;
+  const meta = componentId ? getComponentMeta(componentId as ComponentId) : undefined;
+  const renderedChildren = componentId && getNativeDesignSystemPreview(componentId)
+    ? <NativeDesignSystemPreview componentId={componentId} themeMode={themeMode} />
+    : typeof children === "function" ? children(themeMode) : children;
 
   return (
       <div
-        className="overflow-hidden rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]"
+        className="ds-specimen"
         data-ds-specimen={name}
+        data-ds-search={[name, componentId, source, meta?.componentPath].filter(Boolean).join(' ')}
       >
-        <div className="border-b border-[var(--uc-border-muted)] px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <h3 className="uc-type-n4-strong text-[var(--uc-text)]">{name}</h3>
+        <div className="ds-specimen-header">
+            <div className="min-w-0">
+              <h3>{name}</h3>
+              <code className="ds-specimen-meta">{meta?.componentPath.split('/').pop() ?? source ?? 'Interactive specimen'}</code>
+            </div>
               {detailsHref ? (
                 <a
                   href={detailsHref}
-                  className="inline-flex items-center gap-[4px] text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--uc-action)] hover:underline"
+                  className="ds-text-link shrink-0"
                 >
                   Details
                   <AppIcon name="arrow-right" size={12} color="currentColor" />
                 </a>
               ) : null}
-            </div>
             {showThemeControl && (
               <ThemeModeSegment value={themeMode} onChange={setThemeMode} ariaLabel={`${name} theme mode`} />
             )}
-          </div>
         </div>
-        <div className={`${isDark ? "dark" : ""} ${bg} relative p-5`}>
+        <div className={`${isDark ? "dark" : ""} ${bg} ds-specimen-body`}>
+          {previewNote ? <p className="mb-5 text-[12px] leading-5 text-[var(--uc-text-muted)]">{previewNote}</p> : null}
           {renderedChildren}
       </div>
+      <div className="ds-specimen-footer"><span className="ds-platform-label">{nativeDefinition ? 'React Native' : 'Web component'}</span><span>{nativeDefinition ? `${nativeDefinition.variants.length} variants · source mapped` : 'Live preview'}</span></div>
     </div>
   );
 }

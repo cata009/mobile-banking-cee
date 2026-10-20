@@ -11,7 +11,10 @@ type Draft = Omit<
   RoboAdvisorFlowState,
   'step' | 'previousStep' | 'previousPortfolioStep' | 'managementMode' | 'termsAccepted' | 'selectedPortfolio'
 >
-type InputStage = Exclude<RoboAdvisorCreationStep, 'review' | 'sign' | 'processing' | 'success' | 'goal-detail'>
+type InputStage = Exclude<
+  RoboAdvisorCreationStep,
+  'review' | 'sign' | 'processing' | 'success' | 'failure' | 'goal-detail'
+>
 type CreationStage =
   | { kind: InputStage; portfolio: RoboPortfolio | null }
   | { kind: 'review'; portfolio: RoboPortfolio; termsAccepted: boolean }
@@ -28,7 +31,7 @@ type Common = {
 export type RoboState = Common &
   (
     | { kind: 'creation'; stage: CreationStage; quitOpen: boolean; publishedGoal: RoboExistingGoal | null }
-    | { kind: 'processing' | 'success'; goal: RoboExistingGoal; portfolio: RoboPortfolio }
+    | { kind: 'processing' | 'success' | 'failure'; goal: RoboExistingGoal; portfolio: RoboPortfolio }
     | { kind: 'detail'; goal: RoboExistingGoal; portfolio: RoboPortfolio; management: 'menu' }
     | {
         kind: 'management'
@@ -53,6 +56,9 @@ export type RoboEvent =
   | { type: 'incoming-goal-changed'; goal: RoboExistingGoal }
   | { type: 'management-opened'; mode: RoboAdvisorManagementMode }
   | { type: 'processing-completed' }
+  | { type: 'processing-failed' }
+  | { type: 'creation-submitted'; goal: RoboExistingGoal }
+  | { type: 'retry-creation' }
   | { type: 'quit-requested' | 'quit-resumed' }
 
 export function createRoboState(goal?: RoboExistingGoal, clock?: RoboDemoClock): RoboState {
@@ -132,7 +138,22 @@ export function roboReducer(state: RoboState, event: RoboEvent): RoboState {
       ? { ...state, kind: 'detail', management: 'menu' }
       : { ...state, kind: 'management', management: event.mode }
   }
+  if (event.type === 'creation-submitted')
+    return state.kind === 'creation' && state.stage.kind === 'sign'
+      ? { ...state, kind: 'processing', goal: event.goal, portfolio: state.stage.portfolio, goalSource: 'local' }
+      : state
   if (event.type === 'processing-completed') return state.kind === 'processing' ? { ...state, kind: 'success' } : state
+  if (event.type === 'processing-failed') return state.kind === 'processing' ? { ...state, kind: 'failure' } : state
+  if (event.type === 'retry-creation')
+    return state.kind === 'failure'
+      ? {
+          ...state,
+          kind: 'creation',
+          stage: { kind: 'review', portfolio: state.portfolio, termsAccepted: state.reviewConsent },
+          quitOpen: false,
+          publishedGoal: null,
+        }
+      : state
   if (event.type === 'quit-requested' || event.type === 'quit-resumed')
     return state.kind === 'creation' ? { ...state, quitOpen: event.type === 'quit-requested' } : state
   if (event.type === 'navigate' && state.kind === 'success' && event.to === 'goal-detail')
@@ -171,6 +192,6 @@ export function roboReducer(state: RoboState, event: RoboEvent): RoboState {
     return portfolio && state.publishedGoal
       ? { ...state, kind: 'processing', goal: state.publishedGoal, portfolio }
       : state
-  if (event.to === 'success' || event.to === 'goal-detail') return state
+  if (event.to === 'success' || event.to === 'failure' || event.to === 'goal-detail') return state
   return { ...state, stage: { kind: event.to, portfolio } }
 }

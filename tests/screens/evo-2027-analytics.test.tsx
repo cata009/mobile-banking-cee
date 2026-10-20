@@ -416,7 +416,12 @@ async function openExpenses(month = 'April 2026', accounts?: number) {
     await selectMonth('April 2026')
     fireEvent.click(screen.getByRole('button', { name: 'All income categories' }))
 
-    expect(await screen.findAllByRole('heading', { name: 'Money in' })).toHaveLength(2)
+    const incomeHeadings = await screen.findAllByRole('heading', { name: 'Money in' })
+    expect(incomeHeadings).toHaveLength(1)
+    expect(incomeHeadings[0]).toBeVisible()
+    const incomeTitles = screen.getAllByText('Money in', { exact: true })
+    expect(incomeTitles).toHaveLength(2)
+    expect(incomeTitles.filter(title => title.closest('[aria-hidden="true"]'))).toHaveLength(1)
     expect(periodControlText()).toContain('April 2026')
     fireEvent.click(periodControl())
     fireEvent.click(await screen.findByRole('radio', { name: spendingCopy.presetLastYear }))

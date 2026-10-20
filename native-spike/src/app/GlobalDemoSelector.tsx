@@ -5,8 +5,14 @@ import { ActionButton } from '../universal/ActionButton';
 import { SourceCustomIcon } from '../universal/SourceCustomIcon';
 import { selectorTokens as tokens } from './selectorTokens';
 import type { NativeDemoSelection } from './registry';
+import {
+  NATIVE_DEMO_CHOICES,
+  RELEASE_BUNDLES,
+  resolveNativeDemo,
+} from './registry';
+import { Select } from '../universal/Select';
 
-const demos: readonly {
+const legacyDemos: readonly {
   id: 'italy' | 'cz-evo';
   name: string;
   version: string;
@@ -37,6 +43,12 @@ const demos: readonly {
     },
   },
 ];
+const demos = [
+  ...legacyDemos,
+  ...NATIVE_DEMO_CHOICES.filter(
+    choice => choice.id !== 'italy' && choice.id !== 'cz-evo',
+  ),
+];
 
 export default function GlobalDemoSelector({
   selection,
@@ -51,101 +63,156 @@ export default function GlobalDemoSelector({
   onSearch?: () => void;
   entryAvailable?: boolean;
 }) {
-  const selected = demos.find(demo =>
-    Object.entries(demo.selection).every(
-      ([axis, value]) => selection[axis as keyof NativeDemoSelection] === value,
-    ),
+  const selected = NATIVE_DEMO_CHOICES.find(
+    demo =>
+      demo.selection.product === selection.product &&
+      demo.selection.country === selection.country &&
+      demo.selection.designSystem === selection.designSystem &&
+      demo.releases.includes(selection.release),
   );
-  const canOpen = !!selected && entryAvailable;
-  const canSearch = selected?.id === 'cz-evo' && entryAvailable && !!onSearch;
+  const canOpen =
+    !!selected &&
+    !!resolveNativeDemo(selection).implementation &&
+    entryAvailable;
+  const canSearch =
+    selection.scenario === 'active' &&
+    (selected?.id === 'cz-evo' ||
+      resolveNativeDemo(selection).implementation === 'current') &&
+    entryAvailable &&
+    !!onSearch;
   return (
-    <ScrollView
-      style={s.page}
-      contentContainerStyle={s.scroll}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={s.content}>
-        <View style={s.brand}>
-          <SourceCustomIcon name="nav-home" size={24} color={tokens.accent} />
-          <Text style={s.brandName}>Mobile Banking · CEE</Text>
-        </View>
-        <View style={s.intro}>
-          <Text accessibilityRole="header" style={s.title}>
-            Alege experiența demo
-          </Text>
-          <Text style={s.body}>
-            Selectează demo-ul pe care vrei să îl explorezi.
-          </Text>
-        </View>
-        <View style={s.options}>
-          {demos.map(demo => {
-            const chosen = selected?.id === demo.id;
-            return (
-              <Pressable
-                key={demo.id}
-                testID={`demo-choice-${demo.id}`}
-                accessibilityRole="button"
-                accessibilityLabel={`${demo.name}, ${demo.version}`}
-                accessibilityHint="Selectează acest demo, apoi apasă Deschide demo."
-                accessibilityState={{ selected: chosen }}
-                focusable
-                onPress={() => onChange({ ...demo.selection })}
-                style={({ pressed }) => [
-                  s.card,
-                  chosen && s.cardSelected,
-                  pressed && s.pressed,
-                ]}
-              >
-                <View style={s.cardCopy}>
-                  <Text style={s.country}>{demo.name}</Text>
-                  <Text style={s.version}>{demo.version}</Text>
-                </View>
-                <View
-                  style={[s.selectionMark, chosen && s.selectionMarkSelected]}
-                  accessible={false}
-                  importantForAccessibility="no-hide-descendants"
+    <View style={s.page}>
+      <ScrollView
+        style={s.page}
+        contentContainerStyle={s.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={s.content}>
+          <View style={s.brand}>
+            <SourceCustomIcon name="nav-home" size={24} color={tokens.accent} />
+            <Text style={s.brandName}>Mobile Banking · CEE</Text>
+          </View>
+          <View style={s.intro}>
+            <Text accessibilityRole="header" style={s.title}>
+              Alege experiența demo
+            </Text>
+            <Text style={s.body}>
+              Selectează demo-ul pe care vrei să îl explorezi.
+            </Text>
+          </View>
+          <View style={s.options}>
+            {demos.map(demo => {
+              const chosen = selected?.id === demo.id;
+              const available = !!resolveNativeDemo(demo.selection)
+                .implementation;
+              return (
+                <Pressable
+                  key={demo.id}
+                  testID={`demo-choice-${demo.id}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${demo.name}, ${demo.version}`}
+                  accessibilityHint="Selectează acest demo, apoi apasă Deschide demo."
+                  accessibilityState={{
+                    selected: chosen,
+                    disabled: !available,
+                  }}
+                  disabled={!available}
+                  focusable
+                  onPress={() => {
+                    if (available) onChange({ ...demo.selection });
+                  }}
+                  style={({ pressed }) => [
+                    s.card,
+                    chosen && s.cardSelected,
+                    pressed && s.pressed,
+                  ]}
                 >
-                  {chosen && (
-                    <SourceCustomIcon
-                      name="check"
-                      size={18}
-                      color={tokens.inverse}
-                    />
-                  )}
-                </View>
-              </Pressable>
-            );
-          })}
+                  <View style={s.cardCopy}>
+                    <Text style={s.country}>{demo.name}</Text>
+                    <Text style={s.version}>{demo.version}</Text>
+                  </View>
+                  <View
+                    style={[s.selectionMark, chosen && s.selectionMarkSelected]}
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
+                  >
+                    {chosen && (
+                      <SourceCustomIcon
+                        name="check"
+                        size={18}
+                        color={tokens.inverse}
+                      />
+                    )}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
-        <View style={s.actions}>
-          {!canOpen && (
-            <Text accessibilityLiveRegion="polite" style={s.status}>
-              {selected
-                ? 'Demo-ul ales nu poate fi deschis acum.'
-                : 'Alege una dintre opțiuni pentru a continua.'}
+      </ScrollView>
+      <View style={s.footer}>
+        <View style={s.footerContent}>
+          {selected && (
+            <Text style={s.version}>
+              {selected.name} · {selected.version}
             </Text>
           )}
-          <ActionButton
-            tokens={tokens}
-            label="Deschide demo"
-            disabled={!canOpen}
-            onPress={() => {
-              if (canOpen) onOpen();
-            }}
-          />
-          {canSearch && (
+          {selected && (
+            <View style={s.actions}>
+              {selected.releases.length > 1 && (
+                <Select
+                  tokens={tokens}
+                  label="Versiune"
+                  value={selection.release}
+                  items={selected.releases.map(release => ({
+                    value: release,
+                    label: RELEASE_BUNDLES[release].label,
+                  }))}
+                  onChange={release => onChange({ ...selection, release })}
+                />
+              )}
+              <Select
+                tokens={tokens}
+                label="Stare app"
+                value={selection.scenario}
+                items={[
+                  { value: 'active', label: 'App activă' },
+                  { value: 'inactive', label: 'App inactivă' },
+                ]}
+                onChange={scenario => onChange({ ...selection, scenario })}
+              />
+            </View>
+          )}
+          <View style={s.actions}>
+            {!canOpen && (
+              <Text accessibilityLiveRegion="polite" style={s.status}>
+                {selected
+                  ? 'Demo-ul ales nu poate fi deschis acum.'
+                  : 'Alege una dintre opțiuni pentru a continua.'}
+              </Text>
+            )}
             <ActionButton
               tokens={tokens}
-              label="Caută în demo"
-              secondary
+              label="Deschide demo"
+              disabled={!canOpen}
               onPress={() => {
-                if (canSearch) onSearch?.();
+                if (canOpen) onOpen();
               }}
             />
-          )}
+            {canSearch && (
+              <ActionButton
+                tokens={tokens}
+                label="Caută în demo"
+                secondary
+                onPress={() => {
+                  if (canSearch) onSearch?.();
+                }}
+              />
+            )}
+          </View>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 const s = StyleSheet.create({
@@ -224,7 +291,14 @@ const s = StyleSheet.create({
     borderColor: tokens.accent,
     backgroundColor: tokens.accent,
   },
-  actions: { gap: 12, marginTop: 32 },
+  actions: { gap: 12 },
+  footer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: tokens.border,
+    backgroundColor: tokens.background,
+  },
+  footerContent: { width: '100%', maxWidth: 520, alignSelf: 'center', gap: 12 },
   status: {
     fontFamily: tokens.font,
     fontSize: 14,

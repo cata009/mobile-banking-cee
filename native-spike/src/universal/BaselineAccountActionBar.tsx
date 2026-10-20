@@ -32,14 +32,24 @@ export function BaselineAccountActionBar({
   iconTreatment,
   dark = false,
   style,
+  presentation,
 }: {
   items: readonly BaselineAccountAction[];
   align?: AccountActionAlignment;
   iconTreatment?: AccountActionTreatment;
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
+  presentation?: {
+    paddingVertical?: number;
+    itemWidth?: number;
+    itemGap?: number;
+    stretch?: boolean;
+  };
 }) {
-  const state = resolveAccountActions({ align, iconTreatment }),
+  const state = {
+      ...resolveAccountActions({ align, iconTreatment }),
+      ...presentation,
+    },
     shell = {
       flexDirection: 'row' as const,
       alignItems: 'flex-start' as const,
@@ -50,10 +60,10 @@ export function BaselineAccountActionBar({
         state.align === 'between'
           ? ('space-between' as const)
           : state.align === 'center'
-          ? ('center' as const)
-          : state.align === 'end'
-          ? ('flex-end' as const)
-          : ('flex-start' as const),
+            ? ('center' as const)
+            : state.align === 'end'
+              ? ('flex-end' as const)
+              : ('flex-start' as const),
     };
   const color = (value: string) => sourceColor(value, dark),
     bubbleColor = color(
@@ -135,7 +145,7 @@ export function BaselineAccountActionBar({
                   color={glyphColor}
                 />
               ) : (
-                item.icon ??
+                (item.icon ??
                 (item.iconName ? (
                   <SourceCustomIcon
                     name={item.iconName}
@@ -148,7 +158,7 @@ export function BaselineAccountActionBar({
                     height={glyphDimensions.height}
                     color={glyphColor}
                   />
-                ) : null)
+                ) : null))
               )}
             </View>
             <Text style={labelStyle}>{item.label}</Text>

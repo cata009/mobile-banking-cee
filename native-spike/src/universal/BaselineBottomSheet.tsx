@@ -32,6 +32,8 @@ export function BaselineBottomSheet({
   closeButtonPosition = 'right',
   showDragHandle = false,
   closeLabel = 'Close',
+  padding,
+  contentBleed = false,
 }: {
   title?: string;
   children: ReactNode;
@@ -50,6 +52,8 @@ export function BaselineBottomSheet({
   closeButtonPosition?: 'left' | 'right';
   showDragHandle?: boolean;
   closeLabel?: string;
+  padding?: number;
+  contentBleed?: boolean;
 }) {
   const c = resolveBottomSheet({
     fillHeight,
@@ -58,6 +62,7 @@ export function BaselineBottomSheet({
     reducedMotion,
   });
   const animate = animated && !reducedMotion;
+  const inset = padding ?? c.padding;
   const panelProgress = useRef(new Animated.Value(animate ? 0 : 1)).current;
   const backdropProgress = useRef(new Animated.Value(animate ? 0 : 1)).current;
   const [x1, y1, x2, y2] = c.easing;
@@ -122,7 +127,7 @@ export function BaselineBottomSheet({
     ...styles.panel,
     maxHeight: height - maxHeightOffsetPx,
     height: fillHeight ? height - maxHeightOffsetPx : undefined,
-    padding: c.padding,
+    padding: inset,
     borderTopLeftRadius: c.radius,
     borderTopRightRadius: c.radius,
     backgroundColor: sourceColor(c.surface, dark),
@@ -228,7 +233,10 @@ export function BaselineBottomSheet({
           {closeButtonPosition === 'right' ? closeControl : null}
         </View>
         <ScrollView
-          style={Platform.OS === 'web' ? styles.webScroll : undefined}
+          style={[
+            Platform.OS === 'web' ? styles.webScroll : undefined,
+            contentBleed && { marginHorizontal: -inset },
+          ]}
           contentContainerStyle={fillHeight ? styles.fillContent : undefined}
           keyboardShouldPersistTaps="handled"
         >

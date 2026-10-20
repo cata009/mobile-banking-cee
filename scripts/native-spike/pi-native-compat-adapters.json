@@ -263,23 +263,7 @@
           ]
         }
       ],
-      "exactRuntimeConsumers": [
-        {
-          "path": "src/app/components/templates/templateScreens.tsx",
-          "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
-          "scope": "design-system-platform"
-        },
-        {
-          "path": "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx",
-          "reviewedSha256": "4A601831471E3372C761D6D33421ADC5026053CC2B407A1F9EB012544908A513",
-          "scope": "flow-owned-prototype"
-        },
-        {
-          "path": "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx",
-          "reviewedSha256": "AAD95AA2C3B2795E415DBEA9344E44A7016348B5B99594DA158D43E85F47E276",
-          "scope": "flow-owned-prototype"
-        }
-      ],
+      "exactRuntimeConsumers": [],
       "nativeOnly": true,
       "excludedContextTests": [
         {
@@ -290,7 +274,7 @@
       "requiredTests": [
         "tests/screens/pi-native-products-scope-boundary.test.tsx",
         "tests/screens/source-native-home-products-adapters.test.tsx",
-        "tests/components/template-previews.test.tsx",
+        "tests/screens/rs-property-insurance.test.tsx",
         "tests/tooling/retired-pi-ui-audit.test.ts"
       ],
       "includedScope": {
@@ -350,13 +334,7 @@
           ]
         }
       ],
-      "exactRuntimeConsumers": [
-        {
-          "path": "src/app/components/templates/templateScreens.tsx",
-          "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
-          "scope": "design-system-platform"
-        }
-      ],
+      "exactRuntimeConsumers": [],
       "nativeOnly": true,
       "excludedContextTests": [
         {
@@ -367,7 +345,7 @@
       "requiredTests": [
         "tests/screens/pi-native-products-scope-boundary.test.tsx",
         "tests/screens/source-native-home-products-adapters.test.tsx",
-        "tests/components/template-previews.test.tsx",
+        "tests/screens/rs-property-insurance.test.tsx",
         "tests/tooling/retired-pi-ui-audit.test.ts"
       ],
       "includedScope": {

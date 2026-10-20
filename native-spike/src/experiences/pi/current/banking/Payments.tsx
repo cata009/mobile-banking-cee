@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import {
   getHeroSheetForRelease,
@@ -61,7 +61,7 @@ import {
   Section,
   Toggle,
 } from './Primitives';
-import { paymentArt } from './assets';
+import { BaselinePaymentImage } from '../../../../universal/BaselinePaymentImage';
 const otherIcons = {
   qr: 'payment-create-qr',
   templates: 'payment-templates',
@@ -521,11 +521,12 @@ export function PaymentsScreen(host: CurrentScreenProps) {
                   </Label>
                 </View>
                 {item.imageVariant ? (
-                  <Image
-                    source={paymentArt[item.imageVariant]}
-                    resizeMode="contain"
-                    style={[s.heroArt, artLayout[item.imageVariant]]}
-                  />
+                  <View style={s.heroArt}>
+                    <BaselinePaymentImage
+                      preset={item.imageVariant}
+                      alignment="center"
+                    />
+                  </View>
                 ) : null}
               </Pressable>
             );
@@ -1138,8 +1139,8 @@ const s = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 126,
-    height: 104,
+    width: 137,
+    height: 120,
   },
   shortcuts: {
     flexDirection: 'row',
@@ -1167,46 +1168,7 @@ const s = StyleSheet.create({
     gap: 24,
   },
 });
-/** PaymentHeroCard's original screenshot-art dimensions, without resampling any artwork. */
-const artLayout = StyleSheet.create({
-  'payments-1': {
-    width: 126,
-    height: 104,
-  },
-  'payments-2': {
-    width: 137,
-    height: 92,
-  },
-  'payments-3': {
-    width: 96,
-    height: 104,
-  },
-  'payments-4': {
-    width: 100,
-    height: 104,
-  },
-  'payments-5': {
-    width: 70,
-    height: 104,
-    right: 8,
-  },
-  'payments-6': {
-    width: 137,
-    height: 96,
-  },
-  'payments-7': {
-    width: 104,
-    height: 104,
-  },
-  'payments-8': {
-    width: 86,
-    height: 104,
-  },
-  'payments-9': {
-    width: 118,
-    height: 104,
-  },
-});
+
 const parityStyles = StyleSheet.create({
   item0: {
     flex: 1,

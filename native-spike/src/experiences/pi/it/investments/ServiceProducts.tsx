@@ -91,16 +91,16 @@ export default function ServiceProducts({
   const title = step
     ? 'MoneyBoxCd'
     : line
-      ? 'Dettaglio linea'
-      : detail
-        ? 'Dettaglio prodotto'
-        : savings
-          ? 'Prodotti di risparmio'
-          : destination.view === 'insurance'
-            ? 'Investimenti assicurativi'
-            : destination.view === 'managed'
-              ? 'Gestione di portafogli'
-              : 'Fondi pensione';
+    ? 'Dettaglio linea'
+    : detail
+    ? 'Dettaglio prodotto'
+    : savings
+    ? 'Prodotti di risparmio'
+    : destination.view === 'insurance'
+    ? 'Investimenti assicurativi'
+    : destination.view === 'managed'
+    ? 'Gestione di portafogli'
+    : 'Fondi pensione';
   const savingsPositions = [
     ...investmentServicePositions.filter(item => item.category === 'savings'),
     ...readSavingsSubscriptions(),
@@ -143,7 +143,11 @@ export default function ServiceProducts({
             { label: 'Controvalore', value: monetary(value) },
             {
               label: 'Percentuale del portafoglio',
-              value: `${((value / wealth.reduce((sum, item) => sum + item.valueCents, 0)) * 100).toFixed(2)}%`,
+              value: `${(
+                (value /
+                  wealth.reduce((sum, item) => sum + item.valueCents, 0)) *
+                100
+              ).toFixed(2)}%`,
             },
           ]}
         />
@@ -381,8 +385,8 @@ export default function ServiceProducts({
                 step === 2
                   ? !selected || !reviewed || !precontract
                   : step === 6
-                    ? !contract || !accepted
-                    : false
+                  ? !contract || !accepted
+                  : false
               }
               onPress={() => {
                 if (step === 3) {
@@ -430,8 +434,8 @@ export default function ServiceProducts({
                     value: flexy
                       ? '20/03/2026'
                       : index
-                        ? '26/09/2024'
-                        : '10/10/2024',
+                      ? '26/09/2024'
+                      : '10/10/2024',
                   },
                   {
                     label: 'Tasso annuo nominale',
@@ -476,6 +480,7 @@ export default function ServiceProducts({
               {!detail && (
                 <Link
                   label={`Dettaglio ${position.label} ${index + 1}`}
+                  displayLabel={`Dettaglio ${position.label}`}
                   onPress={() => {
                     setSelectedSavingsId(position.id);
                     setDetail(true);
@@ -493,7 +498,9 @@ export default function ServiceProducts({
               <Button
                 label="Sottoscrivi"
                 onPress={() => {
-                  subscriptionId.current = `MF${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+                  subscriptionId.current = `MF${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 9)}`;
                   setStep(1);
                 }}
               />

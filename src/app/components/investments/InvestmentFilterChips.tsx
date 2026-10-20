@@ -6,6 +6,7 @@ interface InvestmentFilterChipsProps {
   selectedOptionId: InvestmentSortId;
   onChange: (optionId: InvestmentSortId) => void;
   className?: string;
+  ariaLabel?: string;
 }
 
 export default function InvestmentFilterChips({
@@ -13,9 +14,10 @@ export default function InvestmentFilterChips({
   selectedOptionId,
   onChange,
   className,
+  ariaLabel = "Investment sorting",
 }: InvestmentFilterChipsProps) {
   return (
-    <div className={cn("flex w-full justify-center gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide", className)} data-ds-label="Investments sorting chips">
+    <div className={cn("flex w-full justify-center gap-[8px] overflow-x-auto px-[24px] py-[18px] scrollbar-hide", className)} data-ds-label="Investments sorting chips" role="group" aria-label={ariaLabel}>
       {options.map((option) => {
         const selected = option.id === selectedOptionId;
 

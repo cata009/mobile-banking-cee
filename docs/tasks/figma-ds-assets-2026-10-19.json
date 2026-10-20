@@ -1,0 +1,244 @@
+{
+  "owner": "Root integration",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "figmaFileKey": "FKbbStgBIP9bFAMl3DPKHF",
+  "reason": "45 authorized original Figma SVG additions:42 Images and3 Divider rules. No existing asset was replaced, converted or deleted.",
+  "previousBaseline": {
+    "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12 + main 770ea65 native and reference captures 2026-10-13",
+    "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json.",
+    "assetCount": 1167,
+    "pathBlobSha256Aggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
+    "integrationNote": "Preserves every original 1139 path/blob unchanged; includes 16 Source reference captures and 12 native icon exports already committed in main 770ea65. Exact additions and preservation proof: docs/tasks/native-and-reference-asset-baseline.json. Strict count/hash assertions remain unchanged."
+  },
+  "preservedAssetCount": 1167,
+  "preservedAggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
+  "assetCount": 1212,
+  "pathBlobSha256Aggregate": "86557d2cf32c778876a0fae3920b9f650b0a031d4df8803b429971af2bcd7e91",
+  "addedAssets": [
+    {
+      "path": "src/assets/design-system/dividers/rule-327.svg",
+      "bytes": 300,
+      "sha256": "a290b36c6555b0ceda706bf77f55ac6ca9c263671a8bc24dd58cdb2e0b9af13b"
+    },
+    {
+      "path": "src/assets/design-system/dividers/rule-343.svg",
+      "bytes": 300,
+      "sha256": "f3064d535addf6fdeba67d59771c2652ae8e46483a47cc5a5788ea3f43ad9e3a"
+    },
+    {
+      "path": "src/assets/design-system/dividers/rule-light.svg",
+      "bytes": 291,
+      "sha256": "24bf3cfab952d9c6efbb20d3a73c8e314577c68ad4f62fb077f28328e982512e"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-10297.svg",
+      "bytes": 18212,
+      "sha256": "e1370b77f6882ff729ded11dae98722adf9c7c6700853a0b5d89c0d6dade3c58"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-10443.svg",
+      "bytes": 21436,
+      "sha256": "7aaa663e79d8e5c382720c0cdea8d908e1d5dcfa79f0c34eb8e136d14fb2f055"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-10574.svg",
+      "bytes": 907222,
+      "sha256": "cf927d54c38006ba6cce09674d0529548c434b61f649b508dc6d327f5ffa471b"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-11221.svg",
+      "bytes": 892011,
+      "sha256": "148bfbbf1baad7d9e1a025c50322fe360a8f559ba188d09631fb460367de808d"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-11853.svg",
+      "bytes": 20874,
+      "sha256": "378a3f53247b21c411cb06d96080fd23a7baead26b941e044ef0145c772e0fce"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-11992.svg",
+      "bytes": 60585,
+      "sha256": "f119018b6f533649752daac5ed8de1e3609cc91af4c4e99c7fb5973da015be52"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-12236.svg",
+      "bytes": 61246,
+      "sha256": "a515fa01d75612b4599bc418745ce0005d80f05cc65606800a03eeda05976dc8"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-35505.svg",
+      "bytes": 18759,
+      "sha256": "b2698ec4ed21cc08619d4880bdbc550852163c69913e9cb701f046861fedaf89"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-8696.svg",
+      "bytes": 891602,
+      "sha256": "24246824725578b926bd5c2c459506c712791285896680757690f3f09df47327"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-9371.svg",
+      "bytes": 20344,
+      "sha256": "3cdfe6c60d20d50e52a5635dbdd08c7357525189816a83e35045599b90019cf2"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1272-9526.svg",
+      "bytes": 905477,
+      "sha256": "eff2a3254c63ab7c38691b31f8c3f87c20d9eb2557a1aee3ff9cba0baff17638"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1448-46847.svg",
+      "bytes": 21822,
+      "sha256": "4a023b3bc9eeaa7ab8e7b468171783c40dae7152c0088085b33e4ced26d4864b"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1448-47165.svg",
+      "bytes": 17711,
+      "sha256": "0ba4ce52bf4b343ab6d36414b4fd69308abb8157f0346204ad0e8bc5220e8ecf"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1448-47281.svg",
+      "bytes": 17710,
+      "sha256": "ff03258ba28dbae8260639102554b0ca5e003fc007d5517453a52eba9c60e6a0"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1448-47447.svg",
+      "bytes": 17710,
+      "sha256": "dacdc87e40f0db1a7c8bd066411ee0da1aeb7f264d18c0c18464aac110f0ee33"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-13520.svg",
+      "bytes": 895602,
+      "sha256": "2254b33d44e027debcaf709c91b15b6a2ba3f1ec32ea3dbabe7114bad10a1e10"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-14163.svg",
+      "bytes": 893864,
+      "sha256": "2cb6c79f53ba7aa3757a18b630f0d3bc0d8ff6c7b91ef15405825889842e392a"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-15401.svg",
+      "bytes": 890436,
+      "sha256": "99d6344fd46d262ef28767eaf1e1cf8d9805c9d9831126190b6018b76648326d"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-15533.svg",
+      "bytes": 24697,
+      "sha256": "4369112cb4d74f61ba8f281155cf673cbc2585268a228dd359ebb3d04a57b091"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-15710.svg",
+      "bytes": 17691,
+      "sha256": "803c00f5393a4cabeedede64c4f8f984dc48e9b82c0dfedd62e34c6aaf891dc1"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-15921.svg",
+      "bytes": 17644,
+      "sha256": "b5b2b3ca08ed02ac364b23525fa69b47f4ad12b958296c1889aa67f888b5c36a"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1449-16086.svg",
+      "bytes": 18191,
+      "sha256": "34540adb182057d6a15079d96fe676e6ba3be81630e4da7eff88025ad79296e6"
+    },
+    {
+      "path": "src/assets/design-system/images/card-1917-5319.svg",
+      "bytes": 51755,
+      "sha256": "f84d1918453dbb13c5cae280c01c89991bf6389274d43ce4d52bfb9447a1726e"
+    },
+    {
+      "path": "src/assets/design-system/images/card-2028-337.svg",
+      "bytes": 22404658,
+      "sha256": "469e6894df4eec923ec858ca4f1363fe9ff108646b2d2af334bc25c03abdc3cf"
+    },
+    {
+      "path": "src/assets/design-system/images/card-2129-1022.svg",
+      "bytes": 65877,
+      "sha256": "4dfe1ddfb6e4ae9c21cb118da4eeca4992eef077fc0960f976dd5dc3556d3d0c"
+    },
+    {
+      "path": "src/assets/design-system/images/card-2240-1757.svg",
+      "bytes": 57561,
+      "sha256": "682498efc290f04a77c8521f38b9b93260b5873185b271dff6e17e114848e3cc"
+    },
+    {
+      "path": "src/assets/design-system/images/card-7130-2301.svg",
+      "bytes": 419941,
+      "sha256": "363eddf1cafeec167ea5eb281d784df2bedf868c2154adac71523e1fb2b8bf32"
+    },
+    {
+      "path": "src/assets/design-system/images/card-7130-3303.svg",
+      "bytes": 437023,
+      "sha256": "d9306266df75aeb6fc938c14b7b2fe726b6036b6f322270d188b99f2c66f8464"
+    },
+    {
+      "path": "src/assets/design-system/images/card-7130-3384.svg",
+      "bytes": 212361,
+      "sha256": "04061aab94f260a309c979640b41a6b3c74126abd3d0912e459caebee15c34b8"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10883.svg",
+      "bytes": 220098,
+      "sha256": "35e663c6c01ab848c57e8c5108d0359199610930ced3b85379c1e51c31ff9a59"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10891.svg",
+      "bytes": 12582260,
+      "sha256": "119b51d917e49961880388e6b7ed0abbcd8f8088ac447d858fab8d72c62c4099"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10896.svg",
+      "bytes": 8579507,
+      "sha256": "61d52f7f87aed95a45b1e4e39e9421e15fecfc47127644a1fc9e8fbf61b1c5d9"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10901.svg",
+      "bytes": 6412305,
+      "sha256": "64817746e74bb00f8e7b9a144536fd2e4b1155d1314cf70b5eb1cf3c67a97d05"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10906.svg",
+      "bytes": 18071460,
+      "sha256": "074f95db893cc3809fc20d1b84f46573de2daa4557963d6d63ba2dcbfa49dc23"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10911.svg",
+      "bytes": 1334243,
+      "sha256": "e04758d81c74654acfbeae929a7b4b004aad5a6b41db9d3aca407c34032d2bb7"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-10935.svg",
+      "bytes": 3629174,
+      "sha256": "011a854ad07ac666cb8ffa4724cdb98ea781ebf5492ba65cf35b673718894d25"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-11201.svg",
+      "bytes": 176669,
+      "sha256": "67c9e0acebbbac2f3e6e9421d469ff91d58256263fa756f71c4233ec8f765814"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-0-11206.svg",
+      "bytes": 244094,
+      "sha256": "1ea9dc1e7e938f7baacca2c27cae3ac3d6e678b65b8acbb460a00b9b2f786a86"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-1247-5926.svg",
+      "bytes": 11841755,
+      "sha256": "7e9fc74cf638678b5c146bd0f60874c314f7013dfb4f15493b8b8cec5ab3b482"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-1312-2820.svg",
+      "bytes": 2725210,
+      "sha256": "6da421e9a4eeb71ffa951456d595f4c011551a071b83cdb458829d877fd1e3cd"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-1314-2844.svg",
+      "bytes": 3251208,
+      "sha256": "3adce71a479c3f22c7a6dfc2f56395695ea77dca4a00f7559634087163480a95"
+    },
+    {
+      "path": "src/assets/design-system/images/payment-7957-7558.svg",
+      "bytes": 3252324,
+      "sha256": "949bc28882093092f9d90f1c7c4cee3158ce216b1ba95d9549e94eb11ce1f03c"
+    }
+  ]
+}

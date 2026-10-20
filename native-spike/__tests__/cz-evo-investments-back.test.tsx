@@ -50,13 +50,10 @@ describe('native investment hardware Back ownership', () => {
       tree = Renderer.create(<CzRoboFlow onBack={jest.fn()} onExit={exit} />);
     });
     press(tree, 'Create Goal');
+    press(tree, 'Back');
     press(tree, 'Close');
     back();
-    expect(
-      tree.root.findAll(
-        node => node.props.testID === 'cz-personal-data-confirmation',
-      ).length,
-    ).toBeGreaterThan(0);
+    expect(tree.root.findByProps({ testID: 'cz-intro' })).toBeDefined();
     expect(exit).not.toHaveBeenCalled();
     act(() => tree.unmount());
     expect(callbacks.size).toBe(0);

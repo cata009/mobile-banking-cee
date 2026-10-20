@@ -5,8 +5,150 @@ import { BaselineTextField } from '../src/universal/BaselineTextField';
 import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
 import { BaselineAmountField } from '../src/universal/BaselineAmountField';
 import { BaselineAmountSuggestionChip } from '../src/universal/BaselineAmountSuggestionChip';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 
 describe('isolated forms contract renderers', () => {
+  it('keeps the original chevron outside the line without stretching the input row', () => {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <BaselineTextField
+          label="Title"
+          value="Textfield"
+          onChange={jest.fn()}
+          trailingIconName="chevron-down-wide"
+        />,
+      );
+    });
+    const icon = tree.root.findByType(SourceCustomIcon);
+    expect(
+      tree.root.find(
+        n =>
+          StyleSheet.flatten(n.props.style)?.position === 'absolute' &&
+          StyleSheet.flatten(n.props.style)?.right === 0,
+      ),
+    ).toBeDefined();
+    expect(icon.props.size).toBe(20);
+    const boundary = tree.root.find(
+      n => StyleSheet.flatten(n.props.style)?.borderBottomWidth === 0.5,
+    );
+    expect(StyleSheet.flatten(boundary.props.style)).toMatchObject({
+      paddingBottom: 4,
+    });
+    act(() => tree.unmount());
+  });
+  it.each([
+    ['Beneficiary', '', 'disabled-empty'],
+    ['Beneficiary', 'Ana Popescu', 'disabled-filled'],
+    ['Phone number', '', 'disabled-empty'],
+    ['Phone number', '712345678', 'disabled-filled'],
+  ] as const)(
+    'matches approved Figma disabled %s %s',
+    (label, value, visualState) => {
+      const change = jest.fn(),
+        activate = jest.fn(),
+        choose = jest.fn();
+      let tree!: Renderer.ReactTestRenderer;
+      act(() => {
+        tree = Renderer.create(
+          <BaselineTextField
+            label={label}
+            value={value}
+            visualState={visualState}
+            onChange={change}
+            onActivate={activate}
+            helperText="Select an account first"
+            trailingIconName="chevron-down-wide"
+            trailingIconAction={{ ariaLabel: 'Choose value', onClick: choose }}
+          />,
+        );
+      });
+      const input = tree.root.find(
+        n =>
+          typeof n.props.onChangeText === 'function' && n.props.value === value,
+      );
+      expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+        color: '#666666',
+        fontSize: 18,
+        fontFamily: 'UniCredit-regular',
+      });
+      expect(input.props.placeholderTextColor).toBe('#666666');
+      expect(input.props.accessibilityState).toEqual({ disabled: true });
+      expect(tree.root.findByType(SourceCustomIcon).props.color).toBe(
+        '#999999',
+      );
+      const boundary = tree.root.find(
+        n => StyleSheet.flatten(n.props.style)?.borderBottomWidth === 0.5,
+      );
+      expect(StyleSheet.flatten(boundary.props.style).borderBottomColor).toBe(
+        '#999999',
+      );
+      const accessory = tree.root.find(
+        n =>
+          n.props.accessibilityLabel === 'Choose value' &&
+          typeof n.props.onPress === 'function',
+      );
+      expect(accessory.props.disabled).toBe(true);
+      expect(accessory.props.accessibilityState).toEqual({ disabled: true });
+      act(() => {
+        input.props.onChangeText('changed');
+        input.props.onSubmitEditing?.();
+        input.props.onKeyPress?.({ nativeEvent: { key: ' ' } });
+        accessory.props.onPress({ stopPropagation: jest.fn() });
+        tree.root
+          .find(
+            n =>
+              typeof n.props.onPress === 'function' &&
+              StyleSheet.flatten(n.props.style)?.width === '100%',
+          )
+          .props.onPress();
+      });
+      expect(change).not.toHaveBeenCalled();
+      expect(activate).not.toHaveBeenCalled();
+      expect(choose).not.toHaveBeenCalled();
+      act(() => tree.unmount());
+    },
+  );
+  it.each(['disabled-empty', 'disabled-filled'] as const)(
+    'matches approved Figma currency %s',
+    visualState => {
+      const choose = jest.fn();
+      let tree!: Renderer.ReactTestRenderer;
+      act(() => {
+        tree = Renderer.create(
+          <BaselineAmountField
+            label="Amount"
+            value={visualState === 'disabled-filled' ? '1250' : ''}
+            visualState={visualState}
+            onChange={jest.fn()}
+            currency="RON"
+            onCurrencyClick={choose}
+          />,
+        );
+      });
+      const currency = tree.root.find(
+        n =>
+          n.props.accessibilityLabel === 'Currency: RON' &&
+          typeof n.props.disabled === 'boolean',
+      );
+      expect(currency.props.disabled).toBe(true);
+      const value = currency.find(
+        n => n.props.children === 'RON' && !!n.props.style,
+      );
+      expect(StyleSheet.flatten(value.props.style)).toMatchObject({
+        color: '#666666',
+        fontFamily: 'UniCredit-regular',
+        fontSize: 18,
+        marginTop: 0,
+      });
+      expect(tree.root.findByType(SourceCustomIcon).props.color).toBe(
+        '#999999',
+      );
+      act(() => currency.props.onPress?.());
+      expect(choose).not.toHaveBeenCalled();
+      act(() => tree.unmount());
+    },
+  );
   it('keeps presentation focus proxies out of web Tab order and real accessory actions reachable', () => {
     const originalOS = Platform.OS;
     Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
@@ -96,7 +238,7 @@ describe('isolated forms contract renderers', () => {
         expect(input.props.editable).toBe(true);
         expect(
           tree!.root.findAll(
-            n => StyleSheet.flatten(n.props.style)?.borderBottomWidth === 0.5,
+            n => StyleSheet.flatten(n.props.style)?.borderBottomWidth === 1,
           ).length,
         ).toBeGreaterThan(0);
       } finally {

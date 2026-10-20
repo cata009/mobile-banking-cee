@@ -1,0 +1,277 @@
+{
+  "originalCount": 1485,
+  "originalAggregate": "9e9f6bbe7d7ed54093598b793661e5c637d716d2938a7638a835365569f93533",
+  "retiredCount": 17,
+  "retired": [
+    {
+      "path": "screenshots/Panel.png",
+      "sha256": "b751701f441deda34df5e1ebe04626d0b2408521de656a757d028aaecc6032a4",
+      "bytes": 29168
+    },
+    {
+      "path": "screenshots/Activate mToken.jpg",
+      "sha256": "78a048bf1347808b4b9a345cdbd004982079e9b28f4ec5c648d97e1c8a799a2b",
+      "bytes": 292975
+    },
+    {
+      "path": "screenshots/Generate Token.png",
+      "sha256": "05bdc539fc6c6f94a3482e5ee7be10196101101f7f6ff140d41edae084d3c615",
+      "bytes": 20685
+    },
+    {
+      "path": "screenshots/Tutorial 1.png",
+      "sha256": "51f63dcdf6121c7734e0063a4978d118f0457d45e734e812e8e62a89105dd5d8",
+      "bytes": 46369
+    },
+    {
+      "path": "screenshots/67.png",
+      "sha256": "38ab342aeb0628bfa72fc908ae9877295ff85bdaf42807cb513277462faad335",
+      "bytes": 24995
+    },
+    {
+      "path": "screenshots/Error to be.png",
+      "sha256": "015eec7ed0c9afb019a10b7673c75af3f8e0be67f4d04543696c02306a0a0001",
+      "bytes": 23891
+    },
+    {
+      "path": "screenshots/Informative.png",
+      "sha256": "a7be73b286fd59c91fd5d0a5422a2a71ea34560f31872e40ed4fe5ed8ae8a667",
+      "bytes": 21996
+    },
+    {
+      "path": "screenshots/New request with push.png",
+      "sha256": "2b2d26c0e1ab05ad8978903a9fe5faea7ab8ce11cce437b579bd3ef3de7a622c",
+      "bytes": 23010
+    },
+    {
+      "path": "screenshots/Pending.png",
+      "sha256": "190fee43e059a35bd000e6c6b8f1d822394a5ca296c6d80a16af31e860e8bdc5",
+      "bytes": 22192
+    },
+    {
+      "path": "screenshots/Review request.png",
+      "sha256": "52749847e5bda4575d50345e8bf23fa3803d3413be8788f980551efb79ce496f",
+      "bytes": 37986
+    },
+    {
+      "path": "screenshots/Success to be.png",
+      "sha256": "8ee2cf7bd89711813a0946f30dc7e96c8f55b482edc845e664f2ce28df5a2a88",
+      "bytes": 23671
+    },
+    {
+      "path": "screenshots/Warning to be.png",
+      "sha256": "bcbf1cc17bda23e22ba496905422403dbb6420657f5a4e5a1c6f27d749d954c8",
+      "bytes": 24282
+    },
+    {
+      "path": "screenshots/Apple pay.png",
+      "sha256": "8b84c52fe85ebf8cfc0377789604688cf8af72771160ada278284901f89d1ccc",
+      "bytes": 34043
+    },
+    {
+      "path": "screenshots/Product selection.jpg",
+      "sha256": "d1ef3470546cd28b4c7148c76d6732a7bdb7d39883c7836dc0db2325e4bf6d69",
+      "bytes": 65612
+    },
+    {
+      "path": "screenshots/RS - Travel Insurance.png",
+      "sha256": "c3d0647077a05afe26ed98026bf87a5c499b0984318b1611b695c3b88a397478",
+      "bytes": 139601
+    },
+    {
+      "path": "screenshots/Contact.png",
+      "sha256": "e7c71265b3cc316356dd1e15a42c3c9d054dcceb9827d61f4ed41469cd3c9e3f",
+      "bytes": 38193
+    },
+    {
+      "path": "screenshots/Message.png",
+      "sha256": "02012af4245d044c8c69b054190a254c7371d02f6a7aab4a2157131f73971aaf",
+      "bytes": 23928
+    }
+  ],
+  "retainedScreenshots": [
+    {
+      "path": "screenshots/account-options.png",
+      "bytes": 243737,
+      "sha256": "439ba9674b72bc144a1acfccbe6806b0dd3b29df5a5faee9f35cbfad009b76a9",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/accounts/screens.ts",
+        "src/app/registry/domains/accounts/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/accounts/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/homepage.png",
+      "bytes": 82470,
+      "sha256": "d1c80284cbf5753d7b85b15791311f55115ff84b9c4fa00b1d76f12aef206ceb",
+      "references": [
+        "docs/architecture/PROJECT_MODEL.md",
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/accounts/templates.ts",
+        "src/app/registry/domains/home/screens.ts"
+      ],
+      "remainingReferences": [
+        "docs/architecture/PROJECT_MODEL.md",
+        "src/app/registry/domains/home/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Transaction detail.png",
+      "bytes": 64189,
+      "sha256": "4a7697efa14b44579d9753917f68801a6351199e6139f8d73abbb9cd185ed4ff",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/accounts/screens.ts",
+        "src/app/registry/domains/accounts/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/accounts/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Analytics.jpg",
+      "bytes": 276565,
+      "sha256": "915d5917361062e236ebe306941abb68b7372e0a548aae349e99f01b15dd0c59",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/analytics/screens.ts",
+        "src/app/registry/domains/analytics/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/analytics/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Language Selection.png",
+      "bytes": 10186,
+      "sha256": "81f05362611f7af8d5706b606227b60e9c24d2a2f165738873cb078000d5ed8c",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/payments/screens.ts",
+        "src/app/registry/domains/payments/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/payments/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Payment.png",
+      "bytes": 40015,
+      "sha256": "66245971107265172cecbaefa6463baa64fe6d38cb960eb57e6148909aee29c0",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx",
+        "src/app/registry/domains/payments/screens.ts",
+        "src/app/registry/domains/payments/templates.ts"
+      ],
+      "remainingReferences": [
+        "native-spike/ACCOUNTS_SEARCH_QA.md",
+        "package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx",
+        "src/app/registry/domains/payments/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Review.png",
+      "bytes": 32225,
+      "sha256": "ec3bb64611c26b7d04055cfe9d6bc7964e13f9508e4529e37e7bdd10150e8032",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/payments/screens.ts",
+        "src/app/registry/domains/payments/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/payments/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Transfer to new phone.png",
+      "bytes": 14311,
+      "sha256": "ea389fe84c8319fe12232fd8819e86468486594501f473eb048e6a0682479d78",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/payments/screens.ts",
+        "src/app/registry/domains/payments/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/payments/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Cards.jpg",
+      "bytes": 341118,
+      "sha256": "c1f39aaa6ae4863a96d86a3ce9354c083c7d4cac44a4927c39a3e0328dbfc077",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx",
+        "src/app/registry/domains/products/templates.ts"
+      ],
+      "remainingReferences": [
+        "package/mobile-pi-coapping-chat-package/src/CoAppingChatAssistant.tsx"
+      ]
+    },
+    {
+      "path": "screenshots/Product.png",
+      "bytes": 29700,
+      "sha256": "609e00d9a9329475b2eb4752f17fd6d6de49f94dd6bbe9660b124121322c9fca",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/products/screens.ts",
+        "src/app/registry/domains/products/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/products/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/52.png",
+      "bytes": 27172,
+      "sha256": "176e69438e7427fcc6d40e6dede85378561970d75bf4ae90b1177c07427c747a",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/services/screens.ts",
+        "src/app/registry/domains/services/templates.ts"
+      ],
+      "remainingReferences": [
+        "src/app/registry/domains/services/screens.ts"
+      ]
+    },
+    {
+      "path": "screenshots/Documents.png",
+      "bytes": 33120,
+      "sha256": "ac8ae936b6f2139c9b8c0e39291ecf7c9ac96dc77ace05cc5e45054adc9e0b8d",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/services/screens.ts",
+        "src/app/registry/domains/services/templates.ts"
+      ],
+      "remainingReferences": [
+        "native-spike/src/experiences/pi/current/baseline/offers/Detail.tsx",
+        "native-spike/src/experiences/pi/current/products/Detail.tsx",
+        "src/app/registry/domains/services/screens.ts",
+        "src/app/screens/products/SmeProductDetailScreen.tsx"
+      ]
+    },
+    {
+      "path": "screenshots/Settings.png",
+      "bytes": 51055,
+      "sha256": "c1113ab2714efcf3c98cb115cda783f677329105fd4c0a9ee446e5f179653aed",
+      "references": [
+        "docs/tasks/pi-italy-mobile-first-asset-baseline.json",
+        "src/app/registry/domains/services/screens.ts",
+        "src/app/registry/domains/services/templates.ts"
+      ],
+      "remainingReferences": [
+        "native-spike/src/experiences/pi/it/profile/FIDELITY.md",
+        "src/app/registry/domains/services/screens.ts"
+      ]
+    }
+  ],
+  "currentCount": 1468,
+  "currentAggregate": "5f99e3b88b7e996c10e803d0037946f41ec69be3f9d48f1edff28380bbbe1f9b",
+  "preservation": "All non-retired Git-normalized path/blob pairs are unchanged.",
+  "backup": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/before-files/screenshots",
+  "referencePolicy": "All active source, package, test, export and documentation references checked, including URI-decoded and case-insensitive names. Historical docs/tasks asset manifests are retained as historical evidence."
+}

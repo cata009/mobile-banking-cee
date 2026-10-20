@@ -33,6 +33,7 @@ import type {
   SearchEntry,
   SearchTarget,
 } from '@/features/search/mobileFirstSearch';
+import type { ProductCounts } from '@/app/state/demoTypes';
 import Home from './Home';
 import Search from './Search';
 import AccountScreen from './accounts/AccountScreen';
@@ -73,11 +74,15 @@ export default function NativeItalyApp({
   bankAdvisorKind,
   onScreenChromeChange,
   onExit,
+  productCounts = DEFAULT_ITALY_COUNTS,
+  initialAmountsHidden = false,
 }: {
   previewInsetTop?: number;
   bankAdvisorKind?: ItalyNativeScreenProps['bankAdvisorKind'];
   onScreenChromeChange?: (chrome: ItalyNativeChrome) => void;
   onExit?: () => void;
+  productCounts?: ProductCounts;
+  initialAmountsHidden?: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const settings = useSyncExternalStore(
@@ -91,7 +96,7 @@ export default function NativeItalyApp({
     );
   }, [settings.screenshots]);
   const [navigation, setNavigation] = useState(initialItalyNavigation),
-    [hidden, setHidden] = useState(false),
+    [hidden, setHidden] = useState(initialAmountsHidden),
     [revision, refresh] = useState(0);
   const [foreground, setForeground] = useState(
     () => Platform.OS === 'web' || AppState.currentState === 'active',
@@ -197,14 +202,14 @@ export default function NativeItalyApp({
   );
   const snapshot = useMemo(
     () => ({
-      ...getItalySearchSnapshot(DEFAULT_ITALY_COUNTS, {
+      ...getItalySearchSnapshot(productCounts, {
         cards: [...cards],
         movements: {},
       }),
       financialRevision: financial.revision,
       compositionRevision: revision,
     }),
-    [financial.revision, cards, revision],
+    [financial.revision, cards, revision, productCounts],
   );
   const back = useCallback(
     () => changeNavigation(previous => backItalyNavigation(previous)),
@@ -285,7 +290,7 @@ export default function NativeItalyApp({
         route.screen === 'destination'
           ? route.target
           : { kind: 'category', category: 'Conti' },
-      productCounts: DEFAULT_ITALY_COUNTS,
+      productCounts,
       amountsHidden: hidden,
       onBack: back,
       onNavigate: navigate,
@@ -301,7 +306,7 @@ export default function NativeItalyApp({
     if (route.screen === 'home')
       return (
         <Home
-          productCounts={DEFAULT_ITALY_COUNTS}
+          productCounts={productCounts}
           amountsHidden={hidden}
           onAmountsToggle={common.onAmountsToggle!}
           onNavigate={navigate}

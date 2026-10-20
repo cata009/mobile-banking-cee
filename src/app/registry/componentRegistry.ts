@@ -2,6 +2,7 @@ import type { ComponentId, ScreenId } from '@/app/state/demoTypes'
 import type { ComponentMeta } from './domains/contracts'
 import { composeRegistry } from './domains/composeRegistry'
 import { FOUNDATION_COMPONENTS } from './domains/foundation/components'
+import { FIGMA_COMPONENTS, type FigmaCatalogComponentId } from './domains/foundation/figmaComponents'
 import { IDENTITY_COMPONENTS } from './domains/identity/components'
 import { HOME_COMPONENTS } from './domains/home/components'
 import { ANALYTICS_COMPONENTS } from './domains/analytics/components'
@@ -16,6 +17,7 @@ export type { ComponentMeta } from './domains/contracts'
 
 export const COMPONENT_DOMAINS = [
   FOUNDATION_COMPONENTS,
+  FIGMA_COMPONENTS,
   IDENTITY_COMPONENTS,
   HOME_COMPONENTS,
   ANALYTICS_COMPONENTS,
@@ -109,7 +111,6 @@ const COMPONENTS_ORDER = [
   'investments.products-accordion',
   'investments.product-card',
   'investments.fund-banner',
-  'templates.reconstructed-code',
   'products.menu',
   'products.offer-card',
   'products.shopsmart-offer-card',
@@ -128,6 +129,7 @@ const COMPONENTS_ORDER = [
   'prime.benefits-tab',
   'dialogs.logout-confirmation',
   'kids.market-home-concepts',
+  ...Object.keys(FIGMA_COMPONENTS) as FigmaCatalogComponentId[],
 ] as const
 export const COMPONENT_REGISTRY: Record<ComponentId, ComponentMeta> = composeRegistry(
   'COMPONENT_REGISTRY',

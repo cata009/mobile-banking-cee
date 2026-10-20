@@ -53,6 +53,45 @@ function normalize(html: string) {
     .replace(/-r[\w]+-/g, '-generated-')
     .replace(/\s+/g, ' ')
 }
+
+/** Only the approved List-source delta is applied to the frozen baseline.
+ * 1517:2355 / 1517:2372: white surface, dark month, bold fractional amount.
+ * 1517:2380: 80px base row, 2px content gaps and a centred 32px status line.
+ * The base is a minimum so larger text can grow without clipping.
+ * All data, SVGs, semantics, callback ownership and Evo markup stay frozen. */
+function approvedListSourceMarkup(html: string, pending: boolean) {
+  const template = document.createElement('template')
+  template.innerHTML = html
+  const row = template.content.querySelector<HTMLElement>('[data-ds-label="AccountTransactionRow 375x80"]')!
+  row.className =
+    row.className
+      .replace('bg-transparent', 'bg-[var(--uc-surface)]')
+      .replace(' py-[20px]', '')
+      .replace('h-[92px]', 'h-[80px]')
+      .replace('h-[80px]', 'min-h-[80px]') + (pending ? ' py-[2px]' : ' py-[18px]')
+  const month = row.querySelector<HTMLElement>('[data-transaction-date] p:last-child')
+  if (month) month.className = month.className.replace('--uc-text-muted', '--uc-text')
+  for (const amount of row.querySelectorAll<HTMLElement>('p.uc-type-n2-strong')) {
+    const [integer, fraction] = Array.from(amount.children) as HTMLElement[]
+    if (!integer || !fraction) continue
+    const originalText = amount.textContent
+    if (/^[,.]/.test(fraction.textContent ?? '')) {
+      integer.textContent += fraction.textContent![0]
+      fraction.textContent = fraction.textContent!.slice(1)
+    }
+    fraction.className = 'uc-type-n5-strong uppercase tracking-[0px]'
+    expect(amount.textContent).toBe(originalText)
+  }
+  if (pending) {
+    const details = row.querySelector<HTMLElement>('div.items-end')!
+    details.className = details.className.replace('gap-[4px]', 'gap-[2px]')
+    const status = row.querySelector<HTMLElement>('[data-pending-status]')!
+    status.className = status.className
+      .replace('flex ', 'flex h-[32px] ')
+      .replace('uc-type-n5-strong ', 'uc-type-n5-strong leading-[15px] ')
+  }
+  return normalize(template.innerHTML)
+}
 describe('banking identity frozen preservation', () => {
   it('reuses only the original Source PFM SVG path data in the Native avatar', () => {
     const source = readFileSync('src/app/components/pfm/PfmCategoryIcon.tsx', 'utf8')
@@ -139,7 +178,9 @@ describe('banking identity frozen preservation', () => {
             onClick: vi.fn(),
           }
           const { container, rerender, unmount } = render(<FrozenRow {...props} />)
-          const before = normalize(container.innerHTML)
+          const before = evo2027
+            ? normalize(container.innerHTML)
+            : approvedListSourceMarkup(container.innerHTML, status === 'Pending')
           rerender(<Row {...props} />)
           expect(normalize(container.innerHTML)).toBe(before)
           unmount()

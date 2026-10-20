@@ -1,36 +1,34 @@
 import fs from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import {
-  auditTemplateContract,
+  auditRegistryContract,
   collectObjectKeys,
   collectRegistrySource,
-} from '../../scripts/audit-template-contract.mjs'
+} from '../../scripts/audit-registry-contract.mjs'
 const readSource = (path) => fs.readFileSync(path, 'utf8')
 function alteredReader(target, change) {
   return (path) => (change && path === target ? change(readSource(path)) : readSource(path))
 }
-describe('composed template audit', () => {
-  it('audits every canonical component, screen and template domain', () => {
-    expect(auditTemplateContract()).toEqual({
-      templates: 47,
-      codePreviews: 47,
-      components: 100,
+describe('composed registry audit', () => {
+  it('audits every canonical component, screen and flow domain', () => {
+    expect(auditRegistryContract()).toEqual({
+      components: 134,
       screens: 40,
       flows: 14,
     })
   })
-  it('rejects an invalid reference within a nested template declaration', () => {
-    const read = alteredReader('src/app/registry/domains/services/templates.ts', (source) =>
-      source.replace(/(['"])messages\.inbox-list\1/, '"invalid.reference"'),
+  it('rejects an invalid reference within a nested component declaration', () => {
+    const read = alteredReader('src/app/registry/domains/services/components.ts', (source) =>
+      source.replace(/(['"])pi\.messages\.overview\1/, '"invalid.reference"'),
     )
-    expect(() => auditTemplateContract({ readSource: read })).toThrow('unknown component id "invalid.reference"')
+    expect(() => auditRegistryContract({ readSource: read })).toThrow('unknown screen id "invalid.reference"')
   })
   it('rejects duplicate IDs across separate canonical domains', () => {
     const read = alteredReader(
       'src/app/registry/domains/services/components.ts',
       (source) => source + '\nconst duplicate={"ui.primary-button": {id:"ui.primary-button"}};\n',
     )
-    expect(() => auditTemplateContract({ readSource: read })).toThrow('Duplicate registry id: ui.primary-button')
+    expect(() => auditRegistryContract({ readSource: read })).toThrow('Duplicate registry id: ui.primary-button')
   })
   it('does not depend on formatting to find component IDs', () => {
     expect([...collectObjectKeys('const fixtures={"compact.id":{id:"compact.id"}}')]).toEqual(['compact.id'])

@@ -9,7 +9,6 @@ import { FLOW_REGISTRY } from "./flowRegistry";
 import { BASELINES, DESIGN_SYSTEMS, PRODUCTS, PROJECT_COUNTRIES } from "./projectModel";
 import { RELEASE_BUNDLES } from "./releaseRegistry";
 import { SCREEN_REGISTRY } from "./screenRegistry";
-import { TEMPLATE_REGISTRY } from "./templateRegistry";
 
 export const AI_CATALOG_VERSION = "2026-06-04.kids-sk-bulbank-document-refactor";
 
@@ -22,7 +21,6 @@ export const AI_CATALOG = {
   releases: RELEASE_BUNDLES,
   features: FEATURE_META,
   screens: SCREEN_REGISTRY,
-  templates: TEMPLATE_REGISTRY,
   flows: FLOW_REGISTRY,
   components: COMPONENT_REGISTRY,
 } as const;

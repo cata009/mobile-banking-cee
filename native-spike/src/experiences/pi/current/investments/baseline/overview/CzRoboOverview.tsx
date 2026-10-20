@@ -35,6 +35,7 @@ import {
   type InvestmentSection,
 } from '../../../../cz/evo-2027/investments/ModuleNavigation';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
+import { BaselineInvestmentPeriodChips } from '../../../../../../universal/BaselineInvestmentPeriodChips';
 import { SourceBottomSheet } from '../../../../../../universal/SourceBottomSheet';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 
@@ -429,6 +430,14 @@ export function CzRoboOverview({
                     `runtime.investments.tabs.${tabTranslationKeys[tab.id]}`,
                     tab.label,
                   );
+                  const allocationTabStateStyle = {
+                    borderColor: selected
+                      ? investmentColor(host, '--uc-action')
+                      : 'transparent',
+                    backgroundColor: selected
+                      ? investmentColor(host, '--uc-action-strong')
+                      : investmentColor(host, '--uc-neutral-100'),
+                  };
                   return (
                     <Pressable
                       key={tab.id}
@@ -438,14 +447,7 @@ export function CzRoboOverview({
                       onPress={() => onStateChange({ tabId: tab.id })}
                       style={[
                         styles.allocationTab,
-                        {
-                          borderColor: selected
-                            ? investmentColor(host, '--uc-action')
-                            : 'transparent',
-                          backgroundColor: selected
-                            ? investmentColor(host, '--uc-action-strong')
-                            : investmentColor(host, '--uc-neutral-100'),
-                        },
+                      allocationTabStateStyle,
                       ]}
                     >
                       <Copy
@@ -613,49 +615,16 @@ function CzRoboPeriods({
   onChange: (periodId: InvestmentPeriodId) => void;
 }) {
   return (
-    <View style={styles.periods}>
-      {INVESTMENT_PERIODS.map(period => {
-        const selected = period.id === value;
-        return (
-          <Pressable
-            key={period.id}
-            accessibilityRole="button"
-            accessibilityLabel={period.label}
-            accessibilityState={{ selected }}
-            aria-pressed={selected}
-            onPress={() => onChange(period.id)}
-            style={styles.periodTarget}
-          >
-            <View
-              style={[
-                styles.periodChip,
-                {
-                  borderColor: 'transparent',
-                  backgroundColor: selected
-                    ? investmentColor(host, '--uc-action-strong')
-                    : investmentColor(host, '--uc-neutral-100'),
-                },
-              ]}
-            >
-              <Copy
-                host={host}
-                bold
-                style={[
-                  styles.periodLabel,
-                  {
-                    color: selected
-                      ? investmentColor(host, '--uc-static-white')
-                      : investmentColor(host, '--uc-text'),
-                  },
-                ]}
-              >
-                {period.label}
-              </Copy>
-            </View>
-          </Pressable>
-        );
-      })}
-    </View>
+    <BaselineInvestmentPeriodChips
+      periods={INVESTMENT_PERIODS}
+      selectedPeriodId={value}
+      onChange={onChange}
+      dark={investmentDark(host)}
+      softUnselected
+      comfortableTouchTargets
+      style={styles.periods}
+      targetStyle={styles.periodTarget}
+    />
   );
 }
 
@@ -685,30 +654,11 @@ const styles = StyleSheet.create({
   summaryPercent: { fontSize: 14, lineHeight: 18 },
   chartSection: { paddingHorizontal: 16, paddingTop: 8 },
   periods: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 8,
     paddingVertical: 2,
   },
   periodTarget: {
     width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
   },
-  periodChip: {
-    height: 21,
-    minWidth: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderRadius: 3.5,
-    paddingHorizontal: 8,
-  },
-  periodLabel: { fontSize: 14, lineHeight: 15 },
   allocationHeading: {
     paddingHorizontal: 16,
     paddingTop: 24,

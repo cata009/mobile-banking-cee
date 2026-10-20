@@ -123,7 +123,7 @@ it.each(PI_RELEASE_CONTEXTS)(
       expect(activate.props).toMatchObject({
         label: props.t('preLogin.activateApplication'),
         variant: 'surface',
-        labelSize: '16',
+        labelSize: '18',
       });
       expect(activate.props.onPress).toBeUndefined();
       expect(

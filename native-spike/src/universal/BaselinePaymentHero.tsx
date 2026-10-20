@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Image, Pressable, View, Platform, type ViewStyle } from 'react-native';
+import {
+  Image,
+  Pressable,
+  View,
+  Platform,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import {
   resolvePaymentHero,
@@ -7,6 +14,7 @@ import {
 } from '@/app/components/contracts/paymentHero';
 import { Text } from './Typography';
 import { sourceColor } from './sourceColor';
+import { BaselinePaymentImage } from './BaselinePaymentImage';
 
 /** Caller owns the original screenshot asset or CSS-art slot; no fallback artwork is redrawn. */
 export function BaselinePaymentHero({
@@ -17,6 +25,7 @@ export function BaselinePaymentHero({
   disabled = false,
   onSelect,
   dark = false,
+  presentation,
 }: {
   item: { id: string; title: string; description: string };
   imageVariant?: PaymentHeroPreset;
@@ -25,6 +34,15 @@ export function BaselinePaymentHero({
   disabled?: boolean;
   onSelect?: (item: { id: string; title: string; description: string }) => void;
   dark?: boolean;
+  presentation?: {
+    paddingHorizontal?: number;
+    titleWidth?: number;
+    descriptionWidth?: number;
+    descriptionMargin?: number;
+    titleLineHeight?: number;
+    descriptionLineHeight?: number;
+    background?: React.ReactNode;
+  };
 }) {
   const [width, setWidth] = useState(327),
     contract = resolvePaymentHero({
@@ -44,22 +62,27 @@ export function BaselinePaymentHero({
     zIndex: 10,
     height: '100%',
     width: '100%',
-    paddingHorizontal: contract.paddingHorizontal,
+    paddingHorizontal:
+      presentation?.paddingHorizontal ?? contract.paddingHorizontal,
     paddingTop: contract.paddingTop,
   };
   const titleStyle = {
     fontFamily: 'UniCredit-bold',
     fontSize: contract.titleFontSize,
+    width: presentation?.titleWidth,
     lineHeight:
-      typeof contract.titleLineHeight === 'number'
+      presentation?.titleLineHeight ??
+      (typeof contract.titleLineHeight === 'number'
         ? contract.titleLineHeight
-        : undefined,
+        : undefined),
     color: sourceColor('var(--uc-text)', dark),
   };
   const descriptionStyle = {
     fontFamily: 'UniCredit-regular',
     fontSize: contract.descriptionFontSize,
-    marginTop: contract.descriptionMargin,
+    marginTop: presentation?.descriptionMargin ?? contract.descriptionMargin,
+    width: presentation?.descriptionWidth,
+    lineHeight: presentation?.descriptionLineHeight,
     color: sourceColor('var(--uc-text)', dark),
   };
   const imageStyle = { position: 'absolute' as const, ...contract.image };
@@ -115,9 +138,14 @@ export function BaselinePaymentHero({
       onPress={() => {
         if (!contract.disabled) onSelect?.(item);
       }}
-      style={[rootStyle, webPaint]}
+      style={[
+        rootStyle,
+        presentation?.background === undefined ? webPaint : undefined,
+      ]}
     >
-      {Platform.OS !== 'web' ? (
+      {presentation?.background !== undefined ? (
+        presentation.background
+      ) : Platform.OS !== 'web' ? (
         <>
           <View style={backgroundStyle}>
             <SvgXml xml={xml} width="100%" height="100%" />
@@ -139,9 +167,17 @@ export function BaselinePaymentHero({
           resizeMode="contain"
           style={imageStyle}
         />
-      ) : (
+      ) : artwork !== undefined ? (
         artwork
-      )}
+      ) : imageVariant ? (
+        <View pointerEvents="none" style={styles.artwork}>
+          <BaselinePaymentImage preset={imageVariant} />
+        </View>
+      ) : null}
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  artwork: { position: 'absolute', right: 0, bottom: 0 },
+});

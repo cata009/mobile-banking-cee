@@ -9,6 +9,9 @@ export const TOGGLE_BUTTON_SOURCE = {
   borderWidth: 2,
 } as const
 
+/** Current references coexist with the unchanged legacy metadata export. */
+export const CURRENT_TOGGLE_BUTTON_SOURCE_NODES = { checked: '1027:2244', unchecked: '1026:6765' } as const
+
 export type ToggleButtonVariant = 'baseline' | 'prime-mail'
 export interface ToggleButtonOptions {
   checked: boolean

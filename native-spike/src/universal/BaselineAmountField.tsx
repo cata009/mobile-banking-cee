@@ -16,7 +16,9 @@ export function BaselineAmountField(
     hideCurrencySelector?: boolean;
     currencyIconName?: string;
     currencyAriaLabel?: string;
+    currencyIconSize?: number;
     onCurrencyClick?: () => void;
+    currencyPresentation?: 'selector' | 'suffix';
   },
 ) {
   const state = resolveAmountField(props);
@@ -25,19 +27,26 @@ export function BaselineAmountField(
     alignItems: 'flex-start',
     gap: state.gap,
     width: '100%',
+    paddingRight: state.trailingInset,
   } as const;
   const formStyle1 = { flex: 1, minWidth: 0 } as const;
-  const formStyle2 = { flexDirection: 'row', alignItems: 'center' } as const;
+  const formStyle2 = {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    minHeight: 44,
+  } as const;
   const formStyle3 = { minWidth: state.currencyMinimumWidth } as const;
   const formStyle4 = {
     fontFamily: 'UniCredit-regular',
     fontSize: 14,
+    lineHeight: 15,
     color: sourceColor(state.currencyTitleColor, props.dark),
   } as const;
   const formStyle5 = {
     fontFamily: 'UniCredit-regular',
     fontSize: 18,
-    marginTop: 4,
+    lineHeight: 20,
+    marginTop: state.currencyLabelGap,
     color: sourceColor(state.currencyColor, props.dark),
   } as const;
   const formStyle6 = {
@@ -46,10 +55,19 @@ export function BaselineAmountField(
     alignItems: 'center',
     justifyContent: 'center',
   } as const;
+  if (props.currencyPresentation === 'suffix')
+    return (
+      <View style={suffixStyles.row}>
+        <View style={formStyle1}>
+          <BaselineTextField {...props} emptyValueAlignment="end" />
+        </View>
+        <Text style={[formStyle5, suffixStyles.value]}>{state.currency}</Text>
+      </View>
+    );
   return (
     <View style={formStyle0}>
       <View style={formStyle1}>
-        <BaselineTextField {...props} />
+        <BaselineTextField {...props} emptyValueAlignment="end" />
       </View>
       <Pressable
         accessibilityRole="button"
@@ -59,7 +77,10 @@ export function BaselineAmountField(
         accessibilityState={{ disabled: state.isDisabled }}
         aria-disabled={state.isDisabled}
         disabled={state.isDisabled}
-        onPress={props.onCurrencyClick}
+        hitSlop={6}
+        onPress={() => {
+          if (!state.isDisabled) props.onCurrencyClick?.();
+        }}
         style={formStyle2}
       >
         <View style={formStyle3}>
@@ -70,8 +91,8 @@ export function BaselineAmountField(
           <View style={formStyle6}>
             <SourceCustomIcon
               name={props.currencyIconName ?? 'chevron-down-wide'}
-              size={20}
-              color={sourceColor(state.currencyColor, props.dark)}
+              size={props.currencyIconSize ?? 20}
+              color={sourceColor(state.currencyIconColor, props.dark)}
             />
           </View>
         ) : null}
@@ -79,3 +100,17 @@ export function BaselineAmountField(
     </View>
   );
 }
+const suffixStyles = {
+  row: {
+    flexDirection: 'row' as const,
+    alignItems: 'flex-end' as const,
+    gap: 8,
+    width: '100%' as const,
+  },
+  value: {
+    fontFamily: 'UniCredit-bold',
+    marginTop: 0,
+    lineHeight: 20,
+    paddingBottom: 5,
+  },
+};

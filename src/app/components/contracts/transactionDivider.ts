@@ -5,13 +5,15 @@ export function resolveTransactionDivider({
 }: { dateSeparator?: boolean; total?: string } = {}) {
   return {
     dateSeparator,
+    titleRole: dateSeparator ? undefined : ('header' as const),
     hasTotal: Boolean(total),
     hasLine: !dateSeparator,
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 4,
     fontSize: dateSeparator ? 14 : 16,
-    lineHeight: 'normal',
+    lineHeight: dateSeparator ? 15 : 18,
+    totalLineHeight: 15,
     titleToken: '--uc-text-muted',
     totalToken: '--uc-text',
     lineToken: '--uc-border',

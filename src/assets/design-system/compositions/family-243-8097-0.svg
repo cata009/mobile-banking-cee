@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Atoms">
+<path id="Oval 5" d="M14.5 8C14.5 11.5899 11.5899 14.5 8 14.5C4.41015 14.5 1.5 11.5899 1.5 8C1.5 4.41015 4.41015 1.5 8 1.5C11.5899 1.5 14.5 4.41015 14.5 8Z" stroke="white"/>
+<mask id="mask0_0_9721" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="1" y="1" width="14" height="14">
+<path id="Oval 5_2" d="M14.5 8C14.5 11.5899 11.5899 14.5 8 14.5C4.41015 14.5 1.5 11.5899 1.5 8C1.5 4.41015 4.41015 1.5 8 1.5C11.5899 1.5 14.5 4.41015 14.5 8Z" fill="white" stroke="white"/>
+</mask>
+<g mask="url(#mask0_0_9721)">
+<g id="Color">
+<path id="Rectangle" d="M16 0H0V16H16" fill-rule="evenodd" clip-rule="evenodd" fill="#262626"/>
+</g>
+<path id="Shape" d="M11 8.42857H8.42857V11H7.57143V8.42857H5V7.57143H7.57143V5H8.42857V7.57143H11V8.42857Z" fill="white"/>
+</g>
+</g>
+</svg>

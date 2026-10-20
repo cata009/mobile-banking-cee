@@ -24,6 +24,7 @@ export type NativeComponentPreview =
       serviceActive: boolean
       playCallAudio?: boolean
     }
+  | { kind: 'design-system'; componentId: string; variantId?: string; dark: boolean }
   | { kind: 'detail-header'; variant: 'account' | 'card'; title: string; progress: number }
   | { kind: 'analytics-header' }
   | { kind: 'home-header'; title?: string; showActions?: boolean; showTitle?: boolean }

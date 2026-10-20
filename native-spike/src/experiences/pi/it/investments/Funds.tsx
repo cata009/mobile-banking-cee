@@ -23,6 +23,7 @@ import type { InvestmentDestination } from '@/experiences/pi/it/mobile-first/inv
 import type { ItalyNativeScreenProps } from '../contracts';
 import { FormField } from '../../../../universal/FormField';
 import FundDetail from './FundDetail';
+import { FundPortfolio } from './FundPortfolio';
 import FundSheet from './FundSheet';
 import FundCatalog from './FundCatalog';
 import FundOperation from './FundOperation';
@@ -35,12 +36,14 @@ export default function Funds({
   props,
   registerBack,
   embedded = false,
+  onScrollTo,
 }: {
   destination: InvestmentDestination;
   navigate: (destination: InvestmentDestination) => void;
   props: ItalyNativeScreenProps;
   registerBack: (handler: null | (() => boolean)) => void;
   embedded?: boolean;
+  onScrollTo?: (y: number) => void;
 }) {
   const [state, setState] = useState<FundsStoredState>(() => {
     const saved = readFundsState();
@@ -281,10 +284,24 @@ export default function Funds({
     );
   }
   const portfolio = destination.view === 'portfolio';
+  if (portfolio)
+    return (
+      <>
+        {!embedded && <PageTitle>Fondi</PageTitle>}
+        <FundPortfolio
+          positions={positions}
+          empty={props.productCounts.investments === 0}
+          hidden={hidden}
+          initialPir={
+            destination.action === 'pir' || destination.instrument === 'pir'
+          }
+          onOpen={open}
+          onScrollTo={onScrollTo}
+        />
+      </>
+    );
   const filtered = positions.filter(
     item =>
-      (!portfolio ||
-        (props.productCounts.investments > 0 && item.shares > 0)) &&
       (!query ||
         `${item.name} ${item.manager} ${item.isin}`
           .toLowerCase()
@@ -295,64 +312,31 @@ export default function Funds({
     <>
       {!embedded && (
         <PageTitle>
-          {portfolio
-            ? 'Fondi'
-            : destination.view === 'search'
-              ? 'Ricerca fondi'
-              : 'Vetrina Fondi'}
+          {destination.view === 'search' ? 'Ricerca fondi' : 'Vetrina Fondi'}
         </PageTitle>
       )}
-      {portfolio ? (
-        <>
-          <Text style={s.small}>
-            Ultimo aggiornamento: {formatInvestmentReferenceDate()} (dati demo)
-          </Text>
-          <View style={s.card}>
-            <Text style={s.body}>Controvalore di mercato</Text>
-            <Money
-              cents={
-                props.productCounts.investments > 0
-                  ? positions.reduce(
-                      (sum, item) => sum + Math.round(item.value * 100),
-                      0,
-                    )
-                  : 0
-              }
-              hidden={hidden}
-              large
-            />
-          </View>
-          <Link label="Ordini" onPress={() => open('orders')} />
-          <Link label="Ricerca fondi" onPress={() => open('search')} />
-        </>
-      ) : (
-        <>
-          <FormField
-            tokens={tokens}
-            label="Nome, ISIN o società di gestione"
-            value={query}
-            onChange={setQuery}
-          />
-          <Tabs
-            items={[
-              'Tutti',
-              'Azionari',
-              'Bilanciati',
-              'Obbligazionari',
-              'Flessibili',
-            ]}
-            value={category}
-            onChange={setCategory}
-          />
-        </>
-      )}
+      <>
+        <FormField
+          tokens={tokens}
+          label="Nome, ISIN o società di gestione"
+          value={query}
+          onChange={setQuery}
+        />
+        <Tabs
+          items={[
+            'Tutti',
+            'Azionari',
+            'Bilanciati',
+            'Obbligazionari',
+            'Flessibili',
+          ]}
+          value={category}
+          onChange={setCategory}
+        />
+      </>
       {filtered.map(card)}
       {!filtered.length && (
-        <Text style={s.body}>
-          {portfolio
-            ? 'Non sono presenti fondi nel tuo portafoglio.'
-            : 'Non sono stati trovati fondi.'}
-        </Text>
+        <Text style={s.body}>Non sono stati trovati fondi.</Text>
       )}
       <Link
         label="Vetrina Mercati"

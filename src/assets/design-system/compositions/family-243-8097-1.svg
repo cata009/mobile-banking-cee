@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="47.9997" height="54.3174" viewBox="0 0 47.9997 54.3174" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Atoms">
+<g id="Rectangle" filter="url(#filter0_d_0_9713)">
+<path d="M16.4291 28.705C15.857 27.7536 15.857 26.5641 16.4291 25.6128L21.3358 17.4539C22.4903 15.5341 25.2653 15.5111 26.4515 17.4113L31.5446 25.5697C32.1515 26.5419 32.1515 27.7748 31.5446 28.747L26.4512 36.9061C25.265 38.8064 22.49 38.7833 21.3355 36.8635L16.4291 28.705Z" fill="white"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_0_9713" x="0" y="0" width="47.9997" height="54.3174" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="8"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_9713"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_9713" result="shape"/>
+</filter>
+</defs>
+</svg>

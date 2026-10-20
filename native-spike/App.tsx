@@ -31,7 +31,8 @@ export default function App(props: GlobalNativeAppProps = {}) {
       .then(Component => {
         if (active) setApplication(() => Component);
       })
-      .catch(() => {
+      .catch(bootstrapError => {
+        console.error('Native demo bootstrap failed', bootstrapError);
         if (active)
           setError('Datele demo nu pot fi deschise. Încearcă din nou.');
       });

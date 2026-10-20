@@ -1,5 +1,3 @@
-import type { TemplateRegistryItem } from './contracts'
-
 type UnionToIntersection<T> = (T extends unknown ? (value: T) => void : never) extends (value: infer I) => void
   ? I
   : never
@@ -33,25 +31,4 @@ export function composeRegistry<const Domains extends RegistryDomains>(
   // Every domain key occurs exactly once in the validated order. The public mapped
   // type retains the concrete domain keys, so consumers still prove union coverage.
   return Object.fromEntries(ordered) as ComposedRegistry<Domains>
-}
-
-export function composeTemplateRegistry(
-  domains: readonly (readonly TemplateRegistryItem[])[],
-  order: readonly string[],
-): readonly TemplateRegistryItem[] {
-  const entries = new Map<string, TemplateRegistryItem>()
-  for (const domain of domains) {
-    for (const template of domain) {
-      if (entries.has(template.id)) throw new Error(`TEMPLATE_REGISTRY: duplicate id "${template.id}"`)
-      entries.set(template.id, template)
-    }
-  }
-  const ordered = order.map((id) => {
-    const template = entries.get(id)
-    if (!template) throw new Error(`TEMPLATE_REGISTRY: unknown ordered id "${id}"`)
-    entries.delete(id)
-    return template
-  })
-  if (entries.size) throw new Error(`TEMPLATE_REGISTRY: missing ordered ids ${[...entries.keys()].join(', ')}`)
-  return ordered
 }

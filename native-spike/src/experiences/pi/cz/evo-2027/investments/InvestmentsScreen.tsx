@@ -145,6 +145,7 @@ export function CzInvestmentsScreen(props: CzInvestmentsScreenProps) {
 
 function CzInvestmentsComposition({
   snapshot,
+  classicHost,
   onBack,
   amountsHidden = false,
   initialView = 'portfolio',
@@ -169,20 +170,20 @@ function CzInvestmentsComposition({
     initialGoal
       ? { kind: 'goal', goalId: initialGoal.id }
       : initialView === 'funds'
-      ? initialCollection
-        ? { kind: 'collection', collection: initialCollection }
-        : { kind: 'funds' }
-      : initialSecurity
-      ? {
-          kind: initialView === 'buy' ? 'buy' : 'instrument',
-          security: initialSecurity,
-          initialDraft: getValidatedInitialDraft(
-            initialBuyDraft,
-            initialSecurity,
-            snapshot.accounts,
-          ),
-        }
-      : { kind: initialView === 'buy' ? 'portfolio' : initialView },
+        ? initialCollection
+          ? { kind: 'collection', collection: initialCollection }
+          : { kind: 'funds' }
+        : initialSecurity
+          ? {
+              kind: initialView === 'buy' ? 'buy' : 'instrument',
+              security: initialSecurity,
+              initialDraft: getValidatedInitialDraft(
+                initialBuyDraft,
+                initialSecurity,
+                snapshot.accounts,
+              ),
+            }
+          : { kind: initialView === 'buy' ? 'portfolio' : initialView },
   ]);
   const [tab, setTab] = useState<InvestmentPortfolioTabId>('performance'),
     [period, setPeriod] = useState<InvestmentPeriodId>('3y'),
@@ -194,7 +195,12 @@ function CzInvestmentsComposition({
   useEffect(() => {
     const roboRoute = [...stack]
       .reverse()
-      .find(item => item.kind === 'goal' || item.kind === 'goals' || item.kind === 'create');
+      .find(
+        item =>
+          item.kind === 'goal' ||
+          item.kind === 'goals' ||
+          item.kind === 'create',
+      );
     const resumeState =
       roboRoute?.kind === 'goal'
         ? { view: 'detail' as const, goalId: roboRoute.goalId }
@@ -246,8 +252,8 @@ function CzInvestmentsComposition({
       return index >= 0
         ? previous.slice(0, index + 1)
         : initialView === 'portfolio' && !initialGoal
-        ? [{ kind: 'portfolio' }, { kind: 'goals' }]
-        : [{ kind: 'goals' }];
+          ? [{ kind: 'portfolio' }, { kind: 'goals' }]
+          : [{ kind: 'goals' }];
     });
   const updateGoal = (goal: RoboExistingGoal) => {
     setGoals(previous =>
@@ -301,10 +307,13 @@ function CzInvestmentsComposition({
         onExit={showGoals}
         initialGoal={
           route.kind === 'goal'
-            ? goals.find(goal => goal.id === route.goalId) ?? initialGoal
+            ? (goals.find(goal => goal.id === route.goalId) ?? initialGoal)
             : undefined
         }
         onGoalUpdated={updateGoal}
+        onCreateGoal={updateGoal}
+        onProfile={classicHost?.onProfile}
+        screenTopInset={classicHost?.screenTopInset}
         currentAccounts={snapshot.accounts}
         securityCatalog={snapshot.catalog}
         amountsHidden={amountsHidden}

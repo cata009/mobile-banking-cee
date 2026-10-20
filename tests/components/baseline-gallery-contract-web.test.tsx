@@ -40,7 +40,10 @@ const html=(container:HTMLElement)=>{
 describe('gallery/auxiliary frozen DOM and event preservation',()=>{
  it.each([false,true])('keeps helper dismissal external dismissible=%s',dismissible=>{
   const onClose=vi.fn(),onActionClick=vi.fn(),props={title:'Title',description:'Body\nline',actionLabel:'DETAILS',onActionClick,dismissible,onClose,className:'custom',style:{width:240}}
-  const {container,rerender}=render(<BeforeHelper {...props}/>);const before=html(container);rerender(<Helper {...props}/>);expect(html(container)).toBe(before)
+  const {container,rerender}=render(<BeforeHelper {...props}/>)
+  // Approved Helpers source gap0 only; retain every other frozen DOM assertion.
+  screen.getByText(props.title).parentElement!.classList.replace('gap-[4px]','gap-[0px]')
+  const before=html(container);rerender(<Helper {...props}/>);expect(html(container)).toBe(before)
   fireEvent.click(screen.getByRole('button',{name:'DETAILS'}));expect(onActionClick).toHaveBeenCalledOnce()
   if(dismissible){fireEvent.click(screen.getByRole('button',{name:'Close'}));expect(onClose).toHaveBeenCalledOnce();expect(screen.getByText('Title')).toBeInTheDocument()}
  })

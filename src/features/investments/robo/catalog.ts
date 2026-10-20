@@ -13,13 +13,18 @@ export const ROBO_GOAL_TYPES = [
     description: 'Grow your wealth to support long-term goals.',
   },
   {
-    id: 'unforeseen-circumstances',
-    title: 'Saving for unforeseen circumstances',
-    description: 'Build a reserve for unexpected expenses.',
+    id: 'inflation-protection',
+    title: 'Protection for inflation',
+    description: 'Save for a future purchase, like a home or car.',
   },
   {
     id: 'major-purchase',
     title: 'Saving for a major purchase',
+    description: 'Build a reserve for unexpected expenses.',
+  },
+  {
+    id: 'unforeseen-circumstances',
+    title: 'Saving for unforeseen circumstances',
     description: 'Save for a future purchase, like a home or car.',
   },
   {
@@ -31,8 +36,9 @@ export const ROBO_GOAL_TYPES = [
 
 export const ROBO_GOAL_NAME_SUGGESTIONS: Readonly<Record<string, readonly string[]>> = {
   'General build-up wealth': ['Bright future', 'Make money work', 'My next opportunity'],
-  'Saving for unforeseen circumstances': ['Peace of mind', 'My safety net', 'Ready for surprises'],
+  'Protection for inflation': ['Keep my money strong', 'Protect my savings', 'Beat inflation'],
   'Saving for a major purchase': ['My dream home', 'My next car', 'Big purchase'],
+  'Saving for unforeseen circumstances': ['Peace of mind', 'My safety net', 'Ready for surprises'],
   Retirement: ['Retire on my terms', 'Brighter retirement', 'Future freedom'],
 }
 

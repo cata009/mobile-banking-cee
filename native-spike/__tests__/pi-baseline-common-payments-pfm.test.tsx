@@ -1,6 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { Platform, StyleSheet } from 'react-native';
+import { Image, Platform, StyleSheet } from 'react-native';
 import {
   getPaymentsMenuForCountry,
   getHeroSheetForRelease,
@@ -33,6 +33,7 @@ import RoBaselinePfmScreen from '../src/experiences/pi/current/baseline/spending
 import { RoBaselinePfmOverview } from '../src/experiences/pi/current/baseline/spending/Overview';
 import { RoBaselinePfmCategoryDetail } from '../src/experiences/pi/current/baseline/spending/details';
 import { BaselinePaymentHero } from '../src/universal/BaselinePaymentHero';
+import { BaselinePaymentImage } from '../src/universal/BaselinePaymentImage';
 import { BaselineBanner } from '../src/universal/BaselineBanner';
 import { BaselineTextField } from '../src/universal/BaselineTextField';
 import { BaselineAmountField } from '../src/universal/BaselineAmountField';
@@ -269,7 +270,10 @@ it.each(countries)(
         ['payments-4', 'payments-5'].includes(node.props.imageVariant),
       )) {
         const width = hero.props.imageVariant === 'payments-4' ? 110 : 66;
-        const imageStyle = StyleSheet.flatten(hero.props.artwork.props.style);
+        const canonicalImage = hero.findByType(BaselinePaymentImage);
+        const imageStyle = StyleSheet.flatten(
+          canonicalImage.findByType(Image).props.style,
+        );
         expect(imageStyle.width).toBe((width * 104) / 120);
         expect(imageStyle.height).toBe(104);
         expect(imageStyle.right).toBe(

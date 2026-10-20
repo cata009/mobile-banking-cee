@@ -10,6 +10,17 @@ import FrozenPrimaryButton from '../fixtures/primary-button-before'
 afterEach(cleanup)
 
 describe('PrimaryButton', () => {
+  it('keeps Language Save keyboard focus visible and does not submit its host form', () => {
+    const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault())
+    const onClick = vi.fn()
+    render(<form onSubmit={onSubmit}><PrimaryButton variant="language-save" onClick={onClick}>Save language</PrimaryButton></form>)
+    const button = screen.getByRole('button', { name: 'Save language' })
+    fireEvent.click(button)
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(button).toHaveAttribute('type', 'button')
+    expect(button).toHaveClass('focus-visible:ring-2', 'focus-visible:ring-[var(--uc-action)]')
+  })
   it('makes the new disabled Language Save preset agree with its contract', () => {
     const onClick = vi.fn()
     render(

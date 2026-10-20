@@ -1,19 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   View,
   type ImageStyle,
-  type TextStyle,
-  type ViewStyle,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import {
-  resolveProductMenuCard,
-  resolveProductOfferCard,
-} from '@/app/components/contracts/marketingCard';
+import { resolveProductMenuCard } from '@/app/components/contracts/marketingCard';
 import {
   getProductsMenuForCountry,
   type ProductsCard,
@@ -27,11 +20,11 @@ import type {
   NativeProductsPreview,
   NativeProductsPreviewAction,
 } from '@/features/demo-native/productsPreviewContracts';
+import { BaselineProductOfferCard } from '../../../../../universal/BaselineProductOfferCard';
 import { BaselineProductMenuCard } from '../../../../../universal/BaselineProductMenuCard';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
 import { sourceColor } from '../../../../../universal/sourceColor';
-import { Text } from '../../../../../universal/Typography';
 import { RasterImage } from './RasterImage';
 
 const CARD_WIDTH = 327;
@@ -158,116 +151,17 @@ export function RoOfferCard({
   offer: ProductsOffer;
   onPress: () => void;
 }) {
-  const contract = resolveProductOfferCard({});
   const tone = getProductBannerTone(
     offer.colorFamily ?? 'green',
     offer.lightVersion ?? false,
   );
-  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
-  const color = sourceColor(tone.textColor, dark);
-  const rootStyle: ViewStyle = {
-    width: contract.width,
-    height: contract.height,
-    overflow: 'hidden',
-    borderRadius: contract.radius,
-    backgroundColor: sourceColor(tone.backgroundColor, dark),
-  };
-  const chevronStyle: ViewStyle = {
-    position: 'absolute',
-    left: contract.chevron.left,
-    top: '50%',
-    transform: [{ translateY: -contract.chevron.height / 2 }],
-  };
-  const photoStyle: ImageStyle = {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: contract.imageWidth,
-    height: contract.height,
-  };
-  const bodyStyle: ViewStyle = {
-    zIndex: 10,
-    height: '100%',
-    justifyContent: 'center',
-    paddingLeft: contract.paddingLeft,
-    paddingRight: contract.paddingRight,
-  };
-  const copyStyle: ViewStyle = { gap: contract.gap, alignItems: 'flex-start' };
-  const titleStyle: TextStyle = {
-    fontFamily: 'UniCredit-bold',
-    fontSize: contract.titleFontSize,
-    alignSelf: 'stretch',
-    color,
-  };
-  const descriptionStyle: TextStyle = {
-    fontFamily: 'UniCredit-regular',
-    fontSize: contract.descriptionFontSize,
-    alignSelf: 'stretch',
-    color,
-  };
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={rootStyle}>
-      {Platform.OS === 'web' ? (
-        React.createElement(
-          'svg',
-          {
-            'aria-hidden': true,
-            viewBox: contract.chevron.viewBox,
-            preserveAspectRatio: 'xMidYMid meet',
-            style: {
-              position: 'absolute',
-              left: contract.chevron.left,
-              top: '50%',
-              width: contract.chevron.width,
-              height: contract.chevron.height,
-              transform: 'translateY(-50%)',
-            },
-          },
-          React.createElement('path', {
-            fillRule: 'evenodd',
-            clipRule: 'evenodd',
-            d: contract.chevron.path,
-            fill: sourceColor(tone.chevronColor, dark),
-          }),
-        )
-      ) : (
-        <Svg
-          width={contract.chevron.width}
-          height={contract.chevron.height}
-          viewBox={contract.chevron.viewBox}
-          style={chevronStyle}
-        >
-          <Path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d={contract.chevron.path}
-            fill={sourceColor(tone.chevronColor, dark)}
-          />
-        </Svg>
-      )}
-      <RasterImage
-        source={
-          typeof tone.imageSrc === 'number'
-            ? tone.imageSrc
-            : { uri: tone.imageSrc }
-        }
-        resizeMode="cover"
-        style={photoStyle}
-      />
-      <View style={bodyStyle}>
-        <View style={copyStyle}>
-          <Text numberOfLines={contract.titleLines} style={titleStyle}>
-            {offer.title}
-          </Text>
-          <Text
-            numberOfLines={contract.descriptionLines}
-            style={descriptionStyle}
-          >
-            {offer.description}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
+    <BaselineProductOfferCard
+      offer={offer}
+      tone={tone}
+      dark={host.tokens.background === sourceColor('var(--uc-app-bg)', true)}
+      onPress={() => onPress()}
+    />
   );
 }
 
@@ -456,7 +350,10 @@ export function RoOffersCatalog({
         offer.description,
       ),
     }));
-    return getFutureGainProductOffers({ product: 'PI', country: host.country, release: host.release }, localizedOffers);
+    return getFutureGainProductOffers(
+      { product: 'PI', country: host.country, release: host.release },
+      localizedOffers,
+    );
   }, [config.offers, preview, t, host.country, host.release]);
   const products = preview?.products ?? config.products;
   const otherSolutions = preview?.otherSolutions ?? config.otherSolutions;
@@ -513,11 +410,13 @@ export function RoOffersCatalog({
                 ? offer =>
                     onPreviewAction?.({ type: 'offer-open', offerId: offer.id })
                 : futureGainEnabled(host)
-                  ? offer => {
-                      if (offer.id === 'future-gain-products-for-you') host.onNavigate({ screen: 'peer-insights' });
-                      if (offer.id === 'future-gain-smart-investment') host.onNavigate({ screen: 'smart-investment' });
-                    }
-                  : undefined
+                ? offer => {
+                    if (offer.id === 'future-gain-products-for-you')
+                      host.onNavigate({ screen: 'peer-insights' });
+                    if (offer.id === 'future-gain-smart-investment')
+                      host.onNavigate({ screen: 'smart-investment' });
+                  }
+                : undefined
             }
           />
         </View>

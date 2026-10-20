@@ -20,12 +20,17 @@ export function SourceBottomSheet({
   onClose,
   dark = false,
   scrollStyle,
+  maxHeightOffsetPx = 54,
+  stickyHeader = false,
 }: {
   title: string;
   children: React.ReactNode;
   onClose: () => void;
   dark?: boolean;
   scrollStyle?: StyleProp<ViewStyle>;
+  maxHeightOffsetPx?: number;
+  /** Long product details retain their title and close control while scrolling. */
+  stickyHeader?: boolean;
 }) {
   const { height } = useDemoViewport();
   return (
@@ -49,17 +54,28 @@ export function SourceBottomSheet({
         />
         <ScrollView
           keyboardShouldPersistTaps="handled"
+          stickyHeaderIndices={stickyHeader ? [0] : undefined}
           style={[
             s.sheet,
             {
-              maxHeight: height - 54,
+              maxHeight: height - maxHeightOffsetPx,
               backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
             },
             scrollStyle,
           ]}
-          contentContainerStyle={s.content}
+          contentContainerStyle={[s.content, stickyHeader && s.stickyContent]}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={s.header}>
+          <View
+            testID="source-sheet-header"
+            style={[
+              s.header,
+              stickyHeader && s.stickyHeader,
+              stickyHeader && {
+                backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
+              },
+            ]}
+          >
             <Text
               accessibilityRole="header"
               style={[s.title, { color: sourceColor('var(--uc-text)', dark) }]}
@@ -95,6 +111,8 @@ const s = StyleSheet.create({
     boxShadow: '0 -8px 24px rgba(0,0,0,0.18)',
   },
   content: { paddingTop: 24, paddingBottom: 24 },
+  stickyContent: { paddingTop: 0 },
+  stickyHeader: { paddingTop: 24, paddingBottom: 24, marginBottom: 0 },
   header: {
     paddingHorizontal: 24,
     marginBottom: 24,

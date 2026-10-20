@@ -8,6 +8,8 @@
  * component contract" placeholder in `ComponentImplementationPackage.tsx`.
  */
 import type { ReactNode } from "react";
+import { getNativeDesignSystemPreview } from '@/features/demo-native/designSystemPreview';
+import { NativeDesignSystemPreview } from './NativeDesignSystemPreview';
 import PrimaryButton from "@/app/components/PrimaryButton";
 import StatusBar from "@/app/components/StatusBar";
 import { NativeScreenPreview } from "@/app/components/demo/NativeScreenPreview";
@@ -461,14 +463,14 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
   "ui.navigation-row": {
     "icon-title": () => (
       <div className="w-full bg-[var(--uc-neutral-200)]">
-        <NavigationRow title="TITLE LOREM IPSUM" leadingIconName="account-details" trailingAccessory="chevron" onClick={() => {}} />
+        <NavigationRow title="Account settings" leadingIconName="account-details" trailingAccessory="chevron" onClick={() => {}} />
       </div>
     ),
     "icon-description": () => (
       <div className="w-full bg-[var(--uc-neutral-200)]">
         <NavigationRow
-          title="TITLE LOREM IPSUM"
-          description="Description short"
+          title="Account settings"
+          description="Manage your preferences"
           leadingIconName="account-details"
           trailingAccessory="chevron"
           onClick={() => {}}
@@ -477,17 +479,17 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
     ),
     "icon-cta": () => (
       <div className="w-full bg-[var(--uc-neutral-200)]">
-        <NavigationRow title="TITLE LOREM IPSUM" linkLabel="CTA" leadingIconName="account-details" onClick={() => {}} />
+        <NavigationRow title="Account settings" linkLabel="CTA" leadingIconName="account-details" onClick={() => {}} />
       </div>
     ),
     "toggle-title": () => (
       <div className="w-full bg-[var(--uc-neutral-200)]">
-        <NavigationRow title="TITLE LOREM IPSUM" trailingAccessory="toggle" toggleChecked onToggle={() => {}} />
+        <NavigationRow title="Account settings" trailingAccessory="toggle" toggleChecked onToggle={() => {}} />
       </div>
     ),
     "special-card": () => (
       <div className="w-full bg-[var(--uc-neutral-200)]">
-        <NavigationRow title="TITLE LOREM IPSUM" description="Description short" leadingIconName="accounts-coins" trailingAccessory="chevron" onClick={() => {}} />
+        <NavigationRow title="Account settings" description="Manage your preferences" leadingIconName="accounts-coins" trailingAccessory="chevron" onClick={() => {}} />
       </div>
     ),
     "special-cta": () => (
@@ -1133,6 +1135,8 @@ export const COMPONENT_STATE_PREVIEWS: StatePreviewMap = {
 };
 
 /** Returns the real-component preview for a (componentId, stateId) pair, or null. */
-export function getComponentStatePreview(componentId: string, stateId: string): ReactNode | null {
+export function getComponentStatePreview(componentId: string, stateId: string, themeMode: 'light' | 'dark' = 'light'): ReactNode | null {
+  if (getNativeDesignSystemPreview(componentId, stateId)) return <NativeDesignSystemPreview componentId={componentId} variantId={stateId} themeMode={themeMode} />;
+  if (getNativeDesignSystemPreview(componentId)) return null;
   return COMPONENT_STATE_PREVIEWS[componentId]?.[stateId]?.() ?? null;
 }
