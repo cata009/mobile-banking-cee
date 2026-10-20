@@ -25,9 +25,11 @@ export function isRoBaselineHome(
 export function BaselineHomeFrame({
   host,
   redesigned = false,
+  primeEntry,
 }: {
   host: CurrentScreenProps;
   redesigned?: boolean;
+  primeEntry?: React.ReactNode;
 }) {
   const dark = host.tokens.background === '#121212';
   const page = [styles.page, { backgroundColor: host.tokens.background }];
@@ -46,7 +48,7 @@ export function BaselineHomeFrame({
   return (
     <View style={page}>
       <View style={reserve} />
-      <BaselineHomeHeader host={host} />
+      <BaselineHomeHeader host={host} primeEntry={primeEntry} />
       <ScrollView
         style={Platform.OS === 'web' ? styles.webScroll : undefined}
         contentContainerStyle={[styles.content, futureGainPadding]}

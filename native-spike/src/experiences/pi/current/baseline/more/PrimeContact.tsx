@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
   type TextStyle,
+  type ImageSourcePropType,
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { CurrentScreenProps } from '../../contracts';
@@ -17,6 +18,7 @@ import { ToggleButton } from '../../../../../universal/ToggleButton';
 import { RasterImage } from '../offers/RasterImage';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
 import { advisorPhoto } from '../../profile/assets';
+import type { PrimeContactScreen } from '@/features/prime/reference';
 export type MailApp = 'gmail' | 'mail';
 export interface MailPreferences {
   askEveryTime: boolean;
@@ -34,12 +36,16 @@ export default function PrimeContact({
   preferences,
   onPreferences,
   onClose,
+  reference,
+  recipient,
 }: {
   host: CurrentScreenProps;
   action: 'call' | 'email';
   preferences: MailPreferences;
   onPreferences: (value: MailPreferences) => void;
   onClose: () => void;
+  reference?: { screen: PrimeContactScreen; navigate: (screen: PrimeContactScreen) => void };
+  recipient?: { name: string; phone?: string; service?: boolean; photo?: ImageSourcePropType; email?: string };
 }) {
   const t = host.t,
     tokens = host.tokens;
@@ -49,16 +55,18 @@ export default function PrimeContact({
     t(`prime.advisor.${key}`, fallback);
   const keypadWidth = Math.min(250, useDemoViewport().width - 56);
   const digitSlotStyle = { width: (keypadWidth - 36) / 3 };
-  const name = text('name', 'David Novak'),
-    phone = text('phone', '+420 602 123 456'),
-    email = text('emailAddress', 'david.novak@unicredit.cz');
-  const [screen, setScreen] = useState<Screen>(
+  const name = recipient?.name ?? text('name', 'David Novak'),
+    phone = recipient?.service ? recipient.phone ?? '' : recipient?.phone ?? text('phone', '+420 602 123 456'),
+    email = recipient?.email ?? text('emailAddress', 'david.novak@unicredit.cz');
+  const [localScreen, setLocalScreen] = useState<Screen>(
     action === 'call'
       ? 'call-confirm'
       : !preferences.askEveryTime && preferences.preferredApp
       ? 'email-compose'
       : 'email-chooser',
   );
+  const screen = reference?.screen ?? localScreen;
+  const setScreen = (value: Screen) => reference ? reference.navigate(value) : setLocalScreen(value);
   const [app, setApp] = useState<MailApp>(preferences.preferredApp ?? 'gmail'),
     [subject, setSubject] = useState(''),
     [body, setBody] = useState('');
@@ -164,19 +172,19 @@ export default function PrimeContact({
       >
         <View style={styles.flex}>
           <View style={styles.identity}>
-            <RasterImage
-              source={advisorPhoto}
+            {recipient?.service ? <SourceCustomIcon name="contact-phone" size={64} color="white" /> : <RasterImage
+              source={recipient?.photo ?? advisorPhoto}
               accessibilityLabel={name}
               style={styles.callPhoto}
-            />
+            />}
             <View style={styles.name}>
               <Copy strong size={28} lineHeight={31} color="white">
                 {name}
               </Copy>
             </View>
-            <View style={styles.mt8}>
+            {phone ? <View style={styles.mt8}>
               <Copy color="rgba(255,255,255,0.7)">{phone}</Copy>
-            </View>
+            </View> : null}
             <View style={styles.callTime}>
               <Copy size={14} color="rgba(255,255,255,0.7)">
                 {connected
@@ -587,7 +595,7 @@ function MailMark({ app }: { app: MailApp }) {
     </Svg>
   );
 }
-function CallIcon({ name, color }: { name: string; color: string }) {
+export function CallIcon({ name, color }: { name: string; color: string }) {
   let glyph: React.ReactNode;
   if (name === 'mic')
     glyph = (

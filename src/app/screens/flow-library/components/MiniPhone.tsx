@@ -21,6 +21,7 @@ export interface MiniPhoneProps {
   scale?: number;
   /** StatusBar foreground: "light" = dark text, "dark" = white text. */
   statusBarVariant?: "light" | "dark";
+  microphoneActive?: boolean;
   /** Top inset reserved for the status bar, exposed to PageHeader via --uc-phone-top-reserve. */
   topReserve?: number;
   /** Lets the active Journey preview receive native vertical scrolling. */
@@ -40,7 +41,7 @@ const BEZEL = 12;
 const BEZEL_RADIUS = 48;
 
 const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
-  { children, scale = 0.62, statusBarVariant = "light", topReserve = 44, scrollable = false, device = false, className },
+  { children, scale = 0.62, statusBarVariant = "light", microphoneActive = false, topReserve = 44, scrollable = false, device = false, className },
   ref,
 ) {
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -56,6 +57,7 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
   const frameStyle = {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
+    backgroundColor: statusBarVariant === "dark" ? "var(--uc-static-black)" : "var(--uc-surface)",
     transform: device ? undefined : `scale(${scale})`,
     transformOrigin: "top left",
     "--uc-phone-top-reserve": `${topReserve}px`,
@@ -74,6 +76,7 @@ const MiniPhone = forwardRef<HTMLDivElement, MiniPhoneProps>(function MiniPhone(
     >
       <StatusBar variant={statusBarVariant} />
       {device ? <DynamicIsland variant="light" /> : null}
+      {device && microphoneActive ? <span aria-hidden="true" className="pointer-events-none absolute left-[calc(50%+30px)] top-[22px] z-[46] size-[4px] rounded-full bg-[#ff9f0a]" /> : null}
       <div className="h-full w-full overflow-hidden">{children}</div>
     </div>
   );

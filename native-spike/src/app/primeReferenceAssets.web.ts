@@ -1,0 +1,10 @@
+import photo from '@/assets/prime-reference/upgrade-advisor.png';
+import diamond from '@/assets/prime-reference/upgrade-diamond.svg';
+import privatePhoto from '@/assets/prime-reference/private-advisor.png';
+import standardPhoto from '@/assets/prime-reference/standard-advisor.png';
+import shield from '@/assets/prime-reference/private-shield.svg';
+export const upgradePhoto = { uri: photo };
+export const upgradeDiamond = diamond;
+export const privateAdvisorPhoto = { uri: privatePhoto };
+export const standardAdvisorPhoto = { uri: standardPhoto };
+export const privateShield = shield;

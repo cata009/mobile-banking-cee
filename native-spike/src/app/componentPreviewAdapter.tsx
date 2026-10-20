@@ -9,6 +9,7 @@ import {
 import { BaselineInvestmentDocumentsPreview } from '../experiences/pi/current/investments/baseline/flows/Documents';
 import { BaselineSpendingHeader } from '../experiences/pi/current/baseline/spending/Overview';
 import { InternalTransfer } from '../experiences/pi/current/banking/InternalTransfer';
+import { PrimeReferencePreview } from './PrimeReferencePreview';
 import type {
   CurrentAdapter,
   CurrentScreenProps,
@@ -17,6 +18,8 @@ import type {
 function ComponentPreview(host: CurrentScreenProps) {
   const preview = host.componentPreview;
   if (!preview) return null;
+  if (preview.kind === 'prime-reference')
+    return <PrimeReferencePreview host={host} screen={preview.screen} segment={preview.segment} serviceActive={preview.serviceActive} playCallAudio={preview.playCallAudio} />;
   if (preview.kind === 'internal-transfer')
     return (
       <InternalTransfer
@@ -125,6 +128,7 @@ function ComponentPreview(host: CurrentScreenProps) {
 export const NATIVE_COMPONENT_PREVIEW_ADAPTER: CurrentAdapter = {
   id: 'pi-native-component-previews',
   screens: {
+    home: ComponentPreview,
     account: ComponentPreview,
     card: ComponentPreview,
     pfm: ComponentPreview,

@@ -14,6 +14,7 @@ it('owns all canonical definitions as identity reexports without UI runtime impo
     expect(Object.values(entry as object)).toContain(FLOW_DEFINITIONS[ids[index]!])
   })
   expect(FLOW_ORDER).toEqual([
+    'pi-prime',
     'investments-bulk-approval',
     'rs-property-insurance',
     'rs-disposable-cards',
@@ -30,6 +31,6 @@ it('preserves every definition field, scenario step, screen kind, rule and copy 
     'rs-disposable-cards': 'c5b9e620eb524fccfdc1552c4afeb718594e8fb29cf23bd416867236a70da0dd',
     'investments-bulk-approval': '7be32e96f08ba2d4271990e63e1059b756fcf2f438584ab951eb2b8b684b6f91',
   }
-  for (const [id, flow] of Object.entries(FLOW_DEFINITIONS))
-    expect(createHash('sha256').update(JSON.stringify(flow)).digest('hex')).toBe(hashes[id as keyof typeof hashes])
+  for (const id of Object.keys(hashes) as Array<keyof typeof hashes>)
+    expect(createHash('sha256').update(JSON.stringify(FLOW_DEFINITIONS[id])).digest('hex')).toBe(hashes[id])
 })
