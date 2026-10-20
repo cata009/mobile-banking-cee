@@ -60,9 +60,11 @@ function motion(
 export function FaceIdOverlay({
   onComplete,
   success = sourceColor('var(--uc-green-success)'),
+  glyph,
 }: {
   onComplete: () => void;
   success?: string;
+  glyph?: React.ReactNode;
 }) {
   const complete = useRef(onComplete);
   complete.current = onComplete;
@@ -284,28 +286,39 @@ export function FaceIdOverlay({
                 : undefined,
             ]}
           >
-            <AnimatedText
-              style={[
-                styles.glyph,
-                { color: success, opacity: pulseAlpha },
-                Platform.OS === 'web'
-                  ? webGlyphFont
-                  : {
-                      textShadowColor: glowRadius.interpolate({
-                        inputRange: [8, 12],
-                        outputRange: [
-                          shadowColor(success, 0.6),
-                          shadowColor(success, 0.8),
-                        ],
-                      }),
-                      textShadowRadius: glowRadius,
-                      textShadowOffset: { width: 0, height: 0 },
-                    },
-                motion('ro-face-pulse', 800, 'ease-in-out'),
-              ]}
-            >
-              􀎽
-            </AnimatedText>
+            {glyph ? (
+              <Animated.View
+                style={[
+                  { opacity: pulseAlpha },
+                  motion('ro-face-pulse', 800, 'ease-in-out'),
+                ]}
+              >
+                {glyph}
+              </Animated.View>
+            ) : (
+              <AnimatedText
+                style={[
+                  styles.glyph,
+                  { color: success, opacity: pulseAlpha },
+                  Platform.OS === 'web'
+                    ? webGlyphFont
+                    : {
+                        textShadowColor: glowRadius.interpolate({
+                          inputRange: [8, 12],
+                          outputRange: [
+                            shadowColor(success, 0.6),
+                            shadowColor(success, 0.8),
+                          ],
+                        }),
+                        textShadowRadius: glowRadius,
+                        textShadowOffset: { width: 0, height: 0 },
+                      },
+                  motion('ro-face-pulse', 800, 'ease-in-out'),
+                ]}
+              >
+                􀎽
+              </AnimatedText>
+            )}
           </Animated.View>
         ) : (
           <Animated.View

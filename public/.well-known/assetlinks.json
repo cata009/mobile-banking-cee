@@ -1,0 +1,14 @@
+[
+  {
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.mobilebanking.cee.demo",
+      "sha256_cert_fingerprints": [
+        "8A:44:E3:E1:B4:8D:3D:77:12:2F:EF:3E:6E:E5:14:A3:10:0D:05:06:F8:79:3C:B6:B3:E2:E0:25:3A:34:B6:16"
+      ]
+    },
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ]
+  }
+]

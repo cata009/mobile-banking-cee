@@ -9,7 +9,7 @@ interface ProductOfferCardProps {
   colorFamily?: ProductBannerColorFamily;
   lightVersion?: boolean;
   /**
-   * "standard" (default): 22px title / 18px description.
+   * "standard" (default): original Figma 24/26px title / 18/20px description.
    * "compact": 20px title / 16px description, plus an optional 14px
    * one-line caption below the description.
    */
@@ -59,15 +59,15 @@ export default function ProductOfferCard({
       <img
         src={tone.imageSrc}
         alt=""
-        className="absolute right-0 top-0 h-full w-[100px] object-cover object-center"
+        className={contract.imageClass}
         draggable={false}
       />
 
-      <div className="relative z-10 flex h-full items-center pl-[20px] pr-[116px]">
+      <div className={contract.bodyClass}>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-[8px]">
           <h3
             className="self-stretch overflow-hidden whitespace-pre-line font-['UniCredit',sans-serif] font-bold [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-            style={{ color: tone.textColor, fontSize: `${contract.titleFontSize}px`, lineHeight: "normal" }}
+            style={{ color: tone.textColor, fontSize: `${contract.titleFontSize}px`, lineHeight: contract.titleLineHeight ? `${contract.titleLineHeight}px` : "normal" }}
           >
             {offer.title}
           </h3>
@@ -75,14 +75,14 @@ export default function ProductOfferCard({
             className={`self-stretch overflow-hidden whitespace-pre-line [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${
               isCompact ? "uc-type-n4" : "uc-type-p1"
             }`}
-            style={{ color: tone.textColor }}
+            style={{ color: tone.textColor, ...(contract.descriptionLineHeight ? { fontSize: `${contract.descriptionFontSize}px`, lineHeight: `${contract.descriptionLineHeight}px` } : {}) }}
           >
             {offer.description}
           </p>
           {contract.showCaption ? (
             <p
               className="uc-type-p2 block w-full overflow-hidden text-ellipsis whitespace-nowrap"
-              style={{ color: tone.textColor }}
+              style={{ color: tone.textColor, ...(contract.captionLineHeight ? { fontSize: `${contract.captionFontSize}px`, lineHeight: `${contract.captionLineHeight}px` } : {}) }}
             >
               {offer.caption}
             </p>

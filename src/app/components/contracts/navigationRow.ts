@@ -23,17 +23,22 @@ export function resolveNavigationRow({
   hasOnLinkClick = false,
   toggleChecked = false,
 }: NavigationRowOptions = {}) {
+  const hasToggle = trailingAccessory === 'toggle' && !hasTrailing
+  // Payment type's source content was centered 2px outside its nominal 16px inset.
+  const paymentType = rowHeight === 64 && hasToggle && hasLeading && !centerContent
+  const compactSpecial = rowHeight === 64 && centerContent && !hasLeading && !hasTrailing && trailingAccessory === 'none'
   return {
     trailingAccessory,
     rowHeight,
     centerContent,
     toggleChecked,
     rootKind: hasOnClick && !hasOnLinkClick && trailingAccessory !== 'toggle' && !hasTrailing ? 'button' : 'div',
-    paddingLeft: centerContent ? 24 : rowHeight === 64 || hasLeading ? 16 : 24,
-    paddingRight: centerContent ? 24 : rowHeight === 64 ? 16 : 12,
+    paddingLeft: paymentType ? 14 : centerContent ? 24 : rowHeight === 64 || (hasLeading && !hasToggle) ? 16 : 24,
+    paddingRight: centerContent ? 24 : rowHeight === 64 || hasToggle ? 16 : 12,
     gap: 16,
     iconSlot: 32,
-    titleFontSize: 16,
+    titleFontSize: compactSpecial ? 14 : 16,
+    titleMaxLines: compactSpecial ? 1 : 2,
     titleLineHeight: 'normal',
     descriptionFontSize: 16,
     descriptionLineHeight: 'normal',

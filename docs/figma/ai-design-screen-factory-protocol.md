@@ -383,7 +383,7 @@ When writing code:
 - Register reusable components in `src/app/registry/componentRegistry.ts`.
 - Add IDs to `src/app/state/demoTypes.ts` when needed.
 - Add specimens to `src/app/screens/design-system/DesignSystemPage.tsx` for reusable DS components.
-- Update template/screen/flow registries only when the user asks to make it a platform flow or screen.
+- Update screen/flow registries only when the user asks to make it a platform flow or screen.
 - Preserve PI/Kids/SME boundaries unless explicitly asked to bridge them.
 
 ### C5. Verification For Reverse Import
@@ -393,7 +393,7 @@ Minimum verification depends on scope:
 For component normalization:
 
 - `npm run build`
-- `npm run audit:templates`
+- `npm run audit:registry`
 - `npm run audit:platform`
 - Browser smoke on the Design System Inventory page where the specimen appears.
 - `git diff --check`

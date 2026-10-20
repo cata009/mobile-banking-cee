@@ -10,6 +10,8 @@ import { SourceCustomIcon } from './SourceCustomIcon';
 import { Text } from './Typography';
 import { sourceColor } from './sourceColor';
 
+export { BANNER_ORIGINAL_SOURCES } from '@/app/components/contracts/banner';
+
 /** Gallery/auxiliary variants remain distinct; discovery alone owns dismissal. */
 export function BaselineBanner({
   variant,
@@ -33,6 +35,7 @@ export function BaselineBanner({
   actionIconName,
   actionIconSize = 16,
   dark = false,
+  presentation,
 }: {
   variant: BannerVariant | 'payment-discover';
   title: string;
@@ -55,6 +58,20 @@ export function BaselineBanner({
   actionIconName?: string;
   actionIconSize?: number;
   dark?: boolean;
+  presentation?: {
+    width?: ViewStyle['width'];
+    bodyLineHeight?: number;
+    radius?: number;
+    titleFont?: string;
+    titleSize?: number;
+    titleLineHeight?: number;
+    contentWidth?: number;
+    contentPaddingRight?: number;
+    closeSize?: number;
+    closeRight?: number;
+    closeTop?: number;
+    closeNode?: React.ReactNode;
+  };
 }) {
   const [visible, setVisible] = useState(true);
   const discover = variant === 'payment-discover',
@@ -73,11 +90,11 @@ export function BaselineBanner({
     user = variant === 'user-event',
     stacked = variant === 'ghost' && layout === 'stacked';
   const rootStyle: ViewStyle = {
-    width: discover ? '100%' : contract.width,
+    width: presentation?.width ?? (discover ? '100%' : contract.width),
     maxWidth: '100%',
     height: contract.height,
     padding: contract.padding,
-    borderRadius: contract.radius,
+    borderRadius: presentation?.radius ?? contract.radius,
     gap: contract.gap,
     overflow: variant === 'pending' ? 'hidden' : undefined,
     position: 'relative',
@@ -100,9 +117,11 @@ export function BaselineBanner({
     boxShadow: user ? '0 4px 16px rgba(0,0,0,.08)' : undefined,
   };
   const titleStyle = {
-    fontFamily: 'UniCredit-bold',
-    fontSize: contract.titleFontSize,
-    lineHeight: discover ? undefined : contract.titleLineHeight,
+    fontFamily: presentation?.titleFont ?? 'UniCredit-bold',
+    fontSize: presentation?.titleSize ?? contract.titleFontSize,
+    lineHeight:
+      presentation?.titleLineHeight ??
+      (discover ? undefined : contract.titleLineHeight),
     color: discover
       ? sourceColor('var(--uc-text-inverse)', dark)
       : solid
@@ -112,7 +131,9 @@ export function BaselineBanner({
   const descriptionStyle = {
     fontFamily: 'UniCredit-regular',
     fontSize: contract.bodyFontSize,
-    lineHeight: discover ? undefined : contract.bodyLineHeight,
+    lineHeight:
+      presentation?.bodyLineHeight ??
+      (discover ? undefined : contract.bodyLineHeight),
     color: discover
       ? sourceColor('var(--uc-text-inverse)', dark)
       : solid
@@ -120,13 +141,15 @@ export function BaselineBanner({
       : text,
   };
   const contentStyle: ViewStyle = {
-    flex: 1,
+    flex: presentation?.contentWidth === undefined ? 1 : undefined,
+    width: presentation?.contentWidth,
     minWidth: 0,
     gap: 8,
-    paddingRight: variant === 'helper' ? 24 : 0,
+    paddingRight:
+      presentation?.contentPaddingRight ?? (variant === 'helper' ? 24 : 0),
     alignItems: stacked ? 'center' : undefined,
   };
-  const messageStyle: ViewStyle = { gap: user ? 0 : 4 };
+  const messageStyle: ViewStyle = { gap: contract.messageGap };
   const iconStyle: ViewStyle = {
     width: contract.slotSize,
     height: contract.slotSize,
@@ -150,10 +173,10 @@ export function BaselineBanner({
   };
   const closeStyle: ViewStyle = {
     position: 'absolute',
-    right: 12,
-    top: 9,
-    width: 24,
-    height: 24,
+    right: presentation?.closeRight ?? 12,
+    top: presentation?.closeTop ?? 9,
+    width: presentation?.closeSize ?? 24,
+    height: presentation?.closeSize ?? 24,
     alignItems: 'center',
     justifyContent: 'center',
   };
@@ -315,7 +338,9 @@ export function BaselineBanner({
             onPress={onClose}
             style={closeStyle}
           >
-            <SourceCustomIcon name="close-x" size={12} color={white} />
+            {presentation?.closeNode ?? (
+              <SourceCustomIcon name="close-x" size={12} color={white} />
+            )}
           </Pressable>
         )}
         {user && showOptions && (

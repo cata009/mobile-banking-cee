@@ -11,6 +11,7 @@ import { PANEL_MENU_CONTRACT as c } from '@/app/components/contracts/panelMenuSh
 import { SourceCustomIcon } from './SourceCustomIcon';
 import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
+import { BaselineNavigationRow } from './BaselineNavigationRow';
 
 export function BaselinePanelMenuSheet({
   aboutSmartBanking,
@@ -24,6 +25,8 @@ export function BaselinePanelMenuSheet({
   shadeStyle,
   panelStyle,
   handleLayer,
+  title,
+  items,
 }: {
   aboutSmartBanking: string;
   exchangeRates: string;
@@ -36,6 +39,13 @@ export function BaselinePanelMenuSheet({
   shadeStyle?: StyleProp<ViewStyle>;
   panelStyle?: StyleProp<ViewStyle>;
   handleLayer?: React.ReactNode;
+  title?: string;
+  items?: readonly {
+    id: string;
+    title: string;
+    description: string;
+    onPress?: () => void;
+  }[];
 }) {
   const host = { ...styles.host, height };
   const shade = {
@@ -44,7 +54,11 @@ export function BaselinePanelMenuSheet({
   };
   const panel = {
     ...styles.panel,
-    backgroundColor: sourceColor('var(--uc-text)', dark),
+    backgroundColor: sourceColor(
+      items ? 'var(--uc-surface)' : 'var(--uc-text)',
+      dark,
+    ),
+    gap: items ? 24 : 8,
   };
   const label = { ...styles.label, color: sourceColor(c.labelColor, dark) };
   const rows = [
@@ -63,65 +77,137 @@ export function BaselinePanelMenuSheet({
   ];
   return (
     <View style={host}>
-      <Pressable onPress={onClose} style={[shade, shadeStyle]} />
-      <View style={[panel, panelStyle]}>
-        <Pressable
-          accessibilityRole={onClose ? 'button' : undefined}
-          accessibilityLabel={onClose ? 'Close panel' : undefined}
-          onPress={onClose}
-          style={styles.handle}
-        >
-          {handleLayer ?? (
-            <Svg
-              width={40}
-              height={16}
-              viewBox="0 0 40 16"
-              style={styles.handleBias}
+      <Pressable
+        onPress={onClose}
+        accessibilityRole={onClose ? 'button' : undefined}
+        accessibilityLabel={onClose ? 'Close panel' : undefined}
+        style={[shade, shadeStyle]}
+      />
+      <View
+        role={items ? 'dialog' : undefined}
+        aria-modal={items ? true : undefined}
+        accessibilityViewIsModal={Boolean(items)}
+        accessibilityLabel={items ? title : undefined}
+        style={[panel, panelStyle]}
+      >
+        {items ? (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 24,
+              }}
             >
-              <Rect
-                x={2}
-                y={6}
-                width={21}
-                height={5}
-                rx={2.5}
-                fill={sourceColor('var(--uc-border-muted)', dark)}
-                rotation={20}
-                origin="12.5,8.5"
-              />
-              <Rect
-                x={17}
-                y={6}
-                width={21}
-                height={5}
-                rx={2.5}
-                fill={sourceColor('var(--uc-border-muted)', dark)}
-                rotation={-20}
-                origin="27.5,8.5"
-              />
-            </Svg>
-          )}
-        </Pressable>
-        <View style={styles.rows}>
-          {rows.map((row, index) => (
-            <Pressable
-              key={index}
-              accessibilityRole={
-                'onPress' in row && row.onPress ? 'button' : undefined
-              }
-              onPress={'onPress' in row ? row.onPress : undefined}
-              style={styles.row}
-            >
-              <View style={styles.glyphSlot}>
+              <Text
+                accessibilityRole="header"
+                style={{
+                  fontFamily: 'UniCredit-bold',
+                  fontSize: 28,
+                  lineHeight: 32,
+                  letterSpacing: 0.3,
+                  color: sourceColor('var(--uc-text)', dark),
+                  flex: 1,
+                }}
+              >
+                {title}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close product selection"
+                onPress={onClose}
+                style={{ width: 32, height: 32 }}
+              >
                 <SourceCustomIcon
-                  name={row.icon}
-                  size={c.glyphSize}
-                  color={sourceColor(c.labelColor, dark)}
+                  name="close-x"
+                  size={32}
+                  color={sourceColor('var(--uc-text)', dark)}
                 />
-              </View>
-              <Text style={label}>{row.label}</Text>
+              </Pressable>
+            </View>
+            <View>
+              {items.map(item => (
+                <BaselineNavigationRow
+                  key={item.id}
+                  title={item.title}
+                  description={item.description}
+                  onPress={item.onPress}
+                  dark={dark}
+                  leadingVisual={<View style={{ width: 32, height: 32 }} />}
+                  style={{
+                    height: 80,
+                    paddingLeft: 16,
+                    paddingRight: 12,
+                    gap: 16,
+                  }}
+                  titleStyle={{ fontSize: 18 }}
+                  descriptionStyle={{ fontSize: 14 }}
+                />
+              ))}
+            </View>
+          </>
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole={onClose ? 'button' : undefined}
+              accessibilityLabel={onClose ? 'Close panel' : undefined}
+              onPress={onClose}
+              style={styles.handle}
+            >
+              {handleLayer ?? (
+                <Svg
+                  width={40}
+                  height={16}
+                  viewBox="0 0 40 16"
+                  style={styles.handleBias}
+                >
+                  <Rect
+                    x={2}
+                    y={6}
+                    width={21}
+                    height={5}
+                    rx={2.5}
+                    fill={sourceColor('var(--uc-border-muted)', dark)}
+                    rotation={20}
+                    origin="12.5,8.5"
+                  />
+                  <Rect
+                    x={17}
+                    y={6}
+                    width={21}
+                    height={5}
+                    rx={2.5}
+                    fill={sourceColor('var(--uc-border-muted)', dark)}
+                    rotation={-20}
+                    origin="27.5,8.5"
+                  />
+                </Svg>
+              )}
             </Pressable>
-          ))}
-        </View>
+            <View style={styles.rows}>
+              {rows.map((row, index) => (
+                <Pressable
+                  key={index}
+                  accessibilityRole={
+                    'onPress' in row && row.onPress ? 'button' : undefined
+                  }
+                  onPress={'onPress' in row ? row.onPress : undefined}
+                  style={styles.row}
+                >
+                  <View style={styles.glyphSlot}>
+                    <SourceCustomIcon
+                      name={row.icon}
+                      size={c.glyphSize}
+                      color={sourceColor(c.labelColor, dark)}
+                    />
+                  </View>
+                  <Text style={label}>{row.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
       </View>
     </View>
   );

@@ -1,50 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../../../../universal/Typography';
-import { DetailHeader } from '../../../../universal/DetailHeader';
 import { AssetGlyph } from '../../../../universal/AssetGlyph';
 import { mobileFirstTokens as tokens } from '../../../../universal/tokens';
-import back from '@/assets/mobile-first/it/account-chevron.svg';
-import avatar from '@/assets/mobile-first/it/account/imgAvatar.png';
-import eye from '@/assets/mobile-first/it/insurance/show.svg';
-import hiddenEye from '@/assets/mobile-first/it/hide-amounts.svg';
+import back from '@/assets/mobile-first/it/investments/common/back.svg';
+import help from '@/assets/mobile-first/it/investments/common/help.svg';
+import close from '@/assets/mobile-first/it/investments/common/close.svg';
 import serviceForth from '@/assets/mobile-first/it/investments/services/NavigationAndActionForthT2.svg';
 export { AssetGlyph, tokens };
 export function Header({
   onBack,
-  onProfile,
-  onPrivacy,
-  hidden,
+  onClose,
+  onHelp,
+  helpOpen,
 }: {
   onBack: () => void;
-  onProfile: () => void;
-  onPrivacy?: () => void;
-  hidden: boolean;
+  onClose: () => void;
+  onHelp: () => void;
+  helpOpen: boolean;
 }) {
   return (
-    <DetailHeader
-      tokens={tokens}
-      onBack={onBack}
-      onProfile={onProfile}
-      avatarSource={typeof avatar === 'number' ? avatar : { uri: avatar }}
-      backIcon={
-        <View style={s.reverse}>
-          <AssetGlyph asset={back} />
-        </View>
-      }
-      actions={
-        onPrivacy ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={hidden ? 'Mostra importi' : 'Nascondi importi'}
-            onPress={onPrivacy}
-            style={s.iconButton}
-          >
-            <AssetGlyph asset={hidden ? hiddenEye : eye} />
-          </Pressable>
-        ) : undefined
-      }
-    />
+    <View style={s.sourceToolbar}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Indietro"
+        onPress={onBack}
+        style={s.sourceToolbarButton}
+      >
+        <AssetGlyph asset={back} width={40.0034} height={40.0034} />
+      </Pressable>
+      <View style={s.grow} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Aiuto"
+        accessibilityState={{ expanded: helpOpen }}
+        aria-expanded={helpOpen}
+        onPress={onHelp}
+        style={s.sourceToolbarButton}
+      >
+        <AssetGlyph asset={help} size={40} />
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Chiudi"
+        onPress={onClose}
+        style={s.sourceToolbarButton}
+      >
+        <AssetGlyph asset={close} size={40} />
+      </Pressable>
+    </View>
+  );
+}
+export function InvestmentHelp() {
+  return (
+    <Text accessibilityRole="alert" style={s.sourceHelp}>
+      Controlla i dati dell’operazione prima di confermare. Per assistenza,
+      contatta il tuo consulente UniCredit.
+    </Text>
   );
 }
 export function Money({
@@ -55,6 +67,8 @@ export function Money({
   compact = false,
   currencySize = 14,
   currencyStrong = false,
+  integerSize,
+  integerLineHeight,
 }: {
   cents: number;
   hidden: boolean;
@@ -63,6 +77,8 @@ export function Money({
   compact?: boolean;
   currencySize?: number;
   currencyStrong?: boolean;
+  integerSize?: number;
+  integerLineHeight?: number;
 }) {
   const [integer, fraction] = (cents / 100)
     .toLocaleString('it-IT', {
@@ -72,7 +88,15 @@ export function Money({
     })
     .split(',');
   return (
-    <Text style={[s.amount, large && s.total, compact && s.compactAmount]}>
+    <Text
+      style={[
+        s.amount,
+        large && s.total,
+        compact && s.compactAmount,
+        integerSize !== undefined && { fontSize: integerSize },
+        integerLineHeight !== undefined && { lineHeight: integerLineHeight },
+      ]}
+    >
       {hidden ? '••••' : integer}
       <Text
         style={[
@@ -116,12 +140,14 @@ export function Link({
   icon,
   service = false,
   anchor = false,
+  displayLabel,
 }: {
   label: string;
   onPress: () => void;
   icon?: string | number | null;
   service?: boolean;
   anchor?: boolean;
+  displayLabel?: string;
 }) {
   return (
     <Pressable
@@ -137,7 +163,9 @@ export function Link({
           service && anchor && s.serviceAnchorText,
         ]}
       >
-        {service ? label.toUpperCase() : label}
+        {service
+          ? (displayLabel ?? label).toUpperCase()
+          : displayLabel ?? label}
       </Text>
       {icon && <AssetGlyph asset={icon} width={16} height={16} />}
     </Pressable>
@@ -152,6 +180,7 @@ export function ServiceLink({
   onPress: () => void;
   icon?: string | number | null;
   anchor?: boolean;
+  displayLabel?: string;
 }) {
   return <Link {...props} icon={icon} service />;
 }
@@ -160,18 +189,29 @@ export function Tabs({
   value,
   onChange,
   variant,
+  fitContent = false,
 }: {
   items: readonly string[];
   value: string;
   onChange: (value: string) => void;
   variant?: 'securities' | 'funds';
+  fitContent?: boolean;
 }) {
+  const [contentWidth, setContentWidth] = useState(0);
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      style={[s.tabsScroll, variant && s.securitiesTabsScroll]}
+      style={[
+        s.tabsScroll,
+        variant && s.securitiesTabsScroll,
+        fitContent && s.fitContentTabs,
+        fitContent && contentWidth > 0 && { width: contentWidth },
+      ]}
       contentContainerStyle={[s.tabs, variant && s.securitiesTabsContent]}
+      onContentSizeChange={
+        fitContent ? width => setContentWidth(width) : undefined
+      }
     >
       {items.map(item => (
         <Pressable
@@ -251,6 +291,30 @@ export function Check({
   );
 }
 export const s = StyleSheet.create({
+  sourceToolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 48,
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  sourceToolbarButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sourceHelp: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    backgroundColor: '#f5f5f5',
+    fontFamily: tokens.font,
+    fontSize: 16,
+    lineHeight: 22,
+    color: tokens.text,
+  },
   screen: { flex: 1, backgroundColor: '#fff' },
   content: { padding: 16, paddingBottom: 40, gap: 24 },
   title: {
@@ -362,6 +426,7 @@ export const s = StyleSheet.create({
     lineHeight: 20,
   },
   tabsScroll: { marginHorizontal: -16, flexGrow: 0 },
+  fitContentTabs: { maxWidth: '100%', flexShrink: 1 },
   securitiesTabsScroll: { marginHorizontal: 0, marginBottom: 24 },
   securitiesTabsContent: { paddingHorizontal: 0 },
   securitiesTab: { height: 'auto', minHeight: 46 },

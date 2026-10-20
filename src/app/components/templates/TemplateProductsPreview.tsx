@@ -10,7 +10,6 @@ import type {
 } from '@/app/config/productsMenuConfig'
 import type { NativeDemoRoute } from '@/features/demo-native/contracts'
 import { getProductsMenuForCountry } from '@/app/config/productsMenuConfig'
-import type { NativeProductDetailPresentation } from '@/features/demo-native/productDetailPresentation'
 import type {
   NativeProductsPreview,
   NativeProductsPreviewAction,
@@ -203,35 +202,5 @@ export function TemplateProductsScreen({
         <BottomNavigation activeTab="products" />
       </div>
     </div>
-  )
-}
-
-export function TemplateProductDetailPreview({
-  onBack,
-  onActionClick,
-}: {
-  onBack: () => void
-  onActionClick?: () => void
-}) {
-  const presentation: NativeProductDetailPresentation = {
-    title: 'Product name',
-    cardId: 'account',
-    optionId: 'current-account',
-    actionLabel: 'Button',
-    includeSafeArea: false,
-  }
-  const route: NativeDemoRoute = {
-    screen: 'product-detail',
-    params: { title: 'Product name', cardId: 'account', optionId: 'current-account' },
-  }
-
-  return (
-    <NativeScreenPreview
-      route={route}
-      snapshot={{ productDetailPresentation: presentation }}
-      events={{ onProductDetailAction: onActionClick }}
-      onBack={onBack}
-      onNavigate={() => true}
-    />
   )
 }

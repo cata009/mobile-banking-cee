@@ -25,7 +25,8 @@ export interface TextFieldOptions {
   forceFloatLabel?: boolean
   isFocused?: boolean
 }
-const DISABLED_COLOR = 'var(--uc-neutral-650)'
+// Approved Meniga disabled palette: readable text; quieter external action/boundary.
+const DISABLED_COLOR = 'var(--uc-text-muted)'
 export function resolveTextField({
   label,
   value,
@@ -66,7 +67,7 @@ export function resolveTextField({
 
   const valueColor = isDisabled ? DISABLED_COLOR : 'var(--uc-text)'
   const dividerColor = isDisabled
-    ? DISABLED_COLOR
+    ? 'var(--uc-text-subtle)'
     : isError
       ? 'var(--uc-status-red)'
       : isActive
@@ -94,6 +95,13 @@ export function resolveTextField({
     valueColor,
     dividerColor,
     helperColor,
+    iconColor: isDisabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
+    placeholderColor:
+      isDisabled || (isActive && !hasValue)
+        ? DISABLED_COLOR
+        : shouldFloatLabel
+          ? 'var(--uc-text-subtle)'
+          : 'var(--uc-text)',
     descriptionText1,
     descriptionText2,
     hasFloatingTrailingIcon,
@@ -101,13 +109,17 @@ export function resolveTextField({
     displayedMultipleValues,
     effectiveMultipleCount,
     inputPlaceholder,
-    dividerWidth: 0.5,
+    dividerWidth: isActive || isError ? 1 : 0.5,
     iconSlot: 32,
     iconGap: 12,
     labelGap: 4,
     helperGap: 6,
+    helperLineGap: 3,
     valueFontSize: 18,
     helperFontSize: 14,
     labelFontSize: 14,
+    labelLineHeight: 15,
+    helperLineHeight: 15,
+    valueLineHeight: 20,
   } as const
 }

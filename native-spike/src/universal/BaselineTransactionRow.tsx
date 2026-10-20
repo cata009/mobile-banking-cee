@@ -46,6 +46,7 @@ export function BaselineTransactionRow({
   compact?: boolean;
   dark?: boolean;
 }) {
+  const RowElement = onPress ? Pressable : View;
   const state = resolveTransactionRow({
       pending: transaction.status === 'Pending',
       evo2027,
@@ -63,8 +64,7 @@ export function BaselineTransactionRow({
       ? positiveAmountColor ?? color('--uc-action')
       : color(state.textToken);
   const shell = {
-    height: state.height,
-    minHeight: state.minHeight,
+    minHeight: state.evo2027 ? state.minHeight : state.height,
     width: '100%' as const,
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
@@ -72,6 +72,7 @@ export function BaselineTransactionRow({
     gap: state.gap,
     paddingHorizontal: state.gutter,
     paddingVertical: state.paddingVertical,
+    backgroundColor: state.evo2027 ? undefined : color('--uc-surface'),
   };
   const leading = state.showLeading
     ? leadingVisual ?? (
@@ -87,7 +88,7 @@ export function BaselineTransactionRow({
   const labelStyle = {
     fontFamily: state.evo2027 ? 'UniCredit-bold' : 'UniCredit-regular',
     fontSize: state.labelSize,
-    lineHeight: state.evo2027 ? state.labelLineHeight : 17,
+    lineHeight: state.labelLineHeight,
     color: state.pending ? color(state.mutedToken) : color(state.textToken),
     textAlign: state.evo2027 ? ('left' as const) : ('right' as const),
   };
@@ -104,7 +105,7 @@ export function BaselineTransactionRow({
       color: amountColor,
     },
     decimalsStyle = {
-      fontFamily: 'UniCredit-regular',
+      fontFamily: state.evo2027 ? 'UniCredit-regular' : 'UniCredit-bold',
       fontSize: state.decimalsSize,
       lineHeight: state.evo2027 ? undefined : 15,
       letterSpacing: state.evo2027 ? 0.3 : 0,
@@ -115,8 +116,9 @@ export function BaselineTransactionRow({
     <Text style={integerStyle}>
       {state.sign}
       {state.parts.integer}
+      {state.evo2027 ? '' : state.parts.separator}
       <Text style={decimalsStyle}>
-        {state.parts.separator}
+        {state.evo2027 ? state.parts.separator : ''}
         {state.parts.decimals} {currency}
       </Text>
     </Text>
@@ -132,7 +134,7 @@ export function BaselineTransactionRow({
     fontFamily: 'UniCredit-bold',
     fontSize: 14,
     lineHeight: 15,
-    color: color(state.mutedToken),
+    color: color(state.textToken),
   } as const;
   const date =
     showDate && !state.evo2027 ? (
@@ -146,12 +148,13 @@ export function BaselineTransactionRow({
     flex: 1,
     minWidth: 0,
     alignItems: 'flex-end',
-    gap: 4,
+    gap: state.contentGap,
   } as const;
   const viewStyle6 = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
+    height: state.pendingStatusHeight,
   } as const;
   const viewStyle7 = {
     width: 8,
@@ -162,6 +165,7 @@ export function BaselineTransactionRow({
   const textStyle8 = {
     fontFamily: 'UniCredit-bold',
     fontSize: 14,
+    lineHeight: state.statusLineHeight,
     textTransform: 'uppercase',
     color: color(state.mutedToken),
   } as const;
@@ -233,15 +237,17 @@ export function BaselineTransactionRow({
           {date}
           {state.evo2027 || state.showLeading ? categoryControl : null}
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Open transaction ${transaction.label}`}
-          onPress={() => onPress?.(transaction)}
+        <RowElement
+          accessibilityRole={onPress ? 'button' : undefined}
+          accessibilityLabel={
+            onPress ? `Open transaction ${transaction.label}` : undefined
+          }
+          onPress={onPress ? () => onPress(transaction) : undefined}
           style={pressableStyle11}
         >
           {details}
           {state.evo2027 ? amount : null}
-        </Pressable>
+        </RowElement>
       </View>
     );
   const viewStyle12 = {
@@ -256,9 +262,9 @@ export function BaselineTransactionRow({
     justifyContent: 'center',
   } as const;
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => onPress?.(transaction)}
+    <RowElement
+      accessibilityRole={onPress ? 'button' : undefined}
+      onPress={onPress ? () => onPress(transaction) : undefined}
       style={shell}
     >
       <View style={viewStyle12}>
@@ -267,6 +273,6 @@ export function BaselineTransactionRow({
       </View>
       {details}
       {state.evo2027 ? amount : null}
-    </Pressable>
+    </RowElement>
   );
 }

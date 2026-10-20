@@ -1,4 +1,5 @@
 import { bannerWeb } from "../contracts/bannerWeb";
+import { BANNER_ORIGINAL_SOURCES } from "../contracts/banner";
 import type { CSSProperties } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -8,6 +9,7 @@ export const HELPER_CARD_SOURCE = {
   schema: "codex-figma-component-spec/v1",
   figmaComponentName: "Helpers",
   sourceNodeIds: { plain: "9104:14526", withLink: "9104:14570" },
+  originalSource: BANNER_ORIGINAL_SOURCES.helper,
   width: 343,
   cornerRadius: 4,
 } as const;
@@ -65,7 +67,7 @@ export default function HelperCard({
         <AppIcon name={iconName} color="var(--uc-static-white)" />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-[8px] pr-[24px]">
-        <div className="flex flex-col gap-[4px]">
+        <div className="flex flex-col gap-[0px]">
           <span className="uc-type-h2 leading-[20px] text-[var(--uc-static-white)]">
             {title}
           </span>

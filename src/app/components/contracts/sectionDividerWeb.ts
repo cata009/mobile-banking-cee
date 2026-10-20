@@ -13,6 +13,6 @@ export function sectionDividerWeb(options: SectionDividerOptions) {
           : 'text-[var(--uc-text)]',
     rowHeight: state.height === 20 ? 'h-[20px]' : 'h-[24px]',
     horizontalPadding: state.paddingHorizontal === 16 ? 'px-[16px]' : 'px-[24px]',
-    containerHeight: state.twoLine ? 'min-h-[51px]' : 'min-h-[36px]',
+    containerHeight: state.checkbox ? 'min-h-[53px]' : state.twoLine ? 'min-h-[51px]' : 'min-h-[36px]',
   }
 }

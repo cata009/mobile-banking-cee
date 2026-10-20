@@ -1,0 +1,595 @@
+{
+  "owner": "/root",
+  "status": "complete with documented source limitations",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "ownershipRecord": "C:/Users/mihai/AppData/Local/Temp/ds-figma-catalog-parity-2026-10-20/ownership.json",
+  "sourceFileKey": "FKbbStgBIP9bFAMl3DPKHF",
+  "sourceFacts": {
+    "pages": 34,
+    "families": 165,
+    "variants": 900,
+    "liveEntries": 71,
+    "mappedFamilies": 137,
+    "referenceFamilies": 28,
+    "pending": [],
+    "scopeExcludedVariants": [
+      {
+        "id": "10183:65508",
+        "name": "Property 1=Tesla",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65510",
+        "name": "Property 1=Apple",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65512",
+        "name": "Property 1=Nvidia",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65514",
+        "name": "Property 1=Samsung",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65521",
+        "name": "Property 1=Philip",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65530",
+        "name": "Property 1=Intel",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65532",
+        "name": "Property 1=Amundi",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65534",
+        "name": "Property 1=Google",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65536",
+        "name": "Property 1=Netflix",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65538",
+        "name": "Property 1=Spotify",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65540",
+        "name": "Property 1=Disney+",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65542",
+        "name": "Property 1=Amazon",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65544",
+        "name": "Property 1=Mega",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65546",
+        "name": "Property 1=Lidl",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "10183:65548",
+        "name": "Property 1=zara",
+        "reason": "Raster-only Company mark excluded by user request."
+      },
+      {
+        "id": "804:5298",
+        "name": "Type=Blue, Lighter version=No",
+        "reason": "Original source is a digital stock illustration; only original photographs were approved."
+      },
+      {
+        "id": "804:5316",
+        "name": "Type=Blue, Lighter version=Yes",
+        "reason": "Original source is a digital stock illustration; only original photographs were approved."
+      },
+      {
+        "id": "1287:6541",
+        "name": "Property=cz red hf",
+        "reason": "Original source is a composed bitmap banner background; only original photographs were approved."
+      }
+    ]
+  },
+  "coverageMeaning": "Related executable implementations are mapped at family level; the 900 authored source variants are not a claim of 900 implemented runtime states.",
+  "decisions": [
+    "One shared implementation entry with consolidated aliases and variants; no parallel source-image catalog.",
+    "Removed only task-created interface captures; original Figma nodes, keys and pre-existing assets preserved.",
+    "15 raster Company marks excluded by explicit user instruction.",
+    "15 new original photographs permitted; source bytes/extensions retained. Two task-created non-photographic copies withdrawn.",
+    "Three non-photographic states excluded; two legacy/documentation states remain source references.",
+    "Original feature formatting, masking, actions and navigation preserved. No Figma master edits, deployment, publication or Git index mutation."
+  ],
+  "parentFileDelta": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "16d0a36d16f5dd0e109f3ba05c107ffaa69af8eae58990cfecc6c64a3f9b4126"
+    },
+    {
+      "path": "docs/design-system/agent-interface-contract.md",
+      "sha256": "354925550600b65ef68eae1957e3bbd0f3ec3b0f7f8c3f89ff216d556a6302e0"
+    },
+    {
+      "path": "docs/tasks/design-system-asset-baseline-2026-10-20.json",
+      "sha256": "7c7a624ded2b9a9f7eb738642ffb2f08eb93614d41031dbc95a5e5e72d537695"
+    },
+    {
+      "path": "docs/tasks/design-system-figma-source-2026-10-20.json",
+      "sha256": "7bb48bdb4a3717d954d5b097f594facc77eb4d5abc56a52011d1abe492597279"
+    },
+    {
+      "path": "native-spike/__tests__/approved-design-system-gaps.test.tsx",
+      "sha256": "756cea626c3eafe925faa767d8a53ed249edb81beb059a74919f916550e6d497"
+    },
+    {
+      "path": "native-spike/__tests__/canonical-icons-design-system.test.tsx",
+      "sha256": "3f212401358989b882328547b004dfb0376e4b9b8d108483a2d6c703b254b34e"
+    },
+    {
+      "path": "native-spike/__tests__/design-system-canonical-previews.test.tsx",
+      "sha256": "1617a9c120a9c827c34040475812b38a29dee836d92d863f4f731d1bcd871166"
+    },
+    {
+      "path": "native-spike/__tests__/feedback-design-system.test.tsx",
+      "sha256": "08977e35d81548a348dfca19859222dd58837c246e70b7196408ce0dda74e7dd"
+    },
+    {
+      "path": "native-spike/assets/fonts/UniCredit-medium.ttf",
+      "sha256": "b4532f2245ba6a318c93b9b9fed0c2998d509315d9127f77c3a1795acfa4c58f"
+    },
+    {
+      "path": "native-spike/src/app/designSystemPreviews/buttons.tsx",
+      "sha256": "fedb0cd4a73693ca897df7b979c9b12fc35f7aa8ad0f6c8e5132d4a2ad8b7709"
+    },
+    {
+      "path": "native-spike/src/app/designSystemPreviews/catalog.tsx",
+      "sha256": "702f62ae7c0bedeb50e478b639c9afafad29f6bb60fdf0fddaba6ce4775274bc"
+    },
+    {
+      "path": "native-spike/src/app/designSystemPreviews/core.tsx",
+      "sha256": "6898f8cf9c98bbd08bf64a7caa33212fc820739553c4ad804a13fa6045f41bf1"
+    },
+    {
+      "path": "native-spike/src/app/designSystemPreviews/index.tsx",
+      "sha256": "60e71a779e1d877dd792dd4e2d4ed1c2879abf76f9cb2db91fe53d04da4c60f5"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineAmountField.tsx",
+      "sha256": "aeccd5cb989334fa0b20b2a2819be1847f3ccf57670fda220697d2cb64c657fd"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineCanonicalIcon.tsx",
+      "sha256": "f75bde28af620b604d764718c08fd8ad2a9cd294a9514627c4c37d8f141a07f5"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineCatalogCompositions.tsx",
+      "sha256": "863888ef295726216219e3873b526e7d485e8ae565ecce529cf89a76ac619b39"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineCheckbox.tsx",
+      "sha256": "eb5f8dba1f2bd7bb0bcc1e40d2898640a4f43d52f8536b90ffa5a1065cb8081b"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineDropdownField.tsx",
+      "sha256": "e82e9077ce680939f660a5b999a8c2410c1e663bff874e8a42a15f6838b25e9b"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineFeedbackProgress.tsx",
+      "sha256": "7542282d9627cb1b673242211c8f19139d5b260f61e6156ed2cdf893a2b121e2"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineHeaderActions.tsx",
+      "sha256": "eb79f6f11ef29fa65d5b4dc44f35346f7ebb277076544e61965f847b116b1cbf"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineNavigationLink.tsx",
+      "sha256": "be3181a0a2c66fc5f70d4caa1ee658847b6e5dc18dcf7a911da6b91ae4c3f62c"
+    },
+    {
+      "path": "native-spike/src/universal/BaselinePanelMenuSheet.tsx",
+      "sha256": "04c68a9a2a9d633c7cc2f65510ee823a3784d53a08a5c88cb4c00591c3651ffa"
+    },
+    {
+      "path": "native-spike/src/universal/BaselinePill.tsx",
+      "sha256": "955694b0f74082d139a88730bfe845e02a2fd1f12b73726b7a6f6f387230ec82"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineSectionDivider.tsx",
+      "sha256": "1ca96b00d23f3a1431ab46bae6b8df4f709b627968408f1a21e7df764c39c00c"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineTag.tsx",
+      "sha256": "db8e461175d3620f88f230cb5f64d9ee19fb4b45f3d6ab93c4c4311fb1b01883"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineTextField.tsx",
+      "sha256": "b4a95f0ecd9a06e055ac40cc45f19be58862df1ff9b68c66d8159f3905818566"
+    },
+    {
+      "path": "native-spike/src/universal/ModalPanel.tsx",
+      "sha256": "c4209d71054d4b9d79086bcd2724869202beffc5f9fc67c3fa1705a30392445e"
+    },
+    {
+      "path": "native-spike/src/universal/PrimaryButton.tsx",
+      "sha256": "6b2671f753a2986657101685dbd69558e01e0ace4006bc56ebd5596edf457d15"
+    },
+    {
+      "path": "native-spike/src/universal/Select.tsx",
+      "sha256": "02300e4ed8e2a5fa4171846b259efe5cfbcdd0edf5250b5bde03ba90918370b7"
+    },
+    {
+      "path": "native-spike/src/web/currentHost.css",
+      "sha256": "1c453e54b5fecdf1cde3ddc300878ec27236856f75abf732548515ef85a48fe3"
+    },
+    {
+      "path": "native-spike/web.css",
+      "sha256": "b34c758f29806f2598f4a68f16788cd51652081b8cfdd946eee2fd8c85ac8dc7"
+    },
+    {
+      "path": "scripts/asset-baseline.json",
+      "sha256": "0c4a2c0590aa632f6ed201e29d364e19b208afdcd050ca91ea3c942dbe667786"
+    },
+    {
+      "path": "src/app/components/contracts/approvedTags.ts",
+      "sha256": "14f0cea2b41890a29201fa1cf4b556073eda5e92b78d7593343ca87ebb3358f7"
+    },
+    {
+      "path": "src/app/components/contracts/canonicalIcons.ts",
+      "sha256": "994048082e95cab5da47b79fe674109e05e9cca621be85f976b4144357cca00e"
+    },
+    {
+      "path": "src/app/components/contracts/catalogCompositions.ts",
+      "sha256": "3e7f2ee354003b56b87ab24177b1080d8554522b4aab7063613a2e2888d2684b"
+    },
+    {
+      "path": "src/app/components/contracts/primaryButton.ts",
+      "sha256": "5d55ab7dbe2b535eb1a8aa26342a26b30fcbacbb5026b388742040f3f2adc692"
+    },
+    {
+      "path": "src/app/components/contracts/primaryButtonWeb.ts",
+      "sha256": "275c7c0aac18c29c54532fc011540ee5834f1b01b0ac5675f3b61d875f14c4dc"
+    },
+    {
+      "path": "src/app/components/payments/PaymentOtherShortcut.tsx",
+      "sha256": "416d1de9f2beeb319c4d348ff10771193187f7f78fcc5f2614339c7e4f87ad2b"
+    },
+    {
+      "path": "src/app/registry/catalogComponentPackages.ts",
+      "sha256": "7e0880ed43574a7fea8bb4482712797c128418b978508b781b8413dcd82dca6e"
+    },
+    {
+      "path": "src/app/registry/componentImplementationPackages.ts",
+      "sha256": "fe789ed9f49841f699c3c0db633457035d46b59bff2986e4aa87034cebbc4ebe"
+    },
+    {
+      "path": "src/app/registry/componentRegistry.ts",
+      "sha256": "d62dcd6f06c05e036b9b1c7055cc7dbc94371f8321ca05370cbb82b3f4ab4a8f"
+    },
+    {
+      "path": "src/app/registry/domains/foundation/figmaComponents.ts",
+      "sha256": "9854ee67cfad6446263f29dd261c861a7f9ae38d36fc064a327793a9b7c87088"
+    },
+    {
+      "path": "src/app/screens/design-system/ComponentDetailScreen.tsx",
+      "sha256": "60751588018992c1a894953c2f2ca38e1877b09390220f33b65280db340f3af2"
+    },
+    {
+      "path": "src/app/screens/design-system/ComponentOverviewSections.tsx",
+      "sha256": "e051a199cde3e3749708e63b75999db561928521141780848487343a632a310d"
+    },
+    {
+      "path": "src/app/screens/design-system/DesignSystem.css",
+      "sha256": "5497d4154acffd671f7816a2557fa66b65f090f33ac8054ede5811a287e63b5b"
+    },
+    {
+      "path": "src/app/screens/design-system/DesignSystemPage.tsx",
+      "sha256": "f078d01fca0a92b0c89c97e6c8ee3a24f4f367909188ebe8426e441e323faef6"
+    },
+    {
+      "path": "src/app/screens/design-system/FigmaLibraryFamily.tsx",
+      "sha256": "338ef4d7ce96d6b51889670371460e0420672ca81f1b88428339be150b9e4c08"
+    },
+    {
+      "path": "src/app/screens/design-system/FigmaLibraryInventory.tsx",
+      "sha256": "ccd76a46dea5024d00cff7b89a0eb247719b6f3f892bb34edbe36c5ddb1dc5dd"
+    },
+    {
+      "path": "src/app/screens/design-system/ImplementationCodeBrowser.tsx",
+      "sha256": "ab83d762bc19be329874716a8644744863939ad16d1410f7bb7cb1e8b5c3e53d"
+    },
+    {
+      "path": "src/app/screens/design-system/NativeComponentSource.tsx",
+      "sha256": "1f297f34089cead0ce182d6f7c81d2ecb669d4c296476d7a5406f234ee402cf5"
+    },
+    {
+      "path": "src/app/screens/design-system/NativeDesignSystemPreview.tsx",
+      "sha256": "882dd936670b9ad84159875aca1ada4082cdc0be5192fb43a2939e3861c90766"
+    },
+    {
+      "path": "src/app/screens/design-system/componentLivePreviews.tsx",
+      "sha256": "876696da50381bd218210aff7c62a8fddc49714a1360802443ad9d4c92dc6134"
+    },
+    {
+      "path": "src/app/screens/design-system/figmaLibraryCatalog.ts",
+      "sha256": "3687ecb34ffc895d7ee352f02d3bf29aeacbdd12b8bea436301a49b04faa2ce8"
+    },
+    {
+      "path": "src/app/screens/design-system/figmaLibraryReferences.ts",
+      "sha256": "a8f05a81f4a7146abd851e0f8a18e8d82bd9b6051edf57dcf072e8193f12f8e1"
+    },
+    {
+      "path": "src/app/screens/design-system/inventories.tsx",
+      "sha256": "9146eb886f9c4739e565d061b845bcbc993700c5347f813959f3a8db33435cc3"
+    },
+    {
+      "path": "src/app/screens/design-system/inventoryNav.ts",
+      "sha256": "0c698e96804c70c0b38f43d7d6da18516de55cad68cdc64934ee4c1396aaad1b"
+    },
+    {
+      "path": "src/app/screens/design-system/nativeComponentSourceLoader.ts",
+      "sha256": "a60ab0b122aa0c6760b2f4917d323770279d8b8cc99dfbdd8206e183a41dadbd"
+    },
+    {
+      "path": "src/app/state/demoTypes.ts",
+      "sha256": "09b37699dac58c6c7f8f0a1425df7311281e3dfee765cf5b822d5a1c2574263f"
+    },
+    {
+      "path": "src/assets/design-system/bubble-recurrent.svg",
+      "sha256": "eebb6f528e79c556497c2515520fb09bbb80f97895c00b0f754a31743700ce35"
+    },
+    {
+      "path": "src/assets/design-system/bubble-template.svg",
+      "sha256": "dcb63d98fe8c95ac68da0388f44105f621095918332eebbf189d6105ec9d9f75"
+    },
+    {
+      "path": "src/assets/design-system/category-shopping.svg",
+      "sha256": "302000b487eef0200029767eb786e4b000b1f5d95058091f96ffe274426b36b7"
+    },
+    {
+      "path": "src/assets/design-system/checkbox-mark.svg",
+      "sha256": "8508a4f6bd5da4c342367b79ef1fa68b6ed7cc8765dc13d8f407d9839872d380"
+    },
+    {
+      "path": "src/assets/design-system/status-action-required.svg",
+      "sha256": "dabe766545f87f2f9467d28de5d79d99555082ccb89ef7f890d207864d414ce0"
+    },
+    {
+      "path": "src/features/demo-native/designSystemPreview.ts",
+      "sha256": "d47b36bfc3b213a71a97e2d109ebb36716f96efdbcbb64ceda7a661c0e62675d"
+    },
+    {
+      "path": "tests/components/native-design-system-preview.test.tsx",
+      "sha256": "16e40d56023e020116f21d00e4f3c91ae4c57bc584f636f00becbb6af8d05019"
+    },
+    {
+      "path": "tests/components/primary-button-contract.test.ts",
+      "sha256": "75b714f6ec27bc1c938a969c609e060d02e177691aa40ccf72fb1904873899f8"
+    },
+    {
+      "path": "tests/registry/declarative-audit.test.mjs",
+      "sha256": "65104a0e85cb26c6daa66c3f0c8f62a21b41fd5792d1b45c3768e5f92ecc230a"
+    },
+    {
+      "path": "tests/registry/declarative-equivalence.test.ts",
+      "sha256": "c19cc98c0f21e81609e17219c3a66629c30909dde7cd85b25600858738e6611f"
+    },
+    {
+      "path": "tests/registry/fixtures/figma-catalog-components.json",
+      "sha256": "d4a2b55cecd67eb2da0f440f51ac8e5a504d7634866684baf3074e7edd8dafdf"
+    },
+    {
+      "path": "tests/screens/component-implementation-package-coverage.test.tsx",
+      "sha256": "e1c4309c2986a09ed42be60c5dcfb68777d0dc1fef0824d11ee6974950bfb14a"
+    },
+    {
+      "path": "tests/screens/design-system-figma-catalog.test.tsx",
+      "sha256": "ca4a2373dcf4f54456d5bfcd1ffb52f1aa22f52ff50cf2fac86ff6f40f41ce0f"
+    },
+    {
+      "path": "tests/screens/design-system-specimens.test.tsx",
+      "sha256": "5ea436aaf48feb9e46944550dd128e343a79ed5f0525d7ef3c48322a754c6552"
+    }
+  ],
+  "deltaAttribution": "Paths identify task-edited files in a shared dirty checkout. Pre-existing edits within those files remain intact and are not attributed wholesale to this task. Delegated deltas are separate.",
+  "delegatedEvidence": [
+    "C:/Users/mihai/AppData/Local/Temp/ds-mobile-code-implementation-2026-10-20/final-delta.json",
+    "C:/Users/mihai/AppData/Local/Temp/ds-feedback-implementation-2026-10-20/final-delta.json",
+    "C:/Users/mihai/AppData/Local/Temp/ds-canonical-icons-2026-10-20/final-delta.json",
+    "C:/Users/mihai/AppData/Local/Temp/ds-catalog-compositions-2026-10-20/final-delta-and-provenance.json",
+    "C:/Users/mihai/AppData/Local/Temp/ds-baseline-catalog-audit-2026-10-20/handoff.json"
+  ],
+  "targetedChecks": {
+    "webTests": 389,
+    "webExitCode": 0,
+    "moduleAuditExitCode": 0,
+    "nativeAffectedTests": 39,
+    "nativeExitCode": 0,
+    "moduleAuditFiles": 304
+  },
+  "combinedVerification": {
+    "command": "npm run verify",
+    "status": "passed",
+    "exitCode": 0,
+    "log": "C:/Users/mihai/AppData/Local/Temp/ds-figma-catalog-parity-2026-10-20/final-verify.log",
+    "completedAt": "2026-10-20T10:22:00.390Z",
+    "stages": [
+      {
+        "name": "preverify",
+        "status": "passed"
+      },
+      {
+        "name": "typecheck",
+        "status": "passed"
+      },
+      {
+        "name": "lint --max-warnings 0",
+        "status": "passed"
+      },
+      {
+        "name": "format:check",
+        "status": "passed"
+      },
+      {
+        "name": "pretest:coverage",
+        "status": "passed"
+      },
+      {
+        "name": "test:coverage",
+        "status": "passed"
+      },
+      {
+        "name": "audit:card-details",
+        "status": "passed"
+      },
+      {
+        "name": "audit:investments",
+        "status": "passed"
+      },
+      {
+        "name": "audit:figma-bridge",
+        "status": "passed"
+      },
+      {
+        "name": "audit:templates",
+        "status": "passed"
+      },
+      {
+        "name": "audit:platform",
+        "status": "passed"
+      },
+      {
+        "name": "audit:assets",
+        "status": "passed"
+      },
+      {
+        "name": "audit:modules",
+        "status": "passed"
+      },
+      {
+        "name": "audit:retired-pi",
+        "status": "passed"
+      },
+      {
+        "name": "build",
+        "status": "passed"
+      }
+    ],
+    "testFiles": 328,
+    "testsPassed": 3842,
+    "testsFailed": 0,
+    "coverage": {
+      "statements": 84.9,
+      "branches": 82.99,
+      "functions": 64.67,
+      "lines": 84.9,
+      "thresholdsChanged": false
+    },
+    "audits": {
+      "templates": 47,
+      "codePreviews": 47,
+      "components": 135,
+      "screens": 40,
+      "flows": 14,
+      "moduleFiles": 304,
+      "assets": 1485
+    },
+    "nativeWebBundle": {
+      "files": 438,
+      "build": "8be881e12d50a33af14d05295e314a5534464f48ce11340c1cbba9c520aa10fb"
+    },
+    "warnings": [
+      "Vite reports chunks larger than 500 kB.",
+      "Mixed static/dynamic imports prevent separate chunks for MobileFirstProfile and FloatingCoAppingButton."
+    ],
+    "verificationScope": "Combined final source state including the separately owned Robo comments delta; no code changes after this successful gate. Only this evidence report is finalized afterward."
+  },
+  "visualCheck": "Browser verified Dropdown Space/Escape, multiple selection/focus return, currency change and actual source-file chooser; NPS Space/Arrow navigation. Bubble search displays one live card and zero captured Figma control images.",
+  "assetPreservation": {
+    "newExactDuplicateGroups": 0,
+    "currentCount": 1485,
+    "proof": "docs/tasks/design-system-asset-baseline-2026-10-20.json",
+    "currentAggregate": "9e9f6bbe7d7ed54093598b793661e5c637d716d2938a7638a835365569f93533",
+    "originalAggregate": "c0e40427f2c219020ac7bfbe357df4686529be222cb352a0f65d3d683a1f50a1",
+    "additions": 271,
+    "originalCount": 1214
+  },
+  "integrationCorrections": [
+    "Four coordinate literal spellings normalized without changing their JavaScript Number values; no-loss-of-precision remains enabled.",
+    "Native SVG stop offsets passed as numbers; the new warning regression passed.",
+    "Registry metadata made literal for the unchanged strict AST audit; all 35 runtime entries remain byte-for-byte JSON equal.",
+    "The original 100-entry registry hash remains enforced; 35 additions are checked with a separate frozen count/hash.",
+    "Legacy 74-source provenance preserved; current 71-group/137-family provenance checked separately.",
+    "One task-created byte-identical SVG copy withdrawn; original token-imgVector.svg reused."
+  ],
+  "knownSourceLimitations": [
+    {
+      "description": "Original photograph and crop retained; authored Figma temperature 0.23 has no exact transform exposed by the tool. No approximation applied. Limitation is visible in metadata and preview.",
+      "variants": [
+        "804:4940",
+        "804:4987"
+      ]
+    }
+  ],
+  "postFixChecks": {
+    "unchangedLegacyRegistryHash": "1c606fd46a78670135be00c829dbebce2c012c5c5fde29f6d2751758a0d51df7",
+    "nativeGradientAndCompositionTests": 38,
+    "registryTests": 10,
+    "strictAuditComponents": 135,
+    "strictAuditTemplates": 47,
+    "previousFullNativeAffectedTests": 166,
+    "nativeTypecheckExit": 0,
+    "baselineCatalogTests": 5
+  },
+  "screenshot": "C:/Users/mihai/AppData/Local/Temp/ds-figma-catalog-parity-2026-10-20/final-live-bubble-proof.png",
+  "recordedAt": "2026-10-20T10:22:53.375Z",
+  "delegatedIntegrationOverrides": [
+    {
+      "path": "native-spike/src/universal/BaselineCanonicalIcon.tsx",
+      "reason": "Reuses existing identical token-imgVector.svg rather than a task-created duplicate.",
+      "sha256": "f75bde28af620b604d764718c08fd8ad2a9cd294a9514627c4c37d8f141a07f5"
+    },
+    {
+      "path": "src/assets/design-system/icons/brand-10141-40231-0.svg",
+      "status": "task-created copy withdrawn",
+      "reusedPath": "src/assets/mobile-first/it/profile/token-imgVector.svg",
+      "sha256": "05aa746af8d54edb534286d80213a96a1d37c0ddc6f0433b3e942d39aec51f85"
+    },
+    {
+      "path": "src/app/components/contracts/canonicalIcons.ts",
+      "reason": "Equivalent JavaScript Number literal spelling, unchanged geometry.",
+      "sha256": "994048082e95cab5da47b79fe674109e05e9cca621be85f976b4144357cca00e"
+    },
+    {
+      "path": "src/app/components/contracts/catalogCompositions.ts",
+      "reason": "Equivalent JavaScript Number literal spelling, unchanged geometry.",
+      "sha256": "3e7f2ee354003b56b87ab24177b1080d8554522b4aab7063613a2e2888d2684b"
+    },
+    {
+      "path": "native-spike/src/universal/BaselineCatalogCompositions.tsx",
+      "reason": "Numeric SVG stop offsets accepted by native renderer.",
+      "sha256": "863888ef295726216219e3873b526e7d485e8ae565ecce529cf89a76ac619b39"
+    }
+  ],
+  "remainingOpenIntegrations": [],
+  "remainingVerificationErrors": [],
+  "reportFileDelta": {
+    "path": "docs/tasks/design-system-figma-catalog-parity-2026-10-20.json",
+    "reason": "Final task evidence; self hash omitted."
+  },
+  "ownedDiffCheckExitCode": 0
+}

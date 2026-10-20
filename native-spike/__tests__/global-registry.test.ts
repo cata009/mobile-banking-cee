@@ -18,14 +18,14 @@ test('every Source experience/release retains its exact axes and native acceptan
   ).toBe(true);
   expect(GLOBAL_NATIVE_CATALOG.inventoryComplete).toBe(false);
 });
-test('CZ Evo stays current and is explicitly in migration', () => {
+test('default matches Source Romania baseline and remains explicitly in migration', () => {
   expect(DEFAULT_NATIVE_SELECTION.designSystem).toBe('current');
   expect(resolveNativeDemo(DEFAULT_NATIVE_SELECTION)).toMatchObject({
-    implementation: 'cz-evo',
+    implementation: 'current',
     status: 'in-migration',
   });
   expect(selectionKey(DEFAULT_NATIVE_SELECTION)).toBe(
-    'PI:CZ:current:release-future-evo-2027:active',
+    'PI:RO:current:release-current:active',
   );
 });
 test('Italy remains reachable only on its actual implemented axes', () => {
@@ -48,7 +48,7 @@ test('Italy remains reachable only on its actual implemented axes', () => {
     }).implementation,
   ).toBeNull();
 });
-test('all prepared and unmigrated packs are honestly unavailable', () => {
+test('prepared packs remain unavailable while real baseline countries are source-scoped native migrations', () => {
   for (const pack of PROJECT_PACKS.filter(
     item => item.integrationReadiness === 'prepared',
   )) {
@@ -68,11 +68,11 @@ test('all prepared and unmigrated packs are honestly unavailable', () => {
       country: 'RO',
       release: 'release-current',
     }).status,
-  ).toBe('unavailable');
+  ).toBe('in-migration');
   expect(
     resolveNativeDemo({ ...DEFAULT_NATIVE_SELECTION, scenario: 'inactive' })
-      .status,
-  ).toBe('unavailable');
+      .implementation,
+  ).toBe('current');
   expect(
     resolveNativeDemo({
       ...DEFAULT_NATIVE_SELECTION,
@@ -81,5 +81,30 @@ test('all prepared and unmigrated packs are honestly unavailable', () => {
       release: 'release-current',
       scenario: 'inactive',
     }).status,
-  ).toBe('unavailable');
+  ).toBe('in-migration');
+});
+test('every baseline release resolves its exact current family while Kids keeps separate active-only composition', () => {
+  for (const context of GLOBAL_NATIVE_CATALOG.contexts.filter(
+    catalogContext =>
+      catalogContext.experienceId.startsWith('pi.') &&
+      catalogContext.experienceId.endsWith('.baseline'),
+  )) {
+    for (const scenario of ['active', 'inactive'] as const)
+      expect(resolveNativeDemo({ ...context, scenario }).implementation).toBe(
+        'current',
+      );
+  }
+  for (const country of ['RO', 'SK', 'HU'] as const) {
+    const selection = {
+      product: 'KIDS_PI' as const,
+      country,
+      designSystem: 'current' as const,
+      release: 'release-current' as const,
+      scenario: 'active' as const,
+    };
+    expect(resolveNativeDemo(selection).implementation).toBe('kids');
+    expect(
+      resolveNativeDemo({ ...selection, scenario: 'inactive' }).implementation,
+    ).toBeNull();
+  }
 });

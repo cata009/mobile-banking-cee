@@ -1,6 +1,6 @@
-/** Preserves the shipped web behavior. Platform renderers consume this contract. */
-export type PrimaryButtonVariant = 'action' | 'surface' | 'language-save'
-export type PrimaryButtonLabelSize = '16' | '18'
+/** Canonical CTA defaults; legacy renderers retain explicit contextual label sizes. */
+export type PrimaryButtonVariant = 'action' | 'surface' | 'language-save' | 'secondary'
+export type PrimaryButtonLabelSize = '14' | '16' | '18'
 
 export interface PrimaryButtonOptions {
   variant?: PrimaryButtonVariant
@@ -10,7 +10,7 @@ export interface PrimaryButtonOptions {
 
 export function resolvePrimaryButton({
   variant = 'action',
-  labelSize = '16',
+  labelSize = '18',
   disabled = false,
 }: PrimaryButtonOptions = {}) {
   const languageSave = variant === 'language-save'
@@ -21,17 +21,24 @@ export function resolvePrimaryButton({
     disabled,
     height: 48,
     radius: 4,
-    fontSize: largeLabel ? 18 : 16,
+    fontSize: labelSize === '14' ? 14 : largeLabel ? 18 : 16,
+    transparent: variant === 'secondary',
     // Web uses the UniCredit font's normal metrics, not an invented fixed height.
     lineHeight: 'normal',
     fontWeight: 700,
     backgroundToken: languageSave ? '--uc-action' : action ? '--uc-action-strong' : '--uc-surface',
-    textToken: action || languageSave ? '--uc-static-white' : '--uc-text',
+    textToken: languageSave
+      ? '--uc-text-inverse'
+      : action
+        ? '--uc-static-white'
+        : variant === 'secondary'
+          ? '--uc-action'
+          : '--uc-text',
     hoverBackgroundToken: action && !disabled ? '--uc-action-hover' : undefined,
     hoverOpacity: !action && !disabled ? 0.9 : 1,
     opacity: disabled ? 0.3 : 1,
     pressedScale: !disabled && !languageSave ? 0.98 : 1,
     truncateLabel: !languageSave,
-    focusRing: !languageSave,
+    focusRing: true,
   } as const
 }

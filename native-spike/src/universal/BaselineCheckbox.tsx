@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Pressable } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import sourceMark from '@/assets/design-system/checkbox-mark.svg';
+import { AssetGlyph } from './AssetGlyph';
 import { SvgXml } from 'react-native-svg';
 import {
   resolveCheckbox,
@@ -16,6 +18,7 @@ export function BaselineCheckbox({
   onCheckedChange,
   ariaLabel,
   dark = false,
+  presentation = 'generic',
 }: {
   checked?: CheckboxCheckedState;
   defaultChecked?: CheckboxCheckedState;
@@ -23,6 +26,7 @@ export function BaselineCheckbox({
   onCheckedChange?: (value: CheckboxCheckedState) => void;
   ariaLabel?: string;
   dark?: boolean;
+  presentation?: 'generic' | 'canonical';
 }) {
   const [internal, setInternal] = useState(defaultChecked);
   const state = resolveCheckbox({ checked: checked ?? internal, disabled });
@@ -69,24 +73,67 @@ export function BaselineCheckbox({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   };
+  const canonical = presentation === 'canonical';
+  const activate = () => {
+    if (disabled) return;
+    if (checked === undefined) setInternal(state.nextChecked);
+    onCheckedChange?.(state.nextChecked);
+  };
+  const keyboardProps: Pick<
+    React.ComponentProps<typeof Pressable>,
+    'onKeyDown'
+  > = Platform.OS === 'web'
+    ? {
+        onKeyDown: event => {
+          const key: unknown = Reflect.get(event, 'key');
+          if (key === ' ' || key === 'Spacebar') {
+            event.preventDefault();
+            if (Reflect.get(event, 'repeat') !== true) activate();
+          }
+        },
+      }
+    : {};
+  const mark = canonical ? (
+    <View
+      style={{
+        width: 22,
+        height: 22,
+        borderWidth: 1,
+        borderRadius: 4,
+        borderColor: dark ? '#ffffff' : '#262626',
+        backgroundColor: dark ? '#333333' : '#ffffff',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {active ? <AssetGlyph asset={sourceMark} size={14} /> : null}
+    </View>
+  ) : state.showIndicator && xml ? (
+    <SvgXml xml={xml} width={state.iconSize} height={state.iconSize} />
+  ) : null;
   return (
     <Pressable
+      {...keyboardProps}
       accessibilityRole="checkbox"
       accessibilityLabel={ariaLabel}
       accessibilityState={{ checked: state.ariaChecked, disabled }}
       aria-checked={state.ariaChecked}
       aria-disabled={disabled}
       disabled={disabled}
-      onPress={() => {
-        if (disabled) return;
-        if (checked === undefined) setInternal(state.nextChecked);
-        onCheckedChange?.(state.nextChecked);
-      }}
-      style={style}
+      onPress={activate}
+      style={
+        canonical
+          ? {
+              width: 32,
+              height: 32,
+              opacity: state.opacity,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }
+          : style
+      }
     >
-      {state.showIndicator && xml ? (
-        <SvgXml xml={xml} width={state.iconSize} height={state.iconSize} />
-      ) : null}
+      {mark}
     </Pressable>
   );
 }

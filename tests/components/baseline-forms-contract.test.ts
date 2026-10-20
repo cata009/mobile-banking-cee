@@ -2,6 +2,12 @@ import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 describe('baseline forms platform-independent contracts', () => {
+  it('keeps the new empty-focus placeholder readable like the Figma variant', async () => {
+    const { resolveTextField } = await import('@/app/components/contracts/textField')
+    expect(resolveTextField({ label: 'Name', value: '', isFocused: true }).placeholderColor).toBe(
+      'var(--uc-text-muted)',
+    )
+  })
   it('provides the canonical text-field state resolver before platform rendering', async () => {
     expect(existsSync('src/app/components/contracts/textField.ts')).toBe(true)
     const { resolveTextField } = await import('@/app/components/contracts/textField')
@@ -24,9 +30,29 @@ describe('baseline forms platform-independent contracts', () => {
     const { resolveAmountField } = await import('@/app/components/contracts/amountField')
     expect(resolveAmountField({ disabled: true, visualState: 'filled' })).toMatchObject({
       isDisabled: true,
-      currencyColor: 'var(--uc-neutral-650)',
+      currencyColor: 'var(--uc-text-muted)',
+      currencyTitleColor: 'var(--uc-text-muted)',
+      currencyIconColor: 'var(--uc-text-subtle)',
     })
   })
+  it.each(['disabled-empty', 'disabled-filled'] as const)(
+    'uses the approved Figma disabled palette for %s',
+    async (visualState) => {
+      const { resolveTextField } = await import('@/app/components/contracts/textField')
+      expect(
+        resolveTextField({ label: 'Name', value: visualState === 'disabled-filled' ? 'Ana' : '', visualState }),
+      ).toMatchObject({
+        isDisabled: true,
+        labelColor: 'var(--uc-text-muted)',
+        valueColor: 'var(--uc-text-muted)',
+        helperColor: 'var(--uc-text-muted)',
+        placeholderColor: 'var(--uc-text-muted)',
+        dividerColor: 'var(--uc-text-subtle)',
+        iconColor: 'var(--uc-text-subtle)',
+        dividerWidth: 0.5,
+      })
+    },
+  )
   it('keeps query-clear priority and remove-filter geometry without controller policy', async () => {
     expect(existsSync('src/app/components/contracts/searchBar.ts')).toBe(true)
     const { resolveSearchBar } = await import('@/app/components/contracts/searchBar')

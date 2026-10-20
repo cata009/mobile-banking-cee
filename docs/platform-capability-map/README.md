@@ -1,5 +1,7 @@
 # Platform Capability Map
 
+Current DS update — 2026-10-20: the legacy Templates gallery, 47 reconstructed previews and its template registry have been retired. The DS uses the canonical Figma component catalog; RO/RS flows retain their existing shared Products runtime composition. `npm run audit:registry` replaces the old template audit and checks component/screen/flow declarations. Historical template counts and verification logs below describe earlier revisions. See [cleanup evidence](../tasks/templates-cleanup-2026-10-20.json) and [interface authoring contract](../design-system/agent-interface-contract.md).
+
 Status legend: `implemented` / `partial` / `missing` / `placeholder` / `mock-driven` / `legacy` / `archived` / `inferred`
 
 Scope: this map is based on repository source and existing docs. It reflects the current PI runtime, Flow Library previews, stakeholder Baseline/Future controls, CZ Chatbot future preview, Design System Inventory, active SK/HU/RO Mobile PI Kids concepts, and the explicit retirement of the Serbia Kids experiments rather than hiding them behind flags. Evidence links point to repo files.

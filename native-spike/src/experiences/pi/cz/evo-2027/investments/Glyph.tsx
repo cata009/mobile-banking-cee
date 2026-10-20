@@ -12,6 +12,7 @@ export type InvestmentGlyphName =
   | 'radio-selected'
   | 'radio-unselected'
   | 'robo-goal-wealth'
+  | 'robo-goal-inflation'
   | 'robo-goal-unforeseen'
   | 'robo-goal-purchase'
   | 'robo-goal-retirement'

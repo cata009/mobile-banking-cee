@@ -5,6 +5,7 @@ interface InvestmentPeriodChipsProps {
   selectedPeriodId: InvestmentPeriodId;
   onChange: (periodId: InvestmentPeriodId) => void;
   className?: string;
+  ariaLabel?: string;
   softUnselected?: boolean;
   comfortableTouchTargets?: boolean;
 }
@@ -14,11 +15,12 @@ export default function InvestmentPeriodChips({
   selectedPeriodId,
   onChange,
   className = "",
+  ariaLabel = "Investment period",
   softUnselected = false,
   comfortableTouchTargets = false,
 }: InvestmentPeriodChipsProps) {
   return (
-    <div className={`flex items-center justify-center gap-[8px] px-[8px] ${className}`} data-ds-label="Investments period chips">
+    <div className={`flex items-center justify-center gap-[8px] px-[8px] ${className}`} data-ds-label="Investments period chips" role="group" aria-label={ariaLabel}>
       {periods.map((period) => {
         const selected = period.id === selectedPeriodId;
         const chipClassName = `inline-flex h-[21px] min-w-[35px] items-center justify-center whitespace-nowrap rounded-[3.5px] px-[8px] text-center text-[14px] font-bold leading-[15px] ${

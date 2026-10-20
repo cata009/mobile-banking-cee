@@ -1,120 +1,104 @@
-import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { basename, dirname, extname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { basename, dirname, extname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const TRACKED_ASSET_EXTENSIONS = new Set([
-  ".avif",
-  ".bmp",
-  ".gif",
-  ".ico",
-  ".jpeg",
-  ".jpg",
-  ".png",
-  ".svg",
-  ".tif",
-  ".tiff",
-  ".webp",
-]);
+  '.avif',
+  '.bmp',
+  '.gif',
+  '.ico',
+  '.jpeg',
+  '.jpg',
+  '.png',
+  '.svg',
+  '.tif',
+  '.tiff',
+  '.webp',
+])
 
-const CODE_REFERENCE_EXTENSIONS = new Set([
-  ".cjs",
-  ".css",
-  ".html",
-  ".js",
-  ".jsx",
-  ".mjs",
-  ".scss",
-  ".ts",
-  ".tsx",
-]);
+const CODE_REFERENCE_EXTENSIONS = new Set(['.cjs', '.css', '.html', '.js', '.jsx', '.mjs', '.scss', '.ts', '.tsx'])
 
 function normalizePath(path) {
-  return path.replaceAll("\\", "/");
+  return path.replaceAll('\\', '/')
 }
 
 function sha256(value) {
-  return createHash("sha256").update(value).digest("hex");
+  return createHash('sha256').update(value).digest('hex')
 }
 
 export function isTrackedAssetPath(path) {
-  return TRACKED_ASSET_EXTENSIONS.has(extname(path).toLowerCase());
+  return TRACKED_ASSET_EXTENSIONS.has(extname(path).toLowerCase())
 }
 
 function isCodeReferencePath(path) {
-  return CODE_REFERENCE_EXTENSIONS.has(extname(path).toLowerCase());
+  return CODE_REFERENCE_EXTENSIONS.has(extname(path).toLowerCase())
 }
 
 function getReferenceTokens(assetPath) {
-  const tokens = new Set([assetPath, `/${assetPath}`, basename(assetPath)]);
-  if (assetPath.startsWith("src/")) {
-    tokens.add(`@/${assetPath.slice("src/".length)}`);
+  const tokens = new Set([assetPath, `/${assetPath}`, basename(assetPath)])
+  if (assetPath.startsWith('src/')) {
+    tokens.add(`@/${assetPath.slice('src/'.length)}`)
   }
-  if (assetPath.startsWith("src/assets/")) {
-    tokens.add(`figma:asset/${assetPath.slice("src/assets/".length)}`);
+  if (assetPath.startsWith('src/assets/')) {
+    tokens.add(`figma:asset/${assetPath.slice('src/assets/'.length)}`)
   }
-  return [...tokens];
+  return [...tokens]
 }
 
 export function buildAssetAudit({ trackedFiles, readFile, readAssetFile = readFile }) {
-  if (
-    !Array.isArray(trackedFiles) ||
-    typeof readFile !== "function" ||
-    typeof readAssetFile !== "function"
-  ) {
-    throw new TypeError("buildAssetAudit requires trackedFiles and a readFile function");
+  if (!Array.isArray(trackedFiles) || typeof readFile !== 'function' || typeof readAssetFile !== 'function') {
+    throw new TypeError('buildAssetAudit requires trackedFiles and a readFile function')
   }
 
-  const normalizedTrackedFiles = trackedFiles.map(normalizePath).sort();
+  const normalizedTrackedFiles = trackedFiles.map(normalizePath).sort()
   if (new Set(normalizedTrackedFiles).size !== normalizedTrackedFiles.length) {
-    throw new Error("Tracked file inventory contains duplicate paths");
+    throw new Error('Tracked file inventory contains duplicate paths')
   }
 
-  const buffers = new Map();
+  const buffers = new Map()
   for (const path of normalizedTrackedFiles) {
-    const value = isTrackedAssetPath(path) ? readAssetFile(path) : readFile(path);
+    const value = isTrackedAssetPath(path) ? readAssetFile(path) : readFile(path)
     if (!Buffer.isBuffer(value) && !(value instanceof Uint8Array)) {
-      throw new TypeError(`readFile must return bytes for ${path}`);
+      throw new TypeError(`readFile must return bytes for ${path}`)
     }
-    buffers.set(path, Buffer.from(value));
+    buffers.set(path, Buffer.from(value))
   }
 
-  const assets = normalizedTrackedFiles
-    .filter(isTrackedAssetPath)
-    .map((path) => {
-      const bytes = buffers.get(path);
-      return { path, bytes: bytes.byteLength, sha256: sha256(bytes) };
-    });
+  const assets = normalizedTrackedFiles.filter(isTrackedAssetPath).map((path) => {
+    const bytes = buffers.get(path)
+    return { path, bytes: bytes.byteLength, sha256: sha256(bytes) }
+  })
 
   const codeSources = normalizedTrackedFiles
     .filter((path) => !isTrackedAssetPath(path) && isCodeReferencePath(path))
-    .map((path) => ({ path, source: buffers.get(path).toString("utf8") }));
+    .map((path) => ({ path, source: buffers.get(path).toString('utf8') }))
 
-  const referencedAssets = [];
-  const candidateUnreferencedAssets = [];
+  const referencedAssets = []
+  const candidateUnreferencedAssets = []
   for (const asset of assets) {
-    const tokens = getReferenceTokens(asset.path);
+    const tokens = getReferenceTokens(asset.path)
     const referencedBy = codeSources
       .filter(({ source }) => tokens.some((token) => source.includes(token)))
-      .map(({ path }) => path);
-    const reference = { path: asset.path, referencedBy };
-    if (referencedBy.length > 0) referencedAssets.push(reference);
-    else candidateUnreferencedAssets.push(reference);
+      .map(({ path }) => path)
+    const reference = { path: asset.path, referencedBy }
+    if (referencedBy.length > 0) referencedAssets.push(reference)
+    else candidateUnreferencedAssets.push(reference)
   }
 
-  const pathsByBlob = new Map();
+  const pathsByBlob = new Map()
   for (const asset of assets) {
-    const paths = pathsByBlob.get(asset.sha256) ?? [];
-    paths.push(asset.path);
-    pathsByBlob.set(asset.sha256, paths);
+    const paths = pathsByBlob.get(asset.sha256) ?? []
+    paths.push(asset.path)
+    pathsByBlob.set(asset.sha256, paths)
   }
   const duplicateBlobGroups = [...pathsByBlob.entries()]
     .filter(([, paths]) => paths.length > 1)
     .map(([blobSha256, paths]) => ({ sha256: blobSha256, paths: paths.sort() }))
-    .sort((left, right) => left.sha256.localeCompare(right.sha256));
+    .sort((left, right) => left.sha256.localeCompare(right.sha256))
 
-  const pathBlobManifest = assets.map(({ path, sha256: blobSha256 }) => `${path}\0${blobSha256}\n`).join("");
+  const pathBlobManifest = assets.map(({ path, sha256: blobSha256 }) => `${path}\0${blobSha256}\n`).join('')
 
   return {
     assetCount: assets.length,
@@ -123,56 +107,99 @@ export function buildAssetAudit({ trackedFiles, readFile, readAssetFile = readFi
     referencedAssets,
     candidateUnreferencedAssets,
     pathBlobSha256Aggregate: sha256(pathBlobManifest),
-  };
+  }
 }
 
-export function collectAuditedRepositoryFiles(trackedFiles, pendingFiles) {
-  const applicationFiles = pendingFiles.filter((path) => /^(?:src|public|package|api|native-spike)\//.test(normalizePath(path)) && (isTrackedAssetPath(path) || isCodeReferencePath(path)));
-  return [...new Set([...trackedFiles, ...applicationFiles].map(normalizePath))].sort();
+export function collectAuditedRepositoryFiles(
+  trackedFiles,
+  pendingFiles,
+  { deletedFiles = new Set(), approvedRetirements = [], readIndexedAsset } = {},
+) {
+  const retired = new Map()
+  for (const entry of approvedRetirements) {
+    if (!isTrackedAssetPath(entry.path) || !/^[a-f0-9]{64}$/.test(entry.sha256) || retired.has(entry.path)) {
+      throw new Error(`Invalid approved asset retirement: ${entry.path}`)
+    }
+    retired.set(entry.path, entry.sha256)
+  }
+  const currentTrackedFiles = trackedFiles.filter((path) => {
+    if (!deletedFiles.has(path)) return true
+    if (!isTrackedAssetPath(path)) return false
+    if (!retired.has(path)) return true // Unapproved missing assets must still fail when read.
+    if (typeof readIndexedAsset !== 'function' || sha256(readIndexedAsset(path)) !== retired.get(path)) {
+      throw new Error(`Retired asset differs from approved bytes: ${path}`)
+    }
+    return false
+  })
+  const applicationFiles = pendingFiles.filter(
+    (path) =>
+      /^(?:src|public|package|api|native-spike)\//.test(normalizePath(path)) &&
+      (isTrackedAssetPath(path) || isCodeReferencePath(path)),
+  )
+  return [...new Set([...currentTrackedFiles, ...applicationFiles].map(normalizePath))].sort()
 }
 
-export function auditTrackedAssets(root = process.cwd(), includePendingApplicationFiles = false) {
-  const trackedFiles = execFileSync("git", ["ls-files", "-z"], {
+export function auditTrackedAssets(
+  root = process.cwd(),
+  includePendingApplicationFiles = false,
+  approvedRetirements = [],
+) {
+  const trackedFiles = execFileSync('git', ['ls-files', '-z'], {
     cwd: root,
-    encoding: "utf8",
-  }).split("\0").filter(Boolean);
+    encoding: 'utf8',
+  })
+    .split('\0')
+    .filter(Boolean)
 
-  const deletedFiles = new Set(execFileSync("git", ["ls-files", "--deleted", "-z"], {
-    cwd: root,
-    encoding: "utf8",
-  }).split("\0").filter(Boolean));
-  // Retired code is absent from the working tree; missing assets must still fail.
-  const currentTrackedFiles = trackedFiles.filter((path) =>
-    !deletedFiles.has(path) || isTrackedAssetPath(path));
-  const pendingFiles = includePendingApplicationFiles ? execFileSync('git', ['ls-files', '--others', '--exclude-standard', '-z'], {cwd:root,encoding:'utf8'}).split('\0').filter(Boolean) : [];
+  const deletedFiles = new Set(
+    execFileSync('git', ['ls-files', '--deleted', '-z'], {
+      cwd: root,
+      encoding: 'utf8',
+    })
+      .split('\0')
+      .filter(Boolean),
+  )
+  const pendingFiles = includePendingApplicationFiles
+    ? execFileSync('git', ['ls-files', '--others', '--exclude-standard', '-z'], { cwd: root, encoding: 'utf8' })
+        .split('\0')
+        .filter(Boolean)
+    : []
   return buildAssetAudit({
-    trackedFiles: collectAuditedRepositoryFiles(currentTrackedFiles, pendingFiles),
+    trackedFiles: collectAuditedRepositoryFiles(trackedFiles, pendingFiles, {
+      deletedFiles,
+      approvedRetirements,
+      readIndexedAsset: (path) =>
+        execFileSync('git', ['show', `:${path}`], { cwd: root, maxBuffer: 100 * 1024 * 1024 }),
+    }),
     readFile: (path) => readFileSync(resolve(root, path)),
     readAssetFile: (path) => {
-      const objectId = execFileSync(
-        "git",
-        ["hash-object", "-w", `--path=${path}`, "--", path],
-        { cwd: root, encoding: "utf8" },
-      ).trim();
-      return execFileSync("git", ["cat-file", "blob", objectId], {
+      const objectId = execFileSync('git', ['hash-object', '-w', `--path=${path}`, '--', path], {
+        cwd: root,
+        encoding: 'utf8',
+      }).trim()
+      return execFileSync('git', ['cat-file', 'blob', objectId], {
         cwd: root,
         encoding: null,
         maxBuffer: 100 * 1024 * 1024,
-      });
+      })
     },
-  });
+  })
 }
 
 export function formatAssetAuditReport(report) {
-  return JSON.stringify({
-    status: "asset audit ok",
-    assetCount: report.assetCount,
-    referencedCount: report.referencedAssets.length,
-    candidateUnreferencedCount: report.candidateUnreferencedAssets.length,
-    exactDuplicateBlobGroups: report.duplicateBlobGroups,
-    candidateUnreferencedAssets: report.candidateUnreferencedAssets.map(({ path }) => path),
-    pathBlobSha256Aggregate: report.pathBlobSha256Aggregate,
-  }, null, 2);
+  return JSON.stringify(
+    {
+      status: 'asset audit ok',
+      assetCount: report.assetCount,
+      referencedCount: report.referencedAssets.length,
+      candidateUnreferencedCount: report.candidateUnreferencedAssets.length,
+      exactDuplicateBlobGroups: report.duplicateBlobGroups,
+      candidateUnreferencedAssets: report.candidateUnreferencedAssets.map(({ path }) => path),
+      pathBlobSha256Aggregate: report.pathBlobSha256Aggregate,
+    },
+    null,
+    2,
+  )
 }
 
 export function assertAssetBaseline(report, baseline) {
@@ -182,16 +209,16 @@ export function assertAssetBaseline(report, baseline) {
   ) {
     throw new Error(
       `Asset baseline mismatch: expected ${baseline.assetCount}/${baseline.pathBlobSha256Aggregate}, ` +
-      `received ${report.assetCount}/${report.pathBlobSha256Aggregate}`,
-    );
+        `received ${report.assetCount}/${report.pathBlobSha256Aggregate}`,
+    )
   }
 }
 
-const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
+const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null
 if (invokedPath === fileURLToPath(import.meta.url)) {
-  const report = auditTrackedAssets(process.cwd(), true);
-  const baselinePath = resolve(dirname(fileURLToPath(import.meta.url)), "asset-baseline.json");
-  const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
-  assertAssetBaseline(report, baseline);
-  console.log(formatAssetAuditReport(report));
+  const baselinePath = resolve(dirname(fileURLToPath(import.meta.url)), 'asset-baseline.json')
+  const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'))
+  const report = auditTrackedAssets(process.cwd(), true, baseline.approvedRetirements ?? [])
+  assertAssetBaseline(report, baseline)
+  console.log(formatAssetAuditReport(report))
 }

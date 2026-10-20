@@ -2,41 +2,63 @@
 
 import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DemoProvider } from '@/app/state/demoStore'
+import { LanguageProvider } from '@/app/contexts/LanguageContext'
+import { loadNativeDemoModuleForWebTest, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
 import ComponentDetailScreen from '@/app/screens/design-system/ComponentDetailScreen'
 import { COMPONENT_CODE_SAMPLES } from '@/app/registry/componentCodeSamples'
 
+const nativeLoader = vi.hoisted(() => ({ load: vi.fn() }))
+vi.mock('@/app/components/demo/nativeDemoLoader', () => ({ loadNativeDemoModule: nativeLoader.load }))
+
+beforeEach(() => { resetNativeWebRendererDiagnostics(); nativeLoader.load.mockReset(); nativeLoader.load.mockImplementation(loadNativeDemoModuleForWebTest) })
 afterEach(() => cleanup())
 
+function renderDetail() {
+  return render(<DemoProvider initialState={{ country: 'RO' }}><LanguageProvider initialLanguage="en"><ComponentDetailScreen componentId="ui.primary-button" onBack={vi.fn()} /></LanguageProvider></DemoProvider>)
+}
+
 describe('portable component implementation package', () => {
+  it('makes accessibility and geometry available in the documentation view', () => {
+    renderDetail()
+
+    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Accessibility' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Anatomy, dimensions & spacing' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Open Figma documentation/i })).toHaveAttribute('href', 'https://www.figma.com/design/FKbbStgBIP9bFAMl3DPKHF/?node-id=10072-22172')
+    expect(screen.getByRole('button', { name: 'Inspector OFF' })).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(screen.getByRole('button', { name: 'Inspector OFF' }))
+    expect(screen.getByRole('button', { name: 'Inspector ON' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('separates canonical mobile source from illustrative platform references', () => {
+    renderDetail()
+    fireEvent.click(screen.getByRole('button', { name: 'Implementation package' }))
+    expect(screen.getByText('Implemented source')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Swift reference' }))
+    expect(screen.getByText('Illustrative reference')).toBeInTheDocument()
+    expect(screen.getByText(/No production Swift implementation is mapped/)).toBeInTheDocument()
+  })
+
   it('shows the complete vendor-neutral package for Primary button', () => {
-    render(
-      <ComponentDetailScreen
-        componentId="ui.primary-button"
-        onBack={vi.fn()}
-      />,
-    )
+    renderDetail()
 
     // View is the default tab; switch to the Implementation package to assert its content.
     fireEvent.click(screen.getByRole('button', { name: 'Implementation package' }))
     expect(screen.getByRole('heading', { name: 'Implementation code' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Visual specifications' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Motion' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'React' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Swift' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Kotlin' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'React Native' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Swift reference' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Kotlin reference' })).toBeInTheDocument()
 
     const renderedText = document.body.textContent ?? ''
     expect(renderedText).not.toMatch(/asseco|asee|adaptive elements/i)
   })
 
   it('renders States, Accessibility and Assets under the View tab', () => {
-    render(
-      <ComponentDetailScreen
-        componentId="ui.primary-button"
-        onBack={vi.fn()}
-      />,
-    )
+    renderDetail()
 
     fireEvent.click(screen.getByRole('button', { name: 'view' }))
 
@@ -55,19 +77,14 @@ describe('portable component implementation package', () => {
     expect(screen.queryByRole('button', { name: 'Implementation package' })).not.toBeInTheDocument()
   })
 
-  it('renders the real PrimaryButton in the isolated View preview', () => {
-    render(
-      <ComponentDetailScreen
-        componentId="ui.primary-button"
-        onBack={vi.fn()}
-      />,
-    )
+  it('renders the real PrimaryButton in the isolated View preview', async () => {
+    renderDetail()
 
     fireEvent.click(screen.getByRole('button', { name: 'view' }))
 
     // The View tab now also renders the States section, so the PrimaryButton
     // appears in both the live preview and the state previews.
-    expect(screen.getAllByRole('button', { name: 'Continue' }).length).toBeGreaterThan(0)
+    expect((await screen.findAllByRole('button', { name: 'Continue' })).length).toBeGreaterThan(0)
     expect(screen.queryByText(/No isolated live preview/i)).not.toBeInTheDocument()
   })
 

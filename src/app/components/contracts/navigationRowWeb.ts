@@ -9,10 +9,12 @@ export function navigationRowWeb(options: NavigationRowOptions = {}) {
     paddingClass: state.centerContent
       ? 'px-[24px]'
       : state.rowHeight === 64
-        ? 'px-[16px]'
-        : state.paddingLeft === 16
-          ? 'pl-[16px] pr-[12px]'
-          : 'pl-[24px] pr-[12px]',
+        ? state.paddingLeft === 14 ? 'pl-[14px] pr-[16px]' : 'px-[16px]'
+        : state.paddingRight === 16
+          ? 'pl-[24px] pr-[16px]'
+          : state.paddingLeft === 16
+            ? 'pl-[16px] pr-[12px]'
+            : 'pl-[24px] pr-[12px]',
     titleColor: state.titleToken === '--uc-action' ? 'text-[var(--uc-action)]' : 'text-[var(--uc-text)]',
   }
 }

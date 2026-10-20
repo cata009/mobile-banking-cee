@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from './Typography';
 import type { Themed } from './types';
 import { styles } from './styles';
+import { resolveHeaderTitleAccessibility } from '@/app/components/contracts/headerTitleAccessibility';
 
 export function Header({
   tokens,
@@ -15,6 +16,7 @@ export function Header({
   screenTopInset = 0,
   collapsedTitleProgress = 0,
   renderLargeTitle = true,
+  showBack = true,
   leadingVisual,
   subtitle,
   headerSubtitle,
@@ -30,6 +32,7 @@ export function Header({
   screenTopInset?: number;
   collapsedTitleProgress?: number;
   renderLargeTitle?: boolean;
+  showBack?: boolean;
   leadingVisual?: React.ReactNode;
   subtitle?: React.ReactNode;
   headerSubtitle?: React.ReactNode;
@@ -39,6 +42,11 @@ export function Header({
   const progress = Math.max(0, Math.min(1, collapsedTitleProgress));
   const titleOpacity =
     collapsedTitleOpacity ?? (renderLargeTitle ? progress : 1);
+  const titleAccessibility = resolveHeaderTitleAccessibility({
+    largeTitleRendered: renderLargeTitle,
+    largeTitleOpacity: 1 - progress,
+    collapsedTitleOpacity: titleOpacity,
+  });
   if (variant === 'current')
     return (
       <>
@@ -49,19 +57,32 @@ export function Header({
           }}
         >
           <View style={s.currentNavigation}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={backLabel}
-              onPress={onBack}
-              style={s.currentAction}
-            >
-              {backIcon ?? (
-                <Text style={[styles.largeSymbol, { color: tokens.text }]}>
-                  ‹
-                </Text>
-              )}
-            </Pressable>
+            {showBack ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={backLabel}
+                onPress={onBack}
+                style={s.currentAction}
+              >
+                {backIcon ?? (
+                  <Text style={[styles.largeSymbol, { color: tokens.text }]}>
+                    ‹
+                  </Text>
+                )}
+              </Pressable>
+            ) : (
+              <View style={s.currentAction} />
+            )}
             <View
+              aria-hidden={titleAccessibility.collapsedTitleHidden}
+              accessibilityElementsHidden={
+                titleAccessibility.collapsedTitleHidden
+              }
+              importantForAccessibility={
+                titleAccessibility.collapsedTitleHidden
+                  ? 'no-hide-descendants'
+                  : 'auto'
+              }
               style={[
                 s.copy,
                 {
@@ -103,6 +124,13 @@ export function Header({
         </View>
         {renderLargeTitle && (
           <View
+            aria-hidden={titleAccessibility.largeTitleHidden}
+            accessibilityElementsHidden={titleAccessibility.largeTitleHidden}
+            importantForAccessibility={
+              titleAccessibility.largeTitleHidden
+                ? 'no-hide-descendants'
+                : 'auto'
+            }
             style={[
               s.largeBand,
               {
@@ -140,17 +168,22 @@ export function Header({
         { borderBottomColor: tokens.border },
       ]}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={backLabel}
-        onPress={onBack}
-        style={styles.iconButton}
-      >
-        {backIcon ?? (
-          <Text style={[styles.largeSymbol, { color: tokens.text }]}>‹</Text>
-        )}
-      </Pressable>
+      {showBack ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={backLabel}
+          onPress={onBack}
+          style={styles.iconButton}
+        >
+          {backIcon ?? (
+            <Text style={[styles.largeSymbol, { color: tokens.text }]}>‹</Text>
+          )}
+        </Pressable>
+      ) : (
+        <View style={styles.iconButton} />
+      )}
       <Text
+        accessibilityRole="header"
         style={[
           styles.heading,
           { fontFamily: tokens.strongFont, color: tokens.text },

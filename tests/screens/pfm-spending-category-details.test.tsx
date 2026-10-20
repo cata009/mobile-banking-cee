@@ -80,7 +80,9 @@ describe('PFM Spending category details', () => {
       { wrapper: Providers },
     )
 
-    expect(screen.getAllByRole('heading', { name: 'SHOPPING' })).toHaveLength(2)
+    expect(screen.getAllByRole('heading', { name: 'SHOPPING' })).toHaveLength(1)
+    expect(screen.getAllByText('SHOPPING')).toHaveLength(2)
+    expect(screen.getAllByText('SHOPPING').filter(node => node.closest('[aria-hidden="true"]'))).toHaveLength(1)
     expect(screen.getAllByText('SHOPPING (OTHER)').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: 'Add Transaction' })).toBeInTheDocument()
     expect(screen.getByText('APRIL')).toBeInTheDocument()
@@ -191,14 +193,15 @@ describe('PFM Spending category details', () => {
     await renderNative(<AnalyticsScreen onTransactionClick={onTransactionClick} />, { wrapper: Providers })
 
     fireEvent.click(screen.getByRole('button', { name: 'Open category details: SHOPPING' }))
-    expect(await screen.findAllByRole('heading', { name: 'SHOPPING' })).toHaveLength(2)
+    expect(await screen.findAllByRole('heading', { name: 'SHOPPING' })).toHaveLength(1)
     expect(screen.queryByRole('heading', { name: 'Spending' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(await screen.findByRole('heading', { name: 'Spending' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Open category details: INCOME' }))
-    expect(await screen.findAllByRole('heading', { name: 'INCOME' })).toHaveLength(2)
+    expect(await screen.findAllByRole('heading', { name: 'INCOME' })).toHaveLength(1)
+    expect(screen.getAllByText('INCOME')).toHaveLength(2)
     expect(screen.getAllByText('SALARY').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getAllByRole('button', { name: /Dante International/i })[0]!)

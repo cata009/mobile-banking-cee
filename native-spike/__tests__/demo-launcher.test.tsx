@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Renderer, { act } from 'react-test-renderer';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import GlobalDemoSelector from '../src/app/GlobalDemoSelector';
+import { NATIVE_DEMO_CHOICES } from '../src/app/registry';
 import type { NativeDemoSelection } from '../src/app/registry';
 
 const ITALY: NativeDemoSelection = {
@@ -60,15 +61,23 @@ afterEach(async () => {
     mounted.splice(0).forEach(tree => tree.unmount());
   });
 });
+test('open action stays outside the scrolling catalogue so selecting a market does not require scrolling to the end', async () => {
+  const { tree } = await render();
+  let ancestor = action(tree, 'Deschide demo').parent;
+  while (ancestor) {
+    expect(ancestor.type).not.toBe(ScrollView);
+    ancestor = ancestor.parent;
+  }
+});
 
-test('launcher exposes only two clear selectable demos and preserves exact context callbacks', async () => {
+test('launcher exposes every catalogued experience with separate release/scenario axes and preserves exact context callbacks', async () => {
   const { tree, change, open } = await render();
   const choices = tree.root.findAll(
     node =>
       node.props.testID?.startsWith('demo-choice-') &&
       typeof node.props.onPress === 'function',
   );
-  expect(choices).toHaveLength(2);
+  expect(choices).toHaveLength(NATIVE_DEMO_CHOICES.length);
   expect(
     action(tree, 'Italia, Mobile First').props.accessibilityState.selected,
   ).toBe(true);
@@ -81,7 +90,7 @@ test('launcher exposes only two clear selectable demos and preserves exact conte
         node.props.accessibilityState?.expanded !== undefined &&
         typeof node.props.onPress === 'function',
     ),
-  ).toHaveLength(0);
+  ).toHaveLength(1);
   await press(tree, 'Cehia, Evo 2027');
   expect(change).toHaveBeenLastCalledWith(CZECH);
   expect(open).not.toHaveBeenCalled();
@@ -101,7 +110,7 @@ test('launcher exposes only two clear selectable demos and preserves exact conte
 test('unsupported initial axes are not silently replaced; selection requires an explicit supported action', async () => {
   const { tree, change, open } = await render({
     ...CZECH,
-    country: 'RO',
+    country: 'IT',
     release: 'release-current',
     scenario: 'inactive',
   });

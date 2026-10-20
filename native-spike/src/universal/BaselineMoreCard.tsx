@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { Image, Pressable, View, type ViewStyle } from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  type ImageStyle,
+  type ViewStyle,
+} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import {
   resolveMoreCard,
   type MoreCardVariant,
 } from '@/app/components/contracts/moreCard';
-import { MoreArtwork } from '../experiences/pi/current/profile/MoreArtwork';
+import { moreAssets } from '../experiences/pi/current/profile/assets';
 import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
 
-/** Reuses the existing original Source assets/crops; platform theme filters remain unverified. */
+/** Canonical More renderer shared by active screens, RNWeb and isolated previews. */
 export function BaselineMoreCard({
   variant,
   title,
@@ -27,27 +35,170 @@ export function BaselineMoreCard({
   width?: number;
   dark?: boolean;
 }) {
-  const contract = resolveMoreCard({ variant, badgeCount }),
-    [hovered, setHovered] = useState(false);
-  const rootStyle: ViewStyle = {
-    height: contract.height,
-    width,
-    overflow: 'hidden',
-    borderRadius: contract.radius,
-    opacity: hovered ? contract.hoverOpacity : 1,
-  };
-  const titleContainer: ViewStyle = {
+  const c = resolveMoreCard({ variant, badgeCount });
+  const [hovered, setHovered] = useState(false);
+  const color = (value: string) => sourceColor(value, dark);
+  const gradient = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 120"><defs><linearGradient id="card"><stop offset="0" stop-color="${color(
+    'var(--uc-app-bg)',
+  )}"/><stop offset="1" stop-color="${color(
+    'var(--uc-neutral-400)',
+  )}"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#card)"/></svg>`;
+  const artStyle: ViewStyle = {
     position: 'absolute',
-    inset: 0,
-    padding: contract.padding,
+    top: c.image.top,
+    right: c.image.right,
+    bottom: c.image.bottom,
+    left: c.image.left,
+    overflow: 'hidden',
   };
-  const titleStyle = {
-    fontFamily: 'UniCredit-bold',
-    fontSize: contract.titleFontSize,
-    color: sourceColor('var(--uc-text)', dark),
+  const asset = variant === 'base' ? image : moreAssets[variant];
+  const assetSource = typeof asset === 'string' ? { uri: asset } : asset;
+  const imageUri =
+    typeof asset === 'string'
+      ? asset
+      : typeof asset === 'number'
+      ? Image.resolveAssetSource(asset)?.uri
+      : Array.isArray(asset)
+      ? asset[0]?.uri
+      : asset && 'uri' in asset
+      ? asset.uri
+      : undefined;
+  const cardStyle = {
+    width,
+    height: c.height,
+    borderRadius: c.radius,
+    opacity: hovered ? c.hoverOpacity : 1,
   };
-  const backgroundStyle: ViewStyle = { position: 'absolute', inset: 0 };
-  const baseImageContainer: ViewStyle = {
+  const raster =
+    Platform.OS === 'web' ? (
+      React.createElement('img', {
+        src: imageUri,
+        alt: '',
+        decoding: 'async',
+        loading: 'eager',
+        draggable: false,
+        style: {
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '100%',
+          height: '100%',
+          maxWidth: 'none',
+        },
+      })
+    ) : (
+      <Image
+        source={assetSource}
+        resizeMode="stretch"
+        style={StyleSheet.absoluteFill as ImageStyle}
+      />
+    );
+  return (
+    <Pressable
+      testID={`ro-more-card-${variant}`}
+      accessibilityRole="button"
+      accessibilityLabel={
+        c.badgeText === null ? title : `${title} ${c.badgeText}`
+      }
+      onPress={onPress}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={[s.card, cardStyle]}
+    >
+      <View style={StyleSheet.absoluteFill}>
+        <SvgXml xml={gradient} width={width} height={c.height} />
+      </View>
+      {variant === 'base' ? (
+        image ? (
+          <View style={s.baseImageContainer}>
+            <Image
+              source={typeof image === 'number' ? image : { uri: image }}
+              resizeMode="contain"
+              style={s.baseImage}
+            />
+          </View>
+        ) : null
+      ) : variant === 'gdpr-consent' && Platform.OS === 'web' ? (
+        React.createElement('div', {
+          style: {
+            ...artStyle,
+            backgroundImage: `url('${imageUri}')`,
+            backgroundSize: '61.60000091791153px 62.90000093728304px',
+            backgroundPosition: 'top left',
+          } as React.CSSProperties,
+        })
+      ) : (
+        <View
+          pointerEvents="none"
+          style={[
+            artStyle,
+            variant === 'third-party-consent' && s.thirdPartyFrame,
+          ]}
+        >
+          {variant === 'gdpr-consent' ? (
+            Array.from(
+              { length: Math.ceil((width * 0.6158) / 61.60000091791153) * 2 },
+              (_, index) => {
+                const columns = Math.ceil((width * 0.6158) / 61.60000091791153);
+                return (
+                  <Image
+                    key={index}
+                    source={assetSource}
+                    resizeMode="stretch"
+                    style={[
+                      s.tile,
+                      {
+                        left: (index % columns) * 61.60000091791153,
+                        top: Math.floor(index / columns) * 62.90000093728304,
+                      },
+                    ]}
+                  />
+                );
+              },
+            )
+          ) : variant === 'third-party-consent' ? (
+            <View
+              testID="ro-more-third-party-artwork"
+              style={s.thirdPartyArtwork}
+            >
+              <View style={[StyleSheet.absoluteFill, s.rasterClip]}>
+                {raster}
+              </View>
+            </View>
+          ) : (
+            raster
+          )}
+        </View>
+      )}
+      <View style={s.titleContainer}>
+        <Text style={[s.title, { color: color('var(--uc-text)') }]}>
+          {title}
+        </Text>
+      </View>
+      {c.badgeText !== null && (
+        <View style={s.badge}>
+          <View
+            style={[
+              s.badgeCorner,
+              { backgroundColor: color('var(--uc-brand)') },
+            ]}
+          />
+          <View style={s.badgeNumber}>
+            <Text
+              testID="ro-more-documents-badge"
+              style={[s.badgeText, { color: color('var(--uc-static-white)') }]}
+            >
+              {c.badgeText}
+            </Text>
+          </View>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
+const s = StyleSheet.create({
+  baseImageContainer: {
     position: 'absolute',
     bottom: 0,
     right: 0,
@@ -56,79 +207,58 @@ export function BaselineMoreCard({
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
     overflow: 'hidden',
-  };
-  const baseImageStyle = {
-    width: '100%' as const,
-    height: '100%' as const,
+  },
+  baseImage: {
+    width: '100%',
+    height: '100%',
     transform: [{ scale: 0.9 }],
     transformOrigin: 'bottom right',
-  };
-  const badgeStyle: ViewStyle = {
+  },
+  card: { position: 'relative', overflow: 'hidden' },
+  thirdPartyFrame: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  thirdPartyArtwork: {
+    width: 151,
+    height: 158.373,
+    flexShrink: 0,
+    transform: [{ rotate: '-156deg' }, { scaleY: -1 }],
+  },
+  rasterClip: { overflow: 'hidden' },
+  titleContainer: {
+    position: 'absolute',
+    inset: 0,
+    padding: 16,
+    alignItems: 'flex-start',
+  },
+  title: { fontFamily: 'UniCredit-bold', fontSize: 18, textAlign: 'left' },
+  badge: {
     position: 'absolute',
     right: 0,
     top: 0,
     width: 32,
     height: 32,
     zIndex: 20,
-  };
-  const badgeCorner: ViewStyle = {
+  },
+  badgeCorner: {
     position: 'absolute',
     right: 0,
     top: 0,
     width: 30,
     height: 30,
     borderBottomLeftRadius: 30,
-    backgroundColor: sourceColor('var(--uc-brand)', dark),
-  };
-  const badgeNumber: ViewStyle = { position: 'absolute', right: 7, top: 4 };
-  const badgeTextStyle = {
+  },
+  badgeNumber: { position: 'absolute', right: 7, top: 4 },
+  badgeText: {
     fontFamily: 'UniCredit-bold',
     fontSize: 14,
     lineHeight: 14,
-    color: sourceColor('var(--uc-static-white)', dark),
-  };
-  const xml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 120"><defs><linearGradient id="more-gradient"><stop offset="0" stop-color="${sourceColor(
-    'var(--uc-app-bg)',
-    dark,
-  )}"/><stop offset="1" stop-color="${sourceColor(
-    'var(--uc-neutral-400)',
-    dark,
-  )}"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#more-gradient)"/></svg>`;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      style={rootStyle}
-    >
-      <View style={backgroundStyle}>
-        <SvgXml xml={xml} width={width} height={contract.height} />
-      </View>
-      {variant === 'base' ? (
-        image && (
-          <View style={baseImageContainer}>
-            <Image
-              source={typeof image === 'number' ? image : { uri: image }}
-              resizeMode="contain"
-              style={baseImageStyle}
-            />
-          </View>
-        )
-      ) : (
-        <MoreArtwork card={variant} cardWidth={width} />
-      )}
-      <View style={titleContainer}>
-        <Text style={titleStyle}>{title}</Text>
-      </View>
-      {contract.badgeText !== null && (
-        <View style={badgeStyle}>
-          <View style={badgeCorner} />
-          <View style={badgeNumber}>
-            <Text style={badgeTextStyle}>{contract.badgeText}</Text>
-          </View>
-        </View>
-      )}
-    </Pressable>
-  );
-}
+  },
+  tile: {
+    position: 'absolute',
+    width: 61.60000091791153,
+    height: 62.90000093728304,
+  },
+});

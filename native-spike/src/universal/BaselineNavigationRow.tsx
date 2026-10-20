@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Pressable,
+  StyleSheet,
   View,
   type StyleProp,
   type TextStyle,
@@ -33,6 +34,8 @@ export function BaselineNavigationRow({
   dark = false,
   style,
   titleStyle,
+  titleAccessory,
+  titleAccessoryStyle,
   descriptionStyle,
   ...options
 }: Omit<
@@ -54,6 +57,9 @@ export function BaselineNavigationRow({
   dark?: boolean;
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
+  /** Adjacent to the copy column, before the row's trailing control. */
+  titleAccessory?: React.ReactNode;
+  titleAccessoryStyle?: StyleProp<ViewStyle>;
   descriptionStyle?: StyleProp<TextStyle>;
 }) {
   const state = resolveNavigationRow({
@@ -104,7 +110,8 @@ export function BaselineNavigationRow({
     justifyContent: 'center',
   } as const;
   const viewStyle4 = {
-    flex: state.centerContent ? undefined : 1,
+    flex: state.centerContent || titleAccessory ? undefined : 1,
+    flexShrink: titleAccessory ? 1 : undefined,
     minWidth: 0,
   } as const;
   const textStyle5 = [
@@ -132,6 +139,27 @@ export function BaselineNavigationRow({
     alignItems: 'center',
     justifyContent: 'center',
   } as const;
+  const copy = (
+    <View style={viewStyle4}>
+      <Text numberOfLines={state.titleMaxLines} style={textStyle5}>
+        {title}
+      </Text>
+      {description ? (
+        <Text numberOfLines={2} style={textStyle6}>
+          {description}
+        </Text>
+      ) : null}
+      {linkLabel ? (
+        onLinkPress ? (
+          <Pressable accessibilityRole="button" onPress={onLinkPress}>
+            {link}
+          </Pressable>
+        ) : (
+          link
+        )
+      ) : null}
+    </View>
+  );
   const children = (
     <>
       <View style={viewStyle2}>
@@ -151,25 +179,16 @@ export function BaselineNavigationRow({
               />
             </View>
           ) : null)}
-        <View style={viewStyle4}>
-          <Text numberOfLines={2} style={textStyle5}>
-            {title}
-          </Text>
-          {description ? (
-            <Text numberOfLines={2} style={textStyle6}>
-              {description}
-            </Text>
-          ) : null}
-          {linkLabel ? (
-            onLinkPress ? (
-              <Pressable accessibilityRole="button" onPress={onLinkPress}>
-                {link}
-              </Pressable>
-            ) : (
-              link
-            )
-          ) : null}
-        </View>
+        {titleAccessory ? (
+          <View style={styles.copyWithAccessory}>
+            {copy}
+            <View style={[styles.titleAccessory, titleAccessoryStyle]}>
+              {titleAccessory}
+            </View>
+          </View>
+        ) : (
+          copy
+        )}
       </View>
       {trailing ? (
         trailing
@@ -212,3 +231,20 @@ export function BaselineNavigationRow({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  copyWithAccessory: {
+    minWidth: 0,
+    flexShrink: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  titleAccessory: {
+    width: 32,
+    height: 32,
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+});

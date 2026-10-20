@@ -10,6 +10,10 @@ export function Signing({
   pinLabel = 'Enter PIN to sign the order',
   pinHelper = 'Authorize your one-off investment order',
   actionLabel = 'Sign order',
+  pinTopSpacing,
+  pinFocused = false,
+  demoPresentation,
+  canonicalControls,
 }: {
   onBack: () => void;
   onExit: () => void;
@@ -18,6 +22,10 @@ export function Signing({
   pinLabel?: string;
   pinHelper?: string;
   actionLabel?: string;
+  pinTopSpacing?: number;
+  pinFocused?: boolean;
+  demoPresentation?: 'confirmation' | 'face-id';
+  canonicalControls?: boolean;
 }) {
   const isActive = useInvestmentActive();
   return (
@@ -29,6 +37,10 @@ export function Signing({
       pinLabel={pinLabel}
       pinHelper={pinHelper}
       actionLabel={actionLabel}
+      pinTopSpacing={pinTopSpacing}
+      pinFocused={pinFocused}
+      demoPresentation={demoPresentation}
+      canonicalControls={canonicalControls}
     />
   );
 }

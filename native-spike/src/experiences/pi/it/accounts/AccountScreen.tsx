@@ -40,6 +40,7 @@ import share from '@/assets/mobile-first/it/account/imgNavigationAndActionShareK
 import search from '@/assets/mobile-first/it/account/imgNavigationAndActionSearchK10.svg';
 import whiteChevron from '@/assets/mobile-first/it/account/imgNavigationAndActionForthK10.svg';
 import pendingChevron from '@/assets/mobile-first/it/account/imgNavigationAndActionForthK11.svg';
+import tealChevron from '@/assets/mobile-first/it/account/imgNavigationAndActionForthT2.svg';
 import profile from '@/assets/mobile-first/it/account/imgAvatar.png';
 import Movement from './Movement';
 import Settings from './Settings';
@@ -534,14 +535,20 @@ function AccountScreenBody(props: ItalyNativeScreenProps) {
           </View>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Riserva di liquidità"
             onPress={() => setView('liquidity')}
+            style={styles.liquidity}
           >
-            <Text style={styles.liquidity}>RISERVA DI LIQUIDITÀ ›</Text>
+            <Text style={styles.liquidityText}>RISERVA DI LIQUIDITÀ</Text>
+            <AssetGlyph asset={tealChevron} size={16} />
           </Pressable>
           <View style={styles.quick}>
             {ACCOUNT_ACTIONS.map((item, index) => (
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel={
+                  index === 1 && account.imported ? 'Info conto' : item.name
+                }
                 key={item.name}
                 onPress={() => action(index)}
                 style={styles.quickButton}
@@ -549,7 +556,7 @@ function AccountScreenBody(props: ItalyNativeScreenProps) {
                 <View style={styles.quickCircle}>
                   <AssetGlyph
                     asset={[transfer, settingsIcon, frequent, share][index]}
-                    size={32}
+                    size={24}
                   />
                 </View>
                 <Text style={styles.quickLabel}>
@@ -729,10 +736,16 @@ const styles = StyleSheet.create({
   liquidity: {
     marginTop: -8,
     minHeight: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  liquidityText: {
     fontFamily: tokens.strongFont,
     fontSize: 14,
+    lineHeight: 16,
     color: tokens.accent,
-    textAlign: 'center',
   },
   quick: {
     flexDirection: 'row',

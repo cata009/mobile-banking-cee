@@ -1,123 +1,153 @@
-import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { createHash } from 'node:crypto'
+import { describe, expect, it } from 'vitest'
 import {
   buildAssetAudit,
   assertAssetBaseline,
   isTrackedAssetPath,
   collectAuditedRepositoryFiles,
-} from "../../scripts/audit-assets.mjs";
+} from '../../scripts/audit-assets.mjs'
 
-describe("tracked asset audit", () => {
-  it('includes pending application assets and their source references without adopting unrelated designer files', () => {
-    const paths = collectAuditedRepositoryFiles(['src/app/App.tsx','src/assets/logo.svg'], ['src/assets/investments/quit.svg','src/features/robo/View.tsx','liveness-final.png','.env'])
-    expect(paths).toEqual(['src/app/App.tsx','src/assets/investments/quit.svg','src/assets/logo.svg','src/features/robo/View.tsx'])
-    const files = new Map([['src/app/App.tsx',Buffer.from('')],['src/assets/logo.svg',Buffer.from('<svg/>')],['src/features/robo/View.tsx',Buffer.from('import quit from "@/assets/investments/quit.svg"')],['src/assets/investments/quit.svg',Buffer.from('<svg><path/></svg>')]])
-    const report = buildAssetAudit({trackedFiles:paths,readFile:path=>files.get(path)})
-    expect(report.assetCount).toBe(2)
-    expect(report.referencedAssets).toContainEqual({path:'src/assets/investments/quit.svg',referencedBy:['src/features/robo/View.tsx']})
+describe('tracked asset audit', () => {
+  it('retires only explicitly approved missing assets with the same indexed bytes', () => {
+    const tracked = ['src/app/retired.tsx', 'screenshots/retired.png', 'src/assets/required.png']
+    const bytes = Buffer.from('approved original')
+    const options = {
+      deletedFiles: new Set(tracked),
+      approvedRetirements: [
+        { path: 'screenshots/retired.png', sha256: createHash('sha256').update(bytes).digest('hex') },
+      ],
+      readIndexedAsset: () => bytes,
+    }
+    expect(collectAuditedRepositoryFiles(tracked, [], options)).toEqual(['src/assets/required.png'])
+    expect(() =>
+      collectAuditedRepositoryFiles(tracked, [], { ...options, readIndexedAsset: () => Buffer.from('changed') }),
+    ).toThrow('Retired asset differs from approved bytes')
   })
-  it("fails closed when a tracked asset path or blob changes from the approved baseline", () => {
-    const report = { assetCount: 2, pathBlobSha256Aggregate: "approved" };
-    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: "approved" }))
-      .not.toThrow();
-    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: "changed" }))
-      .toThrow(/baseline mismatch/i);
-  });
-
-  it("recognizes supported raster and vector assets without treating source files as assets", () => {
-    expect([
-      "src/assets/card.PNG",
-      "src/assets/photo.jpg",
-      "src/assets/photo.jpeg",
-      "src/assets/animation.gif",
-      "src/assets/photo.webp",
-      "src/assets/photo.avif",
-      "src/assets/icon.svg",
-      "src/assets/icon.ico",
-      "src/assets/photo.bmp",
-      "src/assets/photo.tif",
-      "src/assets/photo.tiff",
-    ].every(isTrackedAssetPath)).toBe(true);
-    expect(isTrackedAssetPath("src/app/Card.tsx")).toBe(false);
-  });
-
-  it("inventories tracked assets, exact duplicate blobs, conservative code references, and the path+blob aggregate", () => {
-    const trackedFiles = [
-      "src/app/Card.tsx",
-      "src/styles/card.css",
-      "src/assets/card.png",
-      "src/assets/card-copy.png",
-      "src/assets/unused.svg",
-      "docs/different.png",
-    ];
+  it('includes pending application assets and their source references without adopting unrelated designer files', () => {
+    const paths = collectAuditedRepositoryFiles(
+      ['src/app/App.tsx', 'src/assets/logo.svg'],
+      ['src/assets/investments/quit.svg', 'src/features/robo/View.tsx', 'liveness-final.png', '.env'],
+    )
+    expect(paths).toEqual([
+      'src/app/App.tsx',
+      'src/assets/investments/quit.svg',
+      'src/assets/logo.svg',
+      'src/features/robo/View.tsx',
+    ])
     const files = new Map([
-      ["src/app/Card.tsx", Buffer.from('import card from "@/assets/card.png";')],
-      ["src/styles/card.css", Buffer.from("/* card-copy.png is selected by the runtime theme */")],
-      ["src/assets/card.png", Buffer.from("same pixels")],
-      ["src/assets/card-copy.png", Buffer.from("same pixels")],
-      ["src/assets/unused.svg", Buffer.from("<svg />")],
-      ["docs/different.png", Buffer.from("different pixels")],
-    ]);
+      ['src/app/App.tsx', Buffer.from('')],
+      ['src/assets/logo.svg', Buffer.from('<svg/>')],
+      ['src/features/robo/View.tsx', Buffer.from('import quit from "@/assets/investments/quit.svg"')],
+      ['src/assets/investments/quit.svg', Buffer.from('<svg><path/></svg>')],
+    ])
+    const report = buildAssetAudit({ trackedFiles: paths, readFile: (path) => files.get(path) })
+    expect(report.assetCount).toBe(2)
+    expect(report.referencedAssets).toContainEqual({
+      path: 'src/assets/investments/quit.svg',
+      referencedBy: ['src/features/robo/View.tsx'],
+    })
+  })
+  it('fails closed when a tracked asset path or blob changes from the approved baseline', () => {
+    const report = { assetCount: 2, pathBlobSha256Aggregate: 'approved' }
+    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: 'approved' })).not.toThrow()
+    expect(() => assertAssetBaseline(report, { assetCount: 2, pathBlobSha256Aggregate: 'changed' })).toThrow(
+      /baseline mismatch/i,
+    )
+  })
+
+  it('recognizes supported raster and vector assets without treating source files as assets', () => {
+    expect(
+      [
+        'src/assets/card.PNG',
+        'src/assets/photo.jpg',
+        'src/assets/photo.jpeg',
+        'src/assets/animation.gif',
+        'src/assets/photo.webp',
+        'src/assets/photo.avif',
+        'src/assets/icon.svg',
+        'src/assets/icon.ico',
+        'src/assets/photo.bmp',
+        'src/assets/photo.tif',
+        'src/assets/photo.tiff',
+      ].every(isTrackedAssetPath),
+    ).toBe(true)
+    expect(isTrackedAssetPath('src/app/Card.tsx')).toBe(false)
+  })
+
+  it('inventories tracked assets, exact duplicate blobs, conservative code references, and the path+blob aggregate', () => {
+    const trackedFiles = [
+      'src/app/Card.tsx',
+      'src/styles/card.css',
+      'src/assets/card.png',
+      'src/assets/card-copy.png',
+      'src/assets/unused.svg',
+      'docs/different.png',
+    ]
+    const files = new Map([
+      ['src/app/Card.tsx', Buffer.from('import card from "@/assets/card.png";')],
+      ['src/styles/card.css', Buffer.from('/* card-copy.png is selected by the runtime theme */')],
+      ['src/assets/card.png', Buffer.from('same pixels')],
+      ['src/assets/card-copy.png', Buffer.from('same pixels')],
+      ['src/assets/unused.svg', Buffer.from('<svg />')],
+      ['docs/different.png', Buffer.from('different pixels')],
+    ])
 
     const report = buildAssetAudit({
       trackedFiles,
       readFile: (path) => files.get(path),
-    });
+    })
 
-    const expectedAggregate = createHash("sha256")
-      .update(report.assets.map(({ path, sha256 }) => `${path}\0${sha256}\n`).join(""))
-      .digest("hex");
+    const expectedAggregate = createHash('sha256')
+      .update(report.assets.map(({ path, sha256 }) => `${path}\0${sha256}\n`).join(''))
+      .digest('hex')
 
-    expect(report.assets).toHaveLength(4);
-    expect(report.duplicateBlobGroups).toEqual([{
-      sha256: createHash("sha256").update("same pixels").digest("hex"),
-      paths: ["src/assets/card-copy.png", "src/assets/card.png"],
-    }]);
-    expect(report.referencedAssets.map(({ path }) => path)).toEqual([
-      "src/assets/card-copy.png",
-      "src/assets/card.png",
-    ]);
+    expect(report.assets).toHaveLength(4)
+    expect(report.duplicateBlobGroups).toEqual([
+      {
+        sha256: createHash('sha256').update('same pixels').digest('hex'),
+        paths: ['src/assets/card-copy.png', 'src/assets/card.png'],
+      },
+    ])
+    expect(report.referencedAssets.map(({ path }) => path)).toEqual(['src/assets/card-copy.png', 'src/assets/card.png'])
     expect(report.candidateUnreferencedAssets.map(({ path }) => path)).toEqual([
-      "docs/different.png",
-      "src/assets/unused.svg",
-    ]);
-    expect(report.pathBlobSha256Aggregate).toBe(expectedAggregate);
-  });
+      'docs/different.png',
+      'src/assets/unused.svg',
+    ])
+    expect(report.pathBlobSha256Aggregate).toBe(expectedAggregate)
+  })
 
-  it("uses basename matches as conservative evidence and never reads untracked files", () => {
-    const reads = [];
-    const trackedFiles = ["src/app/theme.ts", "src/assets/nested/hero.svg"];
+  it('uses basename matches as conservative evidence and never reads untracked files', () => {
+    const reads = []
+    const trackedFiles = ['src/app/theme.ts', 'src/assets/nested/hero.svg']
     const files = new Map([
-      ["src/app/theme.ts", Buffer.from('const selectedAsset = "hero.svg";')],
-      ["src/assets/nested/hero.svg", Buffer.from("<svg />")],
-    ]);
+      ['src/app/theme.ts', Buffer.from('const selectedAsset = "hero.svg";')],
+      ['src/assets/nested/hero.svg', Buffer.from('<svg />')],
+    ])
 
     const report = buildAssetAudit({
       trackedFiles,
       readFile: (path) => {
-        reads.push(path);
-        return files.get(path);
+        reads.push(path)
+        return files.get(path)
       },
-    });
+    })
 
     expect(report.referencedAssets[0]).toEqual({
-      path: "src/assets/nested/hero.svg",
-      referencedBy: ["src/app/theme.ts"],
-    });
-    expect(reads.sort()).toEqual([...trackedFiles].sort());
-  });
+      path: 'src/assets/nested/hero.svg',
+      referencedBy: ['src/app/theme.ts'],
+    })
+    expect(reads.sort()).toEqual([...trackedFiles].sort())
+  })
 
-  it("can hash canonical Git asset bytes instead of platform-specific worktree bytes", () => {
-    const trackedFiles = ["src/assets/icon.svg"];
+  it('can hash canonical Git asset bytes instead of platform-specific worktree bytes', () => {
+    const trackedFiles = ['src/assets/icon.svg']
     const report = buildAssetAudit({
       trackedFiles,
-      readFile: () => Buffer.from("<svg>\r\n  <path />\r\n</svg>\r\n"),
-      readAssetFile: () => Buffer.from("<svg>\n  <path />\n</svg>\n"),
-    });
-    const canonicalSha = createHash("sha256")
-      .update("<svg>\n  <path />\n</svg>\n")
-      .digest("hex");
+      readFile: () => Buffer.from('<svg>\r\n  <path />\r\n</svg>\r\n'),
+      readAssetFile: () => Buffer.from('<svg>\n  <path />\n</svg>\n'),
+    })
+    const canonicalSha = createHash('sha256').update('<svg>\n  <path />\n</svg>\n').digest('hex')
 
-    expect(report.assets[0].sha256).toBe(canonicalSha);
-  });
-});
+    expect(report.assets[0].sha256).toBe(canonicalSha)
+  })
+})

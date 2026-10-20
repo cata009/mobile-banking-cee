@@ -1,6 +1,24 @@
 import type { CustomIconDefinition } from '../../iconTypes'
 
 export const SHARED_CUSTOM_ICONS = {
+  // Original Figma 7144:1687 SVG export, unchanged 24px path geometry.
+  'button-chat': {
+    source: 'custom',
+    label: 'Button chat',
+    category: 'Actions',
+    width: 24,
+    height: 24,
+    viewBox: '0 0 24 24',
+    usage: ['PrimaryButton leading icon', 'Design System primary with-icon'],
+    render: () => (
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M17.25 9C16.422 9 15.75 8.328 15.75 7.5C15.75 6.672 16.422 6 17.25 6C18.078 6 18.75 6.672 18.75 7.5C18.75 8.328 18.078 9 17.25 9ZM12 9C11.172 9 10.5 8.328 10.5 7.5C10.5 6.672 11.172 6 12 6C12.828 6 13.5 6.672 13.5 7.5C13.5 8.328 12.828 9 12 9ZM6.75 9C5.922 9 5.25 8.328 5.25 7.5C5.25 6.672 5.922 6 6.75 6C7.578 6 8.25 6.672 8.25 7.5C8.25 8.328 7.578 9 6.75 9ZM3 0C1.34325 0 0 1.34325 0 3V15.75H0.00075L0.0015 24H0.243C1.76925 24 2.754 23.1308 3.738 21.5925L7.272 15.75H21C22.6567 15.75 24 14.4067 24 12.75V0H3Z"
+        fill="currentColor"
+      />
+    ),
+  },
   'header-profile': {
     source: 'custom',
     label: 'Header profile',
@@ -212,7 +230,6 @@ export const SHARED_CUSTOM_ICONS = {
       'PrimeIconLabelValue',
       'ProductAccordion',
       'KidsMarketHomeApp',
-      'TemplateCodePreviews',
     ],
     render: () => (
       <path
@@ -364,14 +381,7 @@ export const SHARED_CUSTOM_ICONS = {
     width: 32,
     height: 32,
     viewBox: '0 0 32 32',
-    usage: [
-      'BottomSheet',
-      'DemoFeatureSidePanel',
-      'HelperCard',
-      'NewPaymentDiscoverBanner',
-      'KidsMarketHomeApp',
-      'TemplateCodePreviews',
-    ],
+    usage: ['BottomSheet', 'DemoFeatureSidePanel', 'HelperCard', 'NewPaymentDiscoverBanner', 'KidsMarketHomeApp'],
     notes: 'Custom close icon replacing the old lucide X wrapper.',
     render: () => (
       <path

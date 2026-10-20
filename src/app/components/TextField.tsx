@@ -41,7 +41,7 @@ interface TextFieldProps {
   onBlur?: () => void;
 }
 
-const DISABLED_COLOR = "var(--uc-neutral-650)";
+const DISABLED_COLOR = "var(--uc-text-subtle)";
 
 export default function TextField({
   label,
@@ -78,14 +78,15 @@ export default function TextField({
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
-  const { isDisabled, isMultiple, hasValue, shouldFloatLabel, labelColor, valueColor, dividerColor, helperColor, descriptionText1, descriptionText2, hasFloatingTrailingIcon, helperTextWidth, displayedMultipleValues, effectiveMultipleCount, inputPlaceholder, placeholderColorClass } = textFieldWeb({ label, value, helperText, helperText2, errorText, errorText2, placeholder, disabled, visualState, trailingIconName, trailingIconPlacement, multipleValues, multipleCount, forceFloatLabel, isFocused });
+  const { isDisabled, isMultiple, hasValue, shouldFloatLabel, labelColor, valueColor, dividerColor, dividerWidth, helperColor, descriptionText1, descriptionText2, hasFloatingTrailingIcon, helperTextWidth, displayedMultipleValues, effectiveMultipleCount, inputPlaceholder, placeholderColorClass } = textFieldWeb({ label, value, helperText, helperText2, errorText, errorText2, placeholder, disabled, visualState, trailingIconName, trailingIconPlacement, multipleValues, multipleCount, forceFloatLabel, isFocused });
+  const activate = () => { if (!isDisabled) onActivate?.(); };
 
   return (
     <div
       className="w-full"
       data-component="TextField"
       role="presentation"
-      onClick={onActivate}
+      onClick={activate}
     >
       <div className="relative">
         {shouldFloatLabel ? (
@@ -103,7 +104,7 @@ export default function TextField({
             className={`flex min-w-0 flex-1 items-end border-b pb-[3px] ${isDisabled ? "cursor-default" : "cursor-text"}`}
             style={{
               borderBottomColor: dividerColor,
-              borderBottomWidth: "0.5px",
+              borderBottomWidth: `${dividerWidth}px`,
             }}
             role="presentation"
             onClick={() => {
@@ -142,8 +143,9 @@ export default function TextField({
                 maxLength={maxLength}
                 readOnly={readOnly}
                 value={hasValue ? value : ""}
-                onChange={(event) => onChange(event.target.value)}
+                onChange={(event) => { if (!isDisabled) onChange(event.target.value); }}
                 onFocus={() => {
+                  if (isDisabled) return;
                   setIsFocused(true);
                   onFocus?.();
                 }}
@@ -152,9 +154,9 @@ export default function TextField({
                   onBlur?.();
                 }}
                 onKeyDown={(event) => {
-                  if (onActivate && (event.key === "Enter" || event.key === " ")) {
+                  if (!isDisabled && onActivate && (event.key === "Enter" || event.key === " ")) {
                     event.preventDefault();
-                    onActivate();
+                    activate();
                   }
                 }}
                 placeholder={inputPlaceholder}
@@ -181,9 +183,10 @@ export default function TextField({
               <button
                 type="button"
                 aria-label={trailingIconAction.ariaLabel}
+                disabled={isDisabled}
                 onClick={(event) => {
                   event.stopPropagation();
-                  trailingIconAction.onClick();
+                  if (!isDisabled) trailingIconAction.onClick();
                 }}
                 className="ml-[12px] grid h-[32px] w-[32px] shrink-0 place-items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)]"
               >
@@ -210,9 +213,10 @@ export default function TextField({
             <button
               type="button"
               aria-label={trailingIconAction.ariaLabel}
+              disabled={isDisabled}
               onClick={(event) => {
                 event.stopPropagation();
-                trailingIconAction.onClick();
+                if (!isDisabled) trailingIconAction.onClick();
               }}
               className={`absolute right-0 grid h-[32px] w-[32px] place-items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] ${shouldFloatLabel ? "top-[12px]" : "top-0"}`}
             >

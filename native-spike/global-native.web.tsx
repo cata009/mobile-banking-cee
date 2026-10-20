@@ -7,13 +7,17 @@ import {
   DESIGN_SYSTEM_ORDER,
   RELEASE_ORDER,
   DEFAULT_NATIVE_SELECTION,
+  resolveNativeDemo,
 } from './src/app/registry';
 import type { NativeDemoSelection } from './src/app/registry';
-import type { CzechNativeScreen } from './src/experiences/pi/cz/evo-2027/contracts';
+import { getAvailableLanguages } from '@/app/registry/languageByCountry';
+import { readSourceDemoInputs } from './src/app/sourceDemoInputs';
+import { readSourceNativeRoute } from './src/app/sourceRouteInputs';
 import './web.css';
 import './global-native.css';
 
 const query = new URLSearchParams(location.search);
+const sourceState = readSourceDemoInputs(query);
 function axis<T extends string>(
   name: string,
   values: readonly T[],
@@ -41,13 +45,8 @@ const selection: NativeDemoSelection = {
   ),
 };
 const comparison = query.get('demo') === '1';
-const screen = query.get('screen') ?? 'home';
-const params = Object.fromEntries(
-  [...query.entries()]
-    .filter(([key]) => key.startsWith('param_'))
-    .map(([key, value]) => [key.slice(6), value]),
-);
-const reserve = Number(query.get('topReserve') ?? '0');
+const initialRoute = readSourceNativeRoute(query,resolveNativeDemo(selection).implementation);
+const reserve = Number(query.get('topReserve') ?? (selection.country === 'IT' && selection.designSystem === 'mobile-first' ? '70' : query.get('frame') === '0' ? '12' : '54'));
 for (const [axisName, cssProperty, fallback] of [
   ['width', '--native-preview-width', '393'],
   ['height', '--native-preview-height', '852'],
@@ -61,10 +60,17 @@ createRoot(document.getElementById('root')!).render(
     initialSelection={selection}
     startInDemo={comparison}
     showSelectorControl={!comparison}
-    initialRoute={{ screen: screen as CzechNativeScreen, params }}
-    initialLanguage={axis('lang', ['en', 'cs'] as const, 'en')}
+    initialRoute={initialRoute}
+    initialLanguage={axis(
+      'lang',
+      getAvailableLanguages(selection.country),
+      'en',
+    )}
     initialMode={axis('theme', ['light', 'dark', 'system'] as const, 'light')}
     initialHomeTheme={query.get('homeTheme') ?? 'standard'}
+    productCounts={sourceState?.productCounts}
+    initialAmountsHidden={sourceState?.amountsHidden}
+    bankingScenario={sourceState?.bankingScenario}
     previewInsetTop={
       Number.isFinite(reserve) && reserve >= 0 && reserve <= 100 ? reserve : 0
     }

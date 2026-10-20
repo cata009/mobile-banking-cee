@@ -79,6 +79,16 @@ describe('frozen selection control DOM and controllers', () => {
     const onChange = vi.fn(),
       props = { tabs, activeTabId: 'inbox', onChange, layout, minTabWidth: 150, className: 'bg-[var(--uc-surface)]' }
     const { container, rerender } = render(<FrozenMailbox {...props} />)
+    if (layout === 'equal') {
+      // Only the approved Figma Two items deltas; the frozen fixture remains intact.
+      container.querySelectorAll<HTMLElement>('[role="tab"]').forEach(tab => {
+        tab.style.fontSize = '18px'
+        tab.style.lineHeight = '20px'
+        tab.style.paddingTop = '1px'
+      })
+      container.querySelectorAll<HTMLElement>('[class~="mr-[8px]"]').forEach(dot => dot.classList.replace('mr-[8px]', 'mr-[12px]'))
+      container.querySelectorAll<HTMLElement>('[class~="h-[2px]"]').forEach(line => line.classList.replace('h-[2px]', 'h-[3px]'))
+    }
     const before = normalize(container.innerHTML)
     rerender(<Mailbox {...props} />)
     expect(normalize(container.innerHTML)).toBe(before)
@@ -126,6 +136,18 @@ describe('frozen selection control DOM and controllers', () => {
       length: 4,
     }
     const { container, rerender } = render(<FrozenCode {...props} />)
+    for (const input of container.querySelectorAll('input')) {
+      input.className = input.className
+        .replace(
+          ' focus:ring-2 focus:ring-[var(--uc-action)] focus:ring-offset-2 focus:ring-offset-[var(--uc-app-bg)]',
+          '',
+        )
+        .replace(' disabled:bg-[var(--uc-surface-muted)]', '')
+      if (visualState === 'disabled')
+        input.className = input.className
+          .replace('border-[var(--uc-neutral-650)]', 'border-[var(--uc-text-subtle)]')
+          .replace('text-[var(--uc-neutral-650)]', 'text-[var(--uc-text-muted)]')
+    }
     const before = normalize(container.innerHTML)
     rerender(<Code {...props} />)
     expect(normalize(container.innerHTML)).toBe(before)

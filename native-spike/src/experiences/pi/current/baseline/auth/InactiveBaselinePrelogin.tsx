@@ -142,7 +142,7 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
           )}
           <PrimaryButton
             variant="surface"
-            labelSize="16"
+            labelSize="18"
             label={host.t('preLogin.activateApplication')}
           />
           <View style={s.navigation}>

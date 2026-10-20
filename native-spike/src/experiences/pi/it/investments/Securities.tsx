@@ -5,7 +5,6 @@ import { Text } from '../../../../universal/Typography';
 import {
   securities,
   type SecuritiesState,
-  type Security,
 } from '@/features/investments/mobileFirstSecurities';
 import {
   allocateValues,
@@ -16,22 +15,22 @@ import { hasMobileFirstInvestmentHoldings } from '@/features/investments/mobileF
 import {
   securitiesIndices,
   securitiesNews,
-  securitiesDeposits,
 } from '@/experiences/pi/it/mobile-first/investmentsSecuritiesContent';
 import type { InvestmentDestination } from '@/experiences/pi/it/mobile-first/investmentsNavigation';
 import type { ItalyNativeScreenProps } from '../contracts';
 
 import { AssetGlyph, Button, Link, Money, Rows, Tabs, s } from './Primitives';
 import SecuritiesChart from './SecuritiesChart';
+import Quote from './SecuritiesQuote';
+import {
+  SecuritiesDeposit,
+  SecuritiesDepositChooser,
+} from './SecuritiesDeposit';
 import FormSelect from './FormSelect';
 import bookmark from '@/assets/mobile-first/it/investments/securities/imgNavigationAndActionBookmarkK10.svg';
 import add from '@/assets/mobile-first/it/investments/securities/imgNavigationAndActionAddK10.svg';
 import rotation from '@/assets/mobile-first/it/investments/securities/imgDeviceAndTechnologyScreenRotationK10.svg';
 import appleBrand from '@/assets/mobile-first/it/investments/securities/imgBrandApple.png';
-import orders from '@/assets/mobile-first/it/investments/securities/imgInvestmentsOrdersAndTransactionsK10.svg';
-import search from '@/assets/mobile-first/it/investments/securities/imgNavigationAndActionSearchK10.svg';
-import markets from '@/assets/mobile-first/it/investments/securities/imgInvestmentsIndexK10.svg';
-import assembly from '@/assets/mobile-first/it/investments/securities/imgMiscellaneousNewsK10.svg';
 import Lists from './Lists';
 import Assembly from './Assembly';
 import Auctions from './Auctions';
@@ -46,52 +45,9 @@ import {
 } from './SecuritiesDetail';
 import marketGraph from '@/assets/mobile-first/it/investments/securities/marketGraph.svg';
 import marketBaseline from '@/assets/mobile-first/it/investments/securities/marketComposition.svg';
-function Quote({
-  security,
-  hidden,
-  position,
-  onPress,
-}: {
-  security: Security;
-  hidden: boolean;
-  position?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Apri ${security.name}`}
-      onPress={onPress}
-      style={s.quote}
-    >
-      <View style={s.grow}>
-        <Text style={s.strong}>{security.name}</Text>
-        <Text style={s.small}>{security.market}</Text>
-        <Text style={s.small}>
-          {position ? `Qtà. ${security.quantity}` : security.isin}
-        </Text>
-      </View>
-      <View style={s.quoteValue}>
-        <Text style={s.small}>
-          {position ? 'CTV Mercato' : 'Ultimo prezzo'}
-        </Text>
-        <Money
-          cents={
-            position
-              ? Math.round(security.price * security.quantity * 100)
-              : security.price * 100
-          }
-          decimals={!position && security.price < 1 ? 4 : 2}
-          hidden={hidden}
-        />
-        <Text style={[s.body, security.change < 0 ? s.negative : s.positive]}>
-          {security.change > 0 ? '+' : ''}
-          {security.change.toFixed(2).replace('.', ',')}%
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
+import portfolioIcon from '@/assets/mobile-first/it/investments/securities/imgIconsInvestimentiGraficoPortafoglio.svg';
+import infoIcon from '@/assets/mobile-first/it/investments/securities/imgNavigationAndActionInfoSmall.svg';
+import expandIcon from '@/assets/mobile-first/it/investments/securities/imgNavigationAndActionUpT2.svg';
 export default function Securities({
   destination,
   navigate,
@@ -112,10 +68,14 @@ export default function Securities({
   onMarketChange: (market: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>();
+  const [positionView, setPositionView] = useState('Vista base');
+  const [portfolioInfo, setPortfolioInfo] = useState(false);
   const [tab, setTab] = useState('Overview');
   const [period, setPeriod] = useState('1G');
   const [advancedChart, setAdvancedChart] = useState(false);
   const [deposit, setDeposit] = useState('main');
+  const [depositOpen, setDepositOpen] = useState(false);
 
   const [marketTab, setMarketTab] = useState('Italia');
   const [marketIndex, setMarketIndex] = useState(0);
@@ -648,97 +608,113 @@ export default function Securities({
         </Text>
         {hasHoldings ? (
           <>
-            <View style={s.card}>
-              <Tabs
-                items={['main', 'joint']}
-                value={deposit}
-                onChange={setDeposit}
-              />
-              <Text style={s.body}>Deposito⌄</Text>
-              <Text style={s.strong}>
-                {securitiesDeposits.find(item => item.id === deposit)!.owner}
-              </Text>
-              <Text style={s.small}>
-                {hidden
-                  ? '••••'
-                  : securitiesDeposits.find(item => item.id === deposit)!.label}
-              </Text>
-              <Rows
-                rows={[
-                  {
-                    label: 'Controvalore di mercato',
-                    value: (
-                      <Money
-                        cents={positions.reduce(
-                          (sum, item) => sum + item.valueCents,
-                          0,
-                        )}
-                        hidden={hidden}
-                      />
-                    ),
-                  },
-                  { label: 'Ratei lordi', value: 'N.D.' },
-                  { label: 'P&L €/%', value: 'N.D.' },
-                ]}
-              />
+            <SecuritiesDeposit
+              positions={positions}
+              depositId={deposit}
+              onChooserOpen={() => setDepositOpen(true)}
+              hidden={hidden}
+              onOpen={view => open(view)}
+            />
+            <View style={styles.portfolioHeading}>
+              <Text style={s.heading}>I tuoi titoli</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Informazioni sui tuoi titoli"
+                onPress={() => setPortfolioInfo(true)}
+                style={styles.infoButton}
+              >
+                <AssetGlyph asset={infoIcon} size={16} />
+              </Pressable>
             </View>
-            <View style={s.actions}>
-              {[
-                { label: 'Ordini e movimenti', asset: orders, view: 'orders' },
-                { label: 'Ricerca titoli', asset: search, view: 'search' },
-                { label: 'Vetrina mercati', asset: markets, view: 'markets' },
-                {
-                  label: 'Biglietti assembleari',
-                  asset: assembly,
-                  view: 'assembly',
-                },
-              ].map(item => (
-                <Pressable
-                  key={item.view}
-                  accessibilityRole="button"
-                  accessibilityLabel={item.label}
-                  onPress={() => open(item.view)}
-                  style={s.action}
-                >
-                  <View style={s.actionCircle}>
-                    <AssetGlyph asset={item.asset} size={32} />
-                  </View>
-                  <Text style={s.actionLabel}>{item.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Text style={s.heading}>I tuoi titoli</Text>
             {groups.map(group => (
               <Pressable
                 key={group.name}
                 accessibilityRole="button"
                 accessibilityLabel={group.name}
-                onPress={() => setExpanded(true)}
-                style={s.row}
+                onPress={() => {
+                  setExpanded(true);
+                  setSelectedGroup(group.name);
+                }}
+                style={styles.allocationRow}
               >
-                <Text style={[s.body, s.grow]}>{group.name}</Text>
-                <Text style={s.body}>{group.percent}%</Text>
+                <View style={styles.allocationName}>
+                  <AssetGlyph asset={portfolioIcon} size={32} />
+                  <Text style={s.body}>{group.name}</Text>
+                </View>
+                <Text style={styles.allocationPercent}>{group.percent}%</Text>
                 <Money cents={group.valueCents} hidden={hidden} />
               </Pressable>
             ))}
-            <Link
-              label={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
                 expanded ? 'Comprimi elenco titoli' : 'Espandi elenco titoli'
               }
-              onPress={() => setExpanded(!expanded)}
-            />
-            {expanded &&
-              positions
-                .filter(item => item.quantity > 0)
-                .map(item => (
-                  <Quote
-                    key={item.id}
-                    security={item}
-                    position
-                    hidden={hidden}
-                    onPress={() => open('position', item.id)}
-                  />
-                ))}
+              onPress={() => {
+                setExpanded(!expanded);
+                setSelectedGroup(undefined);
+              }}
+              style={styles.expandLink}
+            >
+              <Text style={styles.expandLabel}>
+                {expanded ? 'COMPRIMI ELENCO TITOLI' : 'ESPANDI ELENCO TITOLI'}
+              </Text>
+              <AssetGlyph asset={expandIcon} size={16} />
+            </Pressable>
+            {expanded && (
+              <>
+                <Tabs
+                  items={['Vista base', 'Vista avanzata']}
+                  value={positionView}
+                  onChange={setPositionView}
+                />
+                {groups
+                  .filter(
+                    group => !selectedGroup || group.name === selectedGroup,
+                  )
+                  .map(group => (
+                    <View key={group.name} style={styles.group}>
+                      <Text style={s.heading}>{group.name}</Text>
+                      {positions
+                        .filter(
+                          item => item.kind === group.name && item.quantity > 0,
+                        )
+                        .map(item => (
+                          <Quote
+                            key={item.id}
+                            security={item}
+                            position
+                            advanced={positionView === 'Vista avanzata'}
+                            hidden={hidden}
+                            onPress={() => open('position', item.id)}
+                          />
+                        ))}
+                    </View>
+                  ))}
+                <Text style={s.small}>
+                  Il valore degli strumenti può variare. Le performance passate
+                  non sono indicative dei risultati futuri.
+                </Text>
+              </>
+            )}
+            {portfolioInfo && (
+              <View accessibilityRole="alert" style={styles.infoDialog}>
+                <Text style={s.body}>
+                  Il controvalore di mercato è calcolato sulle quotazioni
+                  disponibili. L’elenco raggruppa gli strumenti per tipologia.
+                </Text>
+                <Button
+                  label="Chiudi informazioni"
+                  onPress={() => setPortfolioInfo(false)}
+                />
+              </View>
+            )}
+            {depositOpen && (
+              <SecuritiesDepositChooser
+                onDeposit={setDeposit}
+                onClose={() => setDepositOpen(false)}
+              />
+            )}
           </>
         ) : (
           <>
@@ -947,6 +923,61 @@ export default function Securities({
   );
 }
 const styles = StyleSheet.create({
+  portfolioHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  infoButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  allocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 64,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  allocationName: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  allocationPercent: {
+    minWidth: 42,
+    fontFamily: 'UniCredit-regular',
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#262626',
+  },
+  expandLink: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    alignItems: 'center',
+    gap: 4,
+    minHeight: 40,
+  },
+  expandLabel: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    lineHeight: 16,
+    color: '#007a91',
+  },
+  group: { gap: 24 },
+  infoDialog: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 16,
+    padding: 16,
+    gap: 24,
+    backgroundColor: '#fff',
+  },
   securityHeading: { fontSize: 28, lineHeight: 32, marginTop: 16 },
   quickActions: { flexDirection: 'row', gap: 8 },
   quickAction: { flex: 1, alignItems: 'center', gap: 8 },

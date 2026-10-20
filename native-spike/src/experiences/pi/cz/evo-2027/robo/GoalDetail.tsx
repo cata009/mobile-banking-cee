@@ -30,16 +30,23 @@ import { PerformanceChart } from '../investments/Charts';
 import {
   Copy,
   czInvestmentTokens,
-  Notice,
   Page,
   Row,
   investmentColors,
 } from '../investments/Primitives';
 import { RoboHelp } from './Help';
-import { ActionRail } from '../investments/ActionRail';
-import { PeriodChips } from '../investments/PeriodChips';
+import { InvestmentGlyph } from '../investments/Glyph';
 import { SortChips } from '../investments/SortChips';
 import { CzRoboSecurityRow } from '../../../current/investments/baseline/overview/CzRoboOverview';
+import { BaselineAccountActionBar } from '../../../../../universal/BaselineAccountActionBar';
+import { BaselineBanner } from '../../../../../universal/BaselineBanner';
+import { BaselineInvestmentPeriodChips } from '../../../../../universal/BaselineInvestmentPeriodChips';
+
+// Source goal detail C1 (14842:83238): six periods, preserving their feature IDs.
+const goalPeriods = INVESTMENT_PERIODS.map(item => ({
+  ...item,
+  label: item.id === 'max' ? 'MAX' : item.id === '6m' ? '6M' : item.label,
+}));
 
 export function GoalDetail({
   goal,
@@ -84,7 +91,19 @@ export function GoalDetail({
     securityCatalog,
     goal.positions,
   );
+  const chartPoints =
+    historical ?? buildInvestmentChartPoints(currentValue, period);
+  const zeroBaseline =
+    flags.isEmptyGoal && chartPoints.every(point => point.value === 0);
+  const displayedPoints = zeroBaseline
+    ? chartPoints.map(point => ({ ...point, showDot: false }))
+    : chartPoints;
   const progress = getRoboGoalProgress(goal);
+  const targetInteger = formatCzkInteger(goal.targetInteger);
+  const targetDecimals = formatCzkGoalAmount(
+    goal.targetInteger,
+    goal.targetDecimals,
+  ).slice(targetInteger.length);
   const emptyTitle = flags.hasPendingBuyOrders
     ? 'Your investment is being processed'
     : flags.hasRecurringPlan
@@ -105,10 +124,12 @@ export function GoalDetail({
       kind="goal-detail"
       title={goal.name}
       description={goal.purpose}
-      descriptionTop={8}
+      gutter={16}
+      descriptionTop={4}
+      descriptionStyle={styles.meta}
       onBack={onBack}
       onHelp={() => setHelp(true)}
-      contentTop={16}
+      contentTop={30}
     >
       <Copy muted style={styles.meta}>
         Current value
@@ -136,72 +157,78 @@ export function GoalDetail({
         ]}
       >
         {amountsHidden
-          ? '•••• total return'
-          : formatCzkReturnLabel(goal.returnLabel)}
-        {goal.returnTone !== 'neutral' ? (
-          <Copy muted style={styles.meta}>
-            {' '}
-            total return
-          </Copy>
-        ) : null}
+          ? '••••'
+          : formatCzkReturnLabel(goal.returnLabel).replace(
+              /\s*total return$/,
+              '',
+            )}
+        <Copy muted style={styles.meta}>
+          {' '}
+          total return
+        </Copy>
       </Copy>
       <View style={styles.chart}>
         <PerformanceChart
-          points={
-            historical ?? buildInvestmentChartPoints(currentValue, period)
-          }
+          points={displayedPoints}
           hidden={amountsHidden}
           step={historical !== null}
           showPerformance={historical === null}
-          zeroBaselineOnly={
-            flags.isEmptyGoal &&
-            !(historical ?? []).some(point => point.value > 0)
-          }
+          zeroBaselineOnly={zeroBaseline}
         />
       </View>
-      <PeriodChips
-        items={INVESTMENT_PERIODS.filter(item => item.id !== '6m')}
-        value={period}
+      <BaselineInvestmentPeriodChips
+        periods={goalPeriods}
+        selectedPeriodId={period}
         onChange={setPeriod}
-        comfortable
+        comfortableTouchTargets
+        wrapInk
+        style={styles.periods}
+        inkStyle={styles.periodInk}
+        labelStyle={styles.periodLabel}
       />
-      <ActionRail
+      <BaselineAccountActionBar
+        style={styles.actions}
+        presentation={{ paddingVertical: 0 }}
         items={[
           {
             id: 'add-money',
-            icon: 'add-money',
+            icon: <InvestmentGlyph name="add-money" size={20} />,
             label: 'Add\nmoney',
-            accessibilityLabel: 'Add money',
+            ariaLabel: 'Add money',
             onPress: () => onAction('add-money'),
           },
           {
             id: 'withdraw',
-            icon: 'robo-withdraw',
+            icon: <InvestmentGlyph name="robo-withdraw" size={20} />,
             label: 'Withdraw\nMoney',
-            accessibilityLabel: 'Withdraw',
+            ariaLabel: 'Withdraw',
             onPress: () => onAction('withdraw'),
           },
           {
             id: 'history',
-            icon: 'investment-history',
+            icon: <InvestmentGlyph name="investment-history" size={32} />,
             label: 'History',
-            accessibilityLabel: 'History',
+            ariaLabel: 'History',
             onPress: () => onAction('history'),
           },
           {
             id: 'settings',
-            icon: 'robo-goal-settings',
+            icon: <InvestmentGlyph name="robo-goal-settings" size={32} />,
             label: 'Goal\nSettings',
-            accessibilityLabel: 'Goal settings',
+            ariaLabel: 'Goal settings',
             onPress: () => onAction('settings'),
           },
         ]}
       />
       {flags.isEmptyGoal ? (
-        <>
-          <Copy strong>{emptyTitle}</Copy>
-          <Notice text={emptyDescription} />
-        </>
+        <View style={styles.emptyState}>
+          <BaselineBanner
+            variant="info"
+            title={emptyTitle}
+            description={emptyDescription}
+            presentation={{ width: '100%', bodyLineHeight: 22 }}
+          />
+        </View>
       ) : null}
       <Copy strong style={styles.heading}>
         Goal progress
@@ -209,19 +236,22 @@ export function GoalDetail({
       <View style={styles.planLine}>
         <View>
           <Copy muted style={styles.meta}>
-            Target amount
+            Target
           </Copy>
-          <Copy strong>
-            {amountsHidden
-              ? '•••• CZK'
-              : formatCzkGoalAmount(goal.targetInteger, goal.targetDecimals)}
+          <Copy strong style={styles.targetAmount}>
+            {amountsHidden ? '••••' : targetInteger}
+            <Copy style={styles.targetDecimals}>
+              {amountsHidden ? ',•• CZK' : targetDecimals}
+            </Copy>
           </Copy>
         </View>
         <View style={styles.alignRight}>
           <Copy muted style={styles.meta}>
             Progress
           </Copy>
-          <Copy strong>{amountsHidden ? '••%' : `${progress}%`}</Copy>
+          <Copy strong style={styles.targetAmount}>
+            {amountsHidden ? '••%' : `${progress}%`}
+          </Copy>
         </View>
       </View>
       <View style={styles.progressTrack}>
@@ -233,12 +263,8 @@ export function GoalDetail({
         />
       </View>
       <View style={styles.dateLine}>
-        <Copy muted style={styles.meta}>
-          {goal.startDate}
-        </Copy>
-        <Copy muted style={styles.meta}>
-          {goal.endDate}
-        </Copy>
+        <Copy style={styles.meta}>{goal.startDate}</Copy>
+        <Copy style={styles.meta}>{goal.endDate}</Copy>
       </View>
       {!flags.isEmptyGoal ? (
         <>
@@ -297,29 +323,42 @@ export function GoalDetail({
   );
 }
 const styles = StyleSheet.create({
-  heading: { fontSize: 20, lineHeight: 24, marginTop: 30 },
+  heading: { fontSize: 20, lineHeight: 24, marginTop: 40 },
   planLine: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginTop: 14,
+    marginTop: 16,
     gap: 16,
   },
   alignRight: { alignItems: 'flex-end' },
   dateLine: { flexDirection: 'row', justifyContent: 'space-between' },
-  returns: { marginTop: 4, fontSize: 14, lineHeight: 15.5 },
+  returns: { marginTop: 2, fontSize: 14, lineHeight: 20 },
   meta: { fontSize: 14, lineHeight: 15.5 },
-  amountLine: { flexDirection: 'row', alignItems: 'baseline', marginTop: 4 },
+  amountLine: { flexDirection: 'row', alignItems: 'baseline', marginTop: 2 },
   amount: { fontSize: 24, lineHeight: 26 },
-  decimals: { fontSize: 16, lineHeight: 26 },
-  chart: { marginTop: 12 },
+  decimals: { fontSize: 16, lineHeight: 18 },
+  chart: {
+    marginTop: 16,
+    paddingHorizontal: 8,
+    width: '100%',
+    maxWidth: 343,
+    alignSelf: 'center',
+  },
+  periods: { marginTop: 16, gap: 16, paddingHorizontal: 0 },
+  periodInk: { width: 40, minWidth: 40, height: 24, paddingHorizontal: 0 },
+  periodLabel: { letterSpacing: 0.2 },
+  actions: { marginTop: 16, marginHorizontal: -16, minHeight: 68 },
+  emptyState: { marginTop: 24 },
+  targetAmount: { fontSize: 16, lineHeight: 18 },
+  targetDecimals: { fontSize: 14, lineHeight: 16 },
   progressTrack: {
     height: 10,
     borderRadius: 5,
     backgroundColor: '#E5E5E5',
     borderWidth: 1,
-    borderColor: '#D8D8D8',
-    marginVertical: 12,
+    borderColor: '#CCCCCC',
+    marginVertical: 8,
     overflow: 'hidden',
   },
   progressFill: { height: '100%', backgroundColor: '#007A91' },

@@ -13,6 +13,7 @@ import { ROBO_INVESTOR_PROFILE_LABELS } from '@/features/investments/robo/presen
 
 export const GOAL_ICONS: Record<(typeof ROBO_GOAL_TYPES)[number]['id'], IconName> = {
   'build-wealth': 'robo-goal-wealth',
+  'inflation-protection': 'robo-goal-inflation',
   'unforeseen-circumstances': 'robo-goal-unforeseen',
   'major-purchase': 'robo-goal-purchase',
   retirement: 'robo-goal-retirement',

@@ -873,13 +873,13 @@ test('Mobile Token remains an in-flow authorization rather than entry password',
   expect(text(tree)).toContain('Mobile Token');
   expect(text(tree)).toContain('12345678');
 });
-test('contextual help preserves a personal draft when returning from another profile area', async () => {
+test('Source contextual Help unmounts and discards the personal email draft', async () => {
   const { tree } = await render('personal', 'email');
   await type(tree, 'Email', 'draft@email.it');
   await press(tree, 'Aiuto');
   expect(text(tree)).toContain('Ciao Andrea');
   await press(tree, 'Indietro');
-  expect(input(tree, 'Email').props.value).toBe('draft@email.it');
+  expect(input(tree, 'Email').props.value).toBe('');
 });
 test('cancelled biometric authorization cannot generate a token or bypass lockout', async () => {
   profileSettingsStore.update({ biometric: true });

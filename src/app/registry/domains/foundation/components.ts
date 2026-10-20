@@ -280,7 +280,7 @@ export const FOUNDATION_COMPONENTS = {
     componentPath: 'src/app/components/ui/Pill.tsx',
     usedByScreens: ['platform.design-system'],
     notes:
-      'Meniga-normalized pill button from Figma node `1057:21187`: 120x36, 18px radius, 8px horizontal padding, N5 14px bold centered label, 0 2 2 shadow, primary teal surface, white secondary/counter/loading/activated surfaces, 16px loading/success icons, and 8px icon-label gap.',
+      'Meniga-normalized pill button from Figma node `1057:21187`: 120x36, 18px radius, 8px horizontal padding, N5 14px bold centered label with 15px line-height, 0 2 4 shadow, primary teal surface, white secondary/counter/loading/activated surfaces, 16px loading/success icons, and 8px icon-label gap. Loading blocks activation without dimming; explicit disabled dims the control.',
   },
   'ui.wallet-button': {
     id: 'ui.wallet-button',
@@ -324,7 +324,7 @@ export const FOUNDATION_COMPONENTS = {
     componentPath: 'src/app/components/ui/PillSorting.tsx',
     usedByScreens: ['platform.design-system'],
     notes:
-      'Meniga-normalized Pill sorting rail from Figma node `290:14610`: 375x40 row, 8px gap, 24px chip height, 14.5px radius, 14px regular idle labels, and black selected chip with bold white label.',
+      'Meniga-normalized Pill sorting rail from Figma node `290:14610`: 375x40 row, 8px gap, 24px chip height, 14.5px radius, 14px labels with 15px line-height, and #333333 selected fill without a layout border, with bold white label. The themed filter presentation remains a contextual API.',
   },
   'ui.code-field': {
     id: 'ui.code-field',
@@ -463,17 +463,6 @@ export const FOUNDATION_COMPONENTS = {
     usedByScreens: ['platform.design-system'],
     notes:
       'Vendored shadcn/Radix primitive family (Button, Badge, Input, Checkbox, Toggle, Toggle group, Slider, Progress, Separator, Skeleton, Alert, Tabs) kept generic and separate from bespoke UniCredit components.',
-  },
-  'templates.reconstructed-code': {
-    id: 'templates.reconstructed-code',
-    label: 'Reconstructed code templates',
-    products: ['PI'],
-    designSystems: ['current'],
-    status: 'implemented',
-    componentPath: 'src/app/components/templates/TemplateCodePreviews.tsx',
-    usedByScreens: ['platform.design-system'],
-    notes:
-      'Renders 50 real JSX template previews: all 30 screenshot-backed templates plus 20 code-only templates derived from active pre-login, panel, Co-Apping, Home/account, Payments, Products, More, Contacts, Messages, Spending, Prime, and dialog patterns. Source PNG/JPG files remain comparison evidence where they exist.',
   },
   'dialogs.logout-confirmation': {
     id: 'dialogs.logout-confirmation',

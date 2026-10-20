@@ -26,7 +26,7 @@ export default function MessagesMailboxTabs({
   withTopMargin = true,
   className = "",
 }: MessagesMailboxTabsProps) {
-  const web = mailboxTabsWeb({ layout, minTabWidth, withTopMargin }, className);
+  const web = mailboxTabsWeb({ layout, minTabWidth, withTopMargin, itemCount: tabs.length }, className);
   const { isScrollable, dragThreshold } = web;
   const tabListRef = useRef<HTMLDivElement | null>(null);
   const activeTabRef = useRef<HTMLButtonElement | null>(null);
@@ -140,14 +140,16 @@ export default function MessagesMailboxTabs({
             role="tab"
             aria-selected={isActive}
             className={web.tabClass}
-            style={isScrollable ? { minWidth: minTabWidth } : undefined}
+            style={web.sourceTwoItems
+              ? { fontSize: web.fontSize, lineHeight: `${web.lineHeight}px`, paddingTop: web.contentInsetTop }
+              : isScrollable ? { minWidth: minTabWidth } : undefined}
           >
             {tab.hasNewItems ? (
-              <span className="mr-[8px] size-[12px] rounded-full bg-[var(--uc-action)]" aria-hidden="true" />
+              <span className={web.badgeClass} aria-hidden="true" />
             ) : null}
             <span className={`whitespace-nowrap ${isActive ? "" : "text-[var(--uc-text-muted)]"}`}>{tab.label}</span>
             {isActive ? (
-              <span className="absolute bottom-[-1px] left-0 h-[2px] w-full bg-[var(--uc-text)]" aria-hidden="true" />
+              <span className={web.underlineClass} aria-hidden="true" />
             ) : null}
           </button>
         );

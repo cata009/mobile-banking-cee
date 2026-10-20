@@ -7,6 +7,8 @@ import {
 import { SourceCustomIcon } from './SourceCustomIcon';
 import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
+import { resolveHeaderTitleAccessibility } from '@/app/components/contracts/headerTitleAccessibility';
+import { HEADER_ACTIONS_CONTRACT } from '@/app/components/contracts/headerActions';
 
 /** Isolated Native geometry; sticky anchoring/blur and safe area belong to the host. */
 export function BaselinePageHeader({
@@ -17,10 +19,13 @@ export function BaselinePageHeader({
   rightActionIcon,
   rightActionLabel = 'Action',
   rightActionPressed,
+  rightActions,
+  toolbarLayout = 'standard',
   backIconName = 'back-heavy',
   backLabel = 'Back',
   largeTitleAlign = 'left',
   largeTitleColor,
+  largeTitleGutter,
   leadingVisual,
   subtitle,
   headerSubtitle,
@@ -35,10 +40,16 @@ export function BaselinePageHeader({
   rightActionIcon?: React.ReactNode;
   rightActionLabel?: string;
   rightActionPressed?: boolean;
+  /** Host-composed actions; rendered without an enclosing button. */
+  rightActions?: React.ReactNode;
+  /** Source L2 uses symmetric 72px rails and 32px actions; other hosts retain 40px slots. */
+  toolbarLayout?: 'standard' | 'source-l2';
   backIconName?: string;
   backLabel?: string;
   largeTitleAlign?: 'left' | 'center';
   largeTitleColor?: string;
+  /** Explicit composition inset; the mapped Figma L2 inner-page case uses 24. */
+  largeTitleGutter?: number;
   leadingVisual?: React.ReactNode;
   subtitle?: React.ReactNode;
   headerSubtitle?: React.ReactNode;
@@ -46,14 +57,24 @@ export function BaselinePageHeader({
   dark?: boolean;
 }) {
   const contract = resolvePageHeader(options);
+  const titleAccessibility = resolveHeaderTitleAccessibility({
+    largeTitleRendered: contract.shouldRenderLargeTitle,
+    largeTitleOpacity: contract.largeTitleOpacity,
+    collapsedTitleOpacity: contract.titleProgress,
+    hideCollapsedTitleWhenHidden: options.hideCollapsedTitleWhenHidden,
+  });
   const textColor = sourceColor(`var(${contract.textToken})`, dark);
   const iconColor = sourceColor(contract.iconColor, dark);
   const backgroundColor = contract.backgroundToken
     ? sourceColor(`var(${contract.backgroundToken})`, dark)
     : 'transparent';
+  const sourceL2 = toolbarLayout === 'source-l2';
+  const actionSize = sourceL2
+    ? HEADER_ACTIONS_CONTRACT.size
+    : contract.actionSize;
   const actionStyle = {
-    width: contract.actionSize,
-    height: contract.actionSize,
+    width: actionSize,
+    height: actionSize,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   };
@@ -74,11 +95,18 @@ export function BaselinePageHeader({
         : backgroundColor,
   };
   const toolbarStyle: ViewStyle = {
-    height: contract.toolbarHeight,
+    height: sourceL2 ? 40 : contract.toolbarHeight,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: contract.toolbarPaddingHorizontal,
-    paddingTop: contract.toolbarPaddingTop,
+    paddingHorizontal: sourceL2 ? 16 : contract.toolbarPaddingHorizontal,
+    paddingTop: sourceL2 ? 0 : contract.toolbarPaddingTop,
+  };
+  const railStyle: ViewStyle = {
+    width: HEADER_ACTIONS_CONTRACT.size * 2 + HEADER_ACTIONS_CONTRACT.railGap,
+    height: HEADER_ACTIONS_CONTRACT.railHeight,
+    flexDirection: 'row',
+    gap: HEADER_ACTIONS_CONTRACT.railGap,
+    flexShrink: 0,
   };
   const collapsedStyle: ViewStyle = {
     flex: 1,
@@ -107,7 +135,7 @@ export function BaselinePageHeader({
     alignItems: 'center',
     justifyContent: largeTitleAlign === 'center' ? 'center' : undefined,
     gap: contract.leadingGap,
-    paddingHorizontal: contract.largeTitlePaddingHorizontal,
+    paddingHorizontal: largeTitleGutter ?? contract.largeTitlePaddingHorizontal,
     paddingVertical: contract.largeTitlePaddingVertical,
     opacity: contract.largeTitleOpacity,
     backgroundColor,
@@ -122,31 +150,40 @@ export function BaselinePageHeader({
       {title}
     </Text>
   );
+  const backAction = contract.showBack ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={backLabel}
+      onPress={onBack}
+      style={actionStyle}
+    >
+      <SourceCustomIcon name={backIconName} size={20} color={iconColor} />
+    </Pressable>
+  ) : (
+    <View style={actionStyle} />
+  );
   return (
     <>
       <View style={stickyStyle}>
         <View style={toolbarStyle}>
-          {contract.showBack ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={backLabel}
-              onPress={onBack}
-              style={actionStyle}
-            >
-              <SourceCustomIcon
-                name={backIconName}
-                size={20}
-                color={iconColor}
-              />
-            </Pressable>
+          {sourceL2 ? (
+            <View style={railStyle}>
+              {backAction}
+              <View style={actionStyle} />
+            </View>
           ) : (
-            <View style={actionStyle} />
+            backAction
           )}
           <View
             pointerEvents="none"
-            accessibilityElementsHidden={contract.collapsedTitleHidden}
+            aria-hidden={titleAccessibility.collapsedTitleHidden}
+            accessibilityElementsHidden={
+              titleAccessibility.collapsedTitleHidden
+            }
             importantForAccessibility={
-              contract.collapsedTitleHidden ? 'no-hide-descendants' : 'auto'
+              titleAccessibility.collapsedTitleHidden
+                ? 'no-hide-descendants'
+                : 'auto'
             }
             style={collapsedStyle}
           >
@@ -163,7 +200,9 @@ export function BaselinePageHeader({
               </Text>
             )}
           </View>
-          {rightActionIcon ? (
+          {rightActions !== undefined ? (
+            <View style={sourceL2 ? railStyle : undefined}>{rightActions}</View>
+          ) : rightActionIcon ? (
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={rightActionLabel}
@@ -196,7 +235,14 @@ export function BaselinePageHeader({
         </View>
       </View>
       {contract.shouldRenderLargeTitle && (
-        <View style={largeTitleStyle}>
+        <View
+          aria-hidden={titleAccessibility.largeTitleHidden}
+          accessibilityElementsHidden={titleAccessibility.largeTitleHidden}
+          importantForAccessibility={
+            titleAccessibility.largeTitleHidden ? 'no-hide-descendants' : 'auto'
+          }
+          style={largeTitleStyle}
+        >
           {leadingVisual}
           {leadingVisual || subtitle ? (
             <View style={titleWrapperStyle}>

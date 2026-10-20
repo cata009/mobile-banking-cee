@@ -1,15 +1,11 @@
 {
   "COMPONENT_REGISTRY": {
-    "count": 100,
-    "hash": "fe7a5c938d660d147dd826ac6eb9cd21b1d547afd305c3d2b6c8ba56a21ec390"
+    "count": 99,
+    "hash": "46a91d8903d3d1701eb709ad951eb4c099c75b15035bcca0a163ce03315c6959"
   },
   "SCREEN_REGISTRY": {
     "count": 40,
     "hash": "0badec0071d89d91fc437c5660742f067b9c287a0c23d8aa1863974a4eb94139"
-  },
-  "TEMPLATE_REGISTRY": {
-    "count": 47,
-    "hash": "21f55047c74409daca4f5a40875ccb3f5404c637a6b49a4485d6d6e282754741"
   },
   "icons": {
     "edit-pencil": "285e199e883edb434642f3d947586ad468b22da703361ae1252b49f9042fad5b",
@@ -177,7 +173,8 @@
     "sliders-horizontal": "4751167c8dc7e6b7c9a26e3c9822a392f425c5aa0ceebf23443bf424eb9a2e99",
     "trophy": "c39ef4a4abec70788badb99816d2998203ded7d97827fe45d09224a7fefbcae7",
     "user-round": "1ef6cdd6b89cd702bade44da76897489fa5bc52defbeeb72b6b06aa886aa156b",
-    "users": "3dec72dc8425a9209060fbe87d67a0f4c689b6f68242fc735120a54a5d353c78"
+    "users": "3dec72dc8425a9209060fbe87d67a0f4c689b6f68242fc735120a54a5d353c78",
+    "button-chat": "9c3c1dd6439aa807efe0cdb5df867991c5e072ecd12bd03d6285f7fe2d658dbe"
   },
-  "inventory": "6fb505b35f09b77ef2393ed69da94f915cf924af5fb2e9e7828ae0acab6df1e3"
+  "inventory": "44953ee3c41109fa604e3f3543199e2b57c5f4496ccd99a78497fc57288e1275"
 }

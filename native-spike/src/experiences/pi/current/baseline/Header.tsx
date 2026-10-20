@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   prime: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
