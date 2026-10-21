@@ -7,13 +7,13 @@ import {
 
 export const PRIME_PRESENTATION_MOMENTS = ['discover', 'connect', 'benefits'] as const
 export type PrimePresentationMoment = (typeof PRIME_PRESENTATION_MOMENTS)[number]
-const UPGRADE_PRESENTATION_MOMENTS = ['discover', 'connect'] as const
+const STANDARD_PRESENTATION_MOMENTS = ['discover', 'connect'] as const
 
 export function primePresentationMoments(
   segment: PrimeCustomerSegment,
-  serviceActive: boolean,
+  _serviceActive: boolean,
 ): readonly PrimePresentationMoment[] {
-  return segment === 'standard' && !serviceActive ? UPGRADE_PRESENTATION_MOMENTS : PRIME_PRESENTATION_MOMENTS
+  return segment === 'standard' ? STANDARD_PRESENTATION_MOMENTS : PRIME_PRESENTATION_MOMENTS
 }
 
 export function normalizePrimePresentationMoment(
@@ -30,9 +30,10 @@ export function resolvePrimePresentationMoment(
   segment: PrimeCustomerSegment,
   serviceActive: boolean,
 ): PrimeReferenceScreen {
-  if (moment === 'discover') return 'prime-home'
+  const selected = normalizePrimePresentationMoment(moment, segment, serviceActive)
+  if (selected === 'discover') return 'prime-home'
   const entry = primeEntryScreen(segment, serviceActive)
-  return moment === 'benefits' ? primeBenefitsScreen(segment) : entry
+  return selected === 'benefits' ? primeBenefitsScreen(segment) : entry
 }
 
 /** The shared Upgrade destination retains an explicitly selected narrative moment. */

@@ -148,13 +148,16 @@ describe('PRIME presentation controller', () => {
     expect(current().serviceActive).toBe(true)
   })
 
-  it('offers Upgrade rather than Prime benefits for an active Standard advisor customer', () => {
+  it('keeps active Standard on its advisor when Benefits or a next moment is requested', () => {
     mountController()
     act(() => current().setStandardServiceActive(true))
     act(() => current().selectMoment('connect'))
     expect(current().screen).toBe('prime-advisor')
     act(() => current().selectMoment('benefits'))
-    expect(current()).toMatchObject({ screen: 'prime-upgrade', moment: 'benefits' })
+    expect(current()).toMatchObject({ screen: 'prime-advisor', moment: 'connect' })
+    act(() => current().nextMoment())
+    expect(current()).toMatchObject({ screen: 'prime-advisor', moment: 'connect' })
+    expect(resolvePrimePresentationMoment('benefits', 'standard', true)).toBe('prime-advisor')
     expect(resolvePrimePrototypeTarget('prime-home', 'prime-upgrade', { segment: 'standard', service: 'active' })).toBe(
       'prime-upgrade',
     )
