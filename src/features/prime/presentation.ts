@@ -7,6 +7,22 @@ import {
 
 export const PRIME_PRESENTATION_MOMENTS = ['discover', 'connect', 'benefits'] as const
 export type PrimePresentationMoment = (typeof PRIME_PRESENTATION_MOMENTS)[number]
+const UPGRADE_PRESENTATION_MOMENTS = ['discover', 'connect'] as const
+
+export function primePresentationMoments(
+  segment: PrimeCustomerSegment,
+  serviceActive: boolean,
+): readonly PrimePresentationMoment[] {
+  return segment === 'standard' && !serviceActive ? UPGRADE_PRESENTATION_MOMENTS : PRIME_PRESENTATION_MOMENTS
+}
+
+export function normalizePrimePresentationMoment(
+  moment: PrimePresentationMoment,
+  segment: PrimeCustomerSegment,
+  serviceActive: boolean,
+): PrimePresentationMoment {
+  return primePresentationMoments(segment, serviceActive).includes(moment) ? moment : 'connect'
+}
 
 /** Presentation navigation delegates service access to the existing feature policy. */
 export function resolvePrimePresentationMoment(
@@ -34,10 +50,11 @@ export function primePresentationMomentForScreen(
 export function adjacentPrimePresentationMoment(
   moment: PrimePresentationMoment,
   direction: -1 | 1,
+  segment: PrimeCustomerSegment = 'prime',
+  serviceActive = true,
 ): PrimePresentationMoment {
-  const index = Math.max(
-    0,
-    Math.min(PRIME_PRESENTATION_MOMENTS.length - 1, PRIME_PRESENTATION_MOMENTS.indexOf(moment) + direction),
-  )
-  return PRIME_PRESENTATION_MOMENTS[index] ?? 'discover'
+  const available = primePresentationMoments(segment, serviceActive)
+  const selected = normalizePrimePresentationMoment(moment, segment, serviceActive)
+  const index = Math.max(0, Math.min(available.length - 1, available.indexOf(selected) + direction))
+  return available[index] ?? 'discover'
 }

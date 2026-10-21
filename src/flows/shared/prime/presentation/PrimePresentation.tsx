@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, Copy, Maximize2, Minimize2, RotateCcw, X } from 'lucide-react'
 import UniCreditLogo from '@/app/components/UniCreditLogo'
 import { PrimeDiamondMark } from '@/app/components/prime/PrimeDiamondMark'
+import { AppIcon } from '@/app/components/icons'
+import { primePresentationMoments } from '@/features/prime/presentation'
 import digitalPhoto from '@/assets/app2027/uc-prime/digitalni-reseni-wide-v2.png'
 import officePhoto from '@/assets/app2027/uc-prime/Prime-Office-banner-wide-v2.png'
 import sailingPhoto from '@/assets/app2027/uc-prime/Prime-Sailing-banner-wide-v2.png'
@@ -52,8 +54,11 @@ function PresentationStage({
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'unavailable'>('idle')
   const [canFullscreen, setCanFullscreen] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const currentMoment = moments.find((moment) => moment.id === model.moment) ?? moments[0]!
-  const momentIndex = moments.indexOf(currentMoment)
+  const availableMoments = moments.filter((moment) =>
+    primePresentationMoments(model.segment, model.serviceActive).includes(moment.id),
+  )
+  const currentMoment = availableMoments.find((moment) => moment.id === model.moment) ?? availableMoments[0]!
+  const momentIndex = availableMoments.indexOf(currentMoment)
 
   useEffect(() => {
     mounted.current = true
@@ -153,12 +158,12 @@ function PresentationStage({
             {currentMoment.title}
           </span>
           <span className="prime-presentation-cue-position">
-            {momentIndex + 1} / {moments.length}
+            {momentIndex + 1} / {availableMoments.length}
           </span>
           <span className="prime-presentation-cue-track" aria-hidden="true">
             <span
               className="prime-presentation-cue-marker"
-              style={{ transform: `translateX(${momentIndex * 100}%)` }}
+              style={{ width: `${100 / availableMoments.length}%`, transform: `translateX(${momentIndex * 100}%)` }}
             />
           </span>
         </div>
@@ -256,7 +261,13 @@ function PresentationStage({
                     checked={model.segment === segment}
                     onChange={() => model.selectSegment(segment)}
                   />
-                  <span className="prime-presentation-choice-mark" aria-hidden="true" />
+                  <span className="prime-presentation-choice-mark" aria-hidden="true">
+                    <AppIcon
+                      name={model.segment === segment ? 'radio-selected' : 'radio-unselected'}
+                      size={20}
+                      color="var(--prime-stage-ink)"
+                    />
+                  </span>
                   <span>{segment === 'standard' ? 'Standard' : segment === 'prime' ? 'Prime' : 'Private'}</span>
                 </label>
               ))}
@@ -268,8 +279,8 @@ function PresentationStage({
               <legend>Advisor service</legend>
               <div className="prime-presentation-service-choices">
                 {[
-                  { active: false, label: 'Not activated' },
                   { active: true, label: 'Already active' },
+                  { active: false, label: 'Not activated' },
                 ].map((service) => (
                   <label
                     key={String(service.active)}
@@ -281,7 +292,13 @@ function PresentationStage({
                       checked={model.serviceActive === service.active}
                       onChange={() => model.setStandardServiceActive(service.active)}
                     />
-                    <span className="prime-presentation-choice-mark" aria-hidden="true" />
+                    <span className="prime-presentation-choice-mark" aria-hidden="true">
+                      <AppIcon
+                        name={model.serviceActive === service.active ? 'radio-selected' : 'radio-unselected'}
+                        size={20}
+                        color="var(--prime-stage-ink)"
+                      />
+                    </span>
                     <span>{service.label}</span>
                   </label>
                 ))}
@@ -306,8 +323,12 @@ function PresentationStage({
       </main>
 
       <footer className="prime-presentation-footer">
-        <nav className="prime-presentation-moments" aria-label="Presentation moments">
-          {moments.map((moment, index) => (
+        <nav
+          className="prime-presentation-moments"
+          aria-label="Presentation moments"
+          style={{ gridTemplateColumns: `repeat(${availableMoments.length}, minmax(0, 1fr))` }}
+        >
+          {availableMoments.map((moment, index) => (
             <button
               type="button"
               key={moment.id}
@@ -331,6 +352,7 @@ function PresentationStage({
             type="button"
             className="prime-presentation-icon-button"
             aria-label="Previous moment"
+            disabled={momentIndex === 0}
             onClick={model.previousMoment}
           >
             <ArrowLeft size={19} strokeWidth={1.6} />
@@ -339,6 +361,7 @@ function PresentationStage({
             type="button"
             className="prime-presentation-icon-button prime-presentation-next"
             aria-label="Next moment"
+            disabled={momentIndex === availableMoments.length - 1}
             onClick={model.nextMoment}
           >
             <ArrowRight size={19} strokeWidth={1.6} />

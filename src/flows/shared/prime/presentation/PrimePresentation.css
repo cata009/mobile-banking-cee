@@ -4,6 +4,7 @@
   --prime-stage-muted: #68645e;
   --prime-stage-line: #d9d5ce;
   --prime-stage-red: #e2001a;
+  --prime-stage-selection: var(--uc-action-strong);
   --prime-stage-soft: #eae6df;
   position: relative;
   isolation: isolate;
@@ -361,26 +362,14 @@
 }
 
 .prime-presentation-choice-mark {
+  --uc-action: var(--prime-stage-selection);
+  --uc-surface: var(--prime-stage-paper);
   position: relative;
-  flex: 0 0 14px;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #a8a39a;
-  border-radius: 50%;
-  transition: border-color 180ms ease;
-}
-
-.prime-presentation-choice-mark::after {
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  background: var(--prime-stage-red);
-  content: '';
-  opacity: 0;
-  transform: scale(0.6);
-  transition:
-    opacity 160ms ease,
-    transform 180ms ease;
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
 }
 
 .prime-presentation-choice input:checked ~ span:last-child {
@@ -389,17 +378,8 @@
   font-weight: 700;
 }
 
-.prime-presentation-choice input:checked + .prime-presentation-choice-mark {
-  border-color: var(--prime-stage-red);
-}
-
-.prime-presentation-choice input:checked + .prime-presentation-choice-mark::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
 .prime-presentation-choice input:focus-visible + .prime-presentation-choice-mark {
-  outline: 2px solid var(--prime-stage-red);
+  outline: 2px solid var(--prime-stage-selection);
   outline-offset: 5px;
 }
 
@@ -419,9 +399,9 @@
 }
 
 .prime-presentation-choice--small .prime-presentation-choice-mark {
-  flex-basis: 12px;
-  width: 12px;
-  height: 12px;
+  flex-basis: 20px;
+  width: 20px;
+  height: 20px;
 }
 
 .prime-presentation-context-footer {
@@ -543,6 +523,11 @@
 
 .prime-presentation-step-controls .prime-presentation-icon-button {
   border: 1px solid var(--prime-stage-line);
+}
+
+.prime-presentation-step-controls .prime-presentation-icon-button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .prime-presentation-step-controls .prime-presentation-next {
