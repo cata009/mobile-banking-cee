@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import type { ReactNode } from 'react'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
@@ -45,6 +47,19 @@ it('announces the official two-line PRIME lockup once and retains its vector art
   expect(container.querySelector('.prime-presentation-brand-divider')).toBeNull()
   expect(screen.getByRole('button', { name: 'Copy presentation link' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Close presentation' })).toBeInTheDocument()
+})
+
+it('uses the existing DS radio artwork and teal action token for client and service selections', () => {
+  const stageCss = readFileSync(resolve('src/flows/shared/prime/presentation/PrimePresentation.css'), 'utf8')
+  render(
+    <PrimePresentation mode="page" onClose={vi.fn()} presentationUrl="http://localhost:4004/?presentation=prime" />,
+  )
+  const selected = screen.getByRole('radio', { name: 'Prime' })
+  expect(selected).toHaveAttribute('type', 'radio')
+  expect(selected.nextElementSibling?.querySelector('circle[r="4.5"]')).toHaveAttribute('fill', 'var(--uc-action)')
+  expect(stageCss).toContain('--prime-stage-selection: var(--uc-action-strong)')
+  expect(stageCss).toContain('--uc-action: var(--prime-stage-selection)')
+  expect(stageCss).not.toMatch(/choice[^{}]*\{[^}]*var\(--prime-stage-red\)/)
 })
 
 it('gives each moment its own approved photograph and exposes only the selected story image', () => {

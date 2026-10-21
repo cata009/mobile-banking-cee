@@ -11,6 +11,7 @@ import {
 } from '@/features/prime/reference'
 import {
   adjacentPrimePresentationMoment,
+  normalizePrimePresentationMoment,
   primePresentationMomentForScreen,
   resolvePrimePresentationMoment,
 } from '@/features/prime/presentation'
@@ -133,11 +134,15 @@ export function PrimePresentationController({ children }: { children: (model: Pr
       if (target === current.screen) return current
       return {
         screen: target,
-        moment: primePresentationMomentForScreen(target),
+        moment: normalizePrimePresentationMoment(
+          primePresentationMomentForScreen(target),
+          customer.segment,
+          customer.serviceActive,
+        ),
         history: [...current.history, { screen: current.screen, moment: current.moment }],
       }
     },
-    [parameters],
+    [parameters, customer.segment, customer.serviceActive],
   )
 
   const navigation = useMemo<FlowNav>(
@@ -166,19 +171,33 @@ export function PrimePresentationController({ children }: { children: (model: Pr
           if (previous) return { ...previous, history: current.history.slice(0, -1) }
           const target = nodes[current.screen]?.back
           return target && isRegisteredPrimeScreen(target)
-            ? { screen: target, moment: primePresentationMomentForScreen(target), history: [] }
+            ? {
+                screen: target,
+                moment: normalizePrimePresentationMoment(
+                  primePresentationMomentForScreen(target),
+                  customer.segment,
+                  customer.serviceActive,
+                ),
+                history: [],
+              }
             : current
         }),
     }),
-    [journey.screen, navigate],
+    [journey.screen, navigate, customer.segment, customer.serviceActive],
   )
 
-  const selectMoment = (moment: PrimePresentationMoment) =>
+  const selectMoment = (moment: PrimePresentationMoment) => {
+    const selected = normalizePrimePresentationMoment(moment, customer.segment, customer.serviceActive)
     setJourney({
-      screen: resolvePrimePresentationMoment(moment, customer.segment, customer.serviceActive),
-      moment,
+      screen: resolvePrimePresentationMoment(selected, customer.segment, customer.serviceActive),
+      moment: selected,
       history: [],
     })
+  }
+  const moveMoment = (direction: -1 | 1) => {
+    const next = adjacentPrimePresentationMoment(journey.moment, direction, customer.segment, customer.serviceActive)
+    if (next !== journey.moment) selectMoment(next)
+  }
   const appearance = getPrimePhoneAppearance(journey.screen)
   const model: PrimePresentationModel = {
     segment,
@@ -208,8 +227,8 @@ export function PrimePresentationController({ children }: { children: (model: Pr
       setJourney(HOME)
       setFixture((value) => value + 1)
     },
-    nextMoment: () => selectMoment(adjacentPrimePresentationMoment(journey.moment, 1)),
-    previousMoment: () => selectMoment(adjacentPrimePresentationMoment(journey.moment, -1)),
+    nextMoment: () => moveMoment(1),
+    previousMoment: () => moveMoment(-1),
   }
   return children(model)
 }

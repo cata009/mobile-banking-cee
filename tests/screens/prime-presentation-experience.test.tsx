@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { useEffect, useState } from 'react'
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import type { NativeScreenPreviewProps } from '@/app/components/demo/NativeScreenPreview'
 import { PrimePresentationDialog } from '@/flows/shared/prime/presentation/PrimePresentationDialog'
@@ -68,6 +68,34 @@ it('connects the real presentation shell, customer controls and canonical phone 
   expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-advisor')
   fireEvent.click(screen.getByRole('button', { name: 'Benefits' }))
   expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-benefits')
+})
+
+it('offers two inactive Standard moments, restores Benefits for active service and orders the service radios without changing the default', async () => {
+  renderBankingScreen(<Experience />)
+  await screen.findByTestId('live-reference')
+  const service = screen.getByRole('group', { name: 'Advisor service' })
+  expect(
+    within(service)
+      .getAllByRole('radio')
+      .map((radio) => radio.getAttribute('aria-label') ?? radio.closest('label')?.textContent?.trim()),
+  ).toEqual(['Already active', 'Not activated'])
+  expect(screen.getByRole('radio', { name: 'Not activated' })).toBeChecked()
+  expect(screen.queryByRole('button', { name: 'Benefits' })).not.toBeInTheDocument()
+  expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Previous moment' })).toBeDisabled()
+  fireEvent.click(screen.getByRole('button', { name: 'Next moment' }))
+  expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-upgrade')
+  expect(screen.getByText('2 / 2')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Next moment' })).toBeDisabled()
+  fireEvent.click(screen.getByRole('radio', { name: 'Already active' }))
+  expect(screen.getByRole('button', { name: 'Benefits' })).toBeInTheDocument()
+  expect(screen.getByText('1 / 3')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Benefits' }))
+  expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-upgrade')
+  expect(screen.getByText('3 / 3')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('radio', { name: 'Not activated' }))
+  expect(screen.queryByRole('button', { name: 'Benefits' })).not.toBeInTheDocument()
+  expect(screen.getByText('1 / 2')).toBeInTheDocument()
 })
 
 it('unmounts the live native phone when the presentation closes', async () => {

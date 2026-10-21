@@ -106,7 +106,7 @@ afterEach(() => {
 })
 
 describe('PRIME presentation controller', () => {
-  it('keeps inactive Standard entitlement while allowing all three narrative moments', () => {
+  it('keeps inactive Standard on two moments and guards a direct Benefits request as Connect', () => {
     mountController()
     expect(current()).toMatchObject({
       segment: 'standard',
@@ -120,7 +120,9 @@ describe('PRIME presentation controller', () => {
     act(() => current().selectMoment('connect'))
     expect(current()).toMatchObject({ screen: 'prime-upgrade', moment: 'connect' })
     act(() => current().selectMoment('benefits'))
-    expect(current()).toMatchObject({ screen: 'prime-upgrade', moment: 'benefits' })
+    expect(current()).toMatchObject({ screen: 'prime-upgrade', moment: 'connect' })
+    act(() => current().nextMoment())
+    expect(current()).toMatchObject({ screen: 'prime-upgrade', moment: 'connect' })
   })
 
   it('resets the phone to Home on segment changes and retains the Standard service choice', () => {
@@ -164,6 +166,17 @@ describe('PRIME presentation controller', () => {
     ).toBe('prime-upgrade')
   })
 
+  it('does not reset an inactive Standard call when advancing past its last available moment', () => {
+    mountController()
+    act(() => current().selectMoment('connect'))
+    fireEvent.click(screen.getByRole('button', { name: 'Phone primary action' }))
+    expect(current()).toMatchObject({ screen: 'prime-upgrade-call', moment: 'connect', isCalling: true })
+    act(() => current().nextMoment())
+    expect(current()).toMatchObject({ screen: 'prime-upgrade-call', moment: 'connect', isCalling: true })
+    act(() => current().previousMoment())
+    expect(current()).toMatchObject({ screen: 'prime-home', moment: 'discover' })
+  })
+
   it('uses canonical phone actions/history, reflects call chrome and contains foreign routes', () => {
     mountController()
     act(() => current().selectSegment('prime'))
@@ -194,6 +207,7 @@ describe('PRIME presentation controller', () => {
 
   it('clamps previous/next moments and fits the entire real bezel inside resized stage bounds', () => {
     const rendered = mountController()
+    act(() => current().selectSegment('prime'))
     act(() => current().previousMoment())
     expect(current().moment).toBe('discover')
     act(() => current().nextMoment())
