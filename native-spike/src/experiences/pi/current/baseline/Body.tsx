@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Image, Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import lighthouse from '@/assets/6f4a518088433560480f90c7a7448fdc1d294def.png';
 import { getCurrencySymbol } from '@/app/registry/countryConfig';
 import { getProductIcon } from '@/app/components/products/productGlyph';
@@ -11,6 +11,8 @@ import type { CurrentScreenProps } from '../contracts';
 import { BaselineAccordion } from '../../../../universal/BaselineAccordion';
 import { BaselineProductsList } from '../../../../universal/BaselineProductsList';
 import { BaselineProductCard } from '../../../../universal/BaselineProductCard';
+import { BaselineBanner } from '../../../../universal/BaselineBanner';
+import { BaselineCarouselIndicator } from '../../../../universal/BaselineCarouselIndicator';
 import { SourceVector } from '../../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { sourceLinearGradient } from '../../../../universal/sourceLinearGradient';
@@ -43,14 +45,57 @@ export function BaselineHomeBody({
   host: CurrentScreenProps;
   redesigned?: boolean;
 }) {
+  const securityNotice = host.bankingPresentation?.homeSecurityNotice;
+  const summaryRail = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const [summaryWidth, setSummaryWidth] = useState(327);
+  const [summaryIndex, setSummaryIndex] = useState(0);
+  const summaryStep = summaryWidth + 12;
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !securityNotice) return;
+    const node = summaryRail.current?.getScrollableNode() as HTMLElement | undefined;
+    if (!node?.addEventListener) return;
+    let pressed = false, moved = false, startX = 0, startScroll = 0, suppressUntil = 0;
+    const finish = () => {
+      if (!pressed) return;
+      pressed = false;
+      node.style.cursor = 'grab';
+      if (!moved) return;
+      suppressUntil = Date.now() + 100;
+      const index = Math.max(0, Math.min(1, Math.round(node.scrollLeft / summaryStep)));
+      setSummaryIndex(index);
+      summaryRail.current?.scrollTo({ x: index * summaryStep, y: 0, animated: true });
+    };
+    const down = (event: MouseEvent) => { if (event.button === 0) { pressed = true; moved = false; startX = event.clientX; startScroll = node.scrollLeft; } };
+    const move = (event: MouseEvent) => {
+      if (!pressed) return;
+      if (event.buttons !== 1) { finish(); return; }
+      const delta = event.clientX - startX;
+      if (!moved && Math.abs(delta) < 4) return;
+      moved = true;
+      event.preventDefault();
+      node.style.cursor = 'grabbing';
+      const scale = node.getBoundingClientRect().width / node.clientWidth || 1;
+      node.scrollLeft = startScroll - delta / scale;
+    };
+    const click = (event: MouseEvent) => { if (moved && Date.now() < suppressUntil) { event.preventDefault(); event.stopPropagation(); } };
+    const preventDrag = (event: Event) => event.preventDefault();
+    node.style.cursor = 'grab';
+    node.addEventListener('mousedown', down);
+    node.addEventListener('click', click, true);
+    node.addEventListener('dragstart', preventDrag);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', finish);
+    return () => { node.removeEventListener('mousedown', down); node.removeEventListener('click', click, true); node.removeEventListener('dragstart', preventDrag); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', finish); };
+  }, [securityNotice, summaryStep]);
   const model = useMemo(
     () =>
       createCurrentProducts({
         country: host.country,
         release: host.release,
         productCounts: host.productCounts,
+        bankingPresentation: host.bankingPresentation,
       }),
-    [host.country, host.release, host.productCounts],
+    [host.country, host.release, host.productCounts, host.bankingPresentation],
   );
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const textColor = sourceColor('var(--uc-text)', dark);
@@ -107,10 +152,8 @@ export function BaselineHomeBody({
   const owedDecimalsStyle = [styles.owedDecimals, { color: textColor }];
   const dividerStyle = [styles.divider, { backgroundColor: textColor }];
 
-  return (
-    <>
-      <View style={styles.summaryGutter}>
-        <View style={summaryStyle}>
+  const summary = (
+        <View style={[summaryStyle, securityNotice ? { height: 157 } : undefined]}>
           <View style={styles.summaryCopy}>
             <View style={styles.balanceBlock}>
               <Text style={labelStyle}>
@@ -161,15 +204,26 @@ export function BaselineHomeBody({
             />
           </View>
         </View>
+  );
+  return (
+    <>
+      <View style={[styles.summaryGutter, securityNotice ? { paddingHorizontal: 0 } : undefined]} onLayout={event => setSummaryWidth(Math.max(1, event.nativeEvent.layout.width - 48))}>
+        {securityNotice ? <>
+          <ScrollView ref={summaryRail} testID="home-security-carousel" horizontal snapToOffsets={[0, summaryStep]} snapToEnd={false} decelerationRate="fast" showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 12 }} scrollEventThrottle={16} onScroll={event => setSummaryIndex(Math.max(0, Math.min(1, Math.round(event.nativeEvent.contentOffset.x / summaryStep))))} style={{ width: summaryWidth + 48 }}>
+            <View style={{ width: summaryWidth }}><BaselineBanner variant="pending" title={securityNotice.title} description={securityNotice.description} tagLabel={securityNotice.tagLabel} presentation={{ width: '100%' }} onPress={() => host.onNavigate({ screen: 'transactions', params: { fraudAction: 'review-alerts' } })} dark={dark} /></View>
+            <View style={{ width: summaryWidth }}>{summary}</View>
+          </ScrollView>
+          <BaselineCarouselIndicator count={2} activeIndex={summaryIndex} itemLabels={['Show security alert', 'Show total available']} onSelect={index => { setSummaryIndex(index); summaryRail.current?.scrollTo({ x: index * summaryStep, y: 0, animated: true }); }} dark={dark} />
+        </> : summary}
       </View>
-      {model.categories.map(category => {
+      {model.categories.map((category, categoryIndex) => {
         const showTotal = category.key !== 'cards';
         const total =
           showTotal && category.products.length >= 2
             ? model.calculateTotal(category.products)
             : undefined;
         return (
-          <View key={category.key} style={styles.category}>
+          <View key={category.key} style={[styles.category, securityNotice && categoryIndex === 0 ? { paddingTop: 12 } : undefined]}>
             <BaselineAccordion
               title={category.title}
               defaultOpen={false}

@@ -8,6 +8,7 @@ import { renderRsPropertyInsurancePreview } from '@/flows/rs/property-insurance/
 import { renderInvestmentsBulkApprovalPreview } from '@/flows/shared/investments-bulk-approval/preview'
 import { renderEthocaPreview } from '@/flows/shared/ethoca/preview'
 import { renderRsDisposableCardsPreview } from '@/flows/rs/disposable-cards/preview'
+import { isFraudScreen, renderFraudPreview } from '@/flows/ba/card-fraud/preview'
 
 const PREVIEW_RENDERERS = {
   'ethoca-list-merchant-logo': () => renderEthocaPreview('ethoca-list-merchant-logo'),
@@ -86,16 +87,18 @@ const PREVIEW_RENDERERS = {
   'investments-bulk-sign': () => renderInvestmentsBulkApprovalPreview('investments-bulk-sign'),
   'investments-bulk-confirmation': () => renderInvestmentsBulkApprovalPreview('investments-bulk-confirmation'),
   'investments-bulk-failure': () => renderInvestmentsBulkApprovalPreview('investments-bulk-failure'),
-} satisfies Record<Exclude<FlowScreenKind, import('@/features/prime/reference').PrimeReferenceScreen>, () => ReactNode>
+} satisfies Record<Exclude<FlowScreenKind, import('@/features/prime/reference').PrimeReferenceScreen | import('@/features/cards/fraud/model').FraudScreen>, () => ReactNode>
 
 export interface PreviewContext {
   countryName?: string
   parameters?: Readonly<Record<string, string>>
 }
 export function flowPreviewStatusBarVariant(kind: FlowScreenKind): 'light' | 'dark' {
+  if (kind === 'fraud-push' || kind === 'fraud-authenticate') return 'dark'
   return isPrimeReferenceScreen(kind) ? getPrimePhoneAppearance(kind).statusBarVariant : 'light'
 }
 export function renderFlowPreview(kind: FlowScreenKind, context: PreviewContext = {}): ReactNode {
+  if (isFraudScreen(kind)) return renderFraudPreview(kind, context.parameters)
   if (isPrimeReferenceScreen(kind)) return renderPrimePreview(kind, context.parameters)
   return Object.prototype.hasOwnProperty.call(PREVIEW_RENDERERS, kind) ? PREVIEW_RENDERERS[kind]() : null
 }
