@@ -1,9 +1,6 @@
-import { useState } from "react";
-import CodeBlock, { type CodeLanguage } from "@/app/components/CodeBlock";
+import ImplementationCodeBrowser from './ImplementationCodeBrowser';
 import type { ComponentCodeSample } from "@/app/registry/componentCodeSamples";
 import type { ComponentImplementationPackage as ImplementationPackageData } from "@/app/registry/componentImplementationPackages";
-
-type CodeSegment = "react" | "swift" | "kotlin";
 
 interface ComponentImplementationPackageProps {
   componentId: string;
@@ -12,69 +9,31 @@ interface ComponentImplementationPackageProps {
   data: ImplementationPackageData;
 }
 
-const FILE_NAME_BY_SEGMENT: Record<CodeSegment, (path: string) => string> = {
-  react: (path) => path.split("/").pop() ?? "Component.tsx",
-  swift: () => "Component.swift",
-  kotlin: () => "Component.kt",
-};
-
 function Section({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--uc-action)]">{eyebrow}</p>
-      <h2 className="mt-1 text-[20px] font-bold leading-[26px] text-[var(--uc-text)]">{title}</h2>
+    <section className="ds-doc-section">
+      <p className="ds-eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
   );
 }
 
 export default function ComponentImplementationPackage({
+  componentId,
   componentPath,
   code,
   data,
 }: ComponentImplementationPackageProps) {
-  const [segment, setSegment] = useState<CodeSegment>("react");
-  const language: CodeLanguage = segment === "react" ? "tsx" : segment;
-
   return (
-    <div className="space-y-5" data-component-implementation-package="true">
-      <div className="rounded-[12px] bg-[var(--uc-surface-muted)] p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--uc-action)]">Portable handoff</p>
+    <div className="ds-code-shell space-y-6" data-component-implementation-package="true">
+      <div className="px-1 py-2">
+        <p className="ds-eyebrow">Developer handoff</p>
         <p className="mt-2 max-w-[780px] text-[14px] leading-[21px] text-[var(--uc-text-muted)]">{data.summary}</p>
       </div>
 
       <Section eyebrow="01 / Source" title="Implementation code">
-        <div className="mb-3 inline-flex rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[2px]">
-          {(["react", "swift", "kotlin"] as const).map((entry) => (
-            <button
-              key={entry}
-              type="button"
-              onClick={() => setSegment(entry)}
-              aria-pressed={segment === entry}
-              className={`rounded-[8px] px-[16px] py-[6px] text-[13px] font-bold uppercase tracking-wide transition-colors ${
-                segment === entry
-                  ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                  : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
-              }`}
-            >
-              {entry === "react" ? "React" : entry === "swift" ? "Swift" : "Kotlin"}
-            </button>
-          ))}
-        </div>
-        {segment !== "react" ? (
-          <p className="mb-3 text-[12px] leading-[18px] text-[var(--uc-text-muted)]">
-            Native reference implementation. Adapt naming, tokens, and lifecycle to the receiving application.
-          </p>
-        ) : (
-          <p className="mb-3 text-[12px] leading-[18px] text-[var(--uc-text-muted)]">
-            Curated from the component that renders in this demo.
-          </p>
-        )}
-        <CodeBlock
-          code={code[segment]}
-          language={language}
-          fileName={FILE_NAME_BY_SEGMENT[segment](componentPath)}
-        />
+        <ImplementationCodeBrowser componentId={componentId} componentPath={componentPath} code={code} />
       </Section>
 
       <Section eyebrow="02 / Geometry & tokens" title="Visual specifications">

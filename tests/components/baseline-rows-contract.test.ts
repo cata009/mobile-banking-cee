@@ -19,7 +19,7 @@ describe('baseline row contracts', () => {
     })
     expect(resolveSectionDivider({ variant: 'action-date-checkbox' })).toMatchObject({
       checkbox: true,
-      minHeight: 51,
+      minHeight: 53,
       paddingHorizontal: 24,
     })
     expect(resolveSectionDivider({ variant: 'with-counter', count: 0, secondaryText: 'unused' }).rightText).toBe('0')

@@ -40,6 +40,8 @@ export default defineConfig({
     },
   },
   build: {
+    // Copy deployment public inputs explicitly; local Android downloads stay local.
+    copyPublicDir: false,
     rollupOptions: {
       output: {
         // Keep executable entrypoints stable so a corporate proxy that retains

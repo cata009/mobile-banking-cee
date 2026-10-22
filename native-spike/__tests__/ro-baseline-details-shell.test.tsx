@@ -435,7 +435,8 @@ it('matches the actual baseline mixed-font line boxes in account amounts and led
       ),
     ).toBe(true);
     const label = texts.find(n => n.props.children === 'Starbucks')!;
-    expect(StyleSheet.flatten(label.props.style).lineHeight).toBe(17);
+    // Canonical TRX source 1517:2380 uses the shared List's 18px label line.
+    expect(StyleSheet.flatten(label.props.style).lineHeight).toBe(18);
     expect(
       texts.some(
         n =>
@@ -504,7 +505,11 @@ const classicDetailRenderers = {
 const classicDetailContexts = [
   { country: 'CZ', release: 'release-future-cz-coapping', scenario: 'active' },
   { country: 'CZ', release: 'release-future-cz-robo', scenario: 'active' },
-  { country: 'RS', release: 'release-future-rs-future-gain', scenario: 'active' },
+  {
+    country: 'RS',
+    release: 'release-future-rs-future-gain',
+    scenario: 'active',
+  },
 ] as const;
 
 it.each([
@@ -530,7 +535,9 @@ it.each([
       expect(isPiClassicCompositionContext(host)).toBe(true);
       const result = Dispatch(host) as React.ReactElement<CurrentScreenProps>;
       expect(result.type).toBe(classicDetailRenderers[screen]);
-      expect(result.props.route.params?.productId).toBe('preserved-selected-id');
+      expect(result.props.route.params?.productId).toBe(
+        'preserved-selected-id',
+      );
       expect(result.props.amountsHidden).toBe(true);
     }
 
@@ -547,7 +554,9 @@ it.each([
       expect(isPiClassicCompositionContext(host)).toBe(false);
       const result = Dispatch(host) as React.ReactElement<CurrentScreenProps>;
       expect(result.type).toBe(Previous);
-      expect(result.props.route.params?.productId).toBe('preserved-selected-id');
+      expect(result.props.route.params?.productId).toBe(
+        'preserved-selected-id',
+      );
       expect(result.props.amountsHidden).toBe(true);
     }
   },

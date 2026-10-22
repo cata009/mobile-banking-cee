@@ -1,0 +1,963 @@
+{
+  "capturedOn": "2026-10-19",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "purpose": "Evidence snapshot for alignment planning. No claim of full AE SDK schema or production compatibility.",
+  "artifact": {
+    "package": "hr.asseco.android.jimba.mUCI.ro",
+    "version": "26.4.32.0",
+    "baseSha256": "b756df92bed68115d0c2e4d661baa7093cc93756be66282f817f9fefb1fec5cf",
+    "sourceBundleSha256": "AF2292CCD434A659E0588AD5385D81DC4848171B7E4E0C71151BE066A380A2FC",
+    "declaredVersionFromManifest": "26.4.32.0",
+    "signatureVerified": false
+  },
+  "extraction": {
+    "javaFilesExported": 15745,
+    "models": 205,
+    "qualifiedTypes": 308,
+    "modelsWithParserObservations": 200,
+    "rpcWriters": 59,
+    "layoutReferences": 196,
+    "jadxErrors": 460,
+    "rawSplitFiles": 4711,
+    "windowsCaseCollisionsPreserved": 2113
+  },
+  "verification": {
+    "sourceAssertions": 3459,
+    "sourceBundleUnchanged": true,
+    "baseDigestMatchesRea": true,
+    "inputTextParserSeparatelyInspectedThroughRea": true,
+    "targetExecuted": false,
+    "runtimeCompatibilityTested": false
+  },
+  "facts": [
+    {
+      "claim": "A type dispatcher recognizes uci:AEInputText",
+      "status": "observed-in-decompiled-artifact",
+      "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+      "line": 7945,
+      "literal": "str.equals(\"uci:AEInputText\")"
+    },
+    {
+      "claim": "A JSON parser exists for the model identified as AEInputText",
+      "status": "observed-in-decompiled-artifact",
+      "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+      "line": 8122,
+      "literal": "default ContextAwareKt setCustomSelectionActionModeCallback"
+    },
+    {
+      "claim": "A factory branches on AEInputText and constructs an Android presenter with a ViewGroup",
+      "status": "observed-in-decompiled-artifact",
+      "file": "decompiled/sources/okio/r8lambdaTpbVe85WogIiSft9KOv3SRKW29k.java",
+      "line": 17,
+      "literal": "if (write.equals(\"AEInputText\"))"
+    },
+    {
+      "claim": "A request writer names getScreenManager",
+      "status": "observed-in-decompiled-artifact",
+      "file": "decompiled/sources/okio/setSynchronized.java",
+      "line": 10234,
+      "literal": "writeStringField(\"method\", \"getScreenManager\")"
+    },
+    {
+      "claim": "The writer emits the jsonrpc property with literal value 2.1",
+      "status": "observed-in-decompiled-artifact",
+      "file": "decompiled/sources/okio/SemaphoreAndMutexImpl.java",
+      "line": 2293,
+      "literal": "writeStringField(\"jsonrpc\", \"2.1\")"
+    }
+  ],
+  "sourceArtifacts": [
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\findings.json",
+      "sha256": "5575C9100D761CC28D261F071519101751B0869F55C43B62E9E4565FB0B48BBD"
+    },
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\ae-contract-catalog.json",
+      "sha256": "9CC4EACF2D41BEF67F24E78FD90D3FAE7AD631B47095962201DB6B6CC0867B63"
+    },
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\rpc-contract-observations.json",
+      "sha256": "890B016F102AA67B066AFDA84B63419BDFD8F89B40D07EDC6C5E64A08FC8B1EB"
+    },
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\rea-package.json",
+      "sha256": "D59CFC4FBD644AA43E2061F3C2E2F91FFF815890E5F82A0C709CABD6D059A66B"
+    },
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\rea-input-text-parser-method-overload1.json",
+      "sha256": "CAACAE1EFC23C5F222563A542781BE3DDF92E255F445BCF2A7584106B1CC1AF9"
+    },
+    {
+      "file": "C:\\Users\\mihai\\Downloads\\mobile-banking-analysis-2026-10-19\\ro-26.4.32.0\\extraction-counts.json",
+      "sha256": "07CD037BD552D20F634577D2DDDDAD33F607E6ECE96F9D2E5A2240EA62A05300"
+    }
+  ],
+  "representativeModels": [
+    {
+      "schemaName": "AEButton",
+      "javaClass": "r8lambdau_x7BEkvLYF9XQ9RRlbMZi_QcQ0",
+      "parentJavaClass": "DefaultScheduler",
+      "file": "decompiled/sources/okio/r8lambdau_x7BEkvLYF9XQ9RRlbMZi_QcQ0.java",
+      "requiredFields": [
+        {
+          "name": "button",
+          "file": "decompiled/sources/okio/r8lambdau_x7BEkvLYF9XQ9RRlbMZi_QcQ0.java",
+          "line": 86
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+          "line": 6484,
+          "method": "setCheckable",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "a11y",
+              "line": 6522
+            },
+            {
+              "name": "button",
+              "line": 6510
+            },
+            {
+              "name": "enablingLogic",
+              "line": 6517
+            },
+            {
+              "name": "visibilityLogic",
+              "line": 6505
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "button",
+          "file": "decompiled/sources/okio/r8lambdau_x7BEkvLYF9XQ9RRlbMZi_QcQ0.java",
+          "line": 86
+        }
+      ],
+      "observedQualifiedTypeNames": ["uci:AEButton"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "AEInputAmount",
+      "javaClass": "getElementAnnotationskotlinx_serialization_core",
+      "parentJavaClass": "element",
+      "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+      "requiredFields": [
+        {
+          "name": "currencyKey",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 351
+        },
+        {
+          "name": "currencies",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 354
+        },
+        {
+          "name": "currencyLabel",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 357
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+          "line": 8501,
+          "method": "setWindowTitle",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "a11y",
+              "line": 8619
+            },
+            {
+              "name": "action",
+              "line": 8539
+            },
+            {
+              "name": "allowNegative",
+              "line": 8527
+            },
+            {
+              "name": "amountEnablingLogic",
+              "line": 8573
+            },
+            {
+              "name": "currencies",
+              "line": 8550
+            },
+            {
+              "name": "currencyDialogButton",
+              "line": 8544
+            },
+            {
+              "name": "currencyDialogButtonTrackData",
+              "line": 8664
+            },
+            {
+              "name": "currencyDialogCornerRadius",
+              "line": 8693
+            },
+            {
+              "name": "currencyDialogSearchData",
+              "line": 8683
+            },
+            {
+              "name": "currencyDialogSubtitle",
+              "line": 8649
+            },
+            {
+              "name": "currencyDialogTitle",
+              "line": 8533
+            },
+            {
+              "name": "currencyDialogTrackData",
+              "line": 8599
+            },
+            {
+              "name": "currencyGroups",
+              "line": 8578
+            },
+            {
+              "name": "currencyId",
+              "line": 8567
+            },
+            {
+              "name": "currencyKey",
+              "line": 8655
+            },
+            {
+              "name": "currencyLabel",
+              "line": 8674
+            },
+            {
+              "name": "enablingLogic",
+              "line": 8594
+            },
+            {
+              "name": "hint",
+              "line": 8625
+            },
+            {
+              "name": "key",
+              "line": 8610
+            },
+            {
+              "name": "label",
+              "line": 8631
+            },
+            {
+              "name": "onChangeAction",
+              "line": 8688
+            },
+            {
+              "name": "onChangeDebounce",
+              "line": 8669
+            },
+            {
+              "name": "onNextFocusable",
+              "line": 8643
+            },
+            {
+              "name": "required",
+              "line": 8589
+            },
+            {
+              "name": "value",
+              "line": 8637
+            },
+            {
+              "name": "visibilityLogic",
+              "line": 8522
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "key",
+          "file": "decompiled/sources/okio/startCoroutineUndispatched.java",
+          "line": 114
+        },
+        {
+          "name": "currencyKey",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 351
+        },
+        {
+          "name": "currencies",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 354
+        },
+        {
+          "name": "currencyLabel",
+          "file": "decompiled/sources/okio/getElementAnnotationskotlinx_serialization_core.java",
+          "line": 357
+        }
+      ],
+      "observedQualifiedTypeNames": ["uci:AEInputAmount"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "AEInputText",
+      "javaClass": "ContextAwareKt",
+      "parentJavaClass": "element",
+      "file": "decompiled/sources/okio/ContextAwareKt.java",
+      "requiredFields": [
+        {
+          "name": "constraints",
+          "file": "decompiled/sources/okio/ContextAwareKt.java",
+          "line": 317
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+          "line": 8122,
+          "method": "setCustomSelectionActionModeCallback",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "a11y",
+              "line": 8219
+            },
+            {
+              "name": "action",
+              "line": 8165
+            },
+            {
+              "name": "allowedChars",
+              "line": 8199
+            },
+            {
+              "name": "constraints",
+              "line": 8148
+            },
+            {
+              "name": "copyPasteEnabled",
+              "line": 8301
+            },
+            {
+              "name": "enablingLogic",
+              "line": 8205
+            },
+            {
+              "name": "hint",
+              "line": 8225
+            },
+            {
+              "name": "inputMask",
+              "line": 8289
+            },
+            {
+              "name": "inputType",
+              "line": 8295
+            },
+            {
+              "name": "key",
+              "line": 8210
+            },
+            {
+              "name": "label",
+              "line": 8231
+            },
+            {
+              "name": "maxLength",
+              "line": 8182
+            },
+            {
+              "name": "maxLengthTriggerKey",
+              "line": 8243
+            },
+            {
+              "name": "maxLines",
+              "line": 8261
+            },
+            {
+              "name": "nullWhenEmpty",
+              "line": 8255
+            },
+            {
+              "name": "onChangeDebounce",
+              "line": 8267
+            },
+            {
+              "name": "onFocusPrepend",
+              "line": 8272
+            },
+            {
+              "name": "onNextFocusable",
+              "line": 8249
+            },
+            {
+              "name": "prefix",
+              "line": 8170
+            },
+            {
+              "name": "remainingCounter",
+              "line": 8188
+            },
+            {
+              "name": "required",
+              "line": 8194
+            },
+            {
+              "name": "suffix",
+              "line": 8176
+            },
+            {
+              "name": "textTransform",
+              "line": 8278
+            },
+            {
+              "name": "value",
+              "line": 8237
+            },
+            {
+              "name": "visibilityLogic",
+              "line": 8143
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "key",
+          "file": "decompiled/sources/okio/startCoroutineUndispatched.java",
+          "line": 114
+        },
+        {
+          "name": "constraints",
+          "file": "decompiled/sources/okio/ContextAwareKt.java",
+          "line": 317
+        }
+      ],
+      "observedQualifiedTypeNames": ["uci:AEInputText"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "AEScreenBase",
+      "javaClass": "PrimitiveKindSHORT",
+      "parentJavaClass": "dispatchExceptionAndMakeCompleting",
+      "file": "decompiled/sources/okio/PrimitiveKindSHORT.java",
+      "requiredFields": [],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/r8lambdaoswNSuimvhVDScFNv8TKCtmTyAI.java",
+          "line": 1504,
+          "method": "setButtonDrawable",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "bgColor",
+              "line": 1596
+            },
+            {
+              "name": "bgImg",
+              "line": 1617
+            },
+            {
+              "name": "content",
+              "line": 1645
+            },
+            {
+              "name": "hwBackAction",
+              "line": 1650
+            },
+            {
+              "name": "inputResize",
+              "line": 1590
+            },
+            {
+              "name": "inputResizeMode",
+              "line": 1639
+            },
+            {
+              "name": "isBgImgFullscreen",
+              "line": 1622
+            },
+            {
+              "name": "tag",
+              "line": 1602
+            },
+            {
+              "name": "themeMode",
+              "line": 1611
+            },
+            {
+              "name": "trackData",
+              "line": 1628
+            },
+            {
+              "name": "transitionAnimation",
+              "line": 1584
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "tag",
+          "file": "decompiled/sources/okio/dispatchExceptionAndMakeCompleting.java",
+          "line": 114
+        }
+      ],
+      "observedQualifiedTypeNames": ["uci:AEScreenBase"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "AEScreenManager",
+      "javaClass": "startCoroutineCancellable",
+      "parentJavaClass": null,
+      "file": "decompiled/sources/okio/startCoroutineCancellable.java",
+      "requiredFields": [],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/elementWiseEquals.java",
+          "line": 4723,
+          "method": "accessonBackPresseds1027565324",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "backStackClear",
+              "line": 4740
+            },
+            {
+              "name": "data",
+              "line": 4745
+            },
+            {
+              "name": "newFlow",
+              "line": 4761
+            },
+            {
+              "name": "screens",
+              "line": 4767
+            },
+            {
+              "name": "startupAction",
+              "line": 4756
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        },
+        {
+          "file": "decompiled/sources/okio/setSynchronized.java",
+          "line": 5699,
+          "method": "addObserverForBackInvoker",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "backStackClear",
+              "line": 5720
+            },
+            {
+              "name": "data",
+              "line": 5725
+            },
+            {
+              "name": "newFlow",
+              "line": 5741
+            },
+            {
+              "name": "screens",
+              "line": 5747
+            },
+            {
+              "name": "startupAction",
+              "line": 5736
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [],
+      "observedQualifiedTypeNames": [],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "LogicAnd",
+      "javaClass": "SelectKt",
+      "parentJavaClass": "accessTrySelectDetailedResult",
+      "file": "decompiled/sources/okio/SelectKt.java",
+      "requiredFields": [
+        {
+          "name": "op1",
+          "file": "decompiled/sources/okio/SelectKt.java",
+          "line": 112
+        },
+        {
+          "name": "op2",
+          "file": "decompiled/sources/okio/SelectKt.java",
+          "line": 115
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/elementWiseEquals.java",
+          "line": 2099,
+          "method": "onPrepareSupportNavigateUpTaskStack",
+          "requiresTypeAsFirstField": true,
+          "fields": [],
+          "hasDecompilationErrorMarker": false
+        },
+        {
+          "file": "decompiled/sources/okio/setSynchronized.java",
+          "line": 3001,
+          "method": "onSupportActionModeFinished",
+          "requiresTypeAsFirstField": true,
+          "fields": [],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "op1",
+          "file": "decompiled/sources/okio/SelectKt.java",
+          "line": 112
+        },
+        {
+          "name": "op2",
+          "file": "decompiled/sources/okio/SelectKt.java",
+          "line": 115
+        }
+      ],
+      "observedQualifiedTypeNames": ["core:LogicAnd"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "LogicCompare",
+      "javaClass": "TrySelectDetailedResult",
+      "parentJavaClass": "accessTrySelectDetailedResult",
+      "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+      "requiredFields": [
+        {
+          "name": "lookupKey",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 165
+        },
+        {
+          "name": "lookupValue",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 168
+        },
+        {
+          "name": "dataType",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 172
+        },
+        {
+          "name": "comparisonOperator",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 175
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/elementWiseEquals.java",
+          "line": 2247,
+          "method": "onNightModeChanged",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "comparisonOperator",
+              "line": 2266
+            },
+            {
+              "name": "dataType",
+              "line": 2296
+            },
+            {
+              "name": "initValue",
+              "line": 2272
+            },
+            {
+              "name": "lookupKey",
+              "line": 2278
+            },
+            {
+              "name": "lookupValue",
+              "line": 2287
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        },
+        {
+          "file": "decompiled/sources/okio/setSynchronized.java",
+          "line": 3157,
+          "method": "onTitleChanged",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "comparisonOperator",
+              "line": 3178
+            },
+            {
+              "name": "dataType",
+              "line": 3208
+            },
+            {
+              "name": "initValue",
+              "line": 3184
+            },
+            {
+              "name": "lookupKey",
+              "line": 3190
+            },
+            {
+              "name": "lookupValue",
+              "line": 3199
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "lookupKey",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 165
+        },
+        {
+          "name": "lookupValue",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 168
+        },
+        {
+          "name": "dataType",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 172
+        },
+        {
+          "name": "comparisonOperator",
+          "file": "decompiled/sources/okio/TrySelectDetailedResult.java",
+          "line": 175
+        }
+      ],
+      "observedQualifiedTypeNames": ["core:LogicCompare"],
+      "wireSchemaComplete": false
+    },
+    {
+      "schemaName": "LogicValue",
+      "javaClass": "accessgetSTATE_REGp",
+      "parentJavaClass": "accessTrySelectDetailedResult",
+      "file": "decompiled/sources/okio/accessgetSTATE_REGp.java",
+      "requiredFields": [
+        {
+          "name": "lookupKey",
+          "file": "decompiled/sources/okio/accessgetSTATE_REGp.java",
+          "line": 119
+        }
+      ],
+      "parserObservations": [
+        {
+          "file": "decompiled/sources/okio/elementWiseEquals.java",
+          "line": 2201,
+          "method": "onSupportNavigateUp",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "initValue",
+              "line": 2232
+            },
+            {
+              "name": "lookupKey",
+              "line": 2225
+            },
+            {
+              "name": "lookupValue",
+              "line": 2221
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        },
+        {
+          "file": "decompiled/sources/okio/setSynchronized.java",
+          "line": 3109,
+          "method": "openOptionsMenu",
+          "requiresTypeAsFirstField": true,
+          "fields": [
+            {
+              "name": "initValue",
+              "line": 3142
+            },
+            {
+              "name": "lookupKey",
+              "line": 3135
+            },
+            {
+              "name": "lookupValue",
+              "line": 3131
+            }
+          ],
+          "hasDecompilationErrorMarker": false
+        }
+      ],
+      "requiredFieldsIncludingRecoveredAncestors": [
+        {
+          "name": "lookupKey",
+          "file": "decompiled/sources/okio/accessgetSTATE_REGp.java",
+          "line": 119
+        }
+      ],
+      "observedQualifiedTypeNames": ["core:LogicValue"],
+      "wireSchemaComplete": false
+    }
+  ],
+  "existingExperiences": [
+    {
+      "id": "kids-pi.hu.baseline",
+      "product": "KIDS_PI",
+      "country": "HU",
+      "designSystem": "current",
+      "file": "src/experiences/kids-pi/hu/baseline/manifest.ts",
+      "sha256": "6060DDF5EDA83609DE8AEFC5410A4C40814EC24642E955D2E7BA19D8E38FC31F"
+    },
+    {
+      "id": "kids-pi.ro.baseline",
+      "product": "KIDS_PI",
+      "country": "RO",
+      "designSystem": "current",
+      "file": "src/experiences/kids-pi/ro/baseline/manifest.ts",
+      "sha256": "89D953B19C84D4328A94AEC449E2EB82CC91CA040E1ED859D272D9CD5391CE3A"
+    },
+    {
+      "id": "kids-pi.sk.baseline",
+      "product": "KIDS_PI",
+      "country": "SK",
+      "designSystem": "current",
+      "file": "src/experiences/kids-pi/sk/baseline/manifest.ts",
+      "sha256": "474F6F3521876A761EF7114779430319CF427E11C3E700F5CBEF1BF5D4BDC3F2"
+    },
+    {
+      "id": "pi.ba.baseline",
+      "product": "PI",
+      "country": "BA",
+      "designSystem": "current",
+      "file": "src/experiences/pi/ba/baseline/manifest.ts",
+      "sha256": "4A0C22A0CF131B1DCD6FDC46062584F72772A375EC2C1F2183B4CBC595207121"
+    },
+    {
+      "id": "pi.ba-bl.baseline",
+      "product": "PI",
+      "country": "BA_BL",
+      "designSystem": "current",
+      "file": "src/experiences/pi/ba-bl/baseline/manifest.ts",
+      "sha256": "555DC5AE2E78DC257D35BB48A4EA164739CD1F7E2E31056064CA307AC7C2BA7F"
+    },
+    {
+      "id": "pi.cz.baseline",
+      "product": "PI",
+      "country": "CZ",
+      "designSystem": "current",
+      "file": "src/experiences/pi/cz/baseline/manifest.ts",
+      "sha256": "3E22D7B64543FC85EE07C516EA78DA4DDA205135985E36377400640800AC5AD9"
+    },
+    {
+      "id": "pi.cz.coapping",
+      "product": "PI",
+      "country": "CZ",
+      "designSystem": "current",
+      "file": "src/experiences/pi/cz/coapping/manifest.ts",
+      "sha256": "AE3A120A430FFA14B6EBBF91D41A7042374C790F191753541EFE0B281CCE1F5A"
+    },
+    {
+      "id": "pi.cz.evo-2027",
+      "product": "PI",
+      "country": "CZ",
+      "designSystem": "current",
+      "file": "src/experiences/pi/cz/evo-2027/manifest.ts",
+      "sha256": "18D94CD69798341D3122AB02F335DADCEBB2B42FB358E3529AE12C8F4C5AFA91"
+    },
+    {
+      "id": "pi.cz.robo",
+      "product": "PI",
+      "country": "CZ",
+      "designSystem": "current",
+      "file": "src/experiences/pi/cz/robo/manifest.ts",
+      "sha256": "E5CF4173D8C2ABE7B0A5C507FD9BCED751801BC9400265878FE460A32B1FA204"
+    },
+    {
+      "id": "pi.hu.baseline",
+      "product": "PI",
+      "country": "HU",
+      "designSystem": "current",
+      "file": "src/experiences/pi/hu/baseline/manifest.ts",
+      "sha256": "AA2580950A265BE628B4924E463A21C8A61D91CFB967AB26876894703144B49D"
+    },
+    {
+      "id": "pi.it.mobile-first",
+      "product": "PI",
+      "country": "IT",
+      "designSystem": "mobile-first",
+      "file": "src/experiences/pi/it/mobile-first/manifest.ts",
+      "sha256": "F865575E9C2D5685BA2FD85BE1E43BC0EAE02CD2608CE11543D6426D011546B9"
+    },
+    {
+      "id": "pi.ro.baseline",
+      "product": "PI",
+      "country": "RO",
+      "designSystem": "current",
+      "file": "src/experiences/pi/ro/baseline/manifest.ts",
+      "sha256": "32FD8C40AB6FC91423822219AE55905569102488FA8228007C4E2A9E3B43DFD6"
+    },
+    {
+      "id": "pi.rs.baseline",
+      "product": "PI",
+      "country": "RS",
+      "designSystem": "current",
+      "file": "src/experiences/pi/rs/baseline/manifest.ts",
+      "sha256": "51449B22EDF42228D21D80F019BC7499D44BF80F7EEE6A231FC57367C148F35C"
+    },
+    {
+      "id": "pi.rs.future-gain",
+      "product": "PI",
+      "country": "RS",
+      "designSystem": "current",
+      "file": "src/experiences/pi/rs/future-gain/manifest.ts",
+      "sha256": "961FB0C19B3773A47B880F5227F732E022FD4B62606066014B3E09BE4027D5D5"
+    },
+    {
+      "id": "pi.si.baseline",
+      "product": "PI",
+      "country": "SI",
+      "designSystem": "current",
+      "file": "src/experiences/pi/si/baseline/manifest.ts",
+      "sha256": "79457E759F32E20CC11A0AA58436F4CBD59A636CE6B81F159F237C1878E6C37C"
+    },
+    {
+      "id": "pi.sk.baseline",
+      "product": "PI",
+      "country": "SK",
+      "designSystem": "current",
+      "file": "src/experiences/pi/sk/baseline/manifest.ts",
+      "sha256": "6AB004F9800D00C837A52309F2FA916715FA45F8C22DFCB7F81DAD77A436ED4C"
+    }
+  ],
+  "compatibilityTested": false,
+  "knownLimits": [
+    "RO build only; CZ and other AE releases unverified",
+    "Names may be obfuscated or decompiler aliases",
+    "APK publisher signature and APKMirror bundle authenticity were not verified",
+    "460 errors reported during whole-base JADX export",
+    "Field discovery is a bounded text extraction from visible parser branches; it is not a complete SDK schema",
+    "No actual server response, runtime rendering, import acceptance, or Android/iOS equivalence was tested"
+  ],
+  "externalUnknowns": [
+    "Exact AE SDK/version and extension/import packaging expected by the bank team",
+    "Server-owned screen configurations and banking decisions not present in this artifact",
+    "Current CZ build and cross-country differences",
+    "iOS renderer behavior, accessibility and platform differences",
+    "Complete wire types, defaults and behaviors for all recovered models",
+    "Whether every screen from our baseline maps to existing elements without SDK additions"
+  ]
+}

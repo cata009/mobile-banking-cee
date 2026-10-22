@@ -106,6 +106,7 @@ export function BaselineProductCard({
       : ('flex-end' as const),
     marginTop: state.evolution ? 8 : 4,
   };
+  const thirdLineStyle = { ...subtitleStyle, fontFamily: 'UniCredit-regular' };
   const amountStyle = {
       fontFamily: 'UniCredit-bold',
       fontSize: state.amountFontSize,
@@ -151,9 +152,7 @@ export function BaselineProductCard({
           <View style={textShell}>
             <Text style={titleStyle}>{title}</Text>
             <Text style={subtitleStyle}>{accountNumber}</Text>
-            {state.evolution && thirdLine ? (
-              <Text style={subtitleStyle}>{thirdLine}</Text>
-            ) : null}
+            {thirdLine ? <Text style={thirdLineStyle}>{thirdLine}</Text> : null}
           </View>
           {state.evolution ? <View style={leading}>{icon}</View> : null}
         </View>

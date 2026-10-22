@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -12,10 +11,8 @@ import {
   getHeroSheetForRelease,
   type PaymentHeroId,
 } from '@/app/config/paymentsMenuConfig';
-import { resolvePaymentHero } from '@/app/components/contracts/paymentHero';
 import type { CurrentScreenProps } from '../../../contracts';
 import { disabledBankingActions } from '../../../banking/model';
-import { paymentArt } from '../../../banking/assets';
 import { BaselineL1Header } from '../../../../../../universal/BaselineL1Header';
 import {
   BaselineHeaderActionButton,
@@ -46,15 +43,6 @@ const actionIcons = {
   qr: 'payment-scan-qr',
   slip: 'payment-create-qr',
   exchange: 'payment-exchange-rates',
-};
-const artworkDimensions = {
-  'payments-1': { width: 105, height: 104 },
-  'payments-2': { width: (137 * 92) / 103, height: 92 },
-  'payments-3': { width: (87 * 104) / 120, height: 104 },
-  // Source object-contain/object-right-bottom places the natural raster at the slot's right edge.
-  'payments-4': { width: (110 * 104) / 120, height: 104 },
-  'payments-5': { width: (66 * 104) / 120, height: 104 },
-  'payments-9': { width: 118, height: (120 * 118) / 137 },
 };
 export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   const [view, setView] = useState(host.route.params?.view ?? 'overview');
@@ -170,18 +158,14 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                   )
                 : item.description,
             };
-            const geometry = resolvePaymentHero({
-              title: localized.title,
-              imageVariant: item.imageVariant,
-            });
             const action =
               item.id === 'between-accounts'
                 ? 'payments.exchange.create'
                 : item.id === 'manage-ebills'
-                ? 'payments.ebills.manage'
-                : item.id === 'recurrent-payments'
-                ? 'payments.templates.manage'
-                : 'payments.domestic.create';
+                  ? 'payments.ebills.manage'
+                  : item.id === 'recurrent-payments'
+                    ? 'payments.templates.manage'
+                    : 'payments.domestic.create';
             return (
               <BaselinePaymentHero
                 key={item.id}
@@ -190,21 +174,6 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                 dark={dark}
                 disabled={disabled.has(action)}
                 onSelect={() => setHero(item.id)}
-                artwork={
-                  item.imageVariant ? (
-                    <Image
-                      source={paymentArt[item.imageVariant]}
-                      resizeMode="stretch"
-                      style={[
-                        s.artwork,
-                        geometry.image,
-                        artworkDimensions[
-                          item.imageVariant as keyof typeof artworkDimensions
-                        ],
-                      ]}
-                    />
-                  ) : undefined
-                }
               />
             );
           })}

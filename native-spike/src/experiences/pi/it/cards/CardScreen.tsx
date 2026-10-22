@@ -587,7 +587,7 @@ function CardScreenBody(props: ItalyNativeScreenProps) {
             style={styles.quickButton}
           >
             <View style={styles.quickCircle}>
-              <AssetGlyph asset={asset} size={32} />
+              <AssetGlyph asset={asset} size={24} />
             </View>
             <Text style={styles.quickLabel}>{label}</Text>
           </Pressable>

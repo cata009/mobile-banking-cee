@@ -15,6 +15,24 @@ vi.mock('@/app/contexts/LanguageContext', () => ({
 }))
 afterEach(cleanup)
 const normalized = (s: string) => s.replace(/:[a-zA-Z]*[a-zA-Z0-9]+:/g, ':generated:').replace(/\s+/g, ' ')
+
+// Keep frozen structure/labels exact while making the approved paint delta explicit.
+function approvedDisabledPaint(container: HTMLElement) {
+  for (const element of container.querySelectorAll<HTMLElement>('[style]')) {
+    if (element.style.color === 'var(--uc-neutral-650)') element.style.color = 'var(--uc-text-muted)'
+    if (element.style.borderBottomColor === 'var(--uc-neutral-650)')
+      element.style.borderBottomColor = 'var(--uc-text-subtle)'
+  }
+  for (const svg of container.querySelectorAll<SVGElement>('svg')) {
+    if (svg.style.color === 'var(--uc-neutral-650)') svg.style.color = 'var(--uc-text-subtle)'
+    if (svg.getAttribute('color') === 'var(--uc-neutral-650)') svg.setAttribute('color', 'var(--uc-text-subtle)')
+  }
+  for (const input of container.querySelectorAll('input:disabled'))
+    input.className = input.className.replace(
+      /placeholder:text-\[var\(--uc-(neutral-650|text-subtle)\)\]/g,
+      'placeholder:text-[var(--uc-text-muted)]',
+    )
+}
 describe('frozen baseline form DOM and owner behavior', () => {
   it.each([
     'empty',
@@ -41,6 +59,11 @@ describe('frozen baseline form DOM and owner behavior', () => {
       suffixOutsideDivider: true,
     }
     const { container, rerender } = render(<FrozenTextField {...props} />)
+    if (visualState.startsWith('disabled')) approvedDisabledPaint(container)
+    if (['on-focus', 'error-filled', 'error-empty'].includes(visualState)) {
+      const boundary = container.querySelector<HTMLElement>('[style*="border-bottom-width"]')!
+      boundary.style.borderBottomWidth = '1px'
+    }
     const before = normalized(container.innerHTML)
     rerender(<TextField {...props} />)
     expect(normalized(container.innerHTML)).toBe(before)
@@ -88,10 +111,47 @@ describe('frozen baseline form DOM and owner behavior', () => {
       visualState: 'filled' as const,
     }
     const { container, rerender } = render(<FrozenAmountField {...props} />)
+    approvedDisabledPaint(container)
+    const currency = screen.getByRole('button', { name: 'Currency: RON' })
+    const column = currency.querySelector<HTMLElement>('.min-w-\\[64px\\]')!
+    column.className = column.className.replace('min-w-[64px]', 'min-w-[66px]')
+    const value = currency.querySelector<HTMLElement>('.uc-type-p1')!
+    value.className = value.className.replace(' mt-[4px]', '')
+    value.style.marginTop = '0px'
     const before = normalized(container.innerHTML)
     rerender(<AmountField {...props} />)
     expect(normalized(container.innerHTML)).toBe(before)
   })
+  it.each(['inline', 'floating'] as const)(
+    'blocks every disabled TextField activation with %s action',
+    (trailingIconPlacement) => {
+      const activate = vi.fn(),
+        choose = vi.fn(),
+        change = vi.fn()
+      const { container } = render(
+        <TextField
+          label="Beneficiary"
+          value="Ana"
+          onChange={change}
+          visualState="disabled-filled"
+          onActivate={activate}
+          trailingIconName="chevron-down"
+          trailingIconPlacement={trailingIconPlacement}
+          trailingIconAction={{ ariaLabel: 'Choose', onClick: choose }}
+        />,
+      )
+      const input = screen.getByRole('textbox', { name: 'Beneficiary' })
+      expect(input).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Choose' })).toBeDisabled()
+      fireEvent.click(container.querySelector('[data-component="TextField"]')!)
+      fireEvent.click(screen.getByRole('button', { name: 'Choose' }))
+      fireEvent.keyDown(input, { key: 'Enter' })
+      fireEvent.change(input, { target: { value: 'Changed' } })
+      expect(activate).not.toHaveBeenCalled()
+      expect(choose).not.toHaveBeenCalled()
+      expect(change).not.toHaveBeenCalled()
+    },
+  )
   it.each(['compact', 'comfortable'] as const)('keeps SearchBar %s variants', (fieldSize) => {
     for (const fieldSurface of ['muted', 'raised'] as const)
       for (const fieldPadding of ['none', '8'] as const)

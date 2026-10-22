@@ -159,5 +159,6 @@ const CUSTOM_ICON_ORDER = [
   'robo-goal-purchase',
   'robo-goal-retirement',
   'investment-goals-product',
+  'button-chat',
 ] as const
 export const CUSTOM_ICONS = composeRegistry('CUSTOM_ICONS', CUSTOM_ICON_DOMAINS, CUSTOM_ICON_ORDER)

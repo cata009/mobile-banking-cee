@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../../../../universal/Typography';
 import PortfolioChart from './PortfolioChart';
 import { ModalPanel } from '../../../../universal/ModalPanel';
@@ -36,6 +36,7 @@ import guide1 from '@/assets/mobile-first/it/investments/imgImage3.png';
 import guide2 from '@/assets/mobile-first/it/investments/imgImage4.png';
 import stepperBack from '@/assets/mobile-first/it/investments/imgNavigationAndActionBackK4.svg';
 import stepperForth from '@/assets/mobile-first/it/investments/imgNavigationAndActionForthK10.svg';
+import ownerChevron from '@/assets/mobile-first/it/investments/imgNavigationAndActionDownK10.svg';
 import {
   InvestmentCatalog,
   InvestmentEducation,
@@ -43,6 +44,9 @@ import {
 } from './OverviewExtras';
 import { createProfilePdf } from '@/features/profile/mobileFirstProfileSettings';
 import { shareDemoFile } from '../../../../platform/nativeFiles';
+const styles = StyleSheet.create({
+  ownerSelector: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+});
 const icons = [
   titleIcon,
   fundIcon,
@@ -110,9 +114,12 @@ export default function Overview({
           accessibilityRole="button"
           accessibilityLabel="Intestatario"
           accessibilityState={{ expanded: owner }}
+          aria-expanded={owner}
           onPress={() => setOwner(!owner)}
+          style={styles.ownerSelector}
         >
-          <Text style={s.strong}>Intestatario⌄</Text>
+          <Text style={s.strong}>Intestatario</Text>
+          <AssetGlyph asset={ownerChevron} size={16} />
         </Pressable>
         {owner && <Text style={s.strong}>Andrea Rossini Bianchi</Text>}
         <Text style={s.small}>
@@ -381,6 +388,7 @@ export default function Overview({
                 </Text>
                 <Link
                   label="Scarica pdf"
+                  displayLabel="SCARICA PDF"
                   onPress={() => {
                     shareDemoFile(
                       `market-focus-${item.date.replaceAll('/', '-')}.pdf`,
@@ -404,6 +412,7 @@ export default function Overview({
         )}
         <Link
           label={focusExpanded ? 'Nascondi' : 'Scopri tutti'}
+          displayLabel={focusExpanded ? 'NASCONDI' : 'SCOPRI TUTTI'}
           onPress={() => setFocusExpanded(!focusExpanded)}
         />
         {!!fileError && (
@@ -451,6 +460,7 @@ export default function Overview({
         </View>
         <Link
           label="Tutti gli approfondimenti"
+          displayLabel="TUTTI GLI APPROFONDIMENTI"
           onPress={() => setEducationOpen(true)}
         />
       </View>

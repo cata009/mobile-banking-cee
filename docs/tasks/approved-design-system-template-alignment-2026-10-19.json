@@ -1,0 +1,3234 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-19",
+  "owner": "/root Approved DS template alignment",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "checkout": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "fileKey": "FKbbStgBIP9bFAMl3DPKHF",
+  "scope": "Align only the seven user-approved and moved component documentation frames to the established canonical template; preserve approved main-component identities and source contracts.",
+  "template": {
+    "width": 1724,
+    "header": {
+      "height": 168,
+      "padding": [
+        40,
+        64,
+        40,
+        64
+      ],
+      "gap": 12
+    },
+    "body": {
+      "padding": [
+        48,
+        64,
+        48,
+        64
+      ],
+      "gap": 24
+    },
+    "sections": [
+      "00 / Page header",
+      "Overview",
+      "Accessibility",
+      "Anatomy, dimensions & spacing",
+      "Variants & states",
+      "Behaviour & adaptation",
+      "References"
+    ],
+    "typeface": "UniCredit",
+    "accessibilityCards": {
+      "columns": 4,
+      "width": 375,
+      "gap": 32
+    },
+    "measurementScale": 1,
+    "spacingNotation": "Actual padding and gap values, pink bands, dotted guides. Geometric separator has no fabricated text-resize example."
+  },
+  "references": [
+    {
+      "page": "10135:7175",
+      "reference": "10145:317",
+      "w": 1724,
+      "layout": "VERTICAL",
+      "padding": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "gap": 0,
+      "sections": [
+        {
+          "id": "10277:40339",
+          "name": "00 / Page header",
+          "w": 1724,
+          "h": 168,
+          "layout": "VERTICAL",
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12,
+          "texts": [
+            {
+              "id": "10277:40340",
+              "name": "Library label",
+              "text": "MENIGA / DESIGN SYSTEM / COMPONENTS",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40341",
+              "name": "Component title",
+              "text": "Tag and Status",
+              "size": 48,
+              "style": "S:b9f47bb07828d1f30806af7f3485328180d27787,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 56
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40342",
+          "name": "Overview",
+          "w": 1724,
+          "h": 502,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40343",
+              "name": "Section marker",
+              "text": "01 / OVERVIEW",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40344",
+              "name": "Section title",
+              "text": "Overview",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40345",
+              "name": "Introduction",
+              "text": "Purpose, coverage and correct use.",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40346",
+              "name": "Component guidance",
+              "text": "Use NEW to identify a new message, the positive-balance tag for the existing account condition, and ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40351",
+          "name": "Accessibility",
+          "w": 1724,
+          "h": 644,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40352",
+              "name": "Section marker",
+              "text": "02 / ACCESSIBILITY",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40353",
+              "name": "Section title",
+              "text": "Accessibility",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40354",
+              "name": "Introduction",
+              "text": "Design for clear meaning, readable content and predictable interaction. WCAG 2.2 AA acceptance must ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40357",
+              "name": "Criterion",
+              "text": "Readable contrast",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 375,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40373",
+          "name": "Anatomy, dimensions & spacing",
+          "w": 1724,
+          "h": 3910,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40374",
+              "name": "Section marker",
+              "text": "03 / ANATOMY, DIMENSIONS & SPACING",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40375",
+              "name": "Section title",
+              "text": "Anatomy, dimensions & spacing",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40376",
+              "name": "Introduction",
+              "text": "Measured on the original component. Pink spacing bands and dotted guides follow the Spacing referenc",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40377",
+              "name": "Measurement family",
+              "text": "Tag / New",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40564",
+          "name": "Variants & states",
+          "w": 1724,
+          "h": 1036,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40565",
+              "name": "Section marker",
+              "text": "04 / VARIANTS & STATES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40566",
+              "name": "Section title",
+              "text": "Variants & states",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40567",
+              "name": "Introduction",
+              "text": "Original authored combinations, shown as linked instances. Property values belong to the original so",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40568",
+              "name": "Source family",
+              "text": "Tag / New",
+              "size": 24,
+              "style": "S:3ffb95cd40098ceafe32b1a99a14c60eb3efcba1,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40643",
+          "name": "Behaviour & adaptation",
+          "w": 1724,
+          "h": 2722,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40644",
+              "name": "Section marker",
+              "text": "05 / BEHAVIOUR & ADAPTATION",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40645",
+              "name": "Section title",
+              "text": "Behaviour & adaptation",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40646",
+              "name": "Introduction",
+              "text": "Use the component’s actual interaction and resizing rules. Enlarged drawings, text growth and runtim",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40647",
+              "name": "Component guidance",
+              "text": "The consuming message model owns whether an item is new. Keep the indicator consistent with the item",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40654",
+          "name": "References",
+          "w": 1724,
+          "h": 376,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40655",
+              "name": "Section marker",
+              "text": "06 / REFERENCES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40656",
+              "name": "Section title",
+              "text": "References",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40657",
+              "name": "Introduction",
+              "text": "Source components remain intact in the preserved source archive. The visible specimens are linked in",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40658",
+              "name": "Spacing reference",
+              "text": "Open the Spacing measurement reference ↗",
+              "size": 16,
+              "style": "S:c7aa27db8f97c9a0e3f8b2415302155faaacd55c,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "0:1817",
+      "reference": "10072:22172",
+      "w": 1724,
+      "layout": "VERTICAL",
+      "padding": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "gap": 0,
+      "sections": [
+        {
+          "id": "10276:37839",
+          "name": "00 / Page header",
+          "w": 1724,
+          "h": 168,
+          "layout": "VERTICAL",
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12,
+          "texts": [
+            {
+              "id": "10276:37840",
+              "name": "Library label",
+              "text": "MENIGA / DESIGN SYSTEM / COMPONENTS",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:37841",
+              "name": "Component title",
+              "text": "Buttons · Actions",
+              "size": 48,
+              "style": "S:b9f47bb07828d1f30806af7f3485328180d27787,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 56
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:37842",
+          "name": "Overview",
+          "w": 1724,
+          "h": 452,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:37843",
+              "name": "Section marker",
+              "text": "01 / OVERVIEW",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:37844",
+              "name": "Section title",
+              "text": "Overview",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:37845",
+              "name": "Introduction",
+              "text": "Purpose, coverage and correct use.",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:37846",
+              "name": "Component guidance",
+              "text": "12 original variants across Button, Double action and Sticky button. Main components stay here with ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:37850",
+          "name": "Accessibility",
+          "w": 1724,
+          "h": 624,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:37851",
+              "name": "Section marker",
+              "text": "02 / ACCESSIBILITY",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:37852",
+              "name": "Section title",
+              "text": "Accessibility",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:37853",
+              "name": "Introduction",
+              "text": "Design for clear meaning, readable content and predictable interaction. WCAG 2.2 AA acceptance must ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:37856",
+              "name": "Criterion",
+              "text": "Readable contrast",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 375,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:37869",
+          "name": "Anatomy, dimensions & spacing",
+          "w": 1724,
+          "h": 4378,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:37870",
+              "name": "Section marker",
+              "text": "03 / ANATOMY, DIMENSIONS & SPACING",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:37871",
+              "name": "Section title",
+              "text": "Anatomy, dimensions & spacing",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:37872",
+              "name": "Introduction",
+              "text": "Measured on the original component. Pink spacing bands and dotted guides follow the Spacing referenc",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:37873",
+              "name": "Measurement family",
+              "text": "Primary / Primary prelogin / Secondary",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:38061",
+          "name": "Variants & states",
+          "w": 1724,
+          "h": 1210,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:38062",
+              "name": "Section marker",
+              "text": "04 / VARIANTS & STATES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:38063",
+              "name": "Section title",
+              "text": "Variants & states",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:38064",
+              "name": "Introduction",
+              "text": "Original authored combinations, shown as linked instances. Property values belong to the original so",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:38065",
+              "name": "Source family",
+              "text": "Button",
+              "size": 24,
+              "style": "S:3ffb95cd40098ceafe32b1a99a14c60eb3efcba1,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:38156",
+          "name": "Behaviour & adaptation",
+          "w": 1724,
+          "h": 2161,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:38157",
+              "name": "Section marker",
+              "text": "05 / BEHAVIOUR & ADAPTATION",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:38158",
+              "name": "Section title",
+              "text": "Behaviour & adaptation",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:38159",
+              "name": "Introduction",
+              "text": "Use the component’s actual interaction and resizing rules. Enlarged drawings, text growth and runtim",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:38160",
+              "name": "Component guidance",
+              "text": "Container → label → optional leading icon. Keep the label, baseline, icon proportions and corner rad",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10276:38167",
+          "name": "References",
+          "w": 1724,
+          "h": 376,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10276:38168",
+              "name": "Section marker",
+              "text": "06 / REFERENCES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10276:38169",
+              "name": "Section title",
+              "text": "References",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10276:38170",
+              "name": "Introduction",
+              "text": "Source components remain intact in the preserved source archive. The visible specimens are linked in",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10276:38171",
+              "name": "Spacing reference",
+              "text": "Open the Spacing measurement reference ↗",
+              "size": 16,
+              "style": "S:c7aa27db8f97c9a0e3f8b2415302155faaacd55c,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "0:3162",
+      "reference": "737:3153",
+      "w": 1724,
+      "layout": "VERTICAL",
+      "padding": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "gap": 0,
+      "sections": [
+        {
+          "id": "10277:40757",
+          "name": "00 / Page header",
+          "w": 1724,
+          "h": 168,
+          "layout": "VERTICAL",
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12,
+          "texts": [
+            {
+              "id": "10277:40758",
+              "name": "Library label",
+              "text": "MENIGA / DESIGN SYSTEM / COMPONENTS",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40759",
+              "name": "Component title",
+              "text": "Dividers",
+              "size": 48,
+              "style": "S:b9f47bb07828d1f30806af7f3485328180d27787,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 56
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40760",
+          "name": "Overview",
+          "w": 1724,
+          "h": 402,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40761",
+              "name": "Section marker",
+              "text": "01 / OVERVIEW",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40762",
+              "name": "Section title",
+              "text": "Overview",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40763",
+              "name": "Introduction",
+              "text": "Purpose, coverage and correct use.",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40764",
+              "name": "Component guidance",
+              "text": "13 original variants · 12 Type values · Light Restyle = No / Yes. The original component set stays i",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40767",
+          "name": "Accessibility",
+          "w": 1724,
+          "h": 800,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40768",
+              "name": "Section marker",
+              "text": "02 / ACCESSIBILITY",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40769",
+              "name": "Section title",
+              "text": "Accessibility",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40770",
+              "name": "Introduction",
+              "text": "Design for clear meaning, readable content and predictable interaction. WCAG 2.2 AA acceptance must ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40773",
+              "name": "Criterion",
+              "text": "Readable contrast",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 375,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:40789",
+          "name": "Anatomy, dimensions & spacing",
+          "w": 1724,
+          "h": 6838,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:40790",
+              "name": "Section marker",
+              "text": "03 / ANATOMY, DIMENSIONS & SPACING",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:40791",
+              "name": "Section title",
+              "text": "Anatomy, dimensions & spacing",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:40792",
+              "name": "Introduction",
+              "text": "Measured on the original component. Pink spacing bands and dotted guides follow the Spacing referenc",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:40793",
+              "name": "Measurement family",
+              "text": "Small title + data / Action + date / Name + Action",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:41235",
+          "name": "Variants & states",
+          "w": 1724,
+          "h": 834,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:41236",
+              "name": "Section marker",
+              "text": "04 / VARIANTS & STATES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:41237",
+              "name": "Section title",
+              "text": "Variants & states",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:41238",
+              "name": "Introduction",
+              "text": "Original authored combinations, shown as linked instances. Property values belong to the original so",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:41239",
+              "name": "Source family",
+              "text": "Divider",
+              "size": 24,
+              "style": "S:3ffb95cd40098ceafe32b1a99a14c60eb3efcba1,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:41353",
+          "name": "Behaviour & adaptation",
+          "w": 1724,
+          "h": 2286,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:41354",
+              "name": "Section marker",
+              "text": "05 / BEHAVIOUR & ADAPTATION",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:41355",
+              "name": "Section title",
+              "text": "Behaviour & adaptation",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:41356",
+              "name": "Introduction",
+              "text": "Use the component’s actual interaction and resizing rules. Enlarged drawings, text growth and runtim",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:41357",
+              "name": "Component guidance",
+              "text": "Existing Templates examples, copied with their original content and linked component instances. Thes",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:41364",
+          "name": "References",
+          "w": 1724,
+          "h": 376,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:41365",
+              "name": "Section marker",
+              "text": "06 / REFERENCES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:41366",
+              "name": "Section title",
+              "text": "References",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:41367",
+              "name": "Introduction",
+              "text": "Source components remain intact in the preserved source archive. The visible specimens are linked in",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:41368",
+              "name": "Spacing reference",
+              "text": "Open the Spacing measurement reference ↗",
+              "size": 16,
+              "style": "S:c7aa27db8f97c9a0e3f8b2415302155faaacd55c,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "10141:33712",
+      "reference": "10156:1226",
+      "w": 1724,
+      "layout": "VERTICAL",
+      "padding": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "gap": 0,
+      "sections": [
+        {
+          "id": "10277:38164",
+          "name": "00 / Page header",
+          "w": 1724,
+          "h": 168,
+          "layout": "VERTICAL",
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12,
+          "texts": [
+            {
+              "id": "10277:38165",
+              "name": "Library label",
+              "text": "MENIGA / DESIGN SYSTEM / COMPONENTS",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:38166",
+              "name": "Component title",
+              "text": "Layers / Drawers",
+              "size": 48,
+              "style": "S:b9f47bb07828d1f30806af7f3485328180d27787,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 56
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:38167",
+          "name": "Overview",
+          "w": 1724,
+          "h": 476,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:38168",
+              "name": "Section marker",
+              "text": "01 / OVERVIEW",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:38169",
+              "name": "Section title",
+              "text": "Overview",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:38170",
+              "name": "Introduction",
+              "text": "Purpose, coverage and correct use.",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:38171",
+              "name": "Component guidance",
+              "text": "Panels present focused content above an existing screen. The prelogin family composes a layered entr",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:38176",
+          "name": "Accessibility",
+          "w": 1724,
+          "h": 644,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:38177",
+              "name": "Section marker",
+              "text": "02 / ACCESSIBILITY",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:38178",
+              "name": "Section title",
+              "text": "Accessibility",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:38179",
+              "name": "Introduction",
+              "text": "Design for clear meaning, readable content and predictable interaction. WCAG 2.2 AA acceptance must ",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:38182",
+              "name": "Criterion",
+              "text": "Readable contrast",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 375,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:38198",
+          "name": "Anatomy, dimensions & spacing",
+          "w": 1724,
+          "h": 11656,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:38199",
+              "name": "Section marker",
+              "text": "03 / ANATOMY, DIMENSIONS & SPACING",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:38200",
+              "name": "Section title",
+              "text": "Anatomy, dimensions & spacing",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:38201",
+              "name": "Introduction",
+              "text": "Measured on the original component. Pink spacing bands and dotted guides follow the Spacing referenc",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:38202",
+              "name": "Measurement family",
+              "text": "Panel ",
+              "size": 20,
+              "style": "S:9749b9a05189dad8cce52216c86f3a916f8a77f7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:39057",
+          "name": "Variants & states",
+          "w": 1724,
+          "h": 5400,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:39058",
+              "name": "Section marker",
+              "text": "04 / VARIANTS & STATES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:39059",
+              "name": "Section title",
+              "text": "Variants & states",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:39060",
+              "name": "Introduction",
+              "text": "Original authored combinations, shown as linked instances. Property values belong to the original so",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:39061",
+              "name": "Source family",
+              "text": "Panel",
+              "size": 24,
+              "style": "S:3ffb95cd40098ceafe32b1a99a14c60eb3efcba1,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 28
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:39982",
+          "name": "Behaviour & adaptation",
+          "w": 1724,
+          "h": 1958,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:39983",
+              "name": "Section marker",
+              "text": "05 / BEHAVIOUR & ADAPTATION",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:39984",
+              "name": "Section title",
+              "text": "Behaviour & adaptation",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:39985",
+              "name": "Introduction",
+              "text": "Use the component’s actual interaction and resizing rules. Enlarged drawings, text growth and runtim",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:39986",
+              "name": "Component guidance",
+              "text": "The consuming screen owns presentation, selection, expansion, dismissal and any data changes. The co",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        },
+        {
+          "id": "10277:39993",
+          "name": "References",
+          "w": 1724,
+          "h": 376,
+          "layout": "VERTICAL",
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24,
+          "texts": [
+            {
+              "id": "10277:39994",
+              "name": "Section marker",
+              "text": "06 / REFERENCES",
+              "size": 14,
+              "style": "S:474dabdb671a7d94a5709ab80eeff52f2ce26227,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 20
+              }
+            },
+            {
+              "id": "10277:39995",
+              "name": "Section title",
+              "text": "References",
+              "size": 28,
+              "style": "S:01255b30c6c3c7b117bc9fc5d3cebed4d839892f,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 36
+              }
+            },
+            {
+              "id": "10277:39996",
+              "name": "Introduction",
+              "text": "Source components remain intact in the preserved source archive. The visible specimens are linked in",
+              "size": 18,
+              "style": "S:0db923f5d05db446b26834446c28d5536dc84bc7,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            },
+            {
+              "id": "10277:39997",
+              "name": "Spacing reference",
+              "text": "Open the Spacing measurement reference ↗",
+              "size": 16,
+              "style": "S:c7aa27db8f97c9a0e3f8b2415302155faaacd55c,",
+              "w": 1596,
+              "line": {
+                "unit": "PIXELS",
+                "value": 26
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "category-tag",
+      "doc": "10320:51",
+      "component": "10320:35",
+      "archive": "10368:443",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10320:52",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10320:55",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:80",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:86",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 652,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:108",
+          "name": "Variants & states",
+          "h": 460,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:114",
+          "name": "Behaviour & adaptation",
+          "h": 438,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:120",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10320:35",
+        "key": "7e5de2a79f1aec7c1f36c870c4c3c64a3bd0b47f",
+        "w": 62,
+        "h": 22,
+        "ids": "a1732101",
+        "properties": "349f0ab3",
+        "geometry": "d4fed24c",
+        "bindings": "6528d15f",
+        "text": "84d65f85",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10320:35",
+        "key": "7e5de2a79f1aec7c1f36c870c4c3c64a3bd0b47f",
+        "w": 62,
+        "h": 22,
+        "ids": "a1732101",
+        "properties": "349f0ab3",
+        "geometry": "d4fed24c",
+        "bindings": "6528d15f",
+        "text": "84d65f85",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:481",
+      "gallery": "10368:503",
+      "enlarged": {
+        "id": "10368:520",
+        "w": 90,
+        "h": 38
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 1884,
+        "y": 0,
+        "w": 1724,
+        "h": 3028
+      }
+    },
+    {
+      "id": "status-success",
+      "doc": "10320:62101",
+      "component": "10320:62098",
+      "archive": "10368:536",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10320:62102",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10320:62105",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62116",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62122",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 652,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62137",
+          "name": "Variants & states",
+          "h": 462,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62143",
+          "name": "Behaviour & adaptation",
+          "h": 440,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62149",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10320:62098",
+        "key": "06af77ec0bc6132ef9e426ec8a311f18dec4177d",
+        "w": 41,
+        "h": 24,
+        "ids": "a6d4e460",
+        "properties": "a2b8507e",
+        "geometry": "30022ba4",
+        "bindings": "54e6cff3",
+        "text": "7015381",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10320:62098",
+        "key": "06af77ec0bc6132ef9e426ec8a311f18dec4177d",
+        "w": 41,
+        "h": 24,
+        "ids": "a6d4e460",
+        "properties": "a2b8507e",
+        "geometry": "30022ba4",
+        "bindings": "54e6cff3",
+        "text": "7015381",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:574",
+      "gallery": "10368:588",
+      "enlarged": {
+        "id": "10368:598",
+        "w": 65,
+        "h": 40
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 3768,
+        "y": 0,
+        "w": 1724,
+        "h": 3032
+      }
+    },
+    {
+      "id": "notification-counter",
+      "doc": "10336:162",
+      "component": "10333:38",
+      "archive": "10368:607",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10336:163",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10336:166",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10336:180",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10336:186",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 652,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10336:202",
+          "name": "Variants & states",
+          "h": 454,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10336:207",
+          "name": "Behaviour & adaptation",
+          "h": 432,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10336:212",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10333:38",
+        "key": "e3ff750f3624d777261ef4732ace7ffec19094f9",
+        "w": 16,
+        "h": 16,
+        "ids": "c7e1a5bb",
+        "properties": "56ce7382",
+        "geometry": "3d201edd",
+        "bindings": "e2ec6078",
+        "text": "98d95505",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10333:38",
+        "key": "e3ff750f3624d777261ef4732ace7ffec19094f9",
+        "w": 16,
+        "h": 16,
+        "ids": "c7e1a5bb",
+        "properties": "56ce7382",
+        "geometry": "3d201edd",
+        "bindings": "e2ec6078",
+        "text": "98d95505",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:645",
+      "gallery": "10368:657",
+      "enlarged": {
+        "id": "10368:667",
+        "w": 24,
+        "h": 32
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 5652,
+        "y": 0,
+        "w": 1724,
+        "h": 3016
+      }
+    },
+    {
+      "id": "navigation-chip",
+      "doc": "10320:384",
+      "component": "10320:379",
+      "archive": "10368:1927",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10320:385",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10320:388",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:401",
+          "name": "Accessibility",
+          "h": 444,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:407",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 678,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:422",
+          "name": "Variants & states",
+          "h": 471,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:428",
+          "name": "Behaviour & adaptation",
+          "h": 449,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:434",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10320:379",
+        "key": "647270eab2ae2ce302bf72cc0b585f9d76916e95",
+        "w": 58,
+        "h": 33,
+        "ids": "f725b584",
+        "properties": "15fc61fa",
+        "geometry": "b1528ec1",
+        "bindings": "f68127dd",
+        "text": "6a48e7a1",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10320:379",
+        "key": "647270eab2ae2ce302bf72cc0b585f9d76916e95",
+        "w": 58,
+        "h": 33,
+        "ids": "f725b584",
+        "properties": "15fc61fa",
+        "geometry": "b1528ec1",
+        "bindings": "f68127dd",
+        "text": "6a48e7a1",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:1965",
+      "gallery": "10368:1980",
+      "enlarged": {
+        "id": "10368:1991",
+        "w": 78,
+        "h": 49
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 5652,
+        "y": 0,
+        "w": 1724,
+        "h": 3102
+      }
+    },
+    {
+      "id": "text-action",
+      "doc": "10320:62276",
+      "component": "10320:62270",
+      "archive": "10368:2001",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10320:62277",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10320:62280",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62295",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62301",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 652,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62314",
+          "name": "Variants & states",
+          "h": 462,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62320",
+          "name": "Behaviour & adaptation",
+          "h": 432,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:62326",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10320:62270",
+        "key": "344160ef2f43d4ff286bcb8bf3e54af365127575",
+        "w": 50,
+        "h": 24,
+        "ids": "7e4f1ace",
+        "properties": "7c7e221c",
+        "geometry": "aea7f786",
+        "bindings": "47527776",
+        "text": "9bca17fa",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10320:62270",
+        "key": "344160ef2f43d4ff286bcb8bf3e54af365127575",
+        "w": 50,
+        "h": 24,
+        "ids": "7e4f1ace",
+        "properties": "7c7e221c",
+        "geometry": "aea7f786",
+        "bindings": "47527776",
+        "text": "9bca17fa",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:2039",
+      "gallery": "10368:2052",
+      "enlarged": {
+        "id": "10368:2064",
+        "w": 80,
+        "h": 32
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 7536,
+        "y": 0,
+        "w": 1724,
+        "h": 3024
+      }
+    },
+    {
+      "id": "divider-hairline",
+      "doc": "10321:914",
+      "component": "10321:911",
+      "archive": "10368:2679",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10321:915",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10321:918",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10321:929",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10321:935",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 652,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10321:945",
+          "name": "Variants & states",
+          "h": 439,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10321:951",
+          "name": "Behaviour & adaptation",
+          "h": 376,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10321:957",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10321:911",
+        "key": "d8d9ed380c1b332b9177c1040709f058b72ce7e0",
+        "w": 375,
+        "h": 1,
+        "ids": "13a14177",
+        "properties": "ebc7235b",
+        "geometry": "1a4dd29d",
+        "bindings": "31b73fcc",
+        "text": "741638a5",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10321:911",
+        "key": "d8d9ed380c1b332b9177c1040709f058b72ce7e0",
+        "w": 375,
+        "h": 1,
+        "ids": "13a14177",
+        "properties": "ebc7235b",
+        "geometry": "1a4dd29d",
+        "bindings": "31b73fcc",
+        "text": "741638a5",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:2717",
+      "gallery": "10368:2727",
+      "enlarged": null,
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 1884,
+        "y": 0,
+        "w": 1724,
+        "h": 2945
+      }
+    },
+    {
+      "id": "product-panel",
+      "doc": "10320:63527",
+      "component": "10320:63365",
+      "archive": "10368:5824",
+      "templateWidth": 1724,
+      "sections": [
+        {
+          "id": "10320:63528",
+          "name": "00 / Page header",
+          "h": 168,
+          "padding": [
+            40,
+            64,
+            40,
+            64
+          ],
+          "gap": 12
+        },
+        {
+          "id": "10320:63531",
+          "name": "Overview",
+          "h": 416,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:63718",
+          "name": "Accessibility",
+          "h": 418,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:63724",
+          "name": "Anatomy, dimensions & spacing",
+          "h": 1353,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:63824",
+          "name": "Variants & states",
+          "h": 1105,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:63830",
+          "name": "Behaviour & adaptation",
+          "h": 519,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        },
+        {
+          "id": "10320:63836",
+          "name": "References",
+          "h": 476,
+          "padding": [
+            48,
+            64,
+            48,
+            64
+          ],
+          "gap": 24
+        }
+      ],
+      "before": {
+        "id": "10320:63365",
+        "key": "11f8c586b209ab9c3cb20c330420647eafaa9906",
+        "w": 375,
+        "h": 667,
+        "ids": "d803d0e4",
+        "properties": "c6652211",
+        "geometry": "80dfa237",
+        "bindings": "9597924d",
+        "text": "8ed02388",
+        "reactions": "741638a5"
+      },
+      "after": {
+        "id": "10320:63365",
+        "key": "11f8c586b209ab9c3cb20c330420647eafaa9906",
+        "w": 375,
+        "h": 667,
+        "ids": "d803d0e4",
+        "properties": "c6652211",
+        "geometry": "80dfa237",
+        "bindings": "9597924d",
+        "text": "8ed02388",
+        "reactions": "741638a5"
+      },
+      "diagram": "10368:5862",
+      "gallery": "10368:6074",
+      "enlarged": {
+        "id": "10368:6275",
+        "w": 375,
+        "h": 119
+      },
+      "sourcePreserved": true,
+      "newBounds": {
+        "x": 1884,
+        "y": 0,
+        "w": 1724,
+        "h": 4455
+      }
+    }
+  ],
+  "sourceContrast": [
+    {
+      "id": "category-tag",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 12,
+          "line": {
+            "unit": "PIXELS",
+            "value": 16
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "Shop",
+          "ratio": 5.98,
+          "target": 4.5,
+          "foreground": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "background": {
+            "r": 0.6392157077789307,
+            "g": 0.21176470816135406,
+            "b": 0.5803921818733215
+          },
+          "assumedWhiteHost": false
+        }
+      ]
+    },
+    {
+      "id": "status-success",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Medium"
+          },
+          "size": 14,
+          "line": {
+            "unit": "PIXELS",
+            "value": 16
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "Status",
+          "ratio": 4.98,
+          "target": 4.5,
+          "foreground": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "background": {
+            "r": 0.239215686917305,
+            "g": 0.4901960790157318,
+            "b": 0.26274511218070984
+          },
+          "assumedWhiteHost": false
+        }
+      ]
+    },
+    {
+      "id": "notification-counter",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 14,
+          "line": {
+            "unit": "PIXELS",
+            "value": 16
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "3",
+          "ratio": 5.01,
+          "target": 4.5,
+          "foreground": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "background": {
+            "r": 0.8117647171020508,
+            "g": 0.2078431397676468,
+            "b": 0.1411764770746231
+          },
+          "assumedWhiteHost": false
+        }
+      ]
+    },
+    {
+      "id": "navigation-chip",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 14,
+          "line": {
+            "unit": "AUTO"
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "Paragraph",
+          "ratio": 13.88,
+          "target": 4.5,
+          "foreground": {
+            "r": 0.14901961386203766,
+            "g": 0.14901961386203766,
+            "b": 0.14901961386203766
+          },
+          "background": {
+            "r": 0.9607843160629272,
+            "g": 0.9607843160629272,
+            "b": 0.9607843160629272
+          },
+          "assumedWhiteHost": false
+        }
+      ]
+    },
+    {
+      "id": "text-action",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 14,
+          "line": {
+            "unit": "PIXELS",
+            "value": 16
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "link",
+          "ratio": 5.01,
+          "target": 4.5,
+          "foreground": {
+            "r": 0,
+            "g": 0.47843137383461,
+            "b": 0.5686274766921997
+          },
+          "background": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "assumedWhiteHost": true
+        }
+      ]
+    },
+    {
+      "id": "divider-hairline",
+      "fonts": [],
+      "contrastPairs": []
+    },
+    {
+      "id": "product-panel",
+      "fonts": [
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 28,
+          "line": {
+            "unit": "PIXELS",
+            "value": 32
+          }
+        },
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 18,
+          "line": {
+            "unit": "AUTO"
+          }
+        },
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Regular"
+          },
+          "size": 14,
+          "line": {
+            "unit": "AUTO"
+          }
+        },
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Bold"
+          },
+          "size": 14,
+          "line": {
+            "unit": "AUTO"
+          }
+        },
+        {
+          "font": {
+            "family": "UniCredit",
+            "style": "Regular"
+          },
+          "size": 15,
+          "line": {
+            "unit": "AUTO"
+          }
+        }
+      ],
+      "contrastPairs": [
+        {
+          "name": "Title",
+          "ratio": 15.13,
+          "target": 3,
+          "foreground": {
+            "r": 0.14901961386203766,
+            "g": 0.14901961386203766,
+            "b": 0.14901961386203766
+          },
+          "background": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "assumedWhiteHost": true
+        },
+        {
+          "name": "Desc",
+          "ratio": 15.13,
+          "target": 4.5,
+          "foreground": {
+            "r": 0.14901961386203766,
+            "g": 0.14901961386203766,
+            "b": 0.14901961386203766
+          },
+          "background": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "assumedWhiteHost": false
+        },
+        {
+          "name": "Button",
+          "ratio": 5.01,
+          "target": 4.5,
+          "foreground": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "background": {
+            "r": 0,
+            "g": 0.47843137383461,
+            "b": 0.5686274766921997
+          },
+          "assumedWhiteHost": false
+        }
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "id": "category-tag",
+      "doc": "10320:51",
+      "component": "10320:35",
+      "w": 1724,
+      "h": 3028,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:520",
+        "w": 90,
+        "h": 38,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10320:58"
+    },
+    {
+      "id": "status-success",
+      "doc": "10320:62101",
+      "component": "10320:62098",
+      "w": 1724,
+      "h": 3032,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:598",
+        "w": 65,
+        "h": 40,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10320:62108"
+    },
+    {
+      "id": "notification-counter",
+      "doc": "10336:162",
+      "component": "10333:38",
+      "w": 1724,
+      "h": 3016,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:667",
+        "w": 24,
+        "h": 32,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10336:169"
+    },
+    {
+      "id": "navigation-chip",
+      "doc": "10320:384",
+      "component": "10320:379",
+      "w": 1724,
+      "h": 3102,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:1991",
+        "w": 78,
+        "h": 49,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10320:391"
+    },
+    {
+      "id": "text-action",
+      "doc": "10320:62276",
+      "component": "10320:62270",
+      "w": 1724,
+      "h": 3024,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:2064",
+        "w": 80,
+        "h": 32,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10320:62283"
+    },
+    {
+      "id": "divider-hairline",
+      "doc": "10321:914",
+      "component": "10321:911",
+      "w": 1724,
+      "h": 2945,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 2,
+      "measurementScale": 1,
+      "enlarged": null,
+      "issues": [],
+      "overviewIntro": "10321:921"
+    },
+    {
+      "id": "product-panel",
+      "doc": "10320:63527",
+      "component": "10320:63365",
+      "w": 1724,
+      "h": 4455,
+      "sectionCount": 7,
+      "sourcePreserved": true,
+      "linkedVisibleInstances": 3,
+      "measurementScale": 1,
+      "enlarged": {
+        "id": "10368:6275",
+        "w": 375,
+        "h": 119,
+        "textOverflow": [],
+        "linked": true
+      },
+      "issues": [],
+      "overviewIntro": "10320:63534"
+    }
+  ],
+  "visualFixes": [
+    {
+      "mutatedNodeIds": [
+        "10320:58",
+        "10320:62108",
+        "10336:169"
+      ],
+      "overviews": [
+        {
+          "id": "category-tag",
+          "overview": "10320:55"
+        },
+        {
+          "id": "status-success",
+          "overview": "10320:62105"
+        },
+        {
+          "id": "notification-counter",
+          "overview": "10336:166"
+        }
+      ]
+    },
+    {
+      "mutatedNodeIds": [
+        "10320:391",
+        "10320:62283"
+      ],
+      "overviews": [
+        {
+          "id": "navigation-chip",
+          "overview": "10320:388"
+        },
+        {
+          "id": "text-action",
+          "overview": "10320:62280"
+        }
+      ]
+    },
+    {
+      "mutatedNodeIds": [
+        "10321:921"
+      ],
+      "overviews": [
+        {
+          "id": "divider-hairline",
+          "overview": "10321:918"
+        }
+      ]
+    },
+    {
+      "mutatedNodeIds": [
+        "10320:63534"
+      ],
+      "overviews": [
+        {
+          "id": "product-panel",
+          "overview": "10320:63531"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "alignedComponents": 7,
+    "preservedComponentIds": 7,
+    "preservedKeys": 7,
+    "preservedPropertyAndBindingSignatures": 7,
+    "sectionOrderPassed": 7,
+    "overflowIssues": 0,
+    "documentationGroupIssues": 0,
+    "unboundDocumentationText": 0,
+    "linked200PercentExamples": 6,
+    "hairlineTextResizingNotApplicable": true,
+    "sourceMastersOutsideVisibleReviewFrame": true,
+    "sourceBusinessLogicChanged": false,
+    "huApprovalChanged": false,
+    "publicationPerformed": false,
+    "runtimeCodeChanged": false,
+    "runtimeTestsRun": false
+  },
+  "visualReview": {
+    "fullDocuments": [
+      "category-tag",
+      "navigation-chip",
+      "text-action",
+      "notification-counter",
+      "status-success",
+      "divider-hairline",
+      "product-panel"
+    ],
+    "postFix": "All seven Overview sections captured after replacing repeated copy with the canonical introduction; representative final pixels reviewed for Category Tag and Product Selection Panel.",
+    "evidenceDirectory": "C:/Users/mihai/AppData/Local/Temp/figma-payments-aa/approved-template-alignment"
+  },
+  "ownRepositoryDelta": [
+    "docs/tasks/approved-design-system-template-alignment-2026-10-19.json"
+  ]
+}

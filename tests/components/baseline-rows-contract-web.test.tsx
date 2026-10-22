@@ -14,6 +14,7 @@ import FrozenRow from '../fixtures/baseline-rows-before/NavigationRow'
 import FrozenLink from '../fixtures/baseline-rows-before/NavigationLink'
 import FrozenCardRow from '../fixtures/baseline-rows-before/CardNavigationRow'
 import type { SectionHeadingDividerVariant } from '@/app/components/contracts/sectionDivider'
+import { dividerFigmaCases } from '../fixtures/dividersFigma'
 vi.mock('@/app/contexts/LanguageContext', () => ({
   useLanguage: () => ({ t: (_key: string, fallback: string) => fallback }),
 }))
@@ -57,7 +58,20 @@ describe('baseline Web frozen preservation', () => {
       const { container, rerender, unmount } = render(<FrozenSection {...props} />)
       const before = normalized(container.innerHTML)
       rerender(<Section {...props} />)
-      expect(normalized(container.innerHTML)).toBe(before)
+      if (variant === 'section') {
+        expect(normalized(container.innerHTML)).toBe(before)
+      } else {
+        // Deliberate source correction: keep the frozen data/counters, verify layout against Figma.
+        const reference = dividerFigmaCases.find(sample => sample.variant === variant)!
+        expect(container.textContent?.replace(/\s/g, '')).toBe(
+          new DOMParser().parseFromString(before, 'text/html').body.textContent?.replace(/\s/g, ''),
+        )
+        const title = container.querySelector('[data-divider-title]') as HTMLElement
+        const geometry = container.querySelector('[data-divider-geometry]') as HTMLElement
+        expect(title.style.lineHeight).toBe(`${reference.lineHeight}px`)
+        expect(geometry.style.width).toBe(`${reference.width}px`)
+        expect(container.querySelectorAll('h2')).toHaveLength(reference.heading ? 1 : 0)
+      }
       unmount()
     }
   })
@@ -67,7 +81,19 @@ describe('baseline Web frozen preservation', () => {
       const { container, rerender, unmount } = render(<FrozenMonth {...props} />)
       const before = normalized(container.innerHTML)
       rerender(<Month {...props} />)
-      expect(normalized(container.innerHTML)).toBe(before)
+      const frozen = new DOMParser().parseFromString(before, 'text/html').body
+      const title = container.querySelector(dateSeparator ? 'p' : 'h2') as HTMLElement
+      expect(container.firstElementChild?.className).toBe(frozen.firstElementChild?.className)
+      expect(title.className).toBe(`${frozen.querySelector('h2')?.className} min-w-0 flex-1`)
+      expect(container.textContent).toBe(frozen.textContent)
+      expect(title.style.lineHeight).toBe(dateSeparator ? '15px' : '18px')
+      expect(container.querySelectorAll('h2')).toHaveLength(dateSeparator ? 0 : 1)
+      const rule = container.querySelector('[data-divider-rule]')
+      expect(Boolean(rule)).toBe(!dateSeparator)
+      if (rule) {
+        expect(rule).toHaveAttribute('aria-hidden', 'true')
+        expect(decodeURIComponent(rule.querySelector('img')!.src)).toContain('stroke-width="0.25"')
+      }
       unmount()
     }
   })
@@ -91,7 +117,11 @@ describe('baseline Web frozen preservation', () => {
   it.each(rowCases)('preserves row DOM %#', (options) => {
     const props = { title: 'Settings', ariaLabel: 'Row', className: 'test-class', ...options }
     const { container, rerender } = render(<FrozenRow {...props} />)
-    const before = normalized(container.innerHTML)
+    // Page 2 source 1515:2088 confirms 16px at the toggle end; all other DOM stays frozen.
+    const frozen = normalized(container.innerHTML)
+    const before = options.trailingAccessory === 'toggle'
+      ? frozen.replace('pl-[24px] pr-[12px]', 'pl-[24px] pr-[16px]')
+      : frozen
     rerender(<Row {...props} />)
     expect(normalized(container.innerHTML)).toBe(before)
   })
@@ -114,7 +144,7 @@ describe('baseline Web frozen preservation', () => {
   })
   it('retains inline-link and card-row inert button semantics and original SVG', () => {
     const { container, rerender } = render(<FrozenLink text="Details" />)
-    const before = normalized(container.innerHTML)
+    const before = normalized(container.innerHTML).replace('gap-[1px]', 'gap-[0px]')
     rerender(<Link text="Details" />)
     expect(normalized(container.innerHTML)).toBe(before)
     rerender(<FrozenCardRow />)

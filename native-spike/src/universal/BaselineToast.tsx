@@ -7,6 +7,8 @@ import {
 import { Text } from './Typography';
 import { sourceColor } from './sourceColor';
 
+export { TOAST_MESSAGE_SOURCE } from '@/app/components/contracts/toast';
+
 export function BaselineToast({
   variant = 'action-required',
   message,

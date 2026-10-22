@@ -85,7 +85,7 @@ export default function ProductCard({
         <div className="flex w-full flex-col gap-[8px]">
           <div className="flex w-full items-start gap-[16px]">
             <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-              <p className="text-[16px] font-bold leading-[18px] tracking-[0] text-[var(--uc-primary-k0,var(--uc-text))]">
+              <p className="text-[18px] font-bold leading-[20px] tracking-[0] text-[var(--uc-primary-k0,var(--uc-text))]">
                 {title}
               </p>
               <p className="text-[14px] font-normal leading-[16px] tracking-[0] text-[var(--uc-text)]">
@@ -99,7 +99,7 @@ export default function ProductCard({
             </div>
             <div
               data-product-card-leading-visual={leadingVisual}
-              className={`flex shrink-0 items-center justify-center text-[var(--uc-action)] ${leadingVisual === 'card' ? 'h-[40px] w-[64px]' : 'size-[40px]'}`}
+              className={`flex shrink-0 items-center justify-center text-[var(--uc-action)] ${state.leadingClass}`}
             >
               {icon}
             </div>
@@ -181,6 +181,7 @@ export default function ProductCard({
           <p className="uc-type-n5-strong text-[var(--uc-text)]">
             {accountNumber}
           </p>
+          {thirdLine ? <p className="uc-type-n5 text-[var(--uc-text)]">{thirdLine}</p> : null}
         </div>
       </div>
 

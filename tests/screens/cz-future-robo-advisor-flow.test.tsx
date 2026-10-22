@@ -165,9 +165,11 @@ describe('CZ Future Robo Advisor flow', () => {
   it('uses 16px subtitles and goal option titles throughout goal creation', () => {
     startFlow()
 
-    expect(screen.getByText('Turn your plans into an investment goal. Choose a suitable portfolio, then decide when and how much to invest.')).toHaveClass(
-      'text-[16px]',
-    )
+    expect(
+      screen.getByText(
+        'Turn your plans into an investment goal. Choose a suitable portfolio, then decide when and how much to invest.',
+      ),
+    ).toHaveClass('text-[16px]')
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
 
@@ -207,7 +209,7 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps the four Figma goal choices', () => {
+  it('keeps the five Figma goal choices', () => {
     startFlow()
 
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
@@ -215,8 +217,9 @@ describe('CZ Future Robo Advisor flow', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
-    expect(screen.getAllByRole('radio')).toHaveLength(4)
+    expect(screen.getAllByRole('radio')).toHaveLength(5)
     expect(screen.getByRole('radio', { name: /General build-up wealth/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Protection for inflation/ })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Saving for unforeseen circumstances/ })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Saving for a major purchase/ })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Retirement/ })).toBeInTheDocument()

@@ -1,0 +1,392 @@
+import type { ComponentMeta } from '../contracts'
+
+/** Approved declarative metadata. Literal entries participate in the strict registry audit. */
+export const FIGMA_COMPONENTS = {
+  'brand.prime-advisory': {
+    id: 'brand.prime-advisory',
+    label: 'Prime advisory badge',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'images.card-type14': {
+    id: 'images.card-type14',
+    label: 'Card payment artwork Type14',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'products.company-selection': {
+    id: 'products.company-selection',
+    label: 'Company selection',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'payments.card-payment': {
+    id: 'payments.card-payment',
+    label: 'Card payment',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'pfm.source-graph': {
+    id: 'pfm.source-graph',
+    label: 'PFM graph',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.timeline-atom': {
+    id: 'ui.timeline-atom',
+    label: 'Timeline atom',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'investments.source-list': {
+    id: 'investments.source-list',
+    label: 'Investment list',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'investments.source-action-bar': {
+    id: 'investments.source-action-bar',
+    label: 'Investment action bar',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'investments.source-campaign': {
+    id: 'investments.source-campaign',
+    label: 'Investment commercial banner',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'marketing.source-campaign': {
+    id: 'marketing.source-campaign',
+    label: 'Commercial banner',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'marketing.source-sticky': {
+    id: 'marketing.source-sticky',
+    label: 'Sticky banner',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCatalogCompositions.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.canonical-icon': {
+    id: 'ui.canonical-icon',
+    label: 'Canonical icons',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCanonicalIcon.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'brand.canonical-marks': {
+    id: 'brand.canonical-marks',
+    label: 'Canonical brand marks',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCanonicalIcon.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'products.service-icon': {
+    id: 'products.service-icon',
+    label: 'Service icons',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCanonicalIcon.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-skeleton': {
+    id: 'ui.feedback-skeleton',
+    label: 'Skeleton',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-output': {
+    id: 'ui.feedback-output',
+    label: 'Progress bar output',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-slider': {
+    id: 'ui.feedback-slider',
+    label: 'Slider',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-linear': {
+    id: 'ui.feedback-linear',
+    label: 'Linear progress',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-info': {
+    id: 'ui.feedback-info',
+    label: 'Information',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.feedback-nps': {
+    id: 'ui.feedback-nps',
+    label: 'NPS stars',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineFeedbackProgress.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.checkbox': {
+    id: 'ui.checkbox',
+    label: 'Checkbox element',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCheckbox.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.new-tag': {
+    id: 'ui.new-tag',
+    label: 'New tag',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.positive-balance-tag': {
+    id: 'ui.positive-balance-tag',
+    label: 'Positive balance tag',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.status-label': {
+    id: 'ui.status-label',
+    label: 'Status label',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.category-tag': {
+    id: 'ui.category-tag',
+    label: 'Category tag',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.success-status': {
+    id: 'ui.success-status',
+    label: 'Successful status badge',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.notification-counter': {
+    id: 'ui.notification-counter',
+    label: 'Notification counter',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineTag.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.navigation-chip': {
+    id: 'ui.navigation-chip',
+    label: 'Navigation chip',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselinePill.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.text-button-primary': {
+    id: 'ui.text-button-primary',
+    label: 'Text button primary',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineNavigationLink.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.divider-hairline': {
+    id: 'ui.divider-hairline',
+    label: 'Divider hairline',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineSectionDivider.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.dropdown-field': {
+    id: 'ui.dropdown-field',
+    label: 'Dropdown field',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineDropdownField.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'ui.mobile-code': {
+    id: 'ui.mobile-code',
+    label: 'Mobile Code / PIN',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineMobileCode.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'products.selection-panel': {
+    id: 'products.selection-panel',
+    label: 'Product selection panel',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselinePanelMenuSheet.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'images.card-art': {
+    id: 'images.card-art',
+    label: 'Card artwork',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselineCardArt.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+  'images.payment-art': {
+    id: 'images.payment-art',
+    label: 'Payment artwork',
+    products: ['PI', 'SME', 'KIDS_PI'],
+    designSystems: ['current'],
+    status: 'implemented',
+    componentPath: 'native-spike/src/universal/BaselinePaymentImage.tsx',
+    usedByScreens: [],
+    notes:
+      'Approved shared presentation with a live catalog preview. The consuming feature owns state, validation and navigation; application-wide adoption is recorded separately.',
+  },
+} satisfies Record<string, ComponentMeta>
+
+export type FigmaCatalogComponentId = keyof typeof FIGMA_COMPONENTS

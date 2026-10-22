@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { AppIcon } from '@/app/components/icons'
 import { SelectionChip } from '@/app/screens/tools/toolsUi'
+import { isPrimeReferenceScreen, resolvePrimePrototypeTarget } from '@/features/prime/reference'
+import { PrimePresentationDialog } from '@/flows/shared/prime/presentation/PrimePresentationDialog'
+import { buildPrimePresentationUrl, isPrimePresentationUrl, removePrimePresentationMarker } from '@/flows/shared/prime/presentation/presentationUrl'
+import { getPrimePhoneAppearance } from '@/flows/shared/prime/presentation/phoneAppearance'
 import { COUNTRY_META } from '@/app/registry/demoConfig'
 import { createPhoneScreenshotBlob } from '@/app/utils/phoneScreenshot'
 import MiniPhone from './MiniPhone'
-import { renderFlowPreview } from './flowPreviews'
+import { flowPreviewStatusBarVariant, renderFlowPreview } from './flowPreviews'
 import { FlowNavProvider, type FlowNav } from './prototypeNav'
 import FlowImplementationPanel from './FlowImplementationPanel'
 import { resolveScenario } from '../flows'
@@ -30,6 +34,7 @@ import { buildFlowDocument, copyConfluenceDocument, downloadFlowDocx } from '../
 import { stateTransitions } from '../handoff/referencePackage'
 
 type DetailTab = 'journey' | 'spec' | 'prototype' | 'implementation'
+type PrototypeRequest = { screen: FlowScreenKind; nonce: number; parameters?: Readonly<Record<string, string>> }
 /** How a reviewer takes the flow away: print, Confluence paste, or Word/import. */
 type ExportKind = 'pdf' | 'confluence' | 'word'
 type JourneyView = 'focused' | 'filmstrip'
@@ -105,7 +110,15 @@ function slugify(value: string) {
 }
 
 export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefinition; onBackToIndex: () => void }) {
-  const [activeTab, setActiveTab] = useState<DetailTab>('journey')
+  const [presentationMode, setPresentationMode] = useState<'modal' | 'page' | null>(() =>
+    flow.id === 'pi-prime' && typeof window !== 'undefined' && isPrimePresentationUrl(window.location.href) ? 'page' : null,
+  )
+  const [activeTab, setActiveTab] = useState<DetailTab>(presentationMode === 'page' ? 'prototype' : 'journey')
+  const demoButtonRef = useRef<HTMLButtonElement>(null)
+  const closePresentation = () => {
+    if (typeof window !== 'undefined') window.history.replaceState(window.history.state, '', removePrimePresentationMarker(window.location.href))
+    setPresentationMode(null)
+  }
   const tabsRef = useRef<HTMLDivElement>(null)
   const [requestedScenarioId, setRequestedScenarioId] = useState(flow.defaultScenarioId)
   const [stepIndex, setStepIndex] = useState(0)
@@ -130,7 +143,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
   // Cross-tab links. Every tab may cite a rule or a screen; these take the
   // reader to where it is owned (Specification) and scroll to it, or open a
   // screen in the prototype. The nonce lets the same screen be asked for twice.
-  const [prototypeRequest, setPrototypeRequest] = useState<{ screen: FlowScreenKind; nonce: number } | null>(null)
+  const [prototypeRequest, setPrototypeRequest] = useState<PrototypeRequest | null>(null)
   const focusAfterTabSwitch = (id: string) => {
     requestAnimationFrame(() => {
       const target = document.getElementById(id)
@@ -157,7 +170,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
     focusAfterTabSwitch(`rule-${ruleId}`)
   }
   const openInPrototype = (screen: FlowScreenKind) => {
-    setPrototypeRequest((current) => ({ screen, nonce: (current?.nonce ?? 0) + 1 }))
+    setPrototypeRequest((current) => ({ screen, nonce: (current?.nonce ?? 0) + 1, parameters: steps.find((step) => step.screen === screen)?.previewParameters }))
     setActiveTab('prototype')
     requestAnimationFrame(() => tabsRef.current?.scrollIntoView({ block: 'start' }))
   }
@@ -248,10 +261,13 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
 
       <FlowHeader
         flow={flow}
+        compact={flow.id === 'pi-prime' && activeTab === 'prototype'}
         exportKind={exportKind}
         exportError={exportError}
         copied={copied}
         onExport={handleExport}
+        onLaunchDemo={flow.id === 'pi-prime' ? () => setPresentationMode('modal') : undefined}
+        demoButtonRef={demoButtonRef}
       />
 
       {/*
@@ -308,7 +324,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         />
       ) : null}
 
-      {activeTab === 'prototype' && flow.prototype ? (
+      {activeTab === 'prototype' && flow.prototype && !presentationMode ? (
         <PrototypePanel
           flow={flow}
           prototype={flow.prototype}
@@ -316,6 +332,16 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
           request={prototypeRequest}
           onOpenScreenContract={openScreenContract}
           onOpenRule={openRule}
+        />
+      ) : null}
+
+      {flow.id === 'pi-prime' ? (
+        <PrimePresentationDialog
+          open={presentationMode !== null}
+          mode={presentationMode ?? 'modal'}
+          onClose={closePresentation}
+          presentationUrl={typeof window !== 'undefined' ? buildPrimePresentationUrl(window.location.href) : ''}
+          returnFocusRef={demoButtonRef}
         />
       ) : null}
 
@@ -331,8 +357,8 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
       {/* Off-screen capture strip: keeps export working from any tab. */}
       <div ref={captureRef} aria-hidden="true" className="pointer-events-none fixed left-[-10000px] top-0">
         {steps.map((step) => (
-          <MiniPhone key={step.id} scale={1}>
-            {renderFlowPreview(step.screen, { countryName })}
+          <MiniPhone key={step.id} scale={1} statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
+            {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
           </MiniPhone>
         ))}
       </div>
@@ -342,30 +368,48 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
 
 function FlowHeader({
   flow,
+  compact = false,
   exportKind,
   exportError,
   copied,
   onExport,
+  onLaunchDemo,
+  demoButtonRef,
 }: {
   flow: FlowDefinition
+  compact?: boolean
   exportKind: ExportKind | null
   exportError: string | null
   copied: boolean
   onExport: (kind: ExportKind) => void
+  onLaunchDemo?: () => void
+  demoButtonRef?: RefObject<HTMLButtonElement>
 }) {
   return (
     <header
       data-testid="flow-detail-header"
-      className="rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm"
+      className={`rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] ${compact ? 'p-[16px]' : 'p-[24px]'} shadow-sm`}
     >
       <div className="flex flex-wrap items-start justify-between gap-[20px] sm:flex-nowrap">
         <div className="min-w-0 flex-1">
-          <h1 className="text-[32px] font-bold leading-[38px] text-[var(--uc-text)]">{flow.title}</h1>
-          <p className="mt-[10px] uc-type-n4 text-[var(--uc-text-muted)]">{flow.summary}</p>
+          <h1 className={`${compact ? 'text-[24px] leading-[30px]' : 'text-[32px] leading-[38px]'} font-bold text-[var(--uc-text)]`}>{flow.title}</h1>
+          {!compact && <p className="mt-[10px] uc-type-n4 text-[var(--uc-text-muted)]">{flow.summary}</p>}
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-[8px]">
           <div className="flex items-center gap-[8px]">
+            {onLaunchDemo ? (
+              <button
+                ref={demoButtonRef}
+                type="button"
+                aria-label="Open PRIME demo"
+                onClick={onLaunchDemo}
+                className="inline-flex h-[40px] shrink-0 items-center justify-center gap-[8px] rounded-[10px] bg-[#e2001a] px-[16px] uc-type-n5-strong text-white transition-colors hover:bg-[#ba0015] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e2001a]"
+              >
+                <AppIcon name="play" size={20} color="currentColor" />
+                Demo
+              </button>
+            ) : null}
             <a
               href={flow.sourceUrl}
               target="_blank"
@@ -802,8 +846,8 @@ function JourneyPanel({
           >
             {activeStep ? (
               <>
-                <MiniPhone ref={focusedScreenRef} scale={0.82} scrollable>
-                  {renderFlowPreview(activeStep.screen, { countryName })}
+                <MiniPhone ref={focusedScreenRef} scale={0.82} scrollable statusBarVariant={flowPreviewStatusBarVariant(activeStep.screen)}>
+                  {renderFlowPreview(activeStep.screen, { countryName, parameters: activeStep.previewParameters })}
                 </MiniPhone>
                 <FlowScreenDownloadButton
                   screenRef={focusedScreenRef}
@@ -945,8 +989,8 @@ function FilmstripCard({
   return (
     <article className="w-[200px] shrink-0" data-testid={testId}>
       <div className="group relative">
-        <MiniPhone ref={screenRef} scale={0.5} scrollable>
-          {renderFlowPreview(step.screen, { countryName })}
+        <MiniPhone ref={screenRef} scale={0.5} scrollable statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
+          {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
         </MiniPhone>
         <FlowScreenDownloadButton screenRef={screenRef} step={step} index={index} showOnHover />
       </div>
@@ -1146,18 +1190,31 @@ function PrototypePanel({
   prototype: FlowPrototypeSpec
   countryName: string
   /** A screen another tab asked to open here; the nonce lets the same screen be asked for twice. */
-  request: { screen: FlowScreenKind; nonce: number } | null
+  request: PrototypeRequest | null
   onOpenScreenContract: (screen: FlowScreenKind) => void
   onOpenRule: (ruleId: string) => void
 }) {
   const [screen, setScreen] = useState<FlowScreenKind>(request?.screen ?? prototype.start)
   const [history, setHistory] = useState<FlowScreenKind[]>([])
   const timelineRef = useRef<HTMLDivElement>(null)
+  const [parameters, setParameters] = useState<Record<string, string>>(() =>
+    Object.fromEntries((prototype.controls ?? []).map((control) => [control.key, control.defaultValue])),
+  )
+  const isPrime = flow.id === 'pi-prime'
+  const [phoneScale, setPhoneScale] = useState(isPrime ? 0.62 : 0.86)
+  useEffect(() => {
+    if (!isPrime) return
+    const resize = () => setPhoneScale(Math.min(0.72, Math.max(0.5, (window.innerHeight - 380) / 836)))
+    resize()
+    window.addEventListener('resize', resize)
+    return () => window.removeEventListener('resize', resize)
+  }, [isPrime])
 
   useEffect(() => {
     if (!request) return
     setHistory([])
     setScreen(request.screen)
+    if (request.parameters) setParameters((current) => ({ ...current, ...request.parameters }))
   }, [request])
 
   const node = prototype.nodes[screen]
@@ -1165,14 +1222,16 @@ function PrototypePanel({
 
   // The happy path is the spine of the timeline; everything else is a detour off it.
   const spine = useMemo(() => {
-    const main = flow.scenarios.find((scenario) => scenario.id === flow.defaultScenarioId) ?? flow.scenarios[0]
+    const controls = (prototype.controls ?? []).filter((control) => !control.visibleWhen || parameters[control.visibleWhen.key] === control.visibleWhen.value)
+    const contextual = controls.length ? flow.scenarios.find((scenario) => controls.every((control) => scenario.steps[0]?.previewParameters?.[control.key] === parameters[control.key])) : undefined
+    const main = contextual ?? flow.scenarios.find((scenario) => scenario.id === flow.defaultScenarioId) ?? flow.scenarios[0]
     return (main?.steps ?? []).map((step) => step.screen)
-  }, [flow])
+  }, [flow, parameters, prototype.controls])
   const spineIndex = spine.indexOf(screen)
 
   const go = (next: FlowScreenKind) => {
     setHistory((current) => [...current, screen])
-    setScreen(next)
+    setScreen(isPrimeReferenceScreen(screen) && isPrimeReferenceScreen(next) ? resolvePrimePrototypeTarget(screen, next, parameters) : next)
   }
 
   const stepBack = () => {
@@ -1229,14 +1288,17 @@ function PrototypePanel({
     // title row — the tab already says what this is.
     <div
       role="tabpanel"
-      className="flex flex-col items-center gap-[18px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm"
+      className={isPrime
+        ? `grid items-start gap-[20px] ${prototype.controls?.length ? 'min-[760px]:grid-cols-[minmax(0,1fr)_190px]' : ''}`
+        : 'flex flex-col items-center gap-[18px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[24px] shadow-sm'}
     >
+      <div data-testid="flow-prototype-surface" className={isPrime ? 'flex min-w-0 flex-col items-center gap-[18px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm' : 'contents'}>
       <div className="grid w-full max-w-[1120px] justify-items-center">
         <div data-testid="flow-prototype-inspect-phone" className="relative justify-self-center">
           {/* The same device frame the Demo area uses, so this reads as a phone. */}
           <FlowNavProvider value={nav}>
-            <MiniPhone scale={0.86} scrollable device>
-              {renderFlowPreview(screen, { countryName })}
+            <MiniPhone scale={phoneScale} scrollable device statusBarVariant={flowPreviewStatusBarVariant(screen)} microphoneActive={isPrimeReferenceScreen(screen) && getPrimePhoneAppearance(screen).microphoneActive}>
+              {renderFlowPreview(screen, { countryName, parameters })}
             </MiniPhone>
           </FlowNavProvider>
         </div>
@@ -1390,6 +1452,26 @@ function PrototypePanel({
           </p>
         ) : null}
       </div>
+      </div>
+      {prototype.controls?.length ? (
+        <aside aria-label="Prototype context" className="order-first flex flex-wrap gap-[20px] min-[760px]:order-last min-[760px]:flex-col min-[760px]:pt-[12px]">
+          {prototype.controls.filter((control) => !control.visibleWhen || parameters[control.visibleWhen.key] === control.visibleWhen.value).map((control) => (
+            <fieldset key={control.key} className="flex flex-wrap gap-[8px] min-[760px]:flex-col">
+              <legend className="mb-[10px] uc-type-n5-strong text-[var(--uc-text)]">{control.label}</legend>
+              {control.options.map((option) => (
+                <label key={option.value} className="flex min-h-[40px] cursor-pointer items-center gap-[8px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[12px] py-[9px] text-[var(--uc-text)]">
+                  <input type="radio" name={`${flow.id}-${control.key}`} value={option.value} checked={parameters[control.key] === option.value} onChange={() => {
+                    setParameters((current) => ({ ...current, [control.key]: option.value }))
+                    setHistory([])
+                    setScreen(prototype.start)
+                  }} />
+                  <span className="uc-type-n5">{option.label}</span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
+        </aside>
+      ) : null}
     </div>
   )
 }
@@ -1766,8 +1848,8 @@ function ScreenSpecView({
   return (
     <div className="mt-[18px] flex flex-col gap-[24px] xl:flex-row xl:items-start">
       <div className="shrink-0">
-        <MiniPhone ref={screenRef} scale={0.62} scrollable device>
-          {renderFlowPreview(step.screen, { countryName })}
+        <MiniPhone ref={screenRef} scale={0.62} scrollable device statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
+          {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
         </MiniPhone>
         <FlowScreenDownloadLink screenRef={screenRef} step={step} index={stepIndex} />
       </div>

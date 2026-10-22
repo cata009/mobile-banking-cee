@@ -1,7 +1,77 @@
 {
-  "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12 + main 770ea65 native and reference captures 2026-10-13",
-  "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json.",
-  "assetCount": 1167,
-  "pathBlobSha256Aggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
-  "integrationNote": "Preserves every original 1139 path/blob unchanged; includes 16 Source reference captures and 12 native icon exports already committed in main 770ea65. Exact additions and preservation proof: docs/tasks/native-and-reference-asset-baseline.json. Strict count/hash assertions remain unchanged."
+  "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12 + main 770ea65 native and reference captures 2026-10-13 + original Figma design-system SVGs 2026-10-19 + CZ Robo goal outcome illustrations 2026-10-19 + original Figma DS vectors and approved photographs 2026-10-20",
+  "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json. Adds the exact Figma success and failure illustrations for the Native CZ Robo creation flow.",
+  "assetCount": 1477,
+  "pathBlobSha256Aggregate": "8f86d34ce48ca7b91e218fc36a4056507aeb37673e20aedccccf442b76b95cec",
+  "integrationNote": "Preserves every original 1139 path/blob unchanged; includes 16 Source reference captures and 12 native icon exports already committed in main 770ea65. Exact additions and preservation proof: docs/tasks/native-and-reference-asset-baseline.json. Strict count/hash assertions remain unchanged. Adds exactly 42 original Images SVGs and 3 Divider SVG rules from the authorized Meniga Figma modernization. All previous 1167 path/blob pairs retain aggregate 3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b. Exact additions and preservation proof: docs/tasks/figma-ds-assets-2026-10-19.json. Adds 2 Figma SVGs for CZ Robo goal creation success and failure. The strict audit implementation and assertions are unchanged. Adds exactly 271 scoped original SVG/photo assets after reusing one byte-identical existing SVG. All previous 1214 path/blob pairs preserve aggregate c0e40427f2c219020ac7bfbe357df4686529be222cb352a0f65d3d683a1f50a1. Exact additions, duplicate check and preservation proof: docs/tasks/design-system-asset-baseline-2026-10-20.json. Strict audit implementation and count/hash assertions are unchanged. Retires exactly 17 unused legacy template captures by explicit user request; preserves all other path/blob pairs. Exact removal and preservation proof: docs/tasks/templates-cleanup-asset-proof-2026-10-20.json. Missing unapproved assets still fail; approved missing paths must match their indexed SHA-256. Integrates exactly one original 100x100 Figma SVG from the separately owned Robo page audit. All 1468 post-cleanup path/blob pairs are unchanged; exact addition/provenance: docs/tasks/templates-cleanup-integrated-asset-2026-10-20.json. Integrates exactly eight source-preserving additions: five PRIME reference assets and three separately owned Robo funding glyphs. Every previous 1469 path/blob pair remains unchanged. Exact additions and preservation proof: docs/tasks/prime-flow-assets-2026-10-20.json. Strict audit implementation and count/hash assertions are unchanged.",
+  "approvedRetirements": [
+    {
+      "path": "screenshots/Panel.png",
+      "sha256": "b751701f441deda34df5e1ebe04626d0b2408521de656a757d028aaecc6032a4"
+    },
+    {
+      "path": "screenshots/Activate mToken.jpg",
+      "sha256": "78a048bf1347808b4b9a345cdbd004982079e9b28f4ec5c648d97e1c8a799a2b"
+    },
+    {
+      "path": "screenshots/Generate Token.png",
+      "sha256": "05bdc539fc6c6f94a3482e5ee7be10196101101f7f6ff140d41edae084d3c615"
+    },
+    {
+      "path": "screenshots/Tutorial 1.png",
+      "sha256": "51f63dcdf6121c7734e0063a4978d118f0457d45e734e812e8e62a89105dd5d8"
+    },
+    {
+      "path": "screenshots/67.png",
+      "sha256": "38ab342aeb0628bfa72fc908ae9877295ff85bdaf42807cb513277462faad335"
+    },
+    {
+      "path": "screenshots/Error to be.png",
+      "sha256": "015eec7ed0c9afb019a10b7673c75af3f8e0be67f4d04543696c02306a0a0001"
+    },
+    {
+      "path": "screenshots/Informative.png",
+      "sha256": "a7be73b286fd59c91fd5d0a5422a2a71ea34560f31872e40ed4fe5ed8ae8a667"
+    },
+    {
+      "path": "screenshots/New request with push.png",
+      "sha256": "2b2d26c0e1ab05ad8978903a9fe5faea7ab8ce11cce437b579bd3ef3de7a622c"
+    },
+    {
+      "path": "screenshots/Pending.png",
+      "sha256": "190fee43e059a35bd000e6c6b8f1d822394a5ca296c6d80a16af31e860e8bdc5"
+    },
+    {
+      "path": "screenshots/Review request.png",
+      "sha256": "52749847e5bda4575d50345e8bf23fa3803d3413be8788f980551efb79ce496f"
+    },
+    {
+      "path": "screenshots/Success to be.png",
+      "sha256": "8ee2cf7bd89711813a0946f30dc7e96c8f55b482edc845e664f2ce28df5a2a88"
+    },
+    {
+      "path": "screenshots/Warning to be.png",
+      "sha256": "bcbf1cc17bda23e22ba496905422403dbb6420657f5a4e5a1c6f27d749d954c8"
+    },
+    {
+      "path": "screenshots/Apple pay.png",
+      "sha256": "8b84c52fe85ebf8cfc0377789604688cf8af72771160ada278284901f89d1ccc"
+    },
+    {
+      "path": "screenshots/Product selection.jpg",
+      "sha256": "d1ef3470546cd28b4c7148c76d6732a7bdb7d39883c7836dc0db2325e4bf6d69"
+    },
+    {
+      "path": "screenshots/RS - Travel Insurance.png",
+      "sha256": "c3d0647077a05afe26ed98026bf87a5c499b0984318b1611b695c3b88a397478"
+    },
+    {
+      "path": "screenshots/Contact.png",
+      "sha256": "e7c71265b3cc316356dd1e15a42c3c9d054dcceb9827d61f4ed41469cd3c9e3f"
+    },
+    {
+      "path": "screenshots/Message.png",
+      "sha256": "02012af4245d044c8c69b054190a254c7371d02f6a7aab4a2157131f73971aaf"
+    }
+  ]
 }

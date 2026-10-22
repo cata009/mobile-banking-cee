@@ -14,6 +14,7 @@ import { BaselineMailboxTabs } from '../src/universal/BaselineMailboxTabs';
 import { BaselinePageHeader } from '../src/universal/BaselinePageHeader';
 import { ServiceDatedRow } from '../src/experiences/pi/current/baseline/more/ServicePrimitives';
 import { getMessagesConfigForCountry } from '@/app/config/messagesConfig';
+import { DeleteActionReveal } from '../src/universal/DeleteActionReveal';
 
 function host(
   screen: 'contacts' | 'documents' | 'messages',
@@ -152,6 +153,10 @@ it('preserves document ordering, localized search, cancellation and actual delet
   expect(text(tree)).not.toContain('LEONARDO OLIVEIRA');
   const id = 'documents-2025-12-12';
   press(tree, `Document actions ${id}`);
+  const reveal = tree.root
+    .findAllByType(DeleteActionReveal)
+    .find(node => node.props.testID === `delete-reveal-${id}`);
+  expect(reveal?.props.actionsOpen).toBe(true);
   press(tree, `Delete document ${id}`);
   press(tree, 'Cancel');
   expect(text(tree)).toContain('SALARY TRANSFER');
@@ -178,12 +183,25 @@ it('keeps legal documents and shows a single-action legal alert after confirmati
   expect(text(tree)).toContain('Legal');
 });
 
-it('filters Source messages across mailbox changes and keeps more actions inert', () => {
+it('filters Source messages and reveals a confirmed delete action from each message row', () => {
   const h = host('messages'),
     tree = mount(Messages, h);
   expect(text(tree)).toContain('CARD NOTIFICATION');
-  press(tree, 'More actions');
-  expect(h.onNavigate).not.toHaveBeenCalled();
+  press(tree, 'Message actions CARD NOTIFICATION');
+  expect(
+    tree.root.findAll(
+      n => n.props.accessibilityLabel === 'Message actions CARD NOTIFICATION',
+    )[0]?.props.accessibilityState,
+  ).toEqual({ expanded: true });
+  expect(text(tree)).toContain('DELETE');
+  press(tree, 'Delete message CARD NOTIFICATION');
+  expect(text(tree)).toContain('Are you sure you want to delete this message?');
+  press(tree, 'Cancel');
+  expect(text(tree)).toContain('CARD NOTIFICATION');
+  press(tree, 'Message actions CARD NOTIFICATION');
+  press(tree, 'Delete message CARD NOTIFICATION');
+  press(tree, 'Delete');
+  expect(text(tree)).not.toContain('CARD NOTIFICATION');
   act(() =>
     tree.root.findByType(BaselineSearchBar).props.onValueChange('  request  '),
   );
@@ -192,7 +210,7 @@ it('filters Source messages across mailbox changes and keeps more actions inert'
   expect(text(tree)).toContain('SUPPORT REQUEST');
   expect(text(tree)).not.toContain('ADDRESS UPDATE');
   act(() =>
-    tree.root.findByType(BaselineSearchBar).props.onValueChange('2025'),
+    tree.root.findByType(BaselineSearchBar).props.onValueChange('2026'),
   );
   expect(text(tree)).toContain('ADDRESS UPDATE');
   press(tree, 'Back');

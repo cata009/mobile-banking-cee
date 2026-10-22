@@ -255,6 +255,7 @@ export function Page({
   showHelp = false,
   largeTitle = true,
   headerSubtitle,
+  titleGutter,
 }: {
   title: string;
   onBack: () => void;
@@ -266,6 +267,7 @@ export function Page({
   showHelp?: boolean;
   largeTitle?: boolean;
   headerSubtitle?: string;
+  titleGutter?: number;
 }) {
   const tokens = useCurrentTokens();
   const [progress, setProgress] = useState(0);
@@ -319,7 +321,15 @@ export function Page({
         showsVerticalScrollIndicator={false}
       >
         {largeTitle ? (
-          <View style={[fidelityStyles.s1, { opacity: 1 - progress }]}>
+          <View
+            style={[
+              fidelityStyles.s1,
+              { opacity: 1 - progress },
+              titleGutter === undefined
+                ? undefined
+                : { paddingHorizontal: titleGutter },
+            ]}
+          >
             <Copy strong size={28}>
               {title}
             </Copy>

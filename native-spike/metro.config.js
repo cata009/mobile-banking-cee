@@ -13,6 +13,7 @@ const config = {
   watchFolders: [
     path.resolve(__dirname, '../src'),
     path.resolve(__dirname, '../screenshots'),
+    path.resolve(__dirname, '../package/mobile-pi-coapping-chat-package/src'),
   ],
   resolver: {
     assetExts: defaults.resolver.assetExts.filter(ext => ext !== 'svg'),

@@ -520,7 +520,8 @@ export default function NativeCurrentApp({
   );
   const ids = useRef({ map: new WeakMap<CurrentRoute, number>(), next: 0 });
   const isFullscreenComponentPreview =
-    control?.componentPreview?.kind === 'internal-transfer';
+    control?.componentPreview?.kind === 'internal-transfer' ||
+    control?.componentPreview?.kind === 'prime-reference';
   const isComponentPreview = !!(
     control?.productsPreview || control?.componentPreview
   );

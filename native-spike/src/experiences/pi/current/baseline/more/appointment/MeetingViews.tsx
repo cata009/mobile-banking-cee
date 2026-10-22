@@ -20,7 +20,6 @@ import {
   type AppointmentRecord,
 } from '@/app/screens/appointments/appointmentModel';
 import { isPastAppointment } from '@/features/profile/evoAppointments';
-import { advisorPhoto } from '../../../profile/assets';
 import { MeetingIcon } from '../../../profile/AppointmentFields';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
@@ -36,6 +35,7 @@ import {
   ReviewValue,
   s,
   useAppointmentHost,
+  useAppointmentAdvisorPhoto,
   useColors,
   webInputOutline,
 } from './Ui';
@@ -292,6 +292,7 @@ export function Slots({
   text: TextFn;
 }) {
   const color = useColors();
+  const advisorPhoto = useAppointmentAdvisorPhoto();
   const renderRows = (times: readonly string[], disabled = false) =>
     Array.from({ length: Math.ceil(times.length / 4) }, (_row, row) => (
       <View key={row} style={styles.slotRow}>
@@ -596,6 +597,7 @@ export function MeetingDetail({
   overlay?: React.ReactNode;
 }) {
   const color = useColors(),
+    advisorPhoto = useAppointmentAdvisorPhoto(),
     past = isPastAppointment(record),
     waiting = record.status === 'pending' && !past;
   const meetingType =

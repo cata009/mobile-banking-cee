@@ -7,6 +7,7 @@ import type { RoboEvent } from '@/features/investments/robo/flowState';
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { getPortfoliosForStrategy } from '@/features/investments/robo/model';
+import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 
 const toTarget: readonly RoboEvent[] = [
   { type: 'navigate', to: 'contact' },
@@ -155,7 +156,17 @@ describe('native Source alternate Robo state families', () => {
     const holding = getPortfoliosForStrategy('sustainable-balanced')[0]!
       .basketFund!.holdings[0]!;
     press(tree, `Open ${holding.title} product details`);
-    press(tree, 'Close holding details');
+    const sheet = tree.root.findByType(SourceBottomSheet);
+    expect(sheet.props.title).toBe(holding.title);
+    const close = sheet.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Close' &&
+        typeof node.props.onPress === 'function',
+    )[0];
+    expect(close).toBeDefined();
+    act(() => close!.props.onPress());
+    expect(tree.root.findAllByType(SourceBottomSheet)).toHaveLength(0);
+    expect(tree.root.findByProps({ testID: 'cz-portfolio' })).toBeDefined();
     press(tree, 'Back');
     expect(
       tree.root

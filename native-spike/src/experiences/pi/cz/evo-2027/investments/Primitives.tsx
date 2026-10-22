@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -9,10 +11,14 @@ import {
   View,
   type StyleProp,
   type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { Text } from '../../../../../universal/Typography';
 import { Header } from '../../../../../universal/Header';
 import { ActionButton } from '../../../../../universal/ActionButton';
+import { PrimaryButton } from '../../../../../universal/PrimaryButton';
+import { BaselinePill } from '../../../../../universal/BaselinePill';
+import { AssetGlyph } from '../../../../../universal/AssetGlyph';
 import { InvestmentGlyph } from './Glyph';
 import type { ControlTokens } from '../../../../../universal/tokens';
 
@@ -74,12 +80,23 @@ export function Button({
   onPress,
   disabled,
   secondary,
+  canonical = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   secondary?: boolean;
+  canonical?: boolean;
 }) {
+  if (canonical)
+    return (
+      <PrimaryButton
+        label={label}
+        onPress={onPress}
+        disabled={disabled}
+        variant={secondary ? 'secondary' : 'action'}
+      />
+    );
   return (
     <ActionButton
       tokens={czInvestmentTokens}
@@ -102,14 +119,20 @@ export function Page({
   footer,
   gray = false,
   gutter = 24,
+  descriptionGutter = gutter,
+  contentGutter = gutter,
   contentTop = 32,
   descriptionTop = 16,
+  descriptionMuted = false,
+  descriptionStyle,
   onHelp,
+  helpIcon,
   footerGutter = gutter,
   footerTop = 12,
   footerBottom = 34,
   titleAccessory,
   raised = false,
+  showBack = true,
   backGlyph = 'back-heavy',
 }: {
   title: string;
@@ -121,17 +144,28 @@ export function Page({
   footer?: React.ReactNode;
   gray?: boolean;
   gutter?: number;
+  descriptionGutter?: number;
+  contentGutter?: number;
   contentTop?: number;
   descriptionTop?: number;
+  descriptionMuted?: boolean;
+  descriptionStyle?: StyleProp<TextStyle>;
   onHelp?: () => void;
+  helpIcon?: React.ReactNode;
   footerGutter?: number;
   footerTop?: number;
   footerBottom?: number;
   titleAccessory?: React.ReactNode;
   raised?: boolean;
+  showBack?: boolean;
   backGlyph?: 'back-heavy' | 'close-flow';
 }) {
   const [progress, setProgress] = useState(0);
+  const pageScroll = useRef<React.ElementRef<typeof ScrollView>>(null);
+  useLayoutEffect(() => {
+    setProgress(0);
+    pageScroll.current?.scrollTo({ x: 0, y: 0, animated: false });
+  }, [kind, title]);
   return (
     <KeyboardAvoidingView
       testID={`cz-${kind}`}
@@ -158,6 +192,7 @@ export function Page({
         title={progress > 0 ? title : ''}
         collapsedTitleProgress={progress}
         onBack={onBack}
+        showBack={showBack}
         trailing={
           onClose ? (
             <Pressable
@@ -175,12 +210,13 @@ export function Page({
               onPress={onHelp}
               style={ui.headerControl}
             >
-              <InvestmentGlyph name="help-circle" size={20} />
+              {helpIcon ?? <InvestmentGlyph name="help-circle" size={20} />}
             </Pressable>
           ) : undefined
         }
       />
       <ScrollView
+        ref={pageScroll}
         style={raised ? ui.raised : undefined}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -216,11 +252,28 @@ export function Page({
           </Copy>
         )}
         {description ? (
-          <Copy style={[ui.description, { marginTop: descriptionTop }]}>
+          <Copy
+            muted={descriptionMuted}
+            style={[
+              ui.description,
+              {
+                marginTop: descriptionTop,
+                marginHorizontal: descriptionGutter - gutter,
+              },
+              descriptionStyle,
+            ]}
+          >
             {description}
           </Copy>
         ) : null}
-        <View style={{ paddingTop: contentTop }}>{children}</View>
+        <View
+          style={{
+            paddingTop: contentTop,
+            marginHorizontal: contentGutter - gutter,
+          }}
+        >
+          {children}
+        </View>
       </ScrollView>
       {footer ? (
         <View
@@ -286,6 +339,12 @@ export function Choice({
   onPress,
   label,
   icon,
+  variant = 'card',
+  titleStyle,
+  descriptionStyle,
+  radioSize = 24,
+  radioIcon,
+  style,
 }: {
   title: string;
   description?: string;
@@ -293,24 +352,49 @@ export function Choice({
   onPress: () => void;
   label?: string;
   icon?: React.ReactNode;
+  variant?: 'card' | 'radio';
+  titleStyle?: StyleProp<TextStyle>;
+  descriptionStyle?: StyleProp<TextStyle>;
+  radioSize?: number;
+  radioIcon?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
 }) {
+  const radio = radioIcon ?? (
+    <InvestmentGlyph
+      name={selected ? 'radio-selected' : 'radio-unselected'}
+      size={radioSize}
+    />
+  );
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityLabel={label ?? title}
       accessibilityState={{ checked: selected }}
       onPress={onPress}
-      style={[ui.choice, selected && ui.choiceSelected]}
+      style={[
+        variant === 'radio' ? ui.radioChoice : ui.choice,
+        selected &&
+          (variant === 'radio' ? ui.radioChoiceSelected : ui.choiceSelected),
+        style,
+      ]}
     >
-      {icon}
+      {variant === 'radio' ? radio : icon}
       <View style={ui.rowBody}>
-        <Copy strong>{title}</Copy>
-        {description ? <Copy style={ui.small}>{description}</Copy> : null}
+        <Copy
+          strong
+          style={[
+            variant === 'radio' ? ui.radioChoiceTitle : undefined,
+            selected && variant === 'card' && ui.choiceSelectedTitle,
+            titleStyle,
+          ]}
+        >
+          {title}
+        </Copy>
+        {description ? (
+          <Copy style={[ui.small, descriptionStyle]}>{description}</Copy>
+        ) : null}
       </View>
-      <InvestmentGlyph
-        name={selected ? 'radio-selected' : 'radio-unselected'}
-        size={24}
-      />
+      {variant === 'radio' ? null : radio}
     </Pressable>
   );
 }
@@ -318,34 +402,71 @@ export function Chips<T extends string>({
   items,
   value,
   onChange,
+  wrap = false,
+  testID,
+  canonical = false,
+  gap = 8,
+  selectionAppearance = true,
 }: {
   items: readonly { id: T; label: string }[];
   value: T;
   onChange: (id: T) => void;
+  wrap?: boolean;
+  testID?: string;
+  canonical?: boolean;
+  gap?: number;
+  selectionAppearance?: boolean;
 }) {
-  return (
+  const choices = items.map(item =>
+    canonical ? (
+      <BaselinePill
+        key={item.id}
+        label={item.label}
+        variant={
+          value === item.id && selectionAppearance ? 'primary' : 'secondary'
+        }
+        selected={value === item.id && selectionAppearance}
+        presentation="navigation"
+        onPress={() => onChange(item.id)}
+        style={[
+          ui.canonicalChip,
+          value === item.id && selectionAppearance && ui.activeChip,
+        ]}
+        labelStyle={[
+          ui.canonicalChipLabel,
+          value === item.id && selectionAppearance && ui.activeChipLabel,
+        ]}
+      />
+    ) : (
+      <Pressable
+        key={item.id}
+        accessibilityRole="button"
+        accessibilityLabel={item.label}
+        accessibilityState={{ selected: value === item.id }}
+        onPress={() => onChange(item.id)}
+        style={[ui.chip, value === item.id && ui.activeChip]}
+      >
+        <Copy
+          strong
+          style={[ui.small, value === item.id && ui.activeChipLabel]}
+        >
+          {item.label}
+        </Copy>
+      </Pressable>
+    ),
+  );
+  return wrap ? (
+    <View testID={testID} style={[ui.chipsWrap, { gap }]}>
+      {choices}
+    </View>
+  ) : (
     <ScrollView
+      testID={testID}
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={ui.chips}
+      contentContainerStyle={[ui.chips, { gap }]}
     >
-      {items.map(item => (
-        <Pressable
-          key={item.id}
-          accessibilityRole="button"
-          accessibilityLabel={item.label}
-          accessibilityState={{ selected: value === item.id }}
-          onPress={() => onChange(item.id)}
-          style={[ui.chip, value === item.id && ui.activeChip]}
-        >
-          <Copy
-            strong
-            style={[ui.small, value === item.id && ui.activeChipLabel]}
-          >
-            {item.label}
-          </Copy>
-        </Pressable>
-      ))}
+      {choices}
     </ScrollView>
   );
 }
@@ -373,15 +494,67 @@ export function Notice({
     </View>
   );
 }
-export function Loading({ text }: { text: string }) {
+export function Loading({
+  text,
+  size,
+  labelStyle,
+  containerStyle,
+  indicatorAsset,
+}: {
+  text: string;
+  size?: number;
+  labelStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  indicatorAsset?: string | number;
+}) {
+  const rotation = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!indicatorAsset) return;
+    const loop = Animated.loop(
+      Animated.timing(rotation, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [indicatorAsset, rotation]);
   return (
-    <View accessibilityRole="progressbar" style={ui.loading}>
-      <ActivityIndicator color={czInvestmentTokens.accent} />
-      <Copy>{text}</Copy>
+    <View accessibilityRole="progressbar" style={[ui.loading, containerStyle]}>
+      {indicatorAsset ? (
+        <Animated.View
+          style={{
+            transform: [
+              {
+                rotate: rotation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0deg', '360deg'],
+                }),
+              },
+            ],
+          }}
+        >
+          <AssetGlyph asset={indicatorAsset} size={size ?? 100} />
+        </Animated.View>
+      ) : (
+        <ActivityIndicator color={czInvestmentTokens.accent} size={size} />
+      )}
+      <Copy strong={Boolean(labelStyle)} style={labelStyle}>
+        {text}
+      </Copy>
     </View>
   );
 }
 export const ui = StyleSheet.create({
+  canonicalChip: {
+    minHeight: 32,
+    paddingLeft: 12,
+    paddingRight: 12,
+    paddingVertical: 8,
+  },
+  canonicalChipLabel: { fontSize: 14, lineHeight: 16, textTransform: 'none' },
   raised: {
     marginTop: 8,
     backgroundColor: '#FFFFFF',
@@ -433,7 +606,22 @@ export const ui = StyleSheet.create({
     gap: 12,
     marginBottom: 12,
   },
-  choiceSelected: { borderColor: '#007A91' },
+  choiceSelected: {
+    borderColor: '#007A91',
+    borderWidth: 2,
+    paddingHorizontal: 15,
+    paddingVertical: 11,
+  },
+  choiceSelectedTitle: { color: '#007A91' },
+  radioChoice: {
+    minHeight: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 4,
+  },
+  radioChoiceSelected: { borderColor: 'transparent' },
+  radioChoiceTitle: { fontSize: 14, lineHeight: 20 },
   radio: {
     width: 24,
     height: 24,
@@ -451,6 +639,12 @@ export const ui = StyleSheet.create({
     backgroundColor: '#007A91',
   },
   chips: { gap: 8, paddingVertical: 8 },
+  chipsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingVertical: 8,
+  },
   chip: {
     borderRadius: 4,
     paddingHorizontal: 12,

@@ -33,7 +33,16 @@ export function productMenuCardWeb(options: Parameters<typeof resolveProductMenu
       (state.compact ? 'bottom-0 right-0 h-[50px] w-[58px]' : 'bottom-0 right-0 h-[74px] w-[78px]'),
   } as const
 }
-export const productOfferCardWeb = resolveProductOfferCard
+export function productOfferCardWeb(options: Parameters<typeof resolveProductOfferCard>[0]) {
+  const state = resolveProductOfferCard(options)
+  return {
+    ...state,
+    imageClass: 'absolute right-0 top-0 h-full w-[96px] object-cover object-center',
+    bodyClass: state.compact
+      ? 'relative z-10 flex h-full items-start pl-[16px] pr-[100px] pt-[16px] pb-[12px]'
+      : 'relative z-10 flex h-full items-start pl-[16px] pr-[100px] pt-[16px] pb-[16px]',
+  }
+}
 export function shopsmartOfferCardWeb(options: Parameters<typeof resolveShopsmartOfferCard>[0]) {
   const state = resolveShopsmartOfferCard(options)
   return {

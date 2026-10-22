@@ -321,6 +321,7 @@ export const homeStyles = StyleSheet.create({
     bottom: 34,
     width: 172,
     height: 72,
+    justifyContent: 'flex-start',
     padding: 4,
     borderRadius: 120,
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -330,7 +331,7 @@ export const homeStyles = StyleSheet.create({
         : '0px 11px 17px rgba(38,38,38,0.36)',
   },
   floatingButton: {
-    flex: 1,
+    height: 66,
     borderRadius: 120,
     backgroundColor: t.accent,
     alignItems: 'center',

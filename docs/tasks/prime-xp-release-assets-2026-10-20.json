@@ -1,0 +1,37 @@
+{
+  "releaseBase": "8d8c4ef22b5ca458ca909155f0e7f6a6d8868439",
+  "excludedLocalCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "originalCount": 1167,
+  "originalAggregate": "3882bb172d1aab28c075a94f0ce97e7c27094057c04293a99565bd4e85c2823b",
+  "releaseCount": 1172,
+  "releaseAggregate": "032f45bd14f84440b7d0fe382a7df624402d96ac936481bed9d012221a15dd61",
+  "additions": [
+    {
+      "path": "src/assets/prime-reference/private-advisor.png",
+      "bytes": 2191511,
+      "sha256": "c13923b12a44e58c5c3b8104e9ac66868337e2206e84df52195c439ea0d6b0f9"
+    },
+    {
+      "path": "src/assets/prime-reference/private-shield.svg",
+      "bytes": 1008,
+      "sha256": "ed46d28859c1398b8036c04b8434cc434f1784de0d8e7427a91a2aaaa4ca1109"
+    },
+    {
+      "path": "src/assets/prime-reference/standard-advisor.png",
+      "bytes": 1099867,
+      "sha256": "c97dd10b862ef6c03d9e0c967aac1400906a24ebc9c4f4692870df29e67114ef"
+    },
+    {
+      "path": "src/assets/prime-reference/upgrade-advisor.png",
+      "bytes": 490502,
+      "sha256": "9f84631d4286e331ebbfc6d1f7c13b12895393e8da403e7bfc865114c411200f"
+    },
+    {
+      "path": "src/assets/prime-reference/upgrade-diamond.svg",
+      "bytes": 1114,
+      "sha256": "ef02eb53d3db4fcedd4c0cecc4dc215f8c48bd42cc2b97ea08fc1e5a6248a2b4"
+    }
+  ],
+  "originalAssetsPreserved": true,
+  "scope": "Strict PRIME-only release assembled from origin/main and attributable task deltas; the combined workspace1477 inventory is not used."
+}

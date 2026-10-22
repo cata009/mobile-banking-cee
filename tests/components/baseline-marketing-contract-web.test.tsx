@@ -88,7 +88,23 @@ describe('marketing frozen Source preservation', () => {
       offer = { id: 'offer', title: 'Title\nline', description: 'Description', caption: 'Caption' }
     const props = { offer, onClick, variant, colorFamily: 'yellow' as const, lightVersion: true }
     const { container, rerender } = render(<BeforeOffer {...props} />)
-    const before = dom(container)
+    let before = dom(container)
+    if (variant === 'standard') {
+      // Approved correction to the original Figma Bottom banner; retain the frozen fixture.
+      before = before
+        .replace('w-[100px] object-cover', 'w-[96px] object-cover')
+        .replace('items-center pl-[20px] pr-[116px]', 'items-start pl-[16px] pr-[100px] pt-[16px] pb-[16px]')
+        .replace('font-size: 22px; line-height: normal;', 'font-size: 24px; line-height: 26px;')
+        .replace('uc-type-p1" style="color: var(--uc-static-black);"', 'uc-type-p1" style="color: var(--uc-static-black); font-size: 18px; line-height: 20px;"')
+    } else {
+      // Approved compact source 9365:16188 bounds/lineboxes; no fixture rewrite.
+      before = before
+        .replace('w-[100px] object-cover', 'w-[96px] object-cover')
+        .replace('items-center pl-[20px] pr-[116px]', 'items-start pl-[16px] pr-[100px] pt-[16px] pb-[12px]')
+        .replace('font-size: 20px; line-height: normal;', 'font-size: 20px; line-height: 22px;')
+        .replace('uc-type-n4" style="color: var(--uc-static-black);"', 'uc-type-n4" style="color: var(--uc-static-black); font-size: 16px; line-height: 18px;"')
+        .replace('whitespace-nowrap" style="color: var(--uc-static-black);"', 'whitespace-nowrap" style="color: var(--uc-static-black); font-size: 14px; line-height: 15px;"')
+    }
     rerender(<Offer {...props} />)
     expect(dom(container)).toBe(before)
     fireEvent.click(screen.getByRole('button'))

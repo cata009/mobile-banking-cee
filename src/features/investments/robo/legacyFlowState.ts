@@ -22,6 +22,7 @@ export type RoboAdvisorCreationStep =
   | 'sign'
   | 'processing'
   | 'success'
+  | 'failure'
   | 'goal-detail'
 
 export type RoboAdvisorManagementMode =
@@ -141,6 +142,7 @@ export function getRoboAdvisorBackStep(
     review: 'portfolio',
     sign: 'review',
     processing: 'sign',
+    failure: 'review',
     'goal-detail': 'success',
   }
 

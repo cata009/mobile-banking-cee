@@ -272,6 +272,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
   const [measurements, setMeasurements] = useState<MeasuredElement[]>([]);
   const [active, setActive] = useState<MeasuredElement | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState('');
 
   const measure = useCallback(() => {
     const root = rootRef.current;
@@ -327,7 +328,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
 
   const findMeasurementFromEvent = (target: EventTarget | null) => {
     const root = rootRef.current;
-    if (!root || !(target instanceof Element)) return null;
+    if (!root || !(target instanceof Element) || target.closest("[data-inspector-ui='true']")) return null;
     const measuredTarget = target.closest("[data-ds-label], button, h1, h2, h3, h4, p, span, svg, img, input, textarea, select");
     if (!measuredTarget || !root.contains(measuredTarget)) return null;
 
@@ -347,6 +348,14 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
         setHoveredId(item?.id || null);
       }}
       onMouseLeave={() => setHoveredId(null)}
+      onFocusCapture={(event) => {
+        if (!inspectMode) return;
+        const item = findMeasurementFromEvent(event.target);
+        if (item) { setActive(item); setCopyMessage(''); }
+      }}
+      onKeyDownCapture={(event) => {
+        if (event.key === 'Escape') { setActive(null); setCopyMessage(''); }
+      }}
       onClickCapture={(event) => {
         if (!inspectMode) return;
         const item = findMeasurementFromEvent(event.target);
@@ -354,6 +363,7 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
         event.preventDefault();
         event.stopPropagation();
         setActive(item);
+        setCopyMessage('');
       }}
     >
       {children}
@@ -374,11 +384,8 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
               <div
                 className="absolute inset-0"
                 style={{
-                  backgroundColor:
-                    guide.kind === "padding"
-                      ? "color-mix(in srgb, var(--uc-action) 10%, transparent)"
-                      : "color-mix(in srgb, var(--uc-brand) 14%, transparent)",
-                  border: "1px dashed color-mix(in srgb, var(--uc-text) 64%, transparent)",
+                  backgroundColor: guide.kind === "padding" ? "rgba(233, 146, 186, 0.22)" : "rgba(233, 146, 186, 0.12)",
+                  border: "1px dotted #b96b91",
                 }}
               />
               <div
@@ -415,16 +422,23 @@ export function MeasurementSurface({ children }: { children: React.ReactNode }) 
       )}
 
       {inspectMode && active && (
-        <div className="absolute bottom-3 right-3 z-[70] w-[360px] rounded-[8px] border border-[var(--uc-action)] bg-[var(--uc-surface)] p-3 shadow-xl" data-inspector-ui="true">
+        <div className="ds-inspector-panel relative z-[70] mt-5 w-full rounded-[4px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-5" role="region" aria-label="Element inspector" data-inspector-ui="true">
           <div className="mb-2 flex items-start justify-between gap-3">
             <div>
-              <p className="font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)]">{active.label}</p>
+              <p className="font-['UniCredit:Bold',sans-serif] text-[16px] text-[var(--uc-action)]">{active.label}</p>
               <p className="text-[11px] uppercase tracking-[0.08em] text-[var(--uc-text-subtle)]">{active.tag}</p>
             </div>
-            <button className="pointer-events-auto rounded px-2 text-[12px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)]" onClick={() => setActive(null)}>
-              close
-            </button>
+            <div className="flex flex-wrap justify-end gap-2">
+              <button type="button" className="ds-inspector-button" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(JSON.stringify({ label: active.label, tag: active.tag, width: active.width, height: active.height, typography: { fontSize: active.fontSize, lineHeight: active.lineHeight, fontWeight: active.fontWeight, fontFamily: active.fontFamily }, padding: active.padding, margin: active.margin, parentLayout: active.parentDisplay, parentGap: active.parentGap, spacing: Object.fromEntries(active.spacingRows) }, null, 2));
+                  setCopyMessage('Measurements copied');
+                } catch { setCopyMessage('Clipboard unavailable. Select the values below to copy them.'); }
+              }}>Copy measurements</button>
+              <button type="button" aria-label="Close element inspector" className="ds-inspector-button" onClick={() => { setActive(null); setCopyMessage(''); }}>Close</button>
+            </div>
           </div>
+          {copyMessage ? <p role="status" className="mb-3 text-[12px] text-[var(--uc-text-muted)]">{copyMessage}</p> : null}
           <dl className="grid grid-cols-[96px_1fr] gap-x-3 gap-y-1 text-[12px]">
             <dt className="text-[var(--uc-text-subtle)]">size</dt><dd>{active.width}px x {active.height}px</dd>
             <dt className="text-[var(--uc-text-subtle)]">position</dt><dd>x {active.x}px / y {active.y}px</dd>

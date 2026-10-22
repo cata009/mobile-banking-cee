@@ -1,3 +1,5 @@
+import { CATALOG_COMPONENT_PACKAGES } from './catalogComponentPackages';
+
 export interface ImplementationSpecification {
   label: string;
   value: string;
@@ -23,15 +25,18 @@ export interface ComponentImplementationPackage {
 }
 
 export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplementationPackage> = {
+  ...CATALOG_COMPONENT_PACKAGES,
   "ui.primary-button": {
     summary:
       "Portable reference implementation for a primary action. The package documents the rendered component, native reference ports, visual values, supported states, motion, and accessibility behavior.",
     visualSpecifications: [
       { label: "Reference width", value: "327 px", detail: "May expand to the width supplied by its container." },
       { label: "Height", value: "48 px" },
+      { label: "Double action", value: "327 × 104 px", detail: "Two existing buttons with an 8 px vertical gap; secondary action is transparent with action-colored text." },
+      { label: "Sticky compositions", value: "375 × 96 / 152 px", detail: "24 px padding around a single button or the existing double-action composition." },
       { label: "Corner radius", value: "4 px" },
       { label: "Content", value: "Centered", detail: "Single-line label with end truncation." },
-      { label: "Label", value: "16 px / 18 px", detail: "Bold semantic typography variants." },
+      { label: "Label", value: "18 px baseline / explicit 16 px contexts", detail: "Bold semantic typography variants; legacy contextual label sizes remain supported." },
       { label: "Action background", value: "--uc-action" },
       { label: "Action foreground", value: "--uc-text-inverse" },
       { label: "Surface background", value: "--uc-surface" },
@@ -42,7 +47,9 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       { id: "pressed", label: "Pressed", description: "Scale feedback while the pointer is active." },
       { id: "disabled", label: "Disabled", description: "Native disabled state at 30% opacity." },
       { id: "focus", label: "Keyboard focus", description: "Two-pixel action-color focus ring with offset." },
-      { id: "large-label", label: "18 px label", description: "Large semantic label option." },
+      { id: "large-label", label: "18 px label", description: "Compatibility alias for the baseline label size." },
+      { id: "with-icon", label: "With source icon", description: "Original Figma Chat icon in a 24px slot, 8px from the 18px label." },
+      { id: "label-16", label: "Contextual 16 px label", description: "Explicit legacy label size retained for existing experience contexts." },
       { id: "loading", label: "Loading", description: "Not part of the current public component contract." },
     ],
     motionSpecifications: [
@@ -576,9 +583,9 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
     summary:
       "Portable reference for the Date filter chip row: five-item and four-item states with a teal selected chip.",
     visualSpecifications: [
-      { label: "Wrapper", value: "286x24px max, centered" },
-      { label: "Chip", value: "35x22px content-driven, 42px min-width", detail: "4px radius, 8px horizontal padding, 14px bold label." },
-      { label: "Chip gap", value: "8px" },
+      { label: "Wrapper", value: "238x24px Figma preset", detail: "The experience preset retains its contextual periods and touch targets." },
+      { label: "Chip", value: "35x22px Figma preset", detail: "3.5px radius and 14px bold label." },
+      { label: "Chip gap", value: "15px Figma preset" },
       { label: "Selected", value: "teal (--uc-action) border+fill, white label" },
     ],
     states: [
@@ -603,8 +610,8 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       "Portable reference for the Pill sorting rail: four sort chips with a black selected/bold-white-label state.",
     visualSpecifications: [
       { label: "Row", value: "375x40px, centered, 8px gap" },
-      { label: "Chip", value: "24px height, 14.5px radius", detail: "8px/4px padding, 14px label." },
-      { label: "Selected", value: "black border+fill, bold white label" },
+      { label: "Chip", value: "24px height, 14.5px radius", detail: "8px/4px padding, 14px label with 15px line-height." },
+      { label: "Selected", value: "#333333 fill, no layout border, bold white label" },
       { label: "Idle", value: "text-color border, regular label" },
     ],
     states: [
@@ -805,7 +812,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       { label: "Description", value: "uc-type-p1, 20px line-height, white, preserves newlines" },
       { label: "Action link", value: "uc-type-n5-strong, white" },
       { label: "Close control", value: "24x24px, absolute top-right (12px/9px inset)" },
-      { label: "Text column", value: "24px right padding", detail: "Reserves space for the close control." },
+      { label: "Text column", value: "24px right padding", detail: "Reserves space for the close control; title-to-description gap is 0px." },
     ],
     states: [
       { id: "with-link", label: "With link", description: "Adds a white text action (e.g. SEE DETAILS)." },
@@ -911,10 +918,10 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
     visualSpecifications: [
       { label: "Size", value: "327 x 157px", detail: "8px corner radius, config-driven background/text color per tone." },
       { label: "Chevron background", value: "decorative SVG", detail: "161x157px, positioned left of center, tone-colored." },
-      { label: "Image column", value: "100px wide", detail: "Right-aligned, object-cover, full height." },
-      { label: "Content padding", value: "20px left, 116px right", detail: "Clears the fixed image column." },
-      { label: "Standard title / description", value: "22px bold (2-line clamp) / uc-type-p1 (3-line clamp)" },
-      { label: "Compact title / description", value: "20px bold (2-line clamp) / uc-type-n4 (3-line clamp)", detail: "plus an optional 1-line 14px caption." },
+      { label: "Image column", value: "96px wide", detail: "Right-aligned, object-cover, full height." },
+      { label: "Content padding", value: "16px left, 100px right, 16px top", detail: "16px standard bottom padding; compact uses 12px bottom padding." },
+      { label: "Standard title / description", value: "24px bold / 26px line (2-line clamp); 18px / 20px line description (3-line clamp)" },
+      { label: "Compact title / description", value: "20px bold / 22px line (2-line clamp); 16px / 18px line description (3-line clamp)", detail: "plus an optional 1-line 14px / 15px caption." },
       { label: "Content gap", value: "8px" },
     ],
     states: [
@@ -1240,6 +1247,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
     visualSpecifications: [
       { label: "Card width", value: "327px (Figma)", detail: "16px padding, 4px corner radius." },
       { label: "Icon slot", value: "32x32px" },
+      { label: "Evolution title", value: "18px bold / 20px line" },
       { label: "Card amount", value: "24px integer + 14px decimals/currency" },
       { label: "Total row amount", value: "20px integer + 14px decimals/currency" },
       { label: "Styles", value: "PI (--uc-surface) and SME (--uc-neutral-200) tones" },
@@ -1325,8 +1333,8 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       "Portable reference for the Meniga-normalized Pill button: a fixed 120x36 rounded action across primary, secondary, counter, loading, and activated states.",
     visualSpecifications: [
       { label: "Size", value: "120 x 36px", detail: "18px corner radius, 8px horizontal padding." },
-      { label: "Label", value: "uc-type-n5-strong, 14px, centered, truncated to one line" },
-      { label: "Shadow", value: "0 2px 2px rgba(0,0,0,0.2)" },
+      { label: "Label", value: "uc-type-n5-strong, 14px / 15px, centered, truncated to one line" },
+      { label: "Shadow", value: "0 2px 4px rgba(0,0,0,0.2)" },
       { label: "Primary surface", value: "--uc-action background, white label" },
       { label: "Secondary/counter/loading/activated surface", value: "--uc-surface background" },
       { label: "Loading/success icon", value: "16px", detail: "8px gap to the label." },
@@ -1335,7 +1343,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       { id: "primary", label: "Primary", description: "Teal filled action." },
       { id: "secondary", label: "Secondary", description: "White surface, teal label." },
       { id: "active-counter", label: "Active counter", description: "White surface showing a counter string." },
-      { id: "loading-counter", label: "Loading counter", description: "Disabled with an animated spinner, aria-busy." },
+      { id: "loading-counter", label: "Loading counter", description: "Blocks activation with an animated spinner and aria-busy; full opacity unless explicitly disabled." },
       { id: "activated", label: "Activated", description: "White surface with a success checkmark." },
     ],
     motionSpecifications: [

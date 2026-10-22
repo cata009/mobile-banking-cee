@@ -42,11 +42,11 @@ describe('design-system Native component previews', () => {
         showActions: true,
         showTitle: true,
       },
-      { kind: 'more-header', actionVariant: 'default', messageCount: 7 },
+      { kind: 'design-system', componentId: 'shell.more-header', variantId: 'default', dark: false },
     ])
     expect(previews.snapshots.map(({ route }) => route)).toEqual([
       { screen: 'account' },
-      { screen: 'account' },
+      { screen: 'payments' },
     ])
   })
 

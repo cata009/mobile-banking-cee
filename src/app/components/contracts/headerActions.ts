@@ -1,6 +1,6 @@
-export type HeaderActionIconName = 'profile' | 'messages' | 'help' | 'search' | 'logout' | 'contact-phone' | 'edit' | 'spending'
+export type HeaderActionIconName = 'profile' | 'messages' | 'help' | 'info' | 'search' | 'logout' | 'contact-phone' | 'edit' | 'spending'
 const icons = {
-  profile: 'header-profile', messages: 'header-messages', help: 'help-circle', search: 'search',
+  profile: 'header-profile', messages: 'header-messages', help: 'help-circle', info: 'info-circle', search: 'search',
   logout: 'logout', 'contact-phone': 'contact-phone', edit: 'edit-pencil', spending: 'nav-analytics',
 } as const
 export const HEADER_ACTIONS_CONTRACT = {

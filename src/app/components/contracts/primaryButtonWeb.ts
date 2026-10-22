@@ -7,23 +7,25 @@ const backgrounds = {
   '--uc-surface': 'bg-[var(--uc-surface)]',
 } as const
 const foregrounds = {
+  '--uc-action': 'text-[var(--uc-action)]',
   '--uc-static-white': 'text-[var(--uc-static-white)]',
+  '--uc-text-inverse': 'text-[var(--uc-text-inverse)]',
   '--uc-text': 'text-[var(--uc-text)]',
 } as const
 const heights = { 48: 'h-[48px]' } as const
 const radii = { 4: 'rounded' } as const
-const typography = { 16: 'uc-type-n4-strong', 18: 'uc-type-h2' } as const
+const typography = { 14: 'uc-type-n5-strong', 16: 'uc-type-n4-strong', 18: 'uc-type-h2' } as const
 
 /** Legacy DOM and utility classes are deliberately preserved, including overrides. */
 export function primaryButtonWeb(options: PrimaryButtonOptions, className = '') {
   const state = resolvePrimaryButton(options)
-  const background = backgrounds[state.backgroundToken]
+  const background = state.transparent ? 'bg-transparent' : backgrounds[state.backgroundToken]
   const foreground = foregrounds[state.textToken]
   if (state.variant === 'language-save') {
     return {
-      type: undefined,
+      type: 'button',
       disabled: state.disabled || undefined,
-      buttonClass: `w-full ${heights[state.height]} ${background} rounded-[4px] flex items-center justify-center ${state.disabled ? 'cursor-not-allowed transition-opacity opacity-30' : 'cursor-pointer transition-opacity hover:opacity-90'}${className ? ` ${className}` : ''}`,
+      buttonClass: `w-full ${heights[state.height]} ${background} rounded-[4px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${state.disabled ? 'cursor-not-allowed transition-opacity opacity-30' : 'cursor-pointer transition-opacity hover:opacity-90'}${className ? ` ${className}` : ''}`,
       labelClass: `${typography[state.fontSize]} ${foreground}`,
     } as const
   }

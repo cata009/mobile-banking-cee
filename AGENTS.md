@@ -20,3 +20,14 @@ Keep legacy exports during extraction. Preserve normal DOM, styles, labels, data
 Run the affected tests, then have the integration owner run `npm run verify` on the combined final state. Review agent deltas sequentially. If separate branches were explicitly requested, integrate them sequentially too. No deployment, remote publication, image deletion/conversion or unrelated cleanup is implied by a refactor task.
 
 The scope manifest and these instructions are cooperative controls; they are not a filesystem lock or authentication boundary. CI runs task-scope validation when `.agent-task.json` is present. Required branch protection is managed separately by the repository owner.
+
+# Design System authoring for DEMO and Figma
+
+Agents building or changing DEMO interfaces or editing Figma must follow [the interface authoring contract](docs/design-system/agent-interface-contract.md).
+
+- Use approved components, variants, assets and tokens from the canonical Figma Design System `FKbbStgBIP9bFAMl3DPKHF` and their verified implementation contracts. Preserve the current approved page names, IDs, order and grouping; organize originals by move/reparent, preserving component keys and instance bindings.
+- Reuse the existing shared/native implementation and approved preview bridges before creating another component. Preserve business logic, screen/flow IDs, navigation, scenarios and platform semantics. Metadata entry points stay free of UI runtime imports.
+- Never substitute screenshots, PNG captures or flattened controls for executable components. Audit existing code before adding a component; consolidate Figma aliases and states into one catalog entry per implementation instead of duplicating previews or renderers.
+- Treat the Figma catalog as an index, not proof of implemented coverage. Verify actual source and supported variants; distinguish canonical source, illustrative examples and unavailable mappings. Never present a shared TextField or an approximation as an implemented Dropdown.
+- Put genuinely unmapped proposals on `De aprobat / <source>` pages, preserving editable source references. Reuse an existing proposal and obtain individual user approval before promotion or publication. Routine use of approved components needs no additional approval.
+- Follow the documentation template and real-host accessibility acceptance in the contract. Run affected checks and coordinate the final combined `npm run verify` with the integration owner; never overlap verification/coverage runs.

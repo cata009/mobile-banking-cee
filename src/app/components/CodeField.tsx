@@ -71,14 +71,15 @@ export default function CodeField({
             aria-describedby={helperId}
             className={cn(
               "uc-type-n1 rounded-[8px] border bg-[var(--uc-surface)] p-0 text-center tabular-nums",
-              "outline-none transition-colors focus:border-[var(--uc-action)] focus:ring-2 focus:ring-[var(--uc-action)] focus:ring-offset-2 focus:ring-offset-[var(--uc-app-bg)]",
-              "disabled:cursor-default disabled:bg-[var(--uc-surface-muted)] disabled:opacity-100",
+              "outline-none transition-colors focus:border-[var(--uc-action)]",
+              "disabled:cursor-default disabled:opacity-100",
               slotBorder,
               slotText,
             )}
             style={web.slotSize}
             onChange={(event) => updateSlot(index, event.target.value)}
             onKeyDown={(event) => {
+              if (isDisabled) return;
               if (event.key === "Backspace") {
                 event.preventDefault();
                 handleBackspace(index);

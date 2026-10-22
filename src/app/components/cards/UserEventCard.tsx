@@ -1,4 +1,5 @@
 import { bannerWeb } from "../contracts/bannerWeb";
+import { BANNER_ORIGINAL_SOURCES } from "../contracts/banner";
 import type { CSSProperties, ReactNode } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -8,6 +9,7 @@ export const USER_EVENT_CARD_SOURCE = {
   schema: "codex-figma-component-spec/v1",
   figmaComponentName: "User events",
   sourceNodeIds: { full: "9104:14482", compact: "9104:14438" },
+  originalSource: BANNER_ORIGINAL_SOURCES['user-event'],
   width: 343,
   cornerRadius: 8,
 } as const;

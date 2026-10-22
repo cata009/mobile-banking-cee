@@ -1,0 +1,164 @@
+{
+  "task": "CZ Robo annotated flow corrections after the page audit",
+  "owner": "/root",
+  "checkout": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "status": "implemented; final combined verification handed to Prime integration owner after its editors freeze",
+  "ownershipEvidence": [
+    ".codex-temp/robo-ds-followups-20261020/ownership.json",
+    ".codex-temp/robo-ds-followups-20261020/file-delta.json",
+    ".codex-temp/robo-contract-content-20261020/handoff.txt",
+    ".codex-temp/robo-funding-account-20261020/evidence.json",
+    ".codex-temp/robo-funding-figma-20261020/evidence.json",
+    ".codex-temp/robo-management-presentation-20261020/evidence.json",
+    ".codex-temp/robo-goal-detail-fidelity-20261020/report.json"
+  ],
+  "combinedScope": [
+    "native-spike/src/universal/PrimaryButton.tsx",
+    "native-spike/src/universal/SourceBottomSheet.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/PortfolioCarousel.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/CreationScreens.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/InvestmentContract.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/Management.tsx",
+    "native-spike/__tests__/primary-button-pilot.test.tsx",
+    "native-spike/__tests__/cz-robo-portfolio-carousel.test.tsx",
+    "native-spike/__tests__/source-bottom-sheet-sticky.test.tsx",
+    "native-spike/__tests__/cz-evo-robo-figma-flow.test.tsx",
+    "native-spike/__tests__/cz-robo-contract-content.test.tsx",
+    "native-spike/__tests__/cz-robo-funding-account.test.tsx",
+    "docs/tasks/cz-robo-ds-followups-2026-10-20.json",
+    "native-spike/src/universal/BaselineTextField.tsx",
+    "native-spike/src/universal/BaselineBanner.tsx",
+    "native-spike/src/universal/BaselineInvestmentPeriodChips.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/investments/Primitives.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/RoboFlow.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/GoalDetail.tsx",
+    "native-spike/src/experiences/pi/cz/evo-2027/robo/BasketDetails.tsx",
+    "native-spike/__tests__/baseline-field-accessory.test.tsx",
+    "native-spike/__tests__/robo-shared-presentation.test.tsx",
+    "native-spike/__tests__/cz-evo-robo.test.tsx",
+    "native-spike/__tests__/cz-evo-robo-management.test.tsx",
+    "native-spike/__tests__/cz-robo-goal-detail-fidelity.test.tsx",
+    "native-spike/__tests__/cz-robo-management-presentation.test.tsx",
+    "src/assets/investments/robo/funding-radio-selected.svg",
+    "src/assets/investments/robo/funding-radio-unselected.svg",
+    "src/assets/investments/robo/funding-chevron-down.svg"
+  ],
+  "corrections": [
+    {
+      "issue": "Portfolio indicators differed from the account carousel reference",
+      "sourceId": "accounts.carousel-indicator",
+      "catalogNode": "1517:12663",
+      "implementation": "BaselineCarouselIndicator with five actionable portfolio labels",
+      "result": "Removed the custom 32px-spaced hitbox row. Visible ink now uses the same 6px dots, 6px gap and 30px active capsule as baseline accounts. Existing drag, snapping and selection behavior is preserved."
+    },
+    {
+      "issue": "Primary CTA showed a focus ring after mouse activation",
+      "sourceId": "ui.primary-button",
+      "catalogNode": "715:6238",
+      "implementation": "PrimaryButton uses the browser :focus-visible heuristic and clears visual focus on pointer input",
+      "result": "Browser observed 0px outline for mouse input and 2px for Tab focus. Native focus and disabled behavior retained."
+    },
+    {
+      "issue": "Product detail title and close control scrolled away",
+      "implementation": "SourceBottomSheet optional stickyHeader, enabled for Create Goal product details",
+      "result": "Opaque header remained at the same viewport top after the product scroll reached 201 logical pixels. Existing 72px system-area offset and other consumers' default presentation retained."
+    },
+    {
+      "issue": "Contract preview contained a blank placeholder",
+      "implementation": "InvestmentContract uses eight demo sections and the same text in the existing paginated PDF export",
+      "result": "Actual document scroll height 4213px. Confirmation absent initially and after a 720px partial scroll, then present after reaching the end. Close/reopen resets acknowledgement."
+    },
+    {
+      "issue": "Funding account selector was clipped and its generic modal did not present the expected sheet",
+      "sourceIds": [
+        "form.text-field",
+        "shell.bottom-sheet"
+      ],
+      "implementation": "BaselineTextField selectionControl plus a sibling ModalPortal and viewport-sized BaselineBottomSheet",
+      "result": "Account number, name and balance render on separate lines. Selecting account 2 then Select updates review; dismissing an unconfirmed change retains account 2. Existing validation and hidden balances retained."
+    },
+    {
+      "issue": "Entire Add money page differed from source",
+      "figmaNodes": [
+        "14506:85180",
+        "14506:85704",
+        "14506:86010"
+      ],
+      "result": "All three states use source-specific titles, left radio rows, CZK amount fields, exact preset sets, monthly-only calendar, account heading/copy/field and canonical fixed footer. Three original SVG assets retained byte-for-byte; exact existing calendar24 reused. Dates, amounts and account data remain dynamic."
+    },
+    {
+      "issue": "Goal detail, settings and Model Portfolio diverged",
+      "figmaNodes": [
+        "14842:83238",
+        "14842:82889",
+        "14842:99715",
+        "14842:101342",
+        "14842:104796"
+      ],
+      "result": "White surface extends behind system bar for detail and management. Goal detail reuses canonical six-period chips, action bar and info banner, with source spacing/typography; all-zero line has no decorative markers. Settings uses canonical NavigationRow80 and chevron32. Shared BasketDetails is used by creation and management, with no Model CTA, correct section order,20px model percentages, and sticky product sheet72."
+    }
+  ],
+  "verification": {
+    "affectedJest": {
+      "suites": 22,
+      "tests": 142,
+      "status": "passed"
+    },
+    "finalStickyRegression": {
+      "tests": 1,
+      "status": "passed"
+    },
+    "nativeTypecheck": "Native project passed before last field style-only extraction; fresh strict scoped Robo check passed with inherited native options, plus Node test ambient types and explicit local typeRoots",
+    "scopedEslint": "passed with max-warnings 0",
+    "scopedPrettier": "passed",
+    "trackedDiffWhitespace": "passed",
+    "browser": "Verified latest goal-detail top and white system bar; settings80px rows/32px chevrons; Model presentation and sticky header before/after scroll; all3 funding states, presets,calendar24,account sheet,and selected amount/date/account in review. Earlier proof covers focus keyboard/pointer,DS indicators and contract end gate. No goal creation or investment submitted by this task.",
+    "reactChecklist": "Reviewed state placement, existing hooks, direct shared imports, roles, selected/expanded state, pointer and keyboard focus, and preserved reducer validation",
+    "combinedVerify": {
+      "status": "pending final gate after concurrent Prime editors freeze",
+      "integrationOwnerThread": "01a159bf-66b9-71b2-851f-0772ad351304",
+      "previousGate": {
+        "completedAt": "2026-10-20T17:24:27+03:00",
+        "log": ".codex-temp/robo-ds-followups-20261020/verify.log",
+        "exitCode": 0,
+        "note": "Preceded later full funding/settings/detail extension; not a validation claim for final state"
+      },
+      "finalAttempt": {
+        "reason": "Concurrent Prime definition.ts TS2352 missing handoff specs. Root typecheck subsequently passes; remaining Prime edits still active.",
+        "log": ".codex-temp/robo-ds-followups-20261020/verify-final.log",
+        "exitCode": 2
+      }
+    },
+    "affectedWeb": {
+      "suites": 10,
+      "tests": 36,
+      "status": "passed",
+      "log": ".codex-temp/robo-ds-followups-20261020/web-affected.log"
+    },
+    "rootTypecheck": "passed after concurrent Prime TS2352 correction",
+    "moduleAudit": "passed,308 files"
+  },
+  "proofDirectory": ".codex-temp/robo-ds-followups-20261020/proof",
+  "screenshots": [
+    "name-pointer-no-ring.png",
+    "name-keyboard-ring.png",
+    "portfolio-ds-indicators.png",
+    "product-sheet-sticky-after-scroll.png",
+    "contract-start.png",
+    "contract-end-confirmation.png",
+    "cash-account-bottom-sheet.png",
+    "cash-account-selected.png",
+    "goal-detail-final-top.png",
+    "goal-settings-final.png",
+    "model-portfolio-final-top.png",
+    "model-product-sticky.png",
+    "funding-once-final-top.png",
+    "funding-monthly-final-top.png",
+    "funding-monthly-final-fields.png",
+    "funding-calendar-final.png",
+    "funding-account-sheet-final.png",
+    "funding-combined-final-fields.png"
+  ],
+  "limits": "Browser checks establish web preview behavior; physical iOS/Android device validation was not performed. No new Figma mapping, asset change, publication or legal document approval is claimed."
+}

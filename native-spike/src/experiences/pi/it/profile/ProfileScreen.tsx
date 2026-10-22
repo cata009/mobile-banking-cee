@@ -94,10 +94,15 @@ function ProfileSession(props: ItalyNativeScreenProps) {
         <View style={styles.page}>
           {routes.map((route, index) => {
             const visible = index === routes.length - 1;
+            if (!visible) return null;
             const common: ScreenNavigation = {
               route,
               onBack: back,
-              onClose: close,
+              onClose:
+                initialProfileRoute(props).area === 'hub' &&
+                route.area !== 'hub'
+                  ? () => navigate({ area: 'hub' })
+                  : close,
               onNavigate: navigate,
               onChanged: props.onChanged,
               bankAdvisorKind: props.bankAdvisorKind,

@@ -33,8 +33,8 @@ export function resolveCodeField({
     helperWidth: 224,
     helperGap: 3,
     helperTop: 8,
-    borderToken: isDisabled ? '--uc-neutral-650' : isError ? '--uc-status-red' : '--uc-neutral-700',
-    textToken: isDisabled ? '--uc-neutral-650' : '--uc-text',
+    borderToken: isDisabled ? '--uc-text-subtle' : isError ? '--uc-status-red' : '--uc-neutral-700',
+    textToken: isDisabled ? '--uc-text-muted' : '--uc-text',
   } as const
 }
 export function updateCodeSlot(

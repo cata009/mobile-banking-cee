@@ -9,18 +9,23 @@ export function resolveMailboxTabs({
   layout = 'equal',
   minTabWidth = 0,
   withTopMargin = true,
-}: { layout?: 'equal' | 'scrollable'; minTabWidth?: number; withTopMargin?: boolean } = {}) {
+  itemCount,
+}: { layout?: 'equal' | 'scrollable'; minTabWidth?: number; withTopMargin?: boolean; itemCount?: number } = {}) {
+  const sourceTwoItems = layout === 'equal' && itemCount === 2
   return {
+    sourceTwoItems,
     isScrollable: layout === 'scrollable',
     minTabWidth,
     withTopMargin,
     height: 48,
     topMargin: withTopMargin ? 22 : 0,
     tabPadding: 16,
-    fontSize: 16,
+    fontSize: sourceTwoItems ? 18 : 16,
+    lineHeight: sourceTwoItems ? 20 : undefined,
+    contentInsetTop: sourceTwoItems ? 1 : 0,
     badgeSize: 12,
-    badgeGap: 8,
-    underlineHeight: 2,
+    badgeGap: sourceTwoItems ? 12 : 8,
+    underlineHeight: sourceTwoItems ? 3 : 2,
     dragThreshold: 10,
     activeTextToken: '--uc-text',
     inactiveTextToken: '--uc-text-muted',
