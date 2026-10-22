@@ -1,24 +1,26 @@
 import React, { useMemo, useState } from 'react';
-import { PanResponder, Pressable, StyleSheet, View } from 'react-native';
+import { PanResponder, StyleSheet, View } from 'react-native';
 import {
   getDocumentsConfigForCountry,
   type DocumentListItem,
 } from '@/app/config/documentsConfig';
 import { CurrentSearch } from './CurrentSearch';
 import type { CurrentScreenProps } from '../contracts';
-import { Confirm, Copy, Page, Section, s } from './Primitives';
+import { Confirm, Page, Section, s } from './Primitives';
 import { DatedRow } from './DatedRow';
-import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
+import { DeleteActionReveal } from '../../../../universal/DeleteActionReveal';
 import { useProfileTranslation } from './Host';
 
 function DocumentRow({
   item,
+  dark,
   open,
   onOpen,
   onClose,
   onDelete,
 }: {
   item: DocumentListItem;
+  dark: boolean;
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
@@ -43,29 +45,21 @@ function DocumentRow({
       style={styles.row}
       {...swipe.panHandlers}
     >
-      {open ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Delete document ${item.id}`}
-          onPress={onDelete}
-          style={styles.delete}
-        >
-          <SourceCustomIcon name="trash-2" size={24} color="#ffffff" />
-          <View style={styles.deleteLabel}>
-            <Copy strong size={14} lineHeight={15} color="#ffffff">
-              DELETE
-            </Copy>
-          </View>
-        </Pressable>
-      ) : null}
-      <View style={open ? styles.shift : undefined}>
+      <DeleteActionReveal
+        actionsOpen={open}
+        dark={dark}
+        deleteActionLabel="DELETE"
+        deleteAccessibilityLabel={`Delete document ${item.id}`}
+        onDelete={onDelete}
+        testID={`delete-reveal-${item.id}`}
+      >
         <DatedRow
           item={item}
           uppercase
           label={`Document actions ${item.id}`}
           actions={open ? onClose : onOpen}
         />
-      </View>
+      </DeleteActionReveal>
     </View>
   );
 }
@@ -161,6 +155,7 @@ export default function Documents(props: CurrentScreenProps) {
             <DocumentRow
               key={item.id}
               item={item}
+              dark={props.tokens.text !== '#262626'}
               open={open === item.id}
               onOpen={() => setOpen(item.id)}
               onClose={() => setOpen(null)}
@@ -199,20 +194,8 @@ export default function Documents(props: CurrentScreenProps) {
   );
 }
 const styles = StyleSheet.create({
-  deleteLabel: { marginTop: 8 },
   tail: { height: 18 },
   row: { height: 80, overflow: 'hidden' },
-  delete: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e2001a',
-  },
-  shift: { transform: [{ translateX: -80 }] },
 });
 
 const fidelityStyles = StyleSheet.create({

@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import type { CountryId } from '@/app/state/demoTypes';
 import {
   getMessagesConfigForCountry,
+  type MessageListItem,
   type MessageMailbox,
 } from '@/app/config/messagesConfig';
 import { Tabs } from '../../../../../universal/controls';
+import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
 import { CurrentSearch } from './CurrentSearch';
 import type { CzechNativeScreenProps } from '../contracts';
-import { Page, Section, s, useCurrentTokens } from './Primitives';
+import { Confirm, Page, Section, s, useCurrentTokens } from './Primitives';
 import { DatedRow } from './DatedRow';
 import { useCzechTranslation } from './features/preferences';
 export default function Messages(props: CzechNativeScreenProps) {
@@ -15,8 +18,17 @@ export default function Messages(props: CzechNativeScreenProps) {
     tokens = useCurrentTokens(),
     config = getMessagesConfigForCountry('CZ');
   const [mailbox, setMailbox] = useState<MessageMailbox>('inbox'),
-    [query, setQuery] = useState('');
+    [query, setQuery] = useState(''),
+    [openMessageId, setOpenMessageId] = useState<string | null>(null),
+    [pendingDelete, setPendingDelete] = useState<{
+      country: CountryId;
+      message: MessageListItem;
+    } | null>(null),
+    [deletedMessageIdsByCountry, setDeletedMessageIdsByCountry] = useState<
+      Partial<Record<CountryId, ReadonlySet<string>>>
+    >({});
   const messages = config[mailbox]
+    .filter(item => !deletedMessageIdsByCountry.CZ?.has(item.id))
     .map(item => {
       const key = `runtime.messages.rows.${item.title
         .toLowerCase()
@@ -44,6 +56,19 @@ export default function Messages(props: CzechNativeScreenProps) {
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
     );
+  const cancelDelete = () => {
+    setPendingDelete(null);
+    setOpenMessageId(null);
+  };
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    setDeletedMessageIdsByCountry(current => {
+      const deletedIds = new Set(current[pendingDelete.country] ?? []);
+      deletedIds.add(pendingDelete.message.id);
+      return { ...current, [pendingDelete.country]: deletedIds };
+    });
+    cancelDelete();
+  };
   const sticky = (
     <View>
       <Tabs
@@ -60,7 +85,10 @@ export default function Messages(props: CzechNativeScreenProps) {
             label: t('runtime.messages.outbox', config.tabs.outbox),
           },
         ]}
-        onChange={setMailbox}
+        onChange={value => {
+          setMailbox(value);
+          setOpenMessageId(null);
+        }}
       />
       <View style={[s.pad, fidelityStyles.s0]}>
         <CurrentSearch value={query} onChange={setQuery} />
@@ -82,18 +110,53 @@ export default function Messages(props: CzechNativeScreenProps) {
         rowsGap={20}
       >
         {messages.map(item => (
-          <View key={item.id} testID="cz-message-row">
-            <DatedRow
-              item={item}
-              label={t('runtime.actions.moreActions', 'More actions')}
-            />
-          </View>
+          <DeleteActionReveal
+            key={item.id}
+            testID={`delete-reveal-${item.id}`}
+            actionsOpen={openMessageId === item.id}
+            dark={tokens.text !== '#262626'}
+            deleteActionLabel={t('runtime.messages.deleteAction', 'DELETE')}
+            deleteAccessibilityLabel={`${t(
+              'runtime.messages.deleteMessage',
+              'Delete message',
+            )} ${item.title}`}
+            onDelete={() => setPendingDelete({ country: 'CZ', message: item })}
+          >
+            <View testID="cz-message-row">
+              <DatedRow
+                item={item}
+                label={`${t(
+                  'runtime.messages.messageActions',
+                  'Message actions',
+                )} ${item.title}`}
+                actionsExpanded={openMessageId === item.id}
+                actions={() =>
+                  setOpenMessageId(current =>
+                    current === item.id ? null : item.id,
+                  )
+                }
+              />
+            </View>
+          </DeleteActionReveal>
         ))}
       </Section>
+      {pendingDelete ? (
+        <Confirm
+          title={t('runtime.messages.deleteDialog.title', 'Delete message?')}
+          body={t(
+            'runtime.messages.deleteDialog.body',
+            'Are you sure you want to delete this message?',
+          )}
+          onCancel={cancelDelete}
+          onConfirm={confirmDelete}
+          confirmLabel={t('runtime.messages.deleteDialog.confirm', 'Delete')}
+          cancelLabel={t('runtime.dialogs.cancel', 'Cancel')}
+        />
+      ) : null}
     </Page>
   );
 }
 
 const fidelityStyles = StyleSheet.create({
-  s0: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
+  s0: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 },
 });

@@ -15,9 +15,9 @@ import type { CurrentScreenProps } from '../../contracts';
 import { assistantAvailable } from '../../coapping/model';
 import { openCurrentContextHelp } from '../../coapping/contextHelp';
 import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
-import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
+import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
 import {
   MoreServicePage,
   serviceDark,
@@ -59,21 +59,14 @@ function DocumentRow({
       style={styles.row}
       {...swipe.panHandlers}
     >
-      {open ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Delete document ${item.id}`}
-          onPress={onDelete}
-          style={[
-            styles.delete,
-            { backgroundColor: sourceColor('var(--uc-status-red)', dark) },
-          ]}
-        >
-          <SourceCustomIcon name="trash-2" size={24} color="#ffffff" />
-          <Text style={styles.deleteLabel}>DELETE</Text>
-        </Pressable>
-      ) : null}
-      <View style={open ? styles.shift : undefined}>
+      <DeleteActionReveal
+        actionsOpen={open}
+        dark={dark}
+        deleteActionLabel="DELETE"
+        deleteAccessibilityLabel={`Delete document ${item.id}`}
+        onDelete={onDelete}
+        testID={`delete-reveal-${item.id}`}
+      >
         <ServiceDatedRow
           item={item}
           dark={dark}
@@ -81,7 +74,7 @@ function DocumentRow({
           label={`Document actions ${item.id}`}
           onActions={open ? onClose : onOpen}
         />
-      </View>
+      </DeleteActionReveal>
     </View>
   );
 }
@@ -280,7 +273,12 @@ export default function Documents(host: CurrentScreenProps) {
       host={host}
       title={t('runtime.documents.title', config.title)}
       overlay={overlay}
-      onHelpPress={host.onHelpRequest ?? (assistantAvailable(host) ? () => openCurrentContextHelp(host, 'documents') : undefined)}
+      onHelpPress={
+        host.onHelpRequest ??
+        (assistantAvailable(host)
+          ? () => openCurrentContextHelp(host, 'documents')
+          : undefined)
+      }
     >
       <View style={styles.search}>
         <BaselineSearchBar
@@ -325,23 +323,6 @@ const webDialogBackground: ViewStyle & {
 } = Platform.OS === 'web' ? { WebkitBackgroundClip: 'padding-box' } : {};
 const styles = StyleSheet.create({
   row: { height: 80, overflow: 'hidden' },
-  delete: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteLabel: {
-    marginTop: 8,
-    fontFamily: 'UniCredit-bold',
-    fontSize: 14,
-    lineHeight: 15,
-    color: '#ffffff',
-  },
-  shift: { transform: [{ translateX: -80 }] },
   search: { paddingHorizontal: 16, paddingVertical: 26 },
   groups: { paddingBottom: 24 },
   group: { paddingBottom: 18 },

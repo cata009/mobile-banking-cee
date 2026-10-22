@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { PanResponder, Pressable, StyleSheet, View } from 'react-native';
+import { PanResponder, StyleSheet, View } from 'react-native';
 import {
   getDocumentsConfigForCountry,
   type DocumentListItem,
 } from '@/app/config/documentsConfig';
 import { CurrentSearch } from './CurrentSearch';
 import type { CzechNativeScreenProps } from '../contracts';
-import { Confirm, Copy, Page, Section, s } from './Primitives';
+import { Confirm, Page, Section, s, useCurrentTokens } from './Primitives';
 import { DatedRow } from './DatedRow';
 import { useCzechTranslation } from './features/preferences';
+import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
 
 function DocumentRow({
   item,
@@ -23,6 +24,7 @@ function DocumentRow({
   onClose: () => void;
   onDelete: () => void;
 }) {
+  const tokens = useCurrentTokens();
   const swipe = useMemo(
     () =>
       PanResponder.create({
@@ -38,26 +40,21 @@ function DocumentRow({
   );
   return (
     <View testID="cz-document-row" style={styles.row} {...swipe.panHandlers}>
-      {open ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Delete document ${item.id}`}
-          onPress={onDelete}
-          style={styles.delete}
-        >
-          <Copy strong size={14} color="#ffffff">
-            DELETE
-          </Copy>
-        </Pressable>
-      ) : null}
-      <View style={open ? styles.shift : undefined}>
+      <DeleteActionReveal
+        actionsOpen={open}
+        dark={tokens.text !== '#262626'}
+        deleteActionLabel="DELETE"
+        deleteAccessibilityLabel={`Delete document ${item.id}`}
+        onDelete={onDelete}
+        testID={`delete-reveal-${item.id}`}
+      >
         <DatedRow
           item={item}
           uppercase
           label={`Document actions ${item.id}`}
           actions={open ? onClose : onOpen}
         />
-      </View>
+      </DeleteActionReveal>
     </View>
   );
 }
@@ -188,17 +185,6 @@ export default function Documents(props: CzechNativeScreenProps) {
 }
 const styles = StyleSheet.create({
   row: { height: 80, overflow: 'hidden' },
-  delete: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e2001a',
-  },
-  shift: { transform: [{ translateX: -80 }] },
 });
 
 const fidelityStyles = StyleSheet.create({
