@@ -5,8 +5,14 @@ vi.mock('react', () => {
   throw new Error('Metadata imported React')
 })
 const entries = import.meta.glob('/src/flows/**/index.ts', { eager: true })
-const paths = ['ro/genius-my-car', 'shared/ethoca', 'rs/property-insurance', 'rs/disposable-cards']
-const ids = ['ro-genius-my-car', 'mobile-pi-ethoca', 'rs-property-insurance', 'rs-disposable-cards'] as const
+const paths = ['ro/genius-my-car', 'shared/ethoca', 'rs/property-insurance', 'rs/disposable-cards', 'ba/card-fraud']
+const ids = [
+  'ro-genius-my-car',
+  'mobile-pi-ethoca',
+  'rs-property-insurance',
+  'rs-disposable-cards',
+  'ba-card-fraud',
+] as const
 it('owns all canonical definitions as identity reexports without UI runtime imports', () => {
   paths.forEach((path, index) => {
     const entry = entries['/src/flows/' + path + '/index.ts']
@@ -14,6 +20,7 @@ it('owns all canonical definitions as identity reexports without UI runtime impo
     expect(Object.values(entry as object)).toContain(FLOW_DEFINITIONS[ids[index]!])
   })
   expect(FLOW_ORDER).toEqual([
+    'ba-card-fraud',
     'pi-prime',
     'investments-bulk-approval',
     'rs-property-insurance',

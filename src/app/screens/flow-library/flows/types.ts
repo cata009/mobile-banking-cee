@@ -24,9 +24,11 @@
 
 import type { CountryId } from '@/app/state/demoTypes'
 import type { PrimeReferenceScreen } from '@/features/prime/reference'
+import type { FraudScreen } from '@/features/cards/fraud/model'
 
 /** Stable ids for the flows shipped in the library. */
 export type FlowPreviewId =
+  | 'ba-card-fraud'
   | 'ro-genius-my-car'
   | 'mobile-pi-ethoca'
   | 'rs-property-insurance'
@@ -135,6 +137,7 @@ export type InvestmentsBulkApprovalScreenKind =
   | 'investments-bulk-failure'
 
 export type FlowScreenKind =
+  | FraudScreen
   | PrimeReferenceScreen
   | EthocaScreenKind
   | RsPropertyInsuranceScreenKind

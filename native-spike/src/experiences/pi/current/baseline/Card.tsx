@@ -374,6 +374,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     }
     setAuthCard(card.id);
   };
+  const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
   const actions = [
     {
       id: 'card-details',
@@ -399,6 +400,9 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
       id: 'block-card',
       iconName: 'block-card',
       label: copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
+      onPress: securityRoutes
+        ? () => host.onNavigate(securityRoutes.block)
+        : undefined,
     },
     {
       id: 'view-pin',
