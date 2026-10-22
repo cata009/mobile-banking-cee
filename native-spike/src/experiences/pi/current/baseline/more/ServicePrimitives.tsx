@@ -118,6 +118,7 @@ export function ServiceDatedRow({
   dark,
   document = false,
   label,
+  actionsExpanded,
   onActions,
 }: {
   item: {
@@ -130,6 +131,7 @@ export function ServiceDatedRow({
   dark: boolean;
   document?: boolean;
   label: string;
+  actionsExpanded?: boolean;
   onActions?: () => void;
 }) {
   const ink = sourceColor('var(--uc-text)', dark),
@@ -175,6 +177,11 @@ export function ServiceDatedRow({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        accessibilityState={
+          actionsExpanded === undefined
+            ? undefined
+            : { expanded: actionsExpanded }
+        }
         onPress={onActions}
         style={styles.more}
       >

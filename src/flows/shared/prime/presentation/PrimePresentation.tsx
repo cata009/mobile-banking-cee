@@ -170,14 +170,30 @@ function PresentationStage({
         <div className="prime-presentation-tools">
           <button
             type="button"
-            className="prime-presentation-copy"
+            className="prime-presentation-icon-button"
             onClick={() => void copyLink()}
-            aria-label={copyState === 'copied' ? 'Presentation link copied' : 'Copy presentation link'}
+            aria-label={
+              copyState === 'copied'
+                ? 'Presentation link copied'
+                : copyState === 'unavailable'
+                  ? 'Copy unavailable'
+                  : 'Copy presentation link'
+            }
+            title="Copy presentation link"
           >
             {copyState === 'copied' ? <Check size={16} strokeWidth={1.7} /> : <Copy size={16} strokeWidth={1.7} />}
-            <span aria-live="polite">
-              {copyState === 'copied' ? 'Link copied' : copyState === 'unavailable' ? 'Copy unavailable' : 'Copy link'}
+            <span className="sr-only" aria-live="polite">
+              {copyState === 'copied' ? 'Link copied' : copyState === 'unavailable' ? 'Copy unavailable' : ''}
             </span>
+          </button>
+          <button
+            type="button"
+            className="prime-presentation-icon-button"
+            onClick={model.restart}
+            aria-label="Start again"
+            title="Start again"
+          >
+            <RotateCcw size={18} strokeWidth={1.7} />
           </button>
           {canFullscreen ? (
             <button
@@ -250,9 +266,9 @@ function PresentationStage({
 
         <aside className="prime-presentation-context" aria-label="Choose the customer experience">
           <fieldset className="prime-presentation-fieldset">
-            <legend>Choose a client</legend>
+            <legend>Choose a segment</legend>
             <div className="prime-presentation-segments">
-              {(['standard', 'prime', 'private'] as const).map((segment) => (
+              {(['prime', 'private', 'standard'] as const).map((segment) => (
                 <label key={segment} className="prime-presentation-choice">
                   <input
                     type="radio"
@@ -273,52 +289,6 @@ function PresentationStage({
               ))}
             </div>
           </fieldset>
-
-          {model.segment === 'standard' ? (
-            <fieldset className="prime-presentation-fieldset prime-presentation-service">
-              <legend>Advisor service</legend>
-              <div className="prime-presentation-service-choices">
-                {[
-                  { active: true, label: 'Already active' },
-                  { active: false, label: 'Not activated' },
-                ].map((service) => (
-                  <label
-                    key={String(service.active)}
-                    className="prime-presentation-choice prime-presentation-choice--small"
-                  >
-                    <input
-                      type="radio"
-                      name="prime-presentation-service"
-                      checked={model.serviceActive === service.active}
-                      onChange={() => model.setStandardServiceActive(service.active)}
-                    />
-                    <span className="prime-presentation-choice-mark" aria-hidden="true">
-                      <AppIcon
-                        name={model.serviceActive === service.active ? 'radio-selected' : 'radio-unselected'}
-                        size={20}
-                        color="var(--prime-stage-ink)"
-                      />
-                    </span>
-                    <span>{service.label}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          ) : null}
-
-          <div className="prime-presentation-context-footer">
-            <p className="prime-presentation-context-note">
-              {model.segment === 'private'
-                ? 'A dedicated Private & Wealth experience.'
-                : model.segment === 'prime' || model.serviceActive
-                  ? 'Personal care, already part of your day.'
-                  : 'Discover what a more personal banking relationship could look like.'}
-            </p>
-            <button type="button" className="prime-presentation-restart" onClick={model.restart}>
-              <RotateCcw size={15} strokeWidth={1.7} />
-              Start again
-            </button>
-          </div>
         </aside>
       </main>
 

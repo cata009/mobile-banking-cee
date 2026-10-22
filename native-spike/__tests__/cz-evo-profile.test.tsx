@@ -8,6 +8,8 @@ import {
   type CzechNativeScreen,
 } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { getDocumentsConfigForCountry } from '@/app/config/documentsConfig';
+import { getMessagesConfigForCountry } from '@/app/config/messagesConfig';
+import { DeleteActionReveal } from '../src/universal/DeleteActionReveal';
 import { czechPreferences } from '../src/experiences/pi/cz/evo-2027/profile/features/preferences';
 
 const mounted: Renderer.ReactTestRenderer[] = [];
@@ -99,6 +101,10 @@ test('documents cancellation and legal protection preserve Source rows, confirme
     item => item.isLegal,
   )!;
   await press(tree, `Document actions ${regular.id}`);
+  const reveal = tree.root
+    .findAllByType(DeleteActionReveal)
+    .find(node => node.props.testID === `delete-reveal-${regular.id}`);
+  expect(reveal?.props.actionsOpen).toBe(true);
   await press(tree, `Delete document ${regular.id}`);
   await press(tree, 'Cancel');
   expect(pressable(tree, `Document actions ${regular.id}`)).toBeDefined();
@@ -156,6 +162,31 @@ test('mailbox selection preserves query and uses canonical outbox data', async (
   expect(JSON.stringify(tree.toJSON())).toContain(
     'Question about a card transaction.',
   );
+});
+
+test('CZ Evo Messages expose Delete, preserve the row on cancel, and remove it on confirmation', async () => {
+  const { tree } = await render('messages');
+  const first = getMessagesConfigForCountry('CZ').inbox[0]!;
+  await press(tree, `Message actions ${first.title}`);
+  expect(
+    pressable(tree, `Message actions ${first.title}`).props.accessibilityState,
+  ).toEqual({ expanded: true });
+  expect(pressable(tree, `Delete message ${first.title}`)).toBeDefined();
+  await press(tree, `Delete message ${first.title}`);
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Are you sure you want to delete this message?',
+  );
+  await press(tree, 'Cancel');
+  expect(pressable(tree, `Message actions ${first.title}`)).toBeDefined();
+  await press(tree, `Message actions ${first.title}`);
+  await press(tree, `Delete message ${first.title}`);
+  await press(tree, 'Delete');
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === `Message actions ${first.title}`,
+    ),
+  ).toHaveLength(0);
 });
 test('settings keeps inactive rows inert and language Back discards the selection', async () => {
   const { tree, props } = await render('settings');

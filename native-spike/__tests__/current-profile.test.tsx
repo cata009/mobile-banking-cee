@@ -13,6 +13,7 @@ import {
   getDocumentsCountForCountry,
 } from '@/app/config/documentsConfig';
 import { getMessagesConfigForCountry } from '@/app/config/messagesConfig';
+import { DeleteActionReveal } from '../src/universal/DeleteActionReveal';
 import { getTutorialsForCountry } from '@/app/config/tutorialsConfig';
 import {
   getAvailableLanguages,
@@ -253,6 +254,10 @@ test('document legal protection and confirmation cancellation retain Source rows
   const ordinary = items.find(i => !i.isLegal)!;
   const legal = items.find(i => i.isLegal)!;
   await press(tree, `Document actions ${ordinary.id}`);
+  const reveal = tree.root
+    .findAllByType(DeleteActionReveal)
+    .find(node => node.props.testID === `delete-reveal-${ordinary.id}`);
+  expect(reveal?.props.actionsOpen).toBe(true);
   await press(tree, `Delete document ${ordinary.id}`);
   await press(tree, 'Cancel');
   expect(control(tree, `Document actions ${ordinary.id}`)).toBeDefined();
@@ -265,6 +270,26 @@ test('document legal protection and confirmation cancellation retain Source rows
   await press(tree, `Delete document ${ordinary.id}`);
   await press(tree, 'Delete');
   expect(control(tree, `Document actions ${ordinary.id}`)).toBeUndefined();
+});
+
+test('current Messages reveal a translated delete action and delete only after confirmation', async () => {
+  const { tree } = await render('messages', 'RO');
+  const first = getMessagesConfigForCountry('RO').inbox[0]!;
+  await press(tree, `Message actions ${first.title}`);
+  expect(
+    control(tree, `Message actions ${first.title}`).props.accessibilityState,
+  ).toEqual({ expanded: true });
+  expect(control(tree, `Delete message ${first.title}`)).toBeDefined();
+  await press(tree, `Delete message ${first.title}`);
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Are you sure you want to delete this message?',
+  );
+  await press(tree, 'Cancel');
+  expect(control(tree, `Message actions ${first.title}`)).toBeDefined();
+  await press(tree, `Message actions ${first.title}`);
+  await press(tree, `Delete message ${first.title}`);
+  await press(tree, 'Delete');
+  expect(control(tree, `Message actions ${first.title}`)).toBeUndefined();
 });
 test.each(countries)(
   '%s tutorials use canonical market order and slide content',

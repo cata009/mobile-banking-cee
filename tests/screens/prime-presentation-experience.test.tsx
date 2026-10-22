@@ -70,16 +70,23 @@ it('connects the real presentation shell, customer controls and canonical phone 
   expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-benefits')
 })
 
-it('offers two Standard moments for either service state and orders the service radios without changing the default', async () => {
+it('presents only inactive Standard with ordered segments and discreet header tools', async () => {
   renderBankingScreen(<Experience />)
   await screen.findByTestId('live-reference')
-  const service = screen.getByRole('group', { name: 'Advisor service' })
+  const segments = screen.getByRole('group', { name: 'Choose a segment' })
   expect(
-    within(service)
+    within(segments)
       .getAllByRole('radio')
       .map((radio) => radio.getAttribute('aria-label') ?? radio.closest('label')?.textContent?.trim()),
-  ).toEqual(['Already active', 'Not activated'])
-  expect(screen.getByRole('radio', { name: 'Not activated' })).toBeChecked()
+  ).toEqual(['Prime', 'Private', 'Standard'])
+  expect(screen.getByRole('radio', { name: 'Standard' })).toBeChecked()
+  expect(screen.queryByRole('group', { name: 'Advisor service' })).not.toBeInTheDocument()
+  expect(
+    screen.queryByText('Discover what a more personal banking relationship could look like.'),
+  ).not.toBeInTheDocument()
+  const header = screen.getByRole('button', { name: 'Copy presentation link' }).closest('header')!
+  expect(within(header).getByRole('button', { name: 'Start again' })).toBeInTheDocument()
+  expect(screen.queryByText('Copy link')).not.toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Benefits' })).not.toBeInTheDocument()
   expect(screen.getByText('1 / 2')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Previous moment' })).toBeDisabled()
@@ -87,14 +94,8 @@ it('offers two Standard moments for either service state and orders the service 
   expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-upgrade')
   expect(screen.getByText('2 / 2')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Next moment' })).toBeDisabled()
-  fireEvent.click(screen.getByRole('radio', { name: 'Already active' }))
-  expect(screen.queryByRole('button', { name: 'Benefits' })).not.toBeInTheDocument()
-  expect(screen.getByText('1 / 2')).toBeInTheDocument()
-  fireEvent.click(screen.getByRole('button', { name: 'Next moment' }))
-  expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-advisor')
-  expect(screen.getByText('2 / 2')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Next moment' })).toBeDisabled()
-  fireEvent.click(screen.getByRole('radio', { name: 'Not activated' }))
+  fireEvent.click(within(header).getByRole('button', { name: 'Start again' }))
+  expect(screen.getByTestId('live-reference')).toHaveAttribute('data-screen', 'prime-home')
   expect(screen.queryByRole('button', { name: 'Benefits' })).not.toBeInTheDocument()
   expect(screen.getByText('1 / 2')).toBeInTheDocument()
 })
