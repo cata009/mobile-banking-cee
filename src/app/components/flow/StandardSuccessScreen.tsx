@@ -1,14 +1,15 @@
-import type { ReactNode } from "react";
-import PrimaryButton from "@/app/components/PrimaryButton";
-import { AppIcon } from "@/app/components/icons";
+import type { ReactNode } from 'react'
+import PrimaryButton from '@/app/components/PrimaryButton'
+import { AppIcon } from '@/app/components/icons'
 
 interface StandardSuccessScreenProps {
-  title: string;
-  body: ReactNode;
-  actionLabel: string;
-  onDone: () => void;
-  secondaryActionLabel?: string;
-  onSecondaryAction?: () => void;
+  title: string
+  body: ReactNode
+  actionLabel: string
+  onDone: () => void
+  secondaryActionLabel?: string
+  onSecondaryAction?: () => void
+  actions?: ReactNode
 }
 
 export default function StandardSuccessScreen({
@@ -18,6 +19,7 @@ export default function StandardSuccessScreen({
   onDone,
   secondaryActionLabel,
   onSecondaryAction,
+  actions,
 }: StandardSuccessScreenProps) {
   return (
     <div className="flex h-full w-full flex-col bg-[var(--uc-surface)]" data-standard-success-screen="true">
@@ -32,18 +34,20 @@ export default function StandardSuccessScreen({
         </div>
         <div className="uc-type-n4 pt-[58px] leading-[22px] text-[var(--uc-text)]">{body}</div>
       </div>
-      <div className="px-[24px] pb-[42px]">
-        <PrimaryButton onClick={onDone}>{actionLabel}</PrimaryButton>
-        {secondaryActionLabel && onSecondaryAction ? (
-          <button
-            type="button"
-            onClick={onSecondaryAction}
-            className="uc-type-n5-strong mt-[8px] min-h-[44px] w-full rounded text-center text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
-          >
-            {secondaryActionLabel}
-          </button>
-        ) : null}
-      </div>
+      {actions ?? (
+        <div className="px-[24px] pb-[42px]">
+          <PrimaryButton onClick={onDone}>{actionLabel}</PrimaryButton>
+          {secondaryActionLabel && onSecondaryAction ? (
+            <button
+              type="button"
+              onClick={onSecondaryAction}
+              className="uc-type-n5-strong mt-[8px] min-h-[44px] w-full rounded text-center text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-surface)]"
+            >
+              {secondaryActionLabel}
+            </button>
+          ) : null}
+        </div>
+      )}
     </div>
-  );
+  )
 }

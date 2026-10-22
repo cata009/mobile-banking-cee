@@ -1,0 +1,23 @@
+{
+  "generatedWallpaper": {
+    "file": "lake-dusk-lockscreen.png",
+    "source": "Built-in image generation, explicitly requested by the user on 22 October 2026",
+    "sha256": "84CA6002725CF674F48E31C2B88F88E59E353BEC91DCC0BCAF20699042760AFC",
+    "prompt": "A new photorealistic 9:19.5 phone wallpaper: peaceful Balkan alpine lake at blue hour after sunset, dark pine shore and layered mountain silhouettes, subtle peach horizon, navy/teal water reflections. Calm dark sky and low-detail middle for clock and notification contrast. Friendly premium natural photography. No phone, text, UI, logos, people or watermark.",
+    "processing": "Original PNG bytes copied into project; overlay is CSS; no conversion."
+  },
+  "appIcon": {
+    "file": "m-ba-approved-icon.png",
+    "figmaFile": "F5ppItNJd0pjehF7Y1UzgG",
+    "nodeId": "4506:2265",
+    "source": "User-selected approved BA PI export; downloaded through Figma download_assets",
+    "sha256": "99B41F22C219AFDA65F537216B28C0D8F88BC1087F5285177B5E3C1EFACA569D",
+    "processing": "Original exported PNG bytes; no conversion."
+  },
+  "atmIcon": {
+    "reference": "sQcjbRC5p4CmldGUqh0mrn/3751:10275",
+    "implementation": "src/app/components/pfm/PfmCategoryIcon.tsx",
+    "variant": "Finance / category-circle / 32 in list, 64 in details",
+    "colorToken": "--uc-pfm-finance"
+  }
+}

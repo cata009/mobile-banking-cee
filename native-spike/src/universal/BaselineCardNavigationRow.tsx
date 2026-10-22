@@ -49,11 +49,13 @@ export function BaselineCardNavigationRow({
   card,
   label,
   maskedNumber,
+  onPress,
   dark = false,
 }: {
   card?: NavigationCardIdentity | null;
   label: string;
   maskedNumber?: string;
+  onPress?: () => void;
   dark?: boolean;
 }) {
   const state = resolveCardNavigationRow(card);
@@ -85,6 +87,7 @@ export function BaselineCardNavigationRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${label} ${number}`}
+      onPress={onPress}
       style={pressableStyle3}
     >
       <CardArtwork card={card} dark={dark} />

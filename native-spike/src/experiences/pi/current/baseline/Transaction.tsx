@@ -30,6 +30,7 @@ import {
 } from '../../../../universal/BaselineAccountActionBar';
 import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDivider';
 import { BaselineCardNavigationRow } from '../../../../universal/BaselineCardNavigationRow';
+import { BaselineBanner } from '../../../../universal/BaselineBanner';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -106,6 +107,11 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
   const transaction = applyCategoryOverride(host, raw),
     detail = createTransactionDetailData(transaction, host.country, product),
     pending = transaction.status === 'Pending';
+  const declined = host.transactionPresentation?.activityStatus === 'declined';
+  const displayAmount = declined ? detail.amount.replace(/^[-−]/, '') : detail.amount;
+  const displayDate = host.transactionPresentation?.postingTime
+    ? `${detail.bookingDate} · ${host.transactionPresentation.postingTime}`
+    : detail.bookingDate;
   const card = product ? (
     product.type === 'credit_card' || product.type === 'debit_card'
       ? product
@@ -116,6 +122,8 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
       : undefined
   ) : undefined;
   const enrichment = host.transactionPresentation?.merchantEnrichment;
+  const cardDetailsRoute = host.transactionPresentation?.cardDetailsRoute;
+  const caseNotice = host.transactionPresentation?.caseNotice;
   const merchant = resolveTransactionMerchant(transaction),
     title = enrichment?.cleanMerchantName ?? merchant?.name ?? detail.title,
     location = enrichment?.location ??
@@ -277,7 +285,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
   } as const;
   const sourceStyle8 = {
     backgroundColor: host.tokens.background,
-    paddingBottom: pending ? 11.5 : 8,
+    paddingBottom: host.transactionPresentation?.showSpendingInsights === false ? 16 : pending ? 11.5 : 8,
   } as const;
   const sourceStyle9 = {
     paddingHorizontal: 24,
@@ -305,7 +313,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
     lineHeight: 33,
   } as const;
   const sourceStyle13 = {
-    marginTop: 18,
+    marginTop: host.transactionPresentation?.showSpendingInsights === false ? 16 : 18,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
@@ -481,14 +489,14 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
               />
             )}
             <Text style={[strong, sourceStyle10]}>{title}</Text>
-            <Text style={[strong, sourceStyle11]}>{detail.bookingDate}</Text>
-            <Text style={[strong, sourceStyle12]}>{detail.amount}</Text>
-            {pending ? (
+            <Text style={[strong, sourceStyle11]}>{displayDate}</Text>
+            <Text style={[strong, sourceStyle12]}>{displayAmount}</Text>
+            {pending || declined ? (
               <View style={sourceStyle13}>
                 <View style={sourceStyle14} />
-                <Text style={[strong, sourceStyle15]}>Pending</Text>
+                <Text style={[strong, sourceStyle15]}>{declined ? 'Declined' : 'Pending'}</Text>
               </View>
-            ) : (
+            ) : host.transactionPresentation?.showSpendingInsights === false ? null : (
               <>
                 <Text style={[strong, sourceStyle16]}>
                   {detail.pfmCategoryLabel.toUpperCase()}
@@ -510,7 +518,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
               </>
             )}
           </View>
-          {!pending ? (
+          {!pending && host.transactionPresentation?.showActions !== false ? (
             <View style={sourceStyle19}>
               <BaselineAccountActionBar
                 items={actions}
@@ -520,7 +528,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
             </View>
           ) : null}
         </View>
-        {!pending ? (
+        {!pending && host.transactionPresentation?.showSpendingInsights !== false ? (
           <View style={sourceStyle21}>
             <Text style={[strong, sourceStyle22]}>
               {t(
@@ -588,6 +596,22 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
           </View>
         ) : null}
         <View style={sourceStyle36}>
+          {caseNotice ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={caseNotice.accessibilityLabel}
+              onPress={() => host.onNavigate(caseNotice.route)}
+              style={{ marginBottom: 24 }}
+            >
+              <BaselineBanner
+                variant="helper"
+                title={caseNotice.title}
+                description={caseNotice.description}
+                presentation={{ width: '100%' }}
+                dark={dark}
+              />
+            </Pressable>
+          ) : null}
           <Text style={[strong, sourceStyle37]}>
             {t('runtime.transactionDetail.title', 'Transaction details')}
           </Text>
@@ -614,14 +638,14 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                 )}
                 {fact(
                   t('runtime.transactionDetail.amount', 'Amount'),
-                  detail.amount,
+                  declined ? `${displayAmount} · No money debited` : detail.amount,
                 )}
                 {fact(
                   t(
                     'runtime.cardTransactionDetail.postingDate',
-                    'Posting date',
+                    declined ? 'Attempt date' : 'Posting date',
                   ),
-                  detail.bookingDate,
+                  displayDate,
                 )}
                 {expanded
                   ? fact(
@@ -632,7 +656,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                       detail.bookingDate,
                     )
                   : null}
-                {mcc ? fact('Merchant Category Code (MCC)', mcc) : null}
+                {mcc ? fact(enrichment?.categoryLabel ?? 'Merchant Category Code (MCC)', mcc) : null}
               </>
             ) : (
               <>
@@ -709,7 +733,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
               </>
             )}
           </View>
-          <Pressable
+          {host.transactionPresentation?.showExpandableDetails !== false ? <Pressable
             accessibilityRole="button"
             accessibilityLabel={
               expanded
@@ -731,7 +755,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                 ? t('runtime.actions.showLess', 'Show less')
                 : t('runtime.actions.showMore', 'Show more')}
             </Text>
-          </Pressable>
+          </Pressable> : null}
           {card ? (
             <View style={sourceStyle41}>
               <BaselineSectionDivider
@@ -741,7 +765,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
               <BaselineCardNavigationRow
                 card={card}
                 label={
-                  card.type === 'credit_card'
+                  host.transactionPresentation?.cardIdentityMode === 'holder' ? `${card.type === 'credit_card' ? 'Credit' : 'Debit'} Mastercard · ${card.cardNumber.slice(-4)}` : card.type === 'credit_card'
                     ? t(
                         'runtime.cardUsed.mastercardStandardCredit',
                         'Mastercard Standard Credit',
@@ -751,7 +775,8 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                         'Mastercard Standard Debit',
                       )
                 }
-                maskedNumber={formatMaskedCardNumber(card.cardNumber)}
+                maskedNumber={host.transactionPresentation?.cardIdentityMode === 'holder' ? card.cardHolderName : formatMaskedCardNumber(card.cardNumber)}
+                onPress={cardDetailsRoute ? () => host.onNavigate(cardDetailsRoute) : undefined}
                 dark={dark}
               />
             </View>
