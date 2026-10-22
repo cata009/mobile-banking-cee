@@ -1,0 +1,332 @@
+.fraud-presentation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  background: rgb(20 20 20 / 55%);
+  backdrop-filter: blur(6px);
+}
+.fraud-presentation-dialog {
+  position: fixed;
+  inset: 16px;
+  width: calc(100vw - 32px);
+  height: calc(100dvh - 32px);
+  z-index: 10000;
+  overflow: hidden;
+  border-radius: 20px;
+  outline: none;
+  border: 1px solid var(--uc-border);
+  background: var(--uc-surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 20%);
+}
+.fraud-presentation-dialog[data-mode='page'] {
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  border-radius: 0;
+}
+.fraud-presentation {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  color: var(--uc-text);
+  background: var(--uc-surface);
+  font-family: 'UniCredit', sans-serif;
+}
+.fraud-presentation-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 22px 36px;
+  border-bottom: 1px solid var(--uc-border);
+}
+.fraud-presentation-brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.fraud-presentation-brand > div {
+  height: 24px;
+}
+.fraud-presentation-brand > span {
+  padding-left: 20px;
+  border-left: 1px solid var(--uc-border);
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.fraud-presentation-market {
+  margin-left: auto;
+  font-size: 13px;
+}
+.fraud-presentation-market > span {
+  color: var(--uc-text-muted);
+}
+.fraud-presentation-tools {
+  display: flex;
+  margin-left: auto;
+  gap: 6px;
+}
+.fraud-presentation-tools button,
+.fraud-presentation-arrows button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--uc-text);
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--uc-app-bg);
+  border: 1px solid var(--uc-border);
+}
+.fraud-presentation-main {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 0.95fr);
+}
+.fraud-presentation-story {
+  min-width: 0;
+  overflow-y: auto;
+  align-self: center;
+  max-height: 100%;
+  padding: 32px clamp(28px, 4vw, 74px);
+}
+.fraud-presentation-kicker {
+  color: var(--uc-action);
+  font-size: 14px;
+}
+.fraud-presentation-chapter {
+  font-size: 13px;
+  color: var(--uc-text-muted);
+  margin: 30px 0 14px;
+}
+.fraud-presentation-story h2 {
+  margin: 0;
+  max-width: 620px;
+  font-size: clamp(36px, 4.7vw, 72px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.fraud-presentation-intro {
+  font-size: clamp(16px, 1.5vw, 21px);
+  line-height: 1.5;
+  margin: 22px 0;
+  max-width: 46ch;
+}
+.fraud-presentation-principle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 44ch;
+  border-top: 1px solid var(--uc-border);
+  padding-top: 18px;
+}
+.fraud-presentation-principle > span {
+  color: var(--uc-action);
+  font-size: 24px;
+}
+.fraud-presentation-principle p {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+.fraud-presenter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 28px;
+  max-width: 480px;
+}
+.fraud-presenter-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 180px;
+  font-size: 12px;
+  color: var(--uc-text-muted);
+}
+.fraud-presenter-controls select {
+  appearance: auto;
+  border: 1px solid var(--uc-border);
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: var(--uc-surface);
+  color: var(--uc-text);
+  font-family: inherit;
+  font-size: 14px;
+  min-width: 0;
+  width: 100%;
+}
+.fraud-presenter-controls > p {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--uc-text-muted);
+  margin: 0;
+}
+.fraud-presentation-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  gap: 10px;
+  padding: 24px 36px 18px;
+  background: var(--uc-app-bg);
+  border-left: 1px solid var(--uc-border);
+}
+.fraud-presentation-phone {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.fraud-presentation-device-caption {
+  font-size: 11px;
+  color: var(--uc-text-muted);
+}
+.fraud-presentation-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 18px 36px;
+  gap: 16px;
+  border-top: 1px solid var(--uc-border);
+}
+.fraud-presentation-footer nav {
+  display: flex;
+  gap: 8px;
+}
+.fraud-presentation-footer nav button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--uc-text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.fraud-presentation-footer nav button span {
+  font-size: 11px;
+}
+.fraud-presentation-footer nav button[aria-current='step'] {
+  color: var(--uc-static-white);
+  background: var(--uc-action);
+}
+.fraud-presentation-arrows {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.fraud-presentation-arrows button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.fraud-presentation-disclaimer {
+  font-size: 11px;
+  color: var(--uc-text-muted);
+  margin: 0;
+}
+@media (max-height: 720px) and (min-width: 761px) {
+  .fraud-presentation-story {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .fraud-presentation-story h2 {
+    font-size: clamp(32px, 4vw, 54px);
+  }
+  .fraud-presentation-chapter {
+    margin-top: 12px;
+  }
+  .fraud-presenter-controls {
+    padding-top: 16px;
+  }
+  .fraud-presentation-intro {
+    margin: 14px 0;
+  }
+}
+@media (max-width: 760px) {
+  .fraud-presentation-dialog {
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .fraud-presentation-header {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .fraud-presentation-brand {
+    gap: 12px;
+  }
+  .fraud-presentation-brand > div {
+    height: 20px;
+  }
+  .fraud-presentation-brand > span {
+    font-size: 16px;
+    padding-left: 12px;
+  }
+  .fraud-presentation-market {
+    display: none;
+  }
+  .fraud-presentation-tools {
+    margin-left: auto;
+  }
+  .fraud-presentation-main {
+    overflow-y: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(540px, 70dvh);
+  }
+  .fraud-presentation-story {
+    padding: 24px;
+    overflow: visible;
+  }
+  .fraud-presentation-story h2 {
+    font-size: 36px;
+  }
+  .fraud-presentation-chapter {
+    margin-top: 12px;
+  }
+  .fraud-presentation-intro {
+    font-size: 16px;
+    margin: 14px 0;
+  }
+  .fraud-presentation-principle {
+    display: none;
+  }
+  .fraud-presenter-controls {
+    padding-top: 8px;
+  }
+  .fraud-presentation-device {
+    border-left: 0;
+    padding: 20px;
+  }
+  .fraud-presentation-footer {
+    padding: 12px;
+    gap: 8px;
+  }
+  .fraud-presentation-footer nav {
+    flex: 1;
+    gap: 0;
+    justify-content: space-between;
+  }
+  .fraud-presentation-footer nav button {
+    padding: 10px 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  .fraud-presentation-arrows {
+    display: none;
+  }
+  .fraud-presentation-disclaimer {
+    width: 100%;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fraud-presentation * {
+    transition: none;
+    animation: none;
+  }
+}

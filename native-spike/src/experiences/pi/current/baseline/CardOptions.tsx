@@ -72,8 +72,9 @@ const debitSettings = [
   ],
 ] as const;
 
-/** Source keeps these navigation rows inert; a selected card only selects its setting family. */
+/** Source rows stay inert unless a host supplies an explicit security route. */
 export default function RoBaselineCardOptions(host: CurrentScreenProps) {
+  const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
   const cards = bankingProducts(host).cards,
     card =
       cards.find(
@@ -102,6 +103,9 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
           trailingAccessory="chevron"
           rowHeight={80}
           dark={dark}
+          onPress={id === 'reissue-card' && securityRoutes
+            ? () => host.onNavigate(securityRoutes.replacement)
+            : undefined}
         />
       </View>
     ));
@@ -114,6 +118,15 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
             <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
           </View>
           <View style={styles.rows}>
+            {securityRoutes ? <BaselineNavigationRow
+              title="CARD SECURITY"
+              description="ATM, online, in-store and country protection"
+              leadingIconName="block-card"
+              trailingAccessory="chevron"
+              rowHeight={80}
+              dark={dark}
+              onPress={() => host.onNavigate(securityRoutes.block)}
+            /> : null}
             {rows([
               ...commonSettings,
               ...(card.type === 'credit_card' ? creditSettings : debitSettings),

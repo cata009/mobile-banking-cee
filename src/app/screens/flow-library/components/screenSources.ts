@@ -8,6 +8,38 @@
  */
 
 import type { FlowPreviewId } from "../flows/types";
+import fraudJourneySource from "@/flows/ba/card-fraud/FraudJourney.tsx?raw";
+import fraudBaselineSource from "@/flows/ba/card-fraud/FraudBaselineScreen.tsx?raw";
+import fraudNotificationSource from "@/flows/ba/card-fraud/FraudNotification.tsx?raw";
+import fraudFormSource from "@/flows/ba/card-fraud/FraudFormLayout.tsx?raw";
+import fraudEvidenceSource from "@/flows/ba/card-fraud/FraudEvidenceFields.tsx?raw";
+import fraudActivitySource from "@/flows/ba/card-fraud/FraudActivityList.tsx?raw";
+import fraudTransactionsSource from "@/features/cards/fraud/transactions.ts?raw";
+import fraudCardSource from "@/features/cards/fraud/cardFixture.ts?raw";
+import fraudNativeBodySource from "../../../../../native-spike/src/experiences/pi/current/baseline/Body.tsx?raw";
+import fraudNativeTransactionSource from "../../../../../native-spike/src/experiences/pi/current/baseline/Transaction.tsx?raw";
+import fraudNativeCardRowSource from "../../../../../native-spike/src/universal/BaselineCardNavigationRow.tsx?raw";
+import fraudNativeHelperSource from "../../../../../native-spike/src/universal/BaselineBanner.tsx?raw";
+import fraudHelperContractSource from "@/app/components/contracts/banner.ts?raw";
+import fraudNativeCardSource from "../../../../../native-spike/src/experiences/pi/current/baseline/Card.tsx?raw";
+import fraudNativeCardOptionsSource from "../../../../../native-spike/src/experiences/pi/current/baseline/CardOptions.tsx?raw";
+import fraudBankingContractSource from "@/features/demo-native/bankingPresentation.ts?raw";
+import fraudTransactionContractSource from "@/features/demo-native/transactionPresentation.ts?raw";
+import fraudScreensSource from "@/flows/ba/card-fraud/FraudScreens.tsx?raw";
+import fraudSuccessSource from "@/app/components/flow/StandardSuccessScreen.tsx?raw";
+import fraudSignatureSource from "@/app/components/FaceIdAnimation.tsx?raw";
+import fraudInfoBannerSource from "@/app/components/cards/InfoBanner.tsx?raw";
+import fraudRadioSource from "@/app/components/common/RadioButton.tsx?raw";
+import fraudSheetSource from "@/app/components/BottomSheet.tsx?raw";
+import fraudModelSource from "@/features/cards/fraud/model.ts?raw";
+import fraudDefinitionSource from "@/flows/ba/card-fraud/definition.ts?raw";
+import fraudEntrySource from "@/flows/ba/card-fraud/index.ts?raw";
+import fraudContractsSource from "@/flows/ba/card-fraud/screenContracts.ts?raw";
+import fraudPreviewSource from "@/flows/ba/card-fraud/preview.tsx?raw";
+import fraudCssSource from "@/flows/ba/card-fraud/fraud.css?raw";
+import fraudPresentationSource from "@/flows/ba/card-fraud/FraudPresentationDialog.tsx?raw";
+import fraudPresentationCssSource from "@/flows/ba/card-fraud/presentation.css?raw";
+import fraudPresentationUrlSource from "@/flows/ba/card-fraud/presentationUrl.ts?raw";
 import investmentsBulkApprovalSource from "@/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx?raw";
 
 import bulkApprovalModelSource from "@/features/investments/bulk-approval/model.ts?raw";
@@ -52,6 +84,43 @@ export interface FlowScreenSource {
 }
 
 export const FLOW_SCREEN_SOURCES: Partial<Record<FlowPreviewId, FlowScreenSource>> = {
+  "ba-card-fraud": {
+    file: "src/flows/ba/card-fraud/FraudJourney.tsx",
+    source: fraudJourneySource,
+    dependencies: [
+      { file: "src/flows/ba/card-fraud/FraudScreens.tsx", source: fraudScreensSource },
+      { file: "src/app/components/flow/StandardSuccessScreen.tsx", source: fraudSuccessSource },
+      { file: "src/app/components/FaceIdAnimation.tsx", source: fraudSignatureSource },
+      { file: "src/app/components/cards/InfoBanner.tsx", source: fraudInfoBannerSource },
+      { file: "src/app/components/common/RadioButton.tsx", source: fraudRadioSource },
+      { file: "src/app/components/BottomSheet.tsx", source: fraudSheetSource },
+      { file: "src/flows/ba/card-fraud/FraudBaselineScreen.tsx", source: fraudBaselineSource },
+      { file: "src/flows/ba/card-fraud/FraudNotification.tsx", source: fraudNotificationSource },
+      { file: "src/flows/ba/card-fraud/FraudFormLayout.tsx", source: fraudFormSource },
+      { file: "src/flows/ba/card-fraud/FraudEvidenceFields.tsx", source: fraudEvidenceSource },
+      { file: "src/flows/ba/card-fraud/FraudActivityList.tsx", source: fraudActivitySource },
+      { file: "src/features/cards/fraud/transactions.ts", source: fraudTransactionsSource },
+      { file: "src/features/cards/fraud/cardFixture.ts", source: fraudCardSource },
+      { file: "native-spike/src/experiences/pi/current/baseline/Body.tsx", source: fraudNativeBodySource },
+      { file: "native-spike/src/experiences/pi/current/baseline/Transaction.tsx", source: fraudNativeTransactionSource },
+      { file: "native-spike/src/universal/BaselineCardNavigationRow.tsx", source: fraudNativeCardRowSource },
+      { file: "native-spike/src/universal/BaselineBanner.tsx", source: fraudNativeHelperSource },
+      { file: "src/app/components/contracts/banner.ts", source: fraudHelperContractSource },
+      { file: "native-spike/src/experiences/pi/current/baseline/Card.tsx", source: fraudNativeCardSource },
+      { file: "native-spike/src/experiences/pi/current/baseline/CardOptions.tsx", source: fraudNativeCardOptionsSource },
+      { file: "src/features/demo-native/bankingPresentation.ts", source: fraudBankingContractSource },
+      { file: "src/features/demo-native/transactionPresentation.ts", source: fraudTransactionContractSource },
+      { file: "src/features/cards/fraud/model.ts", source: fraudModelSource },
+      { file: "src/flows/ba/card-fraud/definition.ts", source: fraudDefinitionSource },
+      { file: "src/flows/ba/card-fraud/index.ts", source: fraudEntrySource },
+      { file: "src/flows/ba/card-fraud/screenContracts.ts", source: fraudContractsSource },
+      { file: "src/flows/ba/card-fraud/preview.tsx", source: fraudPreviewSource },
+      { file: "src/flows/ba/card-fraud/fraud.css", source: fraudCssSource },
+      { file: "src/flows/ba/card-fraud/FraudPresentationDialog.tsx", source: fraudPresentationSource },
+      { file: "src/flows/ba/card-fraud/presentation.css", source: fraudPresentationCssSource },
+      { file: "src/flows/ba/card-fraud/presentationUrl.ts", source: fraudPresentationUrlSource },
+    ],
+  },
   "pi-prime": {
     file: "src/flows/shared/prime/preview.tsx",
     source: primePreviewSource,

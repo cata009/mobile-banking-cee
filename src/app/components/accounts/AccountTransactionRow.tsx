@@ -42,6 +42,12 @@ interface AccountTransactionRowProps {
   showTransactionDate?: boolean
   /** Single-day cards use a tighter row so isolated transactions do not float in excess whitespace. */
   compact?: boolean
+  /** Non-ledger activity such as a declined attempt can omit the debit/credit sign. */
+  amountSign?: '' | '+' | '-'
+  /** Display an explicit non-booked activity status using the baseline status treatment. */
+  statusLabel?: string
+  /** Activity inboxes can keep ledger-state explanations in the detail view. */
+  showStatus?: boolean
 }
 
 export default function AccountTransactionRow({
@@ -63,10 +69,13 @@ export default function AccountTransactionRow({
   evo2027 = false,
   showTransactionDate = false,
   compact = false,
+  amountSign,
+  statusLabel,
+  showStatus = true,
 }: AccountTransactionRowProps) {
   const isPending = transaction.status === 'Pending'
   const state = transactionRowWeb({
-    pending: isPending,
+    pending: isPending && showStatus,
     evo2027,
     compact,
     amount: transaction.amount,
@@ -81,7 +90,7 @@ export default function AccountTransactionRow({
     : transaction.type === 'credit'
       ? positiveAmountClassName
       : 'text-[var(--uc-text)]'
-  const sign = state.sign
+  const sign = amountSign ?? state.sign
   const detailsLine = detailsLabel ?? transaction.details
   const amountParts = state.parts
 
@@ -111,13 +120,13 @@ export default function AccountTransactionRow({
           {amountParts.decimals} {currency}
         </span>
       </p>
-      {isPending ? (
+      {showStatus && (isPending || statusLabel) ? (
         <span
           className="flex h-[32px] items-center gap-[7px] uc-type-n5-strong leading-[15px] uppercase text-[var(--uc-text-muted)]"
           data-pending-status
         >
           <span className="size-[8px] rounded-full bg-[var(--uc-orange-status)]" aria-hidden="true" />
-          Pending
+          {statusLabel ?? 'Pending'}
         </span>
       ) : null}
     </div>

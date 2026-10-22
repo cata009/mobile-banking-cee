@@ -3,6 +3,8 @@ import { AppIcon } from '@/app/components/icons'
 import { SelectionChip } from '@/app/screens/tools/toolsUi'
 import { isPrimeReferenceScreen, resolvePrimePrototypeTarget } from '@/features/prime/reference'
 import { PrimePresentationDialog } from '@/flows/shared/prime/presentation/PrimePresentationDialog'
+import { FraudPresentationDialog } from '@/flows/ba/card-fraud/FraudPresentationDialog'
+import { buildFraudPresentationUrl, isFraudPresentationUrl } from '@/flows/ba/card-fraud/presentationUrl'
 import { buildPrimePresentationUrl, isPrimePresentationUrl, removePrimePresentationMarker } from '@/flows/shared/prime/presentation/presentationUrl'
 import { getPrimePhoneAppearance } from '@/flows/shared/prime/presentation/phoneAppearance'
 import { COUNTRY_META } from '@/app/registry/demoConfig'
@@ -111,7 +113,7 @@ function slugify(value: string) {
 
 export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefinition; onBackToIndex: () => void }) {
   const [presentationMode, setPresentationMode] = useState<'modal' | 'page' | null>(() =>
-    flow.id === 'pi-prime' && typeof window !== 'undefined' && isPrimePresentationUrl(window.location.href) ? 'page' : null,
+    typeof window !== 'undefined' && ((flow.id === 'pi-prime' && isPrimePresentationUrl(window.location.href)) || (flow.id === 'ba-card-fraud' && isFraudPresentationUrl(window.location.href))) ? 'page' : null,
   )
   const [activeTab, setActiveTab] = useState<DetailTab>(presentationMode === 'page' ? 'prototype' : 'journey')
   const demoButtonRef = useRef<HTMLButtonElement>(null)
@@ -266,7 +268,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         exportError={exportError}
         copied={copied}
         onExport={handleExport}
-        onLaunchDemo={flow.id === 'pi-prime' ? () => setPresentationMode('modal') : undefined}
+        onLaunchDemo={flow.id === 'pi-prime' || flow.id === 'ba-card-fraud' ? () => setPresentationMode('modal') : undefined}
         demoButtonRef={demoButtonRef}
       />
 
@@ -345,6 +347,10 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         />
       ) : null}
 
+      {flow.id === 'ba-card-fraud' ? (
+        <FraudPresentationDialog open={presentationMode !== null} mode={presentationMode ?? 'modal'} onClose={closePresentation} presentationUrl={typeof window !== 'undefined' ? buildFraudPresentationUrl(window.location.href) : ''} returnFocusRef={demoButtonRef} />
+      ) : null}
+
       {activeTab === 'implementation' && flow.implementation ? (
         <FlowImplementationPanel
           flow={flow}
@@ -402,7 +408,7 @@ function FlowHeader({
               <button
                 ref={demoButtonRef}
                 type="button"
-                aria-label="Open PRIME demo"
+                aria-label={flow.id === 'pi-prime' ? 'Open PRIME demo' : 'Open Card guard demo'}
                 onClick={onLaunchDemo}
                 className="inline-flex h-[40px] shrink-0 items-center justify-center gap-[8px] rounded-[10px] bg-[#e2001a] px-[16px] uc-type-n5-strong text-white transition-colors hover:bg-[#ba0015] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e2001a]"
               >
