@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 import type { FlowScreenKind } from '../flows/types'
+import { isPrimeReferenceScreen } from '@/features/prime/reference'
+import { renderPrimePreview } from '@/flows/shared/prime/preview'
+import { getPrimePhoneAppearance } from '@/flows/shared/prime/presentation/phoneAppearance'
 import { renderGeniusMyCarPreview } from '@/flows/ro/genius-my-car/preview'
 import { renderRsPropertyInsurancePreview } from '@/flows/rs/property-insurance/preview'
 import { renderInvestmentsBulkApprovalPreview } from '@/flows/shared/investments-bulk-approval/preview'
@@ -83,11 +86,16 @@ const PREVIEW_RENDERERS = {
   'investments-bulk-sign': () => renderInvestmentsBulkApprovalPreview('investments-bulk-sign'),
   'investments-bulk-confirmation': () => renderInvestmentsBulkApprovalPreview('investments-bulk-confirmation'),
   'investments-bulk-failure': () => renderInvestmentsBulkApprovalPreview('investments-bulk-failure'),
-} satisfies Record<FlowScreenKind, () => ReactNode>
+} satisfies Record<Exclude<FlowScreenKind, import('@/features/prime/reference').PrimeReferenceScreen>, () => ReactNode>
 
 export interface PreviewContext {
   countryName?: string
+  parameters?: Readonly<Record<string, string>>
 }
-export function renderFlowPreview(kind: FlowScreenKind, _context: PreviewContext = {}): ReactNode {
+export function flowPreviewStatusBarVariant(kind: FlowScreenKind): 'light' | 'dark' {
+  return isPrimeReferenceScreen(kind) ? getPrimePhoneAppearance(kind).statusBarVariant : 'light'
+}
+export function renderFlowPreview(kind: FlowScreenKind, context: PreviewContext = {}): ReactNode {
+  if (isPrimeReferenceScreen(kind)) return renderPrimePreview(kind, context.parameters)
   return Object.prototype.hasOwnProperty.call(PREVIEW_RENDERERS, kind) ? PREVIEW_RENDERERS[kind]() : null
 }

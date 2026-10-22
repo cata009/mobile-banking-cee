@@ -1,28 +1,39 @@
 import React from 'react';
 import {
-  Image,
+  Platform,
   Pressable,
   View,
-  type ViewStyle,
   type ImageStyle,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native';
-import { SvgXml } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import {
   resolveProductOfferCard,
   type MarketingCardVariant,
 } from '@/app/components/contracts/marketingCard';
+import { RasterImage } from '../experiences/pi/current/baseline/offers/RasterImage';
 import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
 
-/** Tone and original banner image come from the existing feature/config owner. */
+export interface ProductOfferCardData {
+  id: string;
+  title: string;
+  description: string;
+  caption?: string;
+}
+
+/** Canonical campaign renderer; feature owners supply tone, original asset and action. */
 export function BaselineProductOfferCard({
   offer,
   tone,
   variant = 'standard',
   onPress,
   dark = false,
+  presentation,
+  artwork,
 }: {
-  offer: { id: string; title: string; description: string; caption?: string };
+  offer: ProductOfferCardData;
   tone: {
     backgroundColor: string;
     textColor: string;
@@ -30,16 +41,33 @@ export function BaselineProductOfferCard({
     imageSrc: string | number;
   };
   variant?: MarketingCardVariant;
-  onPress?: (offer: {
-    id: string;
-    title: string;
-    description: string;
-    caption?: string;
-  }) => void;
+  onPress?: (offer: ProductOfferCardData) => void;
   dark?: boolean;
+  presentation?: {
+    width?: number;
+    height?: number;
+    radius?: number;
+    paddingLeft?: number;
+    paddingRight?: number;
+    paddingTop?: number;
+    paddingBottom?: number;
+    titleFontSize?: number;
+    titleLineHeight?: number;
+    titleLines?: number;
+    descriptionFontSize?: number;
+    descriptionLineHeight?: number;
+    descriptionLines?: number;
+    captionFontSize?: number;
+    captionLineHeight?: number;
+    gap?: number;
+  };
+  artwork?: React.ReactNode;
 }) {
-  const contract = resolveProductOfferCard({ variant, caption: offer.caption }),
-    color = sourceColor(tone.textColor, dark);
+  const contract = {
+    ...resolveProductOfferCard({ variant, caption: offer.caption }),
+    ...presentation,
+  };
+  const color = sourceColor(tone.textColor, dark);
   const rootStyle: ViewStyle = {
     width: contract.width,
     height: contract.height,
@@ -47,73 +75,110 @@ export function BaselineProductOfferCard({
     borderRadius: contract.radius,
     backgroundColor: sourceColor(tone.backgroundColor, dark),
   };
-  const imageStyle: ImageStyle = {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    height: '100%',
-    width: contract.imageWidth,
-  };
   const chevronStyle: ViewStyle = {
     position: 'absolute',
     left: contract.chevron.left,
+    top: '50%',
+    transform: [{ translateY: -contract.chevron.height / 2 }],
+  };
+  const photoStyle: ImageStyle = {
+    position: 'absolute',
+    right: 0,
     top: 0,
+    width: contract.imageWidth,
+    height: contract.height,
   };
   const bodyStyle: ViewStyle = {
     zIndex: 10,
     height: '100%',
-    justifyContent: 'center',
+    justifyContent: contract.contentAlign,
     paddingLeft: contract.paddingLeft,
     paddingRight: contract.paddingRight,
+    paddingTop: contract.paddingTop,
+    paddingBottom: contract.paddingBottom,
   };
-  const contentStyle: ViewStyle = {
-    gap: contract.gap,
-    alignItems: 'flex-start',
-  };
-  const titleStyle = {
+  const copyStyle: ViewStyle = { gap: contract.gap, alignItems: 'flex-start' };
+  const titleStyle: TextStyle = {
     fontFamily: 'UniCredit-bold',
     fontSize: contract.titleFontSize,
+    lineHeight: contract.titleLineHeight,
+    alignSelf: 'stretch',
     color,
   };
-  const descriptionStyle = {
+  const descriptionStyle: TextStyle = {
     fontFamily: 'UniCredit-regular',
     fontSize: contract.descriptionFontSize,
+    lineHeight: contract.descriptionLineHeight,
+    alignSelf: 'stretch',
     color,
   };
-  const captionStyle = {
+  const captionStyle: TextStyle = {
     fontFamily: 'UniCredit-regular',
     fontSize: contract.captionFontSize,
+    lineHeight: contract.captionLineHeight,
     color,
   };
-  const xml = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${
-    contract.chevron.viewBox
-  }"><path fill-rule="evenodd" clip-rule="evenodd" d="${
-    contract.chevron.path
-  }" fill="${sourceColor(tone.chevronColor, dark)}"/></svg>`;
   return (
     <Pressable
       accessibilityRole="button"
       onPress={() => onPress?.(offer)}
       style={rootStyle}
     >
-      <View style={chevronStyle}>
-        <SvgXml
-          xml={xml}
-          width={contract.chevron.width}
-          height={contract.chevron.height}
-        />
-      </View>
-      <Image
-        source={
-          typeof tone.imageSrc === 'number'
-            ? tone.imageSrc
-            : { uri: tone.imageSrc }
-        }
-        resizeMode="cover"
-        style={imageStyle}
-      />
+      {artwork !== undefined ? (
+        artwork
+      ) : (
+        <>
+          {Platform.OS === 'web' ? (
+            React.createElement(
+              'svg',
+              {
+                'aria-hidden': true,
+                viewBox: contract.chevron.viewBox,
+                preserveAspectRatio: 'xMidYMid meet',
+                style: {
+                  position: 'absolute',
+                  left: contract.chevron.left,
+                  top: '50%',
+                  width: contract.chevron.width,
+                  height: contract.chevron.height,
+                  transform: 'translateY(-50%)',
+                },
+              },
+              React.createElement('path', {
+                fillRule: 'evenodd',
+                clipRule: 'evenodd',
+                d: contract.chevron.path,
+                fill: sourceColor(tone.chevronColor, dark),
+              }),
+            )
+          ) : (
+            <Svg
+              width={contract.chevron.width}
+              height={contract.chevron.height}
+              viewBox={contract.chevron.viewBox}
+              style={chevronStyle}
+            >
+              <Path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d={contract.chevron.path}
+                fill={sourceColor(tone.chevronColor, dark)}
+              />
+            </Svg>
+          )}
+          <RasterImage
+            source={
+              typeof tone.imageSrc === 'number'
+                ? tone.imageSrc
+                : { uri: tone.imageSrc }
+            }
+            resizeMode="cover"
+            style={photoStyle}
+          />
+        </>
+      )}
       <View style={bodyStyle}>
-        <View style={contentStyle}>
+        <View style={copyStyle}>
           <Text numberOfLines={contract.titleLines} style={titleStyle}>
             {offer.title}
           </Text>

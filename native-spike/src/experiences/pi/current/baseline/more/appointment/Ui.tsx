@@ -17,6 +17,7 @@ import {
   type TextStyle,
   type TextProps,
   type ViewStyle,
+  type ImageSourcePropType,
 } from 'react-native';
 import type { CurrentScreenProps } from '../../../contracts';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
@@ -26,8 +27,11 @@ import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { Text, TextInput } from '../../../../../../universal/Typography';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 import { serviceDark } from '../ServicePrimitives';
+import { advisorPhoto as sourceAdvisorPhoto } from '../../../profile/assets';
 
-const Host = createContext<CurrentScreenProps | null>(null);
+const Host = createContext<
+  (CurrentScreenProps & { advisorPhoto?: ImageSourcePropType }) | null
+>(null);
 export const webInputOutline: TextStyle =
   Platform.OS === 'web' ? { outlineStyle: 'solid', outlineWidth: 0 } : {};
 /** Source resets the textarea before measuring, so deleting text also shrinks it. */
@@ -42,11 +46,17 @@ export function useAutoGrow(value: string, minimum: number) {
       !(input instanceof HTMLTextAreaElement)
     )
       return;
+    input.style.overflowY = 'hidden';
     input.style.height = 'auto';
-    const next = input.scrollHeight;
+    const computed = getComputedStyle(input);
+    // scrollHeight includes padding, but not the border of this border-box field.
+    const borders =
+      (parseFloat(computed.borderTopWidth) || 0) +
+      (parseFloat(computed.borderBottomWidth) || 0);
+    const next = Math.max(minimum, Math.ceil(input.scrollHeight + borders));
     input.style.height = `${next}px`;
     setHeight(next);
-  }, [value]);
+  }, [value, minimum]);
   return {
     ref,
     height,
@@ -61,16 +71,26 @@ export function useAutoGrow(value: string, minimum: number) {
 export function AppointmentHost({
   host,
   children,
+  advisorPhoto,
 }: {
   host: CurrentScreenProps;
   children: React.ReactNode;
+  advisorPhoto?: ImageSourcePropType;
 }) {
-  return <Host.Provider value={host}>{children}</Host.Provider>;
+  return (
+    <Host.Provider value={advisorPhoto ? { ...host, advisorPhoto } : host}>
+      {children}
+    </Host.Provider>
+  );
 }
 export function useAppointmentHost() {
   const host = useContext(Host);
   if (!host) throw new Error('Appointment host is required');
   return host;
+}
+/** All appointment substeps resolve the portrait from the same optional reference identity. */
+export function useAppointmentAdvisorPhoto() {
+  return useAppointmentHost().advisorPhoto ?? sourceAdvisorPhoto;
 }
 export function useColors() {
   const host = useAppointmentHost();
@@ -179,28 +199,51 @@ export function AppointmentPage({
 }) {
   const host = useAppointmentHost(),
     color = useColors();
+  const [progress, setProgress] = useState(0);
+  useEffect(() => setProgress(0), [title]);
   return (
     <View style={[s.root, { backgroundColor: color('--uc-surface') }]}>
-      <View style={{ backgroundColor: color('--uc-surface') }}>
-        <BaselinePageHeader
-          title={title}
-          onBack={onBack}
-          showHelp={false}
-          showBack={showBack}
-          includeSafeArea
-          safeAreaReserve={host.screenTopInset}
-          renderLargeTitle={showLargeTitle}
-          variant={headerVariant}
-          dark={serviceDark(host)}
-        />
-        {topContent}
-      </View>
       <ScrollView
+        key={title}
+        testID="appointment-page-scroll"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+        scrollEventThrottle={16}
+        onScroll={event => {
+          const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+          const availableScroll = contentSize && layoutMeasurement
+            ? contentSize.height - layoutMeasurement.height
+            : 48;
+          const distance = availableScroll > 0 ? Math.min(48, availableScroll) : 48;
+          setProgress(Math.min(1, Math.max(0, contentOffset.y / distance)));
+        }}
         style={Platform.OS === 'web' ? s.webScroll : undefined}
         contentContainerStyle={s.body}
       >
+        <View style={{ backgroundColor: color('--uc-surface') }}>
+          <BaselinePageHeader
+            title={title}
+            onBack={onBack}
+            showHelp={false}
+            showBack={showBack}
+            includeSafeArea
+            safeAreaReserve={host.screenTopInset}
+            renderLargeTitle={false}
+            collapsedTitleProgress={showLargeTitle ? progress : 1}
+            hideCollapsedTitleWhenHidden
+            variant={headerVariant}
+            dark={serviceDark(host)}
+          />
+        </View>
+        {showLargeTitle ? (
+          <View style={[s.largeTitle, { opacity: 1 - progress }]} aria-hidden={progress >= 1}>
+            <Copy strong size={28} numberOfLines={2} accessibilityRole="header">
+              {title}
+            </Copy>
+          </View>
+        ) : null}
+        {topContent}
         {children}
       </ScrollView>
       {footer ? (
@@ -341,6 +384,8 @@ export function Notes({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         multiline
+        scrollEnabled={false}
+        textAlignVertical="top"
         numberOfLines={1}
         maxLength={500}
         onContentSizeChange={grow.onContentSizeChange}
@@ -454,7 +499,8 @@ export const s = StyleSheet.create({
   root: { flex: 1 },
   webScroll: { transform: 'none' },
   body: { paddingBottom: 12 },
-  footer: { paddingHorizontal: 24, paddingBottom: 20, paddingTop: 12 },
+  largeTitle: { paddingHorizontal: 16, paddingVertical: 8 },
+  footer: { paddingHorizontal: 24, paddingBottom: 32, paddingTop: 12 },
   heading: { marginBottom: 14, borderBottomWidth: 1, paddingBottom: 8 },
   field: { marginRight: -12, minHeight: 96 },
   calendarIcon: {

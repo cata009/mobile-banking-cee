@@ -24,12 +24,19 @@ export function BaselineCardArtwork({
   ariaLabel,
   style,
   clipGeometry = false,
+  backgroundRadius = 0,
+  transparentCanvas = false,
+  labelFontFamily = 'Arial, Helvetica, sans-serif',
 }: {
   variant?: CardVariant;
   size?: CardSize;
   ariaLabel?: string;
   style?: StyleProp<ViewStyle>;
   clipGeometry?: boolean;
+  /** Compatibility geometry for the existing banking adapter; the shared viewBox stays 64×40. */
+  backgroundRadius?: number;
+  transparentCanvas?: boolean;
+  labelFontFamily?: string;
 }) {
   const state = resolveCardArtwork({ variant, size }),
     { tone } = state,
@@ -41,8 +48,9 @@ export function BaselineCardArtwork({
     height: state.height,
     borderRadius: state.radius,
     overflow: 'hidden' as const,
-    backgroundColor: clipGeometry ? undefined : tone.background,
-    ...(Platform.OS === 'web' && !clipGeometry
+    backgroundColor:
+      clipGeometry || transparentCanvas ? undefined : tone.background,
+    ...(Platform.OS === 'web' && !clipGeometry && !transparentCanvas
       ? {
           transform: 'translateZ(0)',
           backgroundImage: tone.backgroundEnd
@@ -90,7 +98,12 @@ export function BaselineCardArtwork({
           ) : null}
         </Defs>
         <G clipPath={clipGeometry ? `url(#${id}clip)` : undefined}>
-          <Rect width="64" height="40" fill={fill} />
+          <Rect
+            width="64"
+            height="40"
+            rx={backgroundRadius || undefined}
+            fill={fill}
+          />
           <Path
             d={CARD_ARTWORK.edgeArrowPath}
             fill={pattern}
@@ -166,7 +179,7 @@ export function BaselineCardArtwork({
           </G>
           <Text
             fill={tone.labelColor}
-            fontFamily="Arial, Helvetica, sans-serif"
+            fontFamily={labelFontFamily}
             fontSize="2.55"
             fontWeight="700"
             letterSpacing="0.18"

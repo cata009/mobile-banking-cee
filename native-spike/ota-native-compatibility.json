@@ -10,5 +10,5 @@
   "screenPrivacy": "FLAG_SECURE-v1",
   "fileProvider": "private-cache-share-v1",
   "localOtaProof": "loopback-network-exception-v1",
-  "manifestSha256": "58106f9bb4346079fe4fade4e20358c35ce624be7bf9b5e0339493cac6e422fd"
+  "manifestSha256": "086b92eb5c4b95be06c89e12daa1e0c94dd584cfdf7a29f94a0614bb2ef2857c"
 }

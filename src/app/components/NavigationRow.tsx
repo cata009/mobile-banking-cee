@@ -84,7 +84,9 @@ function NavigationRowContent({
   titleClassName,
   titleStyle,
   descriptionClassName,
-}: Omit<NavigationRowProps, "onClick" | "ariaLabel" | "className" | "rowHeight">) {
+  titleFontSize,
+  titleMaxLines,
+}: Omit<NavigationRowProps, "onClick" | "ariaLabel" | "className" | "rowHeight"> & { titleFontSize: number; titleMaxLines: number }) {
   const hasTrailing = trailingAccessory !== "none" || trailing;
   const { titleColor } = navigationRowWeb({ titleTone });
 
@@ -102,7 +104,7 @@ function NavigationRowContent({
         ) : null}
 
         <div className={cn("min-w-0", centerContent ? "flex-none" : "flex-1")}>
-          <p className={cn("uc-type-n4-strong line-clamp-2", titleColor, titleClassName)} style={titleStyle}>
+          <p className={cn(titleFontSize === 14 ? "uc-type-n5-strong" : "uc-type-n4-strong", titleMaxLines === 1 ? "line-clamp-1" : "line-clamp-2", titleColor, titleClassName)} style={titleStyle}>
             {title}
           </p>
           {description ? (
@@ -192,6 +194,8 @@ export default function NavigationRow({
         data-component="NavigationRow"
       >
         <NavigationRowContent
+          titleFontSize={state.titleFontSize}
+          titleMaxLines={state.titleMaxLines}
           title={title}
           description={description}
           linkLabel={linkLabel}
@@ -216,6 +220,8 @@ export default function NavigationRow({
   return (
     <div className={rootClassName} aria-label={ariaLabel} data-component="NavigationRow">
       <NavigationRowContent
+        titleFontSize={state.titleFontSize}
+        titleMaxLines={state.titleMaxLines}
         title={title}
         description={description}
         linkLabel={linkLabel}

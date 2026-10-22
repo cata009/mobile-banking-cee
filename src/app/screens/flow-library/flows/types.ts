@@ -23,6 +23,7 @@
  */
 
 import type { CountryId } from '@/app/state/demoTypes'
+import type { PrimeReferenceScreen } from '@/features/prime/reference'
 
 /** Stable ids for the flows shipped in the library. */
 export type FlowPreviewId =
@@ -31,6 +32,7 @@ export type FlowPreviewId =
   | 'rs-property-insurance'
   | 'rs-disposable-cards'
   | 'investments-bulk-approval'
+  | 'pi-prime'
 
 /**
  * Screen kinds a preview step can render. Each maps to a DS-composed preview in
@@ -133,6 +135,7 @@ export type InvestmentsBulkApprovalScreenKind =
   | 'investments-bulk-failure'
 
 export type FlowScreenKind =
+  | PrimeReferenceScreen
   | EthocaScreenKind
   | RsPropertyInsuranceScreenKind
   | RsDisposableCardsScreenKind
@@ -222,6 +225,14 @@ export interface FlowPrototypeNode {
  */
 export interface FlowPrototypeSpec {
   start: FlowScreenKind
+  /** Preview context controls are metadata; policies remain in the owning feature. */
+  controls?: ReadonlyArray<{
+    key: string
+    label: string
+    defaultValue: string
+    options: ReadonlyArray<{ value: string; label: string }>
+    visibleWhen?: { key: string; value: string }
+  }>
   /** Screens grouped for the jump list, in the order a reviewer thinks about them. */
   groups: ReadonlyArray<{ title: string; screens: readonly FlowScreenKind[] }>
   nodes: Partial<Record<FlowScreenKind, FlowPrototypeNode>>
@@ -233,6 +244,7 @@ export interface FlowStep {
   title: string
   description: string
   screen: FlowScreenKind
+  previewParameters?: Readonly<Record<string, string>>
 }
 
 /** A concrete path through the flow (happy path, an alternate, or an error path). */

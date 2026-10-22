@@ -1,10 +1,48 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
+import { StyleSheet } from 'react-native';
+import { TextInput } from '../src/universal/Typography';
 import { BaselineMailboxTabs } from '../src/universal/BaselineMailboxTabs';
 import { BaselineCarouselIndicator } from '../src/universal/BaselineCarouselIndicator';
 import { BaselineCodeField } from '../src/universal/BaselineCodeField';
 import { BaselineCheckbox } from '../src/universal/BaselineCheckbox';
 describe('isolated selection controls', () => {
+  it.each(['', '1234'])(
+    'matches approved Figma disabled Code cells for %s',
+    value => {
+      let tree!: Renderer.ReactTestRenderer;
+      act(() => {
+        tree = Renderer.create(<BaselineCodeField value={value} disabled />);
+      });
+      const slots = tree.root.findAllByType(TextInput);
+      expect(slots).toHaveLength(4);
+      for (const slot of slots) {
+        expect(StyleSheet.flatten(slot.props.style)).toMatchObject({
+          color: '#666666',
+          borderColor: '#999999',
+          backgroundColor: '#FFFFFF',
+          width: 44,
+          height: 64,
+          fontSize: 30,
+          fontFamily: 'UniCredit-bold',
+          opacity: 1,
+        });
+        expect(slot.props.accessibilityState).toEqual({ disabled: true });
+      }
+      act(() => tree.unmount());
+    },
+  );
+  it('uses the original single Code border for keyboard focus', () => {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(<BaselineCodeField value="1" />);
+    });
+    act(() => tree.root.findAllByType(TextInput)[0].props.onFocus?.({}));
+    expect(
+      StyleSheet.flatten(tree.root.findAllByType(TextInput)[0].props.style),
+    ).toMatchObject({ borderColor: '#007A91', borderWidth: 1 });
+    act(() => tree.unmount());
+  });
   it('resolves overlapping dot presses from actual layout measurements with logical fallback', () => {
     const onSelect = jest.fn();
     let tree!: Renderer.ReactTestRenderer;

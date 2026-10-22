@@ -1,5 +1,6 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import {
+  Platform,
   StyleSheet,
   View,
   type TextInputProps,
@@ -18,6 +19,7 @@ export const FormField = forwardRef<
     onChange: (value: string) => void;
     error?: string;
     inputProps?: Omit<TextInputProps, 'value' | 'onChangeText'>;
+    trailingAccessory?: React.ReactNode;
     containerStyle?: StyleProp<ViewStyle>;
     labelStyle?: StyleProp<TextStyle>;
   }
@@ -29,11 +31,13 @@ export const FormField = forwardRef<
     onChange,
     error,
     inputProps,
+    trailingAccessory,
     containerStyle,
     labelStyle,
   },
   ref,
 ) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={[styles.field, containerStyle]}>
       <Text
@@ -45,24 +49,41 @@ export const FormField = forwardRef<
       >
         {label}
       </Text>
-      <TextInput
-        ref={ref}
-        accessibilityLabel={label}
-        value={value}
-        onChangeText={onChange}
-        placeholderTextColor={tokens.muted}
-        {...inputProps}
-        style={[
-          styles.input,
-          {
-            fontFamily: tokens.font,
-            color: tokens.text,
-            borderColor: tokens.border,
-          },
-          error && styles.errorInput,
-          inputProps?.style,
-        ]}
-      />
+      <View style={trailingAccessory ? styles.inputRow : undefined}>
+        <TextInput
+          ref={ref}
+          accessibilityLabel={label}
+          value={value}
+          onChangeText={onChange}
+          placeholderTextColor={tokens.muted}
+          {...inputProps}
+          onFocus={event => {
+            setFocused(true);
+            inputProps?.onFocus?.(event);
+          }}
+          onBlur={event => {
+            setFocused(false);
+            inputProps?.onBlur?.(event);
+          }}
+          style={[
+            styles.input,
+            trailingAccessory ? styles.inputWithAccessory : undefined,
+            {
+              fontFamily: tokens.font,
+              color: tokens.text,
+              borderColor: tokens.border,
+            },
+            inputProps?.style,
+            focused && styles.focusedInput,
+            focused && { borderColor: tokens.accent },
+            error && styles.errorInput,
+            Platform.OS === 'web' && styles.webInput,
+          ]}
+        />
+        {trailingAccessory ? (
+          <View style={styles.inputAccessory}>{trailingAccessory}</View>
+        ) : null}
+      </View>
       {error && (
         <Text
           accessibilityRole="alert"
@@ -85,6 +106,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     includeFontPadding: false,
   },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  inputWithAccessory: { flex: 1 },
+  inputAccessory: { minHeight: 48, justifyContent: 'center' },
   error: { color: '#e2001a', fontSize: 14, lineHeight: 20 },
   errorInput: { borderColor: '#e2001a' },
+  focusedInput: { borderBottomWidth: 2 },
+  webInput: { outlineWidth: 0 },
 });

@@ -1,0 +1,704 @@
+{
+  "owner": "/root",
+  "status": "complete",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "ownership": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/ownership.json",
+  "recordedAt": "2026-10-20T12:58:38.298Z",
+  "scope": "User-approved removal of the legacy DS Templates gallery and unused associated screenshots. Existing shared flow composition preserved.",
+  "changes": [
+    "Removed Templates tab; legacy #templates links recover to Components.",
+    "Removed 47 reconstructed gallery previews, their exclusive helpers/data, template metadata registry and AI catalog/project-pack declarations.",
+    "Kept shared TemplateProductsPreview and its RO/RS consumers; removed only its unconsumed product-detail preview and exclusive type import.",
+    "Replaced retired template audit with strict component/screen/flow registry audit; no warning/coverage thresholds relaxed.",
+    "Retired exactly 17 unused screenshots: 15 PNG and 2 JPG. All 13 source/package screenshots still referenced were retained."
+  ],
+  "fileDelta": [
+    {
+      "path": "docs/design-system/agent-interface-contract.md",
+      "status": "present",
+      "sha256": "13ae1c0c74468a1544e94b0707d3c4c59ff1b88628b2828c9a65a770938868e5"
+    },
+    {
+      "path": "docs/design-system/component-implementation-handoff/components-handoff.md",
+      "status": "present",
+      "sha256": "8a84fca7b5b1e0bc32a721bc9f56f638b4bbb2f1e0f8653f424461821ff4f605"
+    },
+    {
+      "path": "docs/figma/ai-design-screen-factory-protocol.md",
+      "status": "present",
+      "sha256": "71735ee8b972265ae2ac4f70128df3ba81eeb1cb53e9416a8cdca9311162a916"
+    },
+    {
+      "path": "docs/platform-capability-map/README.md",
+      "status": "present",
+      "sha256": "51966c2a1966be1168e4d04a168834a3468986bb32a0e9d50736d76980b19a9f"
+    },
+    {
+      "path": "docs/tasks/templates-cleanup-asset-proof-2026-10-20.json",
+      "status": "present",
+      "sha256": "8a2eeedd4f9be2e3ae1d89a503c0e9e4b72ad6358cbfeeb56f30975cf12f1a5d"
+    },
+    {
+      "path": "package.json",
+      "status": "present",
+      "sha256": "a54c0bd0dbe7cc1c2fef4e7dca3c196ffe0e92c3403cd28f3f272b89e9cb5c82"
+    },
+    {
+      "path": "screenshots/67.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Activate mToken.jpg",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Apple pay.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Contact.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Error to be.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Generate Token.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Informative.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Message.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/New request with push.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Panel.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Pending.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Product selection.jpg",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/RS - Travel Insurance.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Review request.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Success to be.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Tutorial 1.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "screenshots/Warning to be.png",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "scripts/asset-baseline.json",
+      "status": "present",
+      "sha256": "fd0d3f5006903b57586429b2eec6749222570ffa250255b1a83124e1a43d4241"
+    },
+    {
+      "path": "scripts/audit-assets.mjs",
+      "status": "present",
+      "sha256": "0c56209eb5c9b11dc38834c0e3402026c47389f4cbdc59cf040bad4f508d1043"
+    },
+    {
+      "path": "scripts/audit-registry-contract.mjs",
+      "status": "present",
+      "sha256": "2b0ed09cd3038eac73b7394ea2a4023c92abcdec35168cbcb7e062ee91618b24"
+    },
+    {
+      "path": "scripts/audit-template-contract.mjs",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/components/contracts/baselineCatalog.ts",
+      "status": "present",
+      "sha256": "c242267417ccc027d7c08a120bdfeee2cd0de440ca38d39a66b5d542f27eb7c1"
+    },
+    {
+      "path": "src/app/components/icons/domains/shared/custom.tsx",
+      "status": "present",
+      "sha256": "214ca6d7cecab18eded5a91c374fa62aa2152cfe8c921f77222204c21cbf2d99"
+    },
+    {
+      "path": "src/app/components/templates/TemplateCodePreviews.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/components/templates/TemplateProductsPreview.tsx",
+      "status": "present",
+      "sha256": "bb3a2ccb00cfb8822f81a541077ec58fc6e0ccf6a4abcc1689010a8afe1558b5"
+    },
+    {
+      "path": "src/app/components/templates/templateData.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/components/templates/templateFlows.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/components/templates/templatePrimitives.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/components/templates/templateScreens.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/aiCatalog.ts",
+      "status": "present",
+      "sha256": "062853320bc5b570f82491dab8159079213fed9b71b63d40e6240b9695eb6ed9"
+    },
+    {
+      "path": "src/app/registry/componentRegistry.ts",
+      "status": "present",
+      "sha256": "86a434358d2dbcc30bc99780e2c6e0e811f8ec9c33f718640110d8f380a10d57"
+    },
+    {
+      "path": "src/app/registry/domains/accounts/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/analytics/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/composeRegistry.ts",
+      "status": "present",
+      "sha256": "39d7cfbd6cd1537092119f57bd40e7bfde910d07adfb6ab96b7ca2f2e66b3e32"
+    },
+    {
+      "path": "src/app/registry/domains/contracts.ts",
+      "status": "present",
+      "sha256": "ee51d322ee1a5ad1c3e90afce4b25ddd5de7f5ea3ccb3ab0d0ae1e5128f5a67c"
+    },
+    {
+      "path": "src/app/registry/domains/foundation/components.ts",
+      "status": "present",
+      "sha256": "8c78ec427c9bbaf5789a68b81c2de5deeb876149cd5f01ad1d607e04b127189f"
+    },
+    {
+      "path": "src/app/registry/domains/home/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/identity/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/payments/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/products/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/services/templates.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/templateDefaults.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/registry/domains/validateRegistryContracts.ts",
+      "status": "present",
+      "sha256": "1de36aa34cb4432eedb2cef481b50e754992ec1cc228e5112322df50f9a05a9d"
+    },
+    {
+      "path": "src/app/registry/projectPackRegistry.ts",
+      "status": "present",
+      "sha256": "6e52b6ad22723bbee286bddaae607e0c73f093b36c9f4e373bc0309b8fb0af5a"
+    },
+    {
+      "path": "src/app/registry/templateRegistry.ts",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/screens/design-system/DesignSystemPage.tsx",
+      "status": "present",
+      "sha256": "cafa55f1e258cecdae0e5b5579eb76b08f0cc2ff1f4b5cbb84d10590b28cc940"
+    },
+    {
+      "path": "src/app/screens/design-system/inventoryNav.ts",
+      "status": "present",
+      "sha256": "23daf16d72d5cdbfaddaf2c90f46e2f63c3c9a0634ab3352c6207ae557e74f10"
+    },
+    {
+      "path": "src/app/screens/design-system/templateInventory.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "src/app/state/demoTypes.ts",
+      "status": "present",
+      "sha256": "2e683b3306b780fd7e622b732ffc2547fffddd32c0db8c1c8b578a6da5c3f4bb"
+    },
+    {
+      "path": "tests/audits/asset-audit.test.mjs",
+      "status": "present",
+      "sha256": "1487126d3b7de2b3ab94cba8c14d8fe2fba3ba261adc0b37c81bafabd3d3bc11"
+    },
+    {
+      "path": "tests/components/baseline-catalog.test.ts",
+      "status": "present",
+      "sha256": "e3619441564f2c3b5debbc6e560383335947738a03fe139b4119199db9180e03"
+    },
+    {
+      "path": "tests/components/template-previews.test.tsx",
+      "status": "deleted",
+      "sha256": null
+    },
+    {
+      "path": "tests/registry/declarative-audit.test.mjs",
+      "status": "present",
+      "sha256": "0bb5ce4b78e87f3568e8f357dc972a91859cd7fca9896e50b63fd6e90a1430ed"
+    },
+    {
+      "path": "tests/registry/declarative-equivalence.test.ts",
+      "status": "present",
+      "sha256": "d1c451c917825b08807b9b9f6fa8a2afd4874074350bbd39b8f4c4c5d22b4b46"
+    },
+    {
+      "path": "tests/registry/domain-composition.test.ts",
+      "status": "present",
+      "sha256": "b0e42da657a74f7879bcca69c2aa1677be3da52d9261b219ead132669ad6d6dd"
+    },
+    {
+      "path": "tests/registry/fixtures/declarative-baseline.json",
+      "status": "present",
+      "sha256": "510f77e2fa90cdb7caa917a70d8213933f1884cd22d5fe6722014e7d7934f5dd"
+    },
+    {
+      "path": "tests/screens/design-system-specimens.test.tsx",
+      "status": "present",
+      "sha256": "68a13e519571e747344296b244248b69a9b86fe131f372154d666bb3df38dc50"
+    },
+    {
+      "path": "docs/tasks/templates-cleanup-integrated-asset-2026-10-20.json",
+      "status": "present",
+      "sha256": "96086267a30844b68ce253050f3202291187ef16d36058163548b6d8cd42fd24"
+    },
+    {
+      "path": "scripts/native-spike/pi-native-compat-adapters.json",
+      "status": "present",
+      "sha256": "aa03ac5576a7112a618eb69b127e14f65c889711c59a9f054167fe441e2f92aa"
+    }
+  ],
+  "deltaAttribution": "Exact task-edited paths only; pre-existing edits remain preserved. No Git index mutation or commits. Source preimages and deleted bytes are backed up outside checkout.",
+  "preservedFlows": [
+    {
+      "path": "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx",
+      "sha256": "3e29398bda96253895c4cb4f8b9309b607daf3a399c7fd5aa5954d5a1ade77ba"
+    },
+    {
+      "path": "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx",
+      "sha256": "114d14a8c22e51d115892a9eaf058a3b5be7886a62fd3b4ab9ed12ea3cd9767c"
+    }
+  ],
+  "sharedProductsPreservation": {
+    "removedOnly": "Unconsumed TemplateProductDetailPreview and its exclusive type import.",
+    "preservedFunctions": [
+      {
+        "name": "ProductsPreviewRegion",
+        "sha256": "3bbb66d499885237d4fc83e441c6f1edcf185567502539232b182e47478bc4ac"
+      },
+      {
+        "name": "TemplateProductsHeader",
+        "sha256": "89297c7f7b270e167a269912fcf3ed1306e1009a0c070c009e846a2405efd9f7"
+      },
+      {
+        "name": "TemplateProductsTabs",
+        "sha256": "400d0c5aab0acfc0710606e52b56db23c9a42783c260dfeba0b3d2890723f175"
+      },
+      {
+        "name": "TemplateBankingContent",
+        "sha256": "a1defab264dabe57aefdf2895fe5483511a3e152832d7d6281a2c639cfccdf4a"
+      },
+      {
+        "name": "TemplateShopSmartContent",
+        "sha256": "2f303932f56e36c17c7a6c016b0bbbf346562fc31bb06f265ec572db61fafba7"
+      },
+      {
+        "name": "getTemplateProductsCardTranslationId",
+        "sha256": "44b5d664f376ac3aef61e0e3b6b174bf0e2db436dc02b4a5a5f19610a698b7d4"
+      },
+      {
+        "name": "TemplateProductsScreen",
+        "sha256": "fb5ddd8706e29b99ba6701e493d15cb16911adab74ed7d50e2f1b3de995d8b9c"
+      }
+    ],
+    "allSurvivingFunctionSourcesUnchanged": true
+  },
+  "registryPreservation": {
+    "retiredComponent": {
+      "id": "templates.reconstructed-code",
+      "label": "Reconstructed code templates",
+      "products": [
+        "PI"
+      ],
+      "designSystems": [
+        "current"
+      ],
+      "status": "implemented",
+      "componentPath": "src/app/components/templates/TemplateCodePreviews.tsx",
+      "usedByScreens": [
+        "platform.design-system"
+      ],
+      "notes": "Renders 50 real JSX template previews: all 30 screenshot-backed templates plus 20 code-only templates derived from active pre-login, panel, Co-Apping, Home/account, Payments, Products, More, Contacts, Messages, Spending, Prime, and dialog patterns. Source PNG/JPG files remain comparison evidence where they exist."
+    },
+    "allOtherComponentsUnchanged": true,
+    "screensUnchanged": true,
+    "icons": "Only obsolete TemplateCodePreviews usage labels removed; glyph snapshots unchanged.",
+    "beforeComponents": 135,
+    "afterComponents": 134,
+    "baselineComponents": {
+      "count": 99,
+      "hash": "46a91d8903d3d1701eb709ad951eb4c099c75b15035bcca0a163ce03315c6959"
+    },
+    "sharedProductsPreservation": {
+      "removedOnly": "Unconsumed TemplateProductDetailPreview and its exclusive type import.",
+      "preservedFunctions": [
+        {
+          "name": "ProductsPreviewRegion",
+          "sha256": "3bbb66d499885237d4fc83e441c6f1edcf185567502539232b182e47478bc4ac"
+        },
+        {
+          "name": "TemplateProductsHeader",
+          "sha256": "89297c7f7b270e167a269912fcf3ed1306e1009a0c070c009e846a2405efd9f7"
+        },
+        {
+          "name": "TemplateProductsTabs",
+          "sha256": "400d0c5aab0acfc0710606e52b56db23c9a42783c260dfeba0b3d2890723f175"
+        },
+        {
+          "name": "TemplateBankingContent",
+          "sha256": "a1defab264dabe57aefdf2895fe5483511a3e152832d7d6281a2c639cfccdf4a"
+        },
+        {
+          "name": "TemplateShopSmartContent",
+          "sha256": "2f303932f56e36c17c7a6c016b0bbbf346562fc31bb06f265ec572db61fafba7"
+        },
+        {
+          "name": "getTemplateProductsCardTranslationId",
+          "sha256": "44b5d664f376ac3aef61e0e3b6b174bf0e2db436dc02b4a5a5f19610a698b7d4"
+        },
+        {
+          "name": "TemplateProductsScreen",
+          "sha256": "fb5ddd8706e29b99ba6701e493d15cb16911adab74ed7d50e2f1b3de995d8b9c"
+        }
+      ],
+      "allSurvivingFunctionSourcesUnchanged": true
+    }
+  },
+  "assetProof": "docs/tasks/templates-cleanup-asset-proof-2026-10-20.json",
+  "assetCount": 1469,
+  "retiredScreenshots": 17,
+  "retiredScreenshotBytes": 892597,
+  "retainedScreenshotSources": 13,
+  "validation": {
+    "typecheckExitCode": 0,
+    "lintExitCode": 0,
+    "moduleAudit": {
+      "exitCode": 0,
+      "files": 304
+    },
+    "registryAudit": {
+      "exitCode": 0,
+      "components": 134,
+      "screens": 40,
+      "flows": 14
+    },
+    "affectedTests": {
+      "total": 112,
+      "suites": 9,
+      "exitCode": 0,
+      "status": "passed in one final affected-scope run",
+      "rsFlow": 48,
+      "roGenius": 8
+    },
+    "redGreenEvidence": "Before implementation the legacy-hash/tab test and approved-asset-retirement test both failed for the expected reasons; both pass after cleanup.",
+    "review": "Final independent review approved all four obsolete consumer removals and both retired-test replacements; all other approval fields unchanged.",
+    "formatCheckExitCode": 0,
+    "retiredPiAuditExitCode": 0,
+    "retiredPiGuardTests": {
+      "tests": 9,
+      "suites": 1,
+      "exitCode": 0
+    },
+    "retainedBridgeRegressions": {
+      "tests": 73,
+      "suites": 4,
+      "exitCode": 0
+    },
+    "bridgeApprovals": {
+      "status": "both approved and verified",
+      "proof": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/final-bridge-approval-proof.json"
+    },
+    "finalFrozenPathHashesUnchanged": true,
+    "flowConsumerHashesUnchanged": true
+  },
+  "browser": {
+    "legacyTemplatesHash": "Components selected; no Templates tab",
+    "tabs": [
+      "Components",
+      "Icons",
+      "Colors",
+      "Typography"
+    ],
+    "liveCatalogEntries": 71,
+    "screenshot": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/design-system-without-templates.png"
+  },
+  "combinedVerification": {
+    "command": "npm run verify",
+    "status": "passed",
+    "log": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/final-verify.log",
+    "startedAt": "2026-10-20T13:27:03.599Z",
+    "editorFreeze": {
+      "threadId": "01a154ae-d30f-70c3-aa6f-2dde6d4941bb",
+      "explicitConfirmation": true,
+      "affectedRoboTests": 80,
+      "suites": 12,
+      "report": "docs/tasks/cz-robo-create-goal-page-audit-2026-10-20.json",
+      "delta": ".codex-temp/robo-page-audit-20261020/file-delta.json"
+    },
+    "previousAttempt": {
+      "status": "intentionally interrupted",
+      "reason": "Two scoped bridge approvals still named the deleted gallery module. Only those exact consumer records removed; source hashes and all guards remain intact.",
+      "log": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/verify-interrupted-stale-consumers.log"
+    },
+    "attempt": 3,
+    "interruptedAttempts": [
+      {
+        "status": "intentionally interrupted",
+        "reason": "Two scoped bridge approvals still named the deleted gallery module. Only those exact consumer records removed; source hashes and all guards remain intact.",
+        "log": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/verify-interrupted-stale-consumers.log"
+      },
+      {
+        "status": "intentionally interrupted before test suite completed",
+        "reason": "Review found two requiredTests references to the deleted gallery regression; replaced by retained flow coverage.",
+        "log": "C:/Users/mihai/AppData/Local/Temp/templates-cleanup-2026-10-20/verify-interrupted-retired-test-reference.log"
+      }
+    ],
+    "exitCode": 0,
+    "completedAt": "2026-10-20T13:38:43.596Z",
+    "testFiles": 327,
+    "testsPassed": 3835,
+    "testsFailed": 0,
+    "coverage": {
+      "statements": 84.47,
+      "branches": 82.92,
+      "functions": 64.29,
+      "lines": 84.47,
+      "thresholdsChanged": false
+    },
+    "stages": [
+      {
+        "name": "preverify",
+        "status": "passed"
+      },
+      {
+        "name": "typecheck",
+        "status": "passed"
+      },
+      {
+        "name": "lint --max-warnings 0",
+        "status": "passed"
+      },
+      {
+        "name": "format:check",
+        "status": "passed"
+      },
+      {
+        "name": "pretest:coverage",
+        "status": "passed"
+      },
+      {
+        "name": "test:coverage",
+        "status": "passed"
+      },
+      {
+        "name": "audit:card-details",
+        "status": "passed"
+      },
+      {
+        "name": "audit:investments",
+        "status": "passed"
+      },
+      {
+        "name": "audit:figma-bridge",
+        "status": "passed"
+      },
+      {
+        "name": "audit:registry",
+        "status": "passed"
+      },
+      {
+        "name": "audit:platform",
+        "status": "passed"
+      },
+      {
+        "name": "audit:assets",
+        "status": "passed"
+      },
+      {
+        "name": "audit:modules",
+        "status": "passed"
+      },
+      {
+        "name": "audit:retired-pi",
+        "status": "passed"
+      },
+      {
+        "name": "build",
+        "status": "passed"
+      }
+    ],
+    "assets": {
+      "count": 1469,
+      "aggregate": "c3e8faf2af42f7e733eee8bd0b24af848f17dba70d9899872b6bbc7a9bbfd384"
+    },
+    "registry": {
+      "components": 134,
+      "screens": 40,
+      "flows": 14
+    },
+    "nativeWebBundle": {
+      "files": 439,
+      "build": "e71120bbd188c6ac98a3d81840cb94680d6f5c81868dce7eef3d6ab6c93f37ab"
+    },
+    "warnings": [
+      "(!) Some chunks are larger than 500 kB after minification. Consider:",
+      "(!) C:/Users/mihai/Desktop/Mobile Banking - CEE/src/experiences/pi/it/mobile-first/MobileFirstProfile.tsx is dynamically imported by C:/Users/mihai/Desktop/Mobile Banking - CEE/src/experiences/pi/it/mobile-first/MobileFirstCardsPrimitives.tsx, C:/Users/mihai/Desktop/Mobile Banking - CEE/src/experiences/pi/it/mobile-first/MobileFirstPfm.tsx but also statically imported by C:/Users/mihai/Desktop/Mobile Banking - CEE/src/experiences/pi/it/mobile-first/MobileFirstHome.tsx, dynamic import will not move module into another chunk.",
+      "(!) C:/Users/mihai/Desktop/Mobile Banking - CEE/src/app/components/FloatingCoAppingButton.tsx is dynamically imported by C:/Users/mihai/Desktop/Mobile Banking - CEE/src/app/AppScreenRouter.tsx but also statically imported by C:/Users/mihai/Desktop/Mobile Banking - CEE/src/app/screens/design-system/componentLivePreviews.tsx, C:/Users/mihai/Desktop/Mobile Banking - CEE/src/app/screens/design-system/componentStatePreviews.tsx, dynamic import will not move module into another chunk."
+    ],
+    "verificationScope": "Combined final source state after explicit freeze of Templates cleanup and independently owned Robo page audit; no code changes after the successful gate."
+  },
+  "openIntegrations": [],
+  "notes": [
+    "Canonical Figma Templates source-page reference remains as source documentation; the separate legacy DEMO gallery is removed.",
+    "Historical evidence and old verification logs are retained as historical records."
+  ],
+  "cleanupAssetCount": 1468,
+  "coordinatedAssetAddition": {
+    "integrationOwner": "/root",
+    "sourceOwner": "01a154ae-d30f-70c3-aa6f-2dde6d4941bb",
+    "reason": "Separately owned Robo page audit imports the original Figma progress glyph; integration requested by source owner before the shared final gate.",
+    "reportedFigmaSource": {
+      "fileKey": "Lteu53v7vtyt7UqM64HuMq",
+      "nodeId": "11446:28822",
+      "processingFrame": "12928:238874"
+    },
+    "addition": {
+      "path": "src/assets/investments/robo/goal-creation-progress.svg",
+      "bytes": 1568,
+      "sha256": "c3aa2f3faeb1f14f5d6df7fdeacd4456568cfd22a36df835a333ef292f2416e7"
+    },
+    "previousCount": 1468,
+    "previousAggregate": "5f99e3b88b7e996c10e803d0037946f41ec69be3f9d48f1edff28380bbbe1f9b",
+    "currentCount": 1469,
+    "currentAggregate": "c3e8faf2af42f7e733eee8bd0b24af848f17dba70d9899872b6bbc7a9bbfd384",
+    "newExactDuplicates": 0,
+    "existingAssetPreservation": "No prior path or blob is changed; exactly one explicitly coordinated original SVG is added."
+  },
+  "retiredAuditConsumers": [
+    {
+      "bridge": "src/app/screens/products/ProductsScreen.tsx",
+      "consumer": {
+        "path": "src/app/components/templates/templateScreens.tsx",
+        "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
+        "scope": "design-system-platform"
+      }
+    },
+    {
+      "bridge": "src/app/screens/products/ProductDetailScreen.tsx",
+      "consumer": {
+        "path": "src/app/components/templates/templateScreens.tsx",
+        "reviewedSha256": "B7F8CEF0BD0409762CD868790F9259422A187EFDC81F90C9D9E48246F1FA405D",
+        "scope": "design-system-platform"
+      }
+    }
+  ],
+  "retiredAuditTests": {
+    "retired": "tests/components/template-previews.test.tsx",
+    "replacement": "tests/screens/rs-property-insurance.test.tsx",
+    "reason": "Retained executable flow coverage replaces retired gallery-only coverage; existing native scope and bridge regressions remain required."
+  },
+  "obsoleteLegacyFlowApprovalRows": {
+    "removed": [
+      {
+        "path": "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx",
+        "reviewedSha256": "4A601831471E3372C761D6D33421ADC5026053CC2B407A1F9EB012544908A513",
+        "scope": "flow-owned-prototype"
+      },
+      {
+        "path": "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx",
+        "reviewedSha256": "AAD95AA2C3B2795E415DBEA9344E44A7016348B5B99594DA158D43E85F47E276",
+        "scope": "flow-owned-prototype"
+      }
+    ],
+    "reason": "Both unchanged flows consume TemplateProductsPreview directly, not the legacy ProductsScreen wrapper. The dependency audit reports no actual runtime consumers for the legacy wrapper; approvals now match that graph."
+  },
+  "completedAt": "2026-10-20T13:39:42.634Z",
+  "baseCommitAfterVerification": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "remainingErrors": [],
+  "reportFileDelta": {
+    "path": "docs/tasks/templates-cleanup-2026-10-20.json",
+    "reason": "Final evidence only; self hash omitted."
+  }
+}

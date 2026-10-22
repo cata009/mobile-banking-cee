@@ -1,4 +1,5 @@
 import type { NativeInternalTransferPreview } from './internalTransferPreview'
+import type { PrimeReferenceScreen, PrimeCustomerSegment } from '@/features/prime/reference'
 
 /** Plain component regions rendered by the same Native primitives as complete screens. */
 export type NativeMoreCardType =
@@ -16,6 +17,14 @@ export type NativeContactsNavigationIcon =
 
 export type NativeComponentPreview =
   | NativeInternalTransferPreview
+  | {
+      kind: 'prime-reference'
+      screen: PrimeReferenceScreen
+      segment: PrimeCustomerSegment
+      serviceActive: boolean
+      playCallAudio?: boolean
+    }
+  | { kind: 'design-system'; componentId: string; variantId?: string; dark: boolean }
   | { kind: 'detail-header'; variant: 'account' | 'card'; title: string; progress: number }
   | { kind: 'analytics-header' }
   | { kind: 'home-header'; title?: string; showActions?: boolean; showTitle?: boolean }
@@ -37,5 +46,5 @@ export type NativeComponentPreview =
 
 /** Generic component samples size to content; this flow owns the full phone viewport. */
 export function isNativeComponentPreviewFitContent(preview: NativeComponentPreview | undefined): boolean {
-  return preview !== undefined && preview.kind !== 'internal-transfer'
+  return preview !== undefined && preview.kind !== 'internal-transfer' && preview.kind !== 'prime-reference'
 }

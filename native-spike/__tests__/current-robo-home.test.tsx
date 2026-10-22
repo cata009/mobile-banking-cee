@@ -67,9 +67,24 @@ function control(tree: Renderer.ReactTestRenderer, label: string) {
     .findAll(
       node =>
         node.props.accessibilityLabel === label &&
-        typeof node.props.onPress === 'function',
+        typeof node.props.onPress === 'function' &&
+        isExposed(node),
     )
     .at(-1)!;
+}
+function isExposed(node: Renderer.ReactTestInstance) {
+  let current: Renderer.ReactTestInstance | null = node;
+  while (current) {
+    if (
+      current.props['aria-hidden'] === true ||
+      current.props.accessibilityElementsHidden === true ||
+      current.props.importantForAccessibility === 'no-hide-descendants' ||
+      current.props.pointerEvents === 'none'
+    )
+      return false;
+    current = current.parent;
+  }
+  return true;
 }
 async function press(tree: Renderer.ReactTestRenderer, label: string) {
   await act(async () => {
@@ -97,14 +112,16 @@ test('Robo baseline Home starts with first evolution card and Source shadow in e
   expect(
     tree.root.findAll(
       node =>
-        node.type === View && node.props.testID === 'robo-home-evolution-card',
+        node.type === View &&
+        node.props.testID === 'robo-home-evolution-card' &&
+        isExposed(node),
     ),
   ).toHaveLength(model.categories.length);
   expect(JSON.stringify(tree.toJSON())).toContain('Your Homepage');
   expect(JSON.stringify(tree.toJSON())).not.toContain('Good morning, Peter');
   for (const category of model.categories.filter(
     item => item.products.length > 1 || item.key === 'investments',
-  ))
+  )) {
     expect(
       tree.root.findAll(
         node =>
@@ -112,6 +129,13 @@ test('Robo baseline Home starts with first evolution card and Source shadow in e
           node.props.testID === `robo-home-stack-${category.key}`,
       ),
     ).toHaveLength(1);
+    const tail = tree.root.findByProps({
+      testID: `robo-home-expanded-products-${category.key}`,
+    });
+    expect(tail.props['aria-hidden']).toBe(true);
+    expect(tail.props.accessibilityElementsHidden).toBe(true);
+    expect(tail.props.pointerEvents).toBe('none');
+  }
 });
 test('account quick actions use canonical Source routes and QR placeholders stay inert', async () => {
   const props = host();

@@ -15,6 +15,9 @@ export function BaselineL1Header({
   showActions = true,
   showTitle = true,
   gutter,
+  topInset,
+  backgroundColor,
+  titleColor,
   dark = false,
 }: {
   variant: L1HeaderVariant;
@@ -23,14 +26,20 @@ export function BaselineL1Header({
   showActions?: boolean;
   showTitle?: boolean;
   gutter?: number;
+  topInset?: number;
+  backgroundColor?: string;
+  titleColor?: string;
   dark?: boolean;
 }) {
   const contract = resolveL1Header(variant);
   const rootStyle: ViewStyle = {
     width: '100%',
-    backgroundColor: contract.backgroundToken
-      ? sourceColor(`var(${contract.backgroundToken})`, dark)
-      : undefined,
+    backgroundColor:
+      backgroundColor ??
+      (contract.backgroundToken
+        ? sourceColor(`var(${contract.backgroundToken})`, dark)
+        : undefined),
+    ...(topInset === undefined ? {} : { paddingTop: topInset }),
   };
   const contentStyle: ViewStyle = {
     paddingHorizontal: gutter ?? contract.gutter,
@@ -55,7 +64,7 @@ export function BaselineL1Header({
     fontSize: contract.titleFontSize,
     lineHeight:
       typeof contract.lineHeight === 'number' ? contract.lineHeight : undefined,
-    color: sourceColor(`var(${contract.titleToken})`, dark),
+    color: titleColor ?? sourceColor(`var(${contract.titleToken})`, dark),
     flex: contract.splitActionsAndTitle ? undefined : 1,
     minWidth: contract.splitActionsAndTitle ? undefined : 0,
   };

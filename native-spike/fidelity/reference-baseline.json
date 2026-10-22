@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "policy": "italy-source-ui-v1",
-  "recordedAt": "2026-10-13T07:45:13.381Z",
-  "recordedBy": "root Italy Source annotation integration",
-  "reason": "Capture the verified Source state already published at main 770ea65 plus the five user-requested annotation corrections: canonical Home chevrons, original Help/Close canvas geometry, unclipped movement category, safe card scroll restoration and bounded fund summary with percentage below. The prior capture predates four already-integrated Home/investment files. Reviewed actual browser and regression evidence; this records Source references only, without accepting native visual parity.",
-  "baseCommit": "770ea65e4505c6befc5bc69982d8eefd8d5020c4",
+  "recordedAt": "2026-10-15T08:28:24.409Z",
+  "recordedBy": "root/common_offers_more reviewed BottomSheet contract extraction",
+  "reason": "Reviewed BottomSheet literal/default/style extraction only, retaining all prior references unchanged and freezing src/app/components/contracts/bottomSheet.ts plus bottomSheetWeb.ts. Exact original-code expansion and192complete DOM variants plus focus/close lifecycle tests prove extraction equivalence; see reviewedUpdates provenance. visualAccepted remains false.",
+  "baseCommit": "d338f7cfb92435bb8edc8817afbdd47031fb18e3",
   "visualAccepted": false,
   "areas": [
     "home",
@@ -69,8 +69,44 @@
         "profile"
       ],
       "hashMode": "lf-text",
-      "sha256": "effbb935d3958a284c206b0c982fb48e71ea020f10c6b4999a8d3a65e7e0347b",
-      "contentBytes": 8363
+      "sha256": "33940c317e3596be3517b96b8fb6c83b8beb4996cd91808e09a1b772bbf55830",
+      "contentBytes": 8320
+    },
+    {
+      "path": "src/app/components/contracts/bottomSheet.ts",
+      "kind": "ui",
+      "areas": [
+        "home",
+        "accounts",
+        "cards",
+        "operations",
+        "loans",
+        "insurance",
+        "pfm",
+        "investments",
+        "profile"
+      ],
+      "hashMode": "lf-text",
+      "sha256": "c8cdaeef373d21cb54e6effa8f879b1db2fa68fd7b0986377ae299a9c9a4dd51",
+      "contentBytes": 861
+    },
+    {
+      "path": "src/app/components/contracts/bottomSheetWeb.ts",
+      "kind": "ui",
+      "areas": [
+        "home",
+        "accounts",
+        "cards",
+        "operations",
+        "loans",
+        "insurance",
+        "pfm",
+        "investments",
+        "profile"
+      ],
+      "hashMode": "lf-text",
+      "sha256": "9dedef6889b92a5ce6d74fd3fbc81f047361f7fb4cfc93f6475624ae2d182f3b",
+      "contentBytes": 741
     },
     {
       "path": "src/app/components/ui/keyboardActivation.ts",
@@ -8619,6 +8655,42 @@
       "hashMode": "lf-text",
       "sha256": "03f6db5cb4df69af8414beb9d5d292ec1b6972e1777104f2846b7a8d0a10560f",
       "contentBytes": 28877
+    }
+  ],
+  "reviewedUpdates": [
+    {
+      "recordedAt": "2026-10-15T08:28:24.409Z",
+      "recordedBy": "root/common_offers_more reviewed BottomSheet contract extraction",
+      "baseCommit": "d338f7cfb92435bb8edc8817afbdd47031fb18e3",
+      "previousCapture": {
+        "recordedAt": "2026-10-13T07:45:13.381Z",
+        "recordedBy": "root Italy Source annotation integration",
+        "reason": "Capture the verified Source state already published at main 770ea65 plus the five user-requested annotation corrections: canonical Home chevrons, original Help/Close canvas geometry, unclipped movement category, safe card scroll restoration and bounded fund summary with percentage below. The prior capture predates four already-integrated Home/investment files. Reviewed actual browser and regression evidence; this records Source references only, without accepting native visual parity.",
+        "baseCommit": "770ea65e4505c6befc5bc69982d8eefd8d5020c4"
+      },
+      "reason": "Narrow reviewed extraction repair: the prior frozen BottomSheet matches Git HEAD and the preserved before fixture. Inlining the current canonical literal/default/style references reproduces every byte of that frozen implementation. Defaults, CSS, complete DOM variants, animation timing/deduplication, reduced motion, Escape, Tab focus wrapping/restoration and unmount cancellation were checked. This updates only BottomSheet and adds its two canonical contract authorities; every other reference is retained unchanged. No Source edit or native visual acceptance.",
+      "changedReferences": [
+        {
+          "path": "src/app/components/BottomSheet.tsx",
+          "previousSha256": "effbb935d3958a284c206b0c982fb48e71ea020f10c6b4999a8d3a65e7e0347b",
+          "previousContentBytes": 8363,
+          "sha256": "33940c317e3596be3517b96b8fb6c83b8beb4996cd91808e09a1b772bbf55830",
+          "contentBytes": 8320
+        }
+      ],
+      "addedReferences": [
+        "src/app/components/contracts/bottomSheet.ts",
+        "src/app/components/contracts/bottomSheetWeb.ts"
+      ],
+      "equivalence": {
+        "originalSha256": "effbb935d3958a284c206b0c982fb48e71ea020f10c6b4999a8d3a65e7e0347b",
+        "beforeFixtureSha256": "effbb935d3958a284c206b0c982fb48e71ea020f10c6b4999a8d3a65e7e0347b",
+        "expandedCurrentSha256": "effbb935d3958a284c206b0c982fb48e71ea020f10c6b4999a8d3a65e7e0347b",
+        "fixturePath": "tests/fixtures/baseline-overlays-before/BottomSheet.tsx",
+        "runtimeDomVariants": 192,
+        "runtimeBehaviorAndContractTests": 199
+      },
+      "visualAccepted": false
     }
   ]
 }

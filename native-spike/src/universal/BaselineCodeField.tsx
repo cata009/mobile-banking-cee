@@ -1,5 +1,5 @@
-import React, { useId, useRef } from 'react';
-import { View } from 'react-native';
+import React, { useId, useRef, useState } from 'react';
+import { Platform, View } from 'react-native';
 import {
   resolveCodeField,
   updateCodeSlot,
@@ -40,6 +40,7 @@ export function BaselineCodeField({
     errorText2,
   });
   const refs = useRef<Array<React.ComponentRef<typeof TextInput> | null>>([]);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const id = useId();
   const helperId = state.isError ? `${id}-message` : undefined;
   const apply = (update: ReturnType<typeof updateCodeSlot>) => {
@@ -64,15 +65,13 @@ export function BaselineCodeField({
     borderRadius: state.radius,
     borderColor: sourceColor(`var(${state.borderToken})`, dark),
     color: sourceColor(`var(${state.textToken})`, dark),
-    backgroundColor: sourceColor(
-      state.isDisabled ? 'var(--uc-surface-muted)' : 'var(--uc-surface)',
-      dark,
-    ),
+    backgroundColor: sourceColor('var(--uc-surface)', dark),
     padding: 0,
     textAlign: 'center' as const,
     fontFamily: 'UniCredit-bold',
     fontSize: state.fontSize,
     opacity: 1,
+    ...(Platform.OS === 'web' ? { outlineWidth: 0 } : {}),
   };
   const helperStyle = {
     width: state.helperWidth,
@@ -107,6 +106,10 @@ export function BaselineCodeField({
             value={slot}
             inputMode="numeric"
             autoComplete={index === 0 ? 'one-time-code' : 'off'}
+            onFocus={() => {
+              if (!state.isDisabled) setFocusedIndex(index);
+            }}
+            onBlur={() => setFocusedIndex(null)}
             onChangeText={next =>
               apply(
                 updateCodeSlot(
@@ -119,6 +122,7 @@ export function BaselineCodeField({
               )
             }
             onKeyPress={event => {
+              if (state.isDisabled) return;
               const key = event.nativeEvent.key;
               if (key === 'Backspace') {
                 event.preventDefault();
@@ -133,7 +137,12 @@ export function BaselineCodeField({
                 refs.current[index + 1]?.focus();
               }
             }}
-            style={slotStyle}
+            style={[
+              slotStyle,
+              focusedIndex === index && !state.isDisabled && !state.isError
+                ? { borderColor: sourceColor('var(--uc-action)', dark) }
+                : undefined,
+            ]}
           />
         ))}
       </View>

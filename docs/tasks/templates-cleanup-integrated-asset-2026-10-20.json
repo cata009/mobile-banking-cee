@@ -1,0 +1,21 @@
+{
+  "integrationOwner": "/root",
+  "sourceOwner": "01a154ae-d30f-70c3-aa6f-2dde6d4941bb",
+  "reason": "Separately owned Robo page audit imports the original Figma progress glyph; integration requested by source owner before the shared final gate.",
+  "reportedFigmaSource": {
+    "fileKey": "Lteu53v7vtyt7UqM64HuMq",
+    "nodeId": "11446:28822",
+    "processingFrame": "12928:238874"
+  },
+  "addition": {
+    "path": "src/assets/investments/robo/goal-creation-progress.svg",
+    "bytes": 1568,
+    "sha256": "c3aa2f3faeb1f14f5d6df7fdeacd4456568cfd22a36df835a333ef292f2416e7"
+  },
+  "previousCount": 1468,
+  "previousAggregate": "5f99e3b88b7e996c10e803d0037946f41ec69be3f9d48f1edff28380bbbe1f9b",
+  "currentCount": 1469,
+  "currentAggregate": "c3e8faf2af42f7e733eee8bd0b24af848f17dba70d9899872b6bbc7a9bbfd384",
+  "newExactDuplicates": 0,
+  "existingAssetPreservation": "No prior path or blob is changed; exactly one explicitly coordinated original SVG is added."
+}

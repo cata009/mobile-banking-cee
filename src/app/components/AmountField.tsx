@@ -54,7 +54,7 @@ export default function AmountField({
   onCurrencyClick,
   hideCurrencySelector = false,
 }: AmountFieldProps) {
-  const { isDisabled, currencyColor, currencyTitleColor } = resolveAmountField({ disabled, visualState, currency, currencyLabel, hideCurrencySelector });
+  const { isDisabled, currencyColor, currencyTitleColor, currencyIconColor, currencyLabelGap } = resolveAmountField({ disabled, visualState, currency, currencyLabel, hideCurrencySelector });
 
   return (
     <div className="flex w-full items-start gap-[24px]">
@@ -87,7 +87,7 @@ export default function AmountField({
         onClick={onCurrencyClick}
         className="flex shrink-0 items-center gap-0 text-left disabled:cursor-default"
       >
-        <span className="flex min-w-[64px] flex-col">
+        <span className="flex min-w-[66px] flex-col">
           <span
             className="uc-type-n5"
             style={{ color: currencyTitleColor }}
@@ -95,15 +95,15 @@ export default function AmountField({
             {currencyLabel}
           </span>
           <span
-            className="uc-type-p1 mt-[4px]"
-            style={{ color: currencyColor }}
+            className="uc-type-p1"
+            style={{ color: currencyColor, marginTop: currencyLabelGap }}
           >
             {currency}
           </span>
         </span>
         {!hideCurrencySelector && (
           <span className="grid h-[32px] w-[32px] shrink-0 place-items-center">
-            <AppIcon name={currencyIconName} color={currencyColor} />
+            <AppIcon name={currencyIconName} color={currencyIconColor} />
           </span>
         )}
       </button>

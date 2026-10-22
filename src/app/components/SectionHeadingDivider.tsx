@@ -1,50 +1,36 @@
-import type { SectionHeadingDividerVariant } from "@/app/components/contracts/sectionDivider";
-import { sectionDividerWeb } from "@/app/components/contracts/sectionDividerWeb";
-export type { SectionHeadingDividerVariant } from "@/app/components/contracts/sectionDivider";
+import type { CSSProperties } from 'react'
+import type {
+  SectionHeadingDividerVariant,
+  SectionDividerOptions,
+  SectionDividerInteractions,
+} from '@/app/components/contracts/sectionDivider'
+import { sectionDividerWeb } from '@/app/components/contracts/sectionDividerWeb'
+import { DIVIDER_RULE_327, DIVIDER_RULE_343 } from './contracts/dividerArtwork'
+import { AppIcon } from './icons/AppIcon'
+import './SectionHeadingDivider.css'
+export type { SectionHeadingDividerVariant } from '@/app/components/contracts/sectionDivider'
 
-export const SECTION_HEADING_DIVIDER_SOURCE = {
-  schema: "codex-figma-component-spec/v1",
-  sourceNodeIds: {
-    menigaDivider: "1058:22303",
-    smallTitleData: "1058:22304",
-    smallTwoLineTitleData: "8747:15008",
-    mediumTitle: "8747:15016",
-    withCounter: "8747:15028",
-    mediumTwoLineTitle: "8747:15036",
-    largeTitle: "1058:22317",
-    largeTwoLineTitle: "1058:22319",
-    actionDate: "8747:15049",
-    nameAction: "8747:15057",
-    actionDateCheckbox: "8747:15065",
-    lightTitle: "1517:3674",
-    lightDate: "1517:3679",
-    lightSmallTitleData: "1517:3683",
-  },
-  dimensions: {
-    defaultWidth: 375,
-    lightRestyleWidth: 343,
-    lineHeight: 1,
-  },
-} as const;
+export { SECTION_HEADING_DIVIDER_SOURCE } from '@/app/components/contracts/sectionDivider'
 
-interface SectionHeadingDividerProps {
-  title: string;
-  secondaryText?: string;
-  count?: number;
-  countAlign?: "inline" | "end";
-  variant?: SectionHeadingDividerVariant;
-  className?: string;
+interface SectionHeadingDividerProps extends SectionDividerOptions, SectionDividerInteractions {
+  title: string
+  secondaryText?: string
+  count?: number
+  countAlign?: 'inline' | 'end'
+  variant?: SectionHeadingDividerVariant
+  className?: string
 }
 
 export default function SectionHeadingDivider({
   title,
   secondaryText,
   count,
-  countAlign = "inline",
-  variant = "section",
+  countAlign = 'inline',
+  variant = 'section',
   className,
+  ...options
 }: SectionHeadingDividerProps) {
-  if (variant !== "section") {
+  if (variant !== 'section') {
     return (
       <MenigaDivider
         title={title}
@@ -52,20 +38,19 @@ export default function SectionHeadingDivider({
         count={count}
         variant={variant}
         className={className}
+        {...options}
       />
-    );
+    )
   }
 
-  const { alignCountToEnd } = sectionDividerWeb({ countAlign });
+  const { alignCountToEnd } = sectionDividerWeb({ countAlign })
 
   return (
     <div className={className} data-ds-label="SectionHeadingDivider">
-      {alignCountToEnd && typeof count === "number" ? (
+      {alignCountToEnd && typeof count === 'number' ? (
         <>
           <div className="flex items-center justify-between gap-[8px]">
-            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">
-              {title}
-            </h2>
+            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">{title}</h2>
             <span className="uc-type-n5-strong text-[var(--uc-text-muted)]" aria-label={`${title} count ${count}`}>
               {count}
             </span>
@@ -75,10 +60,8 @@ export default function SectionHeadingDivider({
       ) : (
         <>
           <div className="flex items-center gap-[8px]">
-            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">
-              {title}
-            </h2>
-            {typeof count === "number" ? (
+            <h2 className="uc-type-n5-strong line-clamp-2 uppercase text-[var(--uc-text-muted)]">{title}</h2>
+            {typeof count === 'number' ? (
               <span className="uc-type-n5-strong text-[var(--uc-text-muted)]" aria-label={`${title} count ${count}`}>
                 {count}
               </span>
@@ -88,7 +71,7 @@ export default function SectionHeadingDivider({
         </>
       )}
     </div>
-  );
+  )
 }
 
 function MenigaDivider({
@@ -97,98 +80,192 @@ function MenigaDivider({
   count,
   variant,
   className,
-}: {
-  title: string;
-  secondaryText?: string;
-  count?: number;
-  variant: Exclude<SectionHeadingDividerVariant, "section">;
-  className?: string;
-}) {
-  const state = sectionDividerWeb({ variant, count, secondaryText });
-  const { light: isLight, large: isLarge, hasLine } = state;
-  const line = <div className="h-px w-full bg-[var(--uc-border)]" aria-hidden="true" />;
-
-  if (isLarge) {
-    return (
-      <div
-        className={className}
-        data-ds-label="SectionHeadingDivider"
-        data-divider-variant={variant}
-      >
-        <div className="flex w-[375px] items-center bg-[var(--uc-surface)] px-[24px]">
-          <h2 className="uc-type-n2-strong whitespace-pre-line text-[20px] leading-none text-[var(--uc-text)]">
-            {title}
-            {variant === "large-two-line-title" && secondaryText ? (
-              <>
-                <br />
-                {secondaryText}
-              </>
-            ) : null}
-          </h2>
-        </div>
-      </div>
-    );
+  onAction,
+  checked = false,
+  onCheckedChange,
+  disabled = false,
+  width,
+}: SectionHeadingDividerProps & { variant: Exclude<SectionHeadingDividerVariant, 'section'> }) {
+  const state = sectionDividerWeb({ variant, count, secondaryText, width })
+  const typography: CSSProperties = {
+    fontFamily: '"UniCredit Divider", var(--font-unicredit-stack)',
+    fontSize: state.fontSize,
+    fontWeight: 700,
+    lineHeight: `${state.lineHeight}px`,
+    letterSpacing: 0,
+    margin: 0,
   }
-
-  if (isLight) {
-    const { titleTone, rowHeight } = state;
-
-    return (
-      <div
-        className={className}
-        data-ds-label="SectionHeadingDivider"
-        data-divider-variant={variant}
-      >
-        <div className={`flex w-[343px] flex-col justify-end ${rowHeight}`}>
-          <div className="flex items-center justify-between gap-[8px] px-[8px]">
-            <h2 className={`uc-type-n5-strong min-w-0 truncate text-[14px] leading-none ${titleTone}`}>
-              {title}
-            </h2>
-            {secondaryText ? (
-              <span className="uc-type-n5-strong shrink-0 text-right text-[14px] leading-none text-[var(--uc-text)]">
-                {secondaryText}
-              </span>
-            ) : null}
-            {typeof count === "number" ? (
-              <span className="uc-type-n5-strong shrink-0 text-right text-[14px] leading-none text-[var(--uc-text)]">
-                {count}
-              </span>
-            ) : null}
-          </div>
-          {line}
-        </div>
-      </div>
-    );
+  const titleStyle: CSSProperties = {
+    ...typography,
+    flex: '1 1 0%',
+    minWidth: state.light || state.large ? 0 : 32,
+    color: `var(${state.titleToken})`,
+    whiteSpace: 'pre-line',
+    overflowWrap: 'anywhere',
   }
-
-  const { titleTone: textTone, rightText, horizontalPadding, containerHeight } = state;
-
-  return (
-    <div
-      className={className}
-      data-ds-label="SectionHeadingDivider"
-      data-divider-variant={variant}
+  const otherStyle: CSSProperties = {
+    ...typography,
+    fontSize: 14,
+    lineHeight: '15px',
+    flexShrink: 0,
+    color: `var(${state.secondaryToken})`,
+    whiteSpace: 'pre-wrap',
+    overflowWrap: 'anywhere',
+    maxWidth: '100%',
+    textAlign: state.secondaryAlign,
+    minWidth: state.secondaryMinWidth,
+  }
+  const actionStyle: CSSProperties = {
+    ...typography,
+    border: 0,
+    background: 'none',
+    padding: '8px 0',
+    margin: '-8px 0',
+    textAlign: 'left',
+    cursor: disabled || !onAction ? 'default' : 'pointer',
+    color: `var(${state.titleToken})`,
+  }
+  const Heading = state.titleRole === 'header' ? 'h2' : 'p'
+  const titleContent =
+    state.large && variant === 'large-two-line-title' && secondaryText ? `${title}\n${secondaryText}` : title
+  const primary = state.checkbox ? (
+    <label
+      className="uc-divider-selection"
+      style={{ flex: '1 1 0%', minWidth: 32, display: 'flex', alignItems: 'center', gap: 4 }}
     >
-      <div className={`flex w-[375px] flex-col gap-[4px] bg-[var(--uc-surface)] py-[8px] ${horizontalPadding} ${containerHeight}`}>
-        <div className="flex min-h-[14px] items-center justify-between gap-[8px]">
-          <div className="flex min-w-0 items-center gap-[4px]">
-            {state.checkbox ? (
-              <span className="grid size-[32px] shrink-0 place-items-center" aria-hidden="true">
-                <span className="size-[22px] rounded-[4px] border border-[var(--uc-text)] bg-[var(--uc-surface)]" />
-              </span>
-            ) : null}
-            <h2 className={`uc-type-n5-strong min-w-0 whitespace-pre-line text-[14px] leading-none ${textTone}`}>
-              {title}
-            </h2>
-          </div>
-          {rightText ? (
-            <span className="uc-type-n5-strong shrink-0 text-right text-[14px] leading-none text-[var(--uc-text)]">
-              {rightText}
-            </span>
-          ) : null}
+      <span style={{ width: 32, height: 32, flexShrink: 0, position: 'relative' }}>
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled || !onCheckedChange}
+          onChange={(event) => onCheckedChange?.(event.target.checked)}
+          style={{
+            appearance: 'none',
+            position: 'absolute',
+            left: 5,
+            top: 5,
+            width: 22,
+            height: 22,
+            margin: 0,
+            border: '1px solid var(--uc-text)',
+            borderRadius: 4,
+            backgroundColor: checked ? 'var(--uc-text)' : 'var(--uc-surface)',
+          }}
+        />
+        {checked ? (
+          <span aria-hidden="true" style={{ position: 'absolute', left: 9, top: 9, pointerEvents: 'none' }}>
+            <AppIcon name="check" size={14} strokeWidth={2} color="var(--uc-surface)" />
+          </span>
+        ) : null}
+      </span>
+      <span data-divider-title style={titleStyle}>
+        {title}
+      </span>
+    </label>
+  ) : state.primaryAction ? (
+    <button
+      type="button"
+      className="uc-divider-action"
+      disabled={disabled || !onAction}
+      onClick={onAction}
+      style={{ ...actionStyle, ...titleStyle, padding: '8px 0', margin: '-8px 0' }}
+    >
+      <span data-divider-title style={{ ...typography, display: 'block', color: 'inherit', overflowWrap: 'anywhere' }}>
+        {title}
+      </span>
+    </button>
+  ) : (
+    <Heading
+      data-divider-title
+      style={
+        state.light ? { ...titleStyle, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } : titleStyle
+      }
+    >
+      {titleContent}
+    </Heading>
+  )
+  const secondary =
+    state.secondaryAction && state.rightText ? (
+      <button
+        type="button"
+        className="uc-divider-action"
+        disabled={disabled || !onAction}
+        onClick={onAction}
+        style={{ ...actionStyle, ...otherStyle, padding: '8px 0', margin: '-8px 0' }}
+      >
+        {state.rightText}
+      </button>
+    ) : state.light ? (
+      <>
+        {secondaryText ? <span style={otherStyle}>{secondaryText}</span> : null}
+        {typeof count === 'number' ? <span style={otherStyle}>{count}</span> : null}
+      </>
+    ) : !state.large && state.rightText ? (
+      <span style={otherStyle}>{state.rightText}</span>
+    ) : null
+  const rule = state.hasLine ? (
+    <div
+      data-divider-rule
+      aria-hidden="true"
+      style={
+        state.light
+          ? {
+              height: 1,
+              position: 'absolute',
+              bottom: 0,
+              left: state.ruleLeft,
+              right: state.ruleRight,
+              pointerEvents: 'none',
+            }
+          : { height: 1, flexShrink: 0, width: '100%', pointerEvents: 'none' }
+      }
+    >
+      <img
+        alt=""
+        draggable={false}
+        src={`data:image/svg+xml,${encodeURIComponent(state.light || state.paddingHorizontal === 16 ? DIVIDER_RULE_343 : DIVIDER_RULE_327)}`}
+        style={{ display: 'block', width: '100%', height: 1, maxWidth: 'none' }}
+      />
+    </div>
+  ) : null
+  return (
+    <div className={className} data-ds-label="SectionHeadingDivider" data-divider-variant={variant}>
+      <div
+        data-divider-geometry
+        style={{
+          width: state.width,
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          position: 'relative',
+          backgroundColor: state.backgroundToken ? `var(${state.backgroundToken})` : undefined,
+          paddingLeft: state.light ? state.outerPaddingLeft : state.paddingHorizontal,
+          paddingRight: state.light ? state.outerPaddingRight : state.paddingHorizontal,
+          paddingTop: state.paddingVertical,
+          paddingBottom: state.paddingVertical,
+          minHeight: state.minHeight,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: state.large || state.light ? 0 : state.gap,
+        }}
+      >
+        <div
+          data-divider-row
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: state.light || state.large ? 'nowrap' : 'wrap',
+            columnGap: state.rowGap,
+            rowGap: state.gap,
+            minHeight: state.light ? state.height : state.large ? undefined : state.rowMinHeight,
+            paddingLeft: state.light ? state.paddingHorizontal : 0,
+            paddingRight: state.light ? state.paddingHorizontal : 0,
+          }}
+        >
+          {primary}
+          {secondary}
         </div>
-        {hasLine ? line : null}
+        {rule}
       </div>
     </div>
-  );
+  )
 }

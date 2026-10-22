@@ -1,18 +1,25 @@
-import svgPaths from "@/imports/svg-i4inyt2jkm";
+import svgPaths from '@/imports/svg-i4inyt2jkm'
 
 export default function UniCreditLogo({
-  className = "",
-  textColor = "var(--uc-static-white)",
+  ariaLabel,
+  className = '',
+  textColor = 'var(--uc-static-white)',
 }: {
-  className?: string;
-  textColor?: string;
+  /** Omit when the surrounding content already identifies the bank. */
+  ariaLabel?: string
+  className?: string
+  textColor?: string
 }) {
   return (
     <div className={className} style={{ position: 'relative' }}>
-      <svg 
-        width="174" 
-        height="24" 
-        viewBox="0 0 174 24" 
+      <svg
+        aria-hidden={ariaLabel ? undefined : true}
+        aria-label={ariaLabel}
+        role={ariaLabel ? 'img' : undefined}
+        focusable="false"
+        width="174"
+        height="24"
+        viewBox="0 0 174 24"
         fill="none"
         className="block h-full w-auto"
       >
@@ -22,7 +29,7 @@ export default function UniCreditLogo({
           <path d={svgPaths.p17bca3c0} fill="var(--uc-brand)" />
           <path clipRule="evenodd" d={svgPaths.p2a77a780} fill="var(--uc-static-white)" fillRule="evenodd" />
         </g>
-        
+
         {/* Text - "UniCredit Bank" */}
         <g transform="translate(27.5, 2.8)">
           <path d={svgPaths.p2bbcf1c0} fill={textColor} />
@@ -41,5 +48,5 @@ export default function UniCreditLogo({
         </g>
       </svg>
     </div>
-  );
+  )
 }

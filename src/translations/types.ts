@@ -217,6 +217,14 @@ export interface TranslationKeys {
       outbox: string;
       sectionTitle: string;
       newBadge: string;
+      messageActions: string;
+      deleteAction: string;
+      deleteMessage: string;
+      deleteDialog: {
+        title: string;
+        body: string;
+        confirm: string;
+      };
       rows: Record<string, { title: string; description: string }>;
     };
     documents: {

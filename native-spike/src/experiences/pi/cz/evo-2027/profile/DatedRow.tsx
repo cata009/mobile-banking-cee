@@ -7,6 +7,7 @@ import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 export function DatedRow({
   item,
   actions,
+  actionsExpanded,
   label,
   uppercase = false,
 }: {
@@ -18,6 +19,7 @@ export function DatedRow({
     badge?: string;
   };
   actions?: () => void;
+  actionsExpanded?: boolean;
   label: string;
   uppercase?: boolean;
 }) {
@@ -52,6 +54,11 @@ export function DatedRow({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        accessibilityState={
+          actionsExpanded === undefined
+            ? undefined
+            : { expanded: actionsExpanded }
+        }
         onPress={actions ?? (() => {})}
         style={styles.more}
       >

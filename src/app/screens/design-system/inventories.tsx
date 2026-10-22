@@ -3,45 +3,53 @@
  *
  * Extracted verbatim from DesignSystemPage.tsx.
  */
-import { useRef, useState } from "react";
-import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from "@/app/components/icons";
-import PfmCategoryIcon from "@/app/components/pfm/PfmCategoryIcon";
-import { PFM_CATEGORIES, PFM_ICON_SOURCE, type PfmCategoryDefinition } from "@/data/pfmCategories";
-import { TYPOGRAPHY_TOKENS, type TypographyToken } from "@/app/registry/typographyRegistry";
-import { APP_COLOR_AUDIT, COLOR_PALETTES, DESIGN_SYSTEM_COLORS, type ColorPaletteId, type DesignSystemColor } from "@/app/registry/colorRegistry";
-import { InventorySearchField, InventoryStatGrid, Section } from "./specimenShell";
-import { inventoryTabCounts, inventoryTabLabels, type InventoryTab } from "./inventoryNav";
+import { useRef, useState } from 'react'
+import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from '@/app/components/icons'
+import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
+import { PFM_CATEGORIES, PFM_ICON_SOURCE, type PfmCategoryDefinition } from '@/data/pfmCategories'
+import { TYPOGRAPHY_TOKENS, type TypographyToken } from '@/app/registry/typographyRegistry'
+import {
+  APP_COLOR_AUDIT,
+  COLOR_PALETTES,
+  DESIGN_SYSTEM_COLORS,
+  type ColorPaletteId,
+  type DesignSystemColor,
+} from '@/app/registry/colorRegistry'
+import { InventorySearchField, InventoryStatGrid, Section } from './specimenShell'
+import { inventoryTabCounts, inventoryTabLabels, inventoryTabs, type InventoryTab } from './inventoryNav'
 
-export function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange, placement = "inline" }: {
-  activeTab: InventoryTab;
-  activeSection: string;
-  sectionLinks: readonly (readonly [string, string])[];
-  onChange: (tab: InventoryTab) => void;
-  placement?: "inline" | "sidebar";
+export function InventoryTabs({
+  activeTab,
+  activeSection,
+  sectionLinks,
+  onChange,
+  placement = 'inline',
+}: {
+  activeTab: InventoryTab
+  activeSection: string
+  sectionLinks: readonly (readonly [string, string])[]
+  onChange: (tab: InventoryTab) => void
+  placement?: 'inline' | 'sidebar'
 }) {
-  const isSidebar = placement === "sidebar";
+  const isSidebar = placement === 'sidebar'
 
   return (
     <div
       className={
         isSidebar
-          ? "grid gap-2"
-          : "mt-6 inline-flex rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1"
+          ? 'grid gap-2'
+          : 'mt-6 inline-flex rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-app-bg)] p-1'
       }
-      role={isSidebar ? "navigation" : "tablist"}
+      role={isSidebar ? 'navigation' : 'tablist'}
       aria-label="Design system inventory tabs"
     >
-      {(["components", "templates", "icons", "colors", "typography"] as const).map((tab) => {
-        const isActive = activeTab === tab;
+      {inventoryTabs.map((tab) => {
+        const isActive = activeTab === tab
         return (
           <div
             key={tab}
             className={`overflow-hidden rounded-[8px] transition-colors ${
-              isSidebar
-                ? isActive
-                  ? "bg-[var(--uc-surface-muted)]"
-                  : "bg-transparent"
-                : ""
+              isSidebar ? (isActive ? 'bg-[var(--uc-surface-muted)]' : 'bg-transparent') : ''
             }`}
           >
             <button
@@ -52,15 +60,21 @@ export function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange
               className={
                 isSidebar
                   ? `flex w-full items-center justify-between gap-3 rounded-[8px] px-3 py-2.5 text-left transition-colors ${
-                      isActive ? "text-[var(--uc-text)]" : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]"
+                      isActive
+                        ? 'text-[var(--uc-text)]'
+                        : 'text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-text)]'
                     }`
                   : `rounded-[6px] px-3 py-2 font-['UniCredit:Bold',sans-serif] text-[14px] capitalize transition-colors ${
-                      isActive ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm" : "text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]"
+                      isActive
+                        ? 'bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm'
+                        : 'text-[var(--uc-text-muted)] hover:text-[var(--uc-text)]'
                     }`
               }
             >
               <span className="min-w-0">
-                <span className={`block ${isSidebar ? "uc-type-n4-strong" : "font-['UniCredit:Bold',sans-serif] text-[14px]"}`}>
+                <span
+                  className={`block ${isSidebar ? 'uc-type-n4-strong' : "font-['UniCredit:Bold',sans-serif] text-[14px]"}`}
+                >
                   {inventoryTabLabels[tab]}
                 </span>
               </span>
@@ -68,8 +82,8 @@ export function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold leading-none ${
                     isActive
-                      ? "bg-[var(--uc-text)] text-[var(--uc-surface)]"
-                      : "bg-[var(--uc-surface-muted)] text-[var(--uc-text-subtle)]"
+                      ? 'bg-[var(--uc-text)] text-[var(--uc-surface)]'
+                      : 'bg-[var(--uc-surface-muted)] text-[var(--uc-text-subtle)]'
                   }`}
                 >
                   {inventoryTabCounts[tab]}
@@ -81,29 +95,29 @@ export function InventoryTabs({ activeTab, activeSection, sectionLinks, onChange
               <div className="px-2 pb-2">
                 <div className="grid gap-1">
                   {sectionLinks.map(([id, label]) => {
-                    const isSectionActive = activeSection === id;
+                    const isSectionActive = activeSection === id
                     return (
                       <a
                         key={id}
                         href={`#${id}`}
                         className={`flex items-center rounded-[6px] px-3 py-2 transition-colors ${
                           isSectionActive
-                            ? "bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm"
-                            : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface)] hover:text-[var(--uc-text)]"
+                            ? 'bg-[var(--uc-surface)] text-[var(--uc-text)] shadow-sm'
+                            : 'text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface)] hover:text-[var(--uc-text)]'
                         }`}
                       >
                         <span className="uc-type-n5">{label}</span>
                       </a>
-                    );
+                    )
                   })}
                 </div>
               </div>
             ) : null}
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 export function CopyHexButton({
@@ -112,12 +126,12 @@ export function CopyHexButton({
   onCopy,
   label,
 }: {
-  value: string;
-  copiedValue: string | null;
-  onCopy: (value: string) => void;
-  label: string;
+  value: string
+  copiedValue: string | null
+  onCopy: (value: string) => void
+  label: string
 }) {
-  const copied = copiedValue === value;
+  const copied = copiedValue === value
 
   return (
     <button
@@ -125,14 +139,14 @@ export function CopyHexButton({
       onClick={() => onCopy(value)}
       className={`rounded-[4px] border px-2 py-1 font-mono text-[12px] transition-colors ${
         copied
-          ? "border-[var(--uc-action)] bg-[var(--uc-action-soft)] text-[var(--uc-action-hover)]"
-          : "border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] hover:border-[var(--uc-action)]"
+          ? 'border-[var(--uc-action)] bg-[var(--uc-action-soft)] text-[var(--uc-action-hover)]'
+          : 'border-[var(--uc-border)] bg-[var(--uc-surface)] text-[var(--uc-text)] hover:border-[var(--uc-action)]'
       }`}
       title={`Copy ${label} ${value}`}
     >
-      {copied ? "Copied" : value}
+      {copied ? 'Copied' : value}
     </button>
-  );
+  )
 }
 
 export function ColorSwatch({ color, label }: { color: string; label: string }) {
@@ -142,7 +156,7 @@ export function ColorSwatch({ color, label }: { color: string; label: string }) 
       style={{ backgroundColor: color }}
       aria-label={label}
     />
-  );
+  )
 }
 
 export function TypographyTokenCard({ token }: { token: TypographyToken }) {
@@ -172,7 +186,7 @@ export function TypographyTokenCard({ token }: { token: TypographyToken }) {
         </p>
       </div>
     </article>
-  );
+  )
 }
 
 export function ColorCard({
@@ -180,18 +194,25 @@ export function ColorCard({
   copiedValue,
   onCopy,
 }: {
-  color: DesignSystemColor;
-  copiedValue: string | null;
-  onCopy: (value: string) => void;
+  color: DesignSystemColor
+  copiedValue: string | null
+  onCopy: (value: string) => void
 }) {
   return (
-    <article className="flex flex-col rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-2" title={color.usage}>
+    <article
+      className="flex flex-col rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-2"
+      title={color.usage}
+    >
       <div className="grid grid-cols-2 gap-1">
         <ColorSwatch color={color.lightHex} label={`${color.name} light ${color.lightHex}`} />
         <ColorSwatch color={color.darkHex} label={`${color.name} dark ${color.darkHex}`} />
       </div>
-      <h3 className="mt-2 truncate font-['UniCredit:Bold',sans-serif] text-[12px] text-[var(--uc-text)]">{color.name}</h3>
-      <code className="mt-0.5 block truncate rounded bg-[var(--uc-app-bg)] px-1.5 py-0.5 text-[10px] text-[var(--uc-text-muted)]">{color.cssVariable}</code>
+      <h3 className="mt-2 truncate font-['UniCredit:Bold',sans-serif] text-[12px] text-[var(--uc-text)]">
+        {color.name}
+      </h3>
+      <code className="mt-0.5 block truncate rounded bg-[var(--uc-app-bg)] px-1.5 py-0.5 text-[10px] text-[var(--uc-text-muted)]">
+        {color.cssVariable}
+      </code>
       <div className="mt-1.5 grid gap-1">
         <div className="flex items-center justify-between gap-1">
           <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">L</span>
@@ -203,7 +224,7 @@ export function ColorCard({
         </div>
       </div>
     </article>
-  );
+  )
 }
 
 export function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number] }) {
@@ -214,50 +235,53 @@ export function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number]
           className="size-[40px] shrink-0 rounded-[6px] border border-[var(--uc-border)]"
           style={{
             background:
-              item.sourceColor.startsWith("#") && !item.sourceColor.includes("/")
+              item.sourceColor.startsWith('#') && !item.sourceColor.includes('/')
                 ? item.sourceColor
-                : "linear-gradient(135deg, var(--uc-brand), var(--uc-orange-bright), var(--uc-yellow-gold))",
+                : 'linear-gradient(135deg, var(--uc-brand), var(--uc-orange-bright), var(--uc-yellow-gold))',
           }}
         />
         <div className="min-w-0">
           <code className="block break-all font-mono text-[12px] text-[var(--uc-text)]">{item.sourceColor}</code>
-          <p className="mt-1 break-all font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">{item.targetToken}</p>
+          <p className="mt-1 break-all font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-text)]">
+            {item.targetToken}
+          </p>
         </div>
       </div>
       <p className="mt-3 text-[12px] leading-5 text-[var(--uc-text-muted)]">{item.usage}</p>
       {item.note && <p className="mt-1 text-[12px] leading-5 text-[var(--uc-text-subtle)]">{item.note}</p>}
     </article>
-  );
+  )
 }
 
 export function ColorInventory() {
-  const [selectedPaletteMeta, setSelectedPaletteMeta] = useState<(typeof COLOR_PALETTES)[number]>(COLOR_PALETTES[0]);
-  const [copiedValue, setCopiedValue] = useState<string | null>(null);
-  const [colorSearchQuery, setColorSearchQuery] = useState("");
-  const selectedPalette: ColorPaletteId = selectedPaletteMeta.id;
-  const normalizedColorQuery = colorSearchQuery.trim().toLowerCase();
+  const [selectedPaletteMeta, setSelectedPaletteMeta] = useState<(typeof COLOR_PALETTES)[number]>(COLOR_PALETTES[0])
+  const [copiedValue, setCopiedValue] = useState<string | null>(null)
+  const [colorSearchQuery, setColorSearchQuery] = useState('')
+  const selectedPalette: ColorPaletteId = selectedPaletteMeta.id
+  const normalizedColorQuery = colorSearchQuery.trim().toLowerCase()
   const matchesColorQuery = (values: string[]) =>
-    normalizedColorQuery.length === 0 || values.join(" ").toLowerCase().includes(normalizedColorQuery);
-  const selectedColors = DESIGN_SYSTEM_COLORS.filter((color) =>
-    color.paletteId === selectedPalette &&
-    matchesColorQuery([
-      color.id,
-      color.name,
-      color.lightHex,
-      color.darkHex,
-      color.paletteId,
-      color.cssVariable,
-      color.usage,
-    ])
-  );
+    normalizedColorQuery.length === 0 || values.join(' ').toLowerCase().includes(normalizedColorQuery)
+  const selectedColors = DESIGN_SYSTEM_COLORS.filter(
+    (color) =>
+      color.paletteId === selectedPalette &&
+      matchesColorQuery([
+        color.id,
+        color.name,
+        color.lightHex,
+        color.darkHex,
+        color.paletteId,
+        color.cssVariable,
+        color.usage,
+      ]),
+  )
   const visibleAuditRows = APP_COLOR_AUDIT.filter((item) =>
-    matchesColorQuery([item.sourceColor, item.targetToken, item.usage, item.note ?? ""])
-  );
+    matchesColorQuery([item.sourceColor, item.targetToken, item.usage, item.note ?? '']),
+  )
   const handleCopy = (value: string) => {
-    setCopiedValue(value);
-    void navigator.clipboard?.writeText(value).catch(() => undefined);
-    window.setTimeout(() => setCopiedValue((current) => (current === value ? null : current)), 1200);
-  };
+    setCopiedValue(value)
+    void navigator.clipboard?.writeText(value).catch(() => undefined)
+    window.setTimeout(() => setCopiedValue((current) => (current === value ? null : current)), 1200)
+  }
 
   return (
     <>
@@ -267,17 +291,17 @@ export function ColorInventory() {
         description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
       >
         <div className="sticky top-0 z-20 -mx-6 mb-6 bg-[var(--uc-surface-muted)] px-6 py-3 xl:-mx-8 xl:px-8">
-        <InventorySearchField
-          value={colorSearchQuery}
-          onChange={setColorSearchQuery}
-          placeholder="Search colors"
-          label="Search colors"
-        />
+          <InventorySearchField
+            value={colorSearchQuery}
+            onChange={setColorSearchQuery}
+            placeholder="Search colors"
+            label="Search colors"
+          />
 
           <div className="flex flex-wrap gap-2 pt-3" role="tablist" aria-label="Color palettes">
             {COLOR_PALETTES.map((palette) => {
-              const count = DESIGN_SYSTEM_COLORS.filter((color) => color.paletteId === palette.id).length;
-              const isActive = selectedPalette === palette.id;
+              const count = DESIGN_SYSTEM_COLORS.filter((color) => color.paletteId === palette.id).length
+              const isActive = selectedPalette === palette.id
               return (
                 <button
                   key={palette.id}
@@ -287,14 +311,14 @@ export function ColorInventory() {
                   onClick={() => setSelectedPaletteMeta(palette)}
                   className={`rounded-full border px-4 py-2 text-left text-[13px] transition-colors ${
                     isActive
-                      ? "border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-                      : "border-[var(--uc-border)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]"
+                      ? 'border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]'
+                      : 'border-[var(--uc-border)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]'
                   }`}
                 >
                   <span className="font-['UniCredit:Bold',sans-serif]">{palette.label}</span>
                   <span className="ml-2 opacity-75">{count}</span>
                 </button>
-              );
+              )
             })}
           </div>
         </div>
@@ -330,14 +354,14 @@ export function ColorInventory() {
         </div>
       </Section>
     </>
-  );
+  )
 }
 
 export function TypographyInventory() {
-  const [typographySearchQuery, setTypographySearchQuery] = useState("");
-  const normalizedTypographyQuery = typographySearchQuery.trim().toLowerCase();
+  const [typographySearchQuery, setTypographySearchQuery] = useState('')
+  const normalizedTypographyQuery = typographySearchQuery.trim().toLowerCase()
   const visibleTypographyTokens = TYPOGRAPHY_TOKENS.filter((token) => {
-    if (!normalizedTypographyQuery) return true;
+    if (!normalizedTypographyQuery) return true
     return [
       token.id,
       token.label,
@@ -347,8 +371,11 @@ export function TypographyInventory() {
       String(token.fontSize),
       token.usage,
       token.sample,
-    ].join(" ").toLowerCase().includes(normalizedTypographyQuery);
-  });
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(normalizedTypographyQuery)
+  })
 
   return (
     <Section
@@ -358,8 +385,8 @@ export function TypographyInventory() {
     >
       <InventoryStatGrid
         items={[
-          ["Named tokens", TYPOGRAPHY_TOKENS.length],
-          ["Visible", visibleTypographyTokens.length],
+          ['Named tokens', TYPOGRAPHY_TOKENS.length],
+          ['Visible', visibleTypographyTokens.length],
         ]}
       />
 
@@ -382,107 +409,107 @@ export function TypographyInventory() {
         </div>
       )}
     </Section>
-  );
+  )
 }
 
 export function getIconPreviewSize(icon: IconInventoryItem) {
-  const width = icon.previewWidth > 0 ? icon.previewWidth : 20;
-  const height = icon.previewHeight > 0 ? icon.previewHeight : 20;
-  const maxSide = 32;
+  const width = icon.previewWidth > 0 ? icon.previewWidth : 20
+  const height = icon.previewHeight > 0 ? icon.previewHeight : 20
+  const maxSide = 32
 
   if (width >= height) {
-    const displayWidth = Math.min(width, maxSide);
+    const displayWidth = Math.min(width, maxSide)
     return {
       width: displayWidth,
       height: Math.max(1, Math.round((displayWidth / width) * height)),
-    };
+    }
   }
 
-  const displayHeight = Math.min(height, maxSide);
+  const displayHeight = Math.min(height, maxSide)
   return {
     width: Math.max(1, Math.round((displayHeight / height) * width)),
     height: displayHeight,
-  };
+  }
 }
 
 export function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
-  const previewSize = getIconPreviewSize(icon);
-  const cardRef = useRef<HTMLElement | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [downloadOpen, setDownloadOpen] = useState(false);
+  const previewSize = getIconPreviewSize(icon)
+  const cardRef = useRef<HTMLElement | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [downloadOpen, setDownloadOpen] = useState(false)
 
   const getSerializedSvg = () => {
-    const svg = cardRef.current?.querySelector("svg");
-    if (!svg) return null;
+    const svg = cardRef.current?.querySelector('svg')
+    if (!svg) return null
 
-    const clone = svg.cloneNode(true) as SVGSVGElement;
-    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    clone.setAttribute("color", "#262626");
-    clone.removeAttribute("class");
+    const clone = svg.cloneNode(true) as SVGSVGElement
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    clone.setAttribute('color', '#262626')
+    clone.removeAttribute('class')
 
-    return new XMLSerializer().serializeToString(clone);
-  };
+    return new XMLSerializer().serializeToString(clone)
+  }
 
   const handleCopySvg = async () => {
-    const serializedSvg = getSerializedSvg();
-    if (!serializedSvg) return;
+    const serializedSvg = getSerializedSvg()
+    if (!serializedSvg) return
 
-    await navigator.clipboard.writeText(serializedSvg);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
-  };
+    await navigator.clipboard.writeText(serializedSvg)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1200)
+  }
 
   const downloadSvg = () => {
-    const serializedSvg = getSerializedSvg();
-    if (!serializedSvg) return;
+    const serializedSvg = getSerializedSvg()
+    if (!serializedSvg) return
 
-    const blob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${icon.name}.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setDownloadOpen(false);
-  };
+    const blob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${icon.name}.svg`
+    link.click()
+    URL.revokeObjectURL(url)
+    setDownloadOpen(false)
+  }
 
   const downloadPng = () => {
-    const serializedSvg = getSerializedSvg();
-    if (!serializedSvg) return;
+    const serializedSvg = getSerializedSvg()
+    if (!serializedSvg) return
 
-    const image = new Image();
-    const svgBlob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
+    const image = new Image()
+    const svgBlob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(svgBlob)
 
     image.onload = () => {
-      const scale = 4;
-      const canvas = document.createElement("canvas");
-      canvas.width = previewSize.width * scale;
-      canvas.height = previewSize.height * scale;
-      const context = canvas.getContext("2d");
+      const scale = 4
+      const canvas = document.createElement('canvas')
+      canvas.width = previewSize.width * scale
+      canvas.height = previewSize.height * scale
+      const context = canvas.getContext('2d')
       if (!context) {
-        URL.revokeObjectURL(url);
-        return;
+        URL.revokeObjectURL(url)
+        return
       }
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
 
       canvas.toBlob((blob) => {
-        if (!blob) return;
-        const pngUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = pngUrl;
-        link.download = `${icon.name}.png`;
-        link.click();
-        URL.revokeObjectURL(pngUrl);
-      }, "image/png");
-    };
+        if (!blob) return
+        const pngUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = pngUrl
+        link.download = `${icon.name}.png`
+        link.click()
+        URL.revokeObjectURL(pngUrl)
+      }, 'image/png')
+    }
 
-    image.src = url;
-    setDownloadOpen(false);
-  };
+    image.src = url
+    setDownloadOpen(false)
+  }
 
   return (
     <article ref={cardRef} className="group rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-3">
@@ -492,12 +519,17 @@ export function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex min-h-[22px] items-center gap-2">
-            <h3 className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]" title={icon.label}>
+            <h3
+              className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]"
+              title={icon.label}
+            >
               {icon.label}
             </h3>
             <div
               className={`ml-auto flex shrink-0 items-center gap-0.5 transition-opacity ${
-                copied || downloadOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                copied || downloadOpen
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
               }`}
             >
               {copied ? <span className="text-[10px] text-[var(--uc-text-muted)]">Copied</span> : null}
@@ -506,7 +538,7 @@ export function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
                 onClick={handleCopySvg}
                 className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
                 aria-label={`Copy ${icon.label} SVG`}
-                title={copied ? "Copied" : "Copy SVG"}
+                title={copied ? 'Copied' : 'Copy SVG'}
               >
                 <AppIcon name="copy-documents" color="currentColor" width={15} height={15} />
               </button>
@@ -523,10 +555,18 @@ export function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
                 </button>
                 {downloadOpen ? (
                   <div className="absolute right-0 top-[24px] z-20 grid min-w-[86px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                    <button type="button" onClick={downloadPng} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                    <button
+                      type="button"
+                      onClick={downloadPng}
+                      className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]"
+                    >
                       PNG
                     </button>
-                    <button type="button" onClick={downloadSvg} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                    <button
+                      type="button"
+                      onClick={downloadSvg}
+                      className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]"
+                    >
                       SVG
                     </button>
                   </div>
@@ -537,107 +577,107 @@ export function IconInventoryCard({ icon }: { icon: IconInventoryItem }) {
         </div>
       </div>
     </article>
-  );
+  )
 }
 
 export function getInventoryFileName(value: string) {
   return value
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 export function escapeSvgText(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefinition }) {
-  const cardRef = useRef<HTMLElement | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [downloadOpen, setDownloadOpen] = useState(false);
-  const fileName = `pfm-${getInventoryFileName(category.name)}`;
+  const cardRef = useRef<HTMLElement | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [downloadOpen, setDownloadOpen] = useState(false)
+  const fileName = `pfm-${getInventoryFileName(category.name)}`
 
   const getCategoryColor = () =>
-    getComputedStyle(document.documentElement).getPropertyValue(category.colorVar).trim() || "#262626";
+    getComputedStyle(document.documentElement).getPropertyValue(category.colorVar).trim() || '#262626'
 
   const getSerializedSvg = () => {
-    const categoryColor = getCategoryColor();
-    const svg = cardRef.current?.querySelector("svg");
+    const categoryColor = getCategoryColor()
+    const svg = cardRef.current?.querySelector('svg')
 
     if (svg) {
-      const clone = svg.cloneNode(true) as SVGSVGElement;
-      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-      clone.removeAttribute("class");
-      clone.querySelectorAll("path").forEach((path) => {
-        path.setAttribute("fill", categoryColor);
-      });
+      const clone = svg.cloneNode(true) as SVGSVGElement
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+      clone.removeAttribute('class')
+      clone.querySelectorAll('path').forEach((path) => {
+        path.setAttribute('fill', categoryColor)
+      })
 
-      return new XMLSerializer().serializeToString(clone);
+      return new XMLSerializer().serializeToString(clone)
     }
 
     return [
       '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">',
       `<circle cx="10" cy="10" r="10" fill="${categoryColor}"/>`,
       `<text x="10" y="14" text-anchor="middle" font-family="UniCredit, Arial, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">${escapeSvgText(category.fallbackInitial)}</text>`,
-      "</svg>",
-    ].join("");
-  };
+      '</svg>',
+    ].join('')
+  }
 
   const handleCopySvg = async () => {
-    const serializedSvg = getSerializedSvg();
-    await navigator.clipboard.writeText(serializedSvg);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
-  };
+    const serializedSvg = getSerializedSvg()
+    await navigator.clipboard.writeText(serializedSvg)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1200)
+  }
 
   const downloadSvg = () => {
-    const serializedSvg = getSerializedSvg();
-    const blob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${fileName}.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
-    setDownloadOpen(false);
-  };
+    const serializedSvg = getSerializedSvg()
+    const blob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${fileName}.svg`
+    link.click()
+    URL.revokeObjectURL(url)
+    setDownloadOpen(false)
+  }
 
   const downloadPng = () => {
-    const serializedSvg = getSerializedSvg();
-    const image = new Image();
-    const svgBlob = new Blob([serializedSvg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
+    const serializedSvg = getSerializedSvg()
+    const image = new Image()
+    const svgBlob = new Blob([serializedSvg], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(svgBlob)
 
     image.onload = () => {
-      const canvas = document.createElement("canvas");
-      const scale = 4;
-      canvas.width = 20 * scale;
-      canvas.height = 20 * scale;
-      const context = canvas.getContext("2d");
+      const canvas = document.createElement('canvas')
+      const scale = 4
+      canvas.width = 20 * scale
+      canvas.height = 20 * scale
+      const context = canvas.getContext('2d')
       if (!context) {
-        URL.revokeObjectURL(url);
-        return;
+        URL.revokeObjectURL(url)
+        return
       }
 
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
 
       canvas.toBlob((blob) => {
-        if (!blob) return;
-        const pngUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = pngUrl;
-        link.download = `${fileName}.png`;
-        link.click();
-        URL.revokeObjectURL(pngUrl);
-      }, "image/png");
-    };
+        if (!blob) return
+        const pngUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = pngUrl
+        link.download = `${fileName}.png`
+        link.click()
+        URL.revokeObjectURL(pngUrl)
+      }, 'image/png')
+    }
 
-    image.src = url;
-    setDownloadOpen(false);
-  };
+    image.src = url
+    setDownloadOpen(false)
+  }
 
   return (
     <article
@@ -658,12 +698,17 @@ export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefini
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex min-h-[22px] items-center gap-2">
-            <h3 className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]" title={category.name}>
+            <h3
+              className="min-w-0 flex-1 truncate font-['UniCredit:Bold',sans-serif] text-[14px] leading-5 text-[var(--uc-text)]"
+              title={category.name}
+            >
               {category.name}
             </h3>
             <div
               className={`ml-auto flex shrink-0 items-center gap-0.5 transition-opacity ${
-                copied || downloadOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                copied || downloadOpen
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
               }`}
             >
               {copied ? <span className="text-[10px] text-[var(--uc-text-muted)]">Copied</span> : null}
@@ -672,7 +717,7 @@ export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefini
                 onClick={handleCopySvg}
                 className="grid size-[20px] place-items-center rounded-[4px] text-[var(--uc-text-muted)] hover:bg-[var(--uc-app-bg)] hover:text-[var(--uc-text)] focus-visible:bg-[var(--uc-app-bg)] focus-visible:text-[var(--uc-text)] focus-visible:outline-none"
                 aria-label={`Copy ${category.name} PFM SVG`}
-                title={copied ? "Copied" : "Copy SVG"}
+                title={copied ? 'Copied' : 'Copy SVG'}
               >
                 <AppIcon name="copy-documents" color="currentColor" width={15} height={15} />
               </button>
@@ -689,10 +734,18 @@ export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefini
                 </button>
                 {downloadOpen ? (
                   <div className="absolute right-0 top-[24px] z-20 grid min-w-[86px] rounded-[6px] border border-[var(--uc-border)] bg-[var(--uc-surface)] py-1 shadow-lg">
-                    <button type="button" onClick={downloadPng} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                    <button
+                      type="button"
+                      onClick={downloadPng}
+                      className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]"
+                    >
                       PNG
                     </button>
-                    <button type="button" onClick={downloadSvg} className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]">
+                    <button
+                      type="button"
+                      onClick={downloadSvg}
+                      className="px-3 py-1.5 text-left text-[12px] text-[var(--uc-text)] hover:bg-[var(--uc-app-bg)]"
+                    >
                       SVG
                     </button>
                   </div>
@@ -703,13 +756,13 @@ export function PfmIconInventoryCard({ category }: { category: PfmCategoryDefini
         </div>
       </div>
     </article>
-  );
+  )
 }
 
 export function matchesIconSearch(icon: IconInventoryItem, query: string) {
-  if (!query.trim()) return true;
+  if (!query.trim()) return true
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase()
   const searchableText = [
     icon.label,
     icon.name,
@@ -718,33 +771,31 @@ export function matchesIconSearch(icon: IconInventoryItem, query: string) {
     icon.category,
     icon.source,
     ...icon.usage,
-  ].join(" ").toLowerCase();
+  ]
+    .join(' ')
+    .toLowerCase()
 
-  return searchableText.includes(normalizedQuery);
+  return searchableText.includes(normalizedQuery)
 }
 
 export function matchesPfmIconSearch(category: PfmCategoryDefinition, query: string) {
-  if (!query.trim()) return true;
+  if (!query.trim()) return true
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const searchableText = [
-    category.name,
-    category.colorVar,
-    category.fallbackInitial,
-    "PFM category",
-    PFM_ICON_SOURCE,
-  ].join(" ").toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase()
+  const searchableText = [category.name, category.colorVar, category.fallbackInitial, 'PFM category', PFM_ICON_SOURCE]
+    .join(' ')
+    .toLowerCase()
 
-  return searchableText.includes(normalizedQuery);
+  return searchableText.includes(normalizedQuery)
 }
 
 export function IconInventory() {
-  const [iconSearchQuery, setIconSearchQuery] = useState("");
-  const visibleIcons = ICON_INVENTORY.filter((icon) => matchesIconSearch(icon, iconSearchQuery));
-  const visiblePfmIcons = PFM_CATEGORIES.filter((category) => matchesPfmIconSearch(category, iconSearchQuery));
-  const customCount = ICON_INVENTORY.filter((icon) => icon.source === "custom").length;
-  const lucideCount = ICON_INVENTORY.filter((icon) => icon.source === "lucide").length;
-  const hasVisibleResults = visibleIcons.length > 0 || visiblePfmIcons.length > 0;
+  const [iconSearchQuery, setIconSearchQuery] = useState('')
+  const visibleIcons = ICON_INVENTORY.filter((icon) => matchesIconSearch(icon, iconSearchQuery))
+  const visiblePfmIcons = PFM_CATEGORIES.filter((category) => matchesPfmIconSearch(category, iconSearchQuery))
+  const customCount = ICON_INVENTORY.filter((icon) => icon.source === 'custom').length
+  const lucideCount = ICON_INVENTORY.filter((icon) => icon.source === 'lucide').length
+  const hasVisibleResults = visibleIcons.length > 0 || visiblePfmIcons.length > 0
 
   return (
     <Section
@@ -754,11 +805,11 @@ export function IconInventory() {
     >
       <InventoryStatGrid
         items={[
-          ["App icons", ICON_INVENTORY.length],
-          ["PFM icons", PFM_CATEGORIES.length],
-          ["Visible", visibleIcons.length + visiblePfmIcons.length],
-          ["Custom SVG", customCount],
-          ["Lucide wrappers", lucideCount],
+          ['App icons', ICON_INVENTORY.length],
+          ['PFM icons', PFM_CATEGORIES.length],
+          ['Visible', visibleIcons.length + visiblePfmIcons.length],
+          ['Custom SVG', customCount],
+          ['Lucide wrappers', lucideCount],
         ]}
       />
 
@@ -778,15 +829,19 @@ export function IconInventory() {
       ) : null}
 
       {visiblePfmIcons.length > 0 ? (
-        <div id="pfm-icons" className={`${visibleIcons.length > 0 ? "mt-8" : ""} scroll-mt-28`}>
+        <div id="pfm-icons" className={`${visibleIcons.length > 0 ? 'mt-8' : ''} scroll-mt-28`}>
           <div className="mb-4 flex items-end gap-4 border-t border-[var(--uc-border-muted)] pt-6">
             <div>
-              <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] leading-7 text-[var(--uc-text)]">PFM icons</h3>
+              <h3 className="font-['UniCredit:Bold',sans-serif] text-[22px] leading-7 text-[var(--uc-text)]">
+                PFM icons
+              </h3>
               <p className="mt-1 text-[13px] text-[var(--uc-text-muted)]">
                 Category glyphs from {PFM_ICON_SOURCE}, including the reusable 32px filled category-circle option.
               </p>
             </div>
-            <span className="ml-auto font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)]">{visiblePfmIcons.length}</span>
+            <span className="ml-auto font-['UniCredit:Bold',sans-serif] text-[18px] text-[var(--uc-text)]">
+              {visiblePfmIcons.length}
+            </span>
           </div>
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] xl:grid-cols-4">
             {visiblePfmIcons.map((category) => (
@@ -802,5 +857,5 @@ export function IconInventory() {
         </div>
       ) : null}
     </Section>
-  );
+  )
 }

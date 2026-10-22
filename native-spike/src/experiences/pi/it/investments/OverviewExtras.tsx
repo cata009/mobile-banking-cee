@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { Text } from '../../../../universal/Typography';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import {
@@ -8,8 +15,22 @@ import {
 } from '@/experiences/pi/it/mobile-first/investmentsOverviewContent';
 import type { InvestmentDestination } from '@/experiences/pi/it/mobile-first/investmentsNavigation';
 import type { ItalyNativeScreenProps } from '../contracts';
-import { Button, Header, Link, s } from './Primitives';
+import { Button, Header, InvestmentHelp, Link, s } from './Primitives';
 import { StickyHeading } from './PageLayout';
+import { AssetGlyph } from '../../../../universal/AssetGlyph';
+import { useDemoViewport } from '../../../../universal/DemoViewport';
+import menuHelp from '@/assets/mobile-first/it/investments/common/help.svg';
+import menuClose from '@/assets/mobile-first/it/investments/common/close.svg';
+import menuSearch from '@/assets/mobile-first/it/investments/common/search.svg';
+import menuConsultant from '@/assets/mobile-first/it/investments/common/consultant.svg';
+import menuBookmark from '@/assets/mobile-first/it/investments/common/bookmark.svg';
+import menuOrders from '@/assets/mobile-first/it/investments/common/orders.svg';
+import menuOverview from '@/assets/mobile-first/it/investments/common/overview.svg';
+import menuMarket from '@/assets/mobile-first/it/investments/imgInvestmentsIndexK10.svg';
+import menuFunds from '@/assets/mobile-first/it/investments/imgInvestmentsFundsK10.svg';
+import menuAuction from '@/assets/mobile-first/it/investments/common/auction.svg';
+import menuMifid from '@/assets/mobile-first/it/investments/common/mifid.svg';
+import menuPackages from '@/assets/mobile-first/it/investments/common/packages.svg';
 import focus from '@/assets/mobile-first/it/investments/education/focus.png';
 import tutorial from '@/assets/mobile-first/it/investments/education/tutorial.png';
 import video1 from '@/assets/mobile-first/it/investments/education/video-1.png';
@@ -30,6 +51,8 @@ export function InvestmentSheet({
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const [helpOpen, setHelpOpen] = useState(false);
+  const viewport = useDemoViewport();
   return (
     <ModalPortal
       transparent
@@ -37,11 +60,19 @@ export function InvestmentSheet({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View style={styles.sheet}>
+      <View
+        style={[
+          styles.menuSheet,
+          Platform.OS === 'web'
+            ? { height: viewport.height - (props.screenTopInset ?? 0) }
+            : styles.sheet,
+        ]}
+      >
         <Header
           onBack={onClose}
-          onProfile={props.onProfile}
-          hidden={props.amountsHidden}
+          onClose={onClose}
+          onHelp={() => setHelpOpen(!helpOpen)}
+          helpOpen={helpOpen}
         />
         <ScrollView
           stickyHeaderIndices={[0]}
@@ -52,9 +83,10 @@ export function InvestmentSheet({
           <View>
             <StickyHeading>{title}</StickyHeading>
           </View>
+          {helpOpen && <InvestmentHelp />}
           {children}
         </ScrollView>
-        {footer && <View style={s.footer}>{footer}</View>}
+        {footer && <View style={styles.sheetFooter}>{footer}</View>}
       </View>
     </ModalPortal>
   );
@@ -64,67 +96,157 @@ export function InvestmentMenu({
   onClose,
   navigate,
   props,
+  onOverview,
 }: {
   visible: boolean;
   onClose: () => void;
   navigate: (destination: InvestmentDestination) => void;
   props: ItalyNativeScreenProps;
+  onOverview?: () => void;
 }) {
+  const [helpOpen, setHelpOpen] = useState(false);
+  const viewport = useDemoViewport();
   const open = (destination: InvestmentDestination) => {
     onClose();
     navigate(destination);
   };
   return (
-    <InvestmentSheet
-      title="Investi"
+    <ModalPortal
+      transparent
+      animationType="slide"
       visible={visible}
-      onClose={onClose}
-      props={props}
+      onRequestClose={onClose}
     >
-      <View style={s.card}>
-        {[
-          {
-            title: 'Ricerca',
-            destination: { area: 'securities', view: 'search' },
-          },
-          {
-            title: 'Consulenza',
-            destination: { area: 'services', view: 'advisory' },
-          },
-          {
-            title: 'Watchlist',
-            destination: { area: 'securities', view: 'watchlist' },
-          },
-          {
-            title: 'Ordini e movimenti',
-            destination: { area: 'securities', view: 'orders' },
-          },
-        ].map(item => (
-          <Link
-            key={item.title}
-            label={item.title}
-            onPress={() => open(item.destination as InvestmentDestination)}
-          />
-        ))}
+      <View
+        style={[
+          styles.menuSheet,
+          Platform.OS === 'web'
+            ? {
+                height: viewport.height - (props.screenTopInset ?? 0),
+              }
+            : styles.sheet,
+        ]}
+      >
+        <View style={styles.menuToolbar}>
+          <View style={styles.menuToolbarSpacer} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Aiuto"
+            accessibilityState={{ expanded: helpOpen }}
+            aria-expanded={helpOpen}
+            onPress={() => setHelpOpen(!helpOpen)}
+            style={styles.menuToolbarButton}
+          >
+            <AssetGlyph asset={menuHelp} size={40} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Chiudi"
+            onPress={onClose}
+            style={styles.menuToolbarButton}
+          >
+            <AssetGlyph asset={menuClose} size={40} />
+          </Pressable>
+        </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+          contentContainerStyle={styles.menuContent}
+        >
+          <View>
+            <StickyHeading>Investi</StickyHeading>
+          </View>
+          {helpOpen && (
+            <Text style={styles.menuHelp}>
+              Controlla i dati dell’operazione prima di confermare. Per
+              assistenza, contatta il tuo consulente UniCredit.
+            </Text>
+          )}
+          <View style={styles.menuQuick}>
+            {[
+              {
+                title: 'Ricerca',
+                icon: menuSearch,
+                destination: { area: 'securities', view: 'search' },
+              },
+              {
+                title: 'Consulenza',
+                icon: menuConsultant,
+                destination: { area: 'services', view: 'advisory' },
+              },
+              {
+                title: 'Watchlist',
+                icon: menuBookmark,
+                destination: { area: 'securities', view: 'watchlist' },
+              },
+              {
+                title: 'Ordini e movimenti',
+                icon: menuOrders,
+                destination: { area: 'securities', view: 'orders' },
+              },
+            ].map(item => (
+              <Pressable
+                key={item.title}
+                accessibilityRole="button"
+                accessibilityLabel={item.title}
+                style={styles.menuQuickAction}
+                onPress={() => open(item.destination as InvestmentDestination)}
+              >
+                <View style={styles.menuQuickCircle}>
+                  <AssetGlyph asset={item.icon} size={24} />
+                </View>
+                <Text style={styles.menuQuickLabel}>{item.title}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={styles.menuSection}>
+            <Text style={styles.menuHeading}>Operazioni</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Overview"
+              style={styles.menuRow}
+              onPress={onOverview ?? onClose}
+            >
+              <AssetGlyph asset={menuOverview} size={24} />
+              <Text style={s.body}>Overview</Text>
+            </Pressable>
+            {INVESTMENT_MENU_OPERATIONS.map((item, index) => (
+              <Pressable
+                key={item.title}
+                accessibilityRole="button"
+                accessibilityLabel={item.title}
+                style={styles.menuRow}
+                onPress={() => open(item.destination)}
+              >
+                <AssetGlyph
+                  asset={[menuMarket, menuFunds, menuAuction][index]}
+                  size={24}
+                />
+                <Text style={s.body}>{item.title}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={[styles.menuSection, styles.menuServices]}>
+            <Text style={styles.menuHeading}>Servizi</Text>
+            {INVESTMENT_MENU_SERVICES.map((item, index) => (
+              <Pressable
+                key={item.title}
+                accessibilityRole="button"
+                accessibilityLabel={item.title}
+                style={styles.menuRow}
+                onPress={() => open(item.destination)}
+              >
+                <AssetGlyph
+                  asset={index === 0 ? menuMifid : menuPackages}
+                  size={24}
+                />
+                <Text style={s.body}>{item.title}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
       </View>
-      <Text style={s.heading}>Operazioni</Text>
-      <Link label="Overview" onPress={onClose} />
-      {INVESTMENT_MENU_OPERATIONS.map(item => (
-        <Link
-          key={item.title}
-          label={item.title}
-          onPress={() => open(item.destination)}
-        />
-      ))}
-      <Text style={s.heading}>Servizi</Text>
-      {INVESTMENT_MENU_SERVICES.map(item => (
-        <Link
-          key={item.title}
-          label={item.title}
-          onPress={() => open(item.destination)}
-        />
-      ))}
-    </InvestmentSheet>
+    </ModalPortal>
   );
 }
 export function InvestmentEducation({
@@ -310,6 +432,70 @@ export function InvestmentCatalog({
   );
 }
 const styles = StyleSheet.create({
+  sheetFooter: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 28,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  menuSheet: { backgroundColor: '#fff', flexShrink: 0 },
+  menuToolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 48,
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  menuToolbarSpacer: { flex: 1 },
+  menuToolbarButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuContent: { padding: 16, paddingBottom: 40 },
+  menuHelp: {
+    fontFamily: 'UniCredit-regular',
+    fontSize: 18,
+    lineHeight: 24,
+    color: '#262626',
+    marginTop: 24,
+  },
+  menuQuick: { flexDirection: 'row', gap: 28, marginVertical: 40 },
+  menuQuickAction: { flex: 1, minWidth: 0, alignItems: 'center', gap: 8 },
+  menuQuickCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuQuickLabel: {
+    fontFamily: 'UniCredit-regular',
+    fontSize: 14,
+    lineHeight: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  menuSection: { gap: 8 },
+  menuServices: { marginTop: 32 },
+  menuHeading: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 28,
+    lineHeight: 32,
+    color: '#262626',
+    marginBottom: 16,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    minHeight: 48,
+  },
   sheet: { flex: 1, backgroundColor: '#fff' },
   educationImage: { width: '100%', height: 220 },
   videoCard: { width: 160, gap: 8 },

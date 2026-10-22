@@ -1,9 +1,8 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { BaselineInvestmentProductRow } from '../../../../../../universal/BaselineInvestmentProductRow';
+import React, { useState } from 'react';
 import {
-  PanResponder,
   Platform,
   Pressable,
-  ScrollView,
   View,
 } from 'react-native';
 import {
@@ -21,15 +20,14 @@ import {
   type InvestmentAmountParts,
 } from '@/app/utils/investmentAmountFormatting';
 import { resolvePortfolioTabs } from '@/app/components/contracts/portfolioTabs';
-import {
-  resolveMailboxTabs,
-  centeredMailboxScroll,
-} from '@/app/components/contracts/mailboxTabs';
+import { BaselineMailboxTabs } from '../../../../../../universal/BaselineMailboxTabs';
 import type { CurrentScreenProps } from '../../../contracts';
 import { Text } from '../../../../../../universal/Typography';
+import { BaselineInvestmentPeriodChips } from '../../../../../../universal/BaselineInvestmentPeriodChips';
+import { BaselineInvestmentFilterChips } from '../../../../../../universal/BaselineInvestmentFilterChips';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { sourceIconDimensions } from '../../../../../../universal/sourceIconDimensions';
-import { investmentColor, investmentScrollStyle } from '../Frame';
+import { investmentColor, investmentDark, investmentScrollStyle } from '../Frame';
 
 export function Copy({
   host,
@@ -123,140 +121,24 @@ export function PortfolioTabs({
   value: InvestmentPortfolioTabId;
   onChange: (value: InvestmentPortfolioTabId) => void;
 }) {
-  const contract = resolvePortfolioTabs(),
-    geometry = resolveMailboxTabs({
-      layout: contract.underlineLayout,
-      minTabWidth: contract.underlineMinTabWidth,
-      withTopMargin: false,
-    });
-  const rail = useRef<React.ComponentRef<typeof ScrollView>>(null),
-    position = useRef(0),
-    origin = useRef(0),
-    suppressed = useRef(0),
-    width = useRef(375),
-    content = useRef(750),
-    cells = useRef(new Map<string, { x: number; width: number }>());
-  const [layout, setLayout] = useState(0);
-  useEffect(() => {
-    const cell = cells.current.get(value);
-    if (cell)
-      rail.current?.scrollTo({
-        x: centeredMailboxScroll(
-          cell.x,
-          width.current,
-          cell.width,
-          content.current,
-        ),
-        animated: true,
-      });
-  }, [value, layout]);
-  const drag = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_event, g) =>
-          Platform.OS === 'web' &&
-          Math.abs(g.dx) > geometry.dragThreshold &&
-          Math.abs(g.dx) > Math.abs(g.dy),
-        onPanResponderGrant: () => {
-          origin.current = position.current;
-          suppressed.current = Infinity;
-        },
-        onPanResponderMove: (_event, g) =>
-          rail.current?.scrollTo({
-            x: Math.max(
-              0,
-              Math.min(content.current - width.current, origin.current - g.dx),
-            ),
-            animated: false,
-          }),
-        onPanResponderRelease: () => {
-          suppressed.current = Date.now() + 80;
-        },
-        onPanResponderTerminate: () => {
-          suppressed.current = Date.now() + 80;
-        },
-      }),
-    [geometry.dragThreshold],
-  );
-  const portfolioTabsViewStyle1 = {
-    height: 48,
-    borderBottomWidth: 1,
-    borderBottomColor: investmentColor(host, '--uc-border'),
-  } as const;
+  const contract = resolvePortfolioTabs();
   return (
-    <View
-      accessibilityRole="tablist"
-      accessibilityLabel={contract.underlineAriaLabel}
-      style={portfolioTabsViewStyle1}
-      {...drag.panHandlers}
-    >
-      <ScrollView
-        ref={rail}
-        horizontal
-        style={investmentScrollStyle()}
-        showsHorizontalScrollIndicator={false}
-        onLayout={e => {
-          width.current = e.nativeEvent.layout.width;
-          setLayout(v => v + 1);
-        }}
-        onContentSizeChange={w => {
-          content.current = w;
-          setLayout(v => v + 1);
-        }}
-        onScroll={e => {
-          position.current = e.nativeEvent.contentOffset.x;
-        }}
-        scrollEventThrottle={16}
-        contentContainerStyle={styles.portfolioTabsScrollViewStyle2}
-      >
-        {INVESTMENT_PORTFOLIO_TABS.map(tab => {
-          const selected = tab.id === value,
-            label = host.t(
-              `runtime.investments.tabs.${tabKeys[tab.id]}`,
-              tab.label,
-            );
-          const portfolioTabsCopyStyle4 = {
-            color: investmentColor(
-              host,
-              selected ? '--uc-text' : '--uc-text-muted',
-            ),
-          } as const;
-          const portfolioTabsViewStyle5 = {
-            position: 'absolute',
-            bottom: -1,
-            left: 0,
-            right: 0,
-            height: 2,
-            backgroundColor: investmentColor(host, '--uc-text'),
-          } as const;
-          return (
-            <Pressable
-              key={tab.id}
-              accessibilityRole="tab"
-              accessibilityLabel={label}
-              accessibilityState={{ selected }}
-              onLayout={e => {
-                const { x, width: w } = e.nativeEvent.layout;
-                const old = cells.current.get(tab.id);
-                if (old?.x !== x || old.width !== w) {
-                  cells.current.set(tab.id, { x, width: w });
-                  setLayout(v => v + 1);
-                }
-              }}
-              onPress={() => {
-                if (Date.now() >= suppressed.current) onChange(tab.id);
-              }}
-              style={styles.portfolioTabsPressableStyle3}
-            >
-              <Copy host={host} size={16} bold style={portfolioTabsCopyStyle4}>
-                {label}
-              </Copy>
-              {selected ? <View style={portfolioTabsViewStyle5} /> : null}
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </View>
+    <BaselineMailboxTabs
+      tabs={INVESTMENT_PORTFOLIO_TABS.map(tab => ({
+        id: tab.id,
+        label: host.t('runtime.investments.tabs.' + tabKeys[tab.id], tab.label),
+      }))}
+      activeTabId={value}
+      onChange={id => onChange(id as InvestmentPortfolioTabId)}
+      layout={contract.underlineLayout}
+      minTabWidth={contract.underlineMinTabWidth}
+      ariaLabel={contract.underlineAriaLabel}
+      withTopMargin={false}
+      includeBorderInHeight
+      dark={investmentDark(host)}
+      dragScroll
+      scrollStyle={investmentScrollStyle()}
+    />
   );
 }
 export function Periods({
@@ -272,50 +154,14 @@ export function Periods({
   items?: readonly InvestmentPeriodOption[];
   marginTop?: number;
 }) {
-  const spacing = { marginTop };
   return (
-    <View style={[styles.periodsViewStyle1, spacing]}>
-      {items.map(p => {
-        const selected = p.id === value;
-        const periodsPressableStyle2 = {
-          height: 21,
-          minWidth: 35,
-          paddingHorizontal: 8,
-          borderRadius: 3.5,
-          borderWidth: 1,
-          borderColor: selected
-            ? 'transparent'
-            : investmentColor(host, '--uc-text'),
-          backgroundColor: selected
-            ? investmentColor(host, '--uc-action-strong')
-            : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
-        } as const;
-        const periodsCopyStyle3 = {
-          lineHeight: 15,
-          color: investmentColor(
-            host,
-            selected ? '--uc-static-white' : '--uc-text',
-          ),
-        } as const;
-        return (
-          <Pressable
-            key={p.id}
-            accessibilityRole="button"
-            accessibilityLabel={p.label}
-            accessibilityState={{ selected }}
-            aria-pressed={selected}
-            onPress={() => onChange(p.id)}
-            style={periodsPressableStyle2}
-          >
-            <Copy host={host} bold style={periodsCopyStyle3}>
-              {p.label}
-            </Copy>
-          </Pressable>
-        );
-      })}
-    </View>
+    <BaselineInvestmentPeriodChips
+      periods={items}
+      selectedPeriodId={value}
+      onChange={onChange}
+      dark={investmentDark(host)}
+      style={{ marginTop }}
+    />
   );
 }
 export function Sorts({
@@ -328,51 +174,13 @@ export function Sorts({
   onChange: (value: InvestmentSortId) => void;
 }) {
   return (
-    <ScrollView
-      horizontal
+    <BaselineInvestmentFilterChips
+      options={INVESTMENT_SORT_OPTIONS}
+      selectedOptionId={value}
+      onChange={onChange}
+      dark={investmentDark(host)}
       style={investmentScrollStyle()}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.sortsScrollViewStyle1}
-    >
-      {INVESTMENT_SORT_OPTIONS.map(p => {
-        const selected = p.id === value;
-        const sortsPressableStyle2 = {
-          height: 24,
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          borderRadius: 14.5,
-          borderWidth: 1,
-          borderColor: investmentColor(host, '--uc-text'),
-          backgroundColor: selected
-            ? investmentColor(host, '--uc-text')
-            : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
-        } as const;
-        const sortsCopyStyle3 = {
-          lineHeight: 15,
-          color: investmentColor(
-            host,
-            selected ? '--uc-text-inverse' : '--uc-text',
-          ),
-        } as const;
-        return (
-          <Pressable
-            key={p.id}
-            accessibilityRole="button"
-            accessibilityLabel={p.label}
-            accessibilityState={{ selected }}
-            aria-pressed={selected}
-            onPress={() => onChange(p.id)}
-            style={sortsPressableStyle2}
-          >
-            <Copy host={host} style={sortsCopyStyle3}>
-              {p.label}
-            </Copy>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+    />
   );
 }
 export function Accordion({
@@ -462,73 +270,20 @@ export function ProductRow({
         ? '-'
         : ''
     }${Math.abs(security.performancePercent).toFixed(1).replace('.', ',')}%`;
-  const productRowPressableStyle1 = {
-    minHeight: 95,
-    paddingVertical: 16,
-    paddingLeft: 16,
-    paddingRight: 24,
-    gap: 4,
-    backgroundColor: investmentColor(host, '--uc-surface'),
-  } as const;
-  const productRowCopyStyle8 = {
-    lineHeight: 18,
-    color: investmentColor(
-      host,
-      security.performancePercent > 0
-        ? '--uc-green-olive'
-        : security.performancePercent < 0
-        ? '--uc-status-red'
-        : '--uc-text',
-    ),
-  } as const;
   return (
-    <Pressable
+    <BaselineInvestmentProductRow
       testID={`baseline-investment-product-${security.id}`}
-      accessibilityRole="button"
-      accessibilityLabel={security.title}
+      title={security.title}
+      value={<>{value.integer}{value.decimal} {value.currency}</>}
+      performance={performance}
+      contribution={show ? contribution.toUpperCase() : undefined}
+      recurringIcon={show && contribution === 'RECURRENT' ? <SourceCustomIcon name="recurring-contribution" size={18} color={investmentColor(host, '--uc-text')} /> : undefined}
+      percent={percent}
+      percentColor={investmentColor(host, security.performancePercent > 0 ? '--uc-green-olive' : security.performancePercent < 0 ? '--uc-status-red' : '--uc-text')}
+      textColor={investmentColor(host, '--uc-text')}
+      backgroundColor={investmentColor(host, '--uc-surface')}
       onPress={onPress}
-      style={productRowPressableStyle1}
-    >
-      <Copy
-        host={host}
-        bold
-        numberOfLines={1}
-        style={styles.productRowCopyStyle2}
-      >
-        {security.title}
-      </Copy>
-      <View style={styles.productRowViewStyle3}>
-        <Copy host={host} numberOfLines={1} style={styles.productRowCopyStyle4}>
-          {value.integer}
-          {value.decimal} {value.currency}
-        </Copy>
-        <Amount
-          host={host}
-          parts={performance}
-          integerLine={22}
-          minorLine={21}
-        />
-      </View>
-      <View style={styles.productRowViewStyle5}>
-        <View style={styles.productRowViewStyle6}>
-          {show ? (
-            <Copy host={host} style={styles.productRowCopyStyle7}>
-              {contribution.toUpperCase()}
-            </Copy>
-          ) : null}
-          {show && contribution === 'RECURRENT' ? (
-            <SourceCustomIcon
-              name="recurring-contribution"
-              size={18}
-              color={investmentColor(host, '--uc-text')}
-            />
-          ) : null}
-        </View>
-        <Copy host={host} bold style={productRowCopyStyle8}>
-          {percent}
-        </Copy>
-      </View>
-    </Pressable>
+    />
   );
 }
 export function Actions({
@@ -654,19 +409,6 @@ const styles = {
     paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  periodsViewStyle1: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 8,
-  },
-  sortsScrollViewStyle1: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 18,
   },
   accordionPressableStyle1: {
     height: 56,

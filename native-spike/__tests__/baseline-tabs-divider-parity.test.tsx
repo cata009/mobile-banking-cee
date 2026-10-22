@@ -45,14 +45,14 @@ describe('shared baseline tabs and dividers match Source geometry', () => {
     ).toMatchObject({ height: 47 });
     expect(styleForText(tree, 'Inbox')).toMatchObject({
       fontFamily: 'UniCredit-bold',
-      fontSize: 16,
+      fontSize: 18,
       overflow: 'visible',
     });
-    expect(styleForText(tree, 'Inbox').lineHeight).toBeUndefined();
+    expect(styleForText(tree, 'Inbox').lineHeight).toBe(20);
     act(() => tree.unmount());
   });
 
-  it('keeps Czech catalogue tabs Source-strong at 16px with the existing border allowance', () => {
+  it('uses the approved two-item type for Czech catalogue tabs with the existing border allowance', () => {
     let tree!: Renderer.ReactTestRenderer;
     act(() => {
       tree = Renderer.create(
@@ -72,9 +72,9 @@ describe('shared baseline tabs and dividers match Source geometry', () => {
     for (const label of ['All products', 'Regular Plan']) {
       expect(styleForText(tree, label)).toMatchObject({
         fontFamily: 'UniCredit-bold',
-        fontSize: 16,
+        fontSize: 18,
       });
-      expect(styleForText(tree, label).lineHeight).toBeUndefined();
+      expect(styleForText(tree, label).lineHeight).toBe(20);
     }
     expect(
       StyleSheet.flatten(

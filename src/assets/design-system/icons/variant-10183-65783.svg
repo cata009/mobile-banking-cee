@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Glyph / 20x20">
+<g id="Icon shape">
+<path d="M15 5V20C17.761 20 20 17.761 20 15V0C17.239 0 15 2.239 15 5Z" fill="#666666"/>
+<path d="M0 15V20C2.761 20 5 17.761 5 15V10C2.239 10 0 12.239 0 15Z" fill="#666666"/>
+<path d="M7.5 20V8.75C7.5 5.989 9.739 3.75 12.5 3.75V15C12.5 17.761 10.261 20 7.5 20Z" fill="#666666"/>
+</g>
+</g>
+</svg>

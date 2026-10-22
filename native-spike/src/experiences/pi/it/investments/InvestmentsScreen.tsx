@@ -4,7 +4,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { BackHandler, Pressable, ScrollView } from 'react-native';
+import { BackHandler, ScrollView, View } from 'react-native';
 import { Text } from '../../../../universal/Typography';
 import {
   readSecuritiesFinancialState,
@@ -13,13 +13,15 @@ import {
 import { getSecurityPositions } from '@/features/investments/mobileFirstValuation';
 import { hasMobileFirstInvestmentHoldings } from '@/features/investments/mobileFirstInvestments';
 import type { ItalyNativeScreenProps } from '../contracts';
-import { Button, Header, Tabs, s } from './Primitives';
+import { Button, Header, InvestmentHelp, Tabs, s } from './Primitives';
 import Overview from './Overview';
+import { FloatingInvestments } from './FloatingInvestments';
 import Securities from './Securities';
 import Trade, { initialTrade, type NativeTradeState } from './Trade';
 import Funds from './Funds';
 import Services from './Services';
 import { MainHeader } from '../MainHeader';
+import { homeStyles } from '../homeStyles';
 import { profileSettingsStore } from '@/features/profile/mobileFirstProfileSettings';
 import { ModalPanel } from '../../../../universal/ModalPanel';
 import { tokens } from './Primitives';
@@ -45,6 +47,9 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
   }));
   const [history, setHistory] = useState<Route[]>([]);
   const [embeddedDetail, setEmbeddedDetail] = useState(false);
+  const [headerGap, setHeaderGap] = useState(16);
+  const [overviewGeneration, setOverviewGeneration] = useState(0);
+  const [helpOpen, setHelpOpen] = useState(false);
   const scroll = useRef<React.ElementRef<typeof ScrollView>>(null);
   const scrollY = useRef(0);
   const headingChanged = React.useCallback(() => {
@@ -130,27 +135,43 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
       onHeadingChange={headingChanged}
     >
       {!destination || (route.embedded && !embeddedDetail) ? (
-        <MainHeader
-          preferredProfile={profile.preferredProfile}
-          amountsHidden={props.amountsHidden}
-          onSearch={props.onSearch ?? (() => {})}
-          onPfm={() =>
-            props.onNavigate({ kind: 'pfm', tab: 'Bilancio familiare' })
-          }
-          onProfile={props.onProfile}
-          onPrivacy={props.onAmountsToggle ?? (() => {})}
-          onBrand={() => setBrandOpen(true)}
-          selectedTab="investments"
-          onMainTab={tab => {
-            if (tab === 'home') props.onBack();
-          }}
-        />
+        <View style={homeStyles.chromePlaceholder}>
+          <MainHeader
+            tabsGap={headerGap}
+            preferredProfile={profile.preferredProfile}
+            amountsHidden={props.amountsHidden}
+            onSearch={props.onSearch ?? (() => {})}
+            onPfm={() =>
+              props.onNavigate({ kind: 'pfm', tab: 'Bilancio familiare' })
+            }
+            onProfile={props.onProfile}
+            onPrivacy={props.onAmountsToggle ?? (() => {})}
+            onBrand={() => setBrandOpen(true)}
+            selectedTab="investments"
+            onMainTab={tab => {
+              scroll.current?.scrollTo({ y: 0, animated: false });
+              scrollY.current = 0;
+              setHeaderGap(16);
+              if (tab === 'home') props.onBack();
+              else {
+                setHistory([]);
+                setRoute({ destination: null });
+                setEmbeddedDetail(false);
+                setOverviewGeneration(value => value + 1);
+              }
+            }}
+          />
+        </View>
       ) : (
         <Header
           onBack={back}
-          onProfile={props.onProfile}
-          onPrivacy={props.onAmountsToggle}
-          hidden={props.amountsHidden}
+          onClose={() => {
+            setHistory([]);
+            setRoute({ destination: null });
+            setEmbeddedDetail(false);
+          }}
+          onHelp={() => setHelpOpen(!helpOpen)}
+          helpOpen={helpOpen}
         />
       )}
       <ModalPanel
@@ -168,12 +189,16 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
         ref={scroll}
         onScroll={event => {
           scrollY.current = event.nativeEvent.contentOffset.y;
+          setHeaderGap(Math.max(0, 16 - event.nativeEvent.contentOffset.y));
         }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.content}
         keyboardShouldPersistTaps="handled"
       >
+        {destination && (!route.embedded || embeddedDetail) && helpOpen && (
+          <InvestmentHelp />
+        )}
         {route.embedded && !embeddedDetail && destination && (
           <>
             <Text style={s.title}>Portafoglio</Text>
@@ -192,6 +217,7 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
         )}
         {!destination ? (
           <Overview
+            key={overviewGeneration}
             props={props}
             navigate={navigate}
             onPortfolioTab={portfolioTab}
@@ -203,6 +229,7 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
             props={props}
             registerBack={registerBack}
             embedded={route.embedded}
+            onScrollTo={y => scroll.current?.scrollTo({ y, animated: true })}
           />
         ) : destination.area === 'services' ? (
           <Services
@@ -274,19 +301,18 @@ export default function InvestmentsScreen(props: ItalyNativeScreenProps) {
         )}
       </InvestmentPageScroll>
       {(!destination || route.embedded) && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Investi"
-          onPress={() => setMenuOpen(true)}
-          style={s.floating}
-        >
-          <Text style={s.buttonText}>Investi</Text>
-        </Pressable>
+        <FloatingInvestments onPress={() => setMenuOpen(true)} />
       )}
       <InvestmentMenu
         visible={menuOpen}
         onClose={() => setMenuOpen(false)}
         navigate={navigate}
+        onOverview={() => {
+          setMenuOpen(false);
+          setRoute({ destination: null });
+          setHistory([]);
+          setEmbeddedDetail(false);
+        }}
         props={props}
       />
     </InvestmentPageLayout>

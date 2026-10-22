@@ -1,0 +1,14 @@
+/* A dedicated family supplies the same existing font bytes used by RN, without changing global typography. */
+@font-face {
+  font-family: 'UniCredit Divider';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('../../../native-spike/assets/fonts/UniCredit-bold.ttf') format('truetype');
+}
+
+.uc-divider-action:focus-visible,
+.uc-divider-selection:focus-within {
+  outline: 2px solid var(--uc-action);
+  outline-offset: 3px;
+}

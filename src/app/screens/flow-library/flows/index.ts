@@ -1,4 +1,5 @@
 import { ETHOCA_FLOW } from '@/flows/shared/ethoca'
+import { PRIME_FLOW } from '@/flows/shared/prime'
 import { GENIUS_MY_CAR_FLOW } from '@/flows/ro/genius-my-car'
 import { INVESTMENTS_BULK_APPROVAL_FLOW } from '@/flows/shared/investments-bulk-approval'
 import { RS_PROPERTY_INSURANCE_FLOW } from '@/flows/rs/property-insurance'
@@ -7,6 +8,7 @@ import type { FlowDefinition, FlowPreviewId, FlowScenario } from './types'
 
 /** Single source of truth for the flows shipped in the library. */
 export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
+  'pi-prime': PRIME_FLOW,
   'ro-genius-my-car': GENIUS_MY_CAR_FLOW,
   'mobile-pi-ethoca': ETHOCA_FLOW,
   'rs-property-insurance': RS_PROPERTY_INSURANCE_FLOW,
@@ -16,6 +18,7 @@ export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
 
 /** Display order. Adding a flow = add a data module + one entry here. */
 export const FLOW_ORDER: readonly FlowPreviewId[] = [
+  'pi-prime',
   'investments-bulk-approval',
   'rs-property-insurance',
   'rs-disposable-cards',

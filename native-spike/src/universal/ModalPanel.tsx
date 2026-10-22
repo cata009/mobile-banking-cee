@@ -27,7 +27,13 @@ export function ModalPanel({
       onRequestClose={onClose}
     >
       <View style={styles.backdrop}>
-        <View style={[styles.panel, { backgroundColor: tokens.background }]}>
+        <View
+          role="dialog"
+          aria-modal
+          accessibilityViewIsModal
+          accessibilityLabel={title}
+          style={[styles.panel, { backgroundColor: tokens.background }]}
+        >
           <View style={styles.header}>
             <Text
               style={[

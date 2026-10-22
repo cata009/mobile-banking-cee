@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import type { CountryId } from '@/app/state/demoTypes';
 import {
   getMessagesConfigForCountry,
+  type MessageListItem,
   type MessageMailbox,
 } from '@/app/config/messagesConfig';
 import type { CurrentScreenProps } from '../../contracts';
 import { BaselineMailboxTabs } from '../../../../../universal/BaselineMailboxTabs';
 import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
+import { BaselineDialog } from '../../../../../universal/BaselineDialog';
+import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
 import {
   MoreServicePage,
   serviceDark,
@@ -20,7 +24,16 @@ export default function Messages(host: CurrentScreenProps) {
     config = getMessagesConfigForCountry(host.country);
   const [mailbox, setMailbox] = useState<MessageMailbox>('inbox');
   const [query, setQuery] = useState('');
+  const [openMessageId, setOpenMessageId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{
+    country: CountryId;
+    message: MessageListItem;
+  } | null>(null);
+  const [deletedMessageIdsByCountry, setDeletedMessageIdsByCountry] = useState<
+    Partial<Record<CountryId, ReadonlySet<string>>>
+  >({});
   const messages = config[mailbox]
+    .filter(item => !deletedMessageIdsByCountry[host.country]?.has(item.id))
     .map(item => {
       const key = `runtime.messages.rows.${item.title
         .toLowerCase()
@@ -48,6 +61,19 @@ export default function Messages(host: CurrentScreenProps) {
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
     );
+  const cancelDelete = () => {
+    setPendingDelete(null);
+    setOpenMessageId(null);
+  };
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    setDeletedMessageIdsByCountry(current => {
+      const deletedIds = new Set(current[pendingDelete.country] ?? []);
+      deletedIds.add(pendingDelete.message.id);
+      return { ...current, [pendingDelete.country]: deletedIds };
+    });
+    cancelDelete();
+  };
   const sticky = (
     <>
       <BaselineMailboxTabs
@@ -66,7 +92,10 @@ export default function Messages(host: CurrentScreenProps) {
           },
         ]}
         activeTabId={mailbox}
-        onChange={id => setMailbox(id as MessageMailbox)}
+        onChange={id => {
+          setMailbox(id as MessageMailbox);
+          setOpenMessageId(null);
+        }}
         dark={dark}
       />
       <View style={styles.search}>
@@ -84,6 +113,22 @@ export default function Messages(host: CurrentScreenProps) {
       host={host}
       title={t('runtime.messages.title', config.title)}
       sticky={sticky}
+      overlay={
+        pendingDelete ? (
+          <BaselineDialog
+            title={t('runtime.messages.deleteDialog.title', 'Delete message?')}
+            body={t(
+              'runtime.messages.deleteDialog.body',
+              'Are you sure you want to delete this message?',
+            )}
+            onCancel={cancelDelete}
+            onConfirm={confirmDelete}
+            confirmLabel={t('runtime.messages.deleteDialog.confirm', 'Delete')}
+            cancelLabel={t('runtime.dialogs.cancel', 'Cancel')}
+            dark={dark}
+          />
+        ) : undefined
+      }
     >
       <ServiceYear
         title={t('runtime.messages.sectionTitle', config.sectionTitle)}
@@ -91,12 +136,35 @@ export default function Messages(host: CurrentScreenProps) {
       />
       <View style={styles.items}>
         {messages.map(item => (
-          <ServiceDatedRow
+          <DeleteActionReveal
             key={item.id}
-            item={item}
+            testID={`delete-reveal-${item.id}`}
+            actionsOpen={openMessageId === item.id}
             dark={dark}
-            label={t('runtime.actions.moreActions', 'More actions')}
-          />
+            deleteActionLabel={t('runtime.messages.deleteAction', 'DELETE')}
+            deleteAccessibilityLabel={`${t(
+              'runtime.messages.deleteMessage',
+              'Delete message',
+            )} ${item.title}`}
+            onDelete={() =>
+              setPendingDelete({ country: host.country, message: item })
+            }
+          >
+            <ServiceDatedRow
+              item={item}
+              dark={dark}
+              label={`${t(
+                'runtime.messages.messageActions',
+                'Message actions',
+              )} ${item.title}`}
+              actionsExpanded={openMessageId === item.id}
+              onActions={() =>
+                setOpenMessageId(current =>
+                  current === item.id ? null : item.id,
+                )
+              }
+            />
+          </DeleteActionReveal>
         ))}
       </View>
     </MoreServicePage>
@@ -104,6 +172,6 @@ export default function Messages(host: CurrentScreenProps) {
 }
 const styles = StyleSheet.create({
   mailboxLabel: { overflow: 'visible' },
-  search: { paddingHorizontal: 16, paddingVertical: 8 },
+  search: { paddingHorizontal: 16, paddingVertical: 16 },
   items: { paddingTop: 20, paddingBottom: 24 },
 });

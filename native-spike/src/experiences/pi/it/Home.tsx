@@ -702,11 +702,10 @@ export default function Home({
               })
             }
             selectedTab="home"
-            onMainTab={tab =>
-              tab === 'home'
-                ? scroll.current?.scrollTo({ y: 0, animated: false })
-                : onNavigate({ kind: 'investments' })
-            }
+            onMainTab={tab => {
+              scroll.current?.scrollTo({ y: 0, animated: false });
+              if (tab === 'investments') onNavigate({ kind: 'investments' });
+            }}
           />
         </View>
         <View style={s.widgets}>
@@ -760,6 +759,39 @@ export default function Home({
             contentContainerStyle={s.categoryContent}
             accessibilityRole="tablist"
             accessibilityLabel="Categorie prodotti"
+            {...(Platform.OS === 'web'
+              ? {
+                  onKeyDown: (event: {
+                    key?: string;
+                    nativeEvent?: { key?: string };
+                    preventDefault: () => void;
+                    currentTarget: unknown;
+                  }) => {
+                    const key = event.key ?? event.nativeEvent?.key;
+                    if (
+                      !key ||
+                      !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)
+                    )
+                      return;
+                    event.preventDefault();
+                    const current =
+                      MOBILE_FIRST_PRODUCT_CATEGORIES.indexOf(category);
+                    const count = MOBILE_FIRST_PRODUCT_CATEGORIES.length;
+                    const next =
+                      key === 'Home'
+                        ? 0
+                        : key === 'End'
+                        ? count - 1
+                        : (current + (key === 'ArrowRight' ? 1 : -1) + count) %
+                          count;
+                    selectCategory(MOBILE_FIRST_PRODUCT_CATEGORIES[next]);
+                    // This handler is installed only on RNWeb's DOM scroll surface.
+                    (event.currentTarget as HTMLElement)
+                      .querySelectorAll<HTMLElement>('[role="tab"]')
+                      [next]?.focus({ preventScroll: true });
+                  },
+                }
+              : {})}
             onLayout={event => setCategoryWidth(event.nativeEvent.layout.width)}
           >
             {MOBILE_FIRST_PRODUCT_CATEGORIES.map(name => (
@@ -769,6 +801,7 @@ export default function Home({
                 accessibilityLabel={name}
                 accessibilityState={{ selected: category === name }}
                 aria-selected={category === name}
+                tabIndex={category === name ? 0 : -1}
                 onPress={() => selectCategory(name)}
                 onLayout={event => {
                   categoryPositions.current[name] = event.nativeEvent.layout;

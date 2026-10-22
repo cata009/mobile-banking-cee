@@ -18,10 +18,13 @@ export function resolveAmountField({
     currency,
     currencyLabel,
     hideCurrencySelector,
-    currencyColor: isDisabled ? 'var(--uc-neutral-650)' : 'var(--uc-text)',
-    currencyTitleColor: isDisabled ? 'var(--uc-neutral-650)' : 'var(--uc-text-muted)',
+    currencyColor: isDisabled ? 'var(--uc-text-muted)' : 'var(--uc-text)',
+    currencyTitleColor: 'var(--uc-text-muted)',
+    currencyIconColor: isDisabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
+    currencyLabelGap: 0,
+    trailingInset: 9,
     gap: 24,
-    currencyMinimumWidth: 64,
+    currencyMinimumWidth: 66,
     iconSlot: 32,
   } as const
 }

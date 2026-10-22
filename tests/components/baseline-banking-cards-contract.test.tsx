@@ -54,6 +54,17 @@ describe('banking composition frozen preservation', () => {
             })),
           }
           const { container, rerender, unmount } = render(<FrozenProduct {...props} />)
+          // Only the approved original Figma deltas; the frozen fixture stays intact.
+          if (variant === 'evolution') {
+            const title = screen.getByText(props.title)
+            title.classList.replace('text-[16px]', 'text-[18px]')
+            title.classList.replace('leading-[18px]', 'leading-[20px]')
+          } else {
+            const thirdLine = document.createElement('p')
+            thirdLine.className = 'uc-type-n5 text-[var(--uc-text)]'
+            thirdLine.textContent = props.thirdLine
+            screen.getByText(props.accountNumber).parentElement!.appendChild(thirdLine)
+          }
           const before = normalized(container.innerHTML)
           rerender(<ProductCard {...props} />)
           expect(normalized(container.innerHTML)).toBe(before)

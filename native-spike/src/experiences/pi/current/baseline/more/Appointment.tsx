@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 import {
   addAppointmentDays,
   createAppointmentId,
@@ -69,14 +69,33 @@ type ViewId =
   | 'map'
   | 'feedback'
   | 'feedback-success';
-export default function Appointment(host: CurrentScreenProps) {
+export interface AppointmentStore {
+  load: () => AppointmentRecord[];
+  save: (records: AppointmentRecord[]) => void;
+}
+
+export default function Appointment(
+  host: CurrentScreenProps & {
+    appointmentStore?: AppointmentStore;
+    advisorPhoto?: ImageSourcePropType;
+    clientEmail?: string;
+  },
+) {
   return (
-    <AppointmentHost host={host}>
-      <AppointmentFlow host={host} />
+    <AppointmentHost host={host} advisorPhoto={host.advisorPhoto}>
+      <AppointmentFlow host={host} appointmentStore={host.appointmentStore} clientEmail={host.clientEmail} />
     </AppointmentHost>
   );
 }
-function AppointmentFlow({ host }: { host: CurrentScreenProps }) {
+function AppointmentFlow({
+  host,
+  appointmentStore,
+  clientEmail,
+}: {
+  host: CurrentScreenProps;
+  appointmentStore?: AppointmentStore;
+  clientEmail?: string;
+}) {
   const text = (key: string, fallback: string) =>
       host.t(`appointments.${key}`, fallback),
     locale = getAppointmentDateLocale(host.country, host.language);
@@ -87,13 +106,17 @@ function AppointmentFlow({ host }: { host: CurrentScreenProps }) {
       'prime.advisor.address',
       'Želetavská 1525/1, 140 92, Praha 4',
     );
-  const [records, setRecords] = useState(() => loadAppointments(host.country));
+  const loadRecords = () =>
+    appointmentStore ? appointmentStore.load() : loadAppointments(host.country);
+  const [records, setRecords] = useState(loadRecords);
   const [view, setView] = useState<ViewId>(() =>
-    loadAppointments(host.country).length ? 'list' : 'booking',
+    loadRecords().length ? 'list' : 'booking',
   );
-  const [draft, setDraft] = useState(() =>
-    createAppointmentDraft(branch, address),
-  );
+  const createDraft = () => ({
+    ...createAppointmentDraft(branch, address),
+    ...(clientEmail === undefined ? {} : { email: clientEmail }),
+  });
+  const [draft, setDraft] = useState(createDraft);
   const [tab, setTab] = useState<'active' | 'past'>('active'),
     [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheet, setSheet] = useState<'reason' | 'detail' | null>(null),
@@ -113,7 +136,8 @@ function AppointmentFlow({ host }: { host: CurrentScreenProps }) {
   const update = (changes: Partial<AppointmentDraft>) =>
     setDraft(current => ({ ...current, ...changes }));
   const save = (next: AppointmentRecord[]) => {
-    saveAppointments(host.country, next);
+    if (appointmentStore) appointmentStore.save(next);
+    else saveAppointments(host.country, next);
     setRecords(next);
     host.onChanged();
   };
@@ -481,7 +505,7 @@ function AppointmentFlow({ host }: { host: CurrentScreenProps }) {
       <Button
         label={text('bookAppointment', 'Book an appointment')}
         onPress={() => {
-          setDraft(createAppointmentDraft(branch, address));
+          setDraft(createDraft());
           setView('booking');
         }}
       />,

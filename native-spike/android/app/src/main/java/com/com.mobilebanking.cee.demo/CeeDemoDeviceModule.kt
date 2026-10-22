@@ -13,6 +13,8 @@ import android.os.Build
 import android.os.CancellationSignal
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.provider.MediaStore
+import android.speech.RecognizerIntent
 import android.util.Base64
 import android.view.WindowManager
 import androidx.core.content.FileProvider
@@ -41,6 +43,34 @@ class CeeDemoDeviceModule(private val context: ReactApplicationContext) : ReactC
     Thread(task, "CeeDemoDocumentMetadata").apply { isDaemon = true }
   }
   private val filePickerCode = 48271
+  private val cameraCode = 48272
+  private val speechCode = 48273
+  private var capturePromise: Promise? = null
+  private var speechPromise: Promise? = null
+  private var cameraFile: File? = null
+  private var cameraUri: Uri? = null
+  private fun facilityResult(status: String) = Arguments.createMap().apply { putString("status", status) }
+  private val captureListener = object : BaseActivityEventListener() {
+    override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+      if (invalidated) return
+      if (requestCode == cameraCode) {
+        val pending = capturePromise ?: return
+        capturePromise = null
+        val file = cameraFile
+        val uri = cameraUri
+        cameraFile = null
+        cameraUri = null
+        if (resultCode == Activity.RESULT_OK && file != null && file.length() > 0 && uri != null) {
+          pending.resolve(facilityResult("selected").apply { putString("uri", uri.toString()); putString("name", file.name); putString("mimeType", "image/jpeg") })
+        } else { file?.delete(); pending.resolve(facilityResult("cancelled")) }
+      } else if (requestCode == speechCode) {
+        val pending = speechPromise ?: return
+        speechPromise = null
+        val words = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.trim()
+        pending.resolve(if (resultCode == Activity.RESULT_OK && !words.isNullOrEmpty()) facilityResult("recognized").apply { putString("text", words) } else facilityResult("cancelled"))
+      }
+    }
+  }
   private val filePickerListener = object : BaseActivityEventListener() {
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
       if (requestCode != filePickerCode || invalidated) return
@@ -85,13 +115,51 @@ class CeeDemoDeviceModule(private val context: ReactApplicationContext) : ReactC
       }
     }
   }
-  init { context.addActivityEventListener(filePickerListener) }
+  init { context.addActivityEventListener(filePickerListener); context.addActivityEventListener(captureListener) }
+
+  @ReactMethod
+  fun capturePhoto(promise: Promise) {
+    UiThreadUtil.runOnUiThread {
+      val activity = context.currentActivity
+      if (invalidated || activity == null) { promise.resolve(facilityResult("unavailable")); return@runOnUiThread }
+      if (capturePromise != null || speechPromise != null || filePickerPromise != null) { promise.reject("capture-busy", "A device chooser is already open"); return@runOnUiThread }
+      val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+      if (intent.resolveActivity(context.packageManager) == null) { promise.resolve(facilityResult("unavailable")); return@runOnUiThread }
+      try {
+        val directory = File(context.cacheDir, "demo-capture").apply { mkdirs() }
+        val file = File.createTempFile("capture-", ".jpg", directory)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.demo.files", file)
+        cameraFile = file; cameraUri = uri; capturePromise = promise
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        intent.clipData = ClipData.newRawUri("Demo photograph", uri)
+        activity.startActivityForResult(intent, cameraCode)
+      } catch (error: Exception) { capturePromise = null; cameraFile?.delete(); cameraFile = null; cameraUri = null; promise.reject("capture-error", "Camera could not be opened", error) }
+    }
+  }
+
+  @ReactMethod
+  fun recognizeSpeech(language: String, promise: Promise) {
+    UiThreadUtil.runOnUiThread {
+      val activity = context.currentActivity
+      if (invalidated || activity == null) { promise.resolve(facilityResult("unavailable")); return@runOnUiThread }
+      if (capturePromise != null || speechPromise != null || filePickerPromise != null) { promise.reject("speech-busy", "A device chooser is already open"); return@runOnUiThread }
+      val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE, language.take(64))
+        putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+      }
+      if (intent.resolveActivity(context.packageManager) == null) { promise.resolve(facilityResult("unavailable")); return@runOnUiThread }
+      speechPromise = promise
+      try { activity.startActivityForResult(intent, speechCode) } catch (error: Exception) { speechPromise = null; promise.reject("speech-error", "Speech recognition could not be opened", error) }
+    }
+  }
 
   @ReactMethod
   fun pickLocalDocument(imagesOnly: Boolean, promise: Promise) {
     UiThreadUtil.runOnUiThread {
       if (invalidated) { promise.resolve(null); return@runOnUiThread }
-      if (filePickerPromise != null) { promise.reject("file-picker-busy", "Selezione già aperta"); return@runOnUiThread }
+      if (filePickerPromise != null || capturePromise != null || speechPromise != null) { promise.reject("file-picker-busy", "Selezione già aperta"); return@runOnUiThread }
       val activity = context.currentActivity
       if (activity == null) { promise.reject("file-picker-unavailable", "Selezione non disponibile"); return@runOnUiThread }
       filePickerPromise = promise
@@ -277,6 +345,10 @@ class CeeDemoDeviceModule(private val context: ReactApplicationContext) : ReactC
     invalidated = true
     UiThreadUtil.runOnUiThread {
       context.removeActivityEventListener(filePickerListener)
+      context.removeActivityEventListener(captureListener)
+      capturePromise?.resolve(facilityResult("cancelled")); capturePromise = null
+      speechPromise?.resolve(facilityResult("cancelled")); speechPromise = null
+      cameraFile?.delete(); cameraFile = null; cameraUri = null
       filePickerPromise?.resolve(null)
       filePickerPromise = null
     }

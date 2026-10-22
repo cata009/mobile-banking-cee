@@ -1,0 +1,26 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="329" height="159" viewBox="0 0 329 159" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 4">
+<g id="Mask">
+<path d="M1 9C1 4.58172 4.58172 1 9 1H320C324.418 1 328 4.58172 328 9V150C328 154.418 324.418 158 320 158H9C4.58173 158 1 154.418 1 150V9Z" fill-rule="evenodd" clip-rule="evenodd" fill="#DFA805"/>
+<mask id="stroke0_0_11971" maskUnits="userSpaceOnUse" x="0" y="0" width="329" height="159" fill="black">
+<rect fill="white" width="329" height="159"/>
+<path d="M1 9C1 4.58172 4.58172 1 9 1H320C324.418 1 328 4.58172 328 9V150C328 154.418 324.418 158 320 158H9C4.58173 158 1 154.418 1 150V9Z" fill-rule="evenodd" clip-rule="evenodd"/>
+</mask>
+<path d="M9 158H320C324.418 158 328 154.418 328 150V9C328 4.58172 324.418 1 320 1H9C4.58172 1 1 4.58172 1 9V150C1 154.418 4.58173 158 9 158Z" stroke-width="2" stroke="#917112" mask="url(#stroke0_0_11971)"/>
+</g>
+<mask id="mask0_0_11971" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="1" y="1" width="327" height="157">
+<path id="Mask_2" d="M1 9C1 4.58172 4.58172 1 9 1H320C324.418 1 328 4.58172 328 9V150C328 154.418 324.418 158 320 158H9C4.58173 158 1 154.418 1 150V9Z" fill-rule="evenodd" clip-rule="evenodd" fill="white"/>
+</mask>
+<g mask="url(#mask0_0_11971)">
+<g id="aempty">
+<g id="SafeArea24">
+</g>
+<g id="Rectangle">
+</g>
+</g>
+<g id="Chevron">
+<path id="Shape" d="M40.877 -35L154 79L40.877 193C24.7569 177.767 24.7569 153.064 40.877 137.824L99.248 79L40.877 20.176C24.7569 4.9356 24.7569 -19.7596 40.877 -35ZM-61.91 -35L51.213 79L-61.91 193C-78.03 177.767 -78.03 153.064 -61.91 137.824L-3.53849 79L-61.91 20.176C-78.03 4.9356 -78.03 -19.7596 -61.91 -35Z" fill-rule="evenodd" clip-rule="evenodd" fill="#EDBA00"/>
+</g>
+</g>
+</g>
+</svg>

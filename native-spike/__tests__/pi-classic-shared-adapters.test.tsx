@@ -278,7 +278,8 @@ test('inactive prelogin retains the inactive current Login even when a classic f
     expect(activate.props).toMatchObject({
       label: props.t('preLogin.activateApplication'),
       variant: 'surface',
-      labelSize: '16',
+      // The inactive prelogin source explicitly selects the canonical 18px CTA.
+      labelSize: '18',
     });
     expect(activate.props.onPress).toBeUndefined();
   } finally {

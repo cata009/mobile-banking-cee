@@ -7,7 +7,7 @@ import {
 } from '@/app/components/contracts/headerActions';
 import { SourceCustomIcon } from './SourceCustomIcon';
 import { sourceColor } from './sourceColor';
-import { Text } from './Typography';
+import { BaselineTag } from './BaselineTag';
 
 export function BaselineHeaderActionRail({
   children,
@@ -78,9 +78,12 @@ export function BaselineHeaderActionButton({
         color={sourceColor(`var(${contract.iconToken})`, dark)}
       />
       {contract.badgeText !== null && (
-        <View style={badgeStyle}>
-          <Text style={textStyle}>{contract.badgeText}</Text>
-        </View>
+        <BaselineTag
+          kind="notification"
+          label={String(contract.badgeText)}
+          style={[badgeStyle, { paddingHorizontal: 0, paddingVertical: 0 }]}
+          labelStyle={textStyle}
+        />
       )}
     </Pressable>
   );

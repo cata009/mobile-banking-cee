@@ -1,15 +1,37 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import type { PropsWithChildren } from 'react'
 import { afterEach, beforeAll, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import DesignSystemPage from '@/app/screens/design-system/DesignSystemPage'
+import { Specimen } from '@/app/screens/design-system/specimenShell'
+import { ShadcnSpecimens } from '@/app/screens/design-system/shadcnSpecimens'
+import {
+  GhostBannerVariantSpecimen,
+  InfoBannerVariantSpecimen,
+  UserEventCardVariantSpecimen,
+  HelperCardVariantSpecimen,
+  ProductMenuCardVariantSpecimen,
+  PaymentHeroCardVariantSpecimen,
+  PrimaryButtonVariantSpecimen,
+} from '@/app/screens/design-system/specimens/cardSpecimens'
+import {
+  AccountBalanceCardCountrySpecimen,
+  AccountCarouselIndicatorVariantSpecimen,
+  ProductCardListTotalRowEvolutionSpecimen,
+  ProductAccordionCountrySpecimen,
+  SectionHeadingDividerVariantSpecimen,
+} from '@/app/screens/design-system/specimens/fieldSpecimens'
 import { PAYMENT_HERO_CARD_IMAGE_VARIANTS } from '@/app/components/payments/PaymentHeroCard'
 import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import { COLOR_PALETTES, type DesignSystemPalette } from '@/app/registry/colorRegistry'
 import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DemoProvider } from '@/app/state/demoStore'
+import { loadNativeDemoModuleForWebTest, resetNativeWebRendererDiagnostics } from '../helpers/nativeWebRenderer'
+
+const nativeLoader = vi.hoisted(() => ({ load: vi.fn() }))
+vi.mock('@/app/components/demo/nativeDemoLoader', () => ({ loadNativeDemoModule: nativeLoader.load }))
 
 function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -19,8 +41,40 @@ function AppProviders({ children }: PropsWithChildren) {
   )
 }
 
-function renderInventory() {
-  return render(<DesignSystemPage />, { wrapper: AppProviders })
+// Interaction regressions exercise the existing specimens directly; catalog navigation is tested separately.
+function renderInventory(page = false) {
+  if (page) return render(<DesignSystemPage />, { wrapper: AppProviders })
+  return render(
+    <>
+      <ProductAccordionCountrySpecimen />
+      <ProductAccordionCountrySpecimen animated />
+      <ProductCardListTotalRowEvolutionSpecimen />
+      <AccountBalanceCardCountrySpecimen />
+      <AccountCarouselIndicatorVariantSpecimen />
+      <Specimen name="Divider" detailsHref="#component/ui.section-heading-divider">
+        <SectionHeadingDividerVariantSpecimen />
+      </Specimen>
+      <ShadcnSpecimens />
+      <Specimen name="Ghost" detailsHref="#component/cards.ghost-banner">
+        <GhostBannerVariantSpecimen />
+      </Specimen>
+      <Specimen name="Info" detailsHref="#component/cards.info-banner">
+        <InfoBannerVariantSpecimen />
+      </Specimen>
+      <Specimen name="User event" detailsHref="#component/cards.user-event-card">
+        <UserEventCardVariantSpecimen />
+      </Specimen>
+      <Specimen name="Helper" detailsHref="#component/cards.helper-card">
+        <HelperCardVariantSpecimen />
+      </Specimen>
+      <ProductMenuCardVariantSpecimen />
+      <PaymentHeroCardVariantSpecimen />
+      <Specimen name="Primary button" detailsHref="#component/ui.primary-button">
+        <PrimaryButtonVariantSpecimen />
+      </Specimen>
+    </>,
+    { wrapper: AppProviders },
+  )
 }
 
 function selector(container: HTMLElement, id: string) {
@@ -33,20 +87,6 @@ function selectorSpecimen(select: HTMLSelectElement) {
   const specimen = select.closest('.flex.flex-col.gap-4')
   if (!(specimen instanceof HTMLElement)) throw new Error(`Missing specimen for #${select.id}`)
   return specimen
-}
-
-function domRectAt(top: number): DOMRect {
-  return {
-    x: 0,
-    y: top,
-    width: 0,
-    height: 0,
-    top,
-    right: 0,
-    bottom: top,
-    left: 0,
-    toJSON: () => ({}),
-  }
 }
 
 beforeAll(() => {
@@ -69,6 +109,9 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+  resetNativeWebRendererDiagnostics()
+  nativeLoader.load.mockReset()
+  nativeLoader.load.mockImplementation(loadNativeDemoModuleForWebTest)
   window.history.replaceState(null, '', '#headers')
 })
 
@@ -78,6 +121,32 @@ afterEach(() => {
 })
 
 describe('Design System specimen selectors', () => {
+  it('finds components by their stable source id and recovers from an empty search', () => {
+    window.history.replaceState(null, '', '#figma-library')
+    const { container } = renderInventory(true)
+    const search = within(container).getByRole('textbox', { name: 'Search components' })
+    fireEvent.change(search, { target: { value: 'ui.primary-button' } })
+    expect(container.querySelector('[data-ds-component="ui.primary-button"]')).toBeVisible()
+    expect(container.querySelector('[data-ds-component="shell.page-header"]')).not.toBeInTheDocument()
+    fireEvent.change(search, { target: { value: 'no-component-matches-this-query' } })
+    expect(within(container).getByRole('heading', { name: 'No components found' })).toBeVisible()
+    fireEvent.click(within(container).getByRole('button', { name: /^Clear search$/ }))
+    expect(container.querySelector('[data-ds-component="shell.page-header"]')).toBeVisible()
+  })
+
+  it('uses contextual product copy in both country specimens', () => {
+    const { container } = renderInventory()
+    for (const id of ['product-accordion-country-select', 'product-accordion-animated-country-select']) {
+      const select = selector(container, id)
+      const specimen = selectorSpecimen(select)
+      expect(specimen).toHaveTextContent('Explore account options for your everyday banking.')
+      expect(specimen).not.toHaveTextContent(/lorem ipsum/i)
+      fireEvent.change(select, { target: { value: 'CZ' } })
+      expect(specimen).toHaveTextContent('Explore account options for your everyday banking.')
+      expect(specimen).not.toHaveTextContent(/lorem ipsum/i)
+    }
+  })
+
   it('publishes the Future CZ account card with and without quick actions', () => {
     window.history.replaceState(null, '', '#products')
     const { container } = renderInventory()
@@ -147,7 +216,7 @@ describe('Design System specimen selectors', () => {
     expect(within(specimen).getAllByRole('button')).toHaveLength(4)
   })
 
-  it('preserves all 13 Meniga divider variants, order, and counter specimen', () => {
+  it('preserves all 13 Meniga divider variants, order, and counter specimen', async () => {
     const { container } = renderInventory()
     const dividerSelect = selector(container, 'section-heading-divider-variant-select')
     const specimen = selectorSpecimen(dividerSelect)
@@ -170,11 +239,11 @@ describe('Design System specimen selectors', () => {
     expect(Array.from(dividerSelect.options).map((option) => option.value)).toEqual(expectedVariants)
     for (const variant of expectedVariants) {
       fireEvent.change(dividerSelect, { target: { value: variant } })
-      expect(specimen.querySelector('[data-divider-variant]')).toHaveAttribute('data-divider-variant', variant)
+      expect(specimen).toHaveAttribute('data-native-ds-variant', variant)
     }
 
     fireEvent.change(dividerSelect, { target: { value: 'with-counter' } })
-    expect(specimen).toHaveTextContent('18')
+    expect(await within(specimen).findByText('18')).toBeVisible()
   })
 
   it('resolves a valid Shadcn variant synchronously when families change', () => {
@@ -183,7 +252,11 @@ describe('Design System specimen selectors', () => {
     let variantSelect = selector(container, 'shadcn-variant-select')
 
     expect(Array.from(variantSelect.options).map((option) => option.value)).toEqual([
-      'default', 'secondary', 'outline', 'ghost', 'destructive',
+      'default',
+      'secondary',
+      'outline',
+      'ghost',
+      'destructive',
     ])
     fireEvent.change(variantSelect, { target: { value: 'destructive' } })
     fireEvent.change(familySelect, { target: { value: 'badge' } })
@@ -200,7 +273,7 @@ describe('Design System specimen selectors', () => {
   })
 
   it('keeps neutral as the default palette and PFM content under the colors hash', () => {
-    const { getAllByRole, getByRole } = renderInventory()
+    const { getAllByRole, getByRole } = renderInventory(true)
     const [colorsTab] = getAllByRole('tab', { name: /^Colors/ })
     if (!colorsTab) throw new Error('Missing Colors inventory tab')
     fireEvent.click(colorsTab)
@@ -216,10 +289,11 @@ describe('Design System specimen selectors', () => {
     expect(getByRole('heading', { name: 'PFM Taxes and Penalties' })).toBeInTheDocument()
   })
 
-  it('ignores an invalid raw selector value without crashing or changing the specimen', () => {
+  it('ignores an invalid raw selector value without crashing or changing the specimen', async () => {
     const { container } = renderInventory()
     const select = selector(container, 'ghost-banner-variant-select')
     const specimen = selectorSpecimen(select)
+    expect(await within(specimen).findByText('Apply for a loan')).toBeVisible()
     const initialOutput = specimen.textContent
 
     expect(() => fireEvent.change(select, { target: { value: '__invalid__' } })).not.toThrow()
@@ -228,7 +302,7 @@ describe('Design System specimen selectors', () => {
     expect(specimen.textContent).toBe(initialOutput)
   })
 
-  it('keeps every Ghost, Info, UserEvent, and Helper option mapped to a distinct visible state', () => {
+  it('keeps every Ghost, Info, UserEvent, and Helper option mapped to a distinct visible state', async () => {
     const { container } = renderInventory()
     const cases = [
       ['ghost-banner-variant-select', ['title-and-description', 'title-only', 'long-description']],
@@ -240,11 +314,18 @@ describe('Design System specimen selectors', () => {
     for (const [id, values] of cases) {
       const select = selector(container, id)
       const specimen = selectorSpecimen(select)
-      const outputs = values.map((value) => {
+      const host = specimen.querySelector('[data-native-screen-preview]')
+      if (!(host instanceof HTMLElement)) throw new Error('Missing Native specimen host')
+      await waitFor(() => expect(host).toHaveAttribute('data-native-screen-preview', 'ready'))
+      await waitFor(() => expect(host.textContent?.trim().length).toBeGreaterThan(0))
+      const outputs: Array<string | null> = []
+      for (const [index, value] of values.entries()) {
+        const previous = host.textContent
         fireEvent.change(select, { target: { value } })
         expect(select).toHaveValue(value)
-        return specimen.textContent
-      })
+        if (index > 0) await waitFor(() => expect(host.textContent).not.toBe(previous))
+        outputs.push(host.textContent)
+      }
 
       expect(new Set(outputs).size).toBe(values.length)
     }
@@ -276,41 +357,72 @@ describe('Design System specimen selectors', () => {
     const expectedPayments = [
       { id: 'payments-1', label: 'Payments 1 / Wallet', title: 'Make a payment', description: paymentDescription },
       { id: 'payments-2', label: 'Payments 2 / Laptop', title: 'Transfer money', description: paymentDescription },
-      { id: 'payments-3', label: 'Payments 3 / Bill payments', title: 'Bill payments &\ndonations', description: paymentDescription },
+      {
+        id: 'payments-3',
+        label: 'Payments 3 / Bill payments',
+        title: 'Bill payments &\ndonations',
+        description: paymentDescription,
+      },
       { id: 'payments-4', label: 'Payments 4 / Scan & pay', title: 'Scan & pay', description: paymentDescription },
-      { id: 'payments-5', label: 'Payments 5 / Phone side', title: 'Recurrent payments', description: paymentDescription },
-      { id: 'payments-6', label: 'Payments 6 / Approve payment', title: 'Approve payment', description: paymentDescription },
+      {
+        id: 'payments-5',
+        label: 'Payments 5 / Phone side',
+        title: 'Recurrent payments',
+        description: paymentDescription,
+      },
+      {
+        id: 'payments-6',
+        label: 'Payments 6 / Approve payment',
+        title: 'Approve payment',
+        description: paymentDescription,
+      },
       { id: 'payments-7', label: 'Payments 7 / Globe', title: 'Foreign payment', description: paymentDescription },
       { id: 'payments-8', label: 'Payments 8 / Wearable', title: 'Wearable payments', description: paymentDescription },
       { id: 'payments-9', label: 'Payments 9 / Mobile token', title: 'Mobile token', description: paymentDescription },
     ] as const
-    expect(PAYMENT_HERO_CARD_IMAGE_VARIANTS.map(({ id, label, title, description }) => ({
-      id,
-      label,
-      title,
-      description,
-    }))).toEqual(expectedPayments)
+    expect(
+      PAYMENT_HERO_CARD_IMAGE_VARIANTS.map(({ id, label, title, description }) => ({
+        id,
+        label,
+        title,
+        description,
+      })),
+    ).toEqual(expectedPayments)
     expect(Array.from(paymentSelect.options).map((option) => [option.value, option.text])).toEqual(
       expectedPayments.map(({ id, label }) => [id, label]),
     )
     expect(expectedPayments).toHaveLength(9)
 
     const paymentSpecimen = selectorSpecimen(paymentSelect)
+    const galleryDescriptions = {
+      'payments-1': 'Send money to a saved or new recipient.',
+      'payments-2': 'Move money between your accounts.',
+      'payments-3': 'Pay bills or support a cause.',
+      'payments-4': 'Scan a payment code to get started.',
+      'payments-5': 'Set up a regular payment schedule.',
+      'payments-6': 'Review the details before you approve.',
+      'payments-7': 'Send a payment to another country.',
+      'payments-8': 'Explore payments with your wearable.',
+      'payments-9': 'Confirm an action with your mobile token.',
+    }
     for (const preset of expectedPayments) {
       fireEvent.change(paymentSelect, { target: { value: preset.id } })
       expect(paymentSpecimen).toHaveTextContent(preset.title.replace('\n', ' '))
-      expect(paymentSpecimen).toHaveTextContent(preset.description.replace('\n', ' '))
+      expect(paymentSpecimen).toHaveTextContent(galleryDescriptions[preset.id])
+      expect(paymentSpecimen).not.toHaveTextContent(/lorem ipsum/i)
     }
   })
 
-  it('routes every inventory tab to its existing first section and hash', () => {
-    const { getAllByRole } = renderInventory()
+  it('routes every inventory tab to its canonical section without a second component catalog', () => {
+    window.history.replaceState(null, '', '#templates')
+    const { getAllByRole, queryByRole } = renderInventory(true)
+    expect(queryByRole('tab', { name: 'Templates' })).not.toBeInTheDocument()
+    expect(getAllByRole('tab', { selected: true })[0]).toHaveTextContent('Components')
     const expected = [
-      ['Templates', '#templates'],
       ['Icons', '#icons'],
       ['Colors', '#colors'],
       ['Typography', '#typography'],
-      ['Components', '#headers'],
+      ['Components', '#figma-library'],
     ] as const
 
     for (const [label, hash] of expected) {
@@ -321,51 +433,15 @@ describe('Design System specimen selectors', () => {
     }
   })
 
-  it('tracks the activation line and pins the final component section near the scroll bottom', () => {
-    const scheduledFrames: FrameRequestCallback[] = []
-    const requestAnimationFrame = vi.mocked(window.requestAnimationFrame)
-    requestAnimationFrame.mockImplementation((callback) => {
-      scheduledFrames.push(callback)
-      return scheduledFrames.length
-    })
-
-    try {
-      const { container } = renderInventory()
-      const scrollContainer = container.firstElementChild
-      if (!(scrollContainer instanceof HTMLElement)) throw new Error('Missing Design System scroll container')
-
-      Object.defineProperties(scrollContainer, {
-        scrollTop: { configurable: true, writable: true, value: 100 },
-        clientHeight: { configurable: true, value: 400 },
-        scrollHeight: { configurable: true, value: 1000 },
-      })
-      vi.spyOn(scrollContainer, 'getBoundingClientRect').mockReturnValue(domRectAt(0))
-
-      const sectionTops = new Map([
-        ['headers', 0],
-        ['navigation', 50],
-        ['buttons', 100],
-        ['forms', 200],
-        ['cards', 300],
-        ['products', 400],
-        ['overlays', 500],
-      ])
-      for (const [id, top] of sectionTops) {
-        const section = container.querySelector<HTMLElement>(`#${id}`)
-        if (!section) throw new Error(`Missing Design System section #${id}`)
-        vi.spyOn(section, 'getBoundingClientRect').mockReturnValue(domRectAt(top))
-      }
-
-      act(() => scheduledFrames.shift()?.(0))
-      expect(window.location.hash).toBe('#buttons')
-
-      scrollContainer.scrollTop = 600
-      fireEvent.scroll(scrollContainer)
-      act(() => scheduledFrames.shift()?.(1))
-      expect(window.location.hash).toBe('#overlays')
-    } finally {
-      requestAnimationFrame.mockImplementation(() => 1)
-    }
+  it('keeps the selected canonical category stable while the catalog scrolls', () => {
+    const { container, getByRole } = renderInventory(true)
+    const sections = getByRole('navigation', { name: 'Component sections' })
+    fireEvent.click(within(sections).getByRole('button', { name: /^Buttons$/ }))
+    expect(window.location.hash).toBe('#figma-0-1817')
+    expect(container.querySelectorAll('[data-figma-page]')).toHaveLength(1)
+    fireEvent.scroll(container.firstElementChild!, { target: { scrollTop: 600 } })
+    expect(window.location.hash).toBe('#figma-0-1817')
+    expect(within(sections).getByRole('button', { name: /^Buttons$/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('keeps a tab default hash stable when no sections are available to observe', () => {
@@ -376,12 +452,12 @@ describe('Design System specimen selectors', () => {
       return scheduledFrames.length
     })
 
-    const { getAllByRole } = renderInventory()
+    const { getAllByRole } = renderInventory(true)
     act(() => scheduledFrames.shift()?.(0))
     const originalGetElementById = document.getElementById.bind(document)
-    const sectionLookup = vi.spyOn(document, 'getElementById').mockImplementation((id) =>
-      id === 'colors' || id === 'color-audit' ? null : originalGetElementById(id),
-    )
+    const sectionLookup = vi
+      .spyOn(document, 'getElementById')
+      .mockImplementation((id) => (id === 'colors' || id === 'color-audit' ? null : originalGetElementById(id)))
 
     try {
       const [colorsTab] = getAllByRole('tab', { name: /^Colors/ })
@@ -395,7 +471,7 @@ describe('Design System specimen selectors', () => {
     }
   })
 
-  it('renders the Primary button specimen without a theme toggle', () => {
+  it('renders the Primary button specimen without a theme toggle', async () => {
     const { getByRole } = renderInventory()
     const heading = getByRole('heading', { name: 'Primary button' })
     const specimen = heading.closest('[data-ds-specimen="Primary button"]')
@@ -403,6 +479,6 @@ describe('Design System specimen selectors', () => {
 
     // The per-card light/dark control was removed; the specimen renders in light mode by default.
     expect(within(specimen).queryByRole('button', { name: 'Dark mode' })).not.toBeInTheDocument()
-    expect(within(specimen).getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+    expect(await within(specimen).findByRole('button', { name: 'Continue' })).toBeInTheDocument()
   })
 })

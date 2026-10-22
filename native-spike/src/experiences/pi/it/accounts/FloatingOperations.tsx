@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     bottom: 34,
     width: 172,
     height: 72,
+    justifyContent: 'flex-start',
     padding: 4,
     borderRadius: 120,
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -57,13 +58,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   button: {
-    flex: 1,
+    height: 66,
     borderRadius: 120,
     backgroundColor: tokens.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardButton: { borderWidth: 4, borderColor: 'rgba(255,255,255,0.9)' },
+  cardButton: {
+    height: 64,
+    borderWidth: 4,
+    borderColor: 'rgba(255,255,255,0.9)',
+  },
   label: {
     fontFamily: tokens.strongFont,
     color: '#fff',

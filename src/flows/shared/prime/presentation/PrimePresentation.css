@@ -1,0 +1,858 @@
+.prime-presentation {
+  --prime-stage-paper: #f5f3ef;
+  --prime-stage-ink: #222222;
+  --prime-stage-muted: #68645e;
+  --prime-stage-line: #d9d5ce;
+  --prime-stage-red: #e2001a;
+  --prime-stage-selection: var(--uc-action-strong);
+  --prime-stage-soft: #eae6df;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: 68px minmax(0, 1fr) 98px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 clamp(28px, 4vw, 72px);
+  background: var(--prime-stage-paper);
+  color: var(--prime-stage-ink);
+  font-family: 'UniCredit-regular', 'UniCredit', 'UniCredit:Regular', sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.prime-presentation[data-mode='page'] {
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
+.prime-presentation
+  :where(
+    .prime-presentation-copy,
+    .prime-presentation-icon-button,
+    .prime-presentation-restart,
+    .prime-presentation-moment
+  ) {
+  font: inherit;
+  color: inherit;
+}
+
+.prime-presentation
+  :where(
+    .prime-presentation-copy,
+    .prime-presentation-icon-button,
+    .prime-presentation-restart,
+    .prime-presentation-moment
+  ):focus-visible {
+  outline: 2px solid var(--prime-stage-red);
+  outline-offset: 5px;
+}
+
+.prime-presentation-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--prime-stage-line);
+}
+
+.prime-presentation-moment-cue {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 110px;
+  padding-block: 4px 8px;
+  transform: translateX(-50%);
+}
+
+.prime-presentation-cue-title {
+  color: var(--prime-stage-ink);
+  font-size: 14px;
+  line-height: 20px;
+  animation: prime-presentation-story-enter 320ms ease both;
+}
+
+.prime-presentation-cue-position {
+  margin-left: auto;
+  color: var(--prime-stage-muted);
+  font-size: 11px;
+}
+
+.prime-presentation-cue-track {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  overflow: hidden;
+  background: var(--prime-stage-line);
+}
+
+.prime-presentation-cue-track > span {
+  display: block;
+  width: 33.333333%;
+  height: 100%;
+  background: var(--prime-stage-red);
+  transition: transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prime-presentation-brand {
+  flex-shrink: 0;
+}
+
+.prime-presentation-brand-artwork {
+  --prime-lockup-scale: 1.35;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(2.603px * var(--prime-lockup-scale));
+  color: var(--prime-stage-ink);
+}
+
+.prime-presentation-brand-row {
+  display: flex;
+  align-items: center;
+  gap: calc(2.603px * var(--prime-lockup-scale));
+  white-space: nowrap;
+}
+
+.prime-presentation-brand-prime {
+  font-family: 'UniCredit-medium', 'UniCredit', sans-serif;
+  font-size: calc(18.223px * var(--prime-lockup-scale));
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.prime-presentation-brand-diamond {
+  width: calc(15px * var(--prime-lockup-scale));
+  height: calc(15px * var(--prime-lockup-scale));
+  margin-top: calc(2.603px * var(--prime-lockup-scale));
+}
+
+.prime-presentation-brand-by {
+  font-family: 'UniCredit-regular', 'UniCredit:Regular', 'UniCredit', sans-serif;
+  font-size: calc(13.016px * var(--prime-lockup-scale));
+  line-height: 1.1;
+}
+
+.prime-presentation-logo {
+  height: calc(9.762px * var(--prime-lockup-scale));
+}
+
+.prime-presentation-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prime-presentation-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 112px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.prime-presentation-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.prime-presentation-icon-button:hover,
+.prime-presentation-copy:hover {
+  background: var(--prime-stage-soft);
+}
+
+.prime-presentation-icon-button:active {
+  transform: scale(0.94);
+}
+
+.prime-presentation-close {
+  margin-left: 5px;
+  border: 1px solid var(--prime-stage-line);
+}
+
+.prime-presentation-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 360px) minmax(0, 1fr);
+  align-items: center;
+  column-gap: clamp(28px, 4.2vw, 70px);
+  min-height: 0;
+  padding: 22px 0 20px;
+}
+
+.prime-presentation-narrative {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  container-type: inline-size;
+  padding-bottom: 20px;
+  transition: opacity 600ms ease;
+}
+
+.prime-presentation-story {
+  animation: prime-presentation-story-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.prime-presentation-headline {
+  margin: 0;
+  font-size: clamp(42px, 5.4vw, 82px);
+  font-size: clamp(30px, 18cqi, 82px);
+  font-family: 'UniCredit-bold', 'UniCredit', sans-serif;
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.058em;
+}
+
+.prime-presentation-headline span {
+  display: block;
+  white-space: nowrap;
+}
+
+.prime-presentation-service-label {
+  margin: 0 0 18px;
+  color: var(--prime-stage-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.prime-presentation-introduction {
+  max-width: 290px;
+  margin: 25px 0 0;
+  color: var(--prime-stage-muted);
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+}
+
+.prime-presentation-photograph {
+  position: relative;
+  width: min(112%, 490px);
+  height: clamp(140px, 20vh, 204px);
+  margin: clamp(30px, 4.5vh, 48px) 0 0 28px;
+  overflow: hidden;
+  border-radius: 4px 4px 44px 4px;
+  background: #d7c8b3;
+  animation: prime-presentation-photo-enter 1000ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+.prime-presentation-photo-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 57% center;
+  opacity: 0;
+  transform: scale(1.045);
+  transition:
+    opacity 650ms ease,
+    transform 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prime-presentation-photo-content {
+  position: absolute;
+  inset: 0;
+  transition: opacity 600ms ease;
+}
+
+.prime-presentation-photo-image--discover {
+  object-position: 58% 54%;
+}
+
+.prime-presentation-photo-image[data-active='true'] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.prime-presentation-phone-column {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+}
+
+.prime-presentation-phone-stage {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  animation: prime-presentation-phone-enter 950ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+}
+
+.prime-presentation-context {
+  position: relative;
+  z-index: 3;
+  align-self: center;
+  justify-self: end;
+  width: 100%;
+  max-width: 220px;
+  padding-left: 22px;
+  border-left: 1px solid var(--prime-stage-line);
+  animation: prime-presentation-story-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
+}
+
+.prime-presentation-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.prime-presentation-fieldset legend {
+  margin-bottom: 14px;
+  padding: 0;
+  color: var(--prime-stage-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.prime-presentation-segments,
+.prime-presentation-service-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.prime-presentation-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 6px 0;
+  color: var(--prime-stage-muted);
+  font-size: 20px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.prime-presentation-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.prime-presentation-choice-mark {
+  --uc-action: var(--prime-stage-selection);
+  --uc-surface: var(--prime-stage-paper);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.prime-presentation-choice input:checked ~ span:last-child {
+  color: var(--prime-stage-ink);
+  font-family: 'UniCredit-bold', 'UniCredit', sans-serif;
+  font-weight: 700;
+}
+
+.prime-presentation-choice input:focus-visible + .prime-presentation-choice-mark {
+  outline: 2px solid var(--prime-stage-selection);
+  outline-offset: 5px;
+}
+
+.prime-presentation-choice:hover span:last-child {
+  color: var(--prime-stage-ink);
+}
+
+.prime-presentation-service {
+  margin-top: 29px;
+}
+
+.prime-presentation-choice--small {
+  min-height: 30px;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.prime-presentation-choice--small .prime-presentation-choice-mark {
+  flex-basis: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.prime-presentation-context-footer {
+  margin-top: 28px;
+}
+
+.prime-presentation-context-note {
+  max-width: 175px;
+  margin: 0;
+  color: var(--prime-stage-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.prime-presentation-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  margin-top: 17px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.prime-presentation-restart:hover {
+  color: var(--prime-stage-red);
+}
+
+.prime-presentation-footer {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 36px;
+  min-width: 0;
+  border-top: 1px solid var(--prime-stage-line);
+}
+
+.prime-presentation-moments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 64px);
+  flex: 1;
+  max-width: 930px;
+  min-width: 0;
+}
+
+.prime-presentation-moment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  padding: 18px 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prime-presentation-moment::before {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 56px;
+  height: 2px;
+  background: var(--prime-stage-red);
+  content: '';
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prime-presentation-moment[aria-pressed='true']::before {
+  transform: scaleX(1);
+}
+
+.prime-presentation-moment-number {
+  align-self: center;
+  color: #858077;
+  font-size: 13px;
+}
+
+.prime-presentation-moment-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.prime-presentation-moment-title {
+  font-size: 19px;
+  font-family: 'UniCredit-bold', 'UniCredit', sans-serif;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--prime-stage-muted);
+  transition: color 180ms ease;
+}
+
+.prime-presentation-moment[aria-pressed='true'] .prime-presentation-moment-title,
+.prime-presentation-moment:hover .prime-presentation-moment-title {
+  color: var(--prime-stage-ink);
+}
+
+.prime-presentation-moment-description {
+  color: var(--prime-stage-muted);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.prime-presentation-step-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prime-presentation-step-controls .prime-presentation-icon-button {
+  border: 1px solid var(--prime-stage-line);
+}
+
+.prime-presentation-step-controls .prime-presentation-icon-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.prime-presentation-step-controls .prime-presentation-next {
+  background: var(--prime-stage-ink);
+  border-color: var(--prime-stage-ink);
+  color: var(--prime-stage-paper);
+}
+
+.prime-presentation-step-controls .prime-presentation-next:hover {
+  background: #47433d;
+}
+
+.prime-presentation--calling .prime-presentation-photo-content {
+  opacity: 0.55;
+}
+
+@keyframes prime-presentation-story-enter {
+  from {
+    opacity: 0;
+    transform: translateY(13px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prime-presentation-photo-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prime-presentation-phone-enter {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 1600px) {
+  .prime-presentation {
+    padding-inline: max(72px, calc((100vw - 1536px) / 2));
+  }
+}
+
+@media (max-width: 1100px) {
+  .prime-presentation {
+    padding-inline: 30px;
+    grid-template-rows: 64px minmax(0, 1fr) 86px;
+  }
+
+  .prime-presentation-stage {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, min(32vw, 310px)) minmax(0, 1fr);
+    column-gap: 28px;
+  }
+
+  .prime-presentation-headline {
+    font-size: clamp(38px, 5vw, 56px);
+    font-size: clamp(28px, 18cqi, 56px);
+  }
+
+  .prime-presentation-photograph {
+    width: 109%;
+    margin-left: 12px;
+    height: 160px;
+  }
+
+  .prime-presentation-context {
+    padding-left: 16px;
+  }
+
+  .prime-presentation-choice {
+    font-size: 18px;
+  }
+
+  .prime-presentation-choice--small {
+    font-size: 13px;
+  }
+
+  .prime-presentation-moments {
+    gap: 20px;
+  }
+
+  .prime-presentation-moment-description {
+    max-width: 140px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .prime-presentation-moment-cue,
+  .prime-presentation-service-label {
+    display: none;
+  }
+  .prime-presentation {
+    padding-inline: 20px;
+    grid-template-rows: 58px minmax(0, 1fr) 76px;
+  }
+
+  .prime-presentation-brand-artwork {
+    --prime-lockup-scale: 1.15;
+  }
+
+  .prime-presentation-tools {
+    gap: 2px;
+  }
+
+  .prime-presentation-copy {
+    min-width: 38px;
+    width: 38px;
+    min-height: 38px;
+    padding: 8px;
+  }
+
+  .prime-presentation-copy span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .prime-presentation-stage {
+    grid-template-columns: minmax(0, 1fr) 132px;
+    grid-template-rows: 86px minmax(0, 1fr);
+    gap: 14px 18px;
+    padding-top: 12px;
+    padding-bottom: 14px;
+  }
+
+  .prime-presentation-narrative {
+    display: flex;
+    grid-column: 1 / -1;
+    align-self: stretch;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 0;
+  }
+
+  .prime-presentation-story {
+    flex-shrink: 0;
+  }
+
+  .prime-presentation-headline {
+    font-size: 36px;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+  }
+
+  .prime-presentation-introduction {
+    display: none;
+  }
+
+  .prime-presentation-photograph {
+    align-self: stretch;
+    width: 140px;
+    height: auto;
+    margin: 0;
+    border-bottom-right-radius: 24px;
+  }
+
+  .prime-presentation-phone-column {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .prime-presentation-context {
+    grid-column: 2;
+    grid-row: 2;
+    padding-left: 12px;
+  }
+
+  .prime-presentation-fieldset legend {
+    margin-bottom: 9px;
+    font-size: 12px;
+  }
+
+  .prime-presentation-choice {
+    gap: 8px;
+    min-height: 34px;
+    font-size: 16px;
+  }
+
+  .prime-presentation-choice--small {
+    min-height: 32px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .prime-presentation-context-note {
+    display: none;
+  }
+
+  .prime-presentation-context-footer,
+  .prime-presentation-service {
+    margin-top: 18px;
+  }
+
+  .prime-presentation-restart {
+    gap: 5px;
+    margin-top: 0;
+    font-size: 12px;
+  }
+
+  .prime-presentation-footer {
+    gap: 16px;
+  }
+
+  .prime-presentation-moments {
+    gap: 18px;
+  }
+
+  .prime-presentation-moment {
+    gap: 8px;
+  }
+
+  .prime-presentation-moment-title {
+    font-size: 16px;
+  }
+
+  .prime-presentation-moment-description {
+    display: none;
+  }
+
+  .prime-presentation-step-controls {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .prime-presentation {
+    padding-inline: 14px;
+  }
+
+  .prime-presentation-brand-artwork {
+    --prime-lockup-scale: 1.05;
+  }
+
+  .prime-presentation-fullscreen {
+    display: none;
+  }
+
+  .prime-presentation-icon-button {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+  }
+
+  .prime-presentation-stage {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    column-gap: 12px;
+    grid-template-rows: 72px minmax(0, 1fr);
+  }
+
+  .prime-presentation-headline {
+    font-size: 31px;
+  }
+
+  .prime-presentation-photograph {
+    width: 98px;
+  }
+
+  .prime-presentation-choice {
+    font-size: 14px;
+  }
+
+  .prime-presentation-choice--small {
+    font-size: 11px;
+    gap: 6px;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 761px) {
+  .prime-presentation {
+    grid-template-rows: 58px minmax(0, 1fr) 72px;
+  }
+
+  .prime-presentation-stage {
+    padding-block: 14px;
+  }
+
+  .prime-presentation-headline {
+    font-size: clamp(44px, 5.3vw, 69px);
+  }
+
+  .prime-presentation-photograph {
+    height: 125px;
+    margin-top: 24px;
+  }
+
+  .prime-presentation-introduction {
+    margin-top: 18px;
+    font-size: 16px;
+  }
+
+  .prime-presentation-moment {
+    padding-block: 12px;
+  }
+
+  .prime-presentation-context-note {
+    display: none;
+  }
+
+  .prime-presentation-context-footer {
+    margin-top: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prime-presentation [class^='prime-presentation-'],
+  .prime-presentation [class^='prime-presentation-']::before,
+  .prime-presentation [class^='prime-presentation-']::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

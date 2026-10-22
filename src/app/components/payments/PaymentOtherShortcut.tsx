@@ -1,4 +1,5 @@
 import type { PaymentOtherIcon, PaymentOtherItem } from "@/app/config/paymentsMenuConfig";
+import type { ReactNode } from 'react';
 import ActionIconBubble from "@/app/components/ActionIconBubble";
 import { AppIcon, type IconName } from "@/app/components/icons";
 
@@ -27,9 +28,13 @@ const paymentOtherLabelClass: Record<PaymentOtherShortcutTreatment, string> = {
 export function PaymentOtherShortcutIconBubble({
   icon,
   treatment = "evo-2027",
+  iconName,
+  iconVisual,
 }: {
   icon: PaymentOtherIcon;
   treatment?: PaymentOtherShortcutTreatment;
+  iconName?: IconName;
+  iconVisual?: ReactNode;
 }) {
   if (treatment === "baseline") {
     return (
@@ -39,10 +44,10 @@ export function PaymentOtherShortcutIconBubble({
         style={{ background: "var(--pi-shortcut-icon-bg, var(--uc-action))" }}
       >
         <span className="flex size-[32px] shrink-0 items-center justify-center">
-          <AppIcon
-            name={paymentOtherIconName[icon]}
+          {iconVisual ?? <AppIcon
+            name={iconName ?? paymentOtherIconName[icon]}
             color="var(--pi-shortcut-icon-fg, var(--uc-text-inverse))"
-          />
+          />}
         </span>
       </span>
     );
@@ -50,7 +55,7 @@ export function PaymentOtherShortcutIconBubble({
 
   return (
     <ActionIconBubble
-      iconName={paymentOtherIconName[icon]}
+      iconName={iconName ?? paymentOtherIconName[icon]}
       dataDsLabel="PaymentOtherShortcutIconBubble"
     />
   );
@@ -60,10 +65,17 @@ export default function PaymentOtherShortcut({
   item,
   treatment = "evo-2027",
   onClick,
+  presentation = "default",
+  iconName,
+  iconVisual,
 }: {
   item: PaymentOtherItem;
   treatment?: PaymentOtherShortcutTreatment;
   onClick?: (item: PaymentOtherItem) => void;
+  /** Canonical Bubble documentation uses a 6px gap; existing screen spacing stays explicit. */
+  presentation?: "default" | "bubble";
+  iconName?: IconName;
+  iconVisual?: ReactNode;
 }) {
   const isBaseline = treatment === "baseline";
 
@@ -71,10 +83,10 @@ export default function PaymentOtherShortcut({
     <button
       type="button"
       onClick={() => onClick?.(item)}
-      className={`flex w-[74px] shrink-0 cursor-pointer flex-col items-center rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${isBaseline ? "gap-[10px]" : "gap-[6px] text-[var(--uc-text)]"}`}
+      className={`flex w-[74px] shrink-0 cursor-pointer flex-col items-center rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--uc-app-bg)] ${isBaseline && presentation !== "bubble" ? "gap-[10px]" : "gap-[6px] text-[var(--uc-text)]"}`}
       aria-label={item.label.replace(/\n/g, " ")}
     >
-      <PaymentOtherShortcutIconBubble icon={item.icon} treatment={treatment} />
+      <PaymentOtherShortcutIconBubble icon={item.icon} treatment={treatment} iconName={iconName} iconVisual={iconVisual} />
       <span
         className={paymentOtherLabelClass[treatment]}
         style={{

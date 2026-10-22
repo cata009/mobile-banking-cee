@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
+  type ImageSourcePropType,
 } from 'react-native';
 import type { CurrentScreenProps } from '../../contracts';
 import { BaselinePageHeader } from '../../../../../universal/BaselinePageHeader';
@@ -16,6 +17,20 @@ import { advisorPhoto } from '../../profile/assets';
 import PrimeBrand from './PrimeBrand';
 import PrimeBackground from './PrimeBackground';
 import PrimeContact, { type MailPreferences } from './PrimeContact';
+import { primeContactScreen, type PrimeReferenceScreen } from '@/features/prime/reference';
+import { PrimeEntryButton } from '../../../../../app/PrimeEntryButton';
+import type { PrimeBenefitsCopy } from '@/features/prime/content';
+
+export interface PrimeReferenceControl {
+  screen: PrimeReferenceScreen;
+  navigate: (screen: PrimeReferenceScreen) => void;
+  title?: string;
+  background?: React.ReactNode;
+  advisor?: { name: string; email: string; photo: ImageSourcePropType };
+  standardActive?: boolean;
+  hideBrand?: boolean;
+  benefitsCopy?: PrimeBenefitsCopy;
+}
 
 const preferenceKey = 'uc-prime-mail-preferences-v1';
 function loadPreferences(): MailPreferences {
@@ -41,14 +56,30 @@ function loadPreferences(): MailPreferences {
 }
 
 /** Source PrimeScreen uses one scrolling title, a pinned dark toolbar and local contact overlays. */
-export default function Advisor(host: CurrentScreenProps) {
-  const [tab, setTab] = useState<'advisor' | 'benefits'>('advisor');
+export default function Advisor(host: CurrentScreenProps & { reference?: PrimeReferenceControl }) {
+  const reference = host.reference;
+  const standardActive = reference?.standardActive === true;
+  const [localTab, setLocalTab] = useState<'advisor' | 'benefits'>('advisor');
+  const tab = standardActive ? 'advisor' : reference ? reference.screen === 'prime-benefits' ? 'benefits' : 'advisor' : localTab;
+  const setTab = (value: 'advisor' | 'benefits') => {
+    if (reference) reference.navigate(value === 'advisor' ? 'prime-advisor' : 'prime-benefits');
+    else setLocalTab(value);
+  };
   const [progress, setProgress] = useState(0);
-  const [action, setAction] = useState<'call' | 'email' | null>(null);
-  const [preferences, setPreferences] = useState(loadPreferences);
+  const [localAction, setLocalAction] = useState<'call' | 'email' | null>(null);
+  const [preferences, setPreferences] = useState<MailPreferences>(() => reference ? { askEveryTime: true, preferredApp: null } : loadPreferences());
+  const contact = reference ? primeContactScreen(reference.screen) : null;
+  const action = reference ? contact?.startsWith('call') ? 'call' : contact ? 'email' : null : localAction;
+  const setAction = useCallback((value: 'call' | 'email' | null) => {
+    if (!reference) { setLocalAction(value); return; }
+    reference.navigate(value === 'call' ? 'prime-call-confirm' : value === 'email'
+      ? !preferences.askEveryTime && preferences.preferredApp ? 'prime-email-compose' : 'prime-email-chooser'
+      : 'prime-advisor');
+  }, [reference, preferences.askEveryTime, preferences.preferredApp]);
   const dark = host.tokens.background === '#121212';
   const t = host.t;
-  const text = (key: string) => t(`prime.advisor.${key}`);
+  const text = (key: string) => key === 'name' && reference?.advisor ? reference.advisor.name : key === 'emailAddress' && reference?.advisor ? reference.advisor.email : t(`prime.advisor.${key}`);
+  const title = reference?.title ?? (standardActive ? 'My advisor' : t('prime.pageTitle'));
   const sourceOutline =
     Platform.OS === 'web'
       ? ({
@@ -64,9 +95,10 @@ export default function Advisor(host: CurrentScreenProps) {
       return true;
     });
     return () => register?.(null);
-  }, [host.onBackHandlerChange, action]);
+  }, [host.onBackHandlerChange, action, setAction]);
   const save = (value: MailPreferences) => {
     setPreferences(value);
+    if (reference) return;
     try {
       globalThis.localStorage?.setItem(preferenceKey, JSON.stringify(value));
     } catch {
@@ -78,7 +110,7 @@ export default function Advisor(host: CurrentScreenProps) {
       accessibilityRole="button"
       accessibilityLabel={text(key)}
       onPress={onPress}
-      style={[styles.tile, sourceOutline]}
+      style={[styles.tile, standardActive && styles.standardTile, sourceOutline]}
     >
       <View style={styles.centerIcon}>
         <SourceCustomIcon name={icon} size={20} color="white" />
@@ -88,7 +120,7 @@ export default function Advisor(host: CurrentScreenProps) {
   );
   return (
     <View style={styles.root}>
-      <PrimeBackground host={host} />
+      {reference?.background ?? <PrimeBackground host={host} />}
       <ScrollView
         stickyHeaderIndices={[0]}
         style={Platform.OS === 'web' ? styles.webScroll : undefined}
@@ -109,7 +141,7 @@ export default function Advisor(host: CurrentScreenProps) {
           }
         >
           <BaselinePageHeader
-            title={t('prime.pageTitle')}
+            title={title}
             onBack={host.onBack}
             variant="dark"
             includeSafeArea
@@ -117,19 +149,21 @@ export default function Advisor(host: CurrentScreenProps) {
             showHelp={false}
             renderLargeTitle={false}
             collapsedTitleProgress={progress}
+            hideCollapsedTitleWhenHidden={standardActive || undefined}
             dark={dark}
           />
+          {standardActive && <View style={[styles.standardUpgrade, { top: host.screenTopInset + 8 }]}><PrimeEntryButton upgrade variant="overlay" onPress={() => reference?.navigate('prime-upgrade')} /></View>}
         </View>
-        <View style={[styles.largeTitle, { opacity: 1 - progress }]}>
+        <View style={[styles.largeTitle, standardActive && styles.standardLargeTitle, { opacity: 1 - progress }]} aria-hidden={standardActive && progress >= 1 ? true : undefined}>
           <Text
             accessibilityRole="header"
             numberOfLines={2}
             style={styles.largeTitleText}
           >
-            {t('prime.pageTitle')}
+            {title}
           </Text>
         </View>
-        <View style={styles.tabs}>
+        {!standardActive && <View style={styles.tabs}>
           {(['advisor', 'benefits'] as const).map(value => {
             const label = t(
               value === 'advisor'
@@ -162,15 +196,15 @@ export default function Advisor(host: CurrentScreenProps) {
               </Pressable>
             );
           })}
-        </View>
+        </View>}
         <View style={styles.body}>
           {tab === 'advisor' ? (
             <>
-              <Text style={styles.intro}>{text('introText')}</Text>
-              <View style={styles.card}>
+              {!standardActive && <Text style={styles.intro}>{text('introText')}</Text>}
+              <View style={[styles.card, standardActive && styles.standardCard]}>
                 <View style={styles.advisorHeader}>
                   <RasterImage
-                    source={advisorPhoto}
+                    source={reference?.advisor?.photo ?? advisorPhoto}
                     accessibilityLabel={text('name')}
                     style={styles.photo}
                   />
@@ -200,7 +234,9 @@ export default function Advisor(host: CurrentScreenProps) {
                     </View>
                     {key === 'branchAddress' && (
                       <Pressable
-                        onPress={() => {}}
+                        accessibilityRole={reference ? 'button' : undefined}
+                        accessibilityLabel={reference ? 'Branch directions' : undefined}
+                        onPress={() => reference?.navigate('prime-directions-handoff')}
                         style={styles.directionIcon}
                       >
                         <SourceCustomIcon
@@ -230,16 +266,16 @@ export default function Advisor(host: CurrentScreenProps) {
           ) : (
             <>
               <Text style={styles.benefitsHeading}>
-                {t('prime.benefits.pageTitle')}
+                {reference?.benefitsCopy?.heading ?? t('prime.benefits.pageTitle')}
               </Text>
-              <Text style={styles.intro}>{t('prime.benefits.introText')}</Text>
+              <Text style={styles.intro}>{reference?.benefitsCopy?.introduction ?? t('prime.benefits.introText')}</Text>
               <View style={styles.card}>
                 {[1, 2, 3, 4].map(index => (
                   <Pressable
                     key={index}
                     accessibilityRole="button"
-                    onPress={() => {}}
-                    style={styles.benefit}
+                    onPress={() => reference?.navigate('prime-benefit-handoff')}
+                    style={reference?.benefitsCopy ? [styles.benefit, styles.referenceBenefit] : styles.benefit}
                   >
                     <View style={styles.benefitIcon}>
                       <SourceCustomIcon
@@ -250,10 +286,10 @@ export default function Advisor(host: CurrentScreenProps) {
                     </View>
                     <View style={styles.benefitCopy}>
                       <Text style={styles.strong}>
-                        {t(`prime.benefits.benefit${index}Title`)}
+                        {reference?.benefitsCopy?.benefits[index - 1]?.title ?? t(`prime.benefits.benefit${index}Title`)}
                       </Text>
                       <Text style={styles.copy}>
-                        {t(`prime.benefits.benefit${index}Description`)}
+                        {reference?.benefitsCopy?.benefits[index - 1]?.description ?? t(`prime.benefits.benefit${index}Description`)}
                       </Text>
                     </View>
                     <View style={styles.centerIcon}>
@@ -269,16 +305,16 @@ export default function Advisor(host: CurrentScreenProps) {
               <Pressable
                 testID="ro-prime-terms"
                 accessibilityRole="button"
-                onPress={() => {}}
+                onPress={() => reference?.navigate('prime-terms-handoff')}
                 style={styles.terms}
               >
                 <Text style={styles.tabLabel}>
-                  {t('prime.benefits.termsConditions').toUpperCase()}
+                  {(reference?.benefitsCopy?.termsLabel ?? t('prime.benefits.termsConditions')).toUpperCase()}
                 </Text>
               </Pressable>
             </>
           )}
-          <PrimeBrand />
+          {!standardActive && !reference?.hideBrand && <PrimeBrand />}
         </View>
       </ScrollView>
       {action && (
@@ -289,12 +325,19 @@ export default function Advisor(host: CurrentScreenProps) {
           preferences={preferences}
           onPreferences={save}
           onClose={() => setAction(null)}
+          recipient={reference?.advisor ? { ...reference.advisor, service: false } : undefined}
+          reference={reference && contact ? {
+            screen: contact,
+            navigate: screen => reference.navigate(`prime-${screen}`),
+          } : undefined}
         />
       )}
     </View>
   );
 }
 const styles = StyleSheet.create({
+  standardUpgrade: { position: 'absolute', right: 24, height: 40, alignItems: 'center', justifyContent: 'center' },
+  standardLargeTitle: { paddingHorizontal: 24 }, standardCard: { borderRadius: 8 }, standardTile: { borderRadius: 8 },
   headerBlur: {
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
@@ -425,6 +468,7 @@ const styles = StyleSheet.create({
     gap: 16,
     alignItems: 'center',
   },
+  referenceBenefit: { height: 'auto', minHeight: 80, flexShrink: 0 },
   benefitIcon: { width: 32, height: 32 },
   benefitCopy: { flex: 1, gap: 4, minWidth: 0 },
   terms: { paddingHorizontal: 24, paddingVertical: 8, alignItems: 'center' },

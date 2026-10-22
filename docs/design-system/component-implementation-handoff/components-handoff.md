@@ -114,7 +114,6 @@ The local component registry currently documents these included component IDs an
 | `investments.products-accordion` | Investments products accordion | `src/app/components/investments/InvestmentProductsAccordion.tsx` |
 | `investments.product-card` | Investment product card | `src/app/components/investments/InvestmentProductCard.tsx` |
 | `investments.fund-banner` | Investments fund suggestion banner | `src/app/components/investments/InvestmentsFundBanner.tsx` |
-| `templates.reconstructed-code` | Reconstructed code templates | `src/app/components/templates/TemplateCodePreviews.tsx` |
 | `products.menu` | Products menu | `src/app/screens/products/ProductsScreen.tsx` |
 | `products.offer-card` | Products offer card | `src/app/components/products/ProductOfferCard.tsx` |
 | `products.product-card` | Products menu card | `src/app/components/products/ProductMenuCard.tsx` |

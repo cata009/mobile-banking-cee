@@ -34,6 +34,7 @@ export function MainHeader({
     <MainNavigationHeader
       tokens={tokens}
       tabsGap={tabsGap}
+      tabJustifyContent="center"
       label="Navigazione principale"
       activeIndicator={<AssetGlyph asset={a.selected} size={4} />}
       value={selectedTab}

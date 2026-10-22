@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../../../../universal/Typography';
+import { useDemoViewport } from '../../../../universal/DemoViewport';
 import {
   isValidMobileCode,
   investmentServicesDemoCode,
@@ -30,7 +25,7 @@ export function OriginalDocumentPreview({
   label: string;
 }) {
   const [measuredWidth, setMeasuredWidth] = useState(0);
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useDemoViewport();
   const width = Math.max(0, Math.min(measuredWidth, windowWidth - 32));
   return (
     <View
@@ -66,7 +61,7 @@ export function ServiceDocument({
   const [open, setOpen] = useState(false);
   const [ratio, setRatio] = useState(0.707);
   const [measuredWidth, setMeasuredWidth] = useState(0);
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useDemoViewport();
   const contentWidth = Math.max(0, Math.min(measuredWidth, windowWidth - 32));
   const documentWidth = Math.max(0, contentWidth - 34);
   const imageSource = typeof image === 'number' ? image : { uri: image };

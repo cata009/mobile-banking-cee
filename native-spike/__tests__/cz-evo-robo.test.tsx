@@ -2,7 +2,8 @@ import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
 import { TextInput } from 'react-native';
-import { ActionButton } from '../src/universal/ActionButton';
+import { PrimaryButton } from '../src/universal/PrimaryButton';
+import { resolvePrimaryButton } from '@/app/components/contracts/primaryButton';
 import { CzRoboFlow } from '../src/experiences/pi/cz/evo-2027/robo';
 import { DEFAULT_ROBO_DEMO_CLOCK } from '@/features/investments/robo/demoClock';
 import type { RoboExistingGoal } from '@/features/investments/robo/types';
@@ -31,35 +32,34 @@ function input(
 }
 
 describe('CZ Evo native Robo', () => {
-  it('keeps the Source Edit data text affordance at Source sizing without adding an action', () => {
+  it('keeps the Source Edit data sizing and opens the host profile route', () => {
     let tree!: TestRenderer.ReactTestRenderer;
+    const onProfile = jest.fn();
     act(() => {
       tree = TestRenderer.create(
-        <CzRoboFlow onBack={jest.fn()} onExit={jest.fn()} />,
+        <CzRoboFlow
+          onBack={jest.fn()}
+          onExit={jest.fn()}
+          onProfile={onProfile}
+        />,
       );
     });
 
     press(tree, 'Create Goal');
     const editData = tree.root
-      .findAllByType(ActionButton)
+      .findAllByType(PrimaryButton)
       .find(button => button.props.label === 'Edit data');
     expect(editData).toBeDefined();
-    expect(editData!.props.secondary).toBe(true);
-    expect(editData!.props.containerStyle).toEqual(
-      expect.objectContaining({
-        minHeight: 44,
-        width: '100%',
-        borderRadius: 4,
-      }),
-    );
-    expect(editData!.props.labelStyle).toEqual(
-      expect.objectContaining({ fontSize: 16, lineHeight: 22 }),
-    );
+    expect(editData!.props.variant).toBe('secondary');
+    expect(resolvePrimaryButton(editData!.props)).toMatchObject({
+      height: 48,
+      radius: 4,
+      fontSize: 18,
+      transparent: true,
+    });
 
     press(tree, 'Edit data');
-    expect(
-      tree.root.findByProps({ testID: 'cz-personal-data-confirmation' }),
-    ).toBeDefined();
+    expect(onProfile).toHaveBeenCalledTimes(1);
     act(() => tree.unmount());
   });
 
@@ -99,16 +99,47 @@ describe('CZ Evo native Robo', () => {
       )[0]!.props.disabled,
     ).toBe(true);
     press(tree, 'Investment account contract');
-    press(tree, 'I have read this');
+    act(() =>
+      tree.root
+        .findByProps({ testID: 'cz-investment-contract-scroll' })
+        .props.onScroll({
+          nativeEvent: {
+            contentOffset: { y: 400 },
+            layoutMeasurement: { height: 300 },
+            contentSize: { height: 700 },
+          },
+        }),
+    );
+    press(tree, 'I have read it');
     press(tree, 'Continue to sign');
-    await authorizeDemo(tree, 'Sign goal');
+    await act(async () => Promise.resolve());
+    await act(async () => {
+      await tree.root
+        .findAll(
+          node =>
+            node.props.accessibilityLabel === 'Sign' &&
+            typeof node.props.onPress === 'function',
+        )[0]!
+        .props.onPress();
+    });
+    expect(
+      tree.root.findByProps({ testID: 'source-face-id-animation' }),
+    ).toBeDefined();
+    await act(async () => {
+      jest.advanceTimersByTime(840);
+      await Promise.resolve();
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(900);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
     expect(published).toHaveLength(1);
     expect(published[0]!.currentInteger).toBe('0');
     expect(published[0]!.transactions).toEqual([]);
-    act(() => jest.advanceTimersByTime(900));
     press(tree, 'View goal');
     press(tree, 'Add money');
-    input(tree, 'Amount to add', '10000');
+    input(tree, 'Amount to invest now', '10000');
     press(tree, 'Review investment');
     press(tree, 'Continue to sign');
     await authorizeDemo(tree, 'Confirm investment');
@@ -139,13 +170,13 @@ describe('CZ Evo native Robo', () => {
       });
       press(tree, 'Create Goal');
       press(tree, 'I confirm these data');
-      expect(
-        tree.root.findAll(
-          node =>
-            node.props.accessibilityLabel === 'Continue' &&
-            typeof node.props.onPress === 'function',
-        ),
-      ).toHaveLength(0);
+      const continueButtons = tree.root.findAll(
+        node =>
+          node.props.accessibilityLabel === 'Continue' &&
+          typeof node.props.onPress === 'function',
+      );
+      expect(continueButtons).toHaveLength(1);
+      expect(continueButtons[0]!.props.disabled).toBe(true);
       act(() => tree.unmount());
     },
   );

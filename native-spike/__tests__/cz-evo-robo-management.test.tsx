@@ -1,8 +1,9 @@
 import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { TextInput } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
 import { CzRoboFlow } from '../src/experiences/pi/cz/evo-2027/robo';
+import { BaselineTextField } from '../src/universal/BaselineTextField';
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures';
@@ -51,6 +52,7 @@ describe('native Robo management state families', () => {
   function mount(
     onGoalUpdated = jest.fn(),
     initialGoal: RoboExistingGoal = goal,
+    screenTopInset = 0,
   ) {
     let tree!: Renderer.ReactTestRenderer;
     act(() => {
@@ -63,11 +65,38 @@ describe('native Robo management state families', () => {
           currentAccounts={snapshot.accounts}
           securityCatalog={snapshot.catalog}
           demoClock={DEFAULT_ROBO_DEMO_CLOCK}
+          screenTopInset={screenTopInset}
         />,
       );
     });
     return tree;
   }
+  it.each(['Add money', 'Goal settings'])(
+    'extends the white detail and %s surface underneath the system bar',
+    action => {
+      const tree = mount(jest.fn(), goal, 54);
+      expect(
+        StyleSheet.flatten(
+          tree.root.findByProps({ testID: 'cz-robo-surface' }).props.style,
+        ),
+      ).toMatchObject({
+        marginTop: -54,
+        paddingTop: 54,
+        backgroundColor: '#FFFFFF',
+      });
+      press(tree, action);
+      expect(
+        StyleSheet.flatten(
+          tree.root.findByProps({ testID: 'cz-robo-surface' }).props.style,
+        ),
+      ).toMatchObject({
+        marginTop: -54,
+        paddingTop: 54,
+        backgroundColor: '#FFFFFF',
+      });
+      act(() => tree.unmount());
+    },
+  );
   it('updates a goal name and plan through native inputs', () => {
     const updated = jest.fn();
     const tree = mount(updated);
@@ -140,13 +169,11 @@ describe('native Robo management state families', () => {
       },
     });
     press(tree, 'Add money');
+    press(tree, 'Invest monthly. Choose an amount to contribute each month.');
     expect(
       tree.root
-        .findAllByType(TextInput)
-        .find(
-          node =>
-            node.props.accessibilityLabel === 'Monthly contribution starts',
-        )!.props.value,
+        .findAllByType(BaselineTextField)
+        .find(node => node.props.label === 'Start date')!.props.value,
     ).toBe('01/01/2027');
     act(() => tree.unmount());
   });

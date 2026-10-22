@@ -855,14 +855,6 @@ export const BASELINE_COMPONENT_CATALOG = [
     ],
     evidence: 'baseline-marketing-pilot',
   },
-  {
-    id: 'TemplateCodePreview',
-    source: 'src/app/components/templates/TemplateCodePreviews.tsx',
-    scope: 'documentation',
-    family: 'documentation',
-    contracts: [],
-    evidence: null,
-  },
 ] as const satisfies readonly BaselineCatalogEntry[]
 
 /** Separate primitives available for isolated platform validation, not mounted in existing apps. */

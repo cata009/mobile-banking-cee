@@ -131,7 +131,7 @@ export default function Hub({ onNavigate, onClose }: ScreenNavigation) {
               accessibilityRole="button"
               accessibilityLabel="Logout"
               onPress={() => setLogout(true)}
-              style={s.headerControl}
+              style={h.headerControl}
             >
               <AssetGlyph asset={a.hub.imgHelp} size={40} />
             </Pressable>
@@ -139,7 +139,7 @@ export default function Hub({ onNavigate, onClose }: ScreenNavigation) {
               accessibilityRole="button"
               accessibilityLabel="Chiudi profilo"
               onPress={onClose}
-              style={s.headerControl}
+              style={h.headerControl}
             >
               <AssetGlyph asset={a.hub.imgHelp1} size={40} />
             </Pressable>
@@ -187,6 +187,9 @@ export default function Hub({ onNavigate, onClose }: ScreenNavigation) {
               )}
             </View>
             <View style={h.activities}>
+              {tab !== 'Pratiche' && activities.length === 0 ? (
+                <Copy>Nessun messaggio disponibile</Copy>
+              ) : null}
               {tab === 'Pratiche'
                 ? PROFILE_PRACTICES.filter(item =>
                     services.practices.some(
@@ -430,6 +433,12 @@ export default function Hub({ onNavigate, onClose }: ScreenNavigation) {
 }
 const h = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#fff' },
+  headerControl: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   bannerCopy: { flex: 1, gap: 8, paddingVertical: 16 },
   down: { transform: [{ rotate: '180deg' }] },
   scroll: { paddingBottom: 32 },

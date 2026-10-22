@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import React, { Suspense, lazy, useState } from 'react';
+import { Platform, StyleSheet, View, Pressable } from 'react-native';
 import {
   SafeAreaInsetsContext,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { Text } from '../universal/Typography';
 import { OverlayHost } from '../universal/ModalPortal';
-import NativeItalyApp from '../experiences/pi/it/NativeItalyApp';
-import NativeCzechApp from '../experiences/pi/cz/evo-2027/NativeCzechApp';
+import { DemoViewport } from '../universal/DemoViewport';
+import { PiWebAccessibilityContext } from '../platform/webAccessibility';
+import type { CurrentRoute } from '../experiences/pi/current/contracts';
 import GlobalDemoSelector from './GlobalDemoSelector';
 import {
   DEFAULT_NATIVE_SELECTION,
@@ -18,7 +19,16 @@ import {
 import { selectorTokens as tokens } from './selectorTokens';
 import type { GlobalNativeAppProps } from './types';
 import type { CzechNativeRoute } from '../experiences/pi/cz/evo-2027/contracts';
-import { CZECH_NATIVE_ADAPTERS } from './czechAdapters';
+import {
+  loadItaly,
+  loadCzech,
+  loadKids,
+  loadCurrent,
+} from './loadNativeExperiences';
+const NativeItalyApp = lazy(loadItaly);
+const NativeCzechApp = lazy(loadCzech);
+const NativeKidsApp = lazy(loadKids);
+const NativeCurrentApp = lazy(loadCurrent);
 
 /** A single global native entry is used by RNWeb and Android. */
 export default function GlobalNativeApp({
@@ -30,20 +40,27 @@ export default function GlobalNativeApp({
   initialLanguage,
   initialMode,
   initialHomeTheme,
+  productCounts,
+  initialAmountsHidden,
+  bankingScenario,
 }: GlobalNativeAppProps = {}) {
   const [selection, setSelection] =
     useState<NativeDemoSelection>(initialSelection);
   const [opened, setOpened] = useState(startInDemo);
-  const [launchRoute, setLaunchRoute] = useState<CzechNativeRoute | undefined>(initialRoute);
+  const [launchRoute, setLaunchRoute] =
+    useState<GlobalNativeAppProps['initialRoute']>(initialRoute);
   const [searchRequest, requestSearch] = useState(0);
   const insets = useSafeAreaInsets();
+  const [viewportScale, setViewportScale] = useState(1);
+  const logicalInsets = {
+    top: insets.top / viewportScale,
+    bottom: insets.bottom / viewportScale,
+    left: insets.left / viewportScale,
+    right: insets.right / viewportScale,
+  };
+  const screenTopInset = previewInsetTop || (showSelectorControl ? 0 : Math.max(54,logicalInsets.top));
   const demo = resolveNativeDemo(selection);
-  const entryAvailable =
-    demo.implementation === 'italy' ||
-    (demo.implementation === 'cz-evo' &&
-      CZECH_NATIVE_ADAPTERS.some(
-        adapter => adapter.screens[launchRoute?.screen === 'search' ? 'home' : launchRoute?.screen ?? 'home'],
-      ));
+  const entryAvailable = !!demo.implementation;
   const exit = () => setOpened(false);
   const paddingTop = opened ? 0 : insets.top;
   const paddingBottom = opened ? 0 : insets.bottom;
@@ -66,10 +83,16 @@ export default function GlobalNativeApp({
               setLaunchRoute(initialRoute);
               setOpened(true);
             }}
-            onSearch={demo.implementation === 'cz-evo' ? () => {
-              setLaunchRoute({ screen: 'search' });
-              setOpened(true);
-            } : undefined}
+            onSearch={
+              selection.scenario === 'active' &&
+              (demo.implementation === 'cz-evo' ||
+                demo.implementation === 'current')
+                ? () => {
+                    setLaunchRoute({ screen: 'search' });
+                    setOpened(true);
+                  }
+                : undefined
+            }
             entryAvailable={entryAvailable}
           />
         ) : (
@@ -101,25 +124,106 @@ export default function GlobalNativeApp({
               </View>
             )}
             <View style={s.application} key={selectionKey(selection)}>
-              <SafeAreaInsetsContext.Provider
-                value={{ ...insets, top: showSelectorControl ? 0 : insets.top }}
+              <DemoViewport
+                authoringWidth={demo.implementation === 'italy' ? 393 : 375}
+                onScale={setViewportScale}
               >
-                {demo.implementation === 'italy' ? (
-                  <NativeItalyApp previewInsetTop={previewInsetTop} onExit={exit} />
-                ) : (
-                  <NativeCzechApp
-                    scenario={selection.scenario}
-                    onExit={exit}
-                    screenTopInset={previewInsetTop || (showSelectorControl ? 0 : insets.top)}
-                    bottomInset={insets.bottom}
-                    searchRequest={searchRequest}
-                    initialRoute={launchRoute}
-                    initialLanguage={initialLanguage}
-                    initialMode={initialMode}
-                    initialHomeTheme={initialHomeTheme}
-                  />
-                )}
-              </SafeAreaInsetsContext.Provider>
+                <SafeAreaInsetsContext.Provider
+                  value={{
+                    ...logicalInsets,
+                    top: showSelectorControl ? 0 : logicalInsets.top,
+                  }}
+                >
+                  <Suspense
+                    fallback={
+                      <View style={s.application}>
+                        <Text style={s.link}>Se pregătește demo…</Text>
+                      </View>
+                    }
+                  >
+                    {selection.scenario === 'inactive' &&
+                    selection.product === 'PI' ? (
+                      <NativeCurrentApp
+                        country={selection.country}
+                        release={selection.release}
+                        scenario="inactive"
+                        onExit={exit}
+                        screenTopInset={screenTopInset}
+                        bottomInset={logicalInsets.bottom}
+                        initialRoute={{ screen: 'prelogin' }}
+                        initialLanguage={initialLanguage}
+                        initialMode={initialMode}
+                        productCounts={productCounts}
+                        initialAmountsHidden={initialAmountsHidden}
+                        bankingScenario={bankingScenario}
+                        onActivated={() => {
+                          setLaunchRoute(undefined);
+                          setSelection(previous => ({
+                            ...previous,
+                            scenario: 'active',
+                          }));
+                        }}
+                      />
+                    ) : demo.implementation === 'current' ? (
+                      <NativeCurrentApp
+                        country={selection.country}
+                        release={selection.release}
+                        scenario={selection.scenario}
+                        onExit={exit}
+                        screenTopInset={screenTopInset}
+                        bottomInset={logicalInsets.bottom}
+                        initialRoute={launchRoute as CurrentRoute | undefined}
+                        initialLanguage={initialLanguage}
+                        initialMode={initialMode}
+                        productCounts={productCounts}
+                        initialAmountsHidden={initialAmountsHidden}
+                        bankingScenario={bankingScenario}
+                      />
+                    ) : demo.implementation === 'kids' ? (
+                      <PiWebAccessibilityContext.Provider value={Platform.OS === 'web'}>
+                        <NativeKidsApp
+                          country={selection.country as 'RO' | 'SK' | 'HU'}
+                          scenario={selection.scenario}
+                          onExit={exit}
+                          screenTopInset={screenTopInset}
+                          bottomInset={logicalInsets.bottom}
+                          language={initialLanguage}
+                        />
+                      </PiWebAccessibilityContext.Provider>
+                    ) : demo.implementation === 'italy' ? (
+                      <NativeItalyApp
+                        previewInsetTop={previewInsetTop}
+                        productCounts={productCounts}
+                        initialAmountsHidden={initialAmountsHidden}
+                        onExit={exit}
+                      />
+                    ) : (
+                      <NativeCzechApp
+                        scenario={selection.scenario}
+                        onExit={exit}
+                        screenTopInset={screenTopInset}
+                        bottomInset={logicalInsets.bottom}
+                        searchRequest={searchRequest}
+                        initialRoute={
+                          launchRoute as CzechNativeRoute | undefined
+                        }
+                        initialLanguage={
+                          initialLanguage === 'cs'
+                            ? 'cs'
+                            : initialLanguage === 'en'
+                            ? 'en'
+                            : undefined
+                        }
+                        initialMode={initialMode}
+                        initialHomeTheme={initialHomeTheme}
+                        bankingScenario={bankingScenario}
+                        productCounts={productCounts}
+                        initialAmountsHidden={initialAmountsHidden}
+                      />
+                    )}
+                  </Suspense>
+                </SafeAreaInsetsContext.Provider>
+              </DemoViewport>
             </View>
           </>
         )}

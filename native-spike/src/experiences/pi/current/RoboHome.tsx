@@ -1,7 +1,17 @@
-import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import {
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import lighthouse from '@/assets/6f4a518088433560480f90c7a7448fdc1d294def.png';
+import { resolveAccordion } from '@/app/components/contracts/accordion';
+import { resolveProductsList } from '@/app/components/contracts/productsList';
 import { getProductIcon } from '@/app/components/products/productGlyph';
 import { FUTURE_CZ_ACCOUNT_CARD_ACTIONS } from '@/features/products/currentActions';
 import {
@@ -82,10 +92,10 @@ function ProductEvolution({
         role === 'single'
           ? styles.single
           : role === 'first'
-          ? styles.first
-          : role === 'last'
-          ? styles.last
-          : undefined,
+            ? styles.first
+            : role === 'last'
+              ? styles.last
+              : undefined,
         role === 'middle' || role === 'last' ? styles.separator : undefined,
       ]}
     >
@@ -164,6 +174,12 @@ function ProductEvolution({
 export default function RoboHome(host: CurrentScreenProps) {
   const model = useMemo(() => createCurrentProducts(host), [host]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [contentHeights, setContentHeights] = useState<Record<string, number>>(
+    {},
+  );
+  const motionByCategory = useRef<
+    Record<string, { content: Animated.Value; chevron: Animated.Value }>
+  >({});
   const mask = (value: Amount) => maskAmountParts(value, host.amountsHidden);
   // AccountSummary publishes this Home fixture independently of goal-detail state.
   const goalValue = 151_241.33;
@@ -234,6 +250,7 @@ export default function RoboHome(host: CurrentScreenProps) {
       </View>
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
         <Text
@@ -289,9 +306,6 @@ export default function RoboHome(host: CurrentScreenProps) {
             category.key === 'investments' && category.products.length > 0;
           const count = category.products.length + (investment ? 1 : 0);
           const open = !!expanded[category.key];
-          const shown = open
-            ? category.products
-            : category.products.slice(0, 1);
           const hasTotal = category.key !== 'cards' && count >= 2;
           const total = mask(
             investment
@@ -304,6 +318,69 @@ export default function RoboHome(host: CurrentScreenProps) {
                 )
               : model.calculateTotal(category.products),
           );
+          let motion = motionByCategory.current[category.key];
+          if (!motion) {
+            motion = {
+              content: new Animated.Value(open ? 1 : 0),
+              chevron: new Animated.Value(open ? 1 : 0),
+            };
+            motionByCategory.current[category.key] = motion;
+          }
+          const productListState = resolveProductsList({
+            productCount: count,
+            isOpen: open,
+            variant: 'evolution',
+            showTotal: hasTotal,
+            hasTotalData: Boolean(total),
+          });
+          const accordionState = resolveAccordion({
+            productCount: count,
+            isOpen: open,
+          });
+          const [x1, y1, x2, y2] = accordionState.easing;
+          const rotation = motion.chevron.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['0deg', '180deg'],
+          });
+          const stackOpacity = motion.content.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 0],
+          });
+          const stackOffset = motion.content.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, -2],
+          });
+          const toggleGroup = () => {
+            const nextOpen = !open;
+            const nextListState = resolveProductsList({
+              productCount: count,
+              isOpen: nextOpen,
+              variant: 'evolution',
+              showTotal: hasTotal,
+              hasTotalData: Boolean(total),
+            });
+            const nextAccordionState = resolveAccordion({
+              productCount: count,
+              isOpen: nextOpen,
+            });
+            const [nextX1, nextY1, nextX2, nextY2] = nextAccordionState.easing;
+            Animated.timing(motion.content, {
+              toValue: nextOpen ? 1 : 0,
+              duration: nextListState.durationMs,
+              easing: Easing.bezier(0.42, 0, 0.58, 1),
+              useNativeDriver: false,
+            }).start();
+            Animated.timing(motion.chevron, {
+              toValue: nextOpen ? 1 : 0,
+              duration: nextAccordionState.durationMs,
+              easing: Easing.bezier(nextX1, nextY1, nextX2, nextY2),
+              useNativeDriver: true,
+            }).start();
+            setExpanded(previous => ({
+              ...previous,
+              [category.key]: nextOpen,
+            }));
+          };
           return (
             <View key={category.key} style={styles.category}>
               <Pressable
@@ -311,12 +388,7 @@ export default function RoboHome(host: CurrentScreenProps) {
                 accessibilityLabel={category.title}
                 accessibilityState={{ expanded: open }}
                 disabled={count === 1}
-                onPress={() =>
-                  setExpanded(previous => ({
-                    ...previous,
-                    [category.key]: !open,
-                  }))
-                }
+                onPress={toggleGroup}
                 style={styles.categoryHeader}
               >
                 <Text
@@ -325,10 +397,11 @@ export default function RoboHome(host: CurrentScreenProps) {
                   {category.title}
                 </Text>
                 {count !== 1 ? (
-                  <View
+                  <Animated.View
+                    testID={`robo-home-accordion-chevron-${category.key}`}
                     style={[
                       exactSourceStyles.inline1,
-                      { transform: [{ rotate: open ? '180deg' : '0deg' }] },
+                      { transform: [{ rotate: rotation }] },
                     ]}
                   >
                     <SourceCustomIcon
@@ -336,54 +409,140 @@ export default function RoboHome(host: CurrentScreenProps) {
                       size={20}
                       color={host.tokens.text}
                     />
-                  </View>
+                  </Animated.View>
                 ) : null}
               </Pressable>
               <View style={styles.products}>
-                {shown.map((product, index) => (
+                {category.products[0] ? (
                   <ProductEvolution
-                    key={product.id}
+                    key={category.products[0].id}
                     host={host}
-                    product={product}
-                    title={investment ? 'Security Portfolio' : product.name}
-                    number={model.getProductDisplayNumber(product)}
-                    value={mask(model.formatProductAmount(product))}
-                    role={
-                      count === 1
-                        ? 'single'
-                        : index === 0
-                        ? 'first'
-                        : index === count - 1 && !hasTotal
-                        ? 'last'
-                        : 'middle'
+                    product={category.products[0]}
+                    title={
+                      investment
+                        ? 'Security Portfolio'
+                        : category.products[0].name
                     }
-                    onPress={() => select(product)}
-                  />
-                ))}
-                {open && investment ? (
-                  <ProductEvolution
-                    host={host}
-                    title="Investment goals"
-                    number=""
-                    goal
-                    value={mask({
-                      integer: '151 241',
-                      decimals: '.33',
-                      currency: 'CZK',
-                    })}
-                    role={hasTotal ? 'middle' : 'last'}
-                    onPress={() =>
-                      host.onNavigate({
-                        screen: 'investments',
-                        params: { view: 'goals' },
-                      })
-                    }
+                    number={model.getProductDisplayNumber(category.products[0])}
+                    value={mask(
+                      model.formatProductAmount(category.products[0]),
+                    )}
+                    role={count === 1 ? 'single' : 'first'}
+                    onPress={() => select(category.products[0]!)}
                   />
                 ) : null}
-                {!open && count > 1 ? (
+                <Animated.View
+                  testID={`robo-home-expanded-products-${category.key}`}
+                  pointerEvents={open ? 'auto' : 'none'}
+                  aria-hidden={productListState.contentHidden}
+                  accessibilityElementsHidden={productListState.contentHidden}
+                  importantForAccessibility={
+                    productListState.contentHidden
+                      ? 'no-hide-descendants'
+                      : 'auto'
+                  }
+                  style={[
+                    styles.expandedProducts,
+                    {
+                      maxHeight: motion.content.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, contentHeights[category.key] ?? 0],
+                      }),
+                      opacity: motion.content,
+                    },
+                  ]}
+                >
                   <View
+                    testID={`robo-home-products-content-${category.key}`}
+                    onLayout={event => {
+                      const height = event.nativeEvent.layout.height;
+                      setContentHeights(previous =>
+                        previous[category.key] === height
+                          ? previous
+                          : { ...previous, [category.key]: height },
+                      );
+                    }}
+                  >
+                    {category.products.slice(1).map((product, tailIndex) => {
+                      const productIndex = tailIndex + 1;
+                      return (
+                        <ProductEvolution
+                          key={product.id}
+                          host={host}
+                          product={product}
+                          title={
+                            investment ? 'Security Portfolio' : product.name
+                          }
+                          number={model.getProductDisplayNumber(product)}
+                          value={mask(model.formatProductAmount(product))}
+                          role={
+                            productIndex === count - 1 && !hasTotal
+                              ? 'last'
+                              : 'middle'
+                          }
+                          onPress={() => select(product)}
+                        />
+                      );
+                    })}
+                    {investment ? (
+                      <ProductEvolution
+                        host={host}
+                        title="Investment goals"
+                        number=""
+                        goal
+                        value={mask({
+                          integer: '151 241',
+                          decimals: '.33',
+                          currency: 'CZK',
+                        })}
+                        role={hasTotal ? 'middle' : 'last'}
+                        onPress={() =>
+                          host.onNavigate({
+                            screen: 'investments',
+                            params: { view: 'goals' },
+                          })
+                        }
+                      />
+                    ) : null}
+                    {hasTotal ? (
+                      <View
+                        style={[
+                          styles.totalRow,
+                          {
+                            backgroundColor: host.tokens.surface,
+                            borderColor: host.tokens.border,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.totalLabel,
+                            { color: host.tokens.text },
+                          ]}
+                        >
+                          {investment ? 'Total investments' : 'Total'}
+                        </Text>
+                        <View
+                          testID={`robo-home-total-money-${category.key}`}
+                          style={styles.totalMoney}
+                        >
+                          <AmountLabel host={host} value={total} compact />
+                        </View>
+                      </View>
+                    ) : null}
+                  </View>
+                </Animated.View>
+                {count > 1 ? (
+                  <Animated.View
                     testID={`robo-home-stack-${category.key}`}
-                    style={styles.stack}
+                    pointerEvents="none"
+                    style={[
+                      styles.stack,
+                      {
+                        opacity: stackOpacity,
+                        transform: [{ translateY: stackOffset }],
+                      },
+                    ]}
                   >
                     <Svg
                       width="100%"
@@ -401,27 +560,7 @@ export default function RoboHome(host: CurrentScreenProps) {
                         opacity={0.296317}
                       />
                     </Svg>
-                  </View>
-                ) : null}
-                {open && hasTotal ? (
-                  <View
-                    style={[
-                      styles.totalRow,
-                      {
-                        backgroundColor: host.tokens.surface,
-                        borderColor: host.tokens.border,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.totalLabel, { color: host.tokens.text }]}
-                    >
-                      {investment ? 'Total investments' : 'Total'}
-                    </Text>
-                    <View style={styles.totalMoney}>
-                      <AmountLabel host={host} value={total} compact />
-                    </View>
-                  </View>
+                  </Animated.View>
                 ) : null}
               </View>
             </View>
@@ -511,6 +650,7 @@ const styles = StyleSheet.create({
   },
   categoryTitle: { fontFamily: 'UniCredit-bold', fontSize: 20, lineHeight: 24 },
   products: { paddingHorizontal: 24, paddingTop: 8 },
+  expandedProducts: { overflow: 'hidden' },
   card: { padding: 16 },
   body: { gap: 8 },
   productTop: { flexDirection: 'row', gap: 16, alignItems: 'flex-start' },
@@ -544,8 +684,8 @@ const styles = StyleSheet.create({
   separator: { borderTopWidth: 0.5 },
   stack: {
     height: 9,
-    width: '97.48%',
-    alignSelf: 'center',
+    left: 24,
+    right: 24,
     position: 'absolute',
     top: '100%',
   },
@@ -557,7 +697,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   totalLabel: { fontFamily: 'UniCredit-regular', fontSize: 18, lineHeight: 20 },
-  totalMoney: { alignItems: 'flex-end' },
+  totalMoney: { alignItems: 'flex-start' },
 });
 
 const exactSourceStyles = StyleSheet.create({

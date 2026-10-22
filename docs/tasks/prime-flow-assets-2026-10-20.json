@@ -1,0 +1,135 @@
+{
+  "integrationOwner": "/root/prime_integration",
+  "baseCommit": "700c23395e1481225e0bc594d2b56ff8f50c6000",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "previousCount": 1469,
+  "previousAggregate": "c3e8faf2af42f7e733eee8bd0b24af848f17dba70d9899872b6bbc7a9bbfd384",
+  "currentCount": 1477,
+  "currentAggregate": "8f86d34ce48ca7b91e218fc36a4056507aeb37673e20aedccccf442b76b95cec",
+  "additions": [
+    {
+      "path": "src/assets/investments/robo/funding-chevron-down.svg",
+      "bytes": 542,
+      "sha256": "005ae8ee383c3895d36757ac802ebf6d430d3c3fbfb757fd6a46c7d7c6b9c548",
+      "source": {
+        "fileKey": "Lteu53v7vtyt7UqM64HuMq",
+        "nodeId": "I14506:85908;715:10292",
+        "evidence": ".codex-temp/robo-funding-figma-20261020/evidence.json"
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/investments/robo/funding-radio-selected.svg",
+      "bytes": 379,
+      "sha256": "47260d16889931fe52dcd8785d97adcd94d56647aa9148d6cff4ff504da94a67",
+      "source": {
+        "fileKey": "Lteu53v7vtyt7UqM64HuMq",
+        "nodeId": "I14994:8971;1517:2592",
+        "evidence": ".codex-temp/robo-funding-figma-20261020/evidence.json"
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/investments/robo/funding-radio-unselected.svg",
+      "bytes": 322,
+      "sha256": "f6352acdffc6b82fa8f7dd960b1b18b65ccdc732eb2fe02d6717c5722a819f33",
+      "source": {
+        "fileKey": "Lteu53v7vtyt7UqM64HuMq",
+        "nodeId": "I14994:8981;1517:2592",
+        "evidence": ".codex-temp/robo-funding-figma-20261020/evidence.json"
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/prime-reference/private-advisor.png",
+      "bytes": 2191511,
+      "sha256": "c13923b12a44e58c5c3b8104e9ac66868337e2206e84df52195c439ea0d6b0f9",
+      "source": {
+        "kind": "AI-generated original fictional advisor photograph",
+        "original": "$CODEX_HOME/generated_images/01a159bf-66b9-71b2-851f-0772ad351304/exec-73530e99-9559-490e-aa9b-3d8307e5ac90.png",
+        "userRequest": "Use a different advisor photograph and name for Private & Wealth."
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/prime-reference/private-shield.svg",
+      "bytes": 1008,
+      "sha256": "ed46d28859c1398b8036c04b8434cc434f1784de0d8e7427a91a2aaaa4ca1109",
+      "source": {
+        "fileKey": "r4qf4mRs3EUatRaHokJ0AE",
+        "nodeId": "1091:24468"
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/prime-reference/standard-advisor.png",
+      "bytes": 1099867,
+      "sha256": "c97dd10b862ef6c03d9e0c967aac1400906a24ebc9c4f4692870df29e67114ef",
+      "source": {
+        "kind": "Original user-provided advisor photograph; used for PRIME Iacob Mihai after the explicit identity swap",
+        "sha256": "c97dd10b862ef6c03d9e0c967aac1400906a24ebc9c4f4692870df29e67114ef",
+        "userRequest": "Use the uploaded photograph and Iacob Mihai identity for PRIME; retain David Novak for Standard active."
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/prime-reference/upgrade-advisor.png",
+      "bytes": 490502,
+      "sha256": "9f84631d4286e331ebbfc6d1f7c13b12895393e8da403e7bfc865114c411200f",
+      "source": {
+        "fileKey": "r4qf4mRs3EUatRaHokJ0AE",
+        "nodeId": "7526:17928",
+        "kind": "Original uploaded photograph fill; not a flattened interface"
+      },
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "src/assets/prime-reference/upgrade-diamond.svg",
+      "bytes": 1114,
+      "sha256": "ef02eb53d3db4fcedd4c0cecc4dc215f8c48bd42cc2b97ea08fc1e5a6248a2b4",
+      "source": {
+        "fileKey": "r4qf4mRs3EUatRaHokJ0AE",
+        "nodeId": "2281:17126"
+      },
+      "originalBytesPreserved": true
+    }
+  ],
+  "previousAssetPreservation": {
+    "count": 1469,
+    "pathBlobSha256Aggregate": "c3e8faf2af42f7e733eee8bd0b24af848f17dba70d9899872b6bbc7a9bbfd384",
+    "result": "Every prior path/blob pair is unchanged; subtracting only the eight listed additions reconstructs the approved baseline exactly."
+  },
+  "newExactDuplicateBlobGroups": [],
+  "byteNormalization": "Matches the unchanged strict audit: .gitattributes eol=lf for SVG; original binary bytes for photographs. The normalized 1474 aggregate was cross-checked against strict audit aggregate 8ecf0a19c46eea1fa34e7bfa53eaa72c17dbb2b64bf64968795f38d7c174a09a.",
+  "supplementaryMedia": [
+    {
+      "path": "public/audio/prime-advisor-david-call.mp3",
+      "bytes": 163916,
+      "sha256": "f5763c400bb18bee632e8eec9e402cd00f1847d7bfad0c0dd2984d2bbbb70a12",
+      "kind": "Generated demo ringback and fictional synthesized agent greeting; no real telephone call",
+      "trackedByImageAudit": false
+    },
+    {
+      "path": "public/audio/prime-advisor-iacob-call.mp3",
+      "bytes": 184940,
+      "sha256": "db3af65c5432e9d89d476878712630ab27c612978a92e340be3eef59b4525edf",
+      "kind": "Generated demo ringback and fictional synthesized agent greeting; no real telephone call",
+      "trackedByImageAudit": false
+    },
+    {
+      "path": "public/audio/prime-private-anna-call.mp3",
+      "bytes": 193868,
+      "sha256": "dc48025d037d24f762df74817c16340eac1c02b1a87d66dff00efc7bf1c37571",
+      "kind": "Generated demo ringback and fictional synthesized agent greeting; no real telephone call",
+      "trackedByImageAudit": false
+    },
+    {
+      "path": "public/audio/prime-upgrade-call.mp3",
+      "bytes": 193004,
+      "sha256": "14079b4b48e710c9ba411a12d8054a96961e265a856fc8abf911cc7ace5a5a67",
+      "kind": "Generated demo ringback and fictional synthesized agent greeting; no real telephone call",
+      "trackedByImageAudit": false
+    }
+  ],
+  "policy": "No audit assertion, threshold, count/hash comparison or image conversion was weakened or performed. Existing approved retirements are preserved unchanged."
+}

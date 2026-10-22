@@ -521,22 +521,22 @@ export function NavigationRowVariantSpecimen() {
       <div className="w-[375px] bg-[var(--uc-neutral-200)]">
         {selectedVariant === "icon-title" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            title="Manage account settings and preferences"
             leadingVisual={<NavigationPlaceholderIcon />}
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "icon-description" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
-            description="Description Short"
+            title="Manage account settings and preferences"
+            description="Manage your preferences"
             leadingVisual={<NavigationPlaceholderIcon />}
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "icon-cta" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM"
+            title="Account settings"
             linkLabel="CTA"
             leadingVisual={<NavigationPlaceholderIcon />}
             trailingAccessory="chevron"
@@ -544,55 +544,55 @@ export function NavigationRowVariantSpecimen() {
           />
         ) : selectedVariant === "icon-readed" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
-            description="Description Short"
+            title="Manage account settings and preferences"
+            description="Manage your preferences"
             leadingVisual={<NavigationPlaceholderIcon />}
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "icon-prelogin" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM"
+            title="Account settings"
             leadingVisual={<NavigationPlaceholderIcon />}
           />
         ) : selectedVariant === "no-icon-title" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            title="Manage account settings and preferences"
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "no-icon-description" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
-            description="Description Short"
+            title="Manage account settings and preferences"
+            description="Manage your preferences"
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "no-icon-cta" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM"
+            title="Account settings"
             linkLabel="CTA"
             trailingAccessory="chevron"
             onClick={noop}
           />
         ) : selectedVariant === "toggle-title" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
+            title="Manage account settings and preferences"
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
             onToggle={setToggleChecked}
           />
         ) : selectedVariant === "toggle-description" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM TITLE LOREM IPSUM"
-            description="Description Short"
+            title="Manage account settings and preferences"
+            description="Manage your preferences"
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
             onToggle={setToggleChecked}
           />
         ) : selectedVariant === "toggle-cta" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM"
+            title="Account settings"
             linkLabel="CTA"
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
@@ -600,7 +600,7 @@ export function NavigationRowVariantSpecimen() {
           />
         ) : selectedVariant === "toggle-title-light" ? (
           <NavigationRow
-            title="LOREM IPSUM"
+            title="Payment notifications"
             leadingVisual={<NavigationFaqIcon />}
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
@@ -608,8 +608,8 @@ export function NavigationRowVariantSpecimen() {
           />
         ) : selectedVariant === "toggle-description-light" ? (
           <NavigationRow
-            title="LOREM IPSUM"
-            description="Lorem ipsum"
+            title="Payment notifications"
+            description="Get updates about account activity"
             leadingVisual={<NavigationFaqIcon />}
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
@@ -617,7 +617,7 @@ export function NavigationRowVariantSpecimen() {
           />
         ) : selectedVariant === "toggle-icon-light" ? (
           <NavigationRow
-            title="LOREM IPSUM"
+            title="Payment notifications"
             leadingVisual={<NavigationPlaceholderIcon />}
             trailingAccessory="toggle"
             toggleChecked={toggleChecked}
@@ -625,8 +625,8 @@ export function NavigationRowVariantSpecimen() {
           />
         ) : selectedVariant === "special-card" ? (
           <NavigationRow
-            title="TITLE LOREM IPSUM"
-            description="Description Short"
+            title="Account settings"
+            description="Manage your preferences"
             leadingVisual={<NavigationCardArt />}
             trailingAccessory="chevron"
             onClick={noop}
@@ -1083,12 +1083,25 @@ export function SectionHeadingDividerVariantSpecimen() {
   );
 }
 
+const PRODUCT_SPECIMEN_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  account: 'Explore account options for your everyday banking.',
+  accounts: 'Explore account options for your everyday banking.',
+  loans: 'Explore borrowing options and review the application steps.',
+  'cash-loan': 'Review cash loan options and the steps needed to apply.',
+  cards: 'Explore card options for your everyday purchases.',
+  'credit-cards': 'Review credit card options and how to apply.',
+};
+
 export function ProductAccordionCountrySpecimen({
   animated = false,
 }: {
   animated?: boolean;
 }) {
   const [selectedCountry, setSelectedCountry] = useState<(typeof COUNTRIES)[number]>(COUNTRIES[0]);
+  const specimenProducts = getProductsForCountry(selectedCountry).map(product => ({
+    ...product,
+    description: PRODUCT_SPECIMEN_DESCRIPTIONS[product.id] ?? `Explore ${product.title.toLowerCase()} and review the next steps.`,
+  }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -1104,11 +1117,11 @@ export function ProductAccordionCountrySpecimen({
         {animated ? (
           <ProductAccordionAnimated
             welcomeText={COUNTRY_META[selectedCountry].nameEN}
-            products={getProductsForCountry(selectedCountry)}
+            products={specimenProducts}
             findOutMoreText="FIND OUT MORE"
           />
         ) : (
-          <ProductAccordion products={getProductsForCountry(selectedCountry)} />
+          <ProductAccordion products={specimenProducts} />
         )}
       </div>
     </div>

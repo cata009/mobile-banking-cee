@@ -1,4 +1,5 @@
 import { bannerWeb } from "../contracts/bannerWeb";
+import { BANNER_ORIGINAL_SOURCES } from "../contracts/banner";
 import type { CSSProperties } from "react";
 
 import { AppIcon, type IconName } from "@/app/components/icons";
@@ -8,6 +9,7 @@ export const INFO_BANNER_SOURCE = {
   schema: "codex-figma-component-spec/v1",
   figmaComponentName: "Banner",
   sourceNodeId: "9104:14329",
+  originalSource: BANNER_ORIGINAL_SOURCES.info,
   width: 327,
   height: 153,
   cornerRadius: 8,
