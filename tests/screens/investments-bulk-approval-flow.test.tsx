@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DemoProvider } from "@/app/state/demoStore";
 import { COUNTRIES } from "@/app/registry/demoConfig";
@@ -23,12 +23,14 @@ afterEach(() => {
   resetNativeWebRendererDiagnostics();
 });
 
-function renderBulkPrototype() {
-  return render(
+async function renderBulkPrototype() {
+  const view = render(
     <DemoProvider initialState={{ country: "RO", product: "PI" }}>
       {renderFlowPreview("investments-bulk-prototype" as FlowScreenKind)}
     </DemoProvider>,
   );
+  await waitFor(() => expect(document.querySelector('[data-flow-preview-loading]')).toBeNull());
+  return view;
 }
 
 function enterBulkSigning() {
@@ -99,8 +101,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("flow-prototype-steps")).toHaveClass("w-max");
   });
 
-  it("starts with an ordinary order list and offers BULK SIGNING to enter bulk mode", () => {
-    renderBulkPrototype();
+  it("starts with an ordinary order list and offers BULK SIGNING to enter bulk mode", async () => {
+    await renderBulkPrototype();
 
     expect(screen.getAllByRole("heading", { name: "Orders to approve" })).not.toHaveLength(0);
     expect(screen.getByText("These investment order drafts were prepared by your advisor and are awaiting for your approval. Once approved, the orders will be processed.")).toBeInTheDocument();
@@ -115,8 +117,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" })).toBeInTheDocument();
   });
 
-  it("hides BULK SIGNING when only one order remains", () => {
-    renderBulkPrototype();
+  it("hides BULK SIGNING when only one order remains", async () => {
+    await renderBulkPrototype();
     const draftsToReject = [
       "UniCredit Balanced Income Fund",
       "onemarkets Climate Focus Fund",
@@ -140,7 +142,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
   });
 
   it("selects every eligible draft on bulk entry and keeps the selection fixed", async () => {
-    const { container } = renderBulkPrototype();
+    const { container } = await renderBulkPrototype();
 
     selectDrafts(2);
 
@@ -157,8 +159,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(await screen.findByRole("button", { name: /Ex-Ante cost information/i })).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("exits bulk mode and clears the selection with CANCEL", () => {
-    renderBulkPrototype();
+  it("exits bulk mode and clears the selection with CANCEL", async () => {
+    await renderBulkPrototype();
     selectDrafts(2);
 
     fireEvent.click(screen.getByRole("button", { name: "CANCEL" }));
@@ -168,8 +170,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "BULK SIGNING" })).toBeInTheDocument();
   });
 
-  it("keeps every eligible draft selected through review and summary", () => {
-    renderBulkPrototype();
+  it("keeps every eligible draft selected through review and summary", async () => {
+    await renderBulkPrototype();
 
     selectNamedDrafts("UniCredit Balanced Income Fund", "onemarkets Climate Focus Fund", "Sustainable Future Mixed Fund");
     fireEvent.click(screen.getByRole("button", { name: "Sign orders" }));
@@ -188,8 +190,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-draft-draft-02")).toHaveTextContent("Marked to sign");
   });
 
-  it("keeps an individually rejected draft in the summary after it leaves the default list", () => {
-    renderBulkPrototype();
+  it("keeps an individually rejected draft in the summary after it leaves the default list", async () => {
+    await renderBulkPrototype();
 
     fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
@@ -206,15 +208,15 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-draft-draft-04")).toHaveTextContent("Marked to sign");
   });
 
-  it("renders the Figma row logo in a 32px slot", () => {
-    renderBulkPrototype();
+  it("renders the Figma row logo in a 32px slot", async () => {
+    await renderBulkPrototype();
 
     const logo = screen.getByRole("img", { name: "UniCredit Balanced Income Fund product" });
     expect(logo).toHaveStyle({ width: "32px", height: "32px" });
   });
 
-  it("shows the fixed selection checkmark and leaves group-ending rows without a trailing divider", () => {
-    renderBulkPrototype();
+  it("shows the fixed selection checkmark and leaves group-ending rows without a trailing divider", async () => {
+    await renderBulkPrototype();
 
     enterBulkSigning();
     expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund" })).toBeChecked();
@@ -229,8 +231,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(lastOrderRow).not.toHaveClass("border-b");
   });
 
-  it("enters bulk mode with every eligible draft already selected", () => {
-    renderBulkPrototype();
+  it("enters bulk mode with every eligible draft already selected", async () => {
+    await renderBulkPrototype();
 
     enterBulkSigning();
     expect(screen.getByTestId("bulk-selected-count")).toHaveTextContent("Selected 10");
@@ -238,8 +240,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Sign orders" })).toBeEnabled();
   });
 
-  it("confirms individual rejection before removing the order from the default list", () => {
-    renderBulkPrototype();
+  it("confirms individual rejection before removing the order from the default list", async () => {
+    await renderBulkPrototype();
 
     fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
     expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
@@ -262,8 +264,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.queryByRole("button", { name: "Sign orders" })).not.toBeInTheDocument();
   });
 
-  it("uses singular rejection copy when one order is selected", () => {
-    renderBulkPrototype();
+  it("uses singular rejection copy when one order is selected", async () => {
+    await renderBulkPrototype();
 
     fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
@@ -273,8 +275,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Yes, reject the order" })).toBeInTheDocument();
   });
 
-  it("uses the fixed circular Figma navigator without duplicate order controls", () => {
-    renderBulkPrototype();
+  it("uses the fixed circular Figma navigator without duplicate order controls", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
 
@@ -337,7 +339,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
   });
 
   it("uses the shared Investments disclosure presentation with Ex-Ante open and the other sections closed", async () => {
-    const { container } = renderBulkPrototype();
+    const { container } = await renderBulkPrototype();
     startReviewWithSelectedDrafts(1);
     await asyncNativeReady(container);
 
@@ -350,8 +352,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(await screen.findByText("Key Information Document (KID)")).toBeInTheDocument();
   });
 
-  it("shows every pending draft in a complete, non-truncated read-only summary card", () => {
-    renderBulkPrototype();
+  it("shows every pending draft in a complete, non-truncated read-only summary card", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts(1);
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
@@ -377,8 +379,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toHaveClass("!w-full");
   });
 
-  it("opens any summary card as a read-only inspection and returns without changing its status", () => {
-    renderBulkPrototype();
+  it("opens any summary card as a read-only inspection and returns without changing its status", async () => {
+    await renderBulkPrototype();
 
     fireEvent.click(screen.getByRole("button", { name: "Open order details for UniCredit Balanced Income Fund" }));
     fireEvent.click(screen.getByRole("button", { name: "Reject" }));
@@ -403,12 +405,13 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Rejected");
   });
 
-  it("uses a clean generic success tile with one return action and no failure shortcut", () => {
+  it("uses a clean generic success tile with one return action and no failure shortcut", async () => {
     render(
       <DemoProvider initialState={{ country: "RO", product: "PI" }}>
         {renderFlowPreview("investments-bulk-confirmation" as FlowScreenKind)}
       </DemoProvider>,
     );
+    await waitFor(() => expect(document.querySelector('[data-flow-preview-loading]')).toBeNull());
 
     expect(screen.getByTestId("bulk-signing-success-tile")).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Signing successful" })).not.toHaveLength(0);
@@ -419,8 +422,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-signing-success-tile")).not.toHaveClass("border", "shadow-sm");
   });
 
-  it("keeps a draft unread until its review content reaches the bottom", () => {
-    renderBulkPrototype();
+  it("keeps a draft unread until its review content reaches the bottom", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts(3);
 
@@ -434,8 +437,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-review-read-status")).toHaveAttribute("data-read", "true");
   });
 
-  it("preserves the earned read state while navigating between selected drafts", () => {
-    renderBulkPrototype();
+  it("preserves the earned read state while navigating between selected drafts", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts(3);
     scrollReviewContentToBottom();
@@ -446,8 +449,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-review-read-status")).toHaveTextContent("You're all caught up");
   });
 
-  it("keeps batch signing disabled until every marked order was presented and the last-order terms are accepted", () => {
-    renderBulkPrototype();
+  it("keeps batch signing disabled until every marked order was presented and the last-order terms are accepted", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
     fireEvent.click(screen.getByRole("button", { name: "View summary" }));
@@ -462,8 +465,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Confirm and sign ALL marked ORDERS" })).toBeEnabled();
   });
 
-  it("enters one standard signing step for the eligible marked orders", () => {
-    renderBulkPrototype();
+  it("enters one standard signing step for the eligible marked orders", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
     moveToLastOrder();
@@ -475,8 +478,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByRole("button", { name: "Sign order" })).toBeInTheDocument();
   });
 
-  it("keeps every order marked and removes the current-order deselection control", () => {
-    renderBulkPrototype();
+  it("keeps every order marked and removes the current-order deselection control", async () => {
+    await renderBulkPrototype();
 
     startReviewWithSelectedDrafts();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
@@ -489,8 +492,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByTestId("bulk-summary-draft-draft-01")).toHaveTextContent("Marked to sign");
   });
 
-  it("preserves the complete marked set while moving back from the final review page", () => {
-    renderBulkPrototype();
+  it("preserves the complete marked set while moving back from the final review page", async () => {
+    await renderBulkPrototype();
     startReviewWithSelectedDrafts();
     moveToLastOrder();
     fireEvent.click(screen.getByRole("switch", { name: /Accept terms/i }));
@@ -508,6 +511,7 @@ describe("Investments bulk approval Flow Library prototype", () => {
         {renderFlowPreview("investments-bulk-prototype" as FlowScreenKind)}
       </DemoProvider>,
     );
+    await waitFor(() => expect(document.querySelector('[data-flow-preview-loading]')).toBeNull());
 
     expect(document.body).toHaveTextContent(getCountryCurrency(country));
     startReviewWithSelectedDrafts(1);

@@ -252,8 +252,7 @@ describe('flow-library screen', () => {
     // carry headings of their own, so this looks in the header specifically.
     expect(screen.getByTestId('flow-detail-header')).toHaveTextContent('Bulk approval of investment orders')
 
-    // The off-screen capture strip renders capturable phone screens up-front so
-    // export works regardless of the active tab.
+    // The visible Journey preview is capturable; export-only copies are deferred.
     expect(document.querySelector('[data-flow-screen-capture="true"]')).toBeInTheDocument()
 
     // Tabs use real tab semantics; the Journey tab surfaces the scenarios.
@@ -551,7 +550,8 @@ describe('flow-library screen', () => {
     await asyncNativeReady(document.body)
     expect(screen.getByText('Merchant data available')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('YouTube Premium').length).toBeGreaterThan(0))
-    expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'In-store detail' }))
+    await waitFor(() => expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0))
   })
 
   it('renders ETHOCA merchant marks and PFM fallbacks in the Native transaction lists', async () => {

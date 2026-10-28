@@ -27,7 +27,8 @@ let originalMatchMedia: typeof window.matchMedia
 beforeEach(() => {
   resetNativeWebRendererDiagnostics()
   originalMatchMedia = window.matchMedia
-  window.matchMedia = vi.fn((media: string) => ({ media, matches: false })) as unknown as typeof window.matchMedia
+  // Preserve the complete MediaQueryList API used by the deferred Native host.
+  window.matchMedia = vi.fn((media: string) => originalMatchMedia(media))
 })
 
 afterEach(() => {
@@ -38,13 +39,14 @@ afterEach(() => {
   resetRsPurchase()
 })
 
-function renderPrototype() {
+async function renderPrototype() {
   render(
     <DemoProvider>
       <FlowLibraryScreen initialFlowId="rs-property-insurance" />
     </DemoProvider>,
   )
   fireEvent.click(screen.getByRole('tab', { name: 'Prototype' }))
+  await waitFor(() => expect(document.querySelector('[data-flow-preview-loading]')).toBeNull())
   return within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
 }
 
@@ -64,8 +66,8 @@ function jumpToScreen(kind: RsPropertyInsuranceScreenKind) {
 }
 
 describe('RS property insurance prototype', () => {
-  it('carries the chosen package through configuration, the data check and the payment', () => {
-    const preview = renderPrototype()
+  it('carries the chosen package through configuration, the data check and the payment', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
     fireEvent.click(preview.getByRole('radio', { name: 'Choose Package C' }))
@@ -84,8 +86,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('7.722,09 RSD')).toBeInTheDocument()
   })
 
-  it('reprices every downstream screen when the term changes', () => {
-    const preview = renderPrototype()
+  it('reprices every downstream screen when the term changes', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
     fireEvent.click(preview.getByRole('radio', { name: 'Choose Package A' }))
@@ -123,8 +125,8 @@ describe('RS property insurance prototype', () => {
     expect(within(wrapper).getByRole('button', { name: 'Package A' })).toBeInTheDocument()
   })
 
-  it('shows Restart only after the reviewer has moved away from the first screen', () => {
-    renderPrototype()
+  it('shows Restart only after the reviewer has moved away from the first screen', async () => {
+    await renderPrototype()
 
     expect(screen.queryByRole('button', { name: 'Restart' })).not.toBeInTheDocument()
 
@@ -132,8 +134,8 @@ describe('RS property insurance prototype', () => {
     expect(screen.getByRole('button', { name: 'Restart' })).toBeInTheDocument()
   })
 
-  it('removes the standalone starting-price block from the cover page', () => {
-    const preview = renderPrototype()
+  it('removes the standalone starting-price block from the cover page', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-product-cover')
 
@@ -141,8 +143,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('What you are covered for')).toBeInTheDocument()
   })
 
-  it('keeps package content in normal scroll while the selection CTA remains sticky', () => {
-    const preview = renderPrototype()
+  it('keeps package content in normal scroll while the selection CTA remains sticky', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -154,8 +156,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByRole('button', { name: 'Select package' }).closest('.mt-auto')).toBeInTheDocument()
   })
 
-  it('removes package marketing subtitles from all package cards', () => {
-    const preview = renderPrototype()
+  it('removes package marketing subtitles from all package cards', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -164,8 +166,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText('Widest cover', { exact: true })).not.toBeInTheDocument()
   })
 
-  it('keeps duration and cover period inside the selected package card without duplicate summary rows', () => {
-    const preview = renderPrototype()
+  it('keeps duration and cover period inside the selected package card without duplicate summary rows', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-duration-premium')
 
@@ -183,8 +185,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText('Selected package')).not.toBeInTheDocument()
   })
 
-  it('requires an explicit package choice before continuing', () => {
-    const preview = renderPrototype()
+  it('requires an explicit package choice before continuing', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -193,8 +195,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByRole('button', { name: 'Select package' })).toBeDisabled()
   })
 
-  it('keeps package cards compact by connecting the description directly to the cover limits', () => {
-    const preview = renderPrototype()
+  it('keeps package cards compact by connecting the description directly to the cover limits', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -205,8 +207,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getAllByText('Your things', { exact: true })).toHaveLength(3)
   })
 
-  it('shows RSD on package detail sums without adding it to the section title', () => {
-    const preview = renderPrototype()
+  it('shows RSD on package detail sums without adding it to the section title', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
     fireEvent.click(preview.getAllByRole('button', { name: 'More details' })[0]!)
@@ -219,8 +221,8 @@ describe('RS property insurance prototype', () => {
     expect(details.querySelector('[data-bottom-sheet-footer] > div')).not.toHaveClass('border-t')
   })
 
-  it('keeps the cover benefits compact and centred against their markers', () => {
-    const preview = renderPrototype()
+  it('keeps the cover benefits compact and centred against their markers', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-product-cover')
 
@@ -233,8 +235,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('Burglary and third-party liability')).toBeInTheDocument()
   })
 
-  it('keeps a package-card click responsive after a mouse movement', () => {
-    const preview = renderPrototype()
+  it('keeps a package-card click responsive after a mouse movement', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -253,8 +255,8 @@ describe('RS property insurance prototype', () => {
     expect(packageARadio).toHaveAttribute('aria-checked', 'true')
   })
 
-  it('collects the insurance period before the package carousel and the start date after it', () => {
-    const preview = renderPrototype()
+  it('collects the insurance period before the package carousel and the start date after it', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -269,8 +271,8 @@ describe('RS property insurance prototype', () => {
     expect(calendar).toHaveAttribute('viewBox', '0 0 32 32')
   })
 
-  it('keeps the duration premium step focused on acknowledgement and add-on choices', () => {
-    const preview = renderPrototype()
+  it('keeps the duration premium step focused on acknowledgement and add-on choices', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-duration-premium')
 
@@ -278,8 +280,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByLabelText('Insurance start date')).not.toBeInTheDocument()
   })
 
-  it('keeps the add-on claim-limit copy free of an informational icon', () => {
-    const preview = renderPrototype()
+  it('keeps the add-on claim-limit copy free of an informational icon', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-duration-premium')
     const assistanceOptIn = preview.getByRole('button', { name: /Emergency home assistance/ })
@@ -294,8 +296,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByTestId('emergency-assistance-opt-in')).toContainElement(assistanceOptIn)
   })
 
-  it('puts the home-address toggle above empty property fields and prefills them when enabled', () => {
-    const preview = renderPrototype()
+  it('puts the home-address toggle above empty property fields and prefills them when enabled', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-insured-object')
 
@@ -321,16 +323,16 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByLabelText('House number')).toHaveValue('')
   })
 
-  it('does not repeat the address toggle on the policyholder screen', () => {
-    const preview = renderPrototype()
+  it('does not repeat the address toggle on the policyholder screen', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-policyholder')
 
     expect(preview.queryByRole('switch', { name: 'Same as the insured property' })).not.toBeInTheDocument()
   })
 
-  it('keeps the masked JMBG fully visible on the policyholder screen', () => {
-    const preview = renderPrototype()
+  it('keeps the masked JMBG fully visible on the policyholder screen', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-policyholder')
 
@@ -338,16 +340,16 @@ describe('RS property insurance prototype', () => {
     expect(jmbg).toHaveClass('whitespace-nowrap')
   })
 
-  it('keeps the personal-data section free of the removed helper sentence', () => {
-    const preview = renderPrototype()
+  it('keeps the personal-data section free of the removed helper sentence', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-policyholder')
 
     expect(preview.queryByText('Taken from your verified profile. To change it, update your profile details.')).not.toBeInTheDocument()
   })
 
-  it('shows travel, property and life insurance in a closable insurance sheet', () => {
-    const preview = renderPrototype()
+  it('shows travel, property and life insurance in a closable insurance sheet', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-insurance-sheet')
 
@@ -359,8 +361,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText('Car Insurance (My Car)')).not.toBeInTheDocument()
   })
 
-  it('opens the product-cover step when Property insurance is selected', () => {
-    const preview = renderPrototype()
+  it('opens the product-cover step when Property insurance is selected', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-insurance-sheet')
     fireEvent.click(preview.getByRole('button', { name: 'Property insurance' }))
@@ -368,8 +370,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getAllByRole('heading', { name: 'Property insurance' }).length).toBeGreaterThan(0)
   })
 
-  it('starts the package carousel centered on the middle package', () => {
-    const preview = renderPrototype()
+  it('starts the package carousel centered on the middle package', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -390,8 +392,8 @@ describe('RS property insurance prototype', () => {
     expect(nodes['rs-pi-insured-object']?.primary?.to).toBe('rs-pi-review')
   })
 
-  it('shows the payer account selector and a readable international phone format on Policyholder', () => {
-    const preview = renderPrototype()
+  it('shows the payer account selector and a readable international phone format on Policyholder', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-policyholder')
 
@@ -401,8 +403,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('Use format +381 64 123 4567')).toBeInTheDocument()
   })
 
-  it('uses the Generali account and Purpose code in payment create and review', () => {
-    const preview = renderPrototype()
+  it('uses the Generali account and Purpose code in payment create and review', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-create')
     expect(preview.getByLabelText('Account number')).toHaveValue('160-468202-30')
@@ -413,16 +415,16 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('260')).toBeInTheDocument()
   })
 
-  it('locks urgent processing on the property-insurance payment form', () => {
-    const preview = renderPrototype()
+  it('locks urgent processing on the property-insurance payment form', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-create')
 
     expect(preview.getByRole('switch', { name: 'URGENT/INSTANT PROCESSING' })).toBeDisabled()
   })
 
-  it('centres the carousel with equal side gutters and scrolls to consent after package selection', () => {
-    const preview = renderPrototype()
+  it('centres the carousel with equal side gutters and scrolls to consent after package selection', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -441,8 +443,8 @@ describe('RS property insurance prototype', () => {
     expect(consent).toBeInTheDocument()
   })
 
-  it('stretches every package card to the tallest card height', () => {
-    const preview = renderPrototype()
+  it('stretches every package card to the tallest card height', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
 
@@ -451,8 +453,8 @@ describe('RS property insurance prototype', () => {
     expect(cards.every((card) => card.classList.contains('h-full'))).toBe(true)
   })
 
-  it('opens a Life insurance cover page without adding it to the documented flow', () => {
-    const preview = renderPrototype()
+  it('opens a Life insurance cover page without adding it to the documented flow', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-insurance-sheet')
     fireEvent.click(preview.getByRole('button', { name: 'Life insurance' }))
@@ -464,8 +466,8 @@ describe('RS property insurance prototype', () => {
     expect(RS_PROPERTY_INSURANCE_FLOW.screenSpecs['rs-pi-life-insurance' as keyof typeof RS_PROPERTY_INSURANCE_FLOW.screenSpecs]).toBeUndefined()
   })
 
-  it('treats insufficient balance as a separate pre-package case', () => {
-    const preview = renderPrototype()
+  it('treats insufficient balance as a separate pre-package case', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-product-cover')
     fireEvent.click(screen.getByRole('button', { name: 'Balance check' }))
@@ -476,8 +478,8 @@ describe('RS property insurance prototype', () => {
     expect(RS_PROPERTY_INSURANCE_FLOW.prototype?.nodes['rs-pi-payment-failed' as never]).toBeUndefined()
   })
 
-  it('shows a friendly retry-later state when Generali is unavailable', () => {
-    const preview = renderPrototype()
+  it('shows a friendly retry-later state when Generali is unavailable', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-product-cover')
     jumpToScreen('rs-pi-api-unavailable')
@@ -487,8 +489,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByText(/API|failed|down/i)).not.toBeInTheDocument()
   })
 
-  it('keeps primary bottom CTAs constrained to the same full content width', () => {
-    const preview = renderPrototype()
+  it('keeps primary bottom CTAs constrained to the same full content width', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-create')
 
@@ -497,8 +499,8 @@ describe('RS property insurance prototype', () => {
     expect(cta.parentElement).toHaveClass('px-[24px]')
   })
 
-  it('keeps the Flow Library scroll position when the prototype timeline changes', () => {
-    renderPrototype()
+  it('keeps the Flow Library scroll position when the prototype timeline changes', async () => {
+    await renderPrototype()
 
     const outerScroller = Array.from(document.querySelectorAll('div')).find(
       (element) => element.className === 'h-full overflow-y-auto bg-[var(--uc-app-bg)] text-[var(--uc-text)] scrollbar-hide',
@@ -530,8 +532,8 @@ describe('RS property insurance prototype', () => {
     }
   })
 
-  it('uses a sticky acknowledgement action and a 28px title in Must read', () => {
-    const preview = renderPrototype()
+  it('uses a sticky acknowledgement action and a 28px title in Must read', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-must-read')
 
@@ -539,8 +541,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByRole('button', { name: 'I have read this' }).closest('[data-bottom-sheet-footer="true"]')).toBeInTheDocument()
   })
 
-  it('removes select-all and uses document actions without divider rows', () => {
-    const preview = renderPrototype()
+  it('removes select-all and uses document actions without divider rows', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-terms-consent')
 
@@ -550,16 +552,16 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('I agree that Generali Osiguranje Srbija a.d.o. may contact me and send me useful information, offers and notifications about insurance products and services.').closest('button')).not.toHaveClass('border-b')
   })
 
-  it('removes the privacy helper paragraph from terms and consents', () => {
-    const preview = renderPrototype()
+  it('removes the privacy helper paragraph from terms and consents', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-terms-consent')
 
     expect(preview.queryByText(FLOW_DEMO.rsPropertyInsurance.order.privacyNote)).not.toBeInTheDocument()
   })
 
-  it('keeps the sticky Must read action free of a top divider', () => {
-    const preview = renderPrototype()
+  it('keeps the sticky Must read action free of a top divider', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-must-read')
 
@@ -570,16 +572,16 @@ describe('RS property insurance prototype', () => {
     expect(footer?.firstElementChild).not.toHaveClass('border-t')
   })
 
-  it('does not expose Save as template in the property-insurance payment review', () => {
-    const preview = renderPrototype()
+  it('does not expose Save as template in the property-insurance payment review', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-review')
 
     expect(preview.queryByText('SAVE AS TEMPLATE')).not.toBeInTheDocument()
   })
 
-  it('carries the header close control from the package step to the consents only', () => {
-    const preview = renderPrototype()
+  it('carries the header close control from the package step to the consents only', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-product-cover')
     expect(preview.queryByLabelText('Close purchase')).not.toBeInTheDocument()
@@ -602,7 +604,7 @@ describe('RS property insurance prototype', () => {
   })
 
   it('closes straight out before any data is entered and confirms once there is', async () => {
-    const preview = renderPrototype()
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-package-select')
     fireEvent.click(preview.getByLabelText('Close purchase'))
@@ -619,8 +621,8 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByRole('button', { name: 'Leave purchase' })).toBeInTheDocument()
   })
 
-  it('confirms leaving from the duration step and returns to that step when continuing', () => {
-    const preview = renderPrototype()
+  it('confirms leaving from the duration step and returns to that step when continuing', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-duration-premium')
     fireEvent.click(preview.getByLabelText('Close purchase'))
@@ -630,24 +632,24 @@ describe('RS property insurance prototype', () => {
     expect(preview.getAllByRole('heading', { name: 'Your cover details' }).length).toBeGreaterThan(0)
   })
 
-  it('names the order action after the payment it opens', () => {
-    const preview = renderPrototype()
+  it('names the order action after the payment it opens', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-terms-consent')
 
     expect(preview.getByRole('button', { name: 'Pay now' })).toBeInTheDocument()
   })
 
-  it('does not show the fixed-payment explanatory paragraph on payment create', () => {
-    const preview = renderPrototype()
+  it('does not show the fixed-payment explanatory paragraph on payment create', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-create')
 
     expect(preview.queryByText(/Beneficiary, amount, module, reference and purpose are fixed/)).not.toBeInTheDocument()
   })
 
-  it('keeps only the delivery copy on payment success', () => {
-    const preview = renderPrototype()
+  it('keeps only the delivery copy on payment success', async () => {
+    const preview = await renderPrototype()
 
     jumpToScreen('rs-pi-payment-success')
 

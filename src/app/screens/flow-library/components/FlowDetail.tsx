@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { AppIcon } from '@/app/components/icons'
 import { SelectionChip } from '@/app/screens/tools/toolsUi'
 import { isPrimeReferenceScreen, resolvePrimePrototypeTarget } from '@/features/prime/reference'
-import { PrimePresentationDialog } from '@/flows/shared/prime/presentation/PrimePresentationDialog'
-import { FraudPresentationDialog } from '@/flows/ba/card-fraud/FraudPresentationDialog'
 import { buildFraudPresentationUrl, isFraudPresentationUrl } from '@/flows/ba/card-fraud/presentationUrl'
 import { buildPrimePresentationUrl, isPrimePresentationUrl, removePrimePresentationMarker } from '@/flows/shared/prime/presentation/presentationUrl'
 import { getPrimePhoneAppearance } from '@/flows/shared/prime/presentation/phoneAppearance'
@@ -34,6 +32,12 @@ import {
 } from '../flowExport'
 import { buildFlowDocument, copyConfluenceDocument, downloadFlowDocx } from '../handoff'
 import { stateTransitions } from '../handoff/referencePackage'
+import { buildFlowSearchEntries, resolveSelectedPassage, type SearchEntry } from '@/features/flow-collaboration/search'
+import { DiscussionPanel } from '@/features/flow-collaboration/DiscussionPanel'
+import { waitForPreviewReady } from '@/features/flow-collaboration/DeferredPreview'
+
+const PrimePresentationDialog = lazy(() => import('@/flows/shared/prime/presentation/PrimePresentationDialog').then((module) => ({ default: module.PrimePresentationDialog })))
+const FraudPresentationDialog = lazy(() => import('@/flows/ba/card-fraud/FraudPresentationDialog').then((module) => ({ default: module.FraudPresentationDialog })))
 
 type DetailTab = 'journey' | 'spec' | 'prototype' | 'implementation'
 type PrototypeRequest = { screen: FlowScreenKind; nonce: number; parameters?: Readonly<Record<string, string>> }
@@ -111,19 +115,52 @@ function slugify(value: string) {
     .replace(/^-|-$/g, '')
 }
 
-export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefinition; onBackToIndex: () => void }) {
+export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow: FlowDefinition; onBackToIndex: () => void; initialMatch?: SearchEntry }) {
   const [presentationMode, setPresentationMode] = useState<'modal' | 'page' | null>(() =>
     typeof window !== 'undefined' && ((flow.id === 'pi-prime' && isPrimePresentationUrl(window.location.href)) || (flow.id === 'ba-card-fraud' && isFraudPresentationUrl(window.location.href))) ? 'page' : null,
   )
-  const [activeTab, setActiveTab] = useState<DetailTab>(presentationMode === 'page' ? 'prototype' : 'journey')
+  const [activeTab, setActiveTab] = useState<DetailTab>(presentationMode === 'page' ? 'prototype' : initialMatch?.section ?? 'journey')
   const demoButtonRef = useRef<HTMLButtonElement>(null)
   const closePresentation = () => {
     if (typeof window !== 'undefined') window.history.replaceState(window.history.state, '', removePrimePresentationMarker(window.location.href))
     setPresentationMode(null)
   }
   const tabsRef = useRef<HTMLDivElement>(null)
-  const [requestedScenarioId, setRequestedScenarioId] = useState(flow.defaultScenarioId)
-  const [stepIndex, setStepIndex] = useState(0)
+  const [requestedScenarioId, setRequestedScenarioId] = useState(initialMatch?.scenarioId ?? flow.defaultScenarioId)
+  const [stepIndex, setStepIndex] = useState(Math.max(0, flow.scenarios.find((s) => s.id === initialMatch?.scenarioId)?.steps.findIndex((s) => s.id === initialMatch?.stepId) ?? 0))
+  const [discussionTarget, setDiscussionTarget] = useState<{ id: string; quote: string } | null>(null)
+  const [selectionNotice, setSelectionNotice] = useState('')
+  const specContent = useRef<HTMLDivElement>(null)
+  const sourceEntries = useMemo(() => buildFlowSearchEntries(flow), [flow])
+  useEffect(() => {
+    if (activeTab !== 'spec') return
+    const select = () => {
+      const selection = window.getSelection()
+      const quote = selection?.toString().trim()
+      if (!quote || quote.length > 2000 || !specContent.current?.contains(selection?.anchorNode ?? null) || !specContent.current.contains(selection?.focusNode ?? null)) return
+      const element = selection?.anchorNode instanceof Element ? selection.anchorNode : selection?.anchorNode?.parentElement
+      const screenSection = element?.closest('#spec-section-screen-spec')
+      const selectedStep = flow.scenarios.find((item) => item.id === requestedScenarioId)?.steps[stepIndex]
+      const rule = element?.closest('[id^="rule-"]')
+      const target = element?.closest('[id^="ba-section-"]')?.id
+      const entry = resolveSelectedPassage(sourceEntries, quote, screenSection && selectedStep ? `screen.${selectedStep.screen}.` : rule ? `rule:${rule.id.slice(5)}` : undefined, target)
+      if (entry) { setDiscussionTarget({ id: entry.id, quote }); setSelectionNotice('Selected passage is available in the discussion form.') }
+      else setSelectionNotice('This selection has more than one possible context. Choose its passage in the discussion form.')
+    }
+    document.addEventListener('selectionchange', select)
+    return () => document.removeEventListener('selectionchange', select)
+  }, [activeTab, sourceEntries, flow, requestedScenarioId, stepIndex])
+  useEffect(() => {
+    if (!initialMatch || initialMatch.section !== 'spec') return
+    const frame = requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('flow-spec-focus', { detail: initialMatch.targetId }))
+      requestAnimationFrame(() => {
+        const target = document.getElementById(initialMatch.targetId ?? '')
+        target?.scrollIntoView?.({ block: 'start' })
+      })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [initialMatch])
   const [journeyView, setJourneyView] = useState<JourneyView>('focused')
   const [exportKind, setExportKind] = useState<ExportKind | null>(null)
   const [exportError, setExportError] = useState<string | null>(null)
@@ -215,6 +252,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         setExportError('This scenario has no steps to export yet.')
         return
       }
+      await waitForPreviewReady(container, steps.length)
       const stepElements = Array.from(container.querySelectorAll<HTMLElement>('[data-flow-screen-capture]'))
       const exportSteps: FlowExportStep[] = steps.map((step) => ({
         title: step.title,
@@ -272,6 +310,10 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         demoButtonRef={demoButtonRef}
       />
 
+      {initialMatch && <aside aria-label="Search result" className="rounded border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[16px]">
+        <p className="font-bold">Matched passage · {initialMatch.label}</p><p className="whitespace-pre-line">{initialMatch.text}</p>
+      </aside>}
+
       {/*
         Switching tabs keeps the tab strip where it already is. Without this the
         browser holds the old scroll offset against a panel of a different height,
@@ -312,7 +354,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         />
       ) : null}
 
-      {activeTab === 'spec' ? (
+      {activeTab === 'spec' ? <div ref={specContent}>
         <SpecPanel
           flow={flow}
           scenario={scenario}
@@ -324,7 +366,10 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
           onOpenInPrototype={flow.prototype ? openInPrototype : undefined}
           onOpenRule={openRule}
         />
-      ) : null}
+      </div> : null}
+
+      {selectionNotice && activeTab === 'spec' && <p role="status">{selectionNotice}</p>}
+      {(activeTab === 'spec' || activeTab === 'journey') && !presentationMode && <DiscussionPanel flowId={flow.id} suggestedAnchor={discussionTarget?.id ?? initialMatch?.id ?? (activeStep ? `step:${scenario.id}:${activeStep.id}` : undefined)} suggestedQuote={discussionTarget?.quote} />}
 
       {activeTab === 'prototype' && flow.prototype && !presentationMode ? (
         <PrototypePanel
@@ -337,7 +382,7 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         />
       ) : null}
 
-      {flow.id === 'pi-prime' ? (
+      {flow.id === 'pi-prime' && presentationMode !== null ? <Suspense fallback={<p role="status">Loading presentation…</p>}>
         <PrimePresentationDialog
           open={presentationMode !== null}
           mode={presentationMode ?? 'modal'}
@@ -345,11 +390,11 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
           presentationUrl={typeof window !== 'undefined' ? buildPrimePresentationUrl(window.location.href) : ''}
           returnFocusRef={demoButtonRef}
         />
-      ) : null}
+      </Suspense> : null}
 
-      {flow.id === 'ba-card-fraud' ? (
+      {flow.id === 'ba-card-fraud' && presentationMode !== null ? <Suspense fallback={<p role="status">Loading presentation…</p>}>
         <FraudPresentationDialog open={presentationMode !== null} mode={presentationMode ?? 'modal'} onClose={closePresentation} presentationUrl={typeof window !== 'undefined' ? buildFraudPresentationUrl(window.location.href) : ''} returnFocusRef={demoButtonRef} />
-      ) : null}
+      </Suspense> : null}
 
       {activeTab === 'implementation' && flow.implementation ? (
         <FlowImplementationPanel
@@ -360,9 +405,9 @@ export default function FlowDetail({ flow, onBackToIndex }: { flow: FlowDefiniti
         />
       ) : null}
 
-      {/* Off-screen capture strip: keeps export working from any tab. */}
+      {/* Mount capture screens only for an image-bearing export. */}
       <div ref={captureRef} aria-hidden="true" className="pointer-events-none fixed left-[-10000px] top-0">
-        {steps.map((step) => (
+        {(exportKind === 'pdf' || exportKind === 'word') && steps.map((step) => (
           <MiniPhone key={step.id} scale={1} statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
             {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
           </MiniPhone>
@@ -1034,6 +1079,7 @@ function FlowScreenDownloadButton({
     if (!element || busy) return
     setBusy(true)
     try {
+      await waitForPreviewReady(element)
       const { blob } = await createPhoneScreenshotBlob({ screenElement: element, mode: 'full' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -2465,6 +2511,17 @@ interface SectionDisclosure {
  */
 function useSectionDisclosure(ids: string[]): SectionDisclosure {
   const [open, setOpen] = useState<Set<string>>(() => new Set())
+  const signature = ids.join('|')
+  useEffect(() => {
+    const reveal = (event: Event) => {
+      const target = (event as CustomEvent<string>).detail
+      const owned = signature.split('|')
+      if (owned.includes(target)) setOpen((current) => new Set(current).add(target))
+      else if ((target?.startsWith('rule-') || target === 'spec-section-flow-spec') && owned.every((id) => id.startsWith('spec-block-'))) setOpen(new Set(owned))
+    }
+    window.addEventListener('flow-spec-focus', reveal)
+    return () => window.removeEventListener('flow-spec-focus', reveal)
+  }, [signature])
   const allOpen = ids.length > 0 && ids.every((id) => open.has(id))
 
   const toggle = (id: string) =>

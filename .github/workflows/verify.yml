@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install local platform dependencies
+        run: npm --prefix server ci
 
       # The asset audit reads canonical bytes through `git hash-object`, so it
       # needs a real working tree - which the checkout above already provides.
