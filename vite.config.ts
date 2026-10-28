@@ -19,6 +19,9 @@ function figmaAssetResolver(): Plugin {
 export default defineConfig({
   server: {
     port: Number(process.env.PORT) || 5173,
+    proxy: {
+      '/api/platform': { target: 'http://127.0.0.1:8787' },
+    },
     watch: {
       ignored: ['**/.codex-temp/**', '**/android-spike/**', '**/native-spike/**', '**/public/downloads/*.apk'],
     },

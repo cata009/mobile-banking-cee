@@ -3,6 +3,7 @@ import { shouldUseLocalAccess } from './accessGatePolicy'
 
 type AccessGateProps = {
   children: ReactNode
+  personalAccess?: ReactNode
 }
 
 type AccessStatus = 'checking' | 'locked' | 'unlocked' | 'mobile-error'
@@ -180,7 +181,7 @@ function submitLocalAccess(password: string, remember: boolean) {
   return { ok: true, message: '' }
 }
 
-export default function AccessGate({ children }: AccessGateProps) {
+export default function AccessGate({ children, personalAccess }: AccessGateProps) {
   const [mobileEntry] = useState(isMobileEntryRequested)
   const [status, setStatus] = useState<AccessStatus>('checking')
   const [password, setPassword] = useState('')
@@ -365,6 +366,7 @@ export default function AccessGate({ children }: AccessGateProps) {
 
   return (
     <main style={styles.page} aria-busy={status === 'checking'}>
+      <div style={{ width: 'min(100%, 360px)', display: 'grid', gap: 16 }}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <div style={styles.logoMark} aria-hidden="true" />
         <label style={styles.label} htmlFor="access-password">
@@ -399,6 +401,8 @@ export default function AccessGate({ children }: AccessGateProps) {
         </button>
         <p style={styles.helper}>For support, contact the local UX designer</p>
       </form>
+      {personalAccess}
+      </div>
     </main>
   )
 }

@@ -1,0 +1,28 @@
+{
+  "name": "cee-platform-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.11 <25"
+  },
+  "scripts": {
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx --env-file-if-exists=.env.local src/dev.ts",
+    "bootstrap": "tsx --env-file-if-exists=.env.local src/bootstrap.ts"
+  },
+  "dependencies": {
+    "better-auth": "1.7.12",
+    "kysely": "0.28.17",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@types/node": "24.10.1",
+    "@types/pg": "8.16.0",
+    "kysely-pglite": "0.6.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}
