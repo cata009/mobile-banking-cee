@@ -7,6 +7,8 @@ import { DemoProvider, useDemo } from '@/app/state/demoStore'
 import { LanguageProvider, useLanguage } from '@/app/contexts/LanguageContext'
 import { NavigationProvider, useNavigationContext } from '@/app/contexts/NavigationContext'
 import { NativeDemoSurface } from '@/app/components/demo/NativeDemoSurface'
+import { DevicePreviewProvider, useDevicePreview } from '@/app/components/demo/DevicePreview'
+import { fireEvent } from '@testing-library/react'
 import type { NativeDemoEvents, NativeDemoSnapshot } from '@/features/demo-native/contracts'
 import { getAccountTransactions } from '@/data/accountDetails'
 import { createEmptyDomesticPaymentDraft } from '@/data/paymentFlow'
@@ -25,23 +27,100 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('plain data shell to Native root bridge', () => {
+  it('keeps the current view mounted until a rebuilt Native module is ready', async () => {
+    render(<DemoProvider><LanguageProvider><NavigationProvider initialScreen="homepage"><DevicePreviewProvider><NativeDemoSurface deviceMode={false} /></DevicePreviewProvider></NavigationProvider></LanguageProvider></DemoProvider>)
+    await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(1))
+    let finish!: (module: { version: 1; mountCurrentApplication: typeof mock.mount }) => void
+    mock.load.mockReturnValueOnce(new Promise(resolve => { finish = resolve }))
+    act(() => window.dispatchEvent(new Event('native-demo:built')))
+    expect(mock.unmount).not.toHaveBeenCalled()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    await act(async () => finish({ version: 1, mountCurrentApplication: mock.mount }))
+    await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(2))
+    expect(mock.unmount).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+  it('passes Duo geometry to the real application bridge and changes pose without remounting it', async () => {
+    function FoldControl() {
+      const device = useDevicePreview()
+      return (
+        <>
+          <button onClick={() => device.setProfileId('apple-foldable-closed')}>Close Duo</button>
+          <button onClick={device.rotate}>Rotate Duo</button>
+        </>
+      )
+    }
+    render(
+      <DemoProvider>
+        <LanguageProvider>
+          <NavigationProvider initialScreen="homepage">
+            <DevicePreviewProvider initialProfileId="apple-foldable-open">
+              <FoldControl />
+              <NativeDemoSurface deviceMode={false} />
+            </DevicePreviewProvider>
+          </NavigationProvider>
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+    await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(1))
+    expect(mock.mount.mock.calls[0]![1]).toMatchObject({
+      screenTopInset: 12,
+      duoPreview: { width: 951, height: 669, rightInset: 84, referenceWidth: 375 },
+      route: { screen: 'home' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Rotate Duo' }))
+    await waitFor(() =>
+      expect(mock.update).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          screenTopInset: 54,
+          duoPreview: expect.objectContaining({ width: 669, height: 951, rightInset: 0 }),
+        }),
+      ),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Close Duo' }))
+    await waitFor(() =>
+      expect(mock.update).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          duoPreview: expect.objectContaining({ width: 466, height: 678 }),
+          route: { screen: 'home' },
+        }),
+      ),
+    )
+    expect(mock.mount).toHaveBeenCalledTimes(1)
+    expect(mock.unmount).not.toHaveBeenCalled()
+  })
   it('preserves a coordinator shelf-focus request and returns focus/hero changes only while the Native surface is live', async () => {
-    const onFocus = vi.fn(), onHero = vi.fn()
+    const onFocus = vi.fn(),
+      onHero = vi.fn()
     const focus = { requestId: 9, cardId: 'cards' as const }
     const view = render(
-      <DemoProvider><LanguageProvider><NavigationProvider initialScreen="products">
-        <NativeDemoSurface deviceMode productsShelfFocusRequest={focus}
-          onProductsShelfFocusHandled={onFocus} onProductsShelfHeroCollapsedChange={onHero} />
-      </NavigationProvider></LanguageProvider></DemoProvider>,
+      <DemoProvider>
+        <LanguageProvider>
+          <NavigationProvider initialScreen="products">
+            <NativeDemoSurface
+              deviceMode
+              productsShelfFocusRequest={focus}
+              onProductsShelfFocusHandled={onFocus}
+              onProductsShelfHeroCollapsedChange={onHero}
+            />
+          </NavigationProvider>
+        </LanguageProvider>
+      </DemoProvider>,
     )
     await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(1))
     expect((mock.mount.mock.calls[0]![1] as NativeDemoSnapshot).productsShelfFocusRequest).toBe(focus)
     const events = mock.mount.mock.calls[0]![2] as NativeDemoEvents
-    act(() => { events.onProductsShelfFocusHandled?.(); events.onProductsShelfHeroCollapsedChange?.(true) })
+    act(() => {
+      events.onProductsShelfFocusHandled?.()
+      events.onProductsShelfHeroCollapsedChange?.(true)
+    })
     expect(onFocus).toHaveBeenCalledTimes(1)
     expect(onHero).toHaveBeenCalledWith(true)
     view.unmount()
-    act(() => { events.onProductsShelfFocusHandled?.(); events.onProductsShelfHeroCollapsedChange?.(false) })
+    act(() => {
+      events.onProductsShelfFocusHandled?.()
+      events.onProductsShelfHeroCollapsedChange?.(false)
+    })
     expect(onFocus).toHaveBeenCalledTimes(1)
     expect(onHero).toHaveBeenCalledTimes(1)
   })

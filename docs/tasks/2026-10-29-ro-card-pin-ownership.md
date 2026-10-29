@@ -1,0 +1,190 @@
+# RO baseline PIN task ownership
+
+- Owner: Codex integration owner
+- Checkout: C:/Users/mihai/Desktop/Mobile Banking - CEE
+- Base: 745956e19c87f52bfc84267fa328c48479ccf24e
+- Owned paths: native-spike/src/experiences/pi/current/baseline/CardOptions.tsx; native-spike/src/experiences/pi/current/baseline/pin/; src/features/cards/pin/; native-spike/__tests__/ro-card-pin.test.tsx; docs/tasks/2026-10-29-ro-card-pin-ownership.md
+- Additional integration-owned path for the user's focus correction: `native-spike/src/universal/BaselineTextField.tsx` (initially clean in the recorded status). Extend its existing API to support secure entry and focus without changing other consumers.
+- Figma flow: RO Enablers `2247:16744`, masked PIN `2247:16897`, revealed PIN `2247:16956`, set PIN `2247:17135`, sign `2247:17191`, success `2247:17200`.
+- Reused implementations: `BaselineBottomSheet`, `BaselinePageHeader`, `BaselineCardArtwork`, `VirtualCardArt`, `PrimaryButton`, `FaceIdOverlay` and `ModalPortal`; canonical List source `4622:45214` and navigation `1515:1995`.
+- PIN entry reuses `BaselineTextField` with secure entry; the existing `BaselineCodeField` is an OTP control rather than a PIN display.
+- Initial pending changes (shared checkout, not attributed to this task):
+```
+ M .env.example
+ M .github/workflows/verify.yml
+ M .gitignore
+ M native-spike/__tests__/pi-baseline-common-payments-pfm.test.tsx
+ M native-spike/__tests__/pi-wide-evo-cards-payments.test.tsx
+ M native-spike/__tests__/ro-baseline-payments-hub.test.tsx
+ M native-spike/src/experiences/pi/current/NativeCurrentApp.tsx
+ M native-spike/src/experiences/pi/current/banking/model.ts
+ M native-spike/src/experiences/pi/current/baseline/Body.tsx
+ M native-spike/src/experiences/pi/current/baseline/Card.tsx
+ M native-spike/src/experiences/pi/current/baseline/CardOptions.tsx
+ M native-spike/src/experiences/pi/current/baseline/CategorySheet.tsx
+ M native-spike/src/experiences/pi/current/baseline/TransactionFilters.tsx
+ M native-spike/src/experiences/pi/current/baseline/Transactions.tsx
+ M native-spike/src/experiences/pi/current/baseline/auth/InactiveBaselinePrelogin.tsx
+ M native-spike/src/experiences/pi/current/baseline/more/Advisor.tsx
+ M native-spike/src/experiences/pi/current/baseline/more/Contacts.tsx
+ M native-spike/src/experiences/pi/current/baseline/more/Documents.tsx
+ M native-spike/src/experiences/pi/current/baseline/more/Login.tsx
+ M native-spike/src/experiences/pi/current/baseline/more/More.tsx
+ M native-spike/src/experiences/pi/current/baseline/offers/Catalog.tsx
+ M native-spike/src/experiences/pi/current/baseline/offers/Detail.tsx
+ M native-spike/src/experiences/pi/current/baseline/offers/Products.tsx
+ M native-spike/src/experiences/pi/current/baseline/offers/ShopSmart.tsx
+ M native-spike/src/experiences/pi/current/baseline/payments/hub/ExchangeRates.tsx
+ M native-spike/src/experiences/pi/current/baseline/payments/hub/Payments.tsx
+ M native-spike/src/experiences/pi/current/baseline/payments/hub/Sheet.tsx
+ M native-spike/src/experiences/pi/current/baseline/payments/hub/Templates.tsx
+ M native-spike/src/experiences/pi/current/baseline/spending/Overview.tsx
+ M native-spike/src/experiences/pi/current/baseline/spending/PeriodCarousel.tsx
+ M native-spike/src/experiences/pi/current/baseline/spending/details/index.tsx
+ M native-spike/src/experiences/pi/current/coapping/Assistant.tsx
+ M native-spike/src/experiences/pi/current/coapping/adapter.tsx
+ M native-spike/src/experiences/pi/current/context.ts
+ M native-spike/src/experiences/pi/current/contracts.ts
+ M native-spike/src/experiences/pi/cz/evo-2027/accounts/Carousel.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/accounts/Indicator.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/accounts/Primitives.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/controlledRoutes.ts
+ M native-spike/src/experiences/pi/cz/evo-2027/home/Home.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/home/Primitives.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/home/ShopSmartHome.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/payments/PaymentFlow.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/payments/PaymentsScreen.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/pfm/Charts.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/pfm/PfmScreen.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/products/ProductsScreen.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/profile/Appearance.tsx
+ M native-spike/src/experiences/pi/cz/evo-2027/robo/CreationScreens.tsx
+ M native-spike/src/universal/BaselineBottomNavigation.tsx
+ M native-spike/src/universal/BaselineBottomSheet.tsx
+ M native-spike/src/universal/BaselineCardArtwork.tsx
+ M native-spike/src/universal/BaselineDropdownField.tsx
+ M native-spike/src/universal/BaselineL1Header.tsx
+ M native-spike/src/universal/DemoViewport.tsx
+ M native-spike/src/universal/ModalPortal.tsx
+ M native-spike/src/universal/ModalPortal.web.tsx
+ M native-spike/src/universal/Select.tsx
+ M native-spike/src/universal/SourceBottomSheet.tsx
+ M native-spike/src/web/currentHost.tsx
+ M package-lock.json
+ M package.json
+ M scripts/asset-baseline.json
+ M src/app/components/MobileFrame.tsx
+ M src/app/components/StatusBar.tsx
+ M src/app/components/demo/DevicePreview.tsx
+ M src/app/components/demo/NativeDemoSurface.tsx
+ M src/app/components/demo/NativeScreenPreview.tsx
+ M src/app/components/security/AccessGate.tsx
+ M src/app/screens/flow-library/FlowLibraryScreen.tsx
+ M src/app/screens/flow-library/components/FlowDetail.tsx
+ M src/app/screens/flow-library/components/FlowImplementationPanel.tsx
+ M src/app/screens/flow-library/components/FlowLibraryIndex.tsx
+ M src/app/screens/flow-library/components/flowPreviews.tsx
+ M src/app/screens/flow-library/flowExport.ts
+ M src/app/screens/flow-library/handoff/confluenceClipboard.ts
+ M src/app/screens/flow-library/handoff/documentModel.ts
+ M src/app/screens/flow-library/handoff/docx.ts
+ M src/app/screens/tools/ToolsScreen.tsx
+ M src/features/demo-native/contracts.ts
+ M src/hooks/useDeepLinkUrlSync.ts
+ M src/main.tsx
+ M tests/components/device-preview.test.tsx
+ M tests/components/native-demo-surface.test.tsx
+ M tests/screens/evo-2027-analytics.test.tsx
+ M tests/screens/flow-handoff.test.ts
+ M tests/screens/flow-library.test.tsx
+ M tests/screens/flow-module-ownership-keyboard.test.tsx
+ M tests/screens/investments-bulk-approval-flow.test.tsx
+ M tests/screens/rs-property-insurance.test.tsx
+ M tests/screens/tools-screen.test.tsx
+ M vite.config.ts
+?? api/flow-spec.js
+?? docs/cloud-recovery-2026-10-28.md
+?? docs/features/
+?? docs/flow-spec-editor.md
+?? docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md
+?? docs/superpowers/plans/2026-10-22-flow-spec-cloud-storage.md
+?? docs/superpowers/plans/2026-10-22-marketing-email-builder.md
+?? docs/superpowers/plans/2026-10-22-marketing-email-icons.md
+?? docs/superpowers/plans/2026-10-23-flow-spec-quality.md
+?? docs/superpowers/plans/2026-10-25-flow-collaboration.md
+?? docs/superpowers/plans/2026-10-25-flow-spec-rights.md
+?? docs/superpowers/plans/2026-10-28-cloud-recovery-integration.md
+?? docs/superpowers/plans/2026-10-29-iphone-duo.md
+?? docs/superpowers/plans/2026-10-29-ro-virtual-card.md
+?? docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md
+?? docs/superpowers/specs/2026-10-22-flow-spec-cloud-storage.md
+?? docs/superpowers/specs/2026-10-25-flow-collaboration.md
+?? docs/superpowers/specs/2026-10-25-flow-spec-rights.md
+?? docs/tasks/2026-10-22-card-guard-asset-baseline.json
+?? docs/tasks/2026-10-22-card-guard-spec-editor.json
+?? docs/tasks/2026-10-22-flow-spec-cloud-storage.json
+?? docs/tasks/2026-10-22-marketing-email-builder.json
+?? docs/tasks/2026-10-22-marketing-email-icons.json
+?? docs/tasks/2026-10-23-flow-spec-quality.json
+?? docs/tasks/2026-10-28-cloud-recovery.json
+?? docs/tasks/2026-10-29-iphone-duo.md
+?? docs/tasks/2026-10-29-ro-virtual-card-ownership.md
+?? native-spike/__tests__/cz-evo-analytics-repair.test.tsx
+?? native-spike/__tests__/cz-evo-beneficiary-actions.test.tsx
+?? native-spike/__tests__/cz-evo-customise-payments.test.tsx
+?? native-spike/__tests__/cz-evo-detail-indicator.test.tsx
+?? native-spike/__tests__/cz-evo-home-carousel.test.tsx
+?? native-spike/__tests__/cz-evo-mouse-carousel.test.tsx
+?? native-spike/__tests__/cz-evo-payment-insurance-visual.test.tsx
+?? native-spike/__tests__/cz-evo-product-host-routes.test.ts
+?? native-spike/__tests__/cz-evo-spending-carousel.test.tsx
+?? native-spike/__tests__/cz-evo-spending-overview.test.tsx
+?? native-spike/__tests__/duo-preview.test.tsx
+?? native-spike/__tests__/ro-virtual-card-carousel.test.tsx
+?? native-spike/__tests__/ro-virtual-card-flow.test.tsx
+?? native-spike/__tests__/ro-virtual-card-routing.test.ts
+?? native-spike/src/experiences/pi/current/banking/virtualCardRouting.ts
+?? native-spike/src/experiences/pi/current/banking/virtualCardStore.ts
+?? native-spike/src/experiences/pi/current/baseline/payments/hub/RoBillIcon.tsx
+?? native-spike/src/experiences/pi/current/baseline/payments/hub/RoPayIcon.tsx
+?? native-spike/src/experiences/pi/current/baseline/payments/hub/RoPaymentOptionIcon.tsx
+?? native-spike/src/experiences/pi/current/baseline/payments/hub/roSheetOptions.ts
+?? native-spike/src/experiences/pi/current/baseline/virtual-card/
+?? native-spike/src/experiences/pi/cz/evo-2027/mouseCarousel.ts
+?? native-spike/src/experiences/pi/cz/evo-2027/pfm/SpendingPeriodCarousel.tsx
+?? native-spike/src/universal/DuoPreview.tsx
+?? scripts/flow-spec/
+?? scripts/generate-email-icon-metadata.mjs
+?? scripts/generate-flow-catalog.ts
+?? server/
+?? src/app/components/demo/DuoSystemStrip.tsx
+?? src/app/screens/flow-library/handoff/richDocx.ts
+?? src/app/screens/flow-library/spec-editor/
+?? src/app/screens/tools/MarketingEmailBuilderTool.tsx
+?? src/app/screens/tools/email-builder/
+?? src/assets/ro/
+?? src/features/cards/virtual-card/
+?? src/features/demo-native/duoPreview.ts
+?? src/features/flow-collaboration/
+?? src/features/flow-spec/
+?? src/features/marketing-email/
+?? tests/features/duo-preview.test.ts
+?? tests/features/flow-spec-client.test.ts
+?? tests/features/flow-spec-permissions.test.tsx
+?? tests/features/flow-spec-workspace.test.tsx
+?? tests/features/flow-spec.test.ts
+?? tests/features/marketing-email.test.ts
+?? tests/features/ro-virtual-card.test.ts
+?? tests/flows/flow-preview-loading.test.tsx
+?? tests/flows/flow-search.test.ts
+?? tests/helpers/flowPlatformTransport.ts
+?? tests/screens/flow-account.test.tsx
+?? tests/screens/flow-collaboration.test.tsx
+?? tests/screens/flow-spec-editor.test.tsx
+?? tests/screens/flow-spec-history.test.tsx
+?? tests/screens/marketing-email-builder.test.tsx
+?? tests/tooling/flow-spec-cloud.test.mjs
+?? tests/tooling/flow-spec-personal-access.test.mjs
+?? tests/tooling/flow-spec-store.test.mjs
+?? tests/tooling/flow-spec-validation.test.mjs
+```

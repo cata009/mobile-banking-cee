@@ -3,6 +3,7 @@ import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { nativeBridgePlugin } from './scripts/native-spike/web/bridge-files.mjs'
+import { flowSpecPlugin } from './scripts/flow-spec/server.mjs'
 
 function figmaAssetResolver(): Plugin {
   return {
@@ -17,8 +18,12 @@ function figmaAssetResolver(): Plugin {
 }
 
 export default defineConfig({
+  worker: { format: 'es' },
   server: {
     port: Number(process.env.PORT) || 5173,
+    proxy: {
+      '/api/platform': { target: 'http://127.0.0.1:8787' },
+    },
     watch: {
       ignored: ['**/.codex-temp/**', '**/android-spike/**', '**/native-spike/**', '**/public/downloads/*.apk'],
     },
@@ -26,6 +31,7 @@ export default defineConfig({
   // Restrict Source dependency discovery to its own entry; native HTML has a separate Vite pipeline.
   optimizeDeps: { entries: ['index.html'] },
   plugins: [
+    flowSpecPlugin(__dirname),
     nativeBridgePlugin(__dirname),
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if

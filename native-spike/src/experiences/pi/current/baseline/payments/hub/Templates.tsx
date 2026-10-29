@@ -16,6 +16,7 @@ import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHead
 import { BaselineSearchBar } from '../../../../../../universal/BaselineSearchBar';
 import { BaselineSectionDivider } from '../../../../../../universal/BaselineSectionDivider';
 import { PaymentIcon } from './Icon';
+import { DuoReadable } from '../../../../../../universal/DuoPreview';
 import { Text } from '../../../../../../universal/Typography';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 
@@ -93,70 +94,72 @@ export function RoBaselinePaymentTemplates({
     </Pressable>
   );
   return (
-    <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
-      <ScrollView
-        style={Platform.OS === 'web' ? s.webScroll : undefined}
-        showsVerticalScrollIndicator={false}
-      >
-        <BaselinePageHeader
-          title={t('runtime.payments.templates.title', 'Templates')}
-          onBack={onBack}
-          includeSafeArea
-          safeAreaReserve={host.screenTopInset}
-          dark={dark}
-        />
-        <View style={s.search}>
-          <BaselineSearchBar
-            value={search}
-            onValueChange={setSearch}
-            showTrailingAction={false}
-            placeholder={t('runtime.actions.search', 'Search')}
+    <DuoReadable>
+      <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
+        <ScrollView
+          style={Platform.OS === 'web' ? s.webScroll : undefined}
+          showsVerticalScrollIndicator={false}
+        >
+          <BaselinePageHeader
+            title={t('runtime.payments.templates.title', 'Templates')}
+            onBack={onBack}
+            includeSafeArea
+            safeAreaReserve={host.screenTopInset}
             dark={dark}
           />
-        </View>
-        {!templates.length && !beneficiaries.length ? (
-          <Text style={[s.empty, { color: color('--uc-text-muted') }]}>
-            {t(
-              'runtime.payments.templates.noResults',
-              'No templates or beneficiaries found',
-            )}
-          </Text>
-        ) : (
-          <View style={s.list}>
-            {templates.length ? (
-              <View>
-                <View style={s.heading}>
-                  <BaselineSectionDivider
-                    title={t(
-                      'runtime.payments.templates.selectTemplate',
-                      'SELECT A TEMPLATE',
-                    )}
-                    variant="light-title"
-                    dark={dark}
-                  />
-                </View>
-                <View style={s.rows}>{templates.map(row)}</View>
-              </View>
-            ) : null}
-            {beneficiaries.length ? (
-              <View style={templates.length ? s.beneficiaries : undefined}>
-                <View style={s.heading}>
-                  <BaselineSectionDivider
-                    title={t(
-                      'runtime.payments.templates.chooseBeneficiary',
-                      'OR CHOOSE A BENEFICIARY',
-                    )}
-                    variant="light-title"
-                    dark={dark}
-                  />
-                </View>
-                <View style={s.rows}>{beneficiaries.map(row)}</View>
-              </View>
-            ) : null}
+          <View style={s.search}>
+            <BaselineSearchBar
+              value={search}
+              onValueChange={setSearch}
+              showTrailingAction={false}
+              placeholder={t('runtime.actions.search', 'Search')}
+              dark={dark}
+            />
           </View>
-        )}
-      </ScrollView>
-    </View>
+          {!templates.length && !beneficiaries.length ? (
+            <Text style={[s.empty, { color: color('--uc-text-muted') }]}>
+              {t(
+                'runtime.payments.templates.noResults',
+                'No templates or beneficiaries found',
+              )}
+            </Text>
+          ) : (
+            <View style={s.list}>
+              {templates.length ? (
+                <View>
+                  <View style={s.heading}>
+                    <BaselineSectionDivider
+                      title={t(
+                        'runtime.payments.templates.selectTemplate',
+                        'SELECT A TEMPLATE',
+                      )}
+                      variant="light-title"
+                      dark={dark}
+                    />
+                  </View>
+                  <View style={s.rows}>{templates.map(row)}</View>
+                </View>
+              ) : null}
+              {beneficiaries.length ? (
+                <View style={templates.length ? s.beneficiaries : undefined}>
+                  <View style={s.heading}>
+                    <BaselineSectionDivider
+                      title={t(
+                        'runtime.payments.templates.chooseBeneficiary',
+                        'OR CHOOSE A BENEFICIARY',
+                      )}
+                      variant="light-title"
+                      dark={dark}
+                    />
+                  </View>
+                  <View style={s.rows}>{beneficiaries.map(row)}</View>
+                </View>
+              ) : null}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    </DuoReadable>
   );
 }
 const s = StyleSheet.create({

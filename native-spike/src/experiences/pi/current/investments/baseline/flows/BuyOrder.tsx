@@ -24,6 +24,8 @@ import { BaselineBottomSheet } from '../../../../../../universal/BaselineBottomS
 import { ModalPortal } from '../../../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../../../universal/DemoViewport';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
+import { AccountSelectionSheet } from '../../../baseline/AccountSelectionSheet';
+import { isPiBaselineContext } from '../../../baseline/policy';
 import type { BaselineBuyProps } from './contracts';
 import { BaselineInvestmentDocuments } from './Documents';
 import {
@@ -41,8 +43,8 @@ export const investmentAccountNumber = (
   host.country === 'CZ'
     ? formatCzLocalAccountNumber(value)
     : compact
-    ? compactInvestmentAccount(value)
-    : value;
+      ? compactInvestmentAccount(value)
+      : value;
 export function InvestmentOrderFooter({
   host,
   label,
@@ -169,6 +171,22 @@ export function InvestmentAccountSheet({
 }) {
   const [draft, setDraft] = useState(selectedId);
   const viewport = useDemoViewport();
+  if (isPiBaselineContext(host))
+    return (
+      <AccountSelectionSheet
+        host={host}
+        title={title}
+        selectedId={selectedId}
+        options={options.map(option => ({
+          id: option.id,
+          name: option.name,
+          detail: option.detail,
+          balanceText: option.balance,
+        }))}
+        onClose={onClose}
+        onConfirm={onConfirm}
+      />
+    );
   return (
     <ModalPortal
       visible

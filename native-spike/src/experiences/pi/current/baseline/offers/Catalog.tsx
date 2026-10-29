@@ -24,6 +24,7 @@ import { BaselineProductOfferCard } from '../../../../../universal/BaselineProdu
 import { BaselineProductMenuCard } from '../../../../../universal/BaselineProductMenuCard';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { RasterImage } from './RasterImage';
 
@@ -71,17 +72,21 @@ export function localizeProductCard(
 export function offerSnapOffsets(
   count: number,
   viewportWidth: number,
+  edgeGutter = EDGE_GUTTER,
 ): number[] {
   const contentWidth =
-    count * CARD_WIDTH + Math.max(0, count - 1) * CARD_GAP + EDGE_GUTTER * 3;
+    count * CARD_WIDTH +
+    Math.max(0, count - 1) * CARD_GAP +
+    edgeGutter * 2 +
+    CARD_GAP * 2;
   const maximum = Math.max(0, contentWidth - viewportWidth);
   const clamp = (value: number) => Math.max(0, Math.min(maximum, value));
   return Array.from({ length: count }, (_, index) => {
     if (index === 0) return 0;
-    const offset = EDGE_GUTTER + index * (CARD_WIDTH + CARD_GAP);
+    const offset = edgeGutter + index * (CARD_WIDTH + CARD_GAP);
     return clamp(
       index === count - 1
-        ? offset + CARD_WIDTH + EDGE_GUTTER - viewportWidth
+        ? offset + CARD_WIDTH + edgeGutter - viewportWidth
         : offset - (viewportWidth - CARD_WIDTH) / 2,
     );
   });
@@ -175,14 +180,15 @@ function OffersRail({
   onOfferPress?: (offer: ProductsOffer) => void;
 }) {
   const viewport = useDemoViewport();
+  const duo = useDuoPreview();
   const [width, setWidth] = useState(viewport.width);
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const offset = useRef(0);
   const pressed = useRef(false);
   const idle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const offsets = useMemo(
-    () => offerSnapOffsets(offers.length, width),
-    [offers.length, width],
+    () => offerSnapOffsets(offers.length, width, duo ? 0 : EDGE_GUTTER),
+    [offers.length, width, duo],
   );
   const settle = useRef(() => {});
   settle.current = () => {
@@ -272,13 +278,19 @@ function OffersRail({
       ref={rail}
       testID="ro-offers-rail"
       horizontal
-      style={Platform.OS === 'web' ? s.webScroll : undefined}
+      style={[
+        Platform.OS === 'web' ? s.webScroll : undefined,
+        duo ? { marginHorizontal: 24 } : undefined,
+      ]}
       showsHorizontalScrollIndicator={false}
       snapToOffsets={offsets}
       snapToStart
       snapToEnd={false}
       decelerationRate="fast"
-      contentContainerStyle={s.rail}
+      contentContainerStyle={[
+        s.rail,
+        duo ? { paddingHorizontal: 0 } : undefined,
+      ]}
       onLayout={event => setWidth(event.nativeEvent.layout.width)}
       onScroll={event => {
         offset.current = event.nativeEvent.contentOffset.x;
@@ -410,13 +422,13 @@ export function RoOffersCatalog({
                 ? offer =>
                     onPreviewAction?.({ type: 'offer-open', offerId: offer.id })
                 : futureGainEnabled(host)
-                ? offer => {
-                    if (offer.id === 'future-gain-products-for-you')
-                      host.onNavigate({ screen: 'peer-insights' });
-                    if (offer.id === 'future-gain-smart-investment')
-                      host.onNavigate({ screen: 'smart-investment' });
-                  }
-                : undefined
+                  ? offer => {
+                      if (offer.id === 'future-gain-products-for-you')
+                        host.onNavigate({ screen: 'peer-insights' });
+                      if (offer.id === 'future-gain-smart-investment')
+                        host.onNavigate({ screen: 'smart-investment' });
+                    }
+                  : undefined
             }
           />
         </View>

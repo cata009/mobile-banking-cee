@@ -21,6 +21,7 @@ import { BaselineAccountInfoField } from '../src/universal/BaselineAccountInfoFi
 import { BaselineCardNavigationRow } from '../src/universal/BaselineCardNavigationRow';
 import NativeCurrentApp from '../src/experiences/pi/current/NativeCurrentApp';
 import { CURRENT_BANKING_ADAPTER } from '../src/experiences/pi/current/banking/adapter';
+import { DuoPreviewProvider } from '../src/universal/DuoPreview';
 
 const counts = {
   accounts: 2,
@@ -65,6 +66,30 @@ async function render(props = host()) {
   });
   return { tree, props };
 }
+test('Duo keeps the inactive account card proportionate while retaining its selected state', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <DuoPreviewProvider
+        value={{ width: 951, height: 669, rightInset: 84, referenceWidth: 375 }}
+      >
+        <RoBaselineAccount {...host()} />
+      </DuoPreviewProvider>,
+    );
+  });
+  const second = tree.root.findAll(
+    n =>
+      n.props.testID === 'ro-account-carousel-acc-2' &&
+      typeof n.props.onPress === 'function',
+  )[0]!;
+  expect(StyleSheet.flatten(second.props.style).transform).toEqual([
+    { scale: 0.9 },
+  ]);
+  expect(second.props.accessibilityState.selected).toBe(false);
+  await act(() => second.props.onPress());
+  expect(second.props.accessibilityState.selected).toBe(true);
+  await act(() => tree.unmount());
+});
 function press(tree: Renderer.ReactTestRenderer, label: string) {
   return tree.root.findAll(
     node =>

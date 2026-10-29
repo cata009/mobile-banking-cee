@@ -72,7 +72,7 @@ export default function FlowImplementationPanel({
   const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
 
   return (
-    <div role="tabpanel" className="grid w-full min-w-0 gap-[24px]">
+    <div role="tabpanel" className="grid w-full min-w-0 grid-cols-1 gap-[24px]">
       <Panel>
         <p className="uc-type-n6-strong text-[var(--uc-action)]">Build surface</p>
         <h2 className="mt-[5px] uc-type-h2 text-[var(--uc-text)]">Build it as it is built here</h2>
@@ -112,7 +112,7 @@ export default function FlowImplementationPanel({
         <p className="max-w-[820px] uc-type-n5 leading-[20px] text-[var(--uc-text-muted)]">
           {implementation.sessionModel.description}
         </p>
-        <div className="mt-[14px] grid gap-[16px] xl:grid-cols-[minmax(0,420px)_1fr]">
+        <div className="mt-[14px] grid min-w-0 grid-cols-1 gap-[16px] xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
           <CodeBlock
             title={`${implementation.sessionModel.name} — lives across screens`}
             code={implementation.sessionModel.shape}
@@ -400,7 +400,7 @@ function ScreensAsBuilt({
         </p>
       ) : null}
 
-      <div className="mt-[18px] grid gap-[18px]">
+      <div className="mt-[18px] grid min-w-0 grid-cols-1 gap-[18px]">
         {screens.map((screen) => {
           const component = mapping?.screens[screen]
           const located = screenSource && component ? findFunctionSource(screenSource, component) : undefined
@@ -415,7 +415,7 @@ function ScreensAsBuilt({
             <article
               key={screen}
               data-testid="impl-screen"
-              className="grid gap-[16px] rounded-[10px] border border-[var(--uc-border)] p-[16px] xl:grid-cols-[auto_minmax(0,1fr)]"
+              className="grid min-w-0 grid-cols-1 gap-[16px] rounded-[10px] border border-[var(--uc-border)] p-[16px] xl:grid-cols-[auto_minmax(0,1fr)]"
             >
               <div className="justify-self-center xl:justify-self-start">
                 <ScreenInspector scale={INSPECT_SCALE} enabled={inspecting}>
@@ -724,7 +724,7 @@ function Panel({
   return (
     <section
       id={id}
-      className="scroll-mt-[72px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm"
+      className="min-w-0 scroll-mt-[72px] rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] shadow-sm [overflow-wrap:anywhere]"
     >
       {title ? (
         <div className="flex flex-wrap items-center justify-between gap-[12px]">
@@ -831,7 +831,7 @@ function CodeBlock({ title, code, collapsedHeight }: { title: string; code: stri
   const [expanded, setExpanded] = useState(!collapsedHeight)
   const lines = code.split('\n').length
   return (
-    <div className="overflow-hidden rounded-[8px] border border-[#17202A] bg-[#17202A]">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-[8px] border border-[#17202A] bg-[#17202A]">
       <div className="flex flex-wrap items-center justify-between gap-[8px] border-b border-white/15 px-[12px] py-[8px]">
         <span className="min-w-0 truncate font-mono text-[11px] font-bold text-[#EAF2F8]">{title}</span>
         <span className="flex items-center gap-[6px]">

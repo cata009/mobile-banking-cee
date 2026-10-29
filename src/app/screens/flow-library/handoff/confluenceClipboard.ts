@@ -11,11 +11,12 @@
  *                  Confluence Wiki and the same structure comes back.
  *
  * Screens are deliberately absent. Data Center resolves images to page
- * attachments, and no clipboard flavor can create one — that is what the `.docx`
- * import route is for.
+ * attachments. This route keeps paste predictable across versions; use `.docx`
+ * import for the complete document with embedded images.
  */
 
 import type { DocBlock, FlowDocument } from "./documentModel";
+import { renderSpecHtml, renderSpecWiki } from '@/features/flow-spec/document';
 
 function escapeHtml(value: string): string {
   return value
@@ -31,6 +32,8 @@ function inline(value: string): string {
 
 function blockToHtml(block: DocBlock): string {
   switch (block.kind) {
+    case 'rich':
+      return renderSpecHtml(block.document, block.assets, false);
     case "heading":
       return `<h${block.level}>${inline(block.text)}</h${block.level}>`;
     case "paragraph":
@@ -44,7 +47,7 @@ function blockToHtml(block: DocBlock): string {
       const body = block.rows
         .map((row) => `<tr>${row.map((cell) => `<td>${inline(cell)}</td>`).join("")}</tr>`)
         .join("");
-      return `<table><tbody>${head}${body}</tbody></table>`;
+      return `<table>${head}<tbody>${body}</tbody></table>`;
     }
     case "image":
       // Unreachable for the clipboard document; kept so the switch stays total.
@@ -74,6 +77,8 @@ function escapeWiki(value: string): string {
 
 function blockToWiki(block: DocBlock): string {
   switch (block.kind) {
+    case 'rich':
+      return renderSpecWiki(block.document);
     case "heading":
       return `h${block.level}. ${escapeWiki(block.text)}\n`;
     case "paragraph":

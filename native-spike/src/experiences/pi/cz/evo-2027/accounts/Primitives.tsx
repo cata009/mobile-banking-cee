@@ -233,6 +233,9 @@ export function Page({
   trailing,
   style,
   titleStyle,
+  headerBackground,
+  footer,
+  showLargeTitle = true,
 }: {
   title: string;
   onBack: () => void;
@@ -242,6 +245,9 @@ export function Page({
   trailing?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<import('react-native').TextStyle>;
+  headerBackground?: string;
+  footer?: React.ReactNode;
+  showLargeTitle?: boolean;
 }) {
   const [offset, setOffset] = useState(0);
   useEffect(() => {
@@ -278,7 +284,11 @@ export function Page({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Header
-        tokens={tokens}
+        tokens={
+          headerBackground
+            ? { ...tokens, background: headerBackground }
+            : tokens
+        }
         variant="current"
         renderLargeTitle={false}
         title={offset > 64 ? title : ''}
@@ -293,19 +303,22 @@ export function Page({
         scrollEventThrottle={16}
         contentContainerStyle={s.pageContent}
       >
-        <Text
-          style={[
-            s.title,
-            titleStyle,
-            {
-              opacity: 1 - Math.min(1, offset / 64) * 0.9,
-            },
-          ]}
-        >
-          {title}
-        </Text>
+        {showLargeTitle && (
+          <Text
+            style={[
+              s.title,
+              titleStyle,
+              {
+                opacity: 1 - Math.min(1, offset / 64) * 0.9,
+              },
+            ]}
+          >
+            {title}
+          </Text>
+        )}
         {children}
       </ScrollView>
+      {footer}
     </KeyboardAvoidingView>
   );
 }

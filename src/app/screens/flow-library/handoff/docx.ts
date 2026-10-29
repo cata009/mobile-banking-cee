@@ -3,8 +3,8 @@
  *
  * Built for one job: Confluence Data Center's "Import Word Document". That
  * importer maps Word heading styles onto page headings and — the reason this
- * route exists at all — uploads embedded images as page attachments, which a
- * clipboard paste can never do.
+ * route exists at all — uploads embedded images as page attachments, without
+ * depending on the destination editor's clipboard image handling.
  *
  * Everything is emitted by hand (no packaging library; adding one needs separate
  * approval here), so the part list is deliberately the minimum Word will open:
@@ -13,6 +13,7 @@
 
 import type { DocBlock, FlowDocument } from "./documentModel";
 import { base64ToBytes, createZip, type ZipEntry } from "./zip";
+import { renderRichDocx } from './richDocx';
 
 /** English Metric Units per pixel at 96 DPI — the unit Word sizes drawings in. */
 const EMU_PER_PIXEL = 9525;
@@ -91,9 +92,9 @@ function table(block: Extract<DocBlock, { kind: "table" }>): string {
   return `<w:tbl>${properties}${grid}${head}${body}</w:tbl><w:p/>`;
 }
 
-function drawing(relationshipId: string, docPrId: number, alt: string, widthPx: number, heightPx: number): string {
-  const width = Math.round(IMAGE_WIDTH_PX * EMU_PER_PIXEL);
-  const height = Math.round((heightPx / Math.max(1, widthPx)) * IMAGE_WIDTH_PX * EMU_PER_PIXEL);
+function drawing(relationshipId: string, docPrId: number, alt: string, widthPx: number, heightPx: number, displayWidth = IMAGE_WIDTH_PX): string {
+  const width = Math.round(displayWidth * EMU_PER_PIXEL);
+  const height = Math.round((heightPx / Math.max(1, widthPx)) * displayWidth * EMU_PER_PIXEL);
   const name = escapeXml(alt);
   return `<w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">
 <wp:extent cx="${width}" cy="${height}"/><wp:docPr id="${docPrId}" name="Picture ${docPrId}" descr="${name}"/>
@@ -110,6 +111,7 @@ const CONTENT_TYPES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
 <Default Extension="xml" ContentType="application/xml"/>
 <Default Extension="png" ContentType="image/png"/>
+<Default Extension="jpeg" ContentType="image/jpeg"/>
 <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
 <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
@@ -137,26 +139,42 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:contextualSpacing/></w:pPr></w:style>
 </w:styles>`;
 
-const NUMBERING = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/>
-<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="&#8226;"/><w:lvlJc w:val="left"/>
-<w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr><w:rPr><w:rFonts w:ascii="Symbol" w:hAnsi="Symbol" w:hint="default"/></w:rPr></w:lvl>
-</w:abstractNum>
-<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>
-</w:numbering>`;
+const NUMBERING = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${[false, true].map((ordered, index) => `<w:abstractNum w:abstractNumId="${index}"><w:multiLevelType w:val="multilevel"/>${Array.from({ length: 9 }, (_, level) => `<w:lvl w:ilvl="${level}"><w:start w:val="1"/><w:numFmt w:val="${ordered ? 'decimal' : 'bullet'}"/><w:lvlText w:val="${ordered ? `%${level + 1}.` : '&#8226;'}"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="${720 + level * 360}" w:hanging="360"/></w:pPr></w:lvl>`).join('')}</w:abstractNum>`).join('')}<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>`;
 
 /** Render the shared document model as a `.docx` blob. */
 export function buildFlowDocx(document: FlowDocument): Blob {
   const media: ZipEntry[] = [];
   const imageRels: string[] = [];
   const body: string[] = [];
+  const listDefinitions: string[] = [];
+  const richContext = {
+    list(ordered: boolean, start: number, depth: number) {
+      const id = listDefinitions.length + 2;
+      listDefinitions.push(`<w:num w:numId="${id}"><w:abstractNumId w:val="${ordered ? 1 : 0}"/><w:lvlOverride w:ilvl="${depth}"><w:startOverride w:val="${Math.max(1, Math.round(start))}"/></w:lvlOverride></w:num>`);
+      return id;
+    },
+    image(asset: import('@/features/flow-spec/types').SpecAsset, alt: string, width?: number) {
+      const index = media.length + 1;
+      const extension = asset.mime === 'image/jpeg' ? 'jpeg' : 'png';
+      media.push({ name: `word/media/screen-${index}.${extension}`, data: base64ToBytes(asset.dataUrl.split(',')[1] ?? '') });
+      imageRels.push(`<Relationship Id="rIdImg${index}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/screen-${index}.${extension}"/>`);
+      return drawing(`rIdImg${index}`, index, alt, asset.width, asset.height, Math.min(600, width ?? 480, 800 * asset.width / asset.height)) + paragraph(alt, 'Subtitle');
+    },
+    link(href: string) {
+      const id = `rIdLink${imageRels.length + 1}`;
+      imageRels.push(`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escapeXml(href)}" TargetMode="External"/>`);
+      return id;
+    },
+  };
 
   body.push(paragraph(document.title, "Title"));
   if (document.subtitle) body.push(paragraph(document.subtitle, "Subtitle"));
 
   for (const block of document.blocks) {
     switch (block.kind) {
+      case 'rich':
+        body.push(renderRichDocx(block.document, block.assets, richContext));
+        break;
       case "heading":
         body.push(paragraph(block.text, `Heading${block.level}`));
         break;
@@ -207,7 +225,7 @@ ${imageRels.join("\n")}
     text("word/document.xml", documentXml),
     text("word/_rels/document.xml.rels", documentRels),
     text("word/styles.xml", STYLES),
-    text("word/numbering.xml", NUMBERING),
+    text("word/numbering.xml", NUMBERING.replace('</w:numbering>', listDefinitions.join('') + '</w:numbering>')),
     ...media,
   ]);
 

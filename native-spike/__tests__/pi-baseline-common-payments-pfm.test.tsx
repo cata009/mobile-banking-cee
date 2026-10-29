@@ -287,7 +287,7 @@ it.each(countries)(
         menu.primaryItems[0]!.id,
         { baseline: true },
       );
-      for (const action of sheet.actions) {
+      for (const action of country === 'RO' ? [] : sheet.actions) {
         const nodes = tree.root.findAll(
           node =>
             typeof node.props.onPress === 'function' &&
@@ -301,7 +301,11 @@ it.each(countries)(
       const domestic = tree.root.findAll(
         node =>
           typeof node.props.onPress === 'function' &&
-          String(node.props.accessibilityLabel).startsWith('DOMESTIC PAYMENT'),
+          String(node.props.accessibilityLabel).startsWith(
+            country === 'RO'
+              ? 'PAYMENT TO NEW BENEFICIARY'
+              : 'DOMESTIC PAYMENT',
+          ),
       )[0]!;
       act(() => domestic.props.onPress());
       expect(h.onNavigate).toHaveBeenCalledWith({ screen: 'payment-create' });

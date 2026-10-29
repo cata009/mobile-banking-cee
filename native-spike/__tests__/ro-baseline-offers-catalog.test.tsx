@@ -124,6 +124,7 @@ it('uses Romanian title translations and the source fallback for missing keys', 
 it('uses source edge-clamped scroll targets at 375 and 393 widths', () => {
   expect(offerSnapOffsets(3, 375)).toEqual([0, 339, 678]);
   expect(offerSnapOffsets(3, 393)).toEqual([0, 330, 660]);
+  expect(offerSnapOffsets(3, 512, 0)).toEqual([0, 246.5, 493]);
   expect(offerSnapOffsets(1, 375)).toEqual([0]);
   expect(offerSnapOffsets(0, 375)).toEqual([]);
   expect(offerSnapOffsets(3, 1200)).toEqual([0, 0, 0]);

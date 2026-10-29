@@ -24,6 +24,7 @@ import {
   type AccountTransactionFilterState,
 } from '@/features/accounts-payments/evoTransactionFilters';
 import type { CurrentScreenProps } from '../contracts';
+import { useDuoPreview } from '../../../../universal/DuoPreview';
 import { bankingProducts, copy, productTransactions } from '../banking/model';
 import { BankingCopyToast, useBankingCopy } from '../banking/CopyToast';
 import { BaselineAccountBalanceCard } from '../../../../universal/BaselineAccountBalanceCard';
@@ -60,6 +61,7 @@ function AccountCarousel({
   onSelect: (index: number) => void;
   renderCard: (product: Product, index: number) => React.ReactNode;
 }) {
+  const duo = useDuoPreview();
   const rail = useRef<React.ElementRef<typeof ScrollView>>(null);
   const [viewport, setViewport] = useState(375);
   const scrollLeft = useRef(0);
@@ -162,7 +164,10 @@ function AccountCarousel({
               styles.card,
               index === activeIndex
                 ? { transform: [{ scaleY: 1 }] }
-                : styles.inactive,
+                : [
+                    styles.inactive,
+                    duo ? { transform: [{ scale: 0.9 }] } : undefined,
+                  ],
               Platform.OS === 'web'
                 ? ({ willChange: 'transform' } as never)
                 : undefined,
@@ -225,10 +230,10 @@ function balanceProps(
       product.type === 'term_deposit'
         ? 'Term deposit maturity progress'
         : product.type === 'loan'
-        ? 'Personal loan repayment progress'
-        : product.type === 'mortgage'
-        ? 'Mortgage repayment progress'
-        : undefined,
+          ? 'Personal loan repayment progress'
+          : product.type === 'mortgage'
+            ? 'Mortgage repayment progress'
+            : undefined,
     showCopy: product.type !== 'term_deposit',
   };
 }
@@ -325,16 +330,16 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
               'Close term deposit',
             )
           : product?.type === 'loan' || product?.type === 'mortgage'
-          ? copy(
-              host,
-              'runtime.accounts.actions.reimbursement',
-              'Reimbursement',
-            )
-          : copy(
-              host,
-              'runtime.accounts.actions.internalTransfer',
-              'Internal transfer',
-            ),
+            ? copy(
+                host,
+                'runtime.accounts.actions.reimbursement',
+                'Reimbursement',
+              )
+            : copy(
+                host,
+                'runtime.accounts.actions.internalTransfer',
+                'Internal transfer',
+              ),
     },
   ];
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {

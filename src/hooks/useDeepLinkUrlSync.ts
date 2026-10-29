@@ -7,8 +7,8 @@
  * return — that rewrites history on any state change via `replaceState`.
  */
 
-import { useEffect } from "react";
-import { buildDeepLinkUrl, type DeepLinkState } from "@/app/utils/deepLink";
+import { useEffect } from 'react'
+import { buildDeepLinkUrl, type DeepLinkState } from '@/app/utils/deepLink'
 
 export function useDeepLinkUrlSync({
   product,
@@ -46,8 +46,13 @@ export function useDeepLinkUrlSync({
       cardId,
       transactionSource,
       deviceMode,
-    });
-    window.history.replaceState(window.history.state, "", url);
+    })
+    const previewDevice = new URLSearchParams(window.location.search).get('previewDevice')
+    const previewOrientation = new URLSearchParams(window.location.search).get('previewOrientation')
+    const target = new URL(url, window.location.href)
+    if (previewDevice) target.searchParams.set('previewDevice', previewDevice)
+    if (previewOrientation) target.searchParams.set('previewOrientation', previewOrientation)
+    window.history.replaceState(window.history.state, '', `${target.pathname}${target.search}${target.hash}`)
   }, [
     product,
     country,
@@ -65,5 +70,5 @@ export function useDeepLinkUrlSync({
     cardId,
     transactionSource,
     deviceMode,
-  ]);
+  ])
 }

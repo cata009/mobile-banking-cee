@@ -25,6 +25,9 @@ import {
   type PaymentTemplateSelection,
 } from '@/data/paymentTemplates';
 import { isCurrentDomesticPaymentDraftValid } from '@/features/accounts-payments/currentPaymentPolicy';
+import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount';
+import { formatMoneyNumber } from '@/app/registry/countryConfig';
+import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import {
   reduceNativePaymentIntent,
   type NativePaymentFlow,
@@ -54,6 +57,8 @@ import {
   type BaselineLocalAccountTouched,
 } from './LocalAccountFields';
 import { RoBaselinePaymentTemplates } from '../hub/Templates';
+import { AccountSelectionSheet } from '../../AccountSelectionSheet';
+import { isPiBaselineContext } from '../../policy';
 import {
   RoBaselinePaymentSign,
   RoBaselinePaymentSuccess,
@@ -115,6 +120,7 @@ export default function RoBaselinePaymentCreateScreen(
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   const [progress, setProgress] = useState(0);
   const [recipientPicker, setRecipientPicker] = useState(false);
+  const [accountPicker, setAccountPicker] = useState(false);
   const [accountTouched, setAccountTouched] =
     useState<BaselineLocalAccountTouched>({
       prefix: false,
@@ -141,6 +147,7 @@ export default function RoBaselinePaymentCreateScreen(
     setPaymentFlow(nextFlow);
     setProgress(0);
     setRecipientPicker(false);
+    setAccountPicker(false);
     if (nextFlow.step === 'review') setSaveAsTemplate(false);
     if (nextFlow.step === 'create')
       setAccountTouched({
@@ -214,6 +221,10 @@ export default function RoBaselinePaymentCreateScreen(
   const registerBack = host.onBackHandlerChange;
   useEffect(() => {
     registerBack?.(() => {
+      if (accountPicker) {
+        setAccountPicker(false);
+        return true;
+      }
       if (recipientPicker) {
         setRecipientPicker(false);
         return true;
@@ -224,7 +235,7 @@ export default function RoBaselinePaymentCreateScreen(
       return true;
     });
     return () => registerBack?.(null);
-  }, [registerBack, step, recipientPicker, transition]);
+  }, [registerBack, step, recipientPicker, accountPicker, transition]);
   const done = () => {
     if (host.onPaymentFlowChange) {
       host.onPaymentFlowChange(null);
@@ -270,6 +281,17 @@ export default function RoBaselinePaymentCreateScreen(
       : flow('reviewData', 'Review data');
   const back = () =>
     step === 'create' ? host.onBack() : transition({ type: 'back' });
+  const payerAccounts = bankingProducts(host).currentAccounts;
+  const payerId =
+    payerAccounts.find(
+      item =>
+        item.name === draft.payerAccountName ||
+        item.accountNumber === draft.payerAccountNumber,
+    )?.id ??
+    payerAccounts[0]?.id ??
+    '';
+  const displayAccountNumber = (value: string) =>
+    host.country === 'CZ' ? formatCzLocalAccountNumber(value) : value;
   const strong = [styles.strong, { color: color('--uc-text') }];
   const section = (key: string, fallback: string) => (
     <View
@@ -429,9 +451,21 @@ export default function RoBaselinePaymentCreateScreen(
                 ),
                 {
                   helperText: draft.payerAccountName,
-                  helperText2: draft.payerBalance,
+                  helperText2: maskFormattedAmount(
+                    draft.payerBalance,
+                    host.amountsHidden,
+                  ),
                   trailingIconName: 'chevron-down-wide',
                   trailingIconPlacement: localAccount ? 'floating' : 'inline',
+                  ...(isPiBaselineContext(host) && payerAccounts.length
+                    ? {
+                        selectionControl: {
+                          expanded: accountPicker,
+                          onPress: () => setAccountPicker(true),
+                        },
+                        onActivate: () => setAccountPicker(true),
+                      }
+                    : {}),
                 },
               )}
               {section(
@@ -599,6 +633,46 @@ export default function RoBaselinePaymentCreateScreen(
           }}
         />
       </View>
+      {accountPicker ? (
+        <AccountSelectionSheet
+          host={host}
+          title="Choose account"
+          selectedId={payerId}
+          options={payerAccounts.map(item => ({
+            id: item.id,
+            name: item.name,
+            detail:
+              item.id === payerId
+                ? draft.payerAccountNumber
+                : displayAccountNumber(item.accountNumber),
+            ...(item.id === payerId
+              ? {
+                  balanceText: host.amountsHidden
+                    ? `${maskFormattedAmount(draft.payerBalance, true)} ${item.currency}`
+                    : draft.payerBalance,
+                }
+              : { balance: item.balance }),
+            currency: item.currency,
+          }))}
+          onClose={() => setAccountPicker(false)}
+          onConfirm={id => {
+            const chosen = payerAccounts.find(item => item.id === id);
+            if (chosen && chosen.id !== payerId)
+              commitIntent({
+                type: 'edit',
+                draft: {
+                  ...paymentFlowRef.current.draft,
+                  payerAccountName: chosen.name,
+                  payerAccountNumber: displayAccountNumber(
+                    chosen.accountNumber,
+                  ),
+                  payerBalance: `${formatMoneyNumber(chosen.balance, host.country)} ${chosen.currency}`,
+                },
+              });
+            setAccountPicker(false);
+          }}
+        />
+      ) : null}
     </View>
   );
 }

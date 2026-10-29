@@ -10,6 +10,8 @@ import type {
 } from '@/features/demo-native/contracts'
 import { isNativeComponentPreviewFitContent } from '@/features/demo-native/componentPreview'
 import { loadNativeDemoModule } from './nativeDemoLoader'
+import { useDevicePreview } from './DevicePreview'
+import { duoPreviewViewport } from '@/features/demo-native/duoPreview'
 
 export interface NativeScreenPreviewProps {
   route: NativeDemoRoute
@@ -122,11 +124,21 @@ function updateForwardedEvents(
 
 export function NativeScreenPreview({ route, snapshot, events, onNavigate, onBack }: NativeScreenPreviewProps) {
   const demo = useDemo()
+  const device = useDevicePreview()
+  const deviceGeometry = duoPreviewViewport(device.profileId, device.viewport)
+  const duo =
+    !!deviceGeometry &&
+    demo.product === 'PI' &&
+    demo.designSystem === 'current' &&
+    demo.release === 'release-current' &&
+    !snapshot?.componentPreview &&
+    !snapshot?.productsPreview
   const productData = useProductData()
   const language = useLanguage()
   const element = useRef<HTMLDivElement>(null)
   const [sourceTopReserve, setSourceTopReserve] = useState(54)
   const mounted = useRef<NativeDemoMount | null>(null)
+  const hasMounted = useRef(false)
   const liveEventsRef = useRef<{
     events: NativeDemoEvents
     isDisposed: () => boolean
@@ -178,8 +190,13 @@ export function NativeScreenPreview({ route, snapshot, events, onNavigate, onBac
     amountsHidden: demo.amountsHidden,
     activeFeatures: getActiveFeatures(demo),
     bottomInset: 0,
+    ...(duo && !snapshot?.componentPreview && !snapshot?.productsPreview
+      ? {
+          duoPreview: deviceGeometry,
+        }
+      : {}),
     ...snapshot,
-    screenTopInset: snapshot?.screenTopInset ?? sourceTopReserve,
+    screenTopInset: snapshot?.screenTopInset ?? (duo ? (deviceGeometry?.rightInset ? 12 : 54) : sourceTopReserve),
     route: activeRoute,
   }
   const fitContent =
@@ -250,12 +267,13 @@ export function NativeScreenPreview({ route, snapshot, events, onNavigate, onBac
     }
     liveEventsRef.current = { events: liveEvents, isDisposed }
 
-    setState('loading')
+    if (!hasMounted.current) setState('loading')
     void loadNativeDemoModule()
       .then((module) => {
         if (disposed || element.current !== target) return
         instance = module.mountCurrentApplication(target, latestSnapshot.current, liveEvents)
         mounted.current = instance
+        hasMounted.current = true
         setState('ready')
       })
       .catch((error) => {
@@ -271,6 +289,18 @@ export function NativeScreenPreview({ route, snapshot, events, onNavigate, onBac
       if (mounted.current === instance) mounted.current = null
     }
   }, [attempt])
+  useEffect(() => {
+    let disposed = false
+    let generation = 0
+    const update = () => {
+      const current = ++generation
+      void loadNativeDemoModule().then(() => {
+        if (!disposed && current === generation) retry((value) => value + 1)
+      }).catch((error) => console.error('Native preview update failed', error))
+    }
+    window.addEventListener('native-demo:built', update)
+    return () => { disposed = true; window.removeEventListener('native-demo:built', update) }
+  }, [])
 
   useEffect(() => {
     const capabilitiesChanged = previousEventSignature.current !== eventSignature
@@ -285,7 +315,7 @@ export function NativeScreenPreview({ route, snapshot, events, onNavigate, onBac
   const nativeHostClassName = fitContent ? 'w-full' : 'h-full w-full'
 
   return (
-    <div className={previewClassName} data-native-screen-preview={state}>
+    <div className={previewClassName} data-native-screen-preview={state} data-duo-geometry={duo ? 'true' : undefined}>
       <div ref={element} className={nativeHostClassName} />
       {state === 'loading' && (
         <div className="absolute inset-0 grid place-items-center bg-[var(--uc-app-bg)]" role="status">

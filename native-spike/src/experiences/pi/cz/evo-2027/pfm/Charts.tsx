@@ -126,55 +126,102 @@ export function Bars({
   hidden: boolean;
   currency: Currency;
 }) {
-  const max = Math.max(1, ...bars.map(bar => bar.total));
+  const max = Math.max(0, ...bars.map(bar => bar.total));
+  const rough = max / 4;
+  const magnitude = rough > 0 ? 10 ** Math.floor(Math.log10(rough)) : 1;
+  const normalized = rough / magnitude;
+  const step =
+    (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) *
+    magnitude;
+  const axisMax = max > 0 ? step * 4 : 1;
+  const barWidth = bars.length <= 6 ? 24 : bars.length <= 12 ? 18 : 14;
+  const labelEvery = Math.max(1, Math.ceil(bars.length / 12));
+  const tickLabel = (value: number) => {
+    if (hidden) return '****';
+    if (value >= 1000)
+      return `${new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: value % 1000 === 0 ? 0 : 1,
+      }).format(value / 1000)}K`;
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(
+      value,
+    );
+  };
   return (
-    <View style={s.bars}>
-      {bars.map(bar => (
-        <Pressable
-          key={bar.key}
-          accessibilityRole="button"
-          accessibilityLabel={`Select ${bar.filterLabel ?? bar.label}`}
-          accessibilityState={{ selected: selected === bar.key }}
-          onPress={() => onToggle(bar.key)}
-          style={[s.bar, { flex: bar.weight ?? 1 }]}
-        >
-          <View style={s.barPlot}>
-            <View
-              style={[
-                sourceStyles.borderRadius4width85,
-                {
-                  height: Math.max(2, (bar.total / max) * 160),
-                  backgroundColor:
-                    !selected || selected === bar.key
-                      ? tokens.accent
-                      : tokens.border,
-                },
-              ]}
-            />
-          </View>
-          <Text
-            style={[t.body, t.muted, sourceStyles.fontSize12textAligncenter]}
-          >
-            {bar.caption}
+    <View style={s.plot} accessibilityLabel="Expense bar chart">
+      <View style={s.axis} accessibilityElementsHidden>
+        {[4, 3, 2, 1, 0].map(index => (
+          <Text key={index} testID="cz-pfm-axis-tick" style={s.axisLabel}>
+            {tickLabel(step * index)}
+            {index === 4 ? ` ${currency}` : ''}
           </Text>
-          <Text style={[t.body, sourceStyles.fontSize12textAligncenter]}>
-            {bar.label}
-          </Text>
-          {selected === bar.key && (
-            <Money
-              amount={bar.total}
-              currency={currency}
-              hidden={hidden}
-              role="support"
-            />
-          )}
-        </Pressable>
-      ))}
+        ))}
+      </View>
+      <View style={s.plotContent}>
+        <View pointerEvents="none" style={s.grid}>
+          {[0, 1, 2, 3, 4].map(index => (
+            <View key={index} style={[s.gridLine, { top: `${index * 25}%` }]} />
+          ))}
+        </View>
+        <View style={s.bars}>
+          {bars.map((bar, index) => (
+            <Pressable
+              key={bar.key}
+              accessibilityRole="button"
+              accessibilityLabel={`Select ${
+                bar.filterLabel ??
+                `${bar.caption ? `${bar.caption} ` : ''}${bar.label}`
+              }`}
+              accessibilityState={{ selected: selected === bar.key }}
+              onPress={() => onToggle(bar.key)}
+              style={s.bar}
+            >
+              <View style={s.barPlot}>
+                <View
+                  style={[
+                    s.barFill,
+                    {
+                      width: '100%',
+                      maxWidth: barWidth * (bar.weight ?? 1),
+                      height:
+                        bar.total > 0
+                          ? Math.max(
+                              2,
+                              Math.min(168, (bar.total / axisMax) * 168),
+                            )
+                          : 0,
+                      backgroundColor:
+                        !selected || selected === bar.key
+                          ? tokens.accent
+                          : tokens.border,
+                    },
+                  ]}
+                />
+              </View>
+              {index % labelEvery === 0 && (
+                <Text
+                  style={[
+                    t.body,
+                    t.muted,
+                    sourceStyles.fontSize12textAligncenter,
+                  ]}
+                >
+                  {bar.caption}
+                </Text>
+              )}
+              {index % labelEvery === 0 && (
+                <Text style={[t.body, sourceStyles.fontSize12textAligncenter]}>
+                  {bar.label}
+                </Text>
+              )}
+            </Pressable>
+          ))}
+        </View>
+      </View>
     </View>
   );
 }
 const s = StyleSheet.create({
-  chart: { alignItems: 'center', paddingVertical: 16 },
+  chart: { alignItems: 'center' },
   donut: { position: 'relative', width: 268, height: 268 },
   ring: { position: 'absolute', left: 24, top: 24 },
   marker: { position: 'absolute', width: 32, height: 32, borderRadius: 16 },
@@ -211,13 +258,37 @@ const s = StyleSheet.create({
   },
   bars: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 6,
-    paddingVertical: 16,
+    alignItems: 'flex-start',
+    gap: 2,
   },
-  bar: { minWidth: 0, alignItems: 'center', gap: 4 },
+  plot: { flexDirection: 'row', gap: 6, paddingTop: 12 },
+  axis: {
+    width: 32,
+    height: 168,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  axisLabel: {
+    fontFamily: tokens.font,
+    color: tokens.muted,
+    fontSize: 11,
+    lineHeight: 14,
+    transform: [{ translateY: -7 }],
+  },
+  plotContent: { flex: 1, minWidth: 0, position: 'relative' },
+  grid: { position: 'absolute', top: 0, left: 0, right: 0, height: 168 },
+  gridLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    borderStyle: 'dotted',
+    borderColor: '#cccccc',
+  },
+  bar: { flex: 1, minWidth: 0, alignItems: 'center', gap: 4 },
+  barFill: { borderTopLeftRadius: 4, borderTopRightRadius: 4 },
   barPlot: {
-    height: 164,
+    height: 168,
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -228,6 +299,5 @@ const sourceStyles = StyleSheet.create({
   textAligncenter: { textAlign: 'center' },
   opacity045: { opacity: 0.45 },
   colorfff: { color: '#fff' },
-  borderRadius4width85: { borderRadius: 4, width: '85%' },
   fontSize12textAligncenter: { fontSize: 12, textAlign: 'center' },
 });

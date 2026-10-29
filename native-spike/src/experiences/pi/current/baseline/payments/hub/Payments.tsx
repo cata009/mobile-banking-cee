@@ -27,6 +27,11 @@ import { sourceColor } from '../../../../../../universal/sourceColor';
 import { RoBaselinePaymentTemplates } from './Templates';
 import { RoBaselineExchangeRates } from './ExchangeRates';
 import { PaymentsSheet } from './Sheet';
+import { RO_SHEETS } from './roSheetOptions';
+import { RoPayIcon } from './RoPayIcon';
+import { RoPaymentOptionIcon } from './RoPaymentOptionIcon';
+import { RoBillIcon } from './RoBillIcon';
+import { useDuoPreview } from '../../../../../../universal/DuoPreview';
 
 const otherIcons = {
   qr: 'payment-create-qr',
@@ -45,6 +50,7 @@ const actionIcons = {
   exchange: 'payment-exchange-rates',
 };
 export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
+  const duo = useDuoPreview();
   const [view, setView] = useState(host.route.params?.view ?? 'overview');
   const [hero, setHero] = useState<PaymentHeroId | null>(null);
   const visibility = host.onPrimaryNavigationChange;
@@ -98,11 +104,15 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   const sheet = hero
     ? getHeroSheetForRelease(menu, host.country, hero, { baseline: true })
     : null;
+  const roSheet = hero && host.country === 'RO' ? RO_SHEETS[hero] : undefined;
   return (
-    <View style={[s.page, { backgroundColor: color('--uc-app-bg') }]}>
-      <View style={s.reserve} />
+    <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
+      <View
+        style={[s.reserve, duo ? { height: host.screenTopInset } : undefined]}
+      />
       <BaselineL1Header
         variant="payments"
+        backgroundColor={color('--uc-surface')}
         title={t('runtime.payments.title', menu.title)}
         dark={dark}
         actions={
@@ -167,14 +177,19 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                     ? 'payments.templates.manage'
                     : 'payments.domestic.create';
             return (
-              <BaselinePaymentHero
+              <View
                 key={item.id}
-                item={localized}
-                imageVariant={item.imageVariant}
-                dark={dark}
-                disabled={disabled.has(action)}
-                onSelect={() => setHero(item.id)}
-              />
+                testID="duo-payment-tile"
+                style={{ width: '100%' }}
+              >
+                <BaselinePaymentHero
+                  item={localized}
+                  imageVariant={item.imageVariant}
+                  dark={dark}
+                  disabled={disabled.has(action)}
+                  onSelect={() => setHero(item.id)}
+                />
+              </View>
             );
           })}
         </View>
@@ -245,26 +260,33 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
       </ScrollView>
       {hero && sheet ? (
         <PaymentsSheet
-          title={t(`runtime.payments.heroSheets.${hero}.title`, sheet.title)}
+          title={
+            roSheet?.title ??
+            t(`runtime.payments.heroSheets.${hero}.title`, sheet.title)
+          }
           onClose={() => setHero(null)}
           dark={dark}
         >
           <View style={s.sheetBody}>
-            {sheet.actions.map(action => {
-              const title = t(
-                `runtime.payments.heroSheets.${hero}.actions.${action.id}.title`,
-                t(
-                  `runtime.payments.newPayment.actions.${action.id}.title`,
-                  action.title,
-                ),
-              );
-              const description = t(
-                `runtime.payments.heroSheets.${hero}.actions.${action.id}.description`,
-                t(
-                  `runtime.payments.newPayment.actions.${action.id}.description`,
-                  action.description,
-                ),
-              );
+            {(roSheet?.actions ?? sheet.actions).map(action => {
+              const title = roSheet
+                ? action.title
+                : t(
+                    `runtime.payments.heroSheets.${hero}.actions.${action.id}.title`,
+                    t(
+                      `runtime.payments.newPayment.actions.${action.id}.title`,
+                      action.title,
+                    ),
+                  );
+              const description = roSheet
+                ? action.description
+                : t(
+                    `runtime.payments.heroSheets.${hero}.actions.${action.id}.description`,
+                    t(
+                      `runtime.payments.newPayment.actions.${action.id}.description`,
+                      action.description,
+                    ),
+                  );
               return (
                 <Pressable
                   key={action.id}
@@ -276,13 +298,44 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                       setHero(null);
                       host.onNavigate({ screen: 'payment-create' });
                     }
+                    if (roSheet && action.id === 'templates-beneficiaries') {
+                      setHero(null);
+                      setView('templates');
+                    }
                   }}
                 >
                   <View style={s.actionIcon}>
-                    <PaymentIcon
-                      name={actionIcons[action.icon]}
-                      color={color('--uc-icon')}
-                    />
+                    {roSheet &&
+                    (action.id === 'new-bill' ||
+                      action.id === 'direct-debit' ||
+                      action.id === 'scan-paycode') ? (
+                      <RoBillIcon
+                        kind={action.id}
+                        color={
+                          action.id === 'new-bill' && !dark
+                            ? '#000000'
+                            : color('--uc-icon')
+                        }
+                      />
+                    ) : roSheet &&
+                      (action.id === 'treasury-payment' ||
+                        action.id === 'own-account-transfer') ? (
+                      <RoPaymentOptionIcon
+                        kind={
+                          action.id === 'treasury-payment'
+                            ? 'treasury'
+                            : 'own-accounts'
+                        }
+                        color={color('--uc-icon')}
+                      />
+                    ) : action.icon === 'ropay' ? (
+                      <RoPayIcon color={color('--uc-icon')} />
+                    ) : (
+                      <PaymentIcon
+                        name={actionIcons[action.icon]}
+                        color={color('--uc-icon')}
+                      />
+                    )}
                   </View>
                   <View style={s.actionCopy}>
                     <Text
@@ -308,30 +361,32 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                 </Pressable>
               );
             })}
-            <View style={s.banner}>
-              <BaselineBanner
-                variant="payment-discover"
-                dark={dark}
-                title={t(
-                  `runtime.payments.heroSheets.${hero}.infoBanner.title`,
-                  sheet.infoBanner.translationKey === null
-                    ? sheet.infoBanner.title
-                    : t(
-                        'runtime.payments.newPayment.infoBanner.title',
-                        sheet.infoBanner.title,
-                      ),
-                )}
-                description={t(
-                  `runtime.payments.heroSheets.${hero}.infoBanner.description`,
-                  sheet.infoBanner.translationKey === null
-                    ? sheet.infoBanner.description
-                    : t(
-                        'runtime.payments.newPayment.infoBanner.description',
-                        sheet.infoBanner.description,
-                      ),
-                )}
-              />
-            </View>
+            {!roSheet && (
+              <View style={s.banner}>
+                <BaselineBanner
+                  variant="payment-discover"
+                  dark={dark}
+                  title={t(
+                    `runtime.payments.heroSheets.${hero}.infoBanner.title`,
+                    sheet.infoBanner.translationKey === null
+                      ? sheet.infoBanner.title
+                      : t(
+                          'runtime.payments.newPayment.infoBanner.title',
+                          sheet.infoBanner.title,
+                        ),
+                  )}
+                  description={t(
+                    `runtime.payments.heroSheets.${hero}.infoBanner.description`,
+                    sheet.infoBanner.translationKey === null
+                      ? sheet.infoBanner.description
+                      : t(
+                          'runtime.payments.newPayment.infoBanner.description',
+                          sheet.infoBanner.description,
+                        ),
+                  )}
+                />
+              </View>
+            )}
           </View>
         </PaymentsSheet>
       ) : null}

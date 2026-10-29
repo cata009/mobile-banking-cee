@@ -1,0 +1,36 @@
+{
+  "owner": "marketing-email-builder integration (Codex)",
+  "baseCommit": "745956e19c87f52bfc84267fa328c48479ccf24e",
+  "worktreeRoot": "C:/Users/mihai/Desktop/Mobile Banking - CEE",
+  "initialPendingChanges": [
+    "src/app/screens/flow-library/components/FlowImplementationPanel.tsx"
+  ],
+  "ownedPaths": [
+    "docs/tasks/2026-10-22-marketing-email-builder.json",
+    "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+    "docs/features/marketing-email-builder.md",
+    "src/features/marketing-email/**",
+    "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+    "src/app/screens/tools/email-builder/**",
+    "src/app/screens/tools/ToolsScreen.tsx",
+    "tests/features/marketing-email.test.ts",
+    "tests/screens/marketing-email-builder.test.tsx",
+    "tests/screens/tools-screen.test.tsx",
+    "package.json",
+    "package-lock.json",
+    ".agent-task.json"
+  ],
+  "coordinatedChanges": [
+    {
+      "change": "worker: { format: 'es' } applied by current owner at email feature request",
+      "owner": "Card guard specification editor",
+      "path": "vite.config.ts"
+    }
+  ],
+  "reusedAssets": [
+    "src/assets/design-system/icons/*.svg (original bytes, no edits or copies)"
+  ],
+  "qaArtifacts": [
+    ".codex-temp/marketing-email-builder/**"
+  ]
+}

@@ -33,6 +33,7 @@ import {
 } from './Primitives';
 import { ProductCard } from './ProductCards';
 import { CardComparison } from './CardComparison';
+import { useMouseCarousel } from '../mouseCarousel';
 
 export default function Home(host: CzechNativeScreenProps) {
   const copy = createEvoTranslations(host.language ?? 'en');
@@ -64,6 +65,11 @@ export default function Home(host: CzechNativeScreenProps) {
     ...campaign,
     ...copy.interest.cards[campaign.key],
   }));
+  const campaignRail = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const campaignMouse = useMouseCarousel({
+    rail: campaignRail,
+    offsets: campaigns.map((_, index) => index * 300),
+  });
   const accounts = model.products.filter(p => p.type === 'current_account');
   const openOffer = (itemId: string) =>
     onNavigate({ screen: 'product-detail', params: { itemId } });
@@ -394,43 +400,50 @@ export default function Home(host: CzechNativeScreenProps) {
         )}
         <View>
           <Text style={t.section}>{copy.interest.sectionTitles[tab]}</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={s.campaigns}
-          >
-            {campaigns.map(campaign => (
-              <Pressable
-                key={campaign.key}
-                accessibilityRole="button"
-                accessibilityLabel={campaign.title}
-                onPress={() => openOffer(campaign.itemId)}
-                style={s.campaign}
-              >
-                <AssetGlyph
-                  asset={campaign.image}
-                  width={288}
-                  height={130}
-                  fit="cover"
-                />
-                <View style={s.campaignCopy}>
-                  <Text
-                    style={[
-                      t.body,
-                      t.strong,
-                      sourceStyles.fontSize18lineHeight23,
-                    ]}
-                  >
-                    {campaign.title}
-                  </Text>
-                  <Text style={[t.body, t.muted]}>{campaign.body}</Text>
-                  <Text style={[t.body, t.muted, sourceStyles.fontSize13]}>
-                    {campaign.caption}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <View ref={campaignMouse.containerRef} {...campaignMouse.panHandlers}>
+            <ScrollView
+              ref={campaignRail}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={s.campaigns}
+              onScroll={event =>
+                campaignMouse.trackOffset(event.nativeEvent.contentOffset.x)
+              }
+              scrollEventThrottle={16}
+            >
+              {campaigns.map(campaign => (
+                <Pressable
+                  key={campaign.key}
+                  accessibilityRole="button"
+                  accessibilityLabel={campaign.title}
+                  onPress={() => openOffer(campaign.itemId)}
+                  style={s.campaign}
+                >
+                  <AssetGlyph
+                    asset={campaign.image}
+                    width={288}
+                    height={130}
+                    fit="cover"
+                  />
+                  <View style={s.campaignCopy}>
+                    <Text
+                      style={[
+                        t.body,
+                        t.strong,
+                        sourceStyles.fontSize18lineHeight23,
+                      ]}
+                    >
+                      {campaign.title}
+                    </Text>
+                    <Text style={[t.body, t.muted]}>{campaign.body}</Text>
+                    <Text style={[t.body, t.muted, sourceStyles.fontSize13]}>
+                      {campaign.caption}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
         </View>
         {tab === 'accounts' && <ShopSmartHome host={host} />}
       </ScrollView>
@@ -477,7 +490,7 @@ const s = StyleSheet.create({
     gap: 12,
     flexWrap: 'wrap',
   },
-  policy: { padding: 16 },
+  policy: { padding: 16, backgroundColor: tokens.surface, borderRadius: 8 },
   allianz: {
     width: 72,
     height: 40,

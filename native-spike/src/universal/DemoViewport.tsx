@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useDuoLocalViewport } from './DuoPreview';
 
 const Context = createContext<{
   width: number;
@@ -37,12 +38,12 @@ export function DemoViewport({
         scale: 1,
       }
     : size
-    ? sourceCanvasSize(size.width, size.height, authoringWidth)
-    : {
-        width: authoringWidth,
-        height: authoringWidth === 393 ? 852 : 812,
-        scale: 1,
-      };
+      ? sourceCanvasSize(size.width, size.height, authoringWidth)
+      : {
+          width: authoringWidth,
+          height: authoringWidth === 393 ? 852 : 812,
+          scale: 1,
+        };
   return (
     <View
       style={fitContent ? exactSourceStyles.content : exactSourceStyles.inline1}
@@ -63,15 +64,15 @@ export function DemoViewport({
           fitContent
             ? exactSourceStyles.content
             : logical
-            ? [
-                exactSourceStyles.canvas,
-                {
-                  width: logical.width,
-                  height: logical.height,
-                  transform: [{ scale: logical.scale }],
-                },
-              ]
-            : exactSourceStyles.inline1
+              ? [
+                  exactSourceStyles.canvas,
+                  {
+                    width: logical.width,
+                    height: logical.height,
+                    transform: [{ scale: logical.scale }],
+                  },
+                ]
+              : exactSourceStyles.inline1
         }
       >
         <Context.Provider value={logical}>{children}</Context.Provider>
@@ -86,7 +87,12 @@ export function useDemoCanvas() {
 export function useDemoViewport() {
   const outer = useWindowDimensions();
   const size = useContext(Context);
-  return { ...outer, ...size };
+  const local = useDuoLocalViewport();
+  return {
+    ...outer,
+    ...size,
+    ...(local ? { width: local.width, height: local.height, scale: 1 } : {}),
+  };
 }
 
 const exactSourceStyles = StyleSheet.create({

@@ -4,6 +4,7 @@ import type {
   NativePaymentIntent,
 } from '@/features/demo-native/paymentIntents';
 import type { CzechNativeRoute, CzechNativeScreen } from './contracts';
+import { buildShelfProductSelection } from '@/app/config/productsShelfConfig';
 
 const directScreens: Partial<
   Record<NativeDemoRoute['screen'], CzechNativeScreen>
@@ -70,7 +71,9 @@ export function czechRouteFromNativeDemoRoute(
     if (entry === 'history') {
       return route('investment-history', {
         view: params.view ?? 'history',
-        ...(params.filterByTitle ? { filterByTitle: params.filterByTitle } : {}),
+        ...(params.filterByTitle
+          ? { filterByTitle: params.filterByTitle }
+          : {}),
         ...(params.securityId ?? params.filterBySecurityId
           ? { securityId: params.securityId ?? params.filterBySecurityId }
           : {}),
@@ -79,14 +82,14 @@ export function czechRouteFromNativeDemoRoute(
     if (entry === 'approvals') {
       return route('investment-history', {
         view: params.view ?? 'approvals',
-        ...(params.filterByTitle ? { filterByTitle: params.filterByTitle } : {}),
+        ...(params.filterByTitle
+          ? { filterByTitle: params.filterByTitle }
+          : {}),
       });
     }
     if (entry === 'detail') {
       const securityId = params.securityId ?? params.productId;
-      return securityId
-        ? route('investment-detail', { securityId })
-        : null;
+      return securityId ? route('investment-detail', { securityId }) : null;
     }
     if (
       entry === 'robo' ||
@@ -120,6 +123,16 @@ export function czechRouteFromNativeDemoRoute(
   if (source.screen === 'products' && source.params?.view === 'prime') {
     return route('prime');
   }
+  if (
+    source.screen === 'product-detail' &&
+    source.params?.optionId &&
+    buildShelfProductSelection(source.params.optionId)
+  ) {
+    return route('product-detail', {
+      ...source.params,
+      itemId: source.params.itemId ?? source.params.optionId,
+    });
+  }
   const screen = directScreens[source.screen];
   return screen ? route(screen, source.params) : null;
 }
@@ -129,6 +142,24 @@ export function nativeDemoRouteFromCzechRoute(
   czech: CzechNativeRoute,
 ): NativeDemoRoute | null {
   const params = czech.params ?? {};
+  if (czech.screen === 'product-detail' && params.itemId) {
+    const selection = buildShelfProductSelection(params.itemId);
+    if (selection)
+      return {
+        screen: 'product-detail',
+        params: {
+          ...params,
+          cardId: params.cardId ?? selection.cardId,
+          optionId: params.optionId ?? selection.optionId,
+          title: params.title ?? selection.title,
+          categoryTitle: params.categoryTitle ?? selection.categoryTitle,
+        },
+      };
+    // Match the Source offer coordinator: an unknown shelf item opens the
+    // product shelf instead of producing an unusable detail route.
+    if (!params.cardId || !params.optionId || !params.title)
+      return { screen: 'products' };
+  }
   if (czech.screen === 'investment-history') {
     return {
       screen: 'investments',
@@ -138,14 +169,19 @@ export function nativeDemoRouteFromCzechRoute(
             ? 'approvals'
             : 'history',
         ...(params.view ? { view: params.view } : {}),
-        ...(params.filterByTitle ? { filterByTitle: params.filterByTitle } : {}),
+        ...(params.filterByTitle
+          ? { filterByTitle: params.filterByTitle }
+          : {}),
         ...(params.securityId ? { securityId: params.securityId } : {}),
       },
     };
   }
   if (czech.screen === 'investment-detail') {
     return params.securityId
-      ? { screen: 'investments', params: { entry: 'detail', securityId: params.securityId } }
+      ? {
+          screen: 'investments',
+          params: { entry: 'detail', securityId: params.securityId },
+        }
       : null;
   }
   if (czech.screen === 'robo') {
@@ -161,7 +197,10 @@ export function nativeDemoRouteFromCzechRoute(
   if (czech.screen === 'investments') {
     return {
       screen: 'investments',
-      params: { entry: 'portfolio', ...(params.view ? { initialView: params.view } : {}) },
+      params: {
+        entry: 'portfolio',
+        ...(params.view ? { initialView: params.view } : {}),
+      },
     };
   }
   if (czech.screen === 'products' && params.view === 'prime') {
@@ -181,7 +220,9 @@ export function nativeDemoRouteFromCzechRoute(
   return directScreens[czech.screen as NativeDemoRoute['screen']]
     ? {
         screen: czech.screen as NativeDemoRoute['screen'],
-        ...(copyParams(czech.params) ? { params: copyParams(czech.params) } : {}),
+        ...(copyParams(czech.params)
+          ? { params: copyParams(czech.params) }
+          : {}),
       }
     : null;
 }

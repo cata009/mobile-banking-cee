@@ -11,6 +11,7 @@ import { getReleaseBundle } from "@/app/registry/releaseRegistry";
 import { useDemo } from "@/app/state/demoStore";
 import type { CountryId, DesignSystemId, ProductId, ReleaseId, Scenario } from "@/app/state/demoTypes";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import { ProfileAccountDialog } from "@/features/flow-collaboration/ProfileAccountDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,7 +102,7 @@ function getLocalShareAccessToken() {
 export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const { product, country, scenario, designSystem, release, themeMode, setProduct, setCountry, setScenario, setRelease, setThemeMode } =
     useDemo();
-  const { currentScreen, navigateToAndReset, setCoAppingActive } = useNavigationContext();
+  const { currentScreen, currentRoute, navigateToAndReset, setCoAppingActive } = useNavigationContext();
 
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
@@ -345,16 +346,24 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
           </nav>
 
           <div className="flex min-w-0 items-center justify-end gap-2">
-            <button
-              type="button"
-              className="flex h-[44px] min-w-[56px] items-center justify-center gap-2 rounded-[6px] px-2 text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
-              aria-label="Profile IM"
-              title="Mihai Iacob"
+            <ProfileAccountDialog
+              flowId={
+                currentRoute.screen === "flow-library" && currentRoute.view === "detail"
+                  ? currentRoute.flowId
+                  : undefined
+              }
             >
-              <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-text)] font-['UniCredit:Bold',sans-serif] text-[12px] leading-none text-[var(--uc-surface)]">
-                IM
-              </span>
-            </button>
+              <button
+                type="button"
+                className="flex h-[44px] min-w-[56px] items-center justify-center gap-2 rounded-[6px] px-2 text-[var(--uc-text)] transition-colors hover:bg-[var(--uc-surface-muted)] hover:text-[var(--uc-action)]"
+                aria-label="Profile IM"
+                title="Mihai Iacob"
+              >
+                <span className="grid size-[32px] place-items-center rounded-full bg-[var(--uc-text)] font-['UniCredit:Bold',sans-serif] text-[12px] leading-none text-[var(--uc-surface)]">
+                  IM
+                </span>
+              </button>
+            </ProfileAccountDialog>
             <HeaderIconButton icon="logout" label="Logout" onClick={handleLogout} />
           </div>
         </div>

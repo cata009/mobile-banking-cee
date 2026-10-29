@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -17,6 +17,7 @@ import type { CzechNativeScreenProps } from '../contracts';
 import { SourcePhoto } from '../products/SourcePhoto';
 import { evoTokens as tokens } from './tokens';
 import { textStyles as t } from './Primitives';
+import { useMouseCarousel } from '../mouseCarousel';
 
 export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
   const [filter, setFilter] = useState<'popular' | ShopSmartOfferCategory>(
@@ -29,8 +30,13 @@ export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
     filter === 'popular'
       ? offers
       : offers.filter(offer => offer.categories.includes(filter));
-  if (!offers.length) return null;
   const cardWidth = Math.min(528, width - 32) - 24;
+  const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const mouse = useMouseCarousel({
+    rail,
+    offsets: visible.map((_, index) => index * (cardWidth + 12)),
+  });
+  if (!offers.length) return null;
   return (
     <View style={s.section}>
       <Text style={t.title}>{copy.heading}</Text>
@@ -43,47 +49,54 @@ export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
         ).map(value => ({ value, label: copy.filters[value] }))}
         onChange={setFilter}
       />
-      <ScrollView
-        key={filter}
-        horizontal
-        accessibilityLabel={copy.offersLabel}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={cardWidth + 12}
-        decelerationRate="fast"
-        contentContainerStyle={s.rail}
-      >
-        {visible.map(offer => (
-          <Pressable
-            key={offer.id}
-            accessibilityRole="button"
-            accessibilityLabel={offer.title}
-            onPress={() => host.onNavigate({ screen: 'products' })}
-            style={[s.card, { width: cardWidth }]}
-          >
-            <View>
-              <SourcePhoto asset={offer.imageSrc} height={130} />
-              {offer.tagLabel && (
-                <View style={s.tag}>
-                  <Text style={s.tagText}>{offer.tagLabel}</Text>
-                </View>
-              )}
-            </View>
-            <View style={s.copy}>
-              <Text style={[t.body, t.strong]}>{offer.merchant}</Text>
-              <Text style={s.title}>{offer.title}</Text>
-              {offer.pillLabel && (
-                <Text style={[t.body, t.strong, s.pill]}>
-                  {offer.pillLabel}
-                </Text>
-              )}
-              <Text style={[t.body, t.muted]}>{offer.statusText}</Text>
-              {offer.distance && (
-                <Text style={[t.body, t.muted]}>{offer.distance}</Text>
-              )}
-            </View>
-          </Pressable>
-        ))}
-      </ScrollView>
+      <View ref={mouse.containerRef} {...mouse.panHandlers}>
+        <ScrollView
+          ref={rail}
+          key={filter}
+          horizontal
+          accessibilityLabel={copy.offersLabel}
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={cardWidth + 12}
+          decelerationRate="fast"
+          contentContainerStyle={s.rail}
+          onScroll={event =>
+            mouse.trackOffset(event.nativeEvent.contentOffset.x)
+          }
+          scrollEventThrottle={16}
+        >
+          {visible.map(offer => (
+            <Pressable
+              key={offer.id}
+              accessibilityRole="button"
+              accessibilityLabel={offer.title}
+              onPress={() => host.onNavigate({ screen: 'products' })}
+              style={[s.card, { width: cardWidth }]}
+            >
+              <View>
+                <SourcePhoto asset={offer.imageSrc} height={130} />
+                {offer.tagLabel && (
+                  <View style={s.tag}>
+                    <Text style={s.tagText}>{offer.tagLabel}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={s.copy}>
+                <Text style={[t.body, t.strong]}>{offer.merchant}</Text>
+                <Text style={s.title}>{offer.title}</Text>
+                {offer.pillLabel && (
+                  <Text style={[t.body, t.strong, s.pill]}>
+                    {offer.pillLabel}
+                  </Text>
+                )}
+                <Text style={[t.body, t.muted]}>{offer.statusText}</Text>
+                {offer.distance && (
+                  <Text style={[t.body, t.muted]}>{offer.distance}</Text>
+                )}
+              </View>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 }

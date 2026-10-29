@@ -291,11 +291,12 @@ describe('Evo 2027 analytics overview', () => {
     expect(negative).toBeDefined()
     if (!positive || !negative) throw new Error('Expected positive and negative CZ PFM periods')
     const label = (key: string) => `${new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(new Date(`${key}-01T12:00:00Z`))} ${key.slice(0, 4)}`
-    const net = screen.getByTestId('cz-pfm-net')
     await selectMonth(label(positive.key))
+    let net = screen.getByTestId('cz-pfm-net')
     expect(net).toHaveTextContent(formatEvo2027Number(timeline.summariesByPeriodKey[positive.key]!.netTotal))
     expect(net.textContent).not.toMatch(/[−-]/)
     await selectMonth(label(negative.key))
+    net = screen.getByTestId('cz-pfm-net')
     expect(net).toHaveTextContent(formatEvo2027Number(timeline.summariesByPeriodKey[negative.key]!.netTotal))
     expect(net.textContent).toMatch(/[−-]/)
   })
@@ -312,7 +313,7 @@ describe('Evo 2027 analytics overview', () => {
     expect(income).toHaveTextContent(/CZK/)
     expect(expense).toHaveTextContent(/CZK/)
     expect(follows(income, expense)).toBe(true)
-    expect(follows(expense, net)).toBe(true)
+    expect(follows(net, income)).toBe(true)
   })
 
   it('shows matching top money-out and money-in sections on the overview', async () => {

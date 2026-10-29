@@ -22,6 +22,9 @@ import { formatScheduleSummary } from '@/app/utils/scheduleFormatting';
 import type { ScheduleConfig } from '@/data/schedule';
 import { BankingButton, BankingSheet, SelectedMark } from './Controls';
 import { TransferFlag } from './TransferFlag';
+import { AccountSelectionSheet } from '../baseline/AccountSelectionSheet';
+import { isPiBaselineContext } from '../baseline/policy';
+import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount';
 import { SourceSchedule } from './Schedule';
 import {
   OPERATOR_RE,
@@ -184,7 +187,7 @@ export function InternalTransfer({
       .replace(/÷/g, '/')
       .replace(/−/g, '-');
     commit(
-      normalized.includes('=') ? normalized.split('=')[0] ?? '' : normalized,
+      normalized.includes('=') ? (normalized.split('=')[0] ?? '') : normalized,
     );
   };
   const finish = () => {
@@ -247,8 +250,8 @@ export function InternalTransfer({
             isEditing
               ? 'Transfer updated'
               : schedule
-              ? 'Transfer scheduled'
-              : 'Money moved',
+                ? 'Transfer scheduled'
+                : 'Money moved',
             true,
             s.successTitle,
           )}
@@ -445,8 +448,8 @@ export function InternalTransfer({
             style === s.digit
               ? s.digitText
               : style === s.suggestion
-              ? s.suggestionText
-              : s.keyText,
+                ? s.suggestionText
+                : s.keyText,
           )
         : body}
     </Pressable>
@@ -670,7 +673,48 @@ export function InternalTransfer({
             { color: host.tokens.muted },
           ])
         : null}
-      {picker ? (
+      {picker && isPiBaselineContext(host) ? (
+        <AccountSelectionSheet
+          host={host}
+          title={
+            (picker === 'top' ? topIsSource : !topIsSource)
+              ? 'Choose source account'
+              : 'Choose destination account'
+          }
+          selectedId={picker === 'top' ? top.id : bottom.id}
+          options={accounts
+            .filter(
+              account => account.id !== (picker === 'top' ? bottom.id : top.id),
+            )
+            .map(account => ({
+              id: account.id,
+              name: account.name,
+              detail:
+                host.country === 'CZ'
+                  ? formatCzLocalAccountNumber(account.accountNumber)
+                  : account.accountNumber,
+              balance: account.balance,
+              currency: account.currency,
+            }))}
+          onClose={() => {
+            setPicker(null);
+            setKeypad(true);
+          }}
+          onConfirm={id => {
+            const selectingSource =
+              picker === 'top' ? topIsSource : !topIsSource;
+            setDraft(current => ({
+              ...current,
+              [selectingSource ? 'sourceAccountId' : 'destinationAccountId']:
+                id,
+            }));
+            if (picker === 'top') setTopId(id);
+            else setBottomId(id);
+            setPicker(null);
+            setKeypad(true);
+          }}
+        />
+      ) : picker ? (
         <BankingSheet
           host={host}
           title={

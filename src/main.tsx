@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import AccessGate from '@/app/components/security/AccessGate';
+import { PlatformProvider } from '@/features/flow-collaboration/PlatformContext';
+import { PersonalAccessBoundary } from '@/features/flow-collaboration/PersonalAccessBoundary';
 import '@/styles/index.css';
 import { installRuntimeErrorHandlers, renderBootError } from '@/app/platform/runtimeErrors';
 
@@ -22,7 +23,7 @@ if (!rootElement) {
     .then(({ default: App }) => {
       ReactDOM.createRoot(rootElement).render(
         <React.StrictMode>
-          <RuntimeMounted><AccessGate><App /></AccessGate></RuntimeMounted>
+          <RuntimeMounted><PlatformProvider><PersonalAccessBoundary><App /></PersonalAccessBoundary></PlatformProvider></RuntimeMounted>
         </React.StrictMode>
       );
     })

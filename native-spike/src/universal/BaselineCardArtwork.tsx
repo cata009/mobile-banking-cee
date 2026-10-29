@@ -1,5 +1,12 @@
 import React, { useId } from 'react';
-import { View, Platform, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  View,
+  Image,
+  Platform,
+  type ImageSourcePropType,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Svg, {
   Circle,
   ClipPath,
@@ -26,6 +33,7 @@ export function BaselineCardArtwork({
   clipGeometry = false,
   backgroundRadius = 0,
   transparentCanvas = false,
+  backgroundPhoto,
   labelFontFamily = 'Arial, Helvetica, sans-serif',
 }: {
   variant?: CardVariant;
@@ -36,6 +44,8 @@ export function BaselineCardArtwork({
   /** Compatibility geometry for the existing banking adapter; the shared viewBox stays 64×40. */
   backgroundRadius?: number;
   transparentCanvas?: boolean;
+  /** Optional original photo beneath the executable card marks. */
+  backgroundPhoto?: ImageSourcePropType;
   labelFontFamily?: string;
 }) {
   const state = resolveCardArtwork({ variant, size }),
@@ -67,18 +77,41 @@ export function BaselineCardArtwork({
       accessible={Boolean(ariaLabel)}
       style={viewStyle1}
     >
+      {backgroundPhoto ? (
+        <Image
+          source={backgroundPhoto}
+          resizeMode="cover"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        />
+      ) : null}
       <Svg
         width="100%"
         height="100%"
         viewBox={state.viewBox}
         preserveAspectRatio="none"
-        style={
+        style={[
           Platform.OS === 'web' && !clipGeometry
             ? ({ borderRadius: 'inherit' } as unknown as ViewStyle)
-            : undefined
-        }
+            : undefined,
+          backgroundPhoto ? { position: 'relative', zIndex: 1 } : undefined,
+        ]}
       >
         <Defs>
+          {backgroundPhoto ? (
+            <LinearGradient
+              id={`${id}photoShade`}
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              x2="64"
+              y1="0"
+              y2="0"
+            >
+              <Stop offset="0.35" stopColor="#000000" stopOpacity="0" />
+              <Stop offset="1" stopColor="#000000" stopOpacity="0.62" />
+            </LinearGradient>
+          ) : null}
           {clipGeometry ? (
             <ClipPath id={`${id}clip`}>
               <Rect width="64" height="40" rx="4" />
@@ -98,29 +131,36 @@ export function BaselineCardArtwork({
           ) : null}
         </Defs>
         <G clipPath={clipGeometry ? `url(#${id}clip)` : undefined}>
-          <Rect
-            width="64"
-            height="40"
-            rx={backgroundRadius || undefined}
-            fill={fill}
-          />
-          <Path
-            d={CARD_ARTWORK.edgeArrowPath}
-            fill={pattern}
-            opacity={state.firstArrowOpacity}
-          />
-          <Path
-            d={CARD_ARTWORK.arrowPath}
-            fill={pattern}
-            opacity={state.secondArrowOpacity}
-          />
-          <Path
-            d={CARD_ARTWORK.detailPath}
-            fill="none"
-            stroke="#FFFFFF"
-            strokeOpacity="0.1"
-            strokeWidth="0.4"
-          />
+          {backgroundPhoto ? (
+            <Rect width="64" height="40" fill={`url(#${id}photoShade)`} />
+          ) : null}
+          {!backgroundPhoto ? (
+            <>
+              <Rect
+                width="64"
+                height="40"
+                rx={backgroundRadius || undefined}
+                fill={fill}
+              />
+              <Path
+                d={CARD_ARTWORK.edgeArrowPath}
+                fill={pattern}
+                opacity={state.firstArrowOpacity}
+              />
+              <Path
+                d={CARD_ARTWORK.arrowPath}
+                fill={pattern}
+                opacity={state.secondArrowOpacity}
+              />
+              <Path
+                d={CARD_ARTWORK.detailPath}
+                fill="none"
+                stroke="#FFFFFF"
+                strokeOpacity="0.1"
+                strokeWidth="0.4"
+              />
+            </>
+          ) : null}
           <G transform={CARD_ARTWORK.logoTransform}>
             {[
               CARD_ARTWORK.logoPaths.p2cef6600,

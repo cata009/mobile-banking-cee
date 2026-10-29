@@ -18,6 +18,8 @@ import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { formatEvo2027Amount } from '@/app/utils/evo2027Formatting';
 import type { Currency } from '@/data/products';
 import { evoTokens as tokens } from './tokens';
+import { BaselineCarouselIndicator } from '../../../../../universal/BaselineCarouselIndicator';
+import { useMouseCarousel } from '../mouseCarousel';
 
 export const textStyles = StyleSheet.create({
   body: {
@@ -204,6 +206,15 @@ export function Rail({
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const pageWidth = railWidth - (items.length > 1 && peek ? 24 : 0);
   const stepWidth = pageWidth + 12;
+  const offsets = items.map((_, index) =>
+    index === items.length - 1
+      ? Math.max(
+          0,
+          items.length * pageWidth + (items.length - 1) * 12 - railWidth,
+        )
+      : index * stepWidth,
+  );
+  const mouse = useMouseCarousel({ rail, offsets, onSelect: setPage });
   return (
     <View
       style={s.group}
@@ -234,56 +245,49 @@ export function Rail({
         )}
       </View>
       {items.length ? (
-        <ScrollView
-          ref={rail}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={stepWidth}
-          contentContainerStyle={s.rail}
-          decelerationRate="fast"
-          onMomentumScrollEnd={e =>
-            setPage(Math.round(e.nativeEvent.contentOffset.x / stepWidth))
-          }
-        >
-          {items.map(item => (
-            <View key={item.id} style={{ width: pageWidth }}>
-              {item.content}
-            </View>
-          ))}
-        </ScrollView>
+        <View ref={mouse.containerRef} {...mouse.panHandlers}>
+          <ScrollView
+            ref={rail}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={stepWidth}
+            contentContainerStyle={s.rail}
+            decelerationRate="fast"
+            onScroll={e => {
+              mouse.trackOffset(e.nativeEvent.contentOffset.x);
+              setPage(
+                Math.max(
+                  0,
+                  Math.min(
+                    items.length - 1,
+                    Math.round(e.nativeEvent.contentOffset.x / stepWidth),
+                  ),
+                ),
+              );
+            }}
+            scrollEventThrottle={16}
+          >
+            {items.map(item => (
+              <View key={item.id} style={{ width: pageWidth }}>
+                {item.content}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
       ) : (
         <Text style={[textStyles.body, s.empty]}>No products yet</Text>
       )}
       {items.length > 1 && (
-        <View
-          accessibilityLabel={`Page ${Math.min(page + 1, items.length)} of ${
-            items.length
-          }`}
-          style={s.dots}
-        >
-          {items.map((item, i) => (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Go to ${item.label}`}
-              accessibilityState={{ selected: page === i }}
-              onPress={() => {
-                setPage(i);
-                rail.current?.scrollTo({ x: i * stepWidth, animated: true });
-              }}
-              style={s.dotControl}
-            >
-              <View
-                style={[
-                  s.dot,
-                  {
-                    backgroundColor: page === i ? tokens.accent : tokens.border,
-                  },
-                ]}
-              />
-            </Pressable>
-          ))}
-        </View>
+        <BaselineCarouselIndicator
+          count={items.length}
+          activeIndex={Math.min(page, items.length - 1)}
+          itemLabels={items.map(item => `Go to ${item.label}`)}
+          withBackdropBlur={false}
+          onSelect={i => {
+            setPage(i);
+            rail.current?.scrollTo({ x: i * stepWidth, y: 0, animated: true });
+          }}
+        />
       )}
     </View>
   );
@@ -402,17 +406,4 @@ const s = StyleSheet.create({
   rowCurrency: { fontSize: 13, lineHeight: 16, fontFamily: tokens.font },
   positive: { color: '#398347' },
   empty: { padding: 16 },
-  dots: {
-    flexDirection: 'row',
-    gap: 4,
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  dotControl: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dot: { width: 4, height: 4, borderRadius: 2 },
 });

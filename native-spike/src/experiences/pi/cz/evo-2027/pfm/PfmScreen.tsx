@@ -54,10 +54,14 @@ import { CategoryMark } from './CategoryMark';
 import { CurrencyMark } from '../home/CurrencyMark';
 import MovementAvatar from '../accounts/MovementAvatar';
 import { PeriodSheet, getPresetLabels } from './PeriodSheet';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
+import { BaselineCarouselIndicator } from '../../../../../universal/BaselineCarouselIndicator';
+import { SpendingPeriodCarousel } from './SpendingPeriodCarousel';
+import { formatEvo2027Number } from '@/app/utils/evo2027Formatting';
+import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 
-const EMPTY_CATEGORY_OVERRIDES: Readonly<
-  Record<string, PfmCategorySelection>
-> = Object.freeze({});
+const EMPTY_CATEGORY_OVERRIDES: Readonly<Record<string, PfmCategorySelection>> =
+  Object.freeze({});
 
 function periodFromRoute(
   periodKey: string | undefined,
@@ -100,7 +104,9 @@ function periodFromRoute(
 
   const yearToDate = periodKey.match(/^range:ytd-(\d{4})$/)?.[1];
   if (yearToDate) {
-    const yearMonths = months.filter(month => month.startsWith(`${yearToDate}-`));
+    const yearMonths = months.filter(month =>
+      month.startsWith(`${yearToDate}-`),
+    );
     const endMonth = yearMonths[yearMonths.length - 1] ?? latestMonth;
     return {
       ...buildPresetSelection(
@@ -174,39 +180,31 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     host.route.params?.direction === 'expense'
       ? host.route.params.direction
       : host.route.params?.direction === 'in'
-      ? 'income'
-      : host.route.params?.direction === 'out'
-      ? 'expense'
-      : undefined;
+        ? 'income'
+        : host.route.params?.direction === 'out'
+          ? 'expense'
+          : undefined;
   const initialCategory = categoryFromRoute(host.route.params?.category);
   const externalDetail = host.route.params?.externalDetail === 'true';
-  const [state, dispatch] = useReducer(
-    evoAnalyticsReducer,
-    undefined,
-    () => {
-      const initial = createEvoAnalyticsState(
-        host.route.params?.scopeId,
-        direction,
-        periodFromRoute(
-          host.route.params?.periodKey,
-          months,
-          presetLabels,
-        ),
-      );
-      if (initialCategory) {
-        initial.view = 'breakdown';
-        initial.analysisDirection = direction ?? 'expense';
-        initial.openBreakdownRow = {
-          key: initialCategory,
-          label: getEvoAnalyticsCategoryDisplayLabel(initialCategory),
-          total: 0,
-          transactionCount: 0,
-          category: initialCategory,
-        };
-      }
-      return initial;
-    },
-  );
+  const [state, dispatch] = useReducer(evoAnalyticsReducer, undefined, () => {
+    const initial = createEvoAnalyticsState(
+      host.route.params?.scopeId,
+      direction,
+      periodFromRoute(host.route.params?.periodKey, months, presetLabels),
+    );
+    if (initialCategory) {
+      initial.view = 'breakdown';
+      initial.analysisDirection = direction ?? 'expense';
+      initial.openBreakdownRow = {
+        key: initialCategory,
+        label: getEvoAnalyticsCategoryDisplayLabel(initialCategory),
+        total: 0,
+        transactionCount: 0,
+        category: initialCategory,
+      };
+    }
+    return initial;
+  });
   const scope = scopes.find(s => s.id === state.selectedScopeId) ?? scopes[0];
   useEffect(() => {
     if (!scopes.some(s => s.id === state.selectedScopeId))
@@ -231,7 +229,12 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
         categoryOverrides,
         { includeOwnTransfers: state.includeOwnTransfers },
       ),
-    [categoryOverrides, scope.products, state.period, state.includeOwnTransfers],
+    [
+      categoryOverrides,
+      scope.products,
+      state.period,
+      state.includeOwnTransfers,
+    ],
   );
   const view = selectEvoAnalyticsView(state, summary, products, scope);
   const currency = summary.currency as Currency;
@@ -254,13 +257,21 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
         dispatch({ type: 'set-field', field: 'scopeSheetOpen', value: false });
       else if (state.view !== 'overview') {
         if (state.view === 'breakdown' && externalDetail) onBack();
-        else if (state.view === 'breakdown') dispatch({ type: 'close-breakdown' });
+        else if (state.view === 'breakdown')
+          dispatch({ type: 'close-breakdown' });
         else dispatch({ type: 'back-overview' });
       } else return false;
       return true;
     });
     return () => listener.remove();
-  }, [externalDetail, host.isActive, onBack, state.view, state.periodSheetOpen, state.scopeSheetOpen]);
+  }, [
+    externalDetail,
+    host.isActive,
+    onBack,
+    state.view,
+    state.periodSheetOpen,
+    state.scopeSheetOpen,
+  ]);
   const selectPeriod = (period: SpendingPeriodSelection) => {
     dispatch({ type: 'select-period', period });
     host.onAnalyticsPeriodChange?.(period.id);
@@ -280,7 +291,9 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     else onNavigate({ screen: 'pfm', params: { intent: 'add-transaction' } });
   };
   const openTransaction = (transaction: SpendingAnalyticsTransaction) => {
-    const product = products.find(item => item.id === transaction.sourceProductId);
+    const product = products.find(
+      item => item.id === transaction.sourceProductId,
+    );
     if (host.onTransactionSelected && product) {
       const source =
         product.type === 'credit_card' || product.type === 'debit_card'
@@ -351,8 +364,8 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     state.view === 'overview'
       ? 'Spending'
       : state.view === 'analysis'
-      ? directionTitle
-      : state.openBreakdownRow?.label ?? directionTitle;
+        ? directionTitle
+        : (state.openBreakdownRow?.label ?? directionTitle);
   const periodRail = buildPeriodRail(
     state.period,
     months,
@@ -382,114 +395,293 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
       />
       <ScrollView
         ref={scroll}
-        contentContainerStyle={s.content}
+        contentContainerStyle={[
+          s.content,
+          state.view === 'analysis' && s.analysisContent,
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Choose accounts"
-          onPress={() =>
-            dispatch({
-              type: 'set-field',
-              field: 'scopeSheetOpen',
-              value: true,
-            })
-          }
-          style={s.scope}
-        >
-          <Text style={[t.body, t.strong, sourceStyles.fontSize16]}>
-            {scope.label}
-          </Text>
-          <Glyph name="forward" size={16} />
-        </Pressable>
-        <View style={s.period}>
+        <View style={s.scopeRow}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={copy.spending.previousPeriod}
-            disabled={periodRail.activeIndex <= 0}
-            onPress={() => step(-1)}
-            style={s.arrow}
-          >
-            <Glyph name="back" />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={copy.spending.changePeriod}
+            accessibilityLabel="Choose accounts"
             onPress={() =>
               dispatch({
                 type: 'set-field',
-                field: 'periodSheetOpen',
+                field: 'scopeSheetOpen',
                 value: true,
               })
             }
-            style={s.periodLabel}
+            style={s.analysisScope}
           >
-            <Text style={t.title}>
-              {view.activeBucketTitle ?? state.period.title}
+            <Text style={[t.body, t.strong, sourceStyles.fontSize16]}>
+              {scope.label}
             </Text>
-            <Text style={[t.body, t.muted]}>{state.period.subtitle}</Text>
+            <SourceCustomIcon
+              name="chevron-down-wide"
+              size={18}
+              color={tokens.text}
+            />
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={copy.spending.nextPeriod}
-            disabled={periodRail.activeIndex >= periodRail.items.length - 1}
-            onPress={() => step(1)}
-            style={s.arrow}
-          >
-            <Glyph name="forward" size={18} />
-          </Pressable>
+          {state.view === 'analysis' && (
+            <View
+              style={s.chartMode}
+              accessibilityRole="tablist"
+              accessibilityLabel="Chart type"
+            >
+              {(['donut', 'bars'] as const).map(mode => (
+                <Pressable
+                  key={mode}
+                  accessibilityRole="tab"
+                  accessibilityLabel={mode === 'donut' ? 'Donut' : 'Bars'}
+                  accessibilityState={{
+                    selected: state.expenseChartMode === mode,
+                  }}
+                  onPress={() =>
+                    dispatch({
+                      type: 'set-field',
+                      field: 'expenseChartMode',
+                      value: mode,
+                    })
+                  }
+                  style={[
+                    s.chartModeButton,
+                    state.expenseChartMode === mode && s.chartModeSelected,
+                  ]}
+                >
+                  <SourceCustomIcon
+                    name={
+                      mode === 'donut'
+                        ? 'analytics-donut-toggle'
+                        : 'analytics-bars-toggle'
+                    }
+                    size={16}
+                    color={
+                      state.expenseChartMode === mode
+                        ? tokens.inverse
+                        : tokens.muted
+                    }
+                  />
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
+        {state.view !== 'overview' && (
+          <View style={s.period}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={copy.spending.previousPeriod}
+              disabled={periodRail.activeIndex <= 0}
+              onPress={() => step(-1)}
+              style={s.arrow}
+            >
+              <Glyph name="back" />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={copy.spending.changePeriod}
+              onPress={() =>
+                dispatch({
+                  type: 'set-field',
+                  field: 'periodSheetOpen',
+                  value: true,
+                })
+              }
+              style={s.periodLabel}
+            >
+              <Text style={t.title}>
+                {view.activeBucketTitle ?? state.period.title}
+              </Text>
+              <Text style={[t.body, t.muted]}>{state.period.subtitle}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={copy.spending.nextPeriod}
+              disabled={periodRail.activeIndex >= periodRail.items.length - 1}
+              onPress={() => step(1)}
+              style={s.arrow}
+            >
+              <Glyph name="forward" size={18} />
+            </Pressable>
+          </View>
+        )}
         {state.view === 'overview' ? (
           <>
-            <View style={s.overview}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Analyse money in"
-                onPress={() =>
-                  dispatch({ type: 'open-analysis', direction: 'income' })
-                }
-                style={s.cashflow}
-              >
-                <Text style={t.body}>Money in</Text>
-                <Money
-                  testID="cz-pfm-income"
-                  amount={summary.incomeTotal}
-                  currency={currency}
-                  hidden={hidden}
-                  role="hero"
-                />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Analyse money out"
-                onPress={() =>
-                  dispatch({ type: 'open-analysis', direction: 'expense' })
-                }
-                style={s.cashflow}
-              >
-                <Text style={t.body}>Money out</Text>
-                <Money
-                  testID="cz-pfm-expense"
-                  amount={summary.spendingTotal}
-                  currency={currency}
-                  hidden={hidden}
-                  role="hero"
-                />
-              </Pressable>
-              <View style={s.net}>
-                <Text style={[t.body, t.strong]}>
-                  {copy.spending.netCashflow}
-                </Text>
-                <Money
-                  amount={summary.netTotal}
-                  testID="cz-pfm-net"
-                  signed
-                  currency={currency}
-                  hidden={hidden}
-                  role="support"
-                />
-              </View>
-            </View>
+            <SpendingPeriodCarousel
+              count={periodRail.items.length}
+              activeIndex={periodRail.activeIndex}
+              onSelect={index => {
+                const period = periodRail.items[index];
+                if (period && index !== periodRail.activeIndex)
+                  selectPeriod(period);
+              }}
+              renderItem={index => {
+                const item = periodRail.items[index];
+                if (!item) return null;
+                const cardSummary =
+                  index === periodRail.activeIndex
+                    ? summary
+                    : createSpendingRangeSummary(
+                        'CZ',
+                        scope.products,
+                        item.monthKeys,
+                        {
+                          key: item.id,
+                          label: item.title,
+                          year: item.monthKeys[0]?.split('-')[0] ?? '',
+                          kind: item.kind === 'month' ? 'month' : 'year',
+                        },
+                        categoryOverrides,
+                        { includeOwnTransfers: state.includeOwnTransfers },
+                      );
+                return (
+                  <View
+                    testID={
+                      index === periodRail.activeIndex
+                        ? 'cz-pfm-summary-card'
+                        : undefined
+                    }
+                    style={s.overview}
+                  >
+                    <View style={s.summaryPeriod}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={copy.spending.previousPeriod}
+                        disabled={periodRail.activeIndex <= 0}
+                        onPress={() => step(-1)}
+                        style={s.summaryArrow}
+                      >
+                        <Glyph name="back" size={16} />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={copy.spending.changePeriod}
+                        onPress={() =>
+                          dispatch({
+                            type: 'set-field',
+                            field: 'periodSheetOpen',
+                            value: true,
+                          })
+                        }
+                        style={s.summaryPeriodLabel}
+                      >
+                        <Text style={s.summaryPeriodText}>
+                          {item.title} {item.subtitle}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={copy.spending.nextPeriod}
+                        disabled={
+                          periodRail.activeIndex >= periodRail.items.length - 1
+                        }
+                        onPress={() => step(1)}
+                        style={s.summaryArrow}
+                      >
+                        <Glyph name="forward" size={16} />
+                      </Pressable>
+                    </View>
+                    <View style={s.net}>
+                      <Text style={[t.body, t.strong, { color: tokens.muted }]}>
+                        {copy.spending.netCashflow}
+                      </Text>
+                      <Money
+                        amount={cardSummary.netTotal}
+                        testID={index === periodRail.activeIndex ? 'cz-pfm-net' : undefined}
+                        signed
+                        currency={currency}
+                        hidden={hidden}
+                        role="product"
+                      />
+                      <Text style={[t.body, t.muted]}>
+                        {cardSummary.incomeTotal > 0 &&
+                        cardSummary.netTotal !== 0
+                          ? `${maskFormattedAmount(formatEvo2027Number(Math.abs(cardSummary.netTotal)), hidden)} ${currency} ${cardSummary.netTotal > 0 ? copy.spending.netPositive : copy.spending.netNegative}`
+                          : copy.spending.noIncome}
+                      </Text>
+                    </View>
+                    <View
+                      accessibilityElementsHidden
+                      importantForAccessibility="no-hide-descendants"
+                      style={s.flowBars}
+                    >
+                      {[cardSummary.incomeTotal, cardSummary.spendingTotal].map(
+                        (value, index) => (
+                          <View
+                            key={index}
+                            testID="cz-pfm-flow-bar"
+                            style={s.flowTrack}
+                          >
+                            <View
+                              style={[
+                                s.flowFill,
+                                {
+                                  width: `${Math.max((value / Math.max(cardSummary.incomeTotal, cardSummary.spendingTotal, 1)) * 100, value > 0 ? 2 : 0)}%`,
+                                  backgroundColor:
+                                    index === 0 ? '#00866e' : tokens.text,
+                                },
+                              ]}
+                            />
+                          </View>
+                        ),
+                      )}
+                    </View>
+                    <View style={s.flowAmounts}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Analyse money in"
+                        onPress={() =>
+                          dispatch({
+                            type: 'open-analysis',
+                            direction: 'income',
+                          })
+                        }
+                        style={s.cashflow}
+                      >
+                        <Text
+                          style={[t.body, t.strong, { color: tokens.muted }]}
+                        >
+                          <Text style={{ color: '#00866e' }}>●</Text> Money in
+                        </Text>
+                        <Money
+                          testID={index === periodRail.activeIndex ? 'cz-pfm-income' : undefined}
+                          amount={cardSummary.incomeTotal}
+                          currency={currency}
+                          hidden={hidden}
+                          role="product"
+                        />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Analyse money out"
+                        onPress={() =>
+                          dispatch({
+                            type: 'open-analysis',
+                            direction: 'expense',
+                          })
+                        }
+                        style={s.cashflow}
+                      >
+                        <Text
+                          style={[t.body, t.strong, { color: tokens.muted }]}
+                        >
+                          <Text style={{ color: tokens.text }}>●</Text> Money
+                          out
+                        </Text>
+                        <Money
+                          testID={index === periodRail.activeIndex ? 'cz-pfm-expense' : undefined}
+                          amount={cardSummary.spendingTotal}
+                          currency={currency}
+                          hidden={hidden}
+                          role="product"
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                );
+              }}
+            />
             <View>
               <Text style={t.section}>Top spending categories</Text>
               <View style={s.rows}>
@@ -534,29 +726,20 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
         ) : state.view === 'analysis' ? (
           <>
             <View style={s.analysis}>
-              <Text style={[t.body, t.muted]}>{view.expenseHeaderLabel}</Text>
-              <Money
-                amount={view.expenseHeaderAmount}
-                currency={currency}
-                hidden={hidden}
-                role="hero"
-              />
-              <Tabs
-                tokens={tokens}
-                label="Chart type"
-                value={state.expenseChartMode}
-                items={[
-                  { value: 'donut', label: 'Donut' },
-                  { value: 'bars', label: 'Bars' },
-                ]}
-                onChange={value =>
-                  dispatch({
-                    type: 'set-field',
-                    field: 'expenseChartMode',
-                    value,
-                  })
-                }
-              />
+              {(state.expenseChartMode === 'bars' ||
+                (hidden && !view.directionTransactions.length)) && (
+                <>
+                  <Text style={[t.body, t.muted]}>
+                    {view.expenseHeaderLabel}
+                  </Text>
+                  <Money
+                    amount={view.expenseHeaderAmount}
+                    currency={currency}
+                    hidden={hidden}
+                    role="product"
+                  />
+                </>
+              )}
               {view.directionTransactions.length ? (
                 state.expenseChartMode === 'donut' ? (
                   <Donut
@@ -597,6 +780,22 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                   No {state.analysisDirection} data for this period.
                 </Text>
               )}
+              {periodRail.items.length > 1 && (
+                <BaselineCarouselIndicator
+                  count={periodRail.items.length}
+                  activeIndex={periodRail.activeIndex}
+                  windowSize={6}
+                  itemLabel="period"
+                  itemLabels={periodRail.items.map(item =>
+                    `${item.title} ${item.subtitle}`.trim(),
+                  )}
+                  withBackdropBlur={false}
+                  onSelect={index => {
+                    const period = periodRail.items[index];
+                    if (period) selectPeriod(period);
+                  }}
+                />
+              )}
               {view.expenseFilterLabel && (
                 <View style={s.filter}>
                   <Text style={t.body}>{view.expenseFilterLabel}</Text>
@@ -622,8 +821,8 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                   value === 'categories'
                     ? 'Categories'
                     : value === 'merchants'
-                    ? 'Merchants'
-                    : 'Currencies',
+                      ? 'Merchants'
+                      : 'Currencies',
               }))}
               onChange={mode => dispatch({ type: 'change-split-mode', mode })}
             />
@@ -822,6 +1021,7 @@ const s = StyleSheet.create({
     paddingBottom: 24,
     gap: 24,
   },
+  analysisContent: { gap: 8 },
   scope: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -830,6 +1030,35 @@ const s = StyleSheet.create({
     padding: 12,
     gap: 12,
   },
+  scopeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  analysisScope: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    minHeight: 32,
+    flexShrink: 1,
+  },
+  chartMode: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 18,
+    backgroundColor: '#e5e5e5',
+  },
+  chartModeButton: {
+    width: 40,
+    height: 24,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chartModeSelected: { backgroundColor: tokens.accent },
   period: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   periodLabel: { flex: 1, alignItems: 'center', gap: 4 },
   arrow: {
@@ -844,15 +1073,35 @@ const s = StyleSheet.create({
     padding: 16,
     gap: 16,
   },
-  cashflow: { gap: 4, minHeight: 72 },
-  net: {
-    borderTopWidth: 1,
-    borderColor: tokens.border,
-    paddingTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  summaryPeriod: { flexDirection: 'row', alignItems: 'center' },
+  summaryPeriodLabel: { flex: 1, minHeight: 44, justifyContent: 'center' },
+  summaryPeriodText: {
+    color: tokens.accent,
+    fontFamily: tokens.strongFont,
+    fontSize: 18,
+    textTransform: 'uppercase',
   },
+  summaryArrow: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  net: { gap: 4 },
+  flowBars: { gap: 8 },
+  flowTrack: {
+    height: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: tokens.border,
+  },
+  flowFill: { height: 12, borderRadius: 6 },
+  flowAmounts: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  cashflow: { gap: 4, minHeight: 48, flexShrink: 1 },
   rows: {
     backgroundColor: tokens.surface,
     borderRadius: 8,
@@ -861,10 +1110,7 @@ const s = StyleSheet.create({
   },
   link: { minHeight: 48, padding: 16, alignItems: 'center' },
   analysis: {
-    backgroundColor: tokens.surface,
-    padding: 16,
-    borderRadius: 8,
-    gap: 12,
+    gap: 4,
   },
   filter: {
     backgroundColor: '#e5e5e5',

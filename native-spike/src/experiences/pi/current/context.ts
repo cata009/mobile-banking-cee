@@ -10,13 +10,35 @@ import { sourceColor } from '../../../universal/sourceColor';
 import type { NativeBankingPresentation } from '@/features/demo-native/bankingPresentation';
 
 export function createCurrentProducts(
-  context: Pick<CurrentContext, 'country' | 'release' | 'productCounts'> & { bankingPresentation?: NativeBankingPresentation },
+  context: Pick<CurrentContext, 'country' | 'release' | 'productCounts'> &
+    Pick<CurrentContext, 'virtualCards'> & {
+      bankingPresentation?: NativeBankingPresentation;
+    },
 ) {
-  const categories = context.bankingPresentation?.productCategories?.map(category => ({ ...category, products: [...category.products] })) ?? deriveProductCategories({
-    country: context.country,
-    release: context.release,
-    resolvedProductCounts: context.productCounts,
-  });
+  const categories =
+    context.bankingPresentation?.productCategories?.map(category => ({
+      ...category,
+      products: [...category.products],
+    })) ??
+    deriveProductCategories({
+      country: context.country,
+      release: context.release,
+      resolvedProductCounts: context.productCounts,
+    });
+  if (
+    context.country === 'RO' &&
+    context.release === 'release-current' &&
+    context.virtualCards?.length
+  ) {
+    const cards = categories.find(category => category.key === 'cards');
+    if (cards) cards.products.push(...context.virtualCards);
+    else
+      categories.push({
+        key: 'cards',
+        title: 'Cards',
+        products: [...context.virtualCards],
+      });
+  }
   return {
     categories,
     products: categories.flatMap(category => category.products),

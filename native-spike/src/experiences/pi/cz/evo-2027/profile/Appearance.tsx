@@ -1,3 +1,4 @@
+import { useMouseCarousel } from '../mouseCarousel';
 import React, { useRef, useEffect } from 'react';
 import {
   Pressable,
@@ -174,6 +175,10 @@ export default function Appearance({
   const system = useColorScheme(),
     light = mode === 'light' || (mode === 'system' && system !== 'dark'),
     carousel = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const mouse = useMouseCarousel({
+    rail: carousel,
+    offsets: themeChoices.map((_, index) => index * 96),
+  });
   useEffect(() => {
     const index = themeChoices.findIndex(theme => theme.id === draft);
     carousel.current?.scrollTo({
@@ -217,57 +222,63 @@ export default function Appearance({
           </Copy>
           <Copy size={14}>Choose the visual character of your Home.</Copy>
         </View>
-        <ScrollView
-          ref={carousel}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.carousel}
-        >
-          {themeChoices.map(item => (
-            <Pressable
-              key={item.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Select ${item.name} theme`}
-              accessibilityState={{ selected: draft === item.id }}
-              onPress={() => onSelect(item.id)}
-              style={styles.choice}
-            >
-              <View
-                style={[
-                  styles.swatch,
-                  draft === item.id
-                    ? light
-                      ? stateStyles.selectedLight
-                      : stateStyles.selectedDark
-                    : stateStyles.unselected,
-                ]}
+        <View ref={mouse.containerRef} {...mouse.panHandlers}>
+          <ScrollView
+            ref={carousel}
+            onScroll={event =>
+              mouse.trackOffset(event.nativeEvent.contentOffset.x)
+            }
+            scrollEventThrottle={16}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carousel}
+          >
+            {themeChoices.map(item => (
+              <Pressable
+                key={item.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${item.name} theme`}
+                accessibilityState={{ selected: draft === item.id }}
+                onPress={() => onSelect(item.id)}
+                style={styles.choice}
               >
-                <ThemeArtwork theme={item.id} />
-                {draft === item.id ? (
-                  <View style={styles.check}>
-                    <SourceCustomIcon
-                      name="prime-check"
-                      color="#ffffff"
-                      size={18}
-                    />
-                  </View>
-                ) : null}
-                {draft !== item.id && applied === item.id ? (
-                  <View style={styles.applied}>
-                    <SourceCustomIcon
-                      name="prime-check"
-                      color="#ffffff"
-                      size={13}
-                    />
-                  </View>
-                ) : null}
-              </View>
-              <Copy strong={draft === item.id} size={14}>
-                {item.name}
-              </Copy>
-            </Pressable>
-          ))}
-        </ScrollView>
+                <View
+                  style={[
+                    styles.swatch,
+                    draft === item.id
+                      ? light
+                        ? stateStyles.selectedLight
+                        : stateStyles.selectedDark
+                      : stateStyles.unselected,
+                  ]}
+                >
+                  <ThemeArtwork theme={item.id} />
+                  {draft === item.id ? (
+                    <View style={styles.check}>
+                      <SourceCustomIcon
+                        name="prime-check"
+                        color="#ffffff"
+                        size={18}
+                      />
+                    </View>
+                  ) : null}
+                  {draft !== item.id && applied === item.id ? (
+                    <View style={styles.applied}>
+                      <SourceCustomIcon
+                        name="prime-check"
+                        color="#ffffff"
+                        size={13}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+                <Copy strong={draft === item.id} size={14}>
+                  {item.name}
+                </Copy>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
         <View style={styles.modes}>
           {(['light', 'dark', 'system'] as const).map(value => (
             <Pressable

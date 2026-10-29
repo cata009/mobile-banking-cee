@@ -12,6 +12,11 @@ import More, {
 } from '../src/experiences/pi/current/baseline/more/More';
 import Tutorials from '../src/experiences/pi/current/baseline/more/Tutorials';
 import { moreAssets } from '../src/experiences/pi/current/profile/assets';
+import { resolveMoreCard } from '@/app/components/contracts/moreCard';
+import {
+  DuoContentViewport,
+  DuoPreviewProvider,
+} from '../src/universal/DuoPreview';
 
 function host(language: 'en' | 'ro' = 'en'): CurrentScreenProps {
   return {
@@ -59,6 +64,116 @@ function mount(props = host()) {
   });
   return tree;
 }
+
+it.each([
+  'contacts',
+  'documents',
+  'settings',
+  'tutorial',
+  'digital-activities',
+  'my-requests',
+  'third-party-consent',
+] as const)(
+  'keeps the %s illustration proportionate and anchored on the wide Duo card',
+  variant => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+    let tree!: Renderer.ReactTestRenderer;
+    try {
+      act(() => {
+        tree = Renderer.create(
+          <DuoPreviewProvider
+            value={{
+              width: 951,
+              height: 669,
+              rightInset: 84,
+              referenceWidth: 375,
+            }}
+          >
+            <DuoContentViewport screen="profile">
+              <RoMoreCard
+                card={variant}
+                title={variant}
+                width={256.5}
+                dark={false}
+                onPress={jest.fn()}
+              />
+            </DuoContentViewport>
+          </DuoPreviewProvider>,
+        );
+      });
+      const frame = StyleSheet.flatten(
+        tree.root.findByProps({ testID: `ro-more-art-${variant}` }).props.style,
+      );
+      const source = resolveMoreCard({ variant }).image;
+      expect(frame.right).toBeCloseTo((parseFloat(source.right) / 100) * 155.5);
+      expect(frame.bottom).toBeCloseTo((parseFloat(source.bottom) / 100) * 120);
+      expect(frame.width).toBeCloseTo(
+        (1 - (parseFloat(source.left) + parseFloat(source.right)) / 100) *
+          155.5,
+      );
+      expect(frame.height).toBeCloseTo(
+        (1 - (parseFloat(source.top) + parseFloat(source.bottom)) / 100) * 120,
+      );
+      const image = tree.root.findAllByType('img' as never)[0]!;
+      expect(image.props.style).toMatchObject({
+        objectFit: 'contain',
+        objectPosition: 'right bottom',
+      });
+    } finally {
+      if (tree) act(() => tree.unmount());
+      Object.defineProperty(Platform, 'OS', {
+        configurable: true,
+        value: originalOS,
+      });
+    }
+  },
+);
+
+it('anchors the GDPR repeating artwork to the original right and bottom offsets on wide Duo', () => {
+  const originalOS = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+  let tree!: Renderer.ReactTestRenderer;
+  try {
+    act(() => {
+      tree = Renderer.create(
+        <DuoPreviewProvider
+          value={{
+            width: 951,
+            height: 669,
+            rightInset: 84,
+            referenceWidth: 375,
+          }}
+        >
+          <DuoContentViewport screen="profile">
+            <RoMoreCard
+              card="gdpr-consent"
+              title="GDPR"
+              width={256.5}
+              dark={false}
+              onPress={jest.fn()}
+            />
+          </DuoContentViewport>
+        </DuoPreviewProvider>,
+      );
+    });
+    const frame = tree.root.findByProps({
+      'data-testid': 'ro-more-art-gdpr-consent',
+    }).props.style;
+    const source = resolveMoreCard({ variant: 'gdpr-consent' }).image;
+    expect(frame.right).toBeCloseTo((parseFloat(source.right) / 100) * 155.5);
+    expect(frame.bottom).toBeCloseTo((parseFloat(source.bottom) / 100) * 120);
+    expect(frame.backgroundSize).toBe(
+      '61.60000091791153px 62.90000093728304px',
+    );
+  } finally {
+    if (tree) act(() => tree.unmount());
+    Object.defineProperty(Platform, 'OS', {
+      configurable: true,
+      value: originalOS,
+    });
+  }
+});
 
 it('keeps the five Romanian cards ordered, preserves the document badge and routes only implemented actions', () => {
   const h = host(),

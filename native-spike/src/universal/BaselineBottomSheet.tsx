@@ -233,6 +233,7 @@ export function BaselineBottomSheet({
           {closeButtonPosition === 'right' ? closeControl : null}
         </View>
         <ScrollView
+          showsVerticalScrollIndicator={false}
           style={[
             Platform.OS === 'web' ? styles.webScroll : undefined,
             contentBleed && { marginHorizontal: -inset },

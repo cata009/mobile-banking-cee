@@ -11,6 +11,7 @@ import { ModalPanel } from '../../../../universal/ModalPanel';
 import { FormField } from '../../../../universal/FormField';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
+import { useDuoPreview } from '../../../../universal/DuoPreview';
 import {
   capturePhoto,
   recognizeSpeech,
@@ -247,6 +248,7 @@ function Rich({
   );
 }
 export default function Assistant({ host }: { host: CurrentScreenProps }) {
+  const duo = useDuoPreview();
   const sourceContext = host.coAppingContext;
   const activeRouteIdentity = routeIdentity(host.route);
   const [localOpen, setLocalOpen] = useState(false);
@@ -338,12 +340,12 @@ export default function Assistant({ host }: { host: CurrentScreenProps }) {
     all.find(product => product.id === host.route.params?.productId) ?? null;
   const context = sourceContext
     ? sourceContext.chatContext
-    : localHelpContext ??
+    : (localHelpContext ??
       buildCzChatScreenContext(
         sourceScreenForNative(host.route.screen),
         `${host.route.screen}`,
         account,
-      );
+      ));
   const resolver = useMemo(
     () =>
       host.onResolveCoAppingReply ??
@@ -459,7 +461,11 @@ export default function Assistant({ host }: { host: CurrentScreenProps }) {
         accessibilityRole="button"
         accessibilityLabel="Open Smart Assistant"
         onPress={() => requestChat({ kind: 'launcher' })}
-        style={[styles.launcher, { backgroundColor: host.tokens.accent }]}
+        style={[
+          styles.launcher,
+          { backgroundColor: host.tokens.accent },
+          duo ? { right: duo.rightInset + 16 } : undefined,
+        ]}
       >
         <SourceCustomIcon
           name="contact-prime"
@@ -501,12 +507,12 @@ export default function Assistant({ host }: { host: CurrentScreenProps }) {
               opportunities.map(item => {
                 const opportunityCard =
                   item.relatedItem?.visualKind === 'credit-card'
-                    ? all
+                    ? (all
                         .filter(isCreditCardProduct)
                         .find(
                           cardProduct =>
                             cardProduct.name === item.relatedItem?.title,
-                        ) ?? card
+                        ) ?? card)
                     : null;
                 return (
                   <View
@@ -668,8 +674,8 @@ export default function Assistant({ host }: { host: CurrentScreenProps }) {
                     kind === 'camera'
                       ? 'Camera'
                       : kind === 'photos'
-                      ? 'Photos'
-                      : 'Files'
+                        ? 'Photos'
+                        : 'Files'
                   }
                   onPress={() => attach(kind)}
                 />

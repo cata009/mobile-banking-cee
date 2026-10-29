@@ -198,6 +198,7 @@ export function RoBaselineCategorySheet({
             style={sourceStyle6}
             contentContainerStyle={sourceStyle7}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
             {heading(
               host.t(

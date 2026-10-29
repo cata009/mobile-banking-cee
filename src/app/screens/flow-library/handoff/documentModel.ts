@@ -20,8 +20,10 @@ import type {
   ExportStepSpec,
 } from "../flowExport";
 import type { FlowBusinessAnalysisSpec } from "../flows/types";
+import type { SpecAsset, SpecDocument } from '@/features/flow-spec/types';
 
 export type DocBlock =
+  | { kind: 'rich'; document: SpecDocument; assets: readonly SpecAsset[] }
   | { kind: "heading"; level: 1 | 2 | 3 | 4; text: string }
   | { kind: "paragraph"; text: string }
   | { kind: "bullets"; items: readonly string[] }
@@ -38,6 +40,7 @@ export interface FlowDocument {
 export interface HandoffOptions {
   /** Include the captured journey screens and their per-screen specs. */
   includeScreens: boolean;
+  analysisDocument?: { document: SpecDocument; assets: readonly SpecAsset[] };
 }
 
 function push(blocks: DocBlock[], block: DocBlock | null): void {
@@ -216,7 +219,8 @@ export function buildFlowDocument(
   const analysis = overview?.businessAnalysis;
   if (analysis) {
     blocks.push({ kind: "heading", level: 1, text: "Business analysis specification" });
-    businessAnalysisBlocks(blocks, analysis);
+    if (options.analysisDocument) blocks.push({ kind: 'rich', ...options.analysisDocument });
+    else businessAnalysisBlocks(blocks, analysis);
   }
 
   // A BA document stands as the whole specification unless the flow asks for both.

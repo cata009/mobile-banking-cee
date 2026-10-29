@@ -6,25 +6,24 @@
  * country comparison, component translation tester and translation review.
  */
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { ToolErrorBoundary } from "./toolsUi";
 import { SideBySideTool } from "./SideBySideTool";
 import { TranslationTesterTool } from "./TranslationTesterTool";
 import { TranslationReviewTool } from "./TranslationReviewTool";
 import { CountryDivergenceTool } from "./CountryDivergenceTool";
-import { LocalizationSignoffTool } from "./LocalizationSignoffTool";
-import { LocalizationCoverageTool } from "./LocalizationCoverageTool";
 import { PreloginPictureTesterTool } from "./PreloginPictureTesterTool";
 
+const MarketingEmailBuilderTool = lazy(() => import('./MarketingEmailBuilderTool'));
+
 type ToolId =
+  | "marketing-email"
   | "prelogin-picture"
   | "side-by-side"
   | "country-divergence"
   | "translation-tester"
-  | "translation-review"
-  | "localization-coverage"
-  | "localization-signoff";
+  | "translation-review";
 
 interface ToolMeta {
   id: ToolId;
@@ -35,6 +34,13 @@ interface ToolMeta {
 }
 
 const TOOLS: readonly ToolMeta[] = [
+  {
+    id: "marketing-email",
+    label: "Marketing email builder",
+    icon: "book-open",
+    description: "Compose reusable email blocks, preview responsive light/dark HTML, validate content and download an editable campaign package.",
+    audience: "Marketing · Design · Local market teams · QA",
+  },
   {
     id: "prelogin-picture",
     label: "Prelogin picture tester",
@@ -74,22 +80,6 @@ const TOOLS: readonly ToolMeta[] = [
     description:
       "Every string of a translation namespace across all languages, with overflow-risk highlighting and CSV export.",
     audience: "BA · Local market teams",
-  },
-  {
-    id: "localization-coverage",
-    label: "Localization coverage",
-    icon: "receipt-text",
-    description:
-      "Honest per-language completeness across every namespace — translated vs inherited-from-English vs missing — so the gaps are located, not hidden behind one percentage.",
-    audience: "BA · Local market teams · PM",
-  },
-  {
-    id: "localization-signoff",
-    label: "Localization",
-    icon: "shield-check",
-    description:
-      "Approve or flag each local translation with a note, tracked per language and persisted across reloads, exportable as a release report.",
-    audience: "Local market teams · BA",
   },
 ];
 
@@ -157,7 +147,9 @@ export default function ToolsScreen() {
         ) : (
           <div className="mt-[20px]">
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
-              {activeToolId === "prelogin-picture" ? (
+              {activeToolId === "marketing-email" ? (
+                <Suspense fallback={<p role="status">Se încarcă editorul de emailuri…</p>}><MarketingEmailBuilderTool /></Suspense>
+              ) : activeToolId === "prelogin-picture" ? (
                 <PreloginPictureTesterTool />
               ) : activeToolId === "side-by-side" ? (
                 <SideBySideTool />
@@ -165,12 +157,8 @@ export default function ToolsScreen() {
                 <CountryDivergenceTool />
               ) : activeToolId === "translation-tester" ? (
                 <TranslationTesterTool />
-              ) : activeToolId === "translation-review" ? (
-                <TranslationReviewTool />
-              ) : activeToolId === "localization-coverage" ? (
-                <LocalizationCoverageTool />
               ) : (
-                <LocalizationSignoffTool />
+                <TranslationReviewTool />
               )}
             </ToolErrorBoundary>
           </div>

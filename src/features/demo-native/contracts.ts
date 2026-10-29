@@ -31,6 +31,7 @@ import type { ProductsShelfFocusRequest } from '@/features/products/shelfFocus'
 import type { NativeComponentPreview } from './componentPreview'
 import type { NativeInternalTransferEvent } from './internalTransferPreview'
 import type { NativeTransactionPresentation } from './transactionPresentation'
+import type { DuoPreviewViewport } from './duoPreview'
 
 /** Plain data boundary: neither framework's elements or contexts cross this API. */
 export type NativeDemoScreen =
@@ -117,6 +118,8 @@ export interface NativeDemoSnapshot {
   route: NativeDemoRoute
   /** Preserve React state for a Source-owned Native preview as its snapshot context changes. */
   preservePreviewState?: boolean
+  /** Browser-only minimum adaptation proposal; never treated as native OS measurements. */
+  duoPreview?: DuoPreviewViewport
   screenTopInset: number
   bottomInset: number
   investmentRequests?: NativeInvestmentRequests

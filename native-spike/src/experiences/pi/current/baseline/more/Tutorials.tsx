@@ -25,12 +25,18 @@ import { Text } from '../../../../../universal/Typography';
 export default function Tutorials({
   host,
   onClose,
+  initialTutorial,
 }: {
   host: CurrentScreenProps;
   onClose: () => void;
+  initialTutorial?: BankingTutorial;
 }) {
-  const tutorials = getTutorialsForCountry(host.country);
-  const [selected, setSelected] = useState<string | null>(null);
+  const tutorials = initialTutorial
+    ? [initialTutorial]
+    : getTutorialsForCountry(host.country);
+  const [selected, setSelected] = useState<string | null>(
+    initialTutorial?.id ?? null,
+  );
   const [step, setStep] = useState(0);
   const tutorial = tutorials.find(item => item.id === selected);
   const viewport = useDemoViewport();
@@ -196,8 +202,8 @@ export default function Tutorials({
                   Platform.OS === 'web'
                     ? `color-mix(in srgb, ${surface} 92%, transparent)`
                     : dark
-                    ? 'rgba(38,38,38,.92)'
-                    : 'rgba(255,255,255,.92)',
+                      ? 'rgba(38,38,38,.92)'
+                      : 'rgba(255,255,255,.92)',
               },
             ]}
           >

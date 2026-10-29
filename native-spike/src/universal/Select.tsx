@@ -14,6 +14,8 @@ export function Select<T extends string>({
   onChange,
   closeLabel,
   renderTrigger,
+  renderPanel,
+  searchText = '',
   multiple,
 }: Themed & {
   label: string;
@@ -21,12 +23,18 @@ export function Select<T extends string>({
   items: readonly Choice<T>[];
   onChange: (value: T) => void;
   closeLabel?: string;
+  searchText?: string;
   multiple?: { values: readonly T[]; onChange: (values: readonly T[]) => void };
   renderTrigger?: (control: {
     open: () => void;
     expanded: boolean;
     label: string;
     selectedLabels: readonly string[];
+  }) => React.ReactNode;
+  renderPanel?: (control: {
+    visible: boolean;
+    onClose: () => void;
+    children: React.ReactNode;
   }) => React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -68,6 +76,56 @@ export function Select<T extends string>({
           },
         }
       : {};
+  const options = (
+    <>
+      {items
+        .filter(item =>
+          `${item.label} ${item.value}`
+            .toLocaleLowerCase()
+            .includes(searchText.trim().toLocaleLowerCase()),
+        )
+        .map(item => (
+          <Pressable
+            key={item.value}
+            {...keyboardProps(item)}
+            accessibilityRole={multiple ? 'checkbox' : 'button'}
+            accessibilityLabel={item.label}
+            accessibilityState={{
+              ...(multiple
+                ? { checked: isSelected(item.value) }
+                : { selected: isSelected(item.value) }),
+              disabled: !!item.disabled,
+            }}
+            disabled={!!item.disabled}
+            onPress={() => choose(item)}
+            style={[
+              styles.option,
+              item.disabled && styles.dimmed,
+              {
+                borderBottomColor: tokens.border,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.largeLabel,
+                {
+                  fontFamily: isSelected(item.value)
+                    ? tokens.strongFont
+                    : tokens.font,
+                  color: isSelected(item.value) ? tokens.accent : tokens.text,
+                },
+              ]}
+            >
+              {item.label}
+            </Text>
+            {isSelected(item.value) && (
+              <Text style={{ color: tokens.accent }}>✓</Text>
+            )}
+          </Pressable>
+        ))}
+    </>
+  );
   return (
     <>
       {renderTrigger ? (
@@ -104,56 +162,19 @@ export function Select<T extends string>({
           <Text style={[styles.symbol, { color: tokens.text }]}>⌄</Text>
         </Pressable>
       )}
-      <ModalPanel
-        tokens={tokens}
-        title={label}
-        visible={open}
-        onClose={close}
-        closeLabel={closeLabel}
-      >
-        <ScrollView>
-          {items.map(item => (
-            <Pressable
-              key={item.value}
-              {...keyboardProps(item)}
-              accessibilityRole={multiple ? 'checkbox' : 'button'}
-              accessibilityLabel={item.label}
-              accessibilityState={{
-                ...(multiple
-                  ? { checked: isSelected(item.value) }
-                  : { selected: isSelected(item.value) }),
-                disabled: !!item.disabled,
-              }}
-              disabled={!!item.disabled}
-              onPress={() => choose(item)}
-              style={[
-                styles.option,
-                item.disabled && styles.dimmed,
-                {
-                  borderBottomColor: tokens.border,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.largeLabel,
-                  {
-                    fontFamily: isSelected(item.value)
-                      ? tokens.strongFont
-                      : tokens.font,
-                    color: isSelected(item.value) ? tokens.accent : tokens.text,
-                  },
-                ]}
-              >
-                {item.label}
-              </Text>
-              {isSelected(item.value) && (
-                <Text style={{ color: tokens.accent }}>✓</Text>
-              )}
-            </Pressable>
-          ))}
-        </ScrollView>
-      </ModalPanel>
+      {renderPanel ? (
+        renderPanel({ visible: open, onClose: close, children: options })
+      ) : (
+        <ModalPanel
+          tokens={tokens}
+          title={label}
+          visible={open}
+          onClose={close}
+          closeLabel={closeLabel}
+        >
+          <ScrollView>{options}</ScrollView>
+        </ModalPanel>
+      )}
     </>
   );
 }

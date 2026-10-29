@@ -6,6 +6,7 @@ import {
   buildFlowDocx,
 } from "@/app/screens/flow-library/handoff";
 import type { CapturedFlowStep, ExportOverview, FlowExportMeta } from "@/app/screens/flow-library/flowExport";
+import type { SpecDocument } from '@/features/flow-spec/types';
 
 const META: FlowExportMeta = {
   flowTitle: "Bulk approval of investment orders",
@@ -54,6 +55,42 @@ const STEPS: CapturedFlowStep[] = [
     },
   },
 ];
+
+describe('editable rich specification handoff', () => {
+  it('preserves numbered-list starts and nested bullet levels in Word', async () => {
+    const text = { type: 'paragraph', content: [{ type: 'text', text: 'Item' }] };
+    const document: SpecDocument = { type: 'doc', content: [{ type: 'orderedList', attrs: { start: 3 }, content: [{ type: 'listItem', content: [text, { type: 'bulletList', content: [{ type: 'listItem', content: [text] }] }] }] }] };
+    const handoff = buildFlowDocument(META, [], [], OVERVIEW, { includeScreens: false, analysisDocument: { document, assets: [] } });
+    const xml = new TextDecoder().decode(new Uint8Array(await buildFlowDocx(handoff).arrayBuffer()));
+    expect(xml).toContain('<w:numFmt w:val="decimal"/>');
+    expect(xml).toContain('<w:startOverride w:val="3"/>');
+    expect(xml).toContain('<w:ilvl w:val="1"/>');
+  });
+  it('keeps rich marks, hyperlinks, nested tables, original image bytes and captured screens', async () => {
+    const image = STEPS[0]!.pngBase64;
+    const document: SpecDocument = { type: 'doc', content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'Approved requirement', marks: [{ type: 'bold' }, { type: 'italic' }, { type: 'specTextColor', attrs: { color: '#0052cc' } }] }, { type: 'text', text: 'Reference', marks: [{ type: 'link', attrs: { href: 'https://example.com/spec' } }] }] },
+      { type: 'table', content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Cell requirement' }] }] }] }] },
+      { type: 'image', attrs: { assetId: 'img-11111111111111111111111111111111', alt: 'Evidence one' } },
+      { type: 'image', attrs: { assetId: 'img-22222222222222222222222222222222', alt: 'Evidence two' } },
+    ] };
+    const assets = ['img-11111111111111111111111111111111', 'img-22222222222222222222222222222222'].map(id => ({ id, name: id + '.png', mime: 'image/png' as const, dataUrl: 'data:image/png;base64,' + image, width: 1, height: 1 }));
+    const handoff = buildFlowDocument(META, STEPS, [], OVERVIEW, { includeScreens: true, analysisDocument: { document, assets } });
+    const html = buildConfluenceHtml(handoff);
+    expect(html).toContain('<em><strong>Approved requirement</strong></em>');
+    expect(html).not.toContain('Only pending drafts');
+    const bytes = new Uint8Array(await buildFlowDocx(handoff).arrayBuffer());
+    const xml = new TextDecoder('latin1').decode(bytes);
+    expect(xml).toContain('<w:b/>');
+    expect(xml).toContain('<w:i/>');
+    expect(xml).toContain('<w:color w:val="0052cc"/>');
+    expect(xml).toContain('https://example.com/spec');
+    expect(xml).toContain('<w:hyperlink');
+    expect(xml).toContain('Cell requirement');
+    expect(xml).toContain('word/media/screen-3.png');
+    expect(xml).toContain('Evidence two');
+  });
+});
 
 function specDocument() {
   return buildFlowDocument(META, [], [], OVERVIEW, { includeScreens: false });

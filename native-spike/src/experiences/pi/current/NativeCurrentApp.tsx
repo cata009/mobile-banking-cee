@@ -38,6 +38,8 @@ import { SourceCustomIcon } from '../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../universal/sourceColor';
 import { carrySourceProductSelection } from '../../../app/sourceNavigation';
 import { nativeCreditLimits } from './banking/creditLimitStore';
+import { nativeVirtualCards } from './banking/virtualCardStore';
+import { isLocalVirtualCardRoute } from './banking/virtualCardRouting';
 import { currentInvestmentPresentation } from './investments/presentation';
 import {
   createCurrentTranslator,
@@ -47,6 +49,13 @@ import {
 import { Body, Page } from './Primitives';
 import { CoappingLayer } from './coapping/adapter';
 import { BaselineBottomNavigation } from '../../../universal/BaselineBottomNavigation';
+import {
+  DuoContentViewport,
+  useDuoPreview,
+} from '../../../universal/DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
+import PrimeBackground from './baseline/more/PrimeBackground';
+import { ProfileHost } from './profile/Host';
 import { isPiClassicCompositionContext } from './baseline/policy';
 import type { NativeDemoControl } from '@/features/demo-native/contracts';
 import type {
@@ -147,6 +156,7 @@ export default function NativeCurrentApp({
   control?: NativeDemoControl;
 }) {
   const composition = useMemo(() => composeCurrent(adapters), [adapters]);
+  const duo = useDuoPreview();
   const [stack, setStack] = useState<CurrentRoute[]>(() => [
     control?.route ??
       initialRoute ?? { screen: scenario === 'inactive' ? 'prelogin' : 'home' },
@@ -215,6 +225,10 @@ export default function NativeCurrentApp({
     nativeCreditLimits.subscribe,
     () => nativeCreditLimits.read({ country, bankingScenario }),
   );
+  const localVirtualCards = useSyncExternalStore(
+    nativeVirtualCards.subscribe,
+    () => nativeVirtualCards.read({ country, bankingScenario }),
+  );
   useLayoutEffect(() => {
     if (current.screen !== 'investments') return;
     // Source clears the coordinator selection when the portfolio route exits.
@@ -275,9 +289,13 @@ export default function NativeCurrentApp({
       return;
     else if (stack.length > 1) {
       setStack(old => old.slice(0, -1));
-      controlRef.current?.events.onRouteChange(stack[stack.length - 2], 'back');
+      if (!isLocalVirtualCardRoute(current, localVirtualCards))
+        controlRef.current?.events.onRouteChange(
+          stack[stack.length - 2],
+          'back',
+        );
     } else onExit?.();
-  }, [missing, current, stack, onExit]);
+  }, [missing, current, stack, onExit, localVirtualCards]);
   const back = useRef(onBack);
   back.current = onBack;
   const registerExternalBack = control?.registerBack;
@@ -298,6 +316,7 @@ export default function NativeCurrentApp({
     const routeChanged = JSON.stringify(current) !== JSON.stringify(route);
     if (
       routeChanged &&
+      !isLocalVirtualCardRoute(route, localVirtualCards) &&
       controlRef.current?.events.onRouteChange(route, 'push') === true
     )
       return;
@@ -346,6 +365,21 @@ export default function NativeCurrentApp({
     });
   };
   const host: CurrentScreenProps = {
+    virtualCards:
+      country === 'RO' &&
+      release === 'release-current' &&
+      effectiveScenario === 'active'
+        ? localVirtualCards
+        : undefined,
+    onIssueVirtualCard: (account, design, tier) =>
+      nativeVirtualCards.issue(
+        { country, bankingScenario },
+        account,
+        design,
+        tier,
+      ),
+    onChangeVirtualCardPicture: (id, design) =>
+      nativeVirtualCards.change({ country, bankingScenario }, id, design),
     creditLimitOffer: control?.creditLimitOffer,
     creditLimitOverrides: control?.creditLimitOverrides ?? localCreditLimits,
     investmentHistoryOverrides: control?.investmentHistoryOverrides,
@@ -530,14 +564,34 @@ export default function NativeCurrentApp({
     suppressedPrimary !== current &&
     effectiveScenario === 'active' &&
     primary.some(item => item.screen === current.screen);
+  const duoFrame = duo ? resolveDuoContent(duo, current.screen) : undefined;
   return (
     <View
       style={
         isComponentPreview && !isFullscreenComponentPreview
           ? s.preview
-          : [s.page, { backgroundColor: tokens.background }]
+          : [
+              s.page,
+              {
+                backgroundColor:
+                  isPiClassicCompositionContext(host) &&
+                  ['payments', 'products', 'profile', 'pfm'].includes(
+                    current.screen,
+                  )
+                    ? sourceColor(
+                        'var(--uc-surface)',
+                        tokens.background === '#121212',
+                      )
+                    : tokens.background,
+              },
+            ]
       }
     >
+      {duo && current.screen === 'prime' && (
+        <ProfileHost host={host}>
+          <PrimeBackground host={host} />
+        </ProfileHost>
+      )}
       {!isComponentPreview && (
         <StatusBar
           barStyle={
@@ -745,6 +799,7 @@ export default function NativeCurrentApp({
         return (
           <View
             key={ids.current.map.get(route)}
+            testID={duo ? 'duo-content-viewport' : undefined}
             pointerEvents={active ? 'auto' : 'none'}
             aria-hidden={!active}
             accessibilityElementsHidden={!active}
@@ -754,56 +809,70 @@ export default function NativeCurrentApp({
                 ? s.preview
                 : s.layer,
               !active && s.inactive,
+              duoFrame &&
+              route.screen !== 'prelogin' &&
+              route.screen !== 'login' &&
+              route.screen !== 'pfm'
+                ? {
+                    left: duoFrame.left,
+                    right: undefined,
+                    top: duoFrame.top,
+                    width: duoFrame.width,
+                    height: duoFrame.height,
+                  }
+                : undefined,
             ]}
           >
-            {route.screen === 'search' ? (
-              <Page host={props} title="Search">
-                <SearchField
-                  tokens={tokens}
-                  label="Search all sections"
-                  placeholder="Search accounts, cards, payments and products"
-                  value={query}
-                  onChange={setQuery}
-                  onClear={() => setQuery('')}
-                  onSubmit={Keyboard.dismiss}
-                  autoFocus
-                  icon={
-                    <SourceCustomIcon
-                      name="search"
-                      size={24}
-                      color={tokens.text}
-                    />
-                  }
-                />
-                {results.length ? (
-                  results.map(entry => (
-                    <NavigationRow
-                      key={entry.id}
-                      tokens={tokens}
-                      title={entry.label}
-                      subtitle={entry.subtitle}
-                      payload={entry.target}
-                      onSelect={navigate}
-                      trailing={
-                        <SourceCustomIcon
-                          name="chevron-right"
-                          color={tokens.text}
-                          size={16}
-                        />
-                      }
-                    />
-                  ))
-                ) : (
-                  <Body host={props}>No results. Try another word.</Body>
-                )}
-              </Page>
-            ) : Screen ? (
-              <Screen {...props} />
-            ) : (
-              <Page host={props} title="Demo">
-                <Body host={props}>This screen is not migrated.</Body>
-              </Page>
-            )}
+            <DuoContentViewport screen={route.screen}>
+              {route.screen === 'search' ? (
+                <Page host={props} title="Search">
+                  <SearchField
+                    tokens={tokens}
+                    label="Search all sections"
+                    placeholder="Search accounts, cards, payments and products"
+                    value={query}
+                    onChange={setQuery}
+                    onClear={() => setQuery('')}
+                    onSubmit={Keyboard.dismiss}
+                    autoFocus
+                    icon={
+                      <SourceCustomIcon
+                        name="search"
+                        size={24}
+                        color={tokens.text}
+                      />
+                    }
+                  />
+                  {results.length ? (
+                    results.map(entry => (
+                      <NavigationRow
+                        key={entry.id}
+                        tokens={tokens}
+                        title={entry.label}
+                        subtitle={entry.subtitle}
+                        payload={entry.target}
+                        onSelect={navigate}
+                        trailing={
+                          <SourceCustomIcon
+                            name="chevron-right"
+                            color={tokens.text}
+                            size={16}
+                          />
+                        }
+                      />
+                    ))
+                  ) : (
+                    <Body host={props}>No results. Try another word.</Body>
+                  )}
+                </Page>
+              ) : Screen ? (
+                <Screen {...props} />
+              ) : (
+                <Page host={props} title="Demo">
+                  <Body host={props}>This screen is not migrated.</Body>
+                </Page>
+              )}
+            </DuoContentViewport>
           </View>
         );
       })}
@@ -823,10 +892,18 @@ export default function NativeCurrentApp({
                 tokens.background === '#121212',
               ),
               paddingBottom: bottomInset,
+              ...(duoFrame
+                ? {
+                    left: duoFrame.left,
+                    right: undefined,
+                    width: duoFrame.width,
+                  }
+                : {}),
             },
           ]}
         >
           <BaselineBottomNavigation
+            width={duoFrame?.width}
             activeTab={
               current.screen === 'pfm'
                 ? 'analytics'
@@ -951,7 +1028,9 @@ export default function NativeCurrentApp({
         </ModalPanel>
       )}
       {!isComponentPreview && (
-        <CoappingLayer host={{ ...host, scenario: effectiveScenario }} />
+        <DuoContentViewport>
+          <CoappingLayer host={{ ...host, scenario: effectiveScenario }} />
+        </DuoContentViewport>
       )}
     </View>
   );

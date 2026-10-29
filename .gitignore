@@ -36,3 +36,6 @@ native-spike/dist-host/
 android-spike/
 scripts/android-spike/
 .github/workflows/android-demo.yml
+
+.env*
+!.env.example

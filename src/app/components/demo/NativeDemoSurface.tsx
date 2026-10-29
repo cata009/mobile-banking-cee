@@ -17,6 +17,8 @@ import type { NativeTransactionPayload } from '@/features/demo-native/transactio
 import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents'
 import { getActiveFeatures } from '@/app/state/featureResolver'
 import { nativeRoboResumeLocation, resolveNativeRoboResume } from '@/features/demo-native/roboResume'
+import { useDevicePreview } from './DevicePreview'
+import { duoPreviewViewport } from '@/features/demo-native/duoPreview'
 
 const routePayloads = new WeakMap<NavigationRoute, NativeDemoRoute>()
 export function rememberedNativeRoute(
@@ -118,10 +120,19 @@ export function NativeDemoSurface({
     data = useProductData(),
     language = useLanguage(),
     navigation = useNavigationContext()
+  const device = useDevicePreview()
+  const deviceGeometry = duoPreviewViewport(device.profileId, device.viewport)
+  const duo =
+    !deviceMode &&
+    !!deviceGeometry &&
+    demo.product === 'PI' &&
+    demo.designSystem === 'current' &&
+    demo.release === 'release-current'
   const element = useRef<HTMLDivElement>(null),
     mounted = useRef<NativeDemoMount | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [attempt, retry] = useState(0)
+  const hasMounted = useRef(false)
   const [mode, setMode] = useState<NativeDemoAppearanceMode>(demo.themeMode)
   const expectedTheme = useRef(demo.themeMode)
   const callbacks = useRef({
@@ -299,7 +310,8 @@ export function NativeDemoSurface({
     mode,
     amountsHidden: demo.amountsHidden,
     route: route ?? { screen: 'home' },
-    screenTopInset: deviceMode ? 12 : 54,
+    screenTopInset: deviceMode ? 12 : duo && deviceGeometry?.rightInset ? 12 : 54,
+    ...(duo ? { duoPreview: deviceGeometry } : {}),
     bottomInset: 0,
     investmentRequests,
     transactionSelection,
@@ -346,9 +358,7 @@ export function NativeDemoSurface({
         events.current.onTransactionSelected?.(selection),
       ),
       onAddTransaction: guard(() => events.current.onAddTransaction?.()),
-      onAnalyticsPeriodChange: guard((periodKey: string) =>
-        events.current.onAnalyticsPeriodChange?.(periodKey),
-      ),
+      onAnalyticsPeriodChange: guard((periodKey: string) => events.current.onAnalyticsPeriodChange?.(periodKey)),
       onPaymentFlowChange: guard((flow: NativePaymentFlow | null) => events.current.onPaymentFlowChange?.(flow)),
       onContinueCoapping: guard(() => events.current.onContinueCoapping?.()),
       onCoAppingChatAction: guard((action: Parameters<NonNullable<NativeDemoEvents['onCoAppingChatAction']>>[0]) =>
@@ -386,12 +396,13 @@ export function NativeDemoSurface({
         events.current.onProductsShelfHeroCollapsedChange?.(collapsed),
       ),
     }
-    setState('loading')
+    if (!hasMounted.current) setState('loading')
     void loadNativeDemoModule()
       .then((module) => {
         if (disposed || element.current !== target) return
         instance = module.mountCurrentApplication(target, latest.current, liveEvents)
         mounted.current = instance
+        hasMounted.current = true
         setState('ready')
       })
       .catch((error) => {
@@ -407,6 +418,18 @@ export function NativeDemoSurface({
       callbacks.current.onInvestmentSecuritySelected?.(null)
     }
   }, [attempt, routeAvailable])
+  useEffect(() => {
+    let disposed = false
+    let generation = 0
+    const update = () => {
+      const current = ++generation
+      void loadNativeDemoModule().then(() => {
+        if (!disposed && current === generation) retry((value) => value + 1)
+      }).catch((error) => console.error('Native demo update failed', error))
+    }
+    window.addEventListener('native-demo:built', update)
+    return () => { disposed = true; window.removeEventListener('native-demo:built', update) }
+  }, [])
   const serialized = JSON.stringify(snapshot)
   useEffect(() => {
     mounted.current?.update(latest.current)
@@ -423,7 +446,11 @@ export function NativeDemoSurface({
       </div>
     )
   return (
-    <div className="relative h-full w-full overflow-hidden" data-native-demo-surface={state}>
+    <div
+      className="relative h-full w-full overflow-hidden"
+      data-native-demo-surface={state}
+      data-duo-geometry={duo ? 'true' : undefined}
+    >
       <div ref={element} className="h-full w-full" />
       {state === 'loading' && (
         <div className="absolute inset-0 grid place-items-center bg-[var(--uc-app-bg)]" role="status">

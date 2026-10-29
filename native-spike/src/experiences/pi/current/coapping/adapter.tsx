@@ -10,6 +10,7 @@ import { Confirm } from '../profile/Primitives';
 import { coappingSessions, useCoappingSession } from './session';
 import { assistantAvailable } from './model';
 import Assistant from './Assistant';
+import { useDuoPreview } from '../../../../universal/DuoPreview';
 import { BaselineCoappingSession } from '../baseline/coapping/SessionScreen';
 export { openCurrentContextHelp } from './contextHelp';
 export const CURRENT_COAPPING_ADAPTER: CurrentAdapter = {
@@ -19,6 +20,7 @@ export const CURRENT_COAPPING_ADAPTER: CurrentAdapter = {
   },
 };
 export function CoappingLayer({ host }: { host: CurrentScreenProps }) {
+  const duo = useDuoPreview();
   const localSession = useCoappingSession(host);
   const sourceContext = host.coAppingContext;
   const sessionActive = sourceContext?.sessionActive ?? localSession.active;
@@ -35,7 +37,10 @@ export function CoappingLayer({ host }: { host: CurrentScreenProps }) {
             accessibilityRole="button"
             accessibilityLabel="Co-apping session active"
             onPress={() => setTerminate(true)}
-            style={styles.floating}
+            style={[
+              styles.floating,
+              duo ? { right: duo.rightInset } : undefined,
+            ]}
           >
             <Svg width={44} height={113.013} viewBox="0 0 44 113.013">
               <Path d={svgPaths.p2d5f5a80} fill="#00b35a" />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Switch, View, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
 import { Text } from '../../../../../universal/Typography';
@@ -7,6 +7,12 @@ import { SearchField } from '../../../../../universal/SearchField';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
 import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
+import { BaselineAccountActionBar } from '../../../../../universal/BaselineAccountActionBar';
+import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
+import { PrimaryButton } from '../../../../../universal/PrimaryButton';
+import { ToggleButton } from '../../../../../universal/ToggleButton';
+import { BANK_BADGES } from '@/data/bankIdentity';
+import { getRecipientCountry } from '@/data/paymentRecipientRules';
 import {
   getFrequentBeneficiaries,
   getBeneficiaryPaymentHistory,
@@ -36,7 +42,7 @@ import {
 } from '@/data/exchangeRates';
 import {
   formatScheduleDateAbsolute,
-  formatScheduleSummary,
+  SCHEDULE_REPEAT_OPTIONS,
 } from '@/app/utils/scheduleFormatting';
 import {
   formatEvo2027Amount,
@@ -144,6 +150,44 @@ function formatBeneficiaryPaymentDate(payment: AccountTransaction) {
     year: 'numeric',
   }).format(new Date(`${payment.monthKey}-${payment.day}T12:00:00`));
 }
+function FavoriteStar({ filled }: { filled: boolean }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+      <Path
+        fill={tokens.text}
+        d={
+          filled
+            ? 'M17.93 23.1849L11.83 18.5549L7.38 22.4549C6.62 23.0249 5.79 23.1649 5.01 22.9649L3.97 22.7049L6.57 14.6149L2.24 11.4349C1.55 10.9349 1.13 10.1449 1.07 9.27494L1 8.19494L8.57 8.25494L10.17 3.04494C10.42 2.24494 10.99 1.59494 11.75 1.26494L12.78 0.814941L15.07 8.25494L20.39 8.20494C21.27 8.20494 22.07 8.59494 22.6 9.27494L23.24 10.0849L17.1 14.6149L18.78 19.7949C19.04 20.5949 18.95 21.4749 18.52 22.2049L17.95 23.1649L17.93 23.1849Z'
+            : 'M17.9102 23.36L11.8102 18.73L7.36023 22.63C6.59023 23.2 5.76023 23.34 4.99023 23.14L3.96023 22.88L6.56023 14.8L2.23023 11.62C1.54023 11.12 1.12023 10.33 1.06023 9.46L0.990234 8.38L8.56023 8.44L10.1602 3.23C10.4102 2.43 10.9802 1.78 11.7402 1.45L12.7702 1L15.1002 8.44L20.3902 8.39C21.2702 8.39 22.0702 8.78 22.6002 9.46L23.2402 10.27L17.1002 14.8L18.7802 19.98C19.0402 20.78 18.9502 21.66 18.5202 22.39L17.9502 23.35L17.9102 23.36ZM3.95023 10.41L8.89023 14.04L6.84023 20.43L11.7202 16.15L16.6102 19.86L14.7302 14.06L19.6802 10.41L13.5702 10.45L11.8002 4.7L10.0302 10.46L3.96023 10.41H3.95023Z'
+        }
+      />
+    </Svg>
+  );
+}
+function DetailFact({
+  label,
+  value,
+  divider = false,
+}: {
+  label: string;
+  value: string;
+  divider?: boolean;
+}) {
+  return (
+    <View
+      style={[beneficiaryStyles.factRow, divider && beneficiaryStyles.divider]}
+    >
+      <Copy muted size={13}>
+        {label}
+      </Copy>
+      <View style={beneficiaryStyles.factValue}>
+        <Copy size={13} strong>
+          {value}
+        </Copy>
+      </View>
+    </View>
+  );
+}
 export default function PaymentsScreen(props: CzechNativeScreenProps) {
   const [gridWidth, setGridWidth] = useState(335);
   const disabledActions = disabledBankingActions({
@@ -215,6 +259,28 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
     setRevision(revision + 1);
     props.onChanged();
   };
+  const toggleFavorite = (id: string) => {
+    const next = favoriteIds.includes(id)
+      ? favoriteIds.filter(item => item !== id)
+      : [...favoriteIds, id];
+    storeFavoriteBeneficiaryIds(next);
+    setFavorites(next);
+    changed();
+  };
+  const confirmDelete = () => {
+    if (view === 'beneficiary' && person) {
+      deleteFrequentBeneficiary('CZ', person.id);
+      setView('hub');
+    } else if (view === 'template' && template) {
+      deletePaymentTemplateSelection('CZ', template.id);
+      setView('templates');
+    } else if (view === 'scheduled-detail' && payment) {
+      deleteRecurrentPayment('CZ', payment.id);
+      setView('scheduled');
+    }
+    setDeleteOpen(false);
+    changed();
+  };
   const close = () => {
     setDeleteOpen(false);
     setView('hub');
@@ -257,49 +323,58 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
   const beneficiaryRow = (p: FrequentBeneficiary, index: number) => {
     const amount = formatEvo2027Amount(p.lastAmount, p.currency);
     return (
-    <Pressable
-      key={p.id}
-      accessibilityRole="button"
-      accessibilityLabel={`Beneficiary ${p.id}`}
-      onPress={() => {
-        setPersonId(p.id);
-        setView('beneficiary');
-      }}
-      style={[extractedStyles.item0, index > 0 && hubStyles.divider]}
-    >
-      <BankAvatar name={p.name} bank={p.bank} size={40} />
-      <View style={extractedStyles.item1}>
-        <Copy strong>{p.name}</Copy>
-        <Copy muted size={14} lineHeight={18}>
-          You sent {amount.integer}{amount.decimals} {amount.currency}
-        </Copy>
-      </View>
-      <View style={hubStyles.lastPaid}>
-        <Copy muted size={14} lineHeight={18}>
-          {p.lastPaidLabel}
-        </Copy>
-        {favoriteIds.includes(p.id) && (
-          <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-            <Path
-              fill={tokens.text}
-              d="M17.93 23.1849L11.83 18.5549L7.38 22.4549C6.62 23.0249 5.79 23.1649 5.01 22.9649L3.97 22.7049L6.57 14.6149L2.24 11.4349C1.55 10.9349 1.13 10.1449 1.07 9.27494L1 8.19494L8.57 8.25494L10.17 3.04494C10.42 2.24494 10.99 1.59494 11.75 1.26494L12.78 0.814941L15.07 8.25494L20.39 8.20494C21.27 8.20494 22.07 8.59494 22.6 9.27494L23.24 10.0849L17.1 14.6149L18.78 19.7949C19.04 20.5949 18.95 21.4749 18.52 22.2049L17.95 23.1649L17.93 23.1849Z"
-            />
-          </Svg>
-        )}
-      </View>
-    </Pressable>
+      <Pressable
+        key={p.id}
+        accessibilityRole="button"
+        accessibilityLabel={`Beneficiary ${p.id}`}
+        onPress={() => {
+          setPersonId(p.id);
+          setView('beneficiary');
+        }}
+        style={[extractedStyles.item0, index > 0 && hubStyles.divider]}
+      >
+        <BankAvatar name={p.name} bank={p.bank} size={40} />
+        <View style={extractedStyles.item1}>
+          <Copy strong>{p.name}</Copy>
+          <Copy muted size={14} lineHeight={18}>
+            You sent {amount.integer}
+            {amount.decimals} {amount.currency}
+          </Copy>
+        </View>
+        <View style={hubStyles.lastPaid}>
+          <Copy muted size={14} lineHeight={18}>
+            {p.lastPaidLabel}
+          </Copy>
+          {favoriteIds.includes(p.id) && (
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+              <Path
+                fill={tokens.text}
+                d="M17.93 23.1849L11.83 18.5549L7.38 22.4549C6.62 23.0249 5.79 23.1649 5.01 22.9649L3.97 22.7049L6.57 14.6149L2.24 11.4349C1.55 10.9349 1.13 10.1449 1.07 9.27494L1 8.19494L8.57 8.25494L10.17 3.04494C10.42 2.24494 10.99 1.59494 11.75 1.26494L12.78 0.814941L15.07 8.25494L20.39 8.20494C21.27 8.20494 22.07 8.59494 22.6 9.27494L23.24 10.0849L17.1 14.6149L18.78 19.7949C19.04 20.5949 18.95 21.4749 18.52 22.2049L17.95 23.1649L17.93 23.1849Z"
+              />
+            </Svg>
+          )}
+        </View>
+      </Pressable>
     );
   };
   const subPage = (
     title: string,
     children: React.ReactNode,
     onBack = close,
+    options?: {
+      footer?: React.ReactNode;
+      showLargeTitle?: boolean;
+      trailing?: React.ReactNode;
+    },
   ) => (
     <Page
       title={title}
       onBack={onBack}
       active={props.isActive}
       topInset={props.screenTopInset}
+      footer={options?.footer}
+      showLargeTitle={options?.showLargeTitle}
+      trailing={options?.trailing}
     >
       {children}
     </Page>
@@ -332,37 +407,70 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       {
         <View style={[s.inset, extractedStyles.item2]}>
           <BankAvatar name={person.name} bank={person.bank} size={76} />
-          <Copy strong size={28}>
+          <Text
+            accessibilityRole="header"
+            style={beneficiaryStyles.identityTitle}
+          >
             {person.name}
+          </Text>
+          <Copy muted size={14}>
+            {BANK_BADGES[person.bank].name}
           </Copy>
-          <Copy muted>{person.accountNumber}</Copy>
         </View>
       }
-      <Button label="Pay" onPress={() => goPay(person.id, 'beneficiaryId')} />
-      <Button
-        label="Edit beneficiary"
-        secondary
-        onPress={() => setView('beneficiary-edit')}
-      />
-      <Button
-        label={
-          favoriteIds.includes(person.id) ? 'Remove favourite' : 'Add favourite'
-        }
-        secondary
-        onPress={() => {
-          const next = favoriteIds.includes(person.id)
-            ? favoriteIds.filter(id => id !== person.id)
-            : [...favoriteIds, person.id];
-          storeFavoriteBeneficiaryIds(next);
-          setFavorites(next);
-          changed();
-        }}
-      />
-      <Button
-        label="Delete beneficiary"
-        secondary
-        onPress={() => setDeleteOpen(true)}
-      />
+      <View
+        accessibilityLabel="Beneficiary actions"
+        style={beneficiaryStyles.actions}
+      >
+        <BaselineAccountActionBar
+          align="between"
+          items={[
+            {
+              id: 'edit',
+              iconName: 'edit-pencil',
+              label: 'Edit\nbeneficiary',
+              onPress: () => setView('beneficiary-edit'),
+            },
+            {
+              id: 'favorite',
+              icon: <FavoriteStar filled={favoriteIds.includes(person.id)} />,
+              label: favoriteIds.includes(person.id)
+                ? 'Remove from\nfavorites'
+                : 'Add to\nfavorites',
+              pressed: favoriteIds.includes(person.id),
+              onPress: () => toggleFavorite(person.id),
+            },
+            {
+              id: 'delete',
+              iconName: 'trash-2',
+              label: 'Delete\nbeneficiary',
+              onPress: () => setDeleteOpen(true),
+            },
+          ]}
+        />
+      </View>
+      <View
+        accessibilityLabel="Beneficiary account details"
+        style={beneficiaryStyles.facts}
+      >
+        <DetailFact
+          label="Account"
+          value={`${
+            person.paymentAccountPrefix ? `${person.paymentAccountPrefix}-` : ''
+          }${person.paymentAccountNumber}/${person.paymentBankCode}`}
+        />
+        <DetailFact
+          label="Bank"
+          value={BANK_BADGES[person.bank].name}
+          divider
+        />
+        <DetailFact
+          label="Country / region"
+          value={getRecipientCountry('CZ')?.name ?? 'CZ'}
+          divider
+        />
+        <DetailFact label="Currency" value={person.currency} divider />
+      </View>
       {beneficiaryTransactions.length > 0 ? (
         <View
           accessibilityLabel="Beneficiary transactions"
@@ -380,7 +488,9 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                 {formatEvo2027Number(totalSent)} {person.currency}
               </Copy>
             </View>
-            <View style={[beneficiaryStyles.summaryRow, beneficiaryStyles.divider]}>
+            <View
+              style={[beneficiaryStyles.summaryRow, beneficiaryStyles.divider]}
+            >
               <Copy muted size={14} lineHeight={18}>
                 Total received
               </Copy>
@@ -397,7 +507,13 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
               <Pressable
                 key={transaction.id}
                 accessibilityRole="button"
-                accessibilityLabel={`${transaction.type === 'credit' ? 'View receipt from' : 'View payment to'} ${person.name} on ${formatBeneficiaryPaymentDate(transaction)}`}
+                accessibilityLabel={`${
+                  transaction.type === 'credit'
+                    ? 'View receipt from'
+                    : 'View payment to'
+                } ${person.name} on ${formatBeneficiaryPaymentDate(
+                  transaction,
+                )}`}
                 onPress={() =>
                   props.onNavigate({
                     screen: 'transaction',
@@ -470,7 +586,11 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         <View style={[s.page, hubStyles.reserve]}>
           <MainNavigationHeader
             tokens={tokens}
-            brand={<Text accessibilityRole="header" style={hubStyles.title}>Payments</Text>}
+            brand={
+              <Text accessibilityRole="header" style={hubStyles.title}>
+                Payments
+              </Text>
+            }
             items={[]}
             value="payments"
             onChange={() => {}}
@@ -623,7 +743,18 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         </View>
       </View>
       {view === 'beneficiary' &&
-        subPage(person?.name ?? 'Beneficiary', personDetails)}
+        subPage(person?.name ?? 'Beneficiary', personDetails, close, {
+          showLargeTitle: false,
+          footer: person ? (
+            <View style={beneficiaryStyles.footer}>
+              <PrimaryButton
+                label="Send money"
+                labelSize="16"
+                onPress={() => goPay(person.id, 'beneficiaryId')}
+              />
+            </View>
+          ) : undefined,
+        })}
       {view === 'beneficiary-edit' && person && (
         <BeneficiaryEditor
           person={person}
@@ -656,37 +787,114 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         )}
       {view === 'template' &&
         subPage(
-          template?.title ?? 'Template',
+          template?.beneficiaryName ?? 'Template',
           template ? (
             <>
-              <View style={s.inset}>
-                <FieldValue
+              <View style={[s.inset, extractedStyles.item2]}>
+                <BankAvatar
+                  name={template.beneficiaryName}
+                  bank={template.bank ?? 'unicredit'}
+                  size={76}
+                />
+                <Text
+                  accessibilityRole="header"
+                  style={beneficiaryStyles.identityTitle}
+                >
+                  {template.beneficiaryName}
+                </Text>
+                {template.kind === 'template' ? (
+                  <>
+                    <Copy muted size={14} strong>
+                      {template.title
+                        .toLocaleLowerCase()
+                        .replace(/^./, c => c.toLocaleUpperCase())}
+                    </Copy>
+                    <Copy strong size={23}>
+                      {props.amountsHidden ? '****,**' : template.amount}{' '}
+                      {template.currency}
+                    </Copy>
+                    <Copy muted size={13} strong>
+                      PAYMENT TEMPLATE
+                    </Copy>
+                  </>
+                ) : (
+                  <Copy muted size={13} strong>
+                    SAVED RECIPIENT
+                  </Copy>
+                )}
+              </View>
+              <View
+                accessibilityLabel="Recipient actions"
+                style={beneficiaryStyles.actions}
+              >
+                <BaselineAccountActionBar
+                  align="between"
+                  items={[
+                    {
+                      id: 'edit',
+                      iconName: 'edit-pencil',
+                      label: 'Edit',
+                      onPress: () => setView('template-edit'),
+                    },
+                    {
+                      id: 'delete',
+                      iconName: 'trash-2',
+                      label: 'Delete',
+                      onPress: () => setDeleteOpen(true),
+                    },
+                  ]}
+                />
+              </View>
+              <View
+                accessibilityLabel={
+                  template.kind === 'template'
+                    ? 'Payment template details'
+                    : 'Saved recipient details'
+                }
+                style={beneficiaryStyles.facts}
+              >
+                <DetailFact
                   label="Beneficiary"
                   value={template.beneficiaryName}
                 />
-                <FieldValue label="Account" value={template.accountNumber} />
-                <FieldValue
-                  label="Amount"
-                  value={`${
-                    props.amountsHidden ? '****,**' : template.amount
-                  } ${template.currency}`}
+                <DetailFact
+                  label={template.kind === 'template' ? 'IBAN' : 'Account'}
+                  value={
+                    template.kind === 'template'
+                      ? template.accountNumber
+                      : `${
+                          template.paymentAccountPrefix
+                            ? `${template.paymentAccountPrefix}-`
+                            : ''
+                        }${template.paymentAccountNumber ?? ''}/${
+                          template.bankCode
+                        }`
+                  }
+                  divider
                 />
-                <FieldValue label="Reference" value={template.paymentNote} />
+                <DetailFact
+                  label="BIC / SWIFT"
+                  value={template.bankCode}
+                  divider
+                />
+                <DetailFact label="Bank" value={template.bankName} divider />
+                {template.kind === 'template' && (
+                  <>
+                    <DetailFact
+                      label="Amount"
+                      value={`${
+                        props.amountsHidden ? '****,**' : template.amount
+                      } ${template.currency}`}
+                      divider
+                    />
+                    <DetailFact
+                      label="Payment note"
+                      value={template.paymentNote}
+                      divider
+                    />
+                  </>
+                )}
               </View>
-              <Button
-                label="Pay"
-                onPress={() => goPay(template.id, 'templateId')}
-              />
-              <Button
-                label="Edit template"
-                secondary
-                onPress={() => setView('template-edit')}
-              />
-              <Button
-                label="Delete template"
-                secondary
-                onPress={() => setDeleteOpen(true)}
-              />
             </>
           ) : (
             <View style={s.alert}>
@@ -694,6 +902,34 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
             </View>
           ),
           () => setView('templates'),
+          {
+            showLargeTitle: false,
+            footer: template ? (
+              <View style={beneficiaryStyles.footer}>
+                <PrimaryButton
+                  label="Send money"
+                  labelSize="16"
+                  onPress={() => goPay(template.id, 'templateId')}
+                />
+              </View>
+            ) : undefined,
+            trailing:
+              template?.kind === 'beneficiary' ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    favoriteIds.includes(template.id)
+                      ? 'Remove from favorites'
+                      : 'Add to favorites'
+                  }
+                  aria-pressed={favoriteIds.includes(template.id)}
+                  onPress={() => toggleFavorite(template.id)}
+                  style={hubStyles.headerAction}
+                >
+                  <FavoriteStar filled={favoriteIds.includes(template.id)} />
+                </Pressable>
+              ) : undefined,
+          },
         )}
       {view === 'template-edit' && template && (
         <TemplateEditor
@@ -758,36 +994,161 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
           payment?.name ?? 'Scheduled payment',
           payment ? (
             <>
-              <View style={s.inset}>
-                <FieldValue
-                  label={payment.isLimit ? 'Limit' : 'Amount'}
-                  value={money(
+              <View style={[s.inset, extractedStyles.item2]}>
+                <BankAvatar name={payment.name} bank="unicredit" size={76} />
+                <Text
+                  accessibilityRole="header"
+                  style={beneficiaryStyles.identityTitle}
+                >
+                  {payment.name}
+                </Text>
+                {payment.schedule && (
+                  <Copy muted size={14} strong>
+                    {SCHEDULE_REPEAT_OPTIONS.find(
+                      option => option.id === payment.schedule?.repeat,
+                    )?.label ?? payment.schedule.repeat}
+                  </Copy>
+                )}
+                <Copy strong size={23}>
+                  {payment.kind === 'internal-transfer' ? '' : '−'}
+                  {money(payment.amount, payment.currency, props.amountsHidden)}
+                </Copy>
+                <Copy muted size={13} strong>
+                  {payment.details
+                    ? 'MOVE MONEY'
+                    : payment.kind === 'direct-debit'
+                    ? 'DIRECT DEBIT'
+                    : 'STANDING ORDER'}
+                </Copy>
+              </View>
+              <View
+                accessibilityLabel="Payment actions"
+                style={beneficiaryStyles.actions}
+              >
+                <BaselineAccountActionBar
+                  align="between"
+                  items={[
+                    {
+                      id: 'edit',
+                      iconName: 'edit-pencil',
+                      label: 'Edit',
+                      onPress: () => setScheduleOpen(true),
+                    },
+                    {
+                      id: 'delete',
+                      iconName: 'trash-2',
+                      label: 'Delete',
+                      onPress: () => setDeleteOpen(true),
+                    },
+                  ]}
+                />
+              </View>
+              <View
+                accessibilityLabel="Payment schedule"
+                style={beneficiaryStyles.facts}
+              >
+                {payment.schedule && (
+                  <DetailFact
+                    label="Starts on"
+                    value={formatScheduleDateAbsolute(
+                      payment.schedule.startDate,
+                    )}
+                  />
+                )}
+                <DetailFact
+                  label="Next payment"
+                  value={
+                    payment.nextDate.toLowerCase() === 'today' &&
+                    payment.schedule
+                      ? formatScheduleDateAbsolute(payment.schedule.startDate)
+                      : payment.nextDate
+                  }
+                  divider={Boolean(payment.schedule)}
+                />
+                {payment.schedule && (
+                  <DetailFact
+                    label="Repeat"
+                    value={
+                      SCHEDULE_REPEAT_OPTIONS.find(
+                        option => option.id === payment.schedule?.repeat,
+                      )?.label ?? 'Never'
+                    }
+                    divider
+                  />
+                )}
+                {payment.schedule && payment.schedule.repeat !== 'never' && (
+                  <DetailFact
+                    label="Ends on"
+                    value={
+                      payment.schedule.endsOn.type === 'on-date'
+                        ? formatScheduleDateAbsolute(
+                            payment.schedule.endsOn.date,
+                          )
+                        : 'Never'
+                    }
+                    divider
+                  />
+                )}
+                <DetailFact
+                  label="Amount"
+                  value={`${
+                    payment.kind === 'internal-transfer' ? '' : '−'
+                  }${money(
                     payment.amount,
                     payment.currency,
                     props.amountsHidden,
-                  )}
+                  )}`}
+                  divider
                 />
-                <FieldValue label="Next payment" value={payment.nextDate} />
-                {payment.details && (
-                  <FieldValue label="Move money" value={payment.details} />
-                )}
-                {payment.schedule && (
-                  <FieldValue
-                    label="Schedule"
-                    value={formatScheduleSummary(payment.schedule)}
+                <DetailFact
+                  label="Payment type"
+                  value={
+                    payment.details
+                      ? 'Move money'
+                      : payment.kind === 'direct-debit'
+                      ? 'Direct debit'
+                      : 'Standing order'
+                  }
+                  divider
+                />
+                {payment.isLimit && (
+                  <DetailFact
+                    label="Limit"
+                    value={`${
+                      payment.kind === 'internal-transfer' ? '' : '−'
+                    }${money(
+                      payment.amount,
+                      payment.currency,
+                      props.amountsHidden,
+                    )}`}
+                    divider
                   />
                 )}
               </View>
-              <Button
-                label="Edit schedule"
-                secondary
-                onPress={() => setScheduleOpen(true)}
-              />
-              <Button
-                label="Delete scheduled payment"
-                secondary
-                onPress={() => setDeleteOpen(true)}
-              />
+              <View
+                accessibilityLabel="Payment details"
+                style={beneficiaryStyles.facts}
+              >
+                {payment.sourceAccountName && (
+                  <DetailFact
+                    label="Payment from"
+                    value={`${payment.sourceAccountName} · ${payment.currency}`}
+                  />
+                )}
+                <DetailFact
+                  label={
+                    payment.destinationAccountName ? 'Payment to' : 'Payee'
+                  }
+                  value={payment.destinationAccountName ?? payment.name}
+                  divider={Boolean(payment.sourceAccountName)}
+                />
+                {payment.note && (
+                  <DetailFact label="Note" value={payment.note} divider />
+                )}
+                {payment.details && !payment.sourceAccountName && (
+                  <DetailFact label="Details" value={payment.details} divider />
+                )}
+              </View>
             </>
           ) : (
             <View style={s.alert}>
@@ -795,6 +1156,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
             </View>
           ),
           () => setView('scheduled'),
+          { showLargeTitle: false },
         )}
       {view === 'transfer' && (
         <Transfer
@@ -952,124 +1314,173 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         </ModalPanel>
       )}
       {editor && (
-        <ModalPanel
-          tokens={tokens}
+        <SourceBottomSheet
           title="Customise payments"
-          visible
           onClose={() => setEditor(false)}
-        >
-          {[
-            ...draftLayout.flatMap(id => {
-              const action = actions.find(a => a.id === id);
-              return action ? [action] : [];
-            }),
-            ...actions.filter(a => !draftLayout.includes(a.id)),
-          ].map(a => {
-            const position = draftLayout.indexOf(a.id);
-            const selected = position !== -1;
-            const move = (direction: -1 | 1) =>
-              setDraftLayout(current => {
-                const index = current.indexOf(a.id);
-                const target = index + direction;
-                if (index < 0 || target < 0 || target >= current.length)
-                  return current;
-                const next = [...current];
-                const [moved] = next.splice(index, 1);
-                next.splice(target, 0, moved!);
-                return next;
-              });
-            return (
-              <View key={a.id} style={[s.horizontal, extractedStyles.item11]}>
-                <Copy>{a.label.replace('\n', ' ')}</Copy>
-                {selected ? (
-                  <View style={hubStyles.reorderControls}>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Move up"
-                      disabled={position === 0}
-                      onPress={() => move(-1)}
-                      style={hubStyles.reorderButton}
-                    >
-                      <Glyph name="chevron-up" size={20} />
-                    </Pressable>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Move down"
-                      disabled={position === draftLayout.length - 1}
-                      onPress={() => move(1)}
-                      style={hubStyles.reorderButton}
-                    >
-                      <Glyph name="chevron-down" size={20} />
-                    </Pressable>
-                  </View>
-                ) : null}
-                <Switch
-                  accessibilityLabel={`Show ${a.id}`}
-                  value={selected}
-                  disabled={!selected && draftLayout.length >= CUSTOMISABLE_SLOTS}
-                  onValueChange={checked =>
-                    setDraftLayout(current => {
-                      if (checked) {
-                        if (current.includes(a.id) || current.length >= CUSTOMISABLE_SLOTS)
-                          return current;
-                        return [...current, a.id];
-                      }
-                      return current.filter(id => id !== a.id);
-                    })
+          stickyHeader
+          footer={
+            <View style={hubStyles.customiseFooter}>
+              <PrimaryButton
+                label="Save layout"
+                labelSize="16"
+                disabled={draftLayout.length === 0}
+                onPress={() => {
+                  setLayout(draftLayout);
+                  try {
+                    globalThis.localStorage?.setItem(
+                      'uc.evo2027.payments.hubLayout',
+                      JSON.stringify(draftLayout),
+                    );
+                  } catch {
+                    /* Source retains session layout. */
                   }
-                />
-              </View>
-            );
-          })}
-          <Button
-            label="Save layout"
-            onPress={() => {
-              setLayout(draftLayout);
-              try {
-                globalThis.localStorage?.setItem(
-                  'uc.evo2027.payments.hubLayout',
-                  JSON.stringify(draftLayout),
-                );
-              } catch {
-                /* Source retains session layout. */
-              }
-              setEditor(false);
-            }}
-          />
-          <Button
-            label="Reset to default"
-            secondary
-            onPress={() => setDraftLayout([...DEFAULT_LAYOUT])}
-          />
-        </ModalPanel>
-      )}
-      {deleteOpen && (
-        <ModalPanel
-          tokens={tokens}
-          title="Delete"
-          visible
-          onClose={() => setDeleteOpen(false)}
+                  setEditor(false);
+                }}
+              />
+              <PrimaryButton
+                label="Reset to default"
+                labelSize="16"
+                variant="secondary"
+                onPress={() => setDraftLayout([...DEFAULT_LAYOUT])}
+              />
+            </View>
+          }
         >
-          <Copy>Confirm deletion from the demo?</Copy>
-          <Button
-            label="Confirm delete"
-            onPress={() => {
-              if (view === 'beneficiary' && person) {
-                deleteFrequentBeneficiary('CZ', person.id);
-                setView('hub');
-              } else if (view === 'template' && template) {
-                deletePaymentTemplateSelection('CZ', template.id);
-                setView('templates');
-              } else if (view === 'scheduled-detail' && payment) {
-                deleteRecurrentPayment('CZ', payment.id);
-                setView('scheduled');
-              }
-              setDeleteOpen(false);
-              changed();
-            }}
-          />
-        </ModalPanel>
+          <View style={hubStyles.customiseContent}>
+            <Copy muted size={14}>
+              Pick up to {CUSTOMISABLE_SLOTS} payments for the grid and put them
+              in the order you use them.
+            </Copy>
+            <View style={hubStyles.customiseRows}>
+              {[
+                ...draftLayout.flatMap(id => {
+                  const action = actions.find(a => a.id === id);
+                  return action ? [action] : [];
+                }),
+                ...actions.filter(a => !draftLayout.includes(a.id)),
+              ].map(a => {
+                const position = draftLayout.indexOf(a.id);
+                const selected = position !== -1;
+                const move = (direction: -1 | 1) =>
+                  setDraftLayout(current => {
+                    const index = current.indexOf(a.id);
+                    const target = index + direction;
+                    if (index < 0 || target < 0 || target >= current.length)
+                      return current;
+                    const next = [...current];
+                    const [moved] = next.splice(index, 1);
+                    next.splice(target, 0, moved!);
+                    return next;
+                  });
+                return (
+                  <View key={a.id} style={hubStyles.customiseRow}>
+                    <View style={hubStyles.customiseIcon}>
+                      <Glyph name={a.icon} size={24} />
+                    </View>
+                    <View style={hubStyles.customiseLabel}>
+                      <Copy strong size={16}>
+                        {a.label.replace('\n', ' ')}
+                      </Copy>
+                    </View>
+                    {selected ? (
+                      <View style={hubStyles.reorderControls}>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel="Move up"
+                          disabled={position === 0}
+                          onPress={() => move(-1)}
+                          style={hubStyles.reorderButton}
+                        >
+                          <Glyph name="chevron-up" size={20} />
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel="Move down"
+                          disabled={position === draftLayout.length - 1}
+                          onPress={() => move(1)}
+                          style={hubStyles.reorderButton}
+                        >
+                          <Glyph name="chevron-down" size={20} />
+                        </Pressable>
+                      </View>
+                    ) : null}
+                    <ToggleButton
+                      ariaLabel={`Show ${a.id}`}
+                      checked={selected}
+                      disabled={
+                        !selected && draftLayout.length >= CUSTOMISABLE_SLOTS
+                      }
+                      onToggle={checked =>
+                        setDraftLayout(current => {
+                          if (checked) {
+                            if (
+                              current.includes(a.id) ||
+                              current.length >= CUSTOMISABLE_SLOTS
+                            )
+                              return current;
+                            return [...current, a.id];
+                          }
+                          return current.filter(id => id !== a.id);
+                        })
+                      }
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </SourceBottomSheet>
       )}
+      {deleteOpen &&
+        (view === 'beneficiary' ||
+          view === 'template' ||
+          view === 'scheduled-detail') && (
+          <SourceBottomSheet
+            title={
+              view === 'scheduled-detail'
+                ? 'Delete scheduled payment?'
+                : view === 'beneficiary' || template?.kind === 'beneficiary'
+                ? 'Delete saved recipient?'
+                : 'Delete payment template?'
+            }
+            onClose={() => setDeleteOpen(false)}
+          >
+            <View style={s.inset}>
+              <Copy muted>
+                {view === 'scheduled-detail'
+                  ? payment?.name
+                  : view === 'beneficiary'
+                  ? person?.name
+                  : template?.beneficiaryName}{' '}
+                will be removed from{' '}
+                {view === 'scheduled-detail'
+                  ? 'scheduled payments'
+                  : view === 'template' && template?.kind === 'template'
+                  ? 'payment templates'
+                  : 'saved recipients and Payments Home'}
+                .
+              </Copy>
+            </View>
+            <View style={beneficiaryStyles.sheetActions}>
+              <PrimaryButton
+                label="Delete"
+                labelSize="16"
+                onPress={confirmDelete}
+                style={beneficiaryStyles.sheetButton}
+              />
+              <PrimaryButton
+                label="Cancel"
+                labelSize="16"
+                variant="surface"
+                onPress={() => setDeleteOpen(false)}
+                style={[
+                  beneficiaryStyles.sheetButton,
+                  beneficiaryStyles.sheetCancel,
+                ]}
+              />
+            </View>
+          </SourceBottomSheet>
+        )}
       {scheduleOpen && payment && (
         <Schedule
           initial={payment.schedule}
@@ -1357,6 +1768,25 @@ const extractedStyles = StyleSheet.create({
   },
 });
 const hubStyles = StyleSheet.create({
+  customiseContent: { paddingHorizontal: 24 },
+  customiseRows: { marginTop: 16 },
+  customiseRow: {
+    minHeight: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: tokens.border,
+    paddingVertical: 10,
+  },
+  customiseIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  customiseLabel: { flex: 1, minWidth: 0 },
+  customiseFooter: { gap: 8 },
   reserve: { paddingTop: 54 },
   title: {
     fontFamily: tokens.strongFont,
@@ -1438,6 +1868,38 @@ const hubStyles = StyleSheet.create({
   },
 });
 const beneficiaryStyles = StyleSheet.create({
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    paddingBottom: 28,
+    backgroundColor: tokens.background,
+  },
+  sheetActions: { paddingHorizontal: 24, paddingTop: 16, gap: 10 },
+  sheetButton: { borderRadius: 12 },
+  sheetCancel: { borderWidth: 1, borderColor: tokens.border },
+  identityTitle: {
+    fontFamily: tokens.strongFont,
+    color: tokens.text,
+    fontSize: 29,
+    lineHeight: 34,
+    textAlign: 'center',
+  },
+  actions: { marginHorizontal: 20, marginTop: 8 },
+  facts: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    backgroundColor: tokens.surface,
+  },
+  factRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 14,
+    paddingVertical: 13,
+  },
+  factValue: { flexShrink: 1, alignItems: 'flex-end' },
   section: {
     marginTop: 28,
     marginHorizontal: 20,

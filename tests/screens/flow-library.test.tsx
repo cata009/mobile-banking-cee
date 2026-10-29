@@ -48,6 +48,12 @@ function renderFlowLibraryInKidsHungary() {
   )
 }
 
+it('loads background capture screens only when an export or editor capture requests them', () => {
+  renderFlowLibrary('mobile-pi-ethoca')
+  const backgroundCopies = Array.from(document.querySelectorAll('[data-flow-screen-capture]')).filter(element => element.closest('[aria-hidden="true"]'))
+  expect(backgroundCopies).toHaveLength(0)
+})
+
 describe('flow-library scenario resolution', () => {
   const flow = FLOW_DEFINITIONS['investments-bulk-approval']
 
@@ -234,6 +240,17 @@ function expandAllSections() {
 }
 
 describe('flow-library screen', () => {
+  it('does not render an account banner in the library', () => {
+    render(
+      <DemoProvider>
+        <FlowLibraryScreen initialFlowId="mobile-pi-ethoca" initialView="index" />
+      </DemoProvider>,
+    )
+
+    expect(screen.queryByRole('region', { name: 'Personal account' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Personal sign in' })).not.toBeInTheDocument()
+  })
+
   it('opens the library index when entered from the global Flows destination', () => {
     render(
       <DemoProvider>
@@ -252,8 +269,7 @@ describe('flow-library screen', () => {
     // carry headings of their own, so this looks in the header specifically.
     expect(screen.getByTestId('flow-detail-header')).toHaveTextContent('Bulk approval of investment orders')
 
-    // The off-screen capture strip renders capturable phone screens up-front so
-    // export works regardless of the active tab.
+    // The visible Journey preview is capturable; export-only copies are deferred.
     expect(document.querySelector('[data-flow-screen-capture="true"]')).toBeInTheDocument()
 
     // Tabs use real tab semantics; the Journey tab surfaces the scenarios.
@@ -551,7 +567,8 @@ describe('flow-library screen', () => {
     await asyncNativeReady(document.body)
     expect(screen.getByText('Merchant data available')).toBeInTheDocument()
     await waitFor(() => expect(screen.getAllByText('YouTube Premium').length).toBeGreaterThan(0))
-    expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'In-store detail' }))
+    await waitFor(() => expect(screen.getAllByText('Merchant Category Code (MCC)').length).toBeGreaterThan(0))
   })
 
   it('renders ETHOCA merchant marks and PFM fallbacks in the Native transaction lists', async () => {

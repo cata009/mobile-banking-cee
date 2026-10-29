@@ -10,6 +10,7 @@ import { isNativeComponentPreviewFitContent } from '@/features/demo-native/compo
 import CurrentApplication from '../app/CurrentApplication';
 import { DemoViewport } from '../universal/DemoViewport';
 import { OverlayHost } from '../universal/ModalPortal';
+import { DuoPreviewProvider } from '../universal/DuoPreview';
 import './currentHost.css';
 
 export const version = 1 as const;
@@ -107,50 +108,52 @@ export function mountCurrentApplication(
     element.setAttribute('data-native-content-fit', String(fitContent));
     root.render(
       <DemoViewport authoringWidth={authoringWidth} fitContent={fitContent}>
-        <OverlayHost>
-          <CurrentApplication
-            key={applicationKey(current)}
-            country={current.country}
-            release={current.release}
-            scenario={current.scenario}
-            bankingScenario={current.bankingScenario}
-            productCounts={current.productCounts}
-            initialRoute={current.route}
-            initialLanguage={current.language}
-            initialMode={current.mode}
-            initialAmountsHidden={current.amountsHidden}
-            screenTopInset={current.screenTopInset}
-            bottomInset={current.bottomInset}
-            onExit={events.onExit}
-            control={{
-              route: current.route,
-              language: current.language,
-              mode: current.mode,
-              amountsHidden: current.amountsHidden,
-              events,
-              registerBack,
-              investmentRequests: current.investmentRequests,
-              transactionSelection: current.transactionSelection,
-              transactionPresentation: current.transactionPresentation,
-              paymentFlow: current.paymentFlow,
-              activeFeatures: current.activeFeatures,
-              homeTheme: current.homeTheme,
-              coAppingContext: current.coAppingContext,
-              futureGainSimulatorResumeState:
-                current.futureGainSimulatorResumeState,
-              creditLimitOffer: current.creditLimitOffer,
-              creditLimitOverrides: current.creditLimitOverrides,
-              investmentHistoryOverrides: current.investmentHistoryOverrides,
-              investmentPresentation: current.investmentPresentation,
-              primaryNavigationVisible: current.primaryNavigationVisible,
-              bankingPresentation: current.bankingPresentation,
-              productsPreview: current.productsPreview,
-              componentPreview: current.componentPreview,
-              productsShelfFocusRequest: current.productsShelfFocusRequest,
-              productDetailPresentation: current.productDetailPresentation,
-            }}
-          />
-        </OverlayHost>
+        <DuoPreviewProvider value={current.duoPreview}>
+          <OverlayHost>
+            <CurrentApplication
+              key={applicationKey(current)}
+              country={current.country}
+              release={current.release}
+              scenario={current.scenario}
+              bankingScenario={current.bankingScenario}
+              productCounts={current.productCounts}
+              initialRoute={current.route}
+              initialLanguage={current.language}
+              initialMode={current.mode}
+              initialAmountsHidden={current.amountsHidden}
+              screenTopInset={current.screenTopInset}
+              bottomInset={current.bottomInset}
+              onExit={events.onExit}
+              control={{
+                route: current.route,
+                language: current.language,
+                mode: current.mode,
+                amountsHidden: current.amountsHidden,
+                events,
+                registerBack,
+                investmentRequests: current.investmentRequests,
+                transactionSelection: current.transactionSelection,
+                transactionPresentation: current.transactionPresentation,
+                paymentFlow: current.paymentFlow,
+                activeFeatures: current.activeFeatures,
+                homeTheme: current.homeTheme,
+                coAppingContext: current.coAppingContext,
+                futureGainSimulatorResumeState:
+                  current.futureGainSimulatorResumeState,
+                creditLimitOffer: current.creditLimitOffer,
+                creditLimitOverrides: current.creditLimitOverrides,
+                investmentHistoryOverrides: current.investmentHistoryOverrides,
+                investmentPresentation: current.investmentPresentation,
+                primaryNavigationVisible: current.primaryNavigationVisible,
+                bankingPresentation: current.bankingPresentation,
+                productsPreview: current.productsPreview,
+                componentPreview: current.componentPreview,
+                productsShelfFocusRequest: current.productsShelfFocusRequest,
+                productDetailPresentation: current.productDetailPresentation,
+              }}
+            />
+          </OverlayHost>
+        </DuoPreviewProvider>
       </DemoViewport>,
     );
   };

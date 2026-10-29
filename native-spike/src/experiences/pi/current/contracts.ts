@@ -9,6 +9,12 @@ import type {
 } from '@/app/state/demoTypes';
 import type { AppLanguage } from '@/app/registry/languageByCountry';
 import type { ControlTokens } from '../../../universal/tokens';
+import type { CurrentAccount } from '@/data/products';
+import type {
+  VirtualCard,
+  VirtualCardDesign,
+  VirtualCardTier,
+} from '@/features/cards/virtual-card/model';
 import type { NativeTransactionPayload } from '@/features/demo-native/transactionIntents';
 import type { NativePaymentFlow } from '@/features/demo-native/paymentIntents';
 import type {
@@ -31,8 +37,18 @@ export interface CurrentContext {
   productCounts: ProductCounts;
   activeFeatures?: readonly FeatureId[];
   creditLimitOverrides?: Readonly<Record<string, number>>;
+  virtualCards?: readonly VirtualCard[];
 }
 export interface CurrentScreenProps extends CurrentContext {
+  onIssueVirtualCard?: (
+    account: CurrentAccount,
+    design: VirtualCardDesign,
+    tier: VirtualCardTier,
+  ) => string | null;
+  onChangeVirtualCardPicture?: (
+    id: string,
+    design: VirtualCardDesign,
+  ) => boolean;
   route: CurrentRoute;
   tokens: ControlTokens;
   t: (key: string, fallback?: string) => string;

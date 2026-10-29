@@ -22,6 +22,7 @@ import { RadioButton } from '../../../../../../universal/RadioButton';
 import { Text, TextInput } from '../../../../../../universal/Typography';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 import { PaymentsSheet } from './Sheet';
+import { DuoReadable } from '../../../../../../universal/DuoPreview';
 import { CurrencyFlag } from './CurrencyFlag';
 
 const rate = (value: number) =>
@@ -68,187 +69,195 @@ export function RoBaselineExchangeRates({
     { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' },
   ).format(new Date(`${EXCHANGE_RATE_DATE}T00:00:00Z`));
   return (
-    <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
-      <ScrollView
-        style={Platform.OS === 'web' ? s.webScroll : undefined}
-        showsVerticalScrollIndicator={false}
-      >
-        <BaselinePageHeader
-          title={t('runtime.payments.exchangeRates.title', 'Exchange rates')}
-          onBack={onBack}
-          includeSafeArea
-          safeAreaReserve={host.screenTopInset}
-          dark={dark}
-        />
-        <Text style={[s.date, { color: color('--uc-text-muted') }]}>
-          {t('runtime.payments.exchangeRates.lastUpdated', 'Last updated on')}{' '}
-          {date}
-        </Text>
-        <View style={s.section}>
-          <View style={s.heading}>
-            <BaselineSectionDivider
-              title={t(
-                'runtime.payments.exchangeRates.chooseCurrencyAndAmount',
-                'CHOOSE CURRENCY AND AMOUNT',
-              )}
-              variant="light-title"
-              dark={dark}
-            />
-          </View>
-          <View style={s.fields}>
-            <View style={[s.amount, { borderColor: color('--uc-border') }]}>
-              <Text style={[s.label, { color: color('--uc-text-muted') }]}>
-                {t(
-                  'runtime.payments.exchangeRates.amount',
-                  'AMOUNT',
-                ).toUpperCase()}
-              </Text>
-              <TextInput
-                accessibilityLabel={t(
-                  'runtime.payments.exchangeRates.amount',
-                  'Amount',
+    <DuoReadable>
+      <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
+        <ScrollView
+          style={Platform.OS === 'web' ? s.webScroll : undefined}
+          showsVerticalScrollIndicator={false}
+        >
+          <BaselinePageHeader
+            title={t('runtime.payments.exchangeRates.title', 'Exchange rates')}
+            onBack={onBack}
+            includeSafeArea
+            safeAreaReserve={host.screenTopInset}
+            dark={dark}
+          />
+          <Text style={[s.date, { color: color('--uc-text-muted') }]}>
+            {t('runtime.payments.exchangeRates.lastUpdated', 'Last updated on')}{' '}
+            {date}
+          </Text>
+          <View style={s.section}>
+            <View style={s.heading}>
+              <BaselineSectionDivider
+                title={t(
+                  'runtime.payments.exchangeRates.chooseCurrencyAndAmount',
+                  'CHOOSE CURRENCY AND AMOUNT',
                 )}
-                value={value}
-                onChangeText={setValue}
-                keyboardType="decimal-pad"
-                style={[s.input, { color: color('--uc-text') }]}
+                variant="light-title"
+                dark={dark}
               />
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`${t(
-                'runtime.payments.exchangeRates.chooseCurrency',
-                'Choose currency',
-              )}, ${t(
-                'runtime.payments.exchangeRates.currentCurrency',
-                'current',
-              )} ${currency}`}
-              onPress={() => {
-                setDraft(currency);
-                setChooser(true);
-              }}
-              style={[s.currency, { borderColor: color('--uc-border') }]}
-            >
-              <View>
+            <View style={s.fields}>
+              <View style={[s.amount, { borderColor: color('--uc-border') }]}>
                 <Text style={[s.label, { color: color('--uc-text-muted') }]}>
                   {t(
-                    'runtime.payments.exchangeRates.currency',
-                    'CURRENCY',
+                    'runtime.payments.exchangeRates.amount',
+                    'AMOUNT',
                   ).toUpperCase()}
                 </Text>
-                <Text style={[s.currencyValue, { color: color('--uc-text') }]}>
-                  {currency}
-                </Text>
-              </View>
-              <View style={s.chevron}>
-                <PaymentIcon
-                  name="chevron-down-wide"
-                  color={color('--uc-icon')}
+                <TextInput
+                  accessibilityLabel={t(
+                    'runtime.payments.exchangeRates.amount',
+                    'Amount',
+                  )}
+                  value={value}
+                  onChangeText={setValue}
+                  keyboardType="decimal-pad"
+                  style={[s.input, { color: color('--uc-text') }]}
                 />
               </View>
-            </Pressable>
-          </View>
-        </View>
-        <View style={s.section}>
-          <View style={s.heading}>
-            <BaselineSectionDivider
-              title={t(
-                'runtime.payments.exchangeRates.tapForRates',
-                'TAP FOR BUY/SELL RATES',
-              )}
-              variant="light-title"
-              dark={dark}
-            />
-          </View>
-          <View style={s.rows}>
-            {getExchangeRateRows(amount, currency).map(row => (
               <Pressable
-                key={row.currency}
                 accessibilityRole="button"
-                accessibilityLabel={`${amount} ${currency} ${t(
-                  'runtime.payments.exchangeRates.equals',
-                  'equals',
-                )} ${rate(row.convertedAmount)} ${row.currency}`}
-                onPress={() => setCurrency(row.currency)}
-                style={[s.row, { borderColor: color('--uc-border') }]}
+                accessibilityLabel={`${t(
+                  'runtime.payments.exchangeRates.chooseCurrency',
+                  'Choose currency',
+                )}, ${t(
+                  'runtime.payments.exchangeRates.currentCurrency',
+                  'current',
+                )} ${currency}`}
+                onPress={() => {
+                  setDraft(currency);
+                  setChooser(true);
+                }}
+                style={[s.currency, { borderColor: color('--uc-border') }]}
               >
-                <View style={s.flag}>
-                  <CurrencyFlag currency={row.currency} />
-                </View>
-                <View style={s.rowCopy}>
-                  <Text style={[s.rowTitle, { color: color('--uc-text') }]}>
-                    {row.currency}
+                <View>
+                  <Text style={[s.label, { color: color('--uc-text-muted') }]}>
+                    {t(
+                      'runtime.payments.exchangeRates.currency',
+                      'CURRENCY',
+                    ).toUpperCase()}
                   </Text>
                   <Text
-                    numberOfLines={1}
-                    style={[s.rowSubtitle, { color: color('--uc-text-muted') }]}
+                    style={[s.currencyValue, { color: color('--uc-text') }]}
                   >
-                    1 {row.currency} = {rate(row.unitRate)} {currency}
+                    {currency}
                   </Text>
                 </View>
-                <Text style={[s.result, { color: color('--uc-text') }]}>
-                  {rate(row.convertedAmount)}
-                </Text>
+                <View style={s.chevron}>
+                  <PaymentIcon
+                    name="chevron-down-wide"
+                    color={color('--uc-icon')}
+                  />
+                </View>
               </Pressable>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-      {chooser ? (
-        <PaymentsSheet
-          title={t(
-            'runtime.payments.exchangeRates.chooseCurrency',
-            'Choose currency',
-          )}
-          onClose={close}
-          closeLabel={t(
-            'runtime.payments.exchangeRates.closeChooser',
-            'Close currency chooser',
-          )}
-          fillHeight
-          dark={dark}
-        >
-          <View style={s.chooser}>
-            <BaselineSectionDivider
-              title={t(
-                'runtime.payments.exchangeRates.selectFromList',
-                'SELECT FROM THE LIST BELOW',
-              )}
-              variant="light-title"
-              dark={dark}
-            />
-            <ScrollView
-              style={[
-                s.currencyList,
-                Platform.OS === 'web' ? s.webScroll : undefined,
-              ]}
-              contentContainerStyle={s.currencyListContent}
-              accessibilityRole="radiogroup"
-            >
-              {EXCHANGE_CURRENCIES.map(code => (
-                <RadioButton
-                  key={code}
-                  label={code}
-                  selected={draft === code}
-                  onPress={() => setDraft(code)}
-                  dark={dark}
-                />
-              ))}
-            </ScrollView>
-            <View style={s.confirm}>
-              <PrimaryButton
-                label={t('runtime.payments.exchangeRates.apply', 'OK')}
-                dark={dark}
-                onPress={() => {
-                  setCurrency(draft);
-                  setChooser(false);
-                }}
-              />
             </View>
           </View>
-        </PaymentsSheet>
-      ) : null}
-    </View>
+          <View style={s.section}>
+            <View style={s.heading}>
+              <BaselineSectionDivider
+                title={t(
+                  'runtime.payments.exchangeRates.tapForRates',
+                  'TAP FOR BUY/SELL RATES',
+                )}
+                variant="light-title"
+                dark={dark}
+              />
+            </View>
+            <View style={s.rows}>
+              {getExchangeRateRows(amount, currency).map(row => (
+                <Pressable
+                  key={row.currency}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${amount} ${currency} ${t(
+                    'runtime.payments.exchangeRates.equals',
+                    'equals',
+                  )} ${rate(row.convertedAmount)} ${row.currency}`}
+                  onPress={() => setCurrency(row.currency)}
+                  style={[s.row, { borderColor: color('--uc-border') }]}
+                >
+                  <View style={s.flag}>
+                    <CurrencyFlag currency={row.currency} />
+                  </View>
+                  <View style={s.rowCopy}>
+                    <Text style={[s.rowTitle, { color: color('--uc-text') }]}>
+                      {row.currency}
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        s.rowSubtitle,
+                        { color: color('--uc-text-muted') },
+                      ]}
+                    >
+                      1 {row.currency} = {rate(row.unitRate)} {currency}
+                    </Text>
+                  </View>
+                  <Text style={[s.result, { color: color('--uc-text') }]}>
+                    {rate(row.convertedAmount)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+        {chooser ? (
+          <PaymentsSheet
+            title={t(
+              'runtime.payments.exchangeRates.chooseCurrency',
+              'Choose currency',
+            )}
+            onClose={close}
+            closeLabel={t(
+              'runtime.payments.exchangeRates.closeChooser',
+              'Close currency chooser',
+            )}
+            fillHeight
+            dark={dark}
+          >
+            <View style={s.chooser}>
+              <BaselineSectionDivider
+                title={t(
+                  'runtime.payments.exchangeRates.selectFromList',
+                  'SELECT FROM THE LIST BELOW',
+                )}
+                variant="light-title"
+                dark={dark}
+              />
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={[
+                  s.currencyList,
+                  Platform.OS === 'web' ? s.webScroll : undefined,
+                ]}
+                contentContainerStyle={s.currencyListContent}
+                accessibilityRole="radiogroup"
+              >
+                {EXCHANGE_CURRENCIES.map(code => (
+                  <RadioButton
+                    key={code}
+                    label={code}
+                    selected={draft === code}
+                    onPress={() => setDraft(code)}
+                    dark={dark}
+                  />
+                ))}
+              </ScrollView>
+              <View style={s.confirm}>
+                <PrimaryButton
+                  label={t('runtime.payments.exchangeRates.apply', 'OK')}
+                  dark={dark}
+                  onPress={() => {
+                    setCurrency(draft);
+                    setChooser(false);
+                  }}
+                />
+              </View>
+            </View>
+          </PaymentsSheet>
+        ) : null}
+      </View>
+    </DuoReadable>
   );
 }
 const s = StyleSheet.create({

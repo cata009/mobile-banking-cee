@@ -2,6 +2,8 @@ import React from 'react';
 import { BaselineBottomSheet } from '../../../../../../universal/BaselineBottomSheet';
 import { ModalPortal } from '../../../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../../../universal/DemoViewport';
+import { useDuoPreview } from '../../../../../../universal/DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 
 /** Payments use Source's 16px sheet preset, including its full-height currency chooser. */
 export function PaymentsSheet({
@@ -19,7 +21,9 @@ export function PaymentsSheet({
   fillHeight?: boolean;
   closeLabel?: string;
 }) {
-  const { width, height } = useDemoViewport();
+  const viewport = useDemoViewport();
+  const duo = useDuoPreview();
+  const { width, height } = duo ? resolveDuoContent(duo, 'home') : viewport;
   return (
     <ModalPortal
       visible
