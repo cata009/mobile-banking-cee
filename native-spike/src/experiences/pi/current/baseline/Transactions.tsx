@@ -52,7 +52,7 @@ export function RoBaselineTransactions({
   onActivateSearch,
   filters: controlledFilters,
   onFiltersChange,
-  stickyTop = 102,
+  stickyTop = host.screenTopInset + 48,
   renderSections,
 }: {
   host: CurrentScreenProps;

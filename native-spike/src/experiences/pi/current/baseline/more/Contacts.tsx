@@ -6,9 +6,15 @@ import { building } from '../../profile/assets';
 import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigationRow';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
 import { MoreServicePage, serviceDark } from './ServicePrimitives';
+import {
+  DuoColumns,
+  DuoPane,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 
 const inert = () => undefined;
 export default function Contacts(host: CurrentScreenProps) {
+  const duo = useDuoPreview();
   const dark = serviceDark(host),
     t = host.t;
   const row = (
@@ -39,76 +45,104 @@ export default function Contacts(host: CurrentScreenProps) {
       title={t('runtime.contacts.title', 'Contact us')}
     >
       <View style={styles.content}>
-        <View style={styles.imageFrame}>
-          <RasterImage
-            source={building}
-            accessibilityLabel="UniCredit Building"
-            resizeMode="cover"
-            style={styles.image}
-          />
-        </View>
-        <View>
-          <View style={styles.section}>
-            <BaselineSectionDivider
-              title={t(
-                'runtime.contacts.sections.bankContacts',
-                'BANK CONTACTS',
-              )}
-              dark={dark}
-            />
-          </View>
-          <View style={styles.rows}>
-            {row(
-              'primeAdvisor',
-              'MY PRIME ADVISOR',
-              'contact-prime',
-              undefined,
-              undefined,
-              true,
-            )}
-            {row(
-              'branchAtmFinder',
-              'BRANCH & ATM FINDER',
-              'contact-location',
-              undefined,
-              undefined,
-              true,
-            )}
-            {row(
-              'infolineAvailability',
-              'INFOLINE AVAILABILITY',
-              'contact-time',
-              undefined,
-              'Mon - Sun | 07:00 - 22:00',
-            )}
-            {row('callUs', 'CALL US', 'contact-phone', '+420 221 210 031')}
-            {row(
-              'emergencyLine',
-              'EMERGENCY LINE FOR CARD BLOCKING',
-              'contact-block',
-              '+420 221 210 012',
-            )}
-            {row('email', 'EMAIL', 'contact-email', 'INFO@UNICREDITGROUP.RO')}
-            {row('website', 'WEBSITE', 'contact-website', 'WWW.UNICREDIT.CZ')}
-          </View>
-        </View>
-        <View>
-          <View style={styles.section}>
-            <BaselineSectionDivider
-              title={t('runtime.contacts.sections.socialMedia', 'SOCIAL MEDIA')}
-              dark={dark}
-            />
-          </View>
-          <View style={styles.rows}>
-            {row('youtube', 'YOUTUBE', 'contact-youtube')}
-            <BaselineNavigationRow
-              title="X"
-              leadingIconName="contact-x"
-              onPress={inert}
-              dark={dark}
-            />
-          </View>
-        </View>
+        <DuoColumns rowGap={24}>
+          <DuoPane>
+            <View
+              style={[
+                styles.imageFrame,
+                duo
+                  ? { width: 327, maxWidth: '100%', alignSelf: 'center' }
+                  : undefined,
+              ]}
+            >
+              <RasterImage
+                source={building}
+                accessibilityLabel="UniCredit Building"
+                resizeMode="cover"
+                style={styles.image}
+              />
+            </View>
+          </DuoPane>
+          <DuoPane>
+            <View>
+              <View style={styles.section}>
+                <BaselineSectionDivider
+                  title={t(
+                    'runtime.contacts.sections.bankContacts',
+                    'BANK CONTACTS',
+                  )}
+                  dark={dark}
+                />
+              </View>
+              <View style={styles.rows}>
+                {row(
+                  'primeAdvisor',
+                  'MY PRIME ADVISOR',
+                  'contact-prime',
+                  undefined,
+                  undefined,
+                  true,
+                )}
+                {row(
+                  'branchAtmFinder',
+                  'BRANCH & ATM FINDER',
+                  'contact-location',
+                  undefined,
+                  undefined,
+                  true,
+                )}
+                {row(
+                  'infolineAvailability',
+                  'INFOLINE AVAILABILITY',
+                  'contact-time',
+                  undefined,
+                  'Mon - Sun | 07:00 - 22:00',
+                )}
+                {row('callUs', 'CALL US', 'contact-phone', '+420 221 210 031')}
+                {row(
+                  'emergencyLine',
+                  'EMERGENCY LINE FOR CARD BLOCKING',
+                  'contact-block',
+                  '+420 221 210 012',
+                )}
+                {row(
+                  'email',
+                  'EMAIL',
+                  'contact-email',
+                  'INFO@UNICREDITGROUP.RO',
+                )}
+                {row(
+                  'website',
+                  'WEBSITE',
+                  'contact-website',
+                  'WWW.UNICREDIT.CZ',
+                )}
+              </View>
+            </View>
+          </DuoPane>
+          <DuoPane>
+            <View>
+              <View style={styles.section}>
+                <BaselineSectionDivider
+                  title={t(
+                    'runtime.contacts.sections.socialMedia',
+                    'SOCIAL MEDIA',
+                  )}
+                  dark={dark}
+                />
+              </View>
+              <View style={styles.rows}>
+                {row('youtube', 'YOUTUBE', 'contact-youtube')}
+                <BaselineNavigationRow
+                  title="X"
+                  leadingIconName="contact-x"
+                  onPress={inert}
+                  dark={dark}
+                />
+              </View>
+            </View>
+          </DuoPane>
+        </DuoColumns>
       </View>
     </MoreServicePage>
   );

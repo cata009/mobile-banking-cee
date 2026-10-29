@@ -1,0 +1,25 @@
+{
+  "owner": "/root/card-guard-spec-editor",
+  "baseCommit": "745956e19c87f52bfc84267fa328c48479ccf24e",
+  "sourceCommit": "c2899b2",
+  "reason": "The earlier Card guard release committed two explicitly approved original PNGs while deferring the full asset gate; its strict inventory was not updated.",
+  "originalCount": 1477,
+  "originalAggregate": "8f86d34ce48ca7b91e218fc36a4056507aeb37673e20aedccccf442b76b95cec",
+  "preservation": "Excluding exactly the two listed additions reproduces the prior Git-normalized path/blob SHA-256 aggregate. No existing asset bytes, paths or audit assertions changed.",
+  "addedCount": 2,
+  "added": [
+    {
+      "path": "src/assets/ba/card-fraud/lake-dusk-lockscreen.png",
+      "bytes": 1970689,
+      "sha256": "84ca6002725cf674f48e31c2b88f88e59e353bec91dcc0bcaf20699042760afc"
+    },
+    {
+      "path": "src/assets/ba/card-fraud/m-ba-approved-icon.png",
+      "bytes": 23977,
+      "sha256": "99b41f22c219afda65f537216b28c0d8f88bc1087f5285177b5e3c1efaca569d"
+    }
+  ],
+  "combinedCount": 1479,
+  "combinedAggregate": "132f40b242fc59295ab0d7014951f9ad3cd17abcae2d0007e6f61e5f060c7c19",
+  "provenance": "src/assets/ba/card-fraud/provenance.json"
+}

@@ -18,6 +18,9 @@ export function BaselineDropdownField({
   errorText,
   multipleValues,
   onMultipleChange,
+  onOpen,
+  expanded: externalExpanded,
+  fillWidth = false,
   dark = false,
 }: {
   label: string;
@@ -29,6 +32,10 @@ export function BaselineDropdownField({
   errorText?: string;
   multipleValues?: readonly string[];
   onMultipleChange?: (values: readonly string[]) => void;
+  /** Optional host-owned sheet replaces the default selection panel. */
+  onOpen?: () => void;
+  expanded?: boolean;
+  fillWidth?: boolean;
   dark?: boolean;
 }) {
   const disabled =
@@ -59,7 +66,7 @@ export function BaselineDropdownField({
       renderTrigger={({ open, expanded, label: selected, selectedLabels }) => (
         <View
           style={{
-            width: 375,
+            width: fillWidth ? '100%' : 375,
             minHeight: 96,
             paddingTop: 8,
             paddingBottom: 5,
@@ -79,25 +86,28 @@ export function BaselineDropdownField({
               disabled || errorText || visualState?.startsWith('error')
                 ? visualState
                 : multipleValues?.length
-                ? 'multiple-filled'
-                : expanded
-                ? 'on-focus'
-                : visualState
+                  ? 'multiple-filled'
+                  : (externalExpanded ?? expanded)
+                    ? 'on-focus'
+                    : visualState
             }
             dark={dark}
             selectionControl={{
-              expanded,
+              expanded: externalExpanded ?? expanded,
               onPress: () => {
-                if (!disabled) open();
+                if (!disabled) (onOpen ?? open)();
               },
             }}
           />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={'Open ' + label}
-            accessibilityState={{ disabled, expanded }}
+            accessibilityState={{
+              disabled,
+              expanded: externalExpanded ?? expanded,
+            }}
             disabled={disabled}
-            onPress={open}
+            onPress={onOpen ?? open}
             style={{
               position: 'absolute',
               right: 12,
@@ -108,14 +118,23 @@ export function BaselineDropdownField({
               justifyContent: 'center',
             }}
           >
-            <SourceCustomIcon
-              name="chevron-down-wide"
-              size={32}
-              color={sourceColor(
-                disabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
-                dark,
-              )}
-            />
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <SourceCustomIcon
+                name="chevron-down-wide"
+                size={20}
+                color={sourceColor(
+                  disabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
+                  dark,
+                )}
+              />
+            </View>
           </Pressable>
         </View>
       )}

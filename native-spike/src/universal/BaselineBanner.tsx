@@ -61,6 +61,8 @@ export function BaselineBanner({
   presentation?: {
     width?: ViewStyle['width'];
     bodyLineHeight?: number;
+    /** Null leaves the message untruncated for longer, essential copy. */
+    descriptionLines?: number | null;
     radius?: number;
     titleFont?: string;
     titleSize?: number;
@@ -102,15 +104,15 @@ export function BaselineBanner({
     alignItems: stacked
       ? 'center'
       : discover || contract.align === 'start'
-      ? 'flex-start'
-      : 'center',
+        ? 'flex-start'
+        : 'center',
     backgroundColor: discover
       ? sourceColor('var(--uc-action-strong)', dark)
       : variant === 'helper'
-      ? action
-      : user
-      ? sourceColor('var(--uc-surface)', dark)
-      : undefined,
+        ? action
+        : user
+          ? sourceColor('var(--uc-surface)', dark)
+          : undefined,
     borderWidth: variant === 'ghost' || variant === 'info' ? 1 : 0,
     borderStyle: variant === 'ghost' ? 'dashed' : 'solid',
     borderColor: text,
@@ -125,8 +127,8 @@ export function BaselineBanner({
     color: discover
       ? sourceColor('var(--uc-text-inverse)', dark)
       : solid
-      ? white
-      : text,
+        ? white
+        : text,
   };
   const descriptionStyle = {
     fontFamily: 'UniCredit-regular',
@@ -137,8 +139,8 @@ export function BaselineBanner({
     color: discover
       ? sourceColor('var(--uc-text-inverse)', dark)
       : solid
-      ? white
-      : text,
+        ? white
+        : text,
   };
   const contentStyle: ViewStyle = {
     flex: presentation?.contentWidth === undefined ? 1 : undefined,
@@ -275,18 +277,18 @@ export function BaselineBanner({
                 (user
                   ? 'user-event-badge'
                   : variant === 'ghost'
-                  ? 'add-circle'
-                  : 'info-circle')
+                    ? 'add-circle'
+                    : 'info-circle')
               }
               size={contract.iconSize}
               color={
                 iconColor
                   ? sourceColor(iconColor, dark)
                   : solid || user
-                  ? white
-                  : variant === 'ghost'
-                  ? action
-                  : text
+                    ? white
+                    : variant === 'ghost'
+                      ? action
+                      : text
               }
             />
           )}
@@ -306,7 +308,12 @@ export function BaselineBanner({
             {description && (
               <Text
                 numberOfLines={
-                  variant === 'ghost' || variant === 'info' ? 4 : undefined
+                  presentation?.descriptionLines === null
+                    ? undefined
+                    : (presentation?.descriptionLines ??
+                      (variant === 'ghost' || variant === 'info'
+                        ? 4
+                        : undefined))
                 }
                 style={descriptionStyle}
               >

@@ -52,23 +52,45 @@ export function BaselineHomeBody({
   const summaryStep = summaryWidth + 12;
   useEffect(() => {
     if (Platform.OS !== 'web' || !securityNotice) return;
-    const node = summaryRail.current?.getScrollableNode() as HTMLElement | undefined;
+    const node = summaryRail.current?.getScrollableNode() as
+      HTMLElement | undefined;
     if (!node?.addEventListener) return;
-    let pressed = false, moved = false, startX = 0, startScroll = 0, suppressUntil = 0;
+    let pressed = false,
+      moved = false,
+      startX = 0,
+      startScroll = 0,
+      suppressUntil = 0;
     const finish = () => {
       if (!pressed) return;
       pressed = false;
       node.style.cursor = 'grab';
       if (!moved) return;
       suppressUntil = Date.now() + 100;
-      const index = Math.max(0, Math.min(1, Math.round(node.scrollLeft / summaryStep)));
+      const index = Math.max(
+        0,
+        Math.min(1, Math.round(node.scrollLeft / summaryStep)),
+      );
       setSummaryIndex(index);
-      summaryRail.current?.scrollTo({ x: index * summaryStep, y: 0, animated: true });
+      summaryRail.current?.scrollTo({
+        x: index * summaryStep,
+        y: 0,
+        animated: true,
+      });
     };
-    const down = (event: MouseEvent) => { if (event.button === 0) { pressed = true; moved = false; startX = event.clientX; startScroll = node.scrollLeft; } };
+    const down = (event: MouseEvent) => {
+      if (event.button === 0) {
+        pressed = true;
+        moved = false;
+        startX = event.clientX;
+        startScroll = node.scrollLeft;
+      }
+    };
     const move = (event: MouseEvent) => {
       if (!pressed) return;
-      if (event.buttons !== 1) { finish(); return; }
+      if (event.buttons !== 1) {
+        finish();
+        return;
+      }
       const delta = event.clientX - startX;
       if (!moved && Math.abs(delta) < 4) return;
       moved = true;
@@ -77,7 +99,12 @@ export function BaselineHomeBody({
       const scale = node.getBoundingClientRect().width / node.clientWidth || 1;
       node.scrollLeft = startScroll - delta / scale;
     };
-    const click = (event: MouseEvent) => { if (moved && Date.now() < suppressUntil) { event.preventDefault(); event.stopPropagation(); } };
+    const click = (event: MouseEvent) => {
+      if (moved && Date.now() < suppressUntil) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
     const preventDrag = (event: Event) => event.preventDefault();
     node.style.cursor = 'grab';
     node.addEventListener('mousedown', down);
@@ -85,7 +112,13 @@ export function BaselineHomeBody({
     node.addEventListener('dragstart', preventDrag);
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', finish);
-    return () => { node.removeEventListener('mousedown', down); node.removeEventListener('click', click, true); node.removeEventListener('dragstart', preventDrag); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', finish); };
+    return () => {
+      node.removeEventListener('mousedown', down);
+      node.removeEventListener('click', click, true);
+      node.removeEventListener('dragstart', preventDrag);
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', finish);
+    };
   }, [securityNotice, summaryStep]);
   const model = useMemo(
     () =>
@@ -94,8 +127,15 @@ export function BaselineHomeBody({
         release: host.release,
         productCounts: host.productCounts,
         bankingPresentation: host.bankingPresentation,
+        virtualCards: host.virtualCards,
       }),
-    [host.country, host.release, host.productCounts, host.bankingPresentation],
+    [
+      host.country,
+      host.release,
+      host.productCounts,
+      host.bankingPresentation,
+      host.virtualCards,
+    ],
   );
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const textColor = sourceColor('var(--uc-text)', dark);
@@ -153,69 +193,128 @@ export function BaselineHomeBody({
   const dividerStyle = [styles.divider, { backgroundColor: textColor }];
 
   const summary = (
-        <View style={[summaryStyle, securityNotice ? { height: 157 } : undefined]}>
-          <View style={styles.summaryCopy}>
-            <View style={styles.balanceBlock}>
-              <Text style={labelStyle}>
-                {host.t(
-                  redesigned ? 'home.totalBalance' : 'home.totalAvailable',
-                )}
-              </Text>
-              <View style={styles.availableRow}>
-                <Text style={availableIntegerStyle}>{available.integer}</Text>
-                <Text style={availableDecimalsStyle}>
-                  {available.decimals} {currency}
-                </Text>
-              </View>
-            </View>
-            <View style={dividerStyle} />
-            <View style={styles.balanceBlock}>
-              <Text style={labelStyle}>Total Owed</Text>
-              <View style={styles.owedRow}>
-                <Text style={owedIntegerStyle}>{owed.integer}</Text>
-                <Text style={owedDecimalsStyle}>
-                  {owed.decimals} {currency}
-                </Text>
-              </View>
-            </View>
-            {redesigned ? (
-              <View
-                style={[
-                  styles.redesignInfo,
-                  { borderTopColor: `${textColor}33` },
-                ]}
-              >
-                <Text style={[styles.redesignCopy, { color: textColor }]}>
-                  ✨ Redesigned card layout
-                </Text>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.lighthousePosition}>
-            <Image
-              source={
-                typeof lighthouse === 'number'
-                  ? lighthouse
-                  : { uri: lighthouse }
-              }
-              accessibilityLabel="Lighthouse"
-              resizeMode="cover"
-              style={styles.lighthouse}
-            />
+    <View style={[summaryStyle, securityNotice ? { height: 157 } : undefined]}>
+      <View style={styles.summaryCopy}>
+        <View style={styles.balanceBlock}>
+          <Text style={labelStyle}>
+            {host.t(redesigned ? 'home.totalBalance' : 'home.totalAvailable')}
+          </Text>
+          <View style={styles.availableRow}>
+            <Text style={availableIntegerStyle}>{available.integer}</Text>
+            <Text style={availableDecimalsStyle}>
+              {available.decimals} {currency}
+            </Text>
           </View>
         </View>
+        <View style={dividerStyle} />
+        <View style={styles.balanceBlock}>
+          <Text style={labelStyle}>Total Owed</Text>
+          <View style={styles.owedRow}>
+            <Text style={owedIntegerStyle}>{owed.integer}</Text>
+            <Text style={owedDecimalsStyle}>
+              {owed.decimals} {currency}
+            </Text>
+          </View>
+        </View>
+        {redesigned ? (
+          <View
+            style={[styles.redesignInfo, { borderTopColor: `${textColor}33` }]}
+          >
+            <Text style={[styles.redesignCopy, { color: textColor }]}>
+              ✨ Redesigned card layout
+            </Text>
+          </View>
+        ) : null}
+      </View>
+      <View style={styles.lighthousePosition}>
+        <Image
+          source={
+            typeof lighthouse === 'number' ? lighthouse : { uri: lighthouse }
+          }
+          accessibilityLabel="Lighthouse"
+          resizeMode="cover"
+          style={styles.lighthouse}
+        />
+      </View>
+    </View>
   );
   return (
     <>
-      <View style={[styles.summaryGutter, securityNotice ? { paddingHorizontal: 0 } : undefined]} onLayout={event => setSummaryWidth(Math.max(1, event.nativeEvent.layout.width - 48))}>
-        {securityNotice ? <>
-          <ScrollView ref={summaryRail} testID="home-security-carousel" horizontal snapToOffsets={[0, summaryStep]} snapToEnd={false} decelerationRate="fast" showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, gap: 12 }} scrollEventThrottle={16} onScroll={event => setSummaryIndex(Math.max(0, Math.min(1, Math.round(event.nativeEvent.contentOffset.x / summaryStep))))} style={{ width: summaryWidth + 48 }}>
-            <View style={{ width: summaryWidth }}><BaselineBanner variant="pending" title={securityNotice.title} description={securityNotice.description} tagLabel={securityNotice.tagLabel} presentation={{ width: '100%' }} onPress={() => host.onNavigate({ screen: 'transactions', params: { fraudAction: 'review-alerts' } })} dark={dark} /></View>
-            <View style={{ width: summaryWidth }}>{summary}</View>
-          </ScrollView>
-          <BaselineCarouselIndicator count={2} activeIndex={summaryIndex} itemLabels={['Show security alert', 'Show total available']} onSelect={index => { setSummaryIndex(index); summaryRail.current?.scrollTo({ x: index * summaryStep, y: 0, animated: true }); }} dark={dark} />
-        </> : summary}
-      </View>
+      <>
+        <View
+          style={[
+            styles.summaryGutter,
+            securityNotice ? { paddingHorizontal: 0 } : undefined,
+          ]}
+          onLayout={event =>
+            setSummaryWidth(Math.max(1, event.nativeEvent.layout.width - 48))
+          }
+        >
+          {securityNotice ? (
+            <>
+              <ScrollView
+                ref={summaryRail}
+                testID="home-security-carousel"
+                horizontal
+                snapToOffsets={[0, summaryStep]}
+                snapToEnd={false}
+                decelerationRate="fast"
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 24, gap: 12 }}
+                scrollEventThrottle={16}
+                onScroll={event =>
+                  setSummaryIndex(
+                    Math.max(
+                      0,
+                      Math.min(
+                        1,
+                        Math.round(
+                          event.nativeEvent.contentOffset.x / summaryStep,
+                        ),
+                      ),
+                    ),
+                  )
+                }
+                style={{ width: summaryWidth + 48 }}
+              >
+                <View style={{ width: summaryWidth }}>
+                  <BaselineBanner
+                    variant="pending"
+                    title={securityNotice.title}
+                    description={securityNotice.description}
+                    tagLabel={securityNotice.tagLabel}
+                    presentation={{ width: '100%' }}
+                    onPress={() =>
+                      host.onNavigate({
+                        screen: 'transactions',
+                        params: { fraudAction: 'review-alerts' },
+                      })
+                    }
+                    dark={dark}
+                  />
+                </View>
+                <View style={{ width: summaryWidth }}>{summary}</View>
+              </ScrollView>
+              <BaselineCarouselIndicator
+                count={2}
+                activeIndex={summaryIndex}
+                itemLabels={['Show security alert', 'Show total available']}
+                onSelect={index => {
+                  setSummaryIndex(index);
+                  summaryRail.current?.scrollTo({
+                    x: index * summaryStep,
+                    y: 0,
+                    animated: true,
+                  });
+                }}
+                dark={dark}
+              />
+            </>
+          ) : (
+            summary
+          )}
+        </View>
+      </>
       {model.categories.map((category, categoryIndex) => {
         const showTotal = category.key !== 'cards';
         const total =
@@ -223,57 +322,68 @@ export function BaselineHomeBody({
             ? model.calculateTotal(category.products)
             : undefined;
         return (
-          <View key={category.key} style={[styles.category, securityNotice && categoryIndex === 0 ? { paddingTop: 12 } : undefined]}>
-            <BaselineAccordion
-              title={category.title}
-              defaultOpen={false}
-              dark={dark}
+          <React.Fragment key={category.key}>
+            <View
+              style={[
+                styles.category,
+                securityNotice && categoryIndex === 0
+                  ? { paddingTop: 12 }
+                  : undefined,
+              ]}
             >
-              <BaselineProductsList
-                isOpen={false}
-                showTotal={showTotal}
-                variant="legacy"
-                productStyle="pi"
-                totalData={
-                  total ? maskAmountParts(total, host.amountsHidden) : undefined
-                }
+              <BaselineAccordion
+                title={category.title}
+                defaultOpen={false}
                 dark={dark}
               >
-                {category.products.map(product => {
-                  const amount = maskAmountParts(
-                    model.formatProductAmount(product),
-                    host.amountsHidden,
-                  );
-                  return (
-                    <BaselineProductCard
-                      key={product.id}
-                      icon={
-                        <SourceVector
-                          node={getProductIcon(product)}
-                          size={32}
-                          color={sourceColor('var(--uc-action)', dark)}
-                        />
-                      }
-                      title={product.name}
-                      accountNumber={model.getProductDisplayNumber(product)}
-                      amount={amount.integer}
-                      decimals={amount.decimals}
-                      currency={amount.currency}
-                      variant="legacy"
-                      productStyle="pi"
-                      onPress={productAction(product)}
-                      dark={dark}
-                    />
-                  );
-                })}
-              </BaselineProductsList>
-              {category.key === 'investments' &&
-              category.products.length > 0 &&
-              futureGainEnabled(host) ? (
-                <FutureGainBannerSlot host={host} dark={dark} />
-              ) : null}
-            </BaselineAccordion>
-          </View>
+                <BaselineProductsList
+                  isOpen={false}
+                  showTotal={showTotal}
+                  variant="legacy"
+                  productStyle="pi"
+                  totalData={
+                    total
+                      ? maskAmountParts(total, host.amountsHidden)
+                      : undefined
+                  }
+                  dark={dark}
+                >
+                  {category.products.map(product => {
+                    const amount = maskAmountParts(
+                      model.formatProductAmount(product),
+                      host.amountsHidden,
+                    );
+                    return (
+                      <BaselineProductCard
+                        key={product.id}
+                        icon={
+                          <SourceVector
+                            node={getProductIcon(product)}
+                            size={32}
+                            color={sourceColor('var(--uc-action)', dark)}
+                          />
+                        }
+                        title={product.name}
+                        accountNumber={model.getProductDisplayNumber(product)}
+                        amount={amount.integer}
+                        decimals={amount.decimals}
+                        currency={amount.currency}
+                        variant="legacy"
+                        productStyle="pi"
+                        onPress={productAction(product)}
+                        dark={dark}
+                      />
+                    );
+                  })}
+                </BaselineProductsList>
+                {category.key === 'investments' &&
+                category.products.length > 0 &&
+                futureGainEnabled(host) ? (
+                  <FutureGainBannerSlot host={host} dark={dark} />
+                ) : null}
+              </BaselineAccordion>
+            </View>
+          </React.Fragment>
         );
       })}
     </>

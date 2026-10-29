@@ -124,7 +124,7 @@ export function nativeBridgePlugin(root) {
           if (watching !== activeWatch) return
           try {
             writeBridgeManifest(output)
-            server.ws.send({ type: 'full-reload' })
+            server.ws.send({ type: 'custom', event: 'native-demo:built' })
           } catch (error) {
             server.config.logger.error(String(error))
           }

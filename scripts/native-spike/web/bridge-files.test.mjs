@@ -41,6 +41,34 @@ function fakeWatch() {
   return child
 }
 
+test('completed Native rebuild notifies the demo without reloading the whole page', async (t) => {
+  const child = fakeWatch()
+  const spawn = t.mock.method(childProcess, 'spawn', () => child)
+  syncBuiltinESMExports()
+  const fixture = mkdtempSync(path.resolve('.codex-temp/native-watch-update-'))
+  const viteBin = path.join(fixture, 'native-spike/node_modules/vite/bin')
+  mkdirSync(viteBin, { recursive: true })
+  writeFileSync(path.join(viteBin, 'vite.js'), 'fixture only')
+  const plugin = nativeBridgePlugin(fixture)
+  const messages = []
+  try {
+    await plugin.configureServer({
+      config: { server: { middlewareMode: false }, logger: { warn() {}, error() {} } },
+      httpServer: new EventEmitter(), middlewares: { use() {} }, ws: { send: message => messages.push(message) },
+    })
+    writeFileSync(path.join(fixture, 'native-spike/dist-host/current-host.js'), 'fixture only')
+    child.stdout.emit('data', Buffer.from('built in 1ms'))
+    await new Promise(resolve => setTimeout(resolve, 150))
+    assert.equal(messages.length, 1)
+    assert.equal(messages[0].type, 'custom')
+    assert.equal(messages[0].event, 'native-demo:built')
+  } finally {
+    plugin.closeBundle()
+    spawn.mock.restore()
+    syncBuiltinESMExports()
+  }
+})
+
 test('SSR audit servers do not spawn a Native watcher or register artifact middleware', async (t) => {
   const spawn = t.mock.method(childProcess, 'spawn', () => {
     throw new Error('SSR audit must not start a Native watch build')

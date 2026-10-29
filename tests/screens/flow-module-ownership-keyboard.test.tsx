@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import { afterEach, expect, it } from 'vitest'
 import { DemoProvider } from '@/app/state/demoStore'
 import FlowLibraryScreen from '@/app/screens/flow-library/FlowLibraryScreen'
@@ -11,7 +11,7 @@ afterEach(() => {
   cleanup()
   resetRsPurchase()
 })
-it('lets keyboard users select a package from the full card without activating nested details controls', () => {
+it('lets keyboard users select a package from the full card without activating nested details controls', async () => {
   render(
     <DemoProvider>
       <FlowLibraryScreen initialFlowId="rs-property-insurance" />
@@ -20,6 +20,7 @@ it('lets keyboard users select a package from the full card without activating n
   fireEvent.click(screen.getByRole('tab', { name: 'Prototype' }))
   const timeline = within(screen.getByTestId('flow-prototype-steps'))
   fireEvent.click(timeline.getByTitle(screenTitle(RS_PROPERTY_INSURANCE_FLOW, 'rs-pi-package-select')))
+  await waitFor(() => expect(document.querySelector('[data-flow-preview-loading]')).toBeNull())
   const preview = within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
   const card = preview.getByRole('button', { name: 'Select Package C package' })
   fireEvent.keyDown(card, { key: ' ' })

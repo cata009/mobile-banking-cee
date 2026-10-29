@@ -13,6 +13,10 @@ import { BaselineShopsmartOfferCard } from '../../../../../universal/BaselineSho
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { Text } from '../../../../../universal/Typography';
+import {
+  DuoReadable,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 import { RasterImage } from './RasterImage';
 
 /** Source ShopSmartContent: the shelf host owns tabs and scrolling. */
@@ -26,6 +30,7 @@ export default function ShopSmart({
   onPreviewAction?: (action: NativeProductsPreviewAction) => void;
 }) {
   const config = getProductsMenuForCountry(host.country);
+  const duo = useDuoPreview();
   const summary = preview?.summary ?? config.shopSmartSummary;
   const offerCards = preview?.offerCards ?? config.shopSmartOfferCards;
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,108 +65,122 @@ export default function ShopSmart({
         } as unknown as ViewStyle)
       : undefined;
   return (
-    <View testID="ro-offers-shopsmart-content" style={styles.content}>
-      {preview?.showSummary === false ? null : (
-        <Pressable
-          testID="ro-offers-shopsmart-summary"
-          accessibilityRole="button"
-          onPress={() => {}}
-          style={styles.summary}
-        >
-          <View style={styles.summaryCopy}>
-            <Text style={[styles.activated, { color: host.tokens.muted }]}>
-              ACTIVATED OFFERS:{summary.activatedOffers}
-            </Text>
-            <Text style={[styles.savedLabel, { color: host.tokens.text }]}>
-              {summary.totalSavedLabel}
-            </Text>
-            <Text style={[styles.savedAmount, { color: host.tokens.text }]}>
-              {summary.totalSavedAmount}
-            </Text>
-          </View>
-          <View style={styles.iconSlot}>
-            <SourceCustomIcon
-              name="chevron-link"
-              size={32}
-              color={host.tokens.text}
-            />
-          </View>
-        </Pressable>
-      )}
-      <View style={styles.offersContent}>
-        <View style={styles.heading}>
-          <BaselineSectionDivider
-            title={host.t('runtime.productsMenu.allOffers', 'ALL OFFERS')}
-            dark={dark}
-          />
-        </View>
-        <View
-          style={[
-            styles.searchBand,
-            preview?.searchSurface
-              ? { backgroundColor: sourceColor('var(--uc-surface)', dark) }
-              : null,
-            stickySearchStyle,
-          ]}
-        >
-          <BaselineSearchBar
-            dark={dark}
-            value={searchQuery}
-            onValueChange={query => {
-              setSearchQuery(query);
-              if (preview) onPreviewAction?.({ type: 'search-change', query });
-            }}
-            onFilterClick={() => {}}
-            placeholder={host.t('runtime.actions.search', 'Search')}
-            trailingLabel={host.t('runtime.actions.filters', 'Filters')}
-          />
-        </View>
-        <View testID="ro-offers-shopsmart-offers" style={styles.offers}>
-          {visibleOffers.map(offer => (
-            <View key={offer.id} testID={`ro-offers-${offer.id}`}>
-              <BaselineShopsmartOfferCard
-                merchant={offer.merchant}
-                title={offer.title}
-                statusText={offer.statusText}
-                imageSrc={offer.imageSrc}
-                imageHeight={130}
-                imageLayer={
-                  <RasterImage
-                    accessibilityLabel={offer.merchant}
-                    source={
-                      typeof offer.imageSrc === 'number'
-                        ? offer.imageSrc
-                        : { uri: offer.imageSrc }
-                    }
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
-                }
-                pillLabel={offer.pillLabel}
-                pillTone={offer.pillTone}
-                tagLabel={offer.tagLabel}
-                distance={offer.distance}
-                trailingIcon={offer.trailingIcon}
-                variant="default"
-                onPress={() => {
-                  if (preview)
-                    onPreviewAction?.({
-                      type: 'offer-open',
-                      offerId: offer.id,
-                    });
-                }}
-                dark={dark}
+    <DuoReadable>
+      <View testID="ro-offers-shopsmart-content" style={styles.content}>
+        {preview?.showSummary === false ? null : (
+          <Pressable
+            testID="ro-offers-shopsmart-summary"
+            accessibilityRole="button"
+            onPress={() => {}}
+            style={styles.summary}
+          >
+            <View style={styles.summaryCopy}>
+              <Text style={[styles.activated, { color: host.tokens.muted }]}>
+                ACTIVATED OFFERS:{summary.activatedOffers}
+              </Text>
+              <Text style={[styles.savedLabel, { color: host.tokens.text }]}>
+                {summary.totalSavedLabel}
+              </Text>
+              <Text style={[styles.savedAmount, { color: host.tokens.text }]}>
+                {summary.totalSavedAmount}
+              </Text>
+            </View>
+            <View style={styles.iconSlot}>
+              <SourceCustomIcon
+                name="chevron-link"
+                size={32}
+                color={host.tokens.text}
               />
             </View>
-          ))}
-          {visibleOffers.length === 0 && (
-            <Text style={[styles.empty, { color: host.tokens.muted }]}>
-              {host.t('runtime.productsMenu.noOffersFound', 'No offers found')}
-            </Text>
-          )}
+          </Pressable>
+        )}
+        <View style={styles.offersContent}>
+          <View style={styles.heading}>
+            <BaselineSectionDivider
+              title={host.t('runtime.productsMenu.allOffers', 'ALL OFFERS')}
+              dark={dark}
+            />
+          </View>
+          <View
+            style={[
+              styles.searchBand,
+              preview?.searchSurface
+                ? { backgroundColor: sourceColor('var(--uc-surface)', dark) }
+                : null,
+              stickySearchStyle,
+            ]}
+          >
+            <BaselineSearchBar
+              dark={dark}
+              value={searchQuery}
+              onValueChange={query => {
+                setSearchQuery(query);
+                if (preview)
+                  onPreviewAction?.({ type: 'search-change', query });
+              }}
+              onFilterClick={() => {}}
+              placeholder={host.t('runtime.actions.search', 'Search')}
+              trailingLabel={host.t('runtime.actions.filters', 'Filters')}
+            />
+          </View>
+          <View testID="ro-offers-shopsmart-offers" style={styles.offers}>
+            {visibleOffers.map(offer => (
+              <View
+                key={offer.id}
+                testID={`ro-offers-${offer.id}`}
+                style={
+                  duo
+                    ? { width: '100%', maxWidth: 375, alignSelf: 'center' }
+                    : undefined
+                }
+              >
+                <BaselineShopsmartOfferCard
+                  merchant={offer.merchant}
+                  title={offer.title}
+                  statusText={offer.statusText}
+                  imageSrc={offer.imageSrc}
+                  imageHeight={130}
+                  imageLayer={
+                    <RasterImage
+                      accessibilityLabel={offer.merchant}
+                      source={
+                        typeof offer.imageSrc === 'number'
+                          ? offer.imageSrc
+                          : { uri: offer.imageSrc }
+                      }
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
+                  }
+                  pillLabel={offer.pillLabel}
+                  pillTone={offer.pillTone}
+                  tagLabel={offer.tagLabel}
+                  distance={offer.distance}
+                  trailingIcon={offer.trailingIcon}
+                  variant="default"
+                  onPress={() => {
+                    if (preview)
+                      onPreviewAction?.({
+                        type: 'offer-open',
+                        offerId: offer.id,
+                      });
+                  }}
+                  dark={dark}
+                />
+              </View>
+            ))}
+            {visibleOffers.length === 0 && (
+              <Text style={[styles.empty, { color: host.tokens.muted }]}>
+                {host.t(
+                  'runtime.productsMenu.noOffersFound',
+                  'No offers found',
+                )}
+              </Text>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </DuoReadable>
   );
 }
 

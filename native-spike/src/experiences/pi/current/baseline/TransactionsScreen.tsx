@@ -10,6 +10,9 @@ import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { productTransactions, bankingProducts } from '../banking/model';
 import { RoBaselineTransactions } from './Transactions';
+import { AccountSelectionSheet } from './AccountSelectionSheet';
+import { isPiBaselineContext } from './policy';
+import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount';
 
 const ALL_ACCOUNTS_SCOPE = 'all-accounts';
 const EMPTY_PRODUCTS: readonly Product[] = [];
@@ -232,7 +235,38 @@ export function RoBaselineTransactionsScreen(host: CurrentScreenProps) {
           </View>
         )}
       </ScrollView>
-      {scopeSheetOpen ? (
+      {scopeSheetOpen && isPiBaselineContext(host) ? (
+        <AccountSelectionSheet
+          host={host}
+          title="Show transactions for"
+          selectedId={selectedScopeId}
+          options={scopes.map(scope => {
+            const account =
+              scope.id === ALL_ACCOUNTS_SCOPE
+                ? undefined
+                : data.currentAccounts.find(item => item.id === scope.id);
+            return {
+              id: scope.id,
+              name: scope.label,
+              ...(account
+                ? {
+                    detail:
+                      host.country === 'CZ'
+                        ? formatCzLocalAccountNumber(account.accountNumber)
+                        : account.accountNumber,
+                    balance: account.balance,
+                    currency: account.currency,
+                  }
+                : {}),
+            };
+          })}
+          onClose={() => setScopeSheetOpen(false)}
+          onConfirm={id => {
+            setSelectedScopeId(id);
+            setScopeSheetOpen(false);
+          }}
+        />
+      ) : scopeSheetOpen ? (
         <BaselineBottomSheet
           title="Show transactions for"
           onClose={() => setScopeSheetOpen(false)}

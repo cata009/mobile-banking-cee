@@ -20,12 +20,16 @@ import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 
 /** Source activated-app prelogin, including its inert links and local login demonstration. */
 export default function Login(host: CurrentScreenProps) {
   const [other, setOther] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const viewport = useDemoViewport();
+  const duo = useDuoPreview();
+  const duoFrame = duo ? resolveDuoContent(duo) : undefined;
   const window = useWindowDimensions();
   const visibility = host.onPrimaryNavigationChange;
   const registerBack = host.onBackHandlerChange;
@@ -67,7 +71,7 @@ export default function Login(host: CurrentScreenProps) {
             left: 0,
             top: 0,
             width: '100%',
-            height: '75vh',
+            height: duo ? duo.height * 0.75 : '75vh',
             zIndex: 10,
             pointerEvents: 'none',
             background:
@@ -90,8 +94,15 @@ export default function Login(host: CurrentScreenProps) {
           </Svg>
         </View>
       )}
-      <View style={s.content}>
-        <View style={s.header}>
+      <View
+        style={[
+          s.content,
+          duoFrame
+            ? { left: duoFrame.left, right: undefined, width: duoFrame.width }
+            : undefined,
+        ]}
+      >
+        <View style={[s.header, duo ? { paddingTop: 24 } : undefined]}>
           <SourceLogo />
           <Pressable
             accessibilityRole="button"
@@ -119,14 +130,22 @@ export default function Login(host: CurrentScreenProps) {
             React.createElement('div', {
               style: {
                 position: 'absolute',
-                inset: 0,
+                top: 0,
+                bottom: 0,
+                left: duoFrame ? -duoFrame.left : 0,
+                right: duoFrame && duo ? -(duo.width - duoFrame.left - duoFrame.width) : 0,
                 pointerEvents: 'none',
                 background:
                   'linear-gradient(180deg, color-mix(in srgb, #262626 0%, transparent) 0%, #262626 5.95%)',
               },
             })
           ) : (
-            <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+            <Svg
+              width={duo ? duo.width : '100%'}
+              height="100%"
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFill, duoFrame ? { left: -duoFrame.left, right: undefined } : undefined]}
+            >
               <Defs>
                 <LinearGradient
                   id="ro-login-bottom"
@@ -168,7 +187,14 @@ export default function Login(host: CurrentScreenProps) {
         </View>
       </View>
       {other && (
-        <View style={s.other}>
+        <View
+          style={[
+            s.other,
+            duoFrame
+              ? { left: duoFrame.left, right: undefined, width: duoFrame.width }
+              : undefined,
+          ]}
+        >
           <BaselinePanelMenuSheet
             height={viewport.height}
             aboutSmartBanking={host.t('panel.aboutSmartBanking')}

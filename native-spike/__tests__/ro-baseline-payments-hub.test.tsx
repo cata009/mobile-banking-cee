@@ -13,6 +13,9 @@ import {
 import { EXCHANGE_CURRENCIES, getExchangeRateRows } from '@/data/exchangeRates';
 import { BaselinePaymentHero } from '../src/universal/BaselinePaymentHero';
 import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
+import { RoPayIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoPayIcon';
+import { RoPaymentOptionIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoPaymentOptionIcon';
+import { RoBillIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoBillIcon';
 
 function host(view = 'overview'): CurrentScreenProps {
   return {
@@ -124,7 +127,7 @@ it('changes the rate base only after confirmation and resets the pending currenc
     act(() => tree.unmount());
   }
 });
-it('preserves all four generic hero sheets and the baseline controls that intentionally have no destination', () => {
+it('shows the photographed Romanian payment menus and keeps existing navigation', () => {
   const h = host(),
     tree = mount(h);
   try {
@@ -147,32 +150,83 @@ it('preserves all four generic hero sheets and the baseline controls that intent
         .onPress,
     ).toBeUndefined();
     expect(h.onNavigate).not.toHaveBeenCalled();
-    for (const index of [0, 1, 2, 3]) {
+    for (const [index, labels] of [
+      [
+        0,
+        [
+          'PAYMENT TO NEW BENEFICIARY',
+          'TEMPLATES & BENEFICIARY',
+          'FOREIGN PAYMENTS',
+          'TREASURY PAYMENT',
+          'TRANSFER BETWEEN YOUR OWN ACCOUNTS',
+        ],
+      ],
+      [
+        1,
+        [
+          'PAY REMOTE WITH ROPAY ALIAS',
+          'PAY WITH QR CODE',
+          'REQUEST WITH QR CODE',
+        ],
+      ],
+      [3, ['NEW BILL PAYMENT', 'DIRECT DEBIT', 'SCAN PAYCODE']],
+    ] as const) {
       act(() =>
         tree.root.findAllByType(BaselinePaymentHero)[index].props.onSelect(),
       );
       const controls = tree.root.findAll(
         n => typeof n.props.onPress === 'function',
       );
-      const foreign = controls.find(n =>
-        n.props.accessibilityLabel?.startsWith('FOREIGN PAYMENT'),
-      )!;
-      const templates = controls.find(n =>
-        n.props.accessibilityLabel?.startsWith('TEMPLATES AND BENEFICIARIES'),
-      )!;
-      act(() => foreign.props.onPress());
-      act(() => templates.props.onPress());
-      expect(h.onNavigate).not.toHaveBeenCalled();
+      for (const label of labels)
+        expect(
+          controls.some(n => n.props.accessibilityLabel?.startsWith(label)),
+        ).toBe(true);
+      if (index === 1)
+        expect(tree.root.findAllByType(RoPayIcon)).toHaveLength(3);
+      if (index === 3)
+        expect(
+          tree.root.findAllByType(RoBillIcon).map(n => n.props.kind),
+        ).toEqual(['new-bill', 'direct-debit', 'scan-paycode']);
+      if (index === 0)
+        expect(
+          tree.root.findAllByType(RoPaymentOptionIcon).map(n => n.props.kind),
+        ).toEqual(['treasury', 'own-accounts']);
+      expect(JSON.stringify(tree.toJSON())).not.toContain(
+        'Discover how to pay easier',
+      );
       act(() => button(tree, 'Close').props.onPress());
     }
     act(() => tree.root.findAllByType(BaselinePaymentHero)[0].props.onSelect());
     act(() =>
       tree.root
         .findAll(n => typeof n.props.onPress === 'function')
-        .find(n => n.props.accessibilityLabel?.startsWith('DOMESTIC PAYMENT'))!
+        .find(n =>
+          n.props.accessibilityLabel?.startsWith('PAYMENT TO NEW BENEFICIARY'),
+        )!
         .props.onPress(),
     );
     expect(h.onNavigate).toHaveBeenCalledWith({ screen: 'payment-create' });
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+it('opens the existing templates and beneficiaries view from the Romanian sheet', () => {
+  const h = host(),
+    tree = mount(h);
+  try {
+    act(() => tree.root.findAllByType(BaselinePaymentHero)[0].props.onSelect());
+    const action = tree.root
+      .findAll(n => typeof n.props.onPress === 'function')
+      .find(n =>
+        n.props.accessibilityLabel?.startsWith('TEMPLATES & BENEFICIARY'),
+      )!;
+    act(() => action.props.onPress());
+    expect(
+      button(
+        tree,
+        `Use template ${getPaymentTemplates('RO')[0].title} for ${getPaymentTemplates('RO')[0].beneficiaryName}`,
+      ),
+    ).toBeDefined();
   } finally {
     act(() => tree.unmount());
   }

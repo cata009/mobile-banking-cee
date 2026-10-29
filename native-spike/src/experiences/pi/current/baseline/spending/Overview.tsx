@@ -25,6 +25,10 @@ import {
 import { BaselineAccountActionBar } from '../../../../../universal/BaselineAccountActionBar';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
+import {
+  DuoFullWidthSection,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 
 export function BaselineSpendingHeader({ host }: { host: CurrentScreenProps }) {
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
@@ -245,6 +249,7 @@ export function RoBaselinePfmOverview({
   onPeriodChange: (key: string) => void;
   onCategoryClick: (category: PfmCategoryName, direction: 'out' | 'in') => void;
 }) {
+  const duo = useDuoPreview();
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const activeIndex = Math.max(
     timeline.periods.findIndex(period => period.key === activePeriodKey),
@@ -257,94 +262,120 @@ export function RoBaselinePfmOverview({
   return (
     <View
       testID="ro-pfm-overview"
-      style={[styles.page, { backgroundColor: host.tokens.background }]}
+      style={[
+        styles.page,
+        { backgroundColor: sourceColor('var(--uc-surface)', dark) },
+      ]}
     >
-      <View testID="ro-pfm-top-spacer" style={styles.topSpacer} />
-      <BaselineSpendingHeader host={host} />
+      <DuoFullWidthSection
+        backgroundColor={sourceColor('var(--uc-app-bg)', dark)}
+      >
+        <View
+          testID="ro-pfm-top-spacer"
+          style={[
+            styles.topSpacer,
+            duo ? { height: host.screenTopInset } : undefined,
+          ]}
+        />
+        <BaselineSpendingHeader host={host} />
+      </DuoFullWidthSection>
       <ScrollView
         testID="ro-pfm-overview-scroll"
         style={[
           styles.scroll,
-          { backgroundColor: host.tokens.background },
+          { backgroundColor: sourceColor('var(--uc-surface)', dark) },
           Platform.OS === 'web' ? styles.webScroll : undefined,
         ]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View>
-          <BaselinePfmPeriodCarousel
-            periods={timeline.periods}
-            activePeriodKey={activePeriodKey}
-            onPeriodChange={onPeriodChange}
-            renderPeriod={period => {
-              const value = timeline.summariesByPeriodKey[period.key];
-              if (!value) return null;
-              return (
-                <>
-                  <View style={styles.heroCopy}>
-                    <Text
-                      style={[styles.dataFor, { color: host.tokens.muted }]}
-                    >
-                      {host.t('runtime.analytics.dataFor', 'Data For')}
-                    </Text>
-                    <View style={styles.heroTitle}>
-                      <Text style={[styles.h1, { color: host.tokens.text }]}>
-                        {period.key.startsWith('year-')
-                          ? host.t('runtime.analytics.yearTotal', 'Year total')
-                          : value.periodLabel}
+        <DuoFullWidthSection
+          backgroundColor={sourceColor('var(--uc-app-bg)', dark)}
+        >
+          <View>
+            <BaselinePfmPeriodCarousel
+              periods={timeline.periods}
+              activePeriodKey={activePeriodKey}
+              onPeriodChange={onPeriodChange}
+              renderPeriod={period => {
+                const value = timeline.summariesByPeriodKey[period.key];
+                if (!value) return null;
+                return (
+                  <>
+                    <View style={styles.heroCopy}>
+                      <Text
+                        style={[styles.dataFor, { color: host.tokens.muted }]}
+                      >
+                        {host.t('runtime.analytics.dataFor', 'Data For')}
                       </Text>
-                      <Text style={[styles.h1, { color: host.tokens.muted }]}>
-                        {value.yearLabel}
-                      </Text>
+                      <View style={styles.heroTitle}>
+                        <Text style={[styles.h1, { color: host.tokens.text }]}>
+                          {period.key.startsWith('year-')
+                            ? host.t(
+                                'runtime.analytics.yearTotal',
+                                'Year total',
+                              )
+                            : value.periodLabel}
+                        </Text>
+                        <Text style={[styles.h1, { color: host.tokens.muted }]}>
+                          {value.yearLabel}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                  <BaselineCashFlowChart host={host} summary={value} />
-                </>
-              );
-            }}
-          />
-          <BaselinePeriodIndicator
-            host={host}
-            activePeriodKey={activePeriodKey}
-            periodKeys={indicatorKeys}
-          />
-        </View>
-        <View style={styles.action}>
-          <BaselineAccountActionBar
-            align="end"
-            dark={dark}
-            style={styles.actionBar}
-            items={[
-              {
-                id: 'card-transaction',
-                iconName: 'add-money',
-                iconColor: 'var(--uc-icon)',
-                label: host
-                  .t('runtime.actions.cardTransaction', 'Card Transaction')
-                  .replace(' ', '\n'),
-                onPress: host.onAddTransaction,
-              },
-            ]}
-          />
-        </View>
-        <View style={{ backgroundColor: host.tokens.background }}>
-          <MoneyCategorySection
-            host={host}
-            title={host.t('runtime.analytics.moneyOut', 'Money out')}
-            categories={summary.moneyOutCategories}
-            currency={summary.currency}
-            direction="out"
-            onCategoryClick={onCategoryClick}
-          />
-          <MoneyCategorySection
-            host={host}
-            title={host.t('runtime.analytics.moneyIn', 'Money in')}
-            categories={summary.moneyInCategories}
-            currency={summary.currency}
-            direction="in"
-            onCategoryClick={onCategoryClick}
-          />
-        </View>
+                    <BaselineCashFlowChart host={host} summary={value} />
+                  </>
+                );
+              }}
+            />
+            <BaselinePeriodIndicator
+              host={host}
+              activePeriodKey={activePeriodKey}
+              periodKeys={indicatorKeys}
+            />
+          </View>
+          <View style={styles.action}>
+            <BaselineAccountActionBar
+              align="end"
+              dark={dark}
+              style={styles.actionBar}
+              items={[
+                {
+                  id: 'card-transaction',
+                  iconName: 'add-money',
+                  iconColor: 'var(--uc-icon)',
+                  label: host
+                    .t('runtime.actions.cardTransaction', 'Card Transaction')
+                    .replace(' ', '\n'),
+                  onPress: host.onAddTransaction,
+                },
+              ]}
+            />
+          </View>
+        </DuoFullWidthSection>
+        <DuoFullWidthSection
+          backgroundColor={sourceColor('var(--uc-surface)', dark)}
+        >
+          <View
+            style={{ backgroundColor: sourceColor('var(--uc-surface)', dark) }}
+          >
+            <MoneyCategorySection
+              host={host}
+              title={host.t('runtime.analytics.moneyOut', 'Money out')}
+              categories={summary.moneyOutCategories}
+              currency={summary.currency}
+              direction="out"
+              onCategoryClick={onCategoryClick}
+            />
+            <MoneyCategorySection
+              host={host}
+              title={host.t('runtime.analytics.moneyIn', 'Money in')}
+              categories={summary.moneyInCategories}
+              currency={summary.currency}
+              direction="in"
+              onCategoryClick={onCategoryClick}
+            />
+          </View>
+        </DuoFullWidthSection>
       </ScrollView>
     </View>
   );

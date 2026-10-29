@@ -15,6 +15,7 @@ import {
 import type { CurrentScreenProps } from '../contracts';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
+import { useDuoPreview } from '../../../../universal/DuoPreview';
 import { Text } from '../../../../universal/Typography';
 import { BaselineTextField } from '../../../../universal/BaselineTextField';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
@@ -41,6 +42,7 @@ export function RoBaselineTransactionFilters({
   const [draft, setDraft] = useState(filters),
     { height } = useDemoViewport(),
     dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
+  const duo = useDuoPreview();
   const surface = sourceColor('var(--uc-surface)', dark);
   const patch = (change: Partial<AccountTransactionFilterState>) => {
     return setDraft(current => {
@@ -137,7 +139,7 @@ export function RoBaselineTransactionFilters({
     } as const;
     return (
       <View style={sourceStyle5}>
-        <View style={sourceStyle6}>
+        <View style={duo ? { flex: 1, minWidth: 0 } : sourceStyle6}>
           <BaselineTextField
             label={label}
             value={draft[key]}
@@ -197,12 +199,20 @@ export function RoBaselineTransactionFilters({
         accessibilityLabel={label}
         style={sourceStyle10}
       >
-        <View style={sourceStyle11}>
+        <View
+          style={
+            duo ? { ...sourceStyle11, width: undefined, right: 64 } : sourceStyle11
+          }
+        >
           <Text style={sourceStyle12}>{label}</Text>
           <Text style={sourceStyle13}>{value}</Text>
           <View style={sourceStyle14} />
         </View>
-        <View style={sourceStyle15}>
+        <View
+          style={
+            duo ? { ...sourceStyle15, left: undefined, right: 24 } : sourceStyle15
+          }
+        >
           <SourceCustomIcon
             name="chevron-down"
             size={20}
@@ -301,7 +311,7 @@ export function RoBaselineTransactionFilters({
               />
             </Pressable>
           </View>
-          <ScrollView style={sourceStyle21} keyboardShouldPersistTaps="handled">
+          <ScrollView style={sourceStyle21} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <View style={sourceStyle22}>
               {section(
                 'SEARCH BY TRANSACTION DETAIL',

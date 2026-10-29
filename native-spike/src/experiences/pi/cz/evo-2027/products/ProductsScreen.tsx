@@ -1,3 +1,4 @@
+import { useMouseCarousel } from '../mouseCarousel';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
@@ -47,6 +48,36 @@ const searchable = PRODUCT_SHELF_CATEGORIES.flatMap(category =>
       .toLowerCase(),
   })),
 );
+function ProductRail({
+  count,
+  children,
+}: {
+  count: number;
+  children: React.ReactNode;
+}) {
+  const rail = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const mouse = useMouseCarousel({
+    rail,
+    offsets: Array.from({ length: count }, (_, index) => index * 252),
+  });
+  return (
+    <View ref={mouse.containerRef} {...mouse.panHandlers}>
+      <ScrollView
+        ref={rail}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={252}
+        decelerationRate="fast"
+        contentContainerStyle={s.rail}
+        onScroll={event => mouse.trackOffset(event.nativeEvent.contentOffset.x)}
+        scrollEventThrottle={16}
+      >
+        {children}
+      </ScrollView>
+    </View>
+  );
+}
+
 export default function ProductsScreen(host: CzechNativeScreenProps) {
   const [view, setView] = useState<ViewKind>(() =>
     viewKind(host.route.params?.view),
@@ -282,15 +313,9 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                   </Text>
                   <Glyph name="forward" size={20} />
                 </Pressable>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  snapToInterval={252}
-                  decelerationRate="fast"
-                  contentContainerStyle={s.rail}
-                >
+                <ProductRail count={itemCategory.items.length}>
                   {itemCategory.items.map(item => itemCard(item))}
-                </ScrollView>
+                </ProductRail>
                 <Text
                   accessibilityLabel={`${itemCategory.items.length} products`}
                   style={s.dots}

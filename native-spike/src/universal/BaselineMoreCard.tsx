@@ -16,6 +16,7 @@ import {
 import { moreAssets } from '../experiences/pi/current/profile/assets';
 import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
+import { useDuoPreview, useDuoLocalViewport } from './DuoPreview';
 
 /** Canonical More renderer shared by active screens, RNWeb and isolated previews. */
 export function BaselineMoreCard({
@@ -36,6 +37,25 @@ export function BaselineMoreCard({
   dark?: boolean;
 }) {
   const c = resolveMoreCard({ variant, badgeCount });
+  const duo = useDuoPreview();
+  const local = useDuoLocalViewport();
+  const preserveAspect = !!duo && !!local && local.width > duo.referenceWidth;
+  // Keep the Source artwork's offsets and crop anchored to the original card
+  // dimensions; widening the card must not move the artwork toward its centre.
+  const referenceArt = preserveAspect
+    ? {
+        top: undefined,
+        left: undefined,
+        right: (parseFloat(c.image.right) / 100) * 155.5,
+        bottom: (parseFloat(c.image.bottom) / 100) * c.height,
+        width:
+          (1 - (parseFloat(c.image.left) + parseFloat(c.image.right)) / 100) *
+          155.5,
+        height:
+          (1 - (parseFloat(c.image.top) + parseFloat(c.image.bottom)) / 100) *
+          c.height,
+      }
+    : undefined;
   const [hovered, setHovered] = useState(false);
   const color = (value: string) => sourceColor(value, dark);
   const gradient = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 120"><defs><linearGradient id="card"><stop offset="0" stop-color="${color(
@@ -50,6 +70,7 @@ export function BaselineMoreCard({
     bottom: c.image.bottom,
     left: c.image.left,
     overflow: 'hidden',
+    ...referenceArt,
   };
   const asset = variant === 'base' ? image : moreAssets[variant];
   const assetSource = typeof asset === 'string' ? { uri: asset } : asset;
@@ -57,12 +78,12 @@ export function BaselineMoreCard({
     typeof asset === 'string'
       ? asset
       : typeof asset === 'number'
-      ? Image.resolveAssetSource(asset)?.uri
-      : Array.isArray(asset)
-      ? asset[0]?.uri
-      : asset && 'uri' in asset
-      ? asset.uri
-      : undefined;
+        ? Image.resolveAssetSource(asset)?.uri
+        : Array.isArray(asset)
+          ? asset[0]?.uri
+          : asset && 'uri' in asset
+            ? asset.uri
+            : undefined;
   const cardStyle = {
     width,
     height: c.height,
@@ -84,12 +105,15 @@ export function BaselineMoreCard({
           width: '100%',
           height: '100%',
           maxWidth: 'none',
+          ...(preserveAspect
+            ? { objectFit: 'contain', objectPosition: 'right bottom' }
+            : {}),
         },
       })
     ) : (
       <Image
         source={assetSource}
-        resizeMode="stretch"
+        resizeMode={preserveAspect ? 'contain' : 'stretch'}
         style={StyleSheet.absoluteFill as ImageStyle}
       />
     );
@@ -120,6 +144,7 @@ export function BaselineMoreCard({
         ) : null
       ) : variant === 'gdpr-consent' && Platform.OS === 'web' ? (
         React.createElement('div', {
+          'data-testid': 'ro-more-art-gdpr-consent',
           style: {
             ...artStyle,
             backgroundImage: `url('${imageUri}')`,
@@ -129,6 +154,7 @@ export function BaselineMoreCard({
         })
       ) : (
         <View
+          testID={`ro-more-art-${variant}`}
           pointerEvents="none"
           style={[
             artStyle,

@@ -22,6 +22,7 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 import { localized, localizeProductCard, RoOffersCatalog } from './Catalog';
 import ShopSmart from './ShopSmart';
 import ProductSheet from './ProductSheet';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
 
 export function BaselineProductsHeader({
   host,
@@ -42,6 +43,7 @@ export function BaselineProductsHeader({
   return (
     <BaselineL1Header
       variant="products"
+      backgroundColor={sourceColor('var(--uc-surface)', dark)}
       title={title}
       dark={dark}
       gutter={gutter}
@@ -112,8 +114,9 @@ export function BaselineProductsTabs({
   shopSmartLabel: string;
   onChange: (tab: ProductsMenuTab) => void;
 }) {
+  const duo = useDuoPreview();
   return (
-    <View style={s.tabs}>
+    <View style={[s.tabs, duo ? { marginHorizontal: 24 } : undefined]}>
       {[
         { id: 'banking' as const, label: bankingLabel },
         { id: 'shopsmart' as const, label: shopSmartLabel },
@@ -151,6 +154,7 @@ export function BaselineProductsTabs({
 }
 
 export default function Products(host: CurrentScreenProps) {
+  const duo = useDuoPreview();
   const config = getProductsMenuForCountry(host.country);
   const [tab, setTab] = useState<ProductsMenuTab>('banking');
   const [selected, setSelected] = useState<ProductsCard | null>(null);
@@ -191,8 +195,24 @@ export default function Products(host: CurrentScreenProps) {
     return () => registerBack?.(null);
   }, [host.onBackHandlerChange, selected]);
   return (
-    <View style={[s.root, { backgroundColor: host.tokens.background }]}>
-      <View testID="ro-offers-top-reserve" style={s.topReserve} />
+    <View
+      style={[
+        s.root,
+        {
+          backgroundColor: sourceColor(
+            'var(--uc-surface)',
+            host.tokens.background === '#121212',
+          ),
+        },
+      ]}
+    >
+      <View
+        testID="ro-offers-top-reserve"
+        style={[
+          s.topReserve,
+          duo ? { height: host.screenTopInset } : undefined,
+        ]}
+      />
       <BaselineProductsHeader
         host={host}
         title={localized(host, 'runtime.productsMenu.title', config.title)}

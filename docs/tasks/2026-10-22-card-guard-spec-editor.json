@@ -1,0 +1,51 @@
+{
+  "owner": "/root/card-guard-spec-editor",
+  "integrationOwner": "/root",
+  "baseCommit": "745956e19c87f52bfc84267fa328c48479ccf24e",
+  "worktreeRoot": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "initialPendingChanges": [
+    "package-lock.json",
+    "package.json",
+    "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+    "src/app/screens/tools/ToolsScreen.tsx",
+    "tests/screens/tools-screen.test.tsx",
+    "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+    "docs/tasks/2026-10-22-marketing-email-builder.json",
+    "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+    "src/app/screens/tools/email-builder/",
+    "src/features/marketing-email/",
+    "tests/features/marketing-email.test.ts",
+    "tests/screens/marketing-email-builder.test.tsx"
+  ],
+  "ownedPaths": [
+    "docs/tasks/2026-10-22-card-guard-spec-editor.json",
+    "docs/tasks/2026-10-22-card-guard-asset-baseline.json",
+    "scripts/asset-baseline.json",
+    "docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md",
+    "docs/flow-spec-editor.md",
+    "src/features/flow-spec/**",
+    "src/app/screens/flow-library/spec-editor/**",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/handoff/documentModel.ts",
+    "src/app/screens/flow-library/handoff/confluenceClipboard.ts",
+    "src/app/screens/flow-library/handoff/docx.ts",
+    "src/app/screens/flow-library/handoff/richDocx.ts",
+    "api/flow-spec.js",
+    "scripts/flow-spec/**",
+    "vite.config.ts",
+    "package.json",
+    "package-lock.json",
+    "tests/features/flow-spec.test.ts",
+    "tests/screens/flow-spec-editor.test.tsx",
+    "tests/screens/flow-handoff.test.ts",
+    "tests/tooling/flow-spec-store.test.mjs",
+    "src/app/screens/flow-library/flowExport.ts",
+    ".codex-temp/flow-spec/**"
+  ],
+  "assetBaselineRepair": {
+    "initialSha256": "33e044bbc2746d3740c6e2f3e29e21d530a8f41c02f633fc193fd000c862ba29",
+    "reason": "Final combined verification identified exactly two already-approved Card guard PNGs from c2899b2 missing from the strict inventory. Preserve all prior path/blob hashes and audit assertions."
+  },
+  "preservation": "Main checkout only. Preserve all initial changes, including package additions. No index mutation, commits, publication, flow definition or design-system changes. Root runs final combined verification sequentially."
+}

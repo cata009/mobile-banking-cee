@@ -76,6 +76,7 @@ export function bankingProducts(
   context: Pick<CurrentContext, 'country' | 'release' | 'productCounts'> & {
     creditLimitOverrides?: Readonly<Record<string, number>>;
     bankingPresentation?: NativeBankingPresentation;
+    virtualCards?: CurrentContext['virtualCards'];
   },
 ) {
   const { categories } = createCurrentProducts(context);
@@ -106,6 +107,7 @@ export function productTransactions(
   context: Pick<CurrentContext, 'country' | 'release' | 'productCounts'>,
   product: Product,
 ): AccountTransaction[] {
+  if ('virtual' in product && product.virtual === true) return [];
   const data = bankingProducts(context);
   const currency = getCountryConfig(context.country).currency;
   if (product.type === 'debit_card' || product.type === 'credit_card') {
@@ -211,8 +213,12 @@ export function accountActions(product: Product) {
         action.id === 'add-money'
           ? { ...action, key: 'openTermDeposit', label: 'Open term deposit' }
           : action.id === 'mcash'
-          ? { ...action, key: 'closeTermDeposit', label: 'Close term deposit' }
-          : action,
+            ? {
+                ...action,
+                key: 'closeTermDeposit',
+                label: 'Close term deposit',
+              }
+            : action,
       );
   if (product.type === 'loan' || product.type === 'mortgage')
     return base

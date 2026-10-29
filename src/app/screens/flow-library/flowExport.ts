@@ -15,6 +15,8 @@
 
 import { createPhoneScreenshotBlob } from "@/app/utils/phoneScreenshot";
 import type { FlowBusinessAnalysisSpec } from "./flows/types";
+import { renderSpecHtml } from '@/features/flow-spec/document';
+import type { SpecDocument, SpecAsset } from '@/features/flow-spec/types';
 
 export interface ExportFieldSpec {
   name: string;
@@ -53,6 +55,7 @@ export interface CapturedFlowStep extends FlowExportStep {
 
 /** Flow-level structured spec rendered as front-matter tables. */
 export interface ExportOverview {
+  analysisDocument?: { document: SpecDocument; assets: readonly SpecAsset[] };
   purpose?: string;
   businessAnalysis?: FlowBusinessAnalysisSpec;
   /** Mirrors FlowDefinition.specLayout; decides what follows a BA document. */
@@ -227,10 +230,10 @@ function overviewHtml(overview: ExportOverview | undefined): string {
   // A BA document is the whole export unless the flow asks for both: then the
   // document carries the business case, and the rules, signing, analytics and
   // open questions that follow it are what delivery works from.
+  const analysis = overview.analysisDocument ? `<section><h2>Business analysis specification</h2>${renderSpecHtml(overview.analysisDocument.document, overview.analysisDocument.assets)}</section>` : overview.businessAnalysis ? businessAnalysisHtml(overview.businessAnalysis) : '';
   if (overview.businessAnalysis && overview.specLayout !== "document-and-screens") {
-    return `${businessAnalysisHtml(overview.businessAnalysis)}${implementationHtml(overview.implementation)}`;
+    return `${analysis}${implementationHtml(overview.implementation)}`;
   }
-  const analysis = overview.businessAnalysis ? businessAnalysisHtml(overview.businessAnalysis) : "";
   const sections: string[] = [];
   if (overview.purpose) sections.push(`<h3>Purpose</h3><p>${escapeHtml(overview.purpose)}</p>`);
   if (overview.entryPoints?.length) {

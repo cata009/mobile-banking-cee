@@ -18,6 +18,7 @@ import { BaselineTransactionRow } from '../../../../../../universal/BaselineTran
 import { BaselineTransactionDivider } from '../../../../../../universal/BaselineTransactionDivider';
 import { BaselineBanner } from '../../../../../../universal/BaselineBanner';
 import { Text } from '../../../../../../universal/Typography';
+import { DuoFullWidthSection } from '../../../../../../universal/DuoPreview';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 import { BaselinePfmPeriodCarousel } from '../PeriodCarousel';
 import { BaselinePeriodIndicator, BaselineSubcategoryBubbles } from '../charts';
@@ -142,121 +143,131 @@ export function RoBaselinePfmCategoryDetail({
   return (
     <View
       testID="ro-pfm-category-detail"
-      style={[styles.screen, { backgroundColor: color('--uc-app-bg') }]}
+      style={[styles.screen, { backgroundColor: color('--uc-surface') }]}
     >
-      <BaselinePageHeader
-        title={categoryLabel}
-        onBack={onBack}
-        includeSafeArea
-        safeAreaReserve={host.screenTopInset}
-        showHelp={false}
-        variant="gray"
-        largeTitleColor={color(categoryDefinition.colorVar)}
-        dark={dark}
-      />
+      <DuoFullWidthSection backgroundColor={color('--uc-app-bg')}>
+        <BaselinePageHeader
+          title={categoryLabel}
+          onBack={onBack}
+          includeSafeArea
+          safeAreaReserve={host.screenTopInset}
+          showHelp={false}
+          variant="gray"
+          largeTitleColor={color(categoryDefinition.colorVar)}
+          dark={dark}
+        />
+      </DuoFullWidthSection>
       <ScrollView
         style={[
           styles.scroll,
-          { backgroundColor: color('--uc-app-bg') },
+          { backgroundColor: color('--uc-surface') },
           Platform.OS === 'web' ? styles.webScroll : undefined,
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <BaselinePfmPeriodCarousel
-          hideInactivePanels
-          periods={timeline.periods}
-          activePeriodKey={activePeriodKey}
-          onPeriodChange={onPeriodChange}
-          renderPeriod={renderPeriod}
-          testID="ro-pfm-category-period-carousel"
-        />
-        <BaselinePeriodIndicator
-          host={host}
-          activePeriodKey={activePeriodKey}
-          periodKeys={indicatorKeys}
-        />
-        <BaselineAccountActionBar
-          align="end"
-          dark={dark}
-          items={[
-            {
-              id: 'add-transaction',
-              iconName: 'add-money',
-              label: host.t(
-                'runtime.analytics.addTransaction',
-                'Add Transaction',
-              ),
-              onPress: host.onAddTransaction,
-            },
-          ]}
-          style={styles.actionBar}
-        />
-        {activeSummary && detail ? (
-          <View
-            style={[
-              styles.transactions,
-              { backgroundColor: color('--uc-surface') },
+        <DuoFullWidthSection backgroundColor={color('--uc-app-bg')}>
+          <BaselinePfmPeriodCarousel
+            hideInactivePanels
+            periods={timeline.periods}
+            activePeriodKey={activePeriodKey}
+            onPeriodChange={onPeriodChange}
+            renderPeriod={renderPeriod}
+            testID="ro-pfm-category-period-carousel"
+          />
+          <BaselinePeriodIndicator
+            host={host}
+            activePeriodKey={activePeriodKey}
+            periodKeys={indicatorKeys}
+          />
+          <BaselineAccountActionBar
+            align="end"
+            dark={dark}
+            items={[
+              {
+                id: 'add-transaction',
+                iconName: 'add-money',
+                label: host.t(
+                  'runtime.analytics.addTransaction',
+                  'Add Transaction',
+                ),
+                onPress: host.onAddTransaction,
+              },
             ]}
-          >
-            <BaselineTransactionDivider
-              title={
-                activePeriod?.kind === 'year'
-                  ? activePeriod.year
-                  : activePeriod?.label ?? activeSummary.periodLabel
-              }
-              total={formatAmount(
-                direction === 'out' ? -detail.total : detail.total,
-              )}
-              currency={activeSummary.currency}
-              dark={dark}
-            />
-            {detail.transactions.length ? (
-              detail.transactions.map((transaction, index) => (
-                <View key={transaction.id}>
-                  <BaselineTransactionRow
-                    transaction={transaction}
-                    formattedAmount={formatAmount(Math.abs(transaction.amount))}
-                    currency={activeSummary.currency}
-                    avatarPresentation="category"
-                    onPress={() => onTransactionClick?.(transaction)}
-                    dark={dark}
-                  />
-                  {category === 'Uncategorized' &&
-                  index === 0 &&
-                  showUncategorizedTip ? (
-                    <View style={styles.helper}>
-                      <BaselineBanner
-                        variant="helper"
-                        title={host.t(
-                          'runtime.analytics.uncategorizedTransaction',
-                          'Uncategorized transaction',
-                        )}
-                        description={host.t(
-                          'runtime.analytics.uncategorizedTransactionDescription',
-                          'Choose a category for this transaction and the app will remember it in the future.',
-                        )}
-                        dismissible
-                        closeLabel={host.t(
-                          'runtime.analytics.dismissUncategorizedTip',
-                          'Dismiss uncategorized transaction tip',
-                        )}
-                        onClose={() => setShowUncategorizedTip(false)}
-                        dark={dark}
-                      />
-                    </View>
-                  ) : null}
-                </View>
-              ))
-            ) : (
-              <Text style={[styles.empty, { color: color('--uc-text-muted') }]}>
-                {host.t(
-                  'runtime.analytics.noTransactionsForPeriod',
-                  'No transactions for this period',
+            style={styles.actionBar}
+          />
+        </DuoFullWidthSection>
+        <DuoFullWidthSection backgroundColor={color('--uc-surface')}>
+          {activeSummary && detail ? (
+            <View
+              style={[
+                styles.transactions,
+                { backgroundColor: color('--uc-surface') },
+              ]}
+            >
+              <BaselineTransactionDivider
+                title={
+                  activePeriod?.kind === 'year'
+                    ? activePeriod.year
+                    : (activePeriod?.label ?? activeSummary.periodLabel)
+                }
+                total={formatAmount(
+                  direction === 'out' ? -detail.total : detail.total,
                 )}
-              </Text>
-            )}
-          </View>
-        ) : null}
+                currency={activeSummary.currency}
+                dark={dark}
+              />
+              {detail.transactions.length ? (
+                detail.transactions.map((transaction, index) => (
+                  <View key={transaction.id}>
+                    <BaselineTransactionRow
+                      transaction={transaction}
+                      formattedAmount={formatAmount(
+                        Math.abs(transaction.amount),
+                      )}
+                      currency={activeSummary.currency}
+                      avatarPresentation="category"
+                      onPress={() => onTransactionClick?.(transaction)}
+                      dark={dark}
+                    />
+                    {category === 'Uncategorized' &&
+                    index === 0 &&
+                    showUncategorizedTip ? (
+                      <View style={styles.helper}>
+                        <BaselineBanner
+                          variant="helper"
+                          title={host.t(
+                            'runtime.analytics.uncategorizedTransaction',
+                            'Uncategorized transaction',
+                          )}
+                          description={host.t(
+                            'runtime.analytics.uncategorizedTransactionDescription',
+                            'Choose a category for this transaction and the app will remember it in the future.',
+                          )}
+                          dismissible
+                          closeLabel={host.t(
+                            'runtime.analytics.dismissUncategorizedTip',
+                            'Dismiss uncategorized transaction tip',
+                          )}
+                          onClose={() => setShowUncategorizedTip(false)}
+                          dark={dark}
+                        />
+                      </View>
+                    ) : null}
+                  </View>
+                ))
+              ) : (
+                <Text
+                  style={[styles.empty, { color: color('--uc-text-muted') }]}
+                >
+                  {host.t(
+                    'runtime.analytics.noTransactionsForPeriod',
+                    'No transactions for this period',
+                  )}
+                </Text>
+              )}
+            </View>
+          ) : null}
+        </DuoFullWidthSection>
       </ScrollView>
     </View>
   );

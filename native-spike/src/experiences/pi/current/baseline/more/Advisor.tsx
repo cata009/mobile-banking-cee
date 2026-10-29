@@ -17,9 +17,19 @@ import { advisorPhoto } from '../../profile/assets';
 import PrimeBrand from './PrimeBrand';
 import PrimeBackground from './PrimeBackground';
 import PrimeContact, { type MailPreferences } from './PrimeContact';
-import { primeContactScreen, type PrimeReferenceScreen } from '@/features/prime/reference';
+import {
+  primeContactScreen,
+  type PrimeReferenceScreen,
+} from '@/features/prime/reference';
 import { PrimeEntryButton } from '../../../../../app/PrimeEntryButton';
 import type { PrimeBenefitsCopy } from '@/features/prime/content';
+import {
+  DuoColumns,
+  DuoPane,
+  DuoOnlyView,
+  useDuoPreview,
+  useDuoWide,
+} from '../../../../../universal/DuoPreview';
 
 export interface PrimeReferenceControl {
   screen: PrimeReferenceScreen;
@@ -56,30 +66,69 @@ function loadPreferences(): MailPreferences {
 }
 
 /** Source PrimeScreen uses one scrolling title, a pinned dark toolbar and local contact overlays. */
-export default function Advisor(host: CurrentScreenProps & { reference?: PrimeReferenceControl }) {
+export default function Advisor(
+  host: CurrentScreenProps & { reference?: PrimeReferenceControl },
+) {
+  const duo = useDuoPreview();
+  const wide = useDuoWide();
   const reference = host.reference;
   const standardActive = reference?.standardActive === true;
   const [localTab, setLocalTab] = useState<'advisor' | 'benefits'>('advisor');
-  const tab = standardActive ? 'advisor' : reference ? reference.screen === 'prime-benefits' ? 'benefits' : 'advisor' : localTab;
+  const tab = standardActive
+    ? 'advisor'
+    : reference
+      ? reference.screen === 'prime-benefits'
+        ? 'benefits'
+        : 'advisor'
+      : localTab;
   const setTab = (value: 'advisor' | 'benefits') => {
-    if (reference) reference.navigate(value === 'advisor' ? 'prime-advisor' : 'prime-benefits');
+    if (reference)
+      reference.navigate(
+        value === 'advisor' ? 'prime-advisor' : 'prime-benefits',
+      );
     else setLocalTab(value);
   };
   const [progress, setProgress] = useState(0);
   const [localAction, setLocalAction] = useState<'call' | 'email' | null>(null);
-  const [preferences, setPreferences] = useState<MailPreferences>(() => reference ? { askEveryTime: true, preferredApp: null } : loadPreferences());
+  const [preferences, setPreferences] = useState<MailPreferences>(() =>
+    reference ? { askEveryTime: true, preferredApp: null } : loadPreferences(),
+  );
   const contact = reference ? primeContactScreen(reference.screen) : null;
-  const action = reference ? contact?.startsWith('call') ? 'call' : contact ? 'email' : null : localAction;
-  const setAction = useCallback((value: 'call' | 'email' | null) => {
-    if (!reference) { setLocalAction(value); return; }
-    reference.navigate(value === 'call' ? 'prime-call-confirm' : value === 'email'
-      ? !preferences.askEveryTime && preferences.preferredApp ? 'prime-email-compose' : 'prime-email-chooser'
-      : 'prime-advisor');
-  }, [reference, preferences.askEveryTime, preferences.preferredApp]);
+  const action = reference
+    ? contact?.startsWith('call')
+      ? 'call'
+      : contact
+        ? 'email'
+        : null
+    : localAction;
+  const setAction = useCallback(
+    (value: 'call' | 'email' | null) => {
+      if (!reference) {
+        setLocalAction(value);
+        return;
+      }
+      reference.navigate(
+        value === 'call'
+          ? 'prime-call-confirm'
+          : value === 'email'
+            ? !preferences.askEveryTime && preferences.preferredApp
+              ? 'prime-email-compose'
+              : 'prime-email-chooser'
+            : 'prime-advisor',
+      );
+    },
+    [reference, preferences.askEveryTime, preferences.preferredApp],
+  );
   const dark = host.tokens.background === '#121212';
   const t = host.t;
-  const text = (key: string) => key === 'name' && reference?.advisor ? reference.advisor.name : key === 'emailAddress' && reference?.advisor ? reference.advisor.email : t(`prime.advisor.${key}`);
-  const title = reference?.title ?? (standardActive ? 'My advisor' : t('prime.pageTitle'));
+  const text = (key: string) =>
+    key === 'name' && reference?.advisor
+      ? reference.advisor.name
+      : key === 'emailAddress' && reference?.advisor
+        ? reference.advisor.email
+        : t(`prime.advisor.${key}`);
+  const title =
+    reference?.title ?? (standardActive ? 'My advisor' : t('prime.pageTitle'));
   const sourceOutline =
     Platform.OS === 'web'
       ? ({
@@ -110,7 +159,11 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
       accessibilityRole="button"
       accessibilityLabel={text(key)}
       onPress={onPress}
-      style={[styles.tile, standardActive && styles.standardTile, sourceOutline]}
+      style={[
+        styles.tile,
+        standardActive && styles.standardTile,
+        sourceOutline,
+      ]}
     >
       <View style={styles.centerIcon}>
         <SourceCustomIcon name={icon} size={20} color="white" />
@@ -120,7 +173,7 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
   );
   return (
     <View style={styles.root}>
-      {reference?.background ?? <PrimeBackground host={host} />}
+      {duo ? null : (reference?.background ?? <PrimeBackground host={host} />)}
       <ScrollView
         stickyHeaderIndices={[0]}
         style={Platform.OS === 'web' ? styles.webScroll : undefined}
@@ -152,9 +205,26 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
             hideCollapsedTitleWhenHidden={standardActive || undefined}
             dark={dark}
           />
-          {standardActive && <View style={[styles.standardUpgrade, { top: host.screenTopInset + 8 }]}><PrimeEntryButton upgrade variant="overlay" onPress={() => reference?.navigate('prime-upgrade')} /></View>}
+          {standardActive && (
+            <View
+              style={[styles.standardUpgrade, { top: host.screenTopInset + 8 }]}
+            >
+              <PrimeEntryButton
+                upgrade
+                variant="overlay"
+                onPress={() => reference?.navigate('prime-upgrade')}
+              />
+            </View>
+          )}
         </View>
-        <View style={[styles.largeTitle, standardActive && styles.standardLargeTitle, { opacity: 1 - progress }]} aria-hidden={standardActive && progress >= 1 ? true : undefined}>
+        <View
+          style={[
+            styles.largeTitle,
+            standardActive && styles.standardLargeTitle,
+            { opacity: 1 - progress },
+          ]}
+          aria-hidden={standardActive && progress >= 1 ? true : undefined}
+        >
           <Text
             accessibilityRole="header"
             numberOfLines={2}
@@ -163,119 +233,177 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
             {title}
           </Text>
         </View>
-        {!standardActive && <View style={styles.tabs}>
-          {(['advisor', 'benefits'] as const).map(value => {
-            const label = t(
-              value === 'advisor'
-                ? 'prime.tabYourAdvisor'
-                : 'prime.tabYourBenefits',
-            );
-            const selected = value === tab;
-            const labelStyle = {
-              color: selected ? host.tokens.text : '#ffffff',
-            };
-            return (
-              <Pressable
-                key={value}
-                accessibilityRole="tab"
-                accessibilityLabel={label}
-                accessibilityState={{ selected }}
-                onPress={() => setTab(value)}
-                style={[
-                  styles.tab,
-                  selected
-                    ? {
-                        backgroundColor: sourceColor('var(--uc-surface)', dark),
-                      }
-                    : styles.inactiveTab,
-                ]}
-              >
-                <Text style={[styles.tabLabel, labelStyle]}>
-                  {label.toUpperCase()}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>}
-        <View style={styles.body}>
+        {!standardActive && (
+          <View style={styles.tabs}>
+            {(['advisor', 'benefits'] as const).map(value => {
+              const label = t(
+                value === 'advisor'
+                  ? 'prime.tabYourAdvisor'
+                  : 'prime.tabYourBenefits',
+              );
+              const selected = value === tab;
+              const labelStyle = {
+                color: selected ? host.tokens.text : '#ffffff',
+              };
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="tab"
+                  accessibilityLabel={label}
+                  accessibilityState={{ selected }}
+                  onPress={() => setTab(value)}
+                  style={[
+                    styles.tab,
+                    selected
+                      ? {
+                          backgroundColor: sourceColor(
+                            'var(--uc-surface)',
+                            dark,
+                          ),
+                        }
+                      : styles.inactiveTab,
+                  ]}
+                >
+                  <Text style={[styles.tabLabel, labelStyle]}>
+                    {label.toUpperCase()}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+        <View
+          style={[styles.body, wide ? { paddingHorizontal: 0 } : undefined]}
+        >
           {tab === 'advisor' ? (
             <>
-              {!standardActive && <Text style={styles.intro}>{text('introText')}</Text>}
-              <View style={[styles.card, standardActive && styles.standardCard]}>
-                <View style={styles.advisorHeader}>
-                  <RasterImage
-                    source={reference?.advisor?.photo ?? advisorPhoto}
-                    accessibilityLabel={text('name')}
-                    style={styles.photo}
-                  />
-                  <View style={styles.nameColumn}>
-                    <Text style={styles.strong}>{text('yourAdvisor')}</Text>
-                    <Text style={styles.copy}>{text('name')}</Text>
-                  </View>
-                </View>
-                {(
-                  [
-                    'phoneNumber',
-                    'email',
-                    'branchName',
-                    'branchAddress',
-                  ] as const
-                ).map((key, index) => (
-                  <View key={key} style={styles.pairRow}>
-                    <View style={styles.pair}>
-                      <Text style={styles.strong}>{text(key)}</Text>
-                      <Text style={styles.copy}>
-                        {text(
-                          ['phone', 'emailAddress', 'branch', 'address'][
-                            index
-                          ]!,
-                        )}
-                      </Text>
-                    </View>
-                    {key === 'branchAddress' && (
-                      <Pressable
-                        accessibilityRole={reference ? 'button' : undefined}
-                        accessibilityLabel={reference ? 'Branch directions' : undefined}
-                        onPress={() => reference?.navigate('prime-directions-handoff')}
-                        style={styles.directionIcon}
-                      >
-                        <SourceCustomIcon
-                          name="prime-direction"
-                          size={20}
-                          color="white"
+              {!standardActive && (
+                <Text
+                  style={[
+                    styles.intro,
+                    wide ? { paddingHorizontal: 24 } : undefined,
+                  ]}
+                >
+                  {text('introText')}
+                </Text>
+              )}
+              <View
+                style={[
+                  styles.card,
+                  standardActive && styles.standardCard,
+                  wide ? { padding: 0 } : undefined,
+                ]}
+              >
+                <DuoColumns rowGap={16}>
+                  <DuoPane>
+                    <DuoOnlyView
+                      style={wide ? { padding: 24, gap: 16 } : { gap: 16 }}
+                    >
+                      <View style={styles.advisorHeader}>
+                        <RasterImage
+                          source={reference?.advisor?.photo ?? advisorPhoto}
+                          accessibilityLabel={text('name')}
+                          style={styles.photo}
                         />
-                      </Pressable>
-                    )}
-                  </View>
-                ))}
-                <View style={styles.tileRow}>
-                  {tile('callNow', 'contact-phone', () => setAction('call'))}
-                  {tile('sendEmail', 'prime-email', () => setAction('email'))}
-                </View>
-                <View style={styles.tileRow}>
-                  {tile('bookAppointment', 'prime-book-appointment', () =>
-                    host.onNavigate({ screen: 'appointments' }),
-                  )}
-                  {tile('requestCall', 'prime-request-call', () =>
-                    host.onNavigate({ screen: 'call-request' }),
-                  )}
-                </View>
-                <Text style={styles.availability}>{text('availability')}</Text>
+                        <View style={styles.nameColumn}>
+                          <Text style={styles.strong}>
+                            {text('yourAdvisor')}
+                          </Text>
+                          <Text style={styles.copy}>{text('name')}</Text>
+                        </View>
+                      </View>
+                      {(
+                        [
+                          'phoneNumber',
+                          'email',
+                          'branchName',
+                          'branchAddress',
+                        ] as const
+                      ).map((key, index) => (
+                        <View key={key} style={styles.pairRow}>
+                          <View style={styles.pair}>
+                            <Text style={styles.strong}>{text(key)}</Text>
+                            <Text style={styles.copy}>
+                              {text(
+                                ['phone', 'emailAddress', 'branch', 'address'][
+                                  index
+                                ]!,
+                              )}
+                            </Text>
+                          </View>
+                          {key === 'branchAddress' && (
+                            <Pressable
+                              accessibilityRole={
+                                reference ? 'button' : undefined
+                              }
+                              accessibilityLabel={
+                                reference ? 'Branch directions' : undefined
+                              }
+                              onPress={() =>
+                                reference?.navigate('prime-directions-handoff')
+                              }
+                              style={styles.directionIcon}
+                            >
+                              <SourceCustomIcon
+                                name="prime-direction"
+                                size={20}
+                                color="white"
+                              />
+                            </Pressable>
+                          )}
+                        </View>
+                      ))}
+                    </DuoOnlyView>
+                  </DuoPane>
+                  <DuoPane>
+                    <DuoOnlyView
+                      style={wide ? { padding: 24, gap: 16 } : { gap: 16 }}
+                    >
+                      <View style={styles.tileRow}>
+                        {tile('callNow', 'contact-phone', () =>
+                          setAction('call'),
+                        )}
+                        {tile('sendEmail', 'prime-email', () =>
+                          setAction('email'),
+                        )}
+                      </View>
+                      <View style={styles.tileRow}>
+                        {tile('bookAppointment', 'prime-book-appointment', () =>
+                          host.onNavigate({ screen: 'appointments' }),
+                        )}
+                        {tile('requestCall', 'prime-request-call', () =>
+                          host.onNavigate({ screen: 'call-request' }),
+                        )}
+                      </View>
+                      <Text style={styles.availability}>
+                        {text('availability')}
+                      </Text>
+                    </DuoOnlyView>
+                  </DuoPane>
+                </DuoColumns>
               </View>
             </>
           ) : (
             <>
               <Text style={styles.benefitsHeading}>
-                {reference?.benefitsCopy?.heading ?? t('prime.benefits.pageTitle')}
+                {reference?.benefitsCopy?.heading ??
+                  t('prime.benefits.pageTitle')}
               </Text>
-              <Text style={styles.intro}>{reference?.benefitsCopy?.introduction ?? t('prime.benefits.introText')}</Text>
+              <Text style={styles.intro}>
+                {reference?.benefitsCopy?.introduction ??
+                  t('prime.benefits.introText')}
+              </Text>
               <View style={styles.card}>
                 {[1, 2, 3, 4].map(index => (
                   <Pressable
                     key={index}
                     accessibilityRole="button"
                     onPress={() => reference?.navigate('prime-benefit-handoff')}
-                    style={reference?.benefitsCopy ? [styles.benefit, styles.referenceBenefit] : styles.benefit}
+                    style={
+                      reference?.benefitsCopy
+                        ? [styles.benefit, styles.referenceBenefit]
+                        : styles.benefit
+                    }
                   >
                     <View style={styles.benefitIcon}>
                       <SourceCustomIcon
@@ -286,10 +414,13 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
                     </View>
                     <View style={styles.benefitCopy}>
                       <Text style={styles.strong}>
-                        {reference?.benefitsCopy?.benefits[index - 1]?.title ?? t(`prime.benefits.benefit${index}Title`)}
+                        {reference?.benefitsCopy?.benefits[index - 1]?.title ??
+                          t(`prime.benefits.benefit${index}Title`)}
                       </Text>
                       <Text style={styles.copy}>
-                        {reference?.benefitsCopy?.benefits[index - 1]?.description ?? t(`prime.benefits.benefit${index}Description`)}
+                        {reference?.benefitsCopy?.benefits[index - 1]
+                          ?.description ??
+                          t(`prime.benefits.benefit${index}Description`)}
                       </Text>
                     </View>
                     <View style={styles.centerIcon}>
@@ -309,7 +440,10 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
                 style={styles.terms}
               >
                 <Text style={styles.tabLabel}>
-                  {(reference?.benefitsCopy?.termsLabel ?? t('prime.benefits.termsConditions')).toUpperCase()}
+                  {(
+                    reference?.benefitsCopy?.termsLabel ??
+                    t('prime.benefits.termsConditions')
+                  ).toUpperCase()}
                 </Text>
               </Pressable>
             </>
@@ -325,19 +459,35 @@ export default function Advisor(host: CurrentScreenProps & { reference?: PrimeRe
           preferences={preferences}
           onPreferences={save}
           onClose={() => setAction(null)}
-          recipient={reference?.advisor ? { ...reference.advisor, service: false } : undefined}
-          reference={reference && contact ? {
-            screen: contact,
-            navigate: screen => reference.navigate(`prime-${screen}`),
-          } : undefined}
+          recipient={
+            reference?.advisor
+              ? { ...reference.advisor, service: false }
+              : undefined
+          }
+          reference={
+            reference && contact
+              ? {
+                  screen: contact,
+                  navigate: screen => reference.navigate(`prime-${screen}`),
+                }
+              : undefined
+          }
         />
       )}
     </View>
   );
 }
 const styles = StyleSheet.create({
-  standardUpgrade: { position: 'absolute', right: 24, height: 40, alignItems: 'center', justifyContent: 'center' },
-  standardLargeTitle: { paddingHorizontal: 24 }, standardCard: { borderRadius: 8 }, standardTile: { borderRadius: 8 },
+  standardUpgrade: {
+    position: 'absolute',
+    right: 24,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  standardLargeTitle: { paddingHorizontal: 24 },
+  standardCard: { borderRadius: 8 },
+  standardTile: { borderRadius: 8 },
   headerBlur: {
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',

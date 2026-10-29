@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import type { SpendingAnalyticsPeriod } from '@/data/spendingAnalytics';
 import { useDragCarousel } from '@/hooks/useDragCarousel';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
 
 export const BASELINE_PFM_PERIOD_WIDTH = 375;
 interface PeriodCarouselProps {
@@ -15,12 +16,14 @@ interface PeriodCarouselProps {
 }
 interface PeriodRailProps extends PeriodCarouselProps {
   children: React.ReactNode;
+  constrainViewport?: boolean;
 }
 const clampIndex = (index: number, count: number) =>
   Math.max(0, Math.min(count - 1, index));
 
 /** Source defines 375px panels even in a wider viewport; snapping preserves that design width. */
 export function BaselinePfmPeriodCarousel(props: PeriodCarouselProps) {
+  const duo = useDuoPreview();
   const testID = props.testID ?? 'ro-pfm-period-carousel';
   const panels = props.periods.map(period => (
     <View
@@ -43,7 +46,7 @@ export function BaselinePfmPeriodCarousel(props: PeriodCarouselProps) {
   ));
   const Rail = Platform.OS === 'web' ? WebPeriodRail : NativePeriodRail;
   return (
-    <Rail {...props} testID={testID}>
+    <Rail {...props} testID={testID} constrainViewport={!!duo}>
       {panels}
     </Rail>
   );
@@ -55,6 +58,7 @@ function WebPeriodRail({
   onPeriodChange,
   testID,
   children,
+  constrainViewport,
 }: PeriodRailProps) {
   const rail = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,6 +107,13 @@ function WebPeriodRail({
         timer.current = setTimeout(settle, 120);
       },
       style: {
+        ...(constrainViewport
+          ? {
+              width: BASELINE_PFM_PERIOD_WIDTH,
+              maxWidth: '100%',
+              alignSelf: 'center',
+            }
+          : {}),
         overflowX: 'auto',
         overflowY: 'hidden',
         scrollbarWidth: 'none',
@@ -122,6 +133,7 @@ function NativePeriodRail({
   onPeriodChange,
   testID,
   children,
+  constrainViewport,
 }: PeriodRailProps) {
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const scrollLeft = useRef(0);
@@ -159,6 +171,15 @@ function NativePeriodRail({
     <ScrollView
       ref={rail}
       testID={testID}
+      style={
+        constrainViewport
+          ? {
+              width: BASELINE_PFM_PERIOD_WIDTH,
+              maxWidth: '100%',
+              alignSelf: 'center',
+            }
+          : undefined
+      }
       horizontal
       showsHorizontalScrollIndicator={false}
       snapToInterval={BASELINE_PFM_PERIOD_WIDTH}

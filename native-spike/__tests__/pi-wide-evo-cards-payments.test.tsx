@@ -15,6 +15,7 @@ import {
 } from '../src/experiences/pi/cz/evo-2027/contracts';
 import CardScreen from '../src/experiences/pi/cz/evo-2027/cards/CardScreen';
 import PaymentsScreen from '../src/experiences/pi/cz/evo-2027/payments/PaymentsScreen';
+import { ToggleButton } from '../src/universal/ToggleButton';
 import Carousel from '../src/experiences/pi/cz/evo-2027/accounts/Carousel';
 import {
   MovementDetail,
@@ -62,9 +63,7 @@ const textContent = (
   if (!node) return '';
   if (Array.isArray(node)) return node.map(textContent).join('');
   return (node.children ?? [])
-    .map(child =>
-      typeof child === 'string' ? child : textContent(child),
-    )
+    .map(child => (typeof child === 'string' ? child : textContent(child)))
     .join('');
 };
 
@@ -78,16 +77,13 @@ test('Source no-op card actions remain enabled without navigating', async () => 
 
   const nativeButtons = ['Block Card', 'View PIN'].map(
     label =>
-      native.root.findAll(
-        node => node.props.accessibilityLabel === label,
-      )[0]!,
+      native.root.findAll(node => node.props.accessibilityLabel === label)[0]!,
   );
 
   expect(nativeButtons.every(node => node.props.disabled !== true)).toBe(true);
-  expect(nativeButtons.map(node => node.props.accessibilityState?.disabled)).toEqual([
-    false,
-    false,
-  ]);
+  expect(
+    nativeButtons.map(node => node.props.accessibilityState?.disabled),
+  ).toEqual([false, false]);
   await act(() => nativeButtons.forEach(node => node.props.onPress()));
   expect(props.onNavigate).not.toHaveBeenCalled();
 
@@ -119,8 +115,8 @@ test('controlled card transaction selection emits the exact payload without navi
     native = Renderer.create(<CardScreen {...props} />);
   });
 
-  const transaction = native.root.findByType(MovementRows).props
-    .transactions[0]!;
+  const transaction =
+    native.root.findByType(MovementRows).props.transactions[0]!;
   const row = native.root.findByProps({
     accessibilityLabel: `Transaction ${transaction.id}`,
   });
@@ -132,9 +128,7 @@ test('controlled card transaction selection emits the exact payload without navi
     source: 'card',
     transaction,
   } satisfies NativeTransactionPayload);
-  expect(onTransactionSelected.mock.calls[0]![0].transaction).toBe(
-    transaction,
-  );
+  expect(onTransactionSelected.mock.calls[0]![0].transaction).toBe(transaction);
   expect(props.onNavigate).not.toHaveBeenCalled();
   await act(() => native.unmount());
 });
@@ -147,8 +141,8 @@ test('standalone card transaction rows keep their detail navigation', async () =
     native = Renderer.create(<CardScreen {...props} />);
   });
 
-  const transaction = native.root.findByType(MovementRows).props
-    .transactions[0]!;
+  const transaction =
+    native.root.findByType(MovementRows).props.transactions[0]!;
   const row = native.root.findByProps({
     accessibilityLabel: `Transaction ${transaction.id}`,
   });
@@ -230,8 +224,7 @@ test('Source recipient last amount remains visible when balance privacy is enabl
 
 test('beneficiary detail shows Source totals, four rows, and inert See more', async () => {
   const person = getFrequentBeneficiaries('CZ').find(
-    beneficiary =>
-      getBeneficiaryPaymentHistory(beneficiary, 'CZ').length > 4,
+    beneficiary => getBeneficiaryPaymentHistory(beneficiary, 'CZ').length > 4,
   )!;
   const history = getBeneficiaryPaymentHistory(person, 'CZ');
   const props: CzechNativeScreenProps = {
@@ -264,9 +257,7 @@ test('beneficiary detail shows Source totals, four rows, and inert See more', as
         )
       : false,
   );
-  expect(
-    new Set(rows.map(node => node.props.accessibilityLabel)).size,
-  ).toBe(4);
+  expect(new Set(rows.map(node => node.props.accessibilityLabel)).size).toBe(4);
 
   const seeMore = native.root.findAll(
     node =>
@@ -277,7 +268,9 @@ test('beneficiary detail shows Source totals, four rows, and inert See more', as
   await act(() => seeMore.props.onPress());
   expect(props.onNavigate).not.toHaveBeenCalled();
 
-  const paymentRow = rows.find(node => typeof node.props.onPress === 'function')!;
+  const paymentRow = rows.find(
+    node => typeof node.props.onPress === 'function',
+  )!;
   await act(() => paymentRow.props.onPress());
   expect(props.onNavigate).toHaveBeenCalledWith({
     screen: 'transaction',
@@ -356,12 +349,10 @@ test('payments editor reorders and resets the canonical action layout', async ()
       ),
     ).toHaveLength(1);
 
-    const toggle = native!.root.findAll(
-      node =>
-        node.props.accessibilityLabel === 'Show manage-ebills' &&
-        typeof node.props.onValueChange === 'function',
-    )[0]!;
-    await act(() => toggle.props.onValueChange(true));
+    const toggle = native!.root
+      .findAllByType(ToggleButton)
+      .find(node => node.props.ariaLabel === 'Show manage-ebills')!;
+    await act(() => toggle.props.onToggle(true));
     const moveUp = native!.root
       .findAll(
         node =>
@@ -413,9 +404,9 @@ test('payments editor reorders and resets the canonical action layout', async ()
       )[0]!;
       saveLayout.props.onPress();
     });
-    expect(
-      JSON.parse(storage.get('uc.evo2027.payments.hubLayout')!),
-    ).toEqual(sourceDefaultLayout);
+    expect(JSON.parse(storage.get('uc.evo2027.payments.hubLayout')!)).toEqual(
+      sourceDefaultLayout,
+    );
     await act(() => native!.unmount());
     native = undefined;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { FormField } from '../../../../../universal/FormField';
 import { BaselineTextField } from '../../../../../universal/BaselineTextField';
@@ -32,6 +32,7 @@ import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { BaselineNavigationLink } from '../../../../../universal/BaselineNavigationLink';
 import { PortfolioCarousel } from './PortfolioCarousel';
+import { useMouseCarousel } from '../mouseCarousel';
 import { InvestmentContract } from './InvestmentContract';
 import { BasketDetails, BasketSectionHeading } from './BasketDetails';
 import {
@@ -170,6 +171,49 @@ function ReviewField({ label, value }: { label: string; value: string }) {
       <Copy strong style={styles.reviewFieldValue}>
         {value}
       </Copy>
+    </View>
+  );
+}
+
+function StrategyRail({
+  count,
+  onSelect,
+  children,
+}: {
+  count: number;
+  onSelect: (index: number) => void;
+  children: React.ReactNode;
+}) {
+  const rail = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const mouse = useMouseCarousel({
+    rail,
+    offsets: Array.from({ length: count }, (_, index) => index * 315),
+    onSelect,
+  });
+  return (
+    <View ref={mouse.containerRef} {...mouse.panHandlers}>
+      <ScrollView
+        ref={rail}
+        horizontal
+        snapToInterval={315}
+        decelerationRate="fast"
+        contentContainerStyle={styles.strategyCarousel}
+        onScroll={event => mouse.trackOffset(event.nativeEvent.contentOffset.x)}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={event =>
+          onSelect(
+            Math.max(
+              0,
+              Math.min(
+                count - 1,
+                Math.round(event.nativeEvent.contentOffset.x / 315),
+              ),
+            ),
+          )
+        }
+      >
+        {children}
+      </ScrollView>
     </View>
   );
 }
@@ -689,22 +733,10 @@ export function CreationScreens({
           />
         }
       >
-        <ScrollView
-          horizontal
-          snapToInterval={315}
-          decelerationRate="fast"
-          contentContainerStyle={styles.strategyCarousel}
-          onMomentumScrollEnd={event => {
-            const strategy =
-              strategies[
-                Math.max(
-                  0,
-                  Math.min(
-                    strategies.length - 1,
-                    Math.round(event.nativeEvent.contentOffset.x / 315),
-                  ),
-                )
-              ];
+        <StrategyRail
+          count={strategies.length}
+          onSelect={index => {
+            const strategy = strategies[index];
             if (strategy)
               dispatch({
                 type: 'draft-changed',
@@ -743,7 +775,7 @@ export function CreationScreens({
               />
             </View>
           ))}
-        </ScrollView>
+        </StrategyRail>
       </Page>
     );
   }

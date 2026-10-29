@@ -23,11 +23,15 @@ import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 
 /** Source inactive prelogin composition; activation remains an inert prototype CTA. */
 export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
   const [other, setOther] = useState(false);
   const viewport = useDemoViewport();
+  const duo = useDuoPreview();
+  const duoFrame = duo ? resolveDuoContent(duo) : undefined;
   const visibility = host.onPrimaryNavigationChange;
   const registerBack = host.onBackHandlerChange;
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
@@ -63,8 +67,15 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
         style={s.background}
         resizeMode="cover"
       />
-      <View style={s.content}>
-        <View style={s.header}>
+      <View
+        style={[
+          s.content,
+          duoFrame
+            ? { left: duoFrame.left, right: undefined, width: duoFrame.width }
+            : undefined,
+        ]}
+      >
+        <View style={[s.header, duo ? { paddingTop: 24 } : undefined]}>
           <SourceLogo />
           <Pressable
             accessibilityRole="button"
@@ -86,14 +97,22 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
             React.createElement('div', {
               style: {
                 position: 'absolute',
-                inset: 0,
+                top: 0,
+                bottom: 0,
+                left: duoFrame ? -duoFrame.left : 0,
+                right: duoFrame && duo ? -(duo.width - duoFrame.left - duoFrame.width) : 0,
                 pointerEvents: 'none',
                 background:
                   'linear-gradient(180deg, color-mix(in srgb, #262626 0%, transparent) 0%, #262626 5.95%)',
               },
             })
           ) : (
-            <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+            <Svg
+              width={duo ? duo.width : '100%'}
+              height="100%"
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFill, duoFrame ? { left: -duoFrame.left, right: undefined } : undefined]}
+            >
               <Defs>
                 <LinearGradient
                   id="inactive-prelogin-bottom"
@@ -165,7 +184,14 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
         </View>
       </View>
       {other ? (
-        <View style={s.other}>
+        <View
+          style={[
+            s.other,
+            duoFrame
+              ? { left: duoFrame.left, right: undefined, width: duoFrame.width }
+              : undefined,
+          ]}
+        >
           <BaselinePanelMenuSheet
             height={viewport.height}
             aboutSmartBanking={host.t('panel.aboutSmartBanking')}

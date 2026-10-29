@@ -1,6 +1,10 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { TextInput } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
+import Svg from 'react-native-svg';
+import { DuoPreviewProvider } from '../src/universal/DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
+import ActiveBaselinePrelogin from '../src/experiences/pi/current/baseline/more/Login';
 import type { CurrentScreenProps } from '../src/experiences/pi/current/contracts';
 import {
   currentTokens,
@@ -223,4 +227,29 @@ it('consumes Back to close Other and restores primary navigation visibility on u
     act(() => tree.unmount());
   }
   expect(props.onPrimaryNavigationChange).toHaveBeenLastCalledWith(true);
+});
+
+
+it.each([
+  { width: 951, height: 669, rightInset: 84, referenceWidth: 375 },
+  { width: 669, height: 951, rightInset: 0, referenceWidth: 375 },
+  { width: 466, height: 678, rightInset: 84, referenceWidth: 375 },
+])('extends the prelogin footer backdrop across Duo glass at $width × $height', geometry => {
+  for (const Screen of [InactiveBaselinePrelogin, ActiveBaselinePrelogin]) {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <DuoPreviewProvider value={geometry}>
+          <Screen {...host('CZ')} />
+        </DuoPreviewProvider>,
+      );
+    });
+    try {
+      const gradient = tree.root.findAllByType(Svg).find(svg => svg.props.width === geometry.width);
+      expect(gradient).toBeDefined();
+      expect(StyleSheet.flatten(gradient!.props.style).left).toBe(-resolveDuoContent(geometry).left);
+    } finally {
+      act(() => tree.unmount());
+    }
+  }
 });

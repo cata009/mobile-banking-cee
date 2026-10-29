@@ -22,6 +22,7 @@ export function SourceBottomSheet({
   scrollStyle,
   maxHeightOffsetPx = 54,
   stickyHeader = false,
+  footer,
 }: {
   title: string;
   children: React.ReactNode;
@@ -31,6 +32,8 @@ export function SourceBottomSheet({
   maxHeightOffsetPx?: number;
   /** Long product details retain their title and close control while scrolling. */
   stickyHeader?: boolean;
+  /** Optional fixed actions remain visible when the sheet contents scroll. */
+  footer?: React.ReactNode;
 }) {
   const { height } = useDemoViewport();
   return (
@@ -58,7 +61,10 @@ export function SourceBottomSheet({
           style={[
             s.sheet,
             {
-              maxHeight: height - maxHeightOffsetPx,
+              maxHeight: Math.max(
+                0,
+                height - maxHeightOffsetPx - (footer ? 140 : 0),
+              ),
               backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
             },
             scrollStyle,
@@ -97,6 +103,19 @@ export function SourceBottomSheet({
           </View>
           {children}
         </ScrollView>
+        {footer && (
+          <View
+            style={[
+              s.footer,
+              {
+                backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
+                borderTopColor: sourceColor('var(--uc-border-muted)', dark),
+              },
+            ]}
+          >
+            {footer}
+          </View>
+        )}
       </View>
     </ModalPortal>
   );
@@ -111,6 +130,12 @@ const s = StyleSheet.create({
     boxShadow: '0 -8px 24px rgba(0,0,0,0.18)',
   },
   content: { paddingTop: 24, paddingBottom: 24 },
+  footer: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 24,
+    borderTopWidth: 1,
+  },
   stickyContent: { paddingTop: 0 },
   stickyHeader: { paddingTop: 24, paddingBottom: 24, marginBottom: 0 },
   header: {

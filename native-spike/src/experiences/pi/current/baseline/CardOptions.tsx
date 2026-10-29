@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BaselineNavigationRow } from '../../../../universal/BaselineNavigationRow';
 import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDivider';
@@ -6,6 +6,9 @@ import { sourceColor } from '../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../contracts';
 import { bankingProducts } from '../banking/model';
 import { RoBaselineCardPage } from './CardInfo';
+import VirtualCardFlow from './virtual-card/VirtualCardFlow';
+import CardPinFlow from './pin/CardPinFlow';
+import { isRoBaselinePinAvailable } from '@/features/cards/pin/model';
 
 const programs = [
   ['apple-pay', 'card-options-apple-pay', 'APPLE PAY', 'Active'],
@@ -74,6 +77,9 @@ const debitSettings = [
 
 /** Source rows stay inert unless a host supplies an explicit security route. */
 export default function RoBaselineCardOptions(host: CurrentScreenProps) {
+  const [changingPicture, setChangingPicture] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [demoPins, setDemoPins] = useState<Record<string, string>>({});
   const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
   const cards = bankingProducts(host).cards,
     card =
@@ -91,6 +97,26 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
         ]}
       />
     );
+  const virtual =
+    host.country === 'RO' &&
+    host.release === 'release-current' &&
+    host.scenario === 'active' &&
+    host.virtualCards?.some(item => item.id === card.id);
+  if (changingPicture && virtual)
+    return (
+      <VirtualCardFlow
+        host={host}
+        mode="change"
+        cardId={card.id}
+        onCancel={() => setChangingPicture(false)}
+        onDone={id =>
+          host.onNavigate({
+            screen: 'card',
+            params: { productId: id, cardId: id },
+          })
+        }
+      />
+    );
   const rows = (
     items: readonly (readonly [string, string, string, string])[],
   ) =>
@@ -103,38 +129,78 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
           trailingAccessory="chevron"
           rowHeight={80}
           dark={dark}
-          onPress={id === 'reissue-card' && securityRoutes
-            ? () => host.onNavigate(securityRoutes.replacement)
-            : undefined}
+          onPress={
+            id === 'view-pin' &&
+            isRoBaselinePinAvailable(host.country, host.release, host.scenario)
+              ? () => setPinOpen(true)
+              : id === 'reissue-card' && securityRoutes
+                ? () => host.onNavigate(securityRoutes.replacement)
+                : undefined
+          }
         />
       </View>
     ));
   return (
-    <RoBaselineCardPage host={host} title="Card options" showHelp={false}>
-      <View style={styles.content}>
-        {rows(programs)}
-        <View accessibilityLabel="General settings" style={styles.settings}>
-          <View style={styles.divider}>
-            <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
+    <View style={styles.root}>
+      <View
+        style={styles.root}
+        aria-hidden={pinOpen}
+        accessibilityElementsHidden={pinOpen}
+        importantForAccessibility={pinOpen ? 'no-hide-descendants' : 'auto'}
+      >
+        <RoBaselineCardPage host={host} title="Card options" showHelp={false}>
+          <View style={styles.content}>
+            {rows(programs)}
+            <View accessibilityLabel="General settings" style={styles.settings}>
+              <View style={styles.divider}>
+                <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
+              </View>
+              <View style={styles.rows}>
+                {securityRoutes ? (
+                  <BaselineNavigationRow
+                    title="CARD SECURITY"
+                    description="ATM, online, in-store and country protection"
+                    leadingIconName="block-card"
+                    trailingAccessory="chevron"
+                    rowHeight={80}
+                    dark={dark}
+                    onPress={() => host.onNavigate(securityRoutes.block)}
+                  />
+                ) : null}
+                {virtual ? (
+                  <BaselineNavigationRow
+                    title="CHANGE CARD PICTURE"
+                    description="Change the image of your card"
+                    leadingIconName="card-options-change-name"
+                    trailingAccessory="chevron"
+                    rowHeight={80}
+                    dark={dark}
+                    onPress={() => setChangingPicture(true)}
+                  />
+                ) : null}
+                {rows([
+                  ...commonSettings,
+                  ...(card.type === 'credit_card'
+                    ? creditSettings
+                    : debitSettings),
+                ])}
+              </View>
+            </View>
           </View>
-          <View style={styles.rows}>
-            {securityRoutes ? <BaselineNavigationRow
-              title="CARD SECURITY"
-              description="ATM, online, in-store and country protection"
-              leadingIconName="block-card"
-              trailingAccessory="chevron"
-              rowHeight={80}
-              dark={dark}
-              onPress={() => host.onNavigate(securityRoutes.block)}
-            /> : null}
-            {rows([
-              ...commonSettings,
-              ...(card.type === 'credit_card' ? creditSettings : debitSettings),
-            ])}
-          </View>
-        </View>
+        </RoBaselineCardPage>
       </View>
-    </RoBaselineCardPage>
+      {pinOpen ? (
+        <CardPinFlow
+          host={host}
+          card={card}
+          pin={demoPins[card.id] ?? '1985'}
+          onSave={pin =>
+            setDemoPins(previous => ({ ...previous, [card.id]: pin }))
+          }
+          onClose={() => setPinOpen(false)}
+        />
+      ) : null}
+    </View>
   );
 }
 

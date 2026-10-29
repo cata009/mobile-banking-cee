@@ -16,6 +16,7 @@ import { creditLimitOpportunityNudge } from '@/features/cards/credit-limit/oppor
 import type { AccountTransaction } from '@/data/accountDetails';
 import type { CardVariant } from '@/app/components/contracts/cardArtwork';
 import { BaselineCardArtwork } from '../../../../universal/BaselineCardArtwork';
+import { VirtualCardArt } from './virtual-card/VirtualCardArt';
 import { BaselineCarouselIndicator } from '../../../../universal/BaselineCarouselIndicator';
 import { BaselineAccountActionBar } from '../../../../universal/BaselineAccountActionBar';
 import { BaselinePageHeader } from '../../../../universal/BaselinePageHeader';
@@ -38,6 +39,7 @@ import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
 import { assistantAvailable } from '../coapping/model';
 import { openCurrentForYou } from '../coapping/contextHelp';
+import { DuoColumns, DuoPane } from '../../../../universal/DuoPreview';
 
 const CARD_GEOMETRY = {
   width: 219,
@@ -274,12 +276,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     controlledOffer != null
       ? `offer:${controlledOffer.id}:${controlledOffer.creditLimit}`
       : creditLimitRoute
-      ? `route:${initial}`
-      : null;
+        ? `route:${initial}`
+        : null;
   const offerCard =
     controlledOffer ??
     (creditLimitRoute
-      ? data.cards.find(item => item.id === initial) ?? null
+      ? (data.cards.find(item => item.id === initial) ?? null)
       : null);
   const cancelCreditLimitOffer = () => {
     if (creditLimitKey) setDismissedCreditLimitKey(creditLimitKey);
@@ -462,125 +464,153 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                     Cards
                   </Text>
                 </View>
-                <View style={styles.holder}>
-                  <Text
-                    style={[styles.holderText, { color: host.tokens.text }]}
-                  >
-                    {card.cardHolderName ?? 'PETER JAGODIĆ'}
-                  </Text>
-                  <Text style={[styles.number, { color: host.tokens.text }]}>
-                    {formatMaskedCardNumber(card.accountNumber)}
-                  </Text>
-                </View>
-                <View style={styles.carousel}>
-                  <CardCarousel
-                    items={data.cards}
-                    selectedId={card.id}
-                    selectionRequest={selectionRequest}
-                    onSelect={select}
-                    onRequestSelect={requestSelect}
-                    renderItem={item => (
-                      <View style={styles.art}>
-                        <SoftShadow
-                          width={219}
-                          height={138}
-                          radius={5.67}
-                          offsetY={11.265}
-                          blur={11.265}
-                          color="#000000"
-                          opacity={0.2}
-                        />
-                        <View
+                <DuoColumns>
+                  <DuoPane>
+                    <View style={styles.holder}>
+                      <Text
+                        style={[styles.holderText, { color: host.tokens.text }]}
+                      >
+                        {card.cardHolderName ?? 'PETER JAGODIĆ'}
+                      </Text>
+                      <Text
+                        style={[styles.number, { color: host.tokens.text }]}
+                      >
+                        {formatMaskedCardNumber(card.accountNumber)}
+                      </Text>
+                    </View>
+                    <View style={styles.carousel}>
+                      <CardCarousel
+                        items={data.cards}
+                        selectedId={card.id}
+                        selectionRequest={selectionRequest}
+                        onSelect={select}
+                        onRequestSelect={requestSelect}
+                        renderItem={item => (
+                          <View style={styles.art}>
+                            <SoftShadow
+                              width={219}
+                              height={138}
+                              radius={5.67}
+                              offsetY={11.265}
+                              blur={11.265}
+                              color="#000000"
+                              opacity={0.2}
+                            />
+                            <View
+                              style={[
+                                styles.artClip,
+                                Platform.OS !== 'android' && styles.webShadow,
+                              ]}
+                            >
+                              {host.virtualCards?.find(
+                                virtual => virtual.id === item.id,
+                              ) ? (
+                                <VirtualCardArt
+                                  design={
+                                    host.virtualCards.find(
+                                      virtual => virtual.id === item.id,
+                                    )!.design
+                                  }
+                                  width={219}
+                                  ariaLabel="Virtual card"
+                                />
+                              ) : (
+                                <BaselineCardArtwork
+                                  variant={artworkVariant(item)}
+                                  size="large"
+                                  ariaLabel={
+                                    item.type === 'debit_card'
+                                      ? 'Debit card'
+                                      : 'Credit card'
+                                  }
+                                  style={styles.artClip}
+                                />
+                              )}
+                            </View>
+                          </View>
+                        )}
+                      />
+                    </View>
+                  </DuoPane>
+                  <DuoPane>
+                    <View
+                      style={[
+                        styles.balanceArea,
+                        { backgroundColor: host.tokens.background },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.balance,
+                          { backgroundColor: host.tokens.background },
+                        ]}
+                      >
+                        <Text
                           style={[
-                            styles.artClip,
-                            Platform.OS !== 'android' && styles.webShadow,
+                            styles.balanceLabel,
+                            { color: host.tokens.muted },
                           ]}
                         >
-                          <BaselineCardArtwork
-                            variant={artworkVariant(item)}
-                            size="large"
-                            ariaLabel={
-                              item.type === 'debit_card'
-                                ? 'Debit card'
-                                : 'Credit card'
-                            }
-                            style={styles.artClip}
-                          />
-                        </View>
+                          {copy(
+                            host,
+                            'runtime.cards.freeToSpend',
+                            'Free To Spend',
+                          )}
+                        </Text>
+                        <Text
+                          style={[styles.amount, { color: host.tokens.text }]}
+                        >
+                          {free}{' '}
+                          <Text style={styles.currency}>
+                            {getCountryConfig(host.country).currency}
+                          </Text>
+                        </Text>
                       </View>
-                    )}
-                  />
-                </View>
-                <View
-                  style={[
-                    styles.balanceArea,
-                    { backgroundColor: host.tokens.background },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.balance,
-                      { backgroundColor: host.tokens.background },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.balanceLabel,
-                        { color: host.tokens.muted },
-                      ]}
-                    >
-                      {copy(host, 'runtime.cards.freeToSpend', 'Free To Spend')}
-                    </Text>
-                    <Text style={[styles.amount, { color: host.tokens.text }]}>
-                      {free}{' '}
-                      <Text style={styles.currency}>
-                        {getCountryConfig(host.country).currency}
-                      </Text>
-                    </Text>
-                  </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={copy(
-                      host,
-                      'runtime.cards.showCardDetails',
-                      'Show Card Details',
-                    )}
-                    style={[
-                      styles.showDetails,
-                      { backgroundColor: host.tokens.background },
-                    ]}
-                    onPress={requestCardDetails}
-                  >
-                    <Text
-                      style={[
-                        styles.showDetailsText,
-                        { color: host.tokens.accent },
-                      ]}
-                    >
-                      {copy(
-                        host,
-                        'runtime.cards.showCardDetails',
-                        'Show Card Details',
-                      ).toUpperCase()}
-                    </Text>
-                  </Pressable>
-                  <BaselineCarouselIndicator
-                    count={data.cards.length}
-                    activeIndex={data.cards.indexOf(card)}
-                    onSelect={index => {
-                      const item = data.cards[index];
-                      if (item) requestSelect(item);
-                    }}
-                    dark={dark}
-                  />
-                </View>
-                <BaselineAccountActionBar
-                  items={actions}
-                  align="between"
-                  iconTreatment="bare"
-                  dark={dark}
-                  style={{ backgroundColor: host.tokens.background }}
-                />
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={copy(
+                          host,
+                          'runtime.cards.showCardDetails',
+                          'Show Card Details',
+                        )}
+                        style={[
+                          styles.showDetails,
+                          { backgroundColor: host.tokens.background },
+                        ]}
+                        onPress={requestCardDetails}
+                      >
+                        <Text
+                          style={[
+                            styles.showDetailsText,
+                            { color: host.tokens.accent },
+                          ]}
+                        >
+                          {copy(
+                            host,
+                            'runtime.cards.showCardDetails',
+                            'Show Card Details',
+                          ).toUpperCase()}
+                        </Text>
+                      </Pressable>
+                      <BaselineCarouselIndicator
+                        count={data.cards.length}
+                        activeIndex={data.cards.indexOf(card)}
+                        onSelect={index => {
+                          const item = data.cards[index];
+                          if (item) requestSelect(item);
+                        }}
+                        dark={dark}
+                      />
+                    </View>
+                    <BaselineAccountActionBar
+                      items={actions}
+                      align="between"
+                      iconTreatment="bare"
+                      dark={dark}
+                      style={{ backgroundColor: host.tokens.background }}
+                    />
+                  </DuoPane>
+                </DuoColumns>
               </View>
               <View
                 testID="ro-card-sticky-search"

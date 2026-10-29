@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
 import { FLOW_DEFINITIONS, FLOW_ORDER } from "../flows";
 import type { FlowDefinition, FlowPreviewId } from "../flows/types";
+import { searchFlows, type SearchEntry } from '@/features/flow-collaboration/search';
 
 type ViewMode = "grid" | "table";
 
@@ -21,14 +22,16 @@ function toggleValue(values: string[], value: string): string[] {
   return values.includes(value) ? values.filter((entry) => entry !== value) : [...values, value];
 }
 
-export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: FlowPreviewId) => void }) {
+export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFlow: (flowId: FlowPreviewId) => void; onOpenMatch?: (flowId: FlowPreviewId, match: SearchEntry) => void }) {
   const [query, setQuery] = useState("");
+  const [allMatches, setAllMatches] = useState(false);
   // Empty selection means "no filter applied" for both facets.
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [view, setView] = useState<ViewMode>("grid");
 
   const flows = useMemo(() => FLOW_ORDER.map((id) => FLOW_DEFINITIONS[id]), []);
+  const results = useMemo(() => searchFlows(flows, query), [flows, query]);
 
   const countries = useMemo(
     () => Array.from(new Set(flows.flatMap((flow) => flow.countryScope))),
@@ -44,12 +47,9 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
         return false;
       if (selectedDomains.length > 0 && !selectedDomains.includes(flow.domain)) return false;
       if (!normalizedQuery) return true;
-      return [flow.title, flow.label, flow.summary, flow.domain, flow.countryScope.join(" ")]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery);
+      return results.some((result) => result.flowId === flow.id);
     });
-  }, [flows, query, selectedCountries, selectedDomains]);
+  }, [flows, query, selectedCountries, selectedDomains, results]);
 
   const hasFilters = query.trim().length > 0 || selectedCountries.length > 0 || selectedDomains.length > 0;
 
@@ -67,7 +67,7 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
           <AppIcon name="search" size={18} color="var(--uc-text-muted)" />
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => { setQuery(event.target.value); setAllMatches(false); }}
             placeholder="Search flows"
             aria-label="Search flows"
             className="min-w-0 flex-1 bg-transparent uc-type-n4 text-[var(--uc-text)] outline-none placeholder:text-[var(--uc-text-muted)]"
@@ -127,6 +127,18 @@ export default function FlowLibraryIndex({ onOpenFlow }: { onOpenFlow: (flowId: 
       ) : (
         <FlowTable flows={filtered} onOpenFlow={onOpenFlow} />
       )}
+      {query.trim() && filtered.some((flow) => results.find((r) => r.flowId === flow.id)?.matches.length) ? (
+        <section aria-label="Matches in specifications" className="grid gap-[12px]">
+          <h2 className="uc-type-h2">Matches in specifications</h2>
+          {filtered.flatMap((flow) => (results.find((r) => r.flowId === flow.id)?.matches ?? []).slice(0, allMatches ? undefined : 5).map((match) => (
+            <button type="button" key={`${flow.id}:${match.id}`} onClick={() => onOpenMatch ? onOpenMatch(flow.id, match) : onOpenFlow(flow.id)} className="rounded border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[16px] text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--uc-action)]">
+              <span className="block font-bold">{flow.title} · {match.label}</span>
+              <span className="mt-[6px] block whitespace-pre-line text-sm">{match.text.length > 260 ? `${match.text.slice(0, 260)}…` : match.text}</span>
+            </button>
+          )))}
+          {!allMatches && filtered.some((flow) => (results.find((r) => r.flowId === flow.id)?.matches.length ?? 0) > 5) && <button type="button" className="min-h-[44px] underline" onClick={() => setAllMatches(true)}>Show all matched passages</button>}
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
 } from '@/app/components/contracts/l1Header';
 import { Text } from './Typography';
 import { sourceColor } from './sourceColor';
+import { useDuoPreview } from './DuoPreview';
 
 /** Isolated L1 shell; the owning feature supplies its original action/Prime/privacy slots. */
 export function BaselineL1Header({
@@ -32,6 +33,8 @@ export function BaselineL1Header({
   dark?: boolean;
 }) {
   const contract = resolveL1Header(variant);
+  const duo = useDuoPreview();
+  const effectiveGutter = gutter ?? (duo ? 24 : contract.gutter);
   const rootStyle: ViewStyle = {
     width: '100%',
     backgroundColor:
@@ -42,7 +45,7 @@ export function BaselineL1Header({
     ...(topInset === undefined ? {} : { paddingTop: topInset }),
   };
   const contentStyle: ViewStyle = {
-    paddingHorizontal: gutter ?? contract.gutter,
+    paddingHorizontal: effectiveGutter,
     paddingBottom: contract.paddingBottom,
   };
   const rowStyle: ViewStyle = {
@@ -56,7 +59,7 @@ export function BaselineL1Header({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    paddingHorizontal: contract.gutter,
+    paddingHorizontal: effectiveGutter,
     paddingBottom: contract.paddingBottom,
   };
   const titleStyle: TextStyle = {

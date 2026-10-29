@@ -23,6 +23,8 @@ export interface BaselineTextFieldProps extends TextFieldOptions {
   selectionControl?: { onPress: () => void; expanded: boolean };
   maxLength?: number;
   inputMode?: TextInputProps['inputMode'];
+  secureTextEntry?: boolean;
+  inputRef?: React.RefObject<React.ComponentRef<typeof TextInput> | null>;
   ariaLabel?: string;
   ariaInvalid?: boolean;
   ariaDescribedBy?: string;
@@ -301,7 +303,10 @@ export function BaselineTextField(props: BaselineTextFieldProps) {
               </Pressable>
             ) : (
               <TextInput
-                ref={input}
+                ref={node => {
+                  input.current = node;
+                  if (props.inputRef) props.inputRef.current = node;
+                }}
                 value={state.hasValue ? props.value : ''}
                 placeholder={state.inputPlaceholder}
                 placeholderTextColor={color(state.placeholderColor)}
@@ -317,6 +322,7 @@ export function BaselineTextField(props: BaselineTextFieldProps) {
                     : undefined)
                 }
                 inputMode={props.inputMode}
+                secureTextEntry={props.secureTextEntry}
                 maxLength={props.maxLength}
                 onChangeText={next => {
                   if (!state.isDisabled) props.onChange(next);

@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { nativeModalVisibility } from '../platform/nativeModalVisibility';
 import { useDemoCanvas } from './DemoViewport';
+import { useDuoPreview } from './DuoPreview';
+import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 
 export function ModalPortal({
   manageFocus: _manageFocus,
@@ -16,7 +18,9 @@ export function ModalPortal({
   const visible = props.visible !== false;
   const window = useWindowDimensions();
   const canvas = useDemoCanvas();
-  const viewport = canvas ?? window;
+  const duo = useDuoPreview();
+  const duoFrame = duo ? resolveDuoContent(duo, 'home') : undefined;
+  const viewport = duoFrame ?? canvas ?? window;
   const scale = canvas?.scale ?? 1;
   useEffect(() => {
     if (visible) return nativeModalVisibility.open();
@@ -29,6 +33,9 @@ export function ModalPortal({
           {
             width: viewport.width,
             height: viewport.height,
+            ...(duoFrame
+              ? { marginLeft: duoFrame.left, marginTop: duoFrame.top }
+              : {}),
             transform: [{ scale }],
           },
         ]}

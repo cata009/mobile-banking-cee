@@ -21,6 +21,7 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 import { BaselineMoreCard } from '../../../../../universal/BaselineMoreCard';
 import Logout from './Logout';
 import Tutorials from './Tutorials';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
 
 const labels: Record<MoreCardType, { key: string; fallback: string }> = {
   contacts: { key: 'contacts', fallback: 'Contacts' },
@@ -41,6 +42,8 @@ const labels: Record<MoreCardType, { key: string; fallback: string }> = {
 
 /** Source MoreScreen composition. The application host owns the primary navigation. */
 export default function More(host: CurrentScreenProps) {
+  const duo = useDuoPreview();
+  const columns = 2;
   const [overlay, setOverlay] = useState<'logout' | 'tutorials' | null>(null);
   const [width, setWidth] = useState(375);
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
@@ -68,11 +71,17 @@ export default function More(host: CurrentScreenProps) {
       style={[
         s.root,
         Platform.OS === 'web' && s.webRoot,
-        { backgroundColor: host.tokens.background },
+        { backgroundColor: sourceColor('var(--uc-surface)', dark) },
       ]}
       onLayout={event => setWidth(event.nativeEvent.layout.width)}
     >
-      <View testID="ro-more-top-reserve" style={s.topReserve} />
+      <View
+        testID="ro-more-top-reserve"
+        style={[
+          s.topReserve,
+          duo ? { height: host.screenTopInset } : undefined,
+        ]}
+      />
       <NativeMoreHeader host={host} onLogout={() => setOverlay('logout')} />
       <ScrollView
         style={[s.scroll, Platform.OS === 'web' && s.webScroll]}
@@ -87,7 +96,7 @@ export default function More(host: CurrentScreenProps) {
               `more.cards.${labels[card].key}`,
               labels[card].fallback,
             )}
-            width={(width - 47) / 2}
+            width={(width - 32 - 15 * (columns - 1)) / columns}
             dark={dark}
             badgeCount={
               card === 'documents'

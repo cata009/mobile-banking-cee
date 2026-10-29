@@ -5,6 +5,8 @@ import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import { ToggleButton } from '../../../../../universal/ToggleButton';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
+import { SearchField } from '../../../../../universal/SearchField';
 import { FaceIdOverlay } from '../../../current/baseline/FaceIdOverlay';
 import type { authenticateNativeBiometric } from '../../../../../platform/biometrics';
 import {
@@ -182,6 +184,8 @@ export function initialPaymentDraft(props: CzechNativeScreenProps) {
   return draft;
 }
 function PaymentFlowContent(props: CzechPaymentScreenProps) {
+  const [countrySearch, setCountrySearch] = useState('');
+  const [currencySearch, setCurrencySearch] = useState('');
   const controlled = props.paymentFlow !== undefined;
   const controlledFlow =
     (props.paymentFlow as ControlledPaymentFlow | null | undefined) ?? null;
@@ -402,7 +406,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
     );
   const title =
     step === 'recipient'
-      ? 'New Payment'
+      ? 'Add beneficiary'
       : step === 'amount'
       ? draft.beneficiaryName || 'Amount'
       : step === 'review'
@@ -436,6 +440,89 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       }}
     />
   );
+  const paymentSelectTrigger =
+    (fieldLabel: string) =>
+    ({
+      open,
+      expanded,
+      label,
+    }: {
+      open: () => void;
+      expanded: boolean;
+      label: string;
+    }) =>
+      (
+        <View style={extractedStyles.selectField}>
+          <Copy size={16}>
+            {fieldLabel === 'Recipient country'
+              ? 'Country / region of recipient’s account'
+              : fieldLabel === 'Payment currency'
+              ? 'Currency'
+              : fieldLabel}
+          </Copy>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={fieldLabel}
+            accessibilityValue={{ text: label }}
+            accessibilityState={{ expanded }}
+            onPress={open}
+            style={extractedStyles.selectTrigger}
+          >
+            <Copy size={17}>
+              {fieldLabel === 'Payment currency' ? draft.currency : label}
+            </Copy>
+            <SourceCustomIcon
+              name="chevron-down"
+              size={20}
+              color={tokens.text}
+            />
+          </Pressable>
+        </View>
+      );
+  const paymentSelectPanel =
+    (
+      title: string,
+      search?: {
+        label: string;
+        value: string;
+        setValue: (value: string) => void;
+      },
+    ) =>
+    ({
+      visible,
+      onClose,
+      children,
+    }: {
+      visible: boolean;
+      onClose: () => void;
+      children: React.ReactNode;
+    }) =>
+      visible ? (
+        <SourceBottomSheet
+          title={title}
+          onClose={() => {
+            search?.setValue('');
+            onClose();
+          }}
+        >
+          {search && (
+            <SearchField
+              tokens={tokens}
+              label={search.label}
+              placeholder={search.label}
+              value={search.value}
+              onChange={search.setValue}
+              onSubmit={() => {}}
+              onClear={() => search.setValue('')}
+              icon={
+                <SourceCustomIcon name="search" size={20} color={tokens.text} />
+              }
+              containerStyle={extractedStyles.pickerSearch}
+            />
+          )}
+          {children}
+        </SourceBottomSheet>
+      ) : null;
   const foreign =
     readiness.route === 'foreign-us' || readiness.route === 'foreign-cn';
   const canSign = readiness.canContinueToSign;
@@ -445,23 +532,113 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       onBack={back}
       active={props.isActive}
       topInset={props.screenTopInset}
+      style={
+        step === 'recipient' ? { backgroundColor: tokens.surface } : undefined
+      }
+      headerBackground={step === 'recipient' ? tokens.surface : undefined}
+      titleStyle={
+        step === 'recipient' ? extractedStyles.recipientTitle : undefined
+      }
+      footer={
+        step === 'recipient' ? (
+          <Button
+            label="Continue"
+            disabled={!readiness.recipientValid}
+            onPress={() => setStep('amount')}
+          />
+        ) : undefined
+      }
     >
       {step === 'recipient' && (
         <>
           <View style={s.inset}>
             <Select
               tokens={tokens}
+              label="Recipient type"
+              renderTrigger={() => (
+                <View
+                  accessibilityLabel="Recipient type"
+                  style={extractedStyles.recipientTabs}
+                >
+                  {(['individual', 'business'] as const).map(kind => (
+                    <Pressable
+                      key={kind}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        kind === 'individual' ? 'Individual' : 'Business'
+                      }
+                      accessibilityState={{
+                        selected:
+                          (draft.recipientKind ?? 'individual') === kind,
+                      }}
+                      onPress={() =>
+                        update({
+                          recipientKind: kind,
+                          beneficiaryName:
+                            kind === 'individual'
+                              ? `${firstNames} ${lastName}`.trim()
+                              : draft.beneficiaryName,
+                          paymentPurpose:
+                            kind === (draft.recipientKind ?? 'individual')
+                              ? draft.paymentPurpose
+                              : '',
+                        })
+                      }
+                      style={[
+                        extractedStyles.recipientTab,
+                        (draft.recipientKind ?? 'individual') === kind &&
+                          extractedStyles.recipientTabSelected,
+                      ]}
+                    >
+                      <Copy size={14} strong>
+                        {kind === 'individual' ? 'Individual' : 'Business'}
+                      </Copy>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+              value={draft.recipientKind ?? 'individual'}
+              items={[
+                {
+                  value: 'individual',
+                  label: 'Individual',
+                },
+                {
+                  value: 'business',
+                  label: 'Business',
+                },
+              ]}
+              onChange={recipientKind =>
+                update({
+                  recipientKind,
+                })
+              }
+            />
+            <Select
+              tokens={tokens}
               label="Recipient country"
+              renderTrigger={paymentSelectTrigger('Recipient country')}
+              renderPanel={paymentSelectPanel(
+                'Country / region of recipient’s account',
+                {
+                  label: 'Search countries',
+                  value: countrySearch,
+                  setValue: setCountrySearch,
+                },
+              )}
+              searchText={countrySearch}
               value={draft.recipientCountry ?? 'CZ'}
               items={RECIPIENT_COUNTRIES.map(c => ({
                 value: c.code,
                 label: c.name,
               }))}
               onChange={recipientCountry => {
+                setCountrySearch('');
                 const c = RECIPIENT_COUNTRIES.find(
                   x => x.code === recipientCountry,
                 )!;
-                if (recipientCountry === draft.recipientCountry) return;
+                if (recipientCountry === (draft.recipientCountry ?? 'CZ'))
+                  return;
                 setAmountExpression('');
                 update({
                   recipientCountry,
@@ -486,24 +663,196 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
             />
             <Select
               tokens={tokens}
-              label="Recipient type"
-              value={draft.recipientKind ?? 'individual'}
-              items={[
-                {
-                  value: 'individual',
-                  label: 'Individual',
-                },
-                {
-                  value: 'business',
-                  label: 'Business',
-                },
-              ]}
-              onChange={recipientKind =>
+              label="Payment currency"
+              renderTrigger={paymentSelectTrigger('Payment currency')}
+              renderPanel={paymentSelectPanel('Currency', {
+                label: 'Search currencies',
+                value: currencySearch,
+                setValue: setCurrencySearch,
+              })}
+              searchText={currencySearch}
+              value={draft.currency}
+              items={PAYMENT_CURRENCIES.filter(c =>
+                isCountryCurrencySupported(
+                  draft.recipientCountry ?? 'CZ',
+                  c.code,
+                ),
+              ).map(c => ({
+                value: c.code,
+                label: `${c.code} · ${c.name}`,
+              }))}
+              onChange={currency => {
+                setCurrencySearch('');
+                const chosenPayer = accounts.find(
+                  account => account.currency === currency,
+                );
+                if (currency !== draft.currency) setAmountExpression('');
                 update({
-                  recipientKind,
-                })
-              }
+                  currency,
+                  ...(currency !== draft.currency
+                    ? {
+                        amount: '',
+                        ...(!foreign
+                          ? {
+                              accountNumber: '',
+                              prefix: '',
+                              bankCode: '',
+                              bankName: '',
+                              recipientAccountMode: 'local' as const,
+                            }
+                          : {}),
+                      }
+                    : {}),
+                  ...(chosenPayer
+                    ? {
+                        payerAccountName: chosenPayer.name,
+                        payerAccountNumber: chosenPayer.accountNumber,
+                        payerBalance: money(
+                          chosenPayer.balance,
+                          chosenPayer.currency,
+                        ),
+                      }
+                    : {}),
+                });
+              }}
             />
+            {readiness.route === 'cz-domestic' && (
+              <Select
+                tokens={tokens}
+                label="Account details type"
+                renderTrigger={({ open, expanded, label }) => (
+                  <View style={extractedStyles.recipientDetailsHeader}>
+                    <Copy size={17} strong>
+                      Recipient details
+                    </Copy>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Account details type"
+                      accessibilityValue={{ text: label }}
+                      accessibilityState={{ expanded }}
+                      onPress={open}
+                      style={extractedStyles.accountTypeBadge}
+                    >
+                      <Copy size={12} strong color={tokens.accent}>
+                        {label}
+                      </Copy>
+                      <SourceCustomIcon
+                        name="chevron-down"
+                        size={14}
+                        color={tokens.accent}
+                      />
+                    </Pressable>
+                  </View>
+                )}
+                renderPanel={paymentSelectPanel('Account details type')}
+                value={draft.recipientAccountMode ?? 'local'}
+                items={[
+                  {
+                    value: 'local',
+                    label: 'Account number',
+                  },
+                  {
+                    value: 'iban',
+                    label: 'IBAN',
+                  },
+                ]}
+                onChange={recipientAccountMode =>
+                  update({
+                    recipientAccountMode,
+                    accountNumber: '',
+                  })
+                }
+              />
+            )}
+            {readiness.route !== 'cz-domestic' && (
+              <View style={extractedStyles.recipientDetailsHeader}>
+                <Copy size={17} strong>
+                  Recipient details
+                </Copy>
+              </View>
+            )}
+            {readiness.route === 'cz-domestic' &&
+            (draft.recipientAccountMode ?? 'local') === 'local' ? (
+              <>
+                {field('Prefix (optional)', 'prefix', true)}
+                {field('Account number', 'accountNumber', true)}
+                {field('Bank code', 'bankCode', true)}
+                <Copy muted>
+                  {getCzechPaymentBankName(draft.bankCode) ?? draft.bankName}
+                </Copy>
+              </>
+            ) : (
+              field(foreign ? 'Account number' : 'IBAN', 'accountNumber')
+            )}
+            {foreign && (
+              <>
+                {field('Bank name', 'bankName')}
+                {readiness.route === 'foreign-us' && (
+                  <Select
+                    tokens={tokens}
+                    label="US bank details"
+                    renderTrigger={paymentSelectTrigger('US bank details')}
+                    renderPanel={paymentSelectPanel('US bank details')}
+                    value={draft.usBankDetailsMode ?? 'ach'}
+                    items={US_BANK_DETAILS_OPTIONS}
+                    onChange={usBankDetailsMode =>
+                      update({
+                        usBankDetailsMode,
+                      })
+                    }
+                  />
+                )}
+                {readiness.route === 'foreign-us' &&
+                draft.usBankDetailsMode !== 'swift'
+                  ? field('Routing number', 'routingNumber', true)
+                  : field('SWIFT / BIC', 'bankSwift')}
+                {[
+                  'recipientStreet',
+                  'recipientCity',
+                  'recipientRegion',
+                  'recipientPostalCode',
+                ].map(key => (
+                  <React.Fragment key={key}>
+                    {field(
+                      {
+                        recipientStreet: 'Street and number',
+                        recipientCity: 'City',
+                        recipientRegion: 'Region',
+                        recipientPostalCode: 'Postal code',
+                      }[key]!,
+                      key as keyof DomesticPaymentDraft,
+                    )}
+                  </React.Fragment>
+                ))}
+                {readiness.route === 'foreign-cn' && (
+                  <>
+                    <Select
+                      tokens={tokens}
+                      label="Payment purpose"
+                      renderTrigger={paymentSelectTrigger('Payment purpose')}
+                      renderPanel={paymentSelectPanel('Payment purpose')}
+                      value={draft.paymentPurpose ?? ''}
+                      items={CHINA_PAYMENT_PURPOSES.filter(p =>
+                        p.kinds.some(
+                          kind =>
+                            kind === (draft.recipientKind ?? 'individual'),
+                        ),
+                      ).map(p => ({
+                        value: p.code,
+                        label: p.label,
+                      }))}
+                      onChange={paymentPurpose =>
+                        update({
+                          paymentPurpose,
+                        })
+                      }
+                    />
+                    {draft.currency === 'CNY' &&
+                      field('CNAPS code', 'cnapsCode', true)}
+                  </>
+                )}
+              </>
+            )}
             {draft.recipientKind === 'business' ? (
               field('Business name', 'beneficiaryName')
             ) : (
@@ -545,160 +894,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
               </>
             )}
             {field('Email (optional)', 'recipientEmail')}
-            <Select
-              tokens={tokens}
-              label="Payment currency"
-              value={draft.currency}
-              items={PAYMENT_CURRENCIES.filter(c =>
-                isCountryCurrencySupported(
-                  draft.recipientCountry ?? 'CZ',
-                  c.code,
-                ),
-              ).map(c => ({
-                value: c.code,
-                label: `${c.code} · ${c.name}`,
-              }))}
-              onChange={currency => {
-                const chosenPayer = accounts.find(
-                  account => account.currency === currency,
-                );
-                if (currency !== draft.currency) setAmountExpression('');
-                update({
-                  currency,
-                  ...(currency !== draft.currency
-                    ? {
-                        amount: '',
-                        ...(!foreign
-                          ? {
-                              accountNumber: '',
-                              prefix: '',
-                              bankCode: '',
-                              bankName: '',
-                              recipientAccountMode: 'local' as const,
-                            }
-                          : {}),
-                      }
-                    : {}),
-                  ...(chosenPayer
-                    ? {
-                        payerAccountName: chosenPayer.name,
-                        payerAccountNumber: chosenPayer.accountNumber,
-                        payerBalance: money(
-                          chosenPayer.balance,
-                          chosenPayer.currency,
-                        ),
-                      }
-                    : {}),
-                });
-              }}
-            />
-            {readiness.route === 'cz-domestic' && (
-              <Select
-                tokens={tokens}
-                label="Account details type"
-                value={draft.recipientAccountMode ?? 'local'}
-                items={[
-                  {
-                    value: 'local',
-                    label: 'Account number',
-                  },
-                  {
-                    value: 'iban',
-                    label: 'IBAN',
-                  },
-                ]}
-                onChange={recipientAccountMode =>
-                  update({
-                    recipientAccountMode,
-                    accountNumber: '',
-                  })
-                }
-              />
-            )}
-            {readiness.route === 'cz-domestic' &&
-            draft.recipientAccountMode === 'local' ? (
-              <>
-                {field('Prefix (optional)', 'prefix', true)}
-                {field('Account number', 'accountNumber', true)}
-                {field('Bank code', 'bankCode', true)}
-                <Copy muted>
-                  {getCzechPaymentBankName(draft.bankCode) ?? draft.bankName}
-                </Copy>
-              </>
-            ) : (
-              field(foreign ? 'Account number' : 'IBAN', 'accountNumber')
-            )}
-            {foreign && (
-              <>
-                {field('Bank name', 'bankName')}
-                {readiness.route === 'foreign-us' && (
-                  <Select
-                    tokens={tokens}
-                    label="US bank details"
-                    value={draft.usBankDetailsMode ?? 'ach'}
-                    items={US_BANK_DETAILS_OPTIONS}
-                    onChange={usBankDetailsMode =>
-                      update({
-                        usBankDetailsMode,
-                      })
-                    }
-                  />
-                )}
-                {readiness.route === 'foreign-us' &&
-                draft.usBankDetailsMode !== 'swift'
-                  ? field('Routing number', 'routingNumber', true)
-                  : field('SWIFT / BIC', 'bankSwift')}
-                {[
-                  'recipientStreet',
-                  'recipientCity',
-                  'recipientRegion',
-                  'recipientPostalCode',
-                ].map(key => (
-                  <React.Fragment key={key}>
-                    {field(
-                      {
-                        recipientStreet: 'Street and number',
-                        recipientCity: 'City',
-                        recipientRegion: 'Region',
-                        recipientPostalCode: 'Postal code',
-                      }[key]!,
-                      key as keyof DomesticPaymentDraft,
-                    )}
-                  </React.Fragment>
-                ))}
-                {readiness.route === 'foreign-cn' && (
-                  <>
-                    <Select
-                      tokens={tokens}
-                      label="Payment purpose"
-                      value={draft.paymentPurpose ?? ''}
-                      items={CHINA_PAYMENT_PURPOSES.filter(p =>
-                        p.kinds.some(
-                          kind =>
-                            kind === (draft.recipientKind ?? 'individual'),
-                        ),
-                      ).map(p => ({
-                        value: p.code,
-                        label: p.label,
-                      }))}
-                      onChange={paymentPurpose =>
-                        update({
-                          paymentPurpose,
-                        })
-                      }
-                    />
-                    {draft.currency === 'CNY' &&
-                      field('CNAPS code', 'cnapsCode', true)}
-                  </>
-                )}
-              </>
-            )}
           </View>
-          <Button
-            label="Continue"
-            disabled={!readiness.recipientValid}
-            onPress={() => setStep('amount')}
-          />
         </>
       )}
       {step === 'amount' && (
@@ -1018,7 +1214,59 @@ export default function PaymentFlow(props: CzechPaymentScreenProps) {
 }
 
 const extractedStyles = StyleSheet.create({
-  formField: { marginBottom: 20 },
+  recipientTitle: { marginBottom: 23, fontSize: 30, lineHeight: 35 },
+  pickerSearch: {
+    marginHorizontal: 24,
+    marginBottom: 12,
+    backgroundColor: tokens.background,
+    borderRadius: 12,
+  },
+  recipientDetailsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 13,
+    paddingBottom: 12,
+  },
+  accountTypeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: tokens.border,
+    borderRadius: 16,
+    backgroundColor: tokens.surface,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  recipientTabs: {
+    flexDirection: 'row',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 24,
+    padding: 2,
+    marginBottom: 16,
+  },
+  recipientTab: {
+    flex: 1,
+    height: 32,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recipientTabSelected: { backgroundColor: tokens.surface },
+  selectField: { gap: 8, marginBottom: 12 },
+  selectTrigger: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderColor: tokens.border,
+    borderRadius: 12,
+    backgroundColor: tokens.surface,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  formField: { marginBottom: 12 },
   formLabel: { color: tokens.text, fontSize: 16, lineHeight: 20 },
   formInput: {
     height: 52,

@@ -1,0 +1,1083 @@
+{
+  "owner": "/root-cloud-recovery",
+  "baseCommit": "745956e19c87f52bfc84267fa328c48479ccf24e",
+  "checkout": "C:\\Users\\mihai\\Desktop\\Mobile Banking - CEE",
+  "createdAt": "2026-10-28T13:57:05.520400+00:00",
+  "initialPendingPaths": [
+    ".env.example",
+    ".gitignore",
+    "package-lock.json",
+    "package.json",
+    "scripts/asset-baseline.json",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+    "src/app/screens/flow-library/flowExport.ts",
+    "src/app/screens/flow-library/handoff/confluenceClipboard.ts",
+    "src/app/screens/flow-library/handoff/documentModel.ts",
+    "src/app/screens/flow-library/handoff/docx.ts",
+    "src/app/screens/tools/ToolsScreen.tsx",
+    "tests/screens/flow-handoff.test.ts",
+    "tests/screens/tools-screen.test.tsx",
+    "vite.config.ts",
+    "api/flow-spec.js",
+    "docs/features/marketing-email-builder.md",
+    "docs/flow-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-icons.md",
+    "docs/superpowers/plans/2026-10-23-flow-spec-quality.md",
+    "docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/specs/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/tasks/2026-10-22-card-guard-asset-baseline.json",
+    "docs/tasks/2026-10-22-card-guard-spec-editor.json",
+    "docs/tasks/2026-10-22-flow-spec-cloud-storage.json",
+    "docs/tasks/2026-10-22-marketing-email-builder.json",
+    "docs/tasks/2026-10-22-marketing-email-icons.json",
+    "docs/tasks/2026-10-23-flow-spec-quality.json",
+    "scripts/flow-spec/archive.mjs",
+    "scripts/flow-spec/backup.mjs",
+    "scripts/flow-spec/blob-store.mjs",
+    "scripts/flow-spec/server.d.mts",
+    "scripts/flow-spec/server.mjs",
+    "scripts/flow-spec/store.mjs",
+    "scripts/flow-spec/validation.mjs",
+    "scripts/generate-email-icon-metadata.mjs",
+    "src/app/screens/flow-library/handoff/richDocx.ts",
+    "src/app/screens/flow-library/spec-editor/SpecEditorToolbar.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecHistoryDialog.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecRichTextEditor.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecSaveStatus.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspaceNotices.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspacePanel.tsx",
+    "src/app/screens/flow-library/spec-editor/extensions.ts",
+    "src/app/screens/flow-library/spec-editor/specEditor.css",
+    "src/app/screens/flow-library/spec-editor/specHistory.css",
+    "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+    "src/app/screens/tools/email-builder/Canvas.tsx",
+    "src/app/screens/tools/email-builder/CatalogPanel.tsx",
+    "src/app/screens/tools/email-builder/IconArtwork.tsx",
+    "src/app/screens/tools/email-builder/IconPicker.tsx",
+    "src/app/screens/tools/email-builder/PropertiesPanel.tsx",
+    "src/app/screens/tools/email-builder/blockIcons.ts",
+    "src/app/screens/tools/email-builder/dragDrop.ts",
+    "src/app/screens/tools/email-builder/editor.css",
+    "src/app/screens/tools/email-builder/fields.tsx",
+    "src/features/flow-spec/attachments.ts",
+    "src/features/flow-spec/client.ts",
+    "src/features/flow-spec/document.ts",
+    "src/features/flow-spec/schema.d.mts",
+    "src/features/flow-spec/schema.mjs",
+    "src/features/flow-spec/types.ts",
+    "src/features/flow-spec/useSpecWorkspace.ts",
+    "src/features/marketing-email/appIconMetadata.ts",
+    "src/features/marketing-email/catalog.ts",
+    "src/features/marketing-email/compileClient.ts",
+    "src/features/marketing-email/compiler.ts",
+    "src/features/marketing-email/compiler.worker.ts",
+    "src/features/marketing-email/export.ts",
+    "src/features/marketing-email/iconCatalog.ts",
+    "src/features/marketing-email/mjml-browser.d.ts",
+    "src/features/marketing-email/model.ts",
+    "src/features/marketing-email/storage.ts",
+    "src/features/marketing-email/transforms.ts",
+    "src/features/marketing-email/validation.ts",
+    "tests/features/flow-spec-client.test.ts",
+    "tests/features/flow-spec-workspace.test.tsx",
+    "tests/features/flow-spec.test.ts",
+    "tests/features/marketing-email.test.ts",
+    "tests/screens/flow-spec-editor.test.tsx",
+    "tests/screens/flow-spec-history.test.tsx",
+    "tests/screens/marketing-email-builder.test.tsx",
+    "tests/tooling/flow-spec-cloud.test.mjs",
+    "tests/tooling/flow-spec-store.test.mjs",
+    "tests/tooling/flow-spec-validation.test.mjs"
+  ],
+  "ownedPaths": [
+    ".env.example",
+    ".github/workflows/verify.yml",
+    ".gitignore",
+    "api/flow-spec.js",
+    "docs/cloud-recovery-2026-10-28.md",
+    "docs/features/marketing-email-builder.md",
+    "docs/flow-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-icons.md",
+    "docs/superpowers/plans/2026-10-23-flow-spec-quality.md",
+    "docs/superpowers/plans/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/plans/2026-10-25-flow-spec-rights.md",
+    "docs/superpowers/plans/2026-10-28-cloud-recovery-integration.md",
+    "docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/specs/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/superpowers/specs/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/specs/2026-10-25-flow-spec-rights.md",
+    "docs/tasks/2026-10-22-card-guard-asset-baseline.json",
+    "docs/tasks/2026-10-22-card-guard-spec-editor.json",
+    "docs/tasks/2026-10-22-flow-spec-cloud-storage.json",
+    "docs/tasks/2026-10-22-marketing-email-builder.json",
+    "docs/tasks/2026-10-22-marketing-email-icons.json",
+    "docs/tasks/2026-10-23-flow-spec-quality.json",
+    "docs/tasks/2026-10-28-cloud-recovery.json",
+    "package-lock.json",
+    "package.json",
+    "scripts/asset-baseline.json",
+    "scripts/flow-spec/archive.mjs",
+    "scripts/flow-spec/backup.mjs",
+    "scripts/flow-spec/blob-store.mjs",
+    "scripts/flow-spec/personal-access.mjs",
+    "scripts/flow-spec/server.d.mts",
+    "scripts/flow-spec/server.mjs",
+    "scripts/flow-spec/store.mjs",
+    "scripts/flow-spec/validation.mjs",
+    "scripts/generate-email-icon-metadata.mjs",
+    "scripts/generate-flow-catalog.ts",
+    "server/.env.example",
+    "server/README.md",
+    "server/package-lock.json",
+    "server/package.json",
+    "server/src/app.ts",
+    "server/src/auth.ts",
+    "server/src/bootstrap.ts",
+    "server/src/database.ts",
+    "server/src/dev.ts",
+    "server/src/discussions.ts",
+    "server/src/editor-access.ts",
+    "server/src/flow-access.ts",
+    "server/src/http.ts",
+    "server/src/legacy-reader.ts",
+    "server/src/local-database.ts",
+    "server/src/node.ts",
+    "server/src/runtime.ts",
+    "server/src/specifications.ts",
+    "server/src/users.ts",
+    "server/tests/discussions.test.ts",
+    "server/tests/editor-access.test.ts",
+    "server/tests/flow-access.test.ts",
+    "server/tests/helpers.ts",
+    "server/tests/http.test.ts",
+    "server/tests/identity.test.ts",
+    "server/tests/legacy-reader.test.ts",
+    "server/tests/specifications.test.ts",
+    "server/tsconfig.json",
+    "src/app/components/security/AccessGate.tsx",
+    "src/app/screens/flow-library/FlowLibraryScreen.tsx",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+    "src/app/screens/flow-library/components/FlowLibraryIndex.tsx",
+    "src/app/screens/flow-library/components/flowPreviews.tsx",
+    "src/app/screens/flow-library/flowExport.ts",
+    "src/app/screens/flow-library/handoff/confluenceClipboard.ts",
+    "src/app/screens/flow-library/handoff/documentModel.ts",
+    "src/app/screens/flow-library/handoff/docx.ts",
+    "src/app/screens/flow-library/handoff/richDocx.ts",
+    "src/app/screens/flow-library/spec-editor/SpecEditorToolbar.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecHistoryDialog.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecRichTextEditor.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecSaveStatus.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspaceNotices.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspacePanel.tsx",
+    "src/app/screens/flow-library/spec-editor/extensions.ts",
+    "src/app/screens/flow-library/spec-editor/specEditor.css",
+    "src/app/screens/flow-library/spec-editor/specHistory.css",
+    "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+    "src/app/screens/tools/ToolsScreen.tsx",
+    "src/app/screens/tools/email-builder/Canvas.tsx",
+    "src/app/screens/tools/email-builder/CatalogPanel.tsx",
+    "src/app/screens/tools/email-builder/IconArtwork.tsx",
+    "src/app/screens/tools/email-builder/IconPicker.tsx",
+    "src/app/screens/tools/email-builder/PropertiesPanel.tsx",
+    "src/app/screens/tools/email-builder/blockIcons.ts",
+    "src/app/screens/tools/email-builder/dragDrop.ts",
+    "src/app/screens/tools/email-builder/editor.css",
+    "src/app/screens/tools/email-builder/fields.tsx",
+    "src/features/flow-collaboration/AccountBar.tsx",
+    "src/features/flow-collaboration/DeferredPreview.tsx",
+    "src/features/flow-collaboration/DiscussionPanel.tsx",
+    "src/features/flow-collaboration/PersonalAccessBoundary.tsx",
+    "src/features/flow-collaboration/PlatformContext.tsx",
+    "src/features/flow-collaboration/UserAdministration.tsx",
+    "src/features/flow-collaboration/api.ts",
+    "src/features/flow-collaboration/controls.tsx",
+    "src/features/flow-collaboration/drafts.ts",
+    "src/features/flow-collaboration/search.ts",
+    "src/features/flow-spec/attachments.ts",
+    "src/features/flow-spec/client.ts",
+    "src/features/flow-spec/document.ts",
+    "src/features/flow-spec/personalAccess.ts",
+    "src/features/flow-spec/schema.d.mts",
+    "src/features/flow-spec/schema.mjs",
+    "src/features/flow-spec/types.ts",
+    "src/features/flow-spec/useSpecWorkspace.ts",
+    "src/features/marketing-email/appIconMetadata.ts",
+    "src/features/marketing-email/catalog.ts",
+    "src/features/marketing-email/compileClient.ts",
+    "src/features/marketing-email/compiler.ts",
+    "src/features/marketing-email/compiler.worker.ts",
+    "src/features/marketing-email/export.ts",
+    "src/features/marketing-email/iconCatalog.ts",
+    "src/features/marketing-email/mjml-browser.d.ts",
+    "src/features/marketing-email/model.ts",
+    "src/features/marketing-email/storage.ts",
+    "src/features/marketing-email/transforms.ts",
+    "src/features/marketing-email/validation.ts",
+    "src/main.tsx",
+    "tests/features/flow-spec-client.test.ts",
+    "tests/features/flow-spec-permissions.test.tsx",
+    "tests/features/flow-spec-workspace.test.tsx",
+    "tests/features/flow-spec.test.ts",
+    "tests/features/marketing-email.test.ts",
+    "tests/flows/flow-preview-loading.test.tsx",
+    "tests/flows/flow-search.test.ts",
+    "tests/helpers/flowPlatformTransport.ts",
+    "tests/screens/flow-account.test.tsx",
+    "tests/screens/flow-collaboration.test.tsx",
+    "tests/screens/flow-handoff.test.ts",
+    "tests/screens/flow-library.test.tsx",
+    "tests/screens/flow-module-ownership-keyboard.test.tsx",
+    "tests/screens/flow-spec-editor.test.tsx",
+    "tests/screens/flow-spec-history.test.tsx",
+    "tests/screens/investments-bulk-approval-flow.test.tsx",
+    "tests/screens/marketing-email-builder.test.tsx",
+    "tests/screens/rs-property-insurance.test.tsx",
+    "tests/screens/tools-screen.test.tsx",
+    "tests/tooling/flow-spec-cloud.test.mjs",
+    "tests/tooling/flow-spec-personal-access.test.mjs",
+    "tests/tooling/flow-spec-store.test.mjs",
+    "tests/tooling/flow-spec-validation.test.mjs",
+    "vite.config.ts"
+  ],
+  "preservation": "No branch switch, stash, reset, clean or shared index mutations. Original local pending work backed up; integration adds recovered source and merges overlapping files explicitly.",
+  "backupRecords": [
+    {
+      "path": ".env.example",
+      "bytes": 1061,
+      "sha256": "fd6baa8b4180e02a46522302fa069b83f11bd02b6fb0f9f426ad73ae561382ca"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 606,
+      "sha256": "3cd16721eac979a50588054dc7aa4c85b429761671f78c5c419d726b727bc346"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 427057,
+      "sha256": "17b450b68dc4776b4ef77100971a904b709094677b08319ccf2f3c6bb4c428c8"
+    },
+    {
+      "path": "package.json",
+      "bytes": 7770,
+      "sha256": "b9c94d0f060302634f28ef1130d38798f6f5e9d0120f153964cbdf2c8fe5b8c5"
+    },
+    {
+      "path": "scripts/asset-baseline.json",
+      "bytes": 6116,
+      "sha256": "cf09011e706b69ad45736a578e91a58c15bb499e3b7c787fff76eeabef886df1"
+    },
+    {
+      "path": "src/app/screens/flow-library/components/FlowDetail.tsx",
+      "bytes": 105203,
+      "sha256": "19d2f7e93f6d874c61c1df5c50f1f41ed2d30144cc67397a208f3010e1ac61bb"
+    },
+    {
+      "path": "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+      "bytes": 35720,
+      "sha256": "3c16261fd5cbba2df73056cd24b488892aa3f0781811838476eb5eda3b05b365"
+    },
+    {
+      "path": "src/app/screens/flow-library/flowExport.ts",
+      "bytes": 18848,
+      "sha256": "8ce996c7a04958fd5d82b0ec03f494c84a378d518a8b2247dff597967fd06341"
+    },
+    {
+      "path": "src/app/screens/flow-library/handoff/confluenceClipboard.ts",
+      "bytes": 4906,
+      "sha256": "7b3fb45272ffcbbbef52c9783e600222eb820b42579a9fef462c181934ec482d"
+    },
+    {
+      "path": "src/app/screens/flow-library/handoff/documentModel.ts",
+      "bytes": 11643,
+      "sha256": "4434c2bd7635370dfa0bbc9049f0861c20e2e6aa6d7887fd07843edfa290cead"
+    },
+    {
+      "path": "src/app/screens/flow-library/handoff/docx.ts",
+      "bytes": 13649,
+      "sha256": "4ab63f83884473045c97dfdeb03b7c3de4b45906f959b345412e54b69c6f3f75"
+    },
+    {
+      "path": "src/app/screens/tools/ToolsScreen.tsx",
+      "bytes": 8547,
+      "sha256": "e3177fe45aa1edb580f9bb2f5c6ecd05692731428369bc8c18d5093b7c28bc8f"
+    },
+    {
+      "path": "tests/screens/flow-handoff.test.ts",
+      "bytes": 12367,
+      "sha256": "8edf5947295568cda8d86be7d53c9cc050196432ce48637648a1ea06af17208d"
+    },
+    {
+      "path": "tests/screens/tools-screen.test.tsx",
+      "bytes": 8143,
+      "sha256": "baf2a953696378dbde92b0887b89a58a781dcac64d45b5083f47047214f03c44"
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 3945,
+      "sha256": "9b42b011eea588619677c4b2372b2d1886d64765a1bf042b46edf25ac8a14706"
+    },
+    {
+      "path": "api/flow-spec.js",
+      "bytes": 104,
+      "sha256": "e8a8776669886d1604726d0aadbeca99d8077e03453833aac08769c3836e3c6a"
+    },
+    {
+      "path": "docs/features/marketing-email-builder.md",
+      "bytes": 15155,
+      "sha256": "54df8be44177789bf3f8eb81f7eb8541b3603f3f77732aadffafdf779a6b591d"
+    },
+    {
+      "path": "docs/flow-spec-editor.md",
+      "bytes": 13853,
+      "sha256": "1f83f7ac642fb67d0967a28b5c604c5ea8128a1a0363f2fc179b6130c5208033"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md",
+      "bytes": 9272,
+      "sha256": "666aa7c4e55530cbb27c39e06bd97a64b50a77c4fc9edef572d03d39059e93cb"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-22-flow-spec-cloud-storage.md",
+      "bytes": 7959,
+      "sha256": "20d81e4e603c5051c82c09386407ab89033cbb82c3e60cbae647a97a5680072c"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+      "bytes": 7077,
+      "sha256": "0a4faed8de24e8320ce44b238a123e0db94f95e7f4f550eec65151e68eafc684"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-22-marketing-email-icons.md",
+      "bytes": 7565,
+      "sha256": "4877eeba92a4c01baaf5f1d6a68f7680fe426c0483a47db82f5ebb7e8aa939be"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-10-23-flow-spec-quality.md",
+      "bytes": 1993,
+      "sha256": "a45583efeed629d7bc0763655a0e09f002af45cf8676354846f55110345d836a"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md",
+      "bytes": 2873,
+      "sha256": "a98ae326b43ac4be689a56fde779dcc6d85c5998627c7a456cf8f82a6dbf029a"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-10-22-flow-spec-cloud-storage.md",
+      "bytes": 2776,
+      "sha256": "1651e39ef0f125fdcd1a86948fb030b62910931b5920b21f6879b729d149734d"
+    },
+    {
+      "path": "docs/tasks/2026-10-22-card-guard-asset-baseline.json",
+      "bytes": 1191,
+      "sha256": "321ed1b1fcb85356498eb10a2e12e1740079849a1c785cb5724bb9cb09f71cf2"
+    },
+    {
+      "path": "docs/tasks/2026-10-22-card-guard-spec-editor.json",
+      "bytes": 2473,
+      "sha256": "f659f29832a3f76199ac8ac8caa430efc9c0c98f10b548d54bf4b9c46ea610db"
+    },
+    {
+      "path": "docs/tasks/2026-10-22-flow-spec-cloud-storage.json",
+      "bytes": 7133,
+      "sha256": "dced144d2dfebe7edb11050c4c53f9a0eef55b6b30b0a3b20a3ff7b2bd19d66f"
+    },
+    {
+      "path": "docs/tasks/2026-10-22-marketing-email-builder.json",
+      "bytes": 1319,
+      "sha256": "52b82ea8e521cea0a6cc583406f4812ef7312d20b944da8d32802714cbd09e4c"
+    },
+    {
+      "path": "docs/tasks/2026-10-22-marketing-email-icons.json",
+      "bytes": 3632,
+      "sha256": "04fbd21a1bf384eaa6643c791d798c537d5f1218817d4c3ca7024a4b88425591"
+    },
+    {
+      "path": "docs/tasks/2026-10-23-flow-spec-quality.json",
+      "bytes": 8065,
+      "sha256": "9079aca2dc25c2abf576513db29418a274225b138938263362911da7b84804a1"
+    },
+    {
+      "path": "scripts/flow-spec/archive.mjs",
+      "bytes": 2068,
+      "sha256": "5c74a6e9c7cd8a1783b05df4965c3eac1db22d9cefec01877bf8f3ae3eab8b87"
+    },
+    {
+      "path": "scripts/flow-spec/backup.mjs",
+      "bytes": 2189,
+      "sha256": "de0712b9536427223c5a98f22fa28020b147ab3bf7f3a6418eee2a395d6ade95"
+    },
+    {
+      "path": "scripts/flow-spec/blob-store.mjs",
+      "bytes": 12081,
+      "sha256": "8aff818556230e257ec06b609999874d2e7c6f31d219e7c50af62b796272dc0a"
+    },
+    {
+      "path": "scripts/flow-spec/server.d.mts",
+      "bytes": 328,
+      "sha256": "7558af421250e215900a186275336f388388d20acdef1e8925229d105e97e439"
+    },
+    {
+      "path": "scripts/flow-spec/server.mjs",
+      "bytes": 6643,
+      "sha256": "ad2497624052a18a4b0b36327a24f6ae3bb1c20e1fe356dc2df50b72e3d0d096"
+    },
+    {
+      "path": "scripts/flow-spec/store.mjs",
+      "bytes": 4827,
+      "sha256": "4665516eaeafcd62f598f31049d903aec6ec2e0e57cf5ced365d1495c54b8edd"
+    },
+    {
+      "path": "scripts/flow-spec/validation.mjs",
+      "bytes": 2651,
+      "sha256": "09b1e05d2792ae5b653ee5a902c44741f6abc3933aa5a087786f358287e95f76"
+    },
+    {
+      "path": "scripts/generate-email-icon-metadata.mjs",
+      "bytes": 2129,
+      "sha256": "112a285598c8e53d65c4b2f5bc199eaae96bce2cf24de2896af1d283b6a96639"
+    },
+    {
+      "path": "src/app/screens/flow-library/handoff/richDocx.ts",
+      "bytes": 6190,
+      "sha256": "db23c3b973969b3cd75ab5a1d45280722f183a83d03605307deb9da4075d4533"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecEditorToolbar.tsx",
+      "bytes": 8523,
+      "sha256": "3cb6ae03a0c6899e8bae47b3809f60da12d366b02ae6195c49571f37782d7eab"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecHistoryDialog.tsx",
+      "bytes": 11495,
+      "sha256": "f5e9b67aac33674d382ecce997b120b8ce29084deb8fbb540853998c7c9d4267"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecRichTextEditor.tsx",
+      "bytes": 17136,
+      "sha256": "a1792f3c536a8aa86f82d9044900d98f2b6fc4d48b302db5461876e9e640a276"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecSaveStatus.tsx",
+      "bytes": 1486,
+      "sha256": "5241285a138e96d78af7cde28ff6147b6117edb2e7f18deca7060aaf4378f5a3"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecWorkspaceNotices.tsx",
+      "bytes": 3322,
+      "sha256": "bf0837ed2b53a5970d792ee8ce71cd42dc58d5560db8a1386048a6b005e65e1c"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/SpecWorkspacePanel.tsx",
+      "bytes": 14754,
+      "sha256": "ee5b639bda72eed6441db9ef83550558b803270cd4837123dd2fa05a24952f45"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/extensions.ts",
+      "bytes": 3666,
+      "sha256": "f8e07172f6fa4d6d292b4200477fce9b11642573077ea9f31b5dbd839d603d76"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/specEditor.css",
+      "bytes": 20399,
+      "sha256": "794e10d7879526991097a97892857c53d37848c4dfedec7e423f0c0ea45cb901"
+    },
+    {
+      "path": "src/app/screens/flow-library/spec-editor/specHistory.css",
+      "bytes": 5257,
+      "sha256": "78065d33bce610da08352ca1aaaf8c24d8537d70ae1ed959798c976a20ef15b2"
+    },
+    {
+      "path": "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+      "bytes": 25782,
+      "sha256": "e3fac89107e29b35aa170df297bff0bd8b0fd109bef0b84e303a28f26131d3ba"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/Canvas.tsx",
+      "bytes": 7603,
+      "sha256": "e8df03eb37539182c9403b4051a010a17694c65a7a69c54d72b3ed4ae16b2e90"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/CatalogPanel.tsx",
+      "bytes": 7192,
+      "sha256": "fd4937e6d51854570cad5a9a8ca7d17e0eb4ff8a6683ed557c83775a6c93024d"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/IconArtwork.tsx",
+      "bytes": 5122,
+      "sha256": "451d620128fb7b8194c3773384c8ce0436fc92581ded23b67db93e20e0dc20d7"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/IconPicker.tsx",
+      "bytes": 7866,
+      "sha256": "14318895818ceb85cd3c4dea44ace7d3b7798b671aab62f9dcba4fe0b7bed9dc"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/PropertiesPanel.tsx",
+      "bytes": 10768,
+      "sha256": "f3372142c09154a4de0f220ca879d8bd1809f4b752a06e087eddb7a4e87567d4"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/blockIcons.ts",
+      "bytes": 507,
+      "sha256": "11936201a3c8704a5e46d7974268c095c49cb9cb743fab574f63dbc4ed64b752"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/dragDrop.ts",
+      "bytes": 767,
+      "sha256": "369c1a90d57beec1b13b61b90f84d46ee439596cc95a937eea16614e4a4f8159"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/editor.css",
+      "bytes": 19146,
+      "sha256": "f6737901486d7cd69a01ff8ec11ce385c78d243792ba3aa976a05afc2dcab0a8"
+    },
+    {
+      "path": "src/app/screens/tools/email-builder/fields.tsx",
+      "bytes": 2311,
+      "sha256": "a10c51f31756c03628d65a315a719a904ca026c21f2c9b219f60751101f97392"
+    },
+    {
+      "path": "src/features/flow-spec/attachments.ts",
+      "bytes": 497,
+      "sha256": "b92f6e6babbfd0128c79b06c69f01d9e7c039ff1b4b2a5da9df3abfc87f15df7"
+    },
+    {
+      "path": "src/features/flow-spec/client.ts",
+      "bytes": 6440,
+      "sha256": "5a80e43ee1cd85dada4d6d9da73446d0e7b69392961ce8f2f3f951f1cd107358"
+    },
+    {
+      "path": "src/features/flow-spec/document.ts",
+      "bytes": 9342,
+      "sha256": "300b5f7d0eba39073add2cda188fe9f07695e6d770ace48d311b7af6ea660ddb"
+    },
+    {
+      "path": "src/features/flow-spec/schema.d.mts",
+      "bytes": 190,
+      "sha256": "f54e62bf6201353f8bef27cee2a3f564b670f93a77dbd5c045b9832342e54783"
+    },
+    {
+      "path": "src/features/flow-spec/schema.mjs",
+      "bytes": 5340,
+      "sha256": "860d648526236d902ca0d9c2ebfd38c1fb35a766e04c2b4bc9536ed3472fce80"
+    },
+    {
+      "path": "src/features/flow-spec/types.ts",
+      "bytes": 1344,
+      "sha256": "5117f1b3b8d815fc959607aee4a8659727390e8c750fe814b8e4b0ffee17c954"
+    },
+    {
+      "path": "src/features/flow-spec/useSpecWorkspace.ts",
+      "bytes": 17568,
+      "sha256": "769145c610832a261fba24c982feb6ace3e53bf100041b6a74e7cd70de10a2a8"
+    },
+    {
+      "path": "src/features/marketing-email/appIconMetadata.ts",
+      "bytes": 33214,
+      "sha256": "7e5dda8eede53614c5246ebf1f90fc0a149efb4707ec181f647623851cefd3ee"
+    },
+    {
+      "path": "src/features/marketing-email/catalog.ts",
+      "bytes": 4384,
+      "sha256": "77b3a9fcda294ba9637ac694f62a01e3ad9809e9b46e060729e6903f8739adeb"
+    },
+    {
+      "path": "src/features/marketing-email/compileClient.ts",
+      "bytes": 1675,
+      "sha256": "19523bf298095d317671d7939978efbc336c2e2521a8fa9f1d47b2abf35339b6"
+    },
+    {
+      "path": "src/features/marketing-email/compiler.ts",
+      "bytes": 13099,
+      "sha256": "fce8ea0091c2edc5ee9dee77ea605cf6183928c6b3d600db3d0cd2af63885e55"
+    },
+    {
+      "path": "src/features/marketing-email/compiler.worker.ts",
+      "bytes": 480,
+      "sha256": "ff7336040d3e5cf15cd31c1953c1e9eb0a297aadfd97e9b2b48a34ebbf2f2e40"
+    },
+    {
+      "path": "src/features/marketing-email/export.ts",
+      "bytes": 1049,
+      "sha256": "39da66d828df4ba88660cd474527763175aee2672127bd236b66b57f2ce895c2"
+    },
+    {
+      "path": "src/features/marketing-email/iconCatalog.ts",
+      "bytes": 6693,
+      "sha256": "272982de3fae66b438e188fc9b79f1db66277140349ba3117d4aa90ad8e5e89f"
+    },
+    {
+      "path": "src/features/marketing-email/mjml-browser.d.ts",
+      "bytes": 285,
+      "sha256": "a078a7926e2321dbc77b2487c26ca9a9f039593c4a78ee77e3784f1f6acbf114"
+    },
+    {
+      "path": "src/features/marketing-email/model.ts",
+      "bytes": 7367,
+      "sha256": "c125a31e683116b303f42f7a16d9b7ab2c302da35646a08cecb98bda23266981"
+    },
+    {
+      "path": "src/features/marketing-email/storage.ts",
+      "bytes": 5341,
+      "sha256": "42fda19692d8b188922b2124c0558087288f02667bec31dfde40e8714db5d618"
+    },
+    {
+      "path": "src/features/marketing-email/transforms.ts",
+      "bytes": 2967,
+      "sha256": "a1ff5576158da066234b8968b7f1bb220ec211947db505d3c662754c9ae52436"
+    },
+    {
+      "path": "src/features/marketing-email/validation.ts",
+      "bytes": 8089,
+      "sha256": "976baeb397a4209d5567638bf3f2aa87bc511ceddff9493fbd030928c70d3622"
+    },
+    {
+      "path": "tests/features/flow-spec-client.test.ts",
+      "bytes": 4625,
+      "sha256": "4f4618879fa643550223e4635540e79653acb36c4956081bbedfdaa2ce8e5c79"
+    },
+    {
+      "path": "tests/features/flow-spec-workspace.test.tsx",
+      "bytes": 5442,
+      "sha256": "e19c1ecc79d8121c338527f4266e27c6424522ed1c3fc19c1b6c579d429b6fa6"
+    },
+    {
+      "path": "tests/features/flow-spec.test.ts",
+      "bytes": 4658,
+      "sha256": "d17cfd22cbfb68865b4da3eb597ae48b68d3ec6d1e6e53a6889af9a9eae19262"
+    },
+    {
+      "path": "tests/features/marketing-email.test.ts",
+      "bytes": 16447,
+      "sha256": "68b19960af78b4d8e92d8c5c477832ca7d3337e8b85375a9cfb46510ff65d3d8"
+    },
+    {
+      "path": "tests/screens/flow-spec-editor.test.tsx",
+      "bytes": 16449,
+      "sha256": "10758db4eae6103b1e7ccc3438e5aedf577ad416face719c80aa47a015281988"
+    },
+    {
+      "path": "tests/screens/flow-spec-history.test.tsx",
+      "bytes": 3391,
+      "sha256": "66bb3bfd95944555c9f1b7b90bc21066070566d8ec1aa2f6d0a6e1d22674a22d"
+    },
+    {
+      "path": "tests/screens/marketing-email-builder.test.tsx",
+      "bytes": 12308,
+      "sha256": "2f14a0c6d9c4b63994b1383d2ebbf9dd4e0c6075b044cd4e878dc19abc46d97d"
+    },
+    {
+      "path": "tests/tooling/flow-spec-cloud.test.mjs",
+      "bytes": 12013,
+      "sha256": "fb237fdd38bc5df4449dc73d5fe723d088c5322deb7f2caeb74fcafa6fed9886"
+    },
+    {
+      "path": "tests/tooling/flow-spec-store.test.mjs",
+      "bytes": 8311,
+      "sha256": "45b333c7cc4d947e87ca43fe576a5ee056148aea09f923c13e872f645ea06c7f"
+    },
+    {
+      "path": "tests/tooling/flow-spec-validation.test.mjs",
+      "bytes": 1450,
+      "sha256": "5790ce73f7c11f6bb74d236d7404db4c5ddfd3c75230334ca85da8d9241a68b9"
+    },
+    {
+      "path": ".agent-task.json",
+      "bytes": 228704,
+      "sha256": "ca51500d9e773b88cbcecb3f2d8df625d244034fcb9785b26768ee306f4303b9"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-1.json",
+      "bytes": 12571,
+      "sha256": "3447c7fe9bbc76441d7fb7cbafa5fed054ab7306ad1b1faf9a93b3955cba5175"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-10.json",
+      "bytes": 16518,
+      "sha256": "f3e324bfae6ced1dd891d95527624c0c488fb7750106cba1a63d57973188aa55"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-2.json",
+      "bytes": 16682,
+      "sha256": "d363e5c8db7f08ea9253d185887245e500da322dd4e16faa66ebd0326332acc8"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-3.json",
+      "bytes": 16878,
+      "sha256": "b03b164c3c522ce3703f85a9a324e7fa94bf0c5ead931cc8feffd39efd3cb1ee"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-4.json",
+      "bytes": 16874,
+      "sha256": "dcdba06bc1d045f18fb5d07689af441ed6a3178a214c1d7ed4c351c1c4892448"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-5.json",
+      "bytes": 17216,
+      "sha256": "562306bbaa503cbb664985e4228982cb99428af5ff4fb69fad4e71b9364969db"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-6.json",
+      "bytes": 12571,
+      "sha256": "3447c7fe9bbc76441d7fb7cbafa5fed054ab7306ad1b1faf9a93b3955cba5175"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-7.json",
+      "bytes": 16518,
+      "sha256": "f3e324bfae6ced1dd891d95527624c0c488fb7750106cba1a63d57973188aa55"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-8.json",
+      "bytes": 16607,
+      "sha256": "931a1108d91f2c58760f1278a476d6e9d73da35b64c7b9bd8e90d4db0adfba5a"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/revision-9.json",
+      "bytes": 12571,
+      "sha256": "3447c7fe9bbc76441d7fb7cbafa5fed054ab7306ad1b1faf9a93b3955cba5175"
+    },
+    {
+      "path": ".codex-temp/flow-spec-store/ba-card-fraud/state.json",
+      "bytes": 3321211,
+      "sha256": "923ea77cccac420571e4cdc5bf77542c2e8cc052fddb592504124e89a10f8398"
+    }
+  ],
+  "cloudThread": "01a17176-e868-7300-9c1a-e38060a6906e",
+  "cloudBase": "3cec8b33cda330260f39fe52eaf3f2a5c842a396",
+  "state": "integrated locally and verified; no main publication/deployment",
+  "recoveredCommit": "8a7a5a4c9969f9d56711e995872612c24b5d7c6e",
+  "recoveredPaths": [
+    ".github/workflows/verify.yml",
+    "docs/superpowers/plans/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/plans/2026-10-25-flow-spec-rights.md",
+    "docs/superpowers/specs/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/specs/2026-10-25-flow-spec-rights.md",
+    "package.json",
+    "scripts/generate-flow-catalog.ts",
+    "server/.env.example",
+    "server/README.md",
+    "server/package-lock.json",
+    "server/package.json",
+    "server/src/app.ts",
+    "server/src/auth.ts",
+    "server/src/bootstrap.ts",
+    "server/src/database.ts",
+    "server/src/dev.ts",
+    "server/src/discussions.ts",
+    "server/src/flow-access.ts",
+    "server/src/http.ts",
+    "server/src/legacy-reader.ts",
+    "server/src/local-database.ts",
+    "server/src/node.ts",
+    "server/src/runtime.ts",
+    "server/src/specifications.ts",
+    "server/src/users.ts",
+    "server/tests/discussions.test.ts",
+    "server/tests/flow-access.test.ts",
+    "server/tests/helpers.ts",
+    "server/tests/http.test.ts",
+    "server/tests/identity.test.ts",
+    "server/tests/legacy-reader.test.ts",
+    "server/tests/specifications.test.ts",
+    "server/tsconfig.json",
+    "src/app/components/security/AccessGate.tsx",
+    "src/app/screens/flow-library/FlowLibraryScreen.tsx",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/components/FlowLibraryIndex.tsx",
+    "src/app/screens/flow-library/components/flowPreviews.tsx",
+    "src/features/flow-collaboration/AccountBar.tsx",
+    "src/features/flow-collaboration/DeferredPreview.tsx",
+    "src/features/flow-collaboration/DiscussionPanel.tsx",
+    "src/features/flow-collaboration/PersonalAccessBoundary.tsx",
+    "src/features/flow-collaboration/PlatformContext.tsx",
+    "src/features/flow-collaboration/UserAdministration.tsx",
+    "src/features/flow-collaboration/api.ts",
+    "src/features/flow-collaboration/controls.tsx",
+    "src/features/flow-collaboration/drafts.ts",
+    "src/features/flow-collaboration/search.ts",
+    "src/main.tsx",
+    "tests/flows/flow-preview-loading.test.tsx",
+    "tests/flows/flow-search.test.ts",
+    "tests/helpers/flowPlatformTransport.ts",
+    "tests/screens/flow-account.test.tsx",
+    "tests/screens/flow-collaboration.test.tsx",
+    "tests/screens/flow-library.test.tsx",
+    "tests/screens/flow-module-ownership-keyboard.test.tsx",
+    "tests/screens/investments-bulk-approval-flow.test.tsx",
+    "tests/screens/rs-property-insurance.test.tsx",
+    "vite.config.ts"
+  ],
+  "decisions": [
+    "Existing file/Blob document store remains canonical; PostgreSQL stores accounts/discussions/grants only for Card guard.",
+    "Mutations bind expected actor ID to verified account; pending personal saves stop after unmount.",
+    "View/shared responses include only current-document images; original assets remain internally preserved for private history.",
+    "No new Figma/components/assets or public deployment. Search/discussion anchors remain source-owned."
+  ],
+  "additionalContext": {
+    "source": "C:\\Users\\mihai\\.codex\\attachments\\815b46c6-1067-4033-90c0-b08dc9ebb0a2\\Pasted text.txt",
+    "sha256": "52a2725d8052d9e09e6b5aafc6f34c2825f794ad2877e6172e22a50bce27ee84",
+    "confirmedScope": "Local pilot with named accounts, existing rich editor, admin/rights/history/draft recovery; no Vercel publication or managed database activation."
+  },
+  "verification": {
+    "fullCommand": "npm run verify",
+    "exitCode": 0,
+    "applicationTests": 4074,
+    "applicationTestFiles": 359,
+    "apiTests": 25,
+    "coverage": {
+      "statements": 84.55,
+      "branches": 82.59,
+      "functions": 64.14,
+      "lines": 84.55
+    },
+    "logSha256": "8b6d5498e25223e9202cc1a1a958c759991fbbf555decb18281a4e488c940ffd",
+    "browserWordScreens": 47,
+    "operatorSpecStoreUnchanged": true,
+    "emailBuilderSourceUnchanged": true
+  },
+  "exactIntegrationDeltaPaths": [
+    ".env.example",
+    ".github/workflows/verify.yml",
+    "api/flow-spec.js",
+    "docs/cloud-recovery-2026-10-28.md",
+    "docs/flow-spec-editor.md",
+    "docs/superpowers/plans/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/plans/2026-10-25-flow-spec-rights.md",
+    "docs/superpowers/plans/2026-10-28-cloud-recovery-integration.md",
+    "docs/superpowers/specs/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/specs/2026-10-25-flow-spec-rights.md",
+    "docs/tasks/2026-10-28-cloud-recovery.json",
+    "package.json",
+    "scripts/flow-spec/personal-access.mjs",
+    "scripts/flow-spec/server.d.mts",
+    "scripts/flow-spec/server.mjs",
+    "scripts/generate-flow-catalog.ts",
+    "server/.env.example",
+    "server/README.md",
+    "server/package-lock.json",
+    "server/package.json",
+    "server/src/app.ts",
+    "server/src/auth.ts",
+    "server/src/bootstrap.ts",
+    "server/src/database.ts",
+    "server/src/dev.ts",
+    "server/src/discussions.ts",
+    "server/src/editor-access.ts",
+    "server/src/flow-access.ts",
+    "server/src/http.ts",
+    "server/src/legacy-reader.ts",
+    "server/src/local-database.ts",
+    "server/src/node.ts",
+    "server/src/runtime.ts",
+    "server/src/specifications.ts",
+    "server/src/users.ts",
+    "server/tests/discussions.test.ts",
+    "server/tests/editor-access.test.ts",
+    "server/tests/flow-access.test.ts",
+    "server/tests/helpers.ts",
+    "server/tests/http.test.ts",
+    "server/tests/identity.test.ts",
+    "server/tests/legacy-reader.test.ts",
+    "server/tests/specifications.test.ts",
+    "server/tsconfig.json",
+    "src/app/components/security/AccessGate.tsx",
+    "src/app/screens/flow-library/FlowLibraryScreen.tsx",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/components/FlowLibraryIndex.tsx",
+    "src/app/screens/flow-library/components/flowPreviews.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecHistoryDialog.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspacePanel.tsx",
+    "src/features/flow-collaboration/AccountBar.tsx",
+    "src/features/flow-collaboration/DeferredPreview.tsx",
+    "src/features/flow-collaboration/DiscussionPanel.tsx",
+    "src/features/flow-collaboration/PersonalAccessBoundary.tsx",
+    "src/features/flow-collaboration/PlatformContext.tsx",
+    "src/features/flow-collaboration/UserAdministration.tsx",
+    "src/features/flow-collaboration/api.ts",
+    "src/features/flow-collaboration/controls.tsx",
+    "src/features/flow-collaboration/drafts.ts",
+    "src/features/flow-collaboration/search.ts",
+    "src/features/flow-spec/client.ts",
+    "src/features/flow-spec/personalAccess.ts",
+    "src/features/flow-spec/types.ts",
+    "src/features/flow-spec/useSpecWorkspace.ts",
+    "src/main.tsx",
+    "tests/features/flow-spec-permissions.test.tsx",
+    "tests/flows/flow-preview-loading.test.tsx",
+    "tests/flows/flow-search.test.ts",
+    "tests/helpers/flowPlatformTransport.ts",
+    "tests/screens/flow-account.test.tsx",
+    "tests/screens/flow-collaboration.test.tsx",
+    "tests/screens/flow-library.test.tsx",
+    "tests/screens/flow-module-ownership-keyboard.test.tsx",
+    "tests/screens/investments-bulk-approval-flow.test.tsx",
+    "tests/screens/rs-property-insurance.test.tsx",
+    "tests/tooling/flow-spec-cloud.test.mjs",
+    "tests/tooling/flow-spec-personal-access.test.mjs",
+    "vite.config.ts"
+  ],
+  "combinedPendingPaths": [
+    ".env.example",
+    ".github/workflows/verify.yml",
+    ".gitignore",
+    "api/flow-spec.js",
+    "docs/cloud-recovery-2026-10-28.md",
+    "docs/features/marketing-email-builder.md",
+    "docs/flow-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/plans/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-builder.md",
+    "docs/superpowers/plans/2026-10-22-marketing-email-icons.md",
+    "docs/superpowers/plans/2026-10-23-flow-spec-quality.md",
+    "docs/superpowers/plans/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/plans/2026-10-25-flow-spec-rights.md",
+    "docs/superpowers/plans/2026-10-28-cloud-recovery-integration.md",
+    "docs/superpowers/specs/2026-10-22-card-guard-spec-editor.md",
+    "docs/superpowers/specs/2026-10-22-flow-spec-cloud-storage.md",
+    "docs/superpowers/specs/2026-10-25-flow-collaboration.md",
+    "docs/superpowers/specs/2026-10-25-flow-spec-rights.md",
+    "docs/tasks/2026-10-22-card-guard-asset-baseline.json",
+    "docs/tasks/2026-10-22-card-guard-spec-editor.json",
+    "docs/tasks/2026-10-22-flow-spec-cloud-storage.json",
+    "docs/tasks/2026-10-22-marketing-email-builder.json",
+    "docs/tasks/2026-10-22-marketing-email-icons.json",
+    "docs/tasks/2026-10-23-flow-spec-quality.json",
+    "docs/tasks/2026-10-28-cloud-recovery.json",
+    "package-lock.json",
+    "package.json",
+    "scripts/asset-baseline.json",
+    "scripts/flow-spec/archive.mjs",
+    "scripts/flow-spec/backup.mjs",
+    "scripts/flow-spec/blob-store.mjs",
+    "scripts/flow-spec/personal-access.mjs",
+    "scripts/flow-spec/server.d.mts",
+    "scripts/flow-spec/server.mjs",
+    "scripts/flow-spec/store.mjs",
+    "scripts/flow-spec/validation.mjs",
+    "scripts/generate-email-icon-metadata.mjs",
+    "scripts/generate-flow-catalog.ts",
+    "server/.env.example",
+    "server/README.md",
+    "server/package-lock.json",
+    "server/package.json",
+    "server/src/app.ts",
+    "server/src/auth.ts",
+    "server/src/bootstrap.ts",
+    "server/src/database.ts",
+    "server/src/dev.ts",
+    "server/src/discussions.ts",
+    "server/src/editor-access.ts",
+    "server/src/flow-access.ts",
+    "server/src/http.ts",
+    "server/src/legacy-reader.ts",
+    "server/src/local-database.ts",
+    "server/src/node.ts",
+    "server/src/runtime.ts",
+    "server/src/specifications.ts",
+    "server/src/users.ts",
+    "server/tests/discussions.test.ts",
+    "server/tests/editor-access.test.ts",
+    "server/tests/flow-access.test.ts",
+    "server/tests/helpers.ts",
+    "server/tests/http.test.ts",
+    "server/tests/identity.test.ts",
+    "server/tests/legacy-reader.test.ts",
+    "server/tests/specifications.test.ts",
+    "server/tsconfig.json",
+    "src/app/components/security/AccessGate.tsx",
+    "src/app/screens/flow-library/FlowLibraryScreen.tsx",
+    "src/app/screens/flow-library/components/FlowDetail.tsx",
+    "src/app/screens/flow-library/components/FlowImplementationPanel.tsx",
+    "src/app/screens/flow-library/components/FlowLibraryIndex.tsx",
+    "src/app/screens/flow-library/components/flowPreviews.tsx",
+    "src/app/screens/flow-library/flowExport.ts",
+    "src/app/screens/flow-library/handoff/confluenceClipboard.ts",
+    "src/app/screens/flow-library/handoff/documentModel.ts",
+    "src/app/screens/flow-library/handoff/docx.ts",
+    "src/app/screens/flow-library/handoff/richDocx.ts",
+    "src/app/screens/flow-library/spec-editor/SpecEditorToolbar.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecHistoryDialog.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecRichTextEditor.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecSaveStatus.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspaceNotices.tsx",
+    "src/app/screens/flow-library/spec-editor/SpecWorkspacePanel.tsx",
+    "src/app/screens/flow-library/spec-editor/extensions.ts",
+    "src/app/screens/flow-library/spec-editor/specEditor.css",
+    "src/app/screens/flow-library/spec-editor/specHistory.css",
+    "src/app/screens/tools/MarketingEmailBuilderTool.tsx",
+    "src/app/screens/tools/ToolsScreen.tsx",
+    "src/app/screens/tools/email-builder/Canvas.tsx",
+    "src/app/screens/tools/email-builder/CatalogPanel.tsx",
+    "src/app/screens/tools/email-builder/IconArtwork.tsx",
+    "src/app/screens/tools/email-builder/IconPicker.tsx",
+    "src/app/screens/tools/email-builder/PropertiesPanel.tsx",
+    "src/app/screens/tools/email-builder/blockIcons.ts",
+    "src/app/screens/tools/email-builder/dragDrop.ts",
+    "src/app/screens/tools/email-builder/editor.css",
+    "src/app/screens/tools/email-builder/fields.tsx",
+    "src/features/flow-collaboration/AccountBar.tsx",
+    "src/features/flow-collaboration/DeferredPreview.tsx",
+    "src/features/flow-collaboration/DiscussionPanel.tsx",
+    "src/features/flow-collaboration/PersonalAccessBoundary.tsx",
+    "src/features/flow-collaboration/PlatformContext.tsx",
+    "src/features/flow-collaboration/UserAdministration.tsx",
+    "src/features/flow-collaboration/api.ts",
+    "src/features/flow-collaboration/controls.tsx",
+    "src/features/flow-collaboration/drafts.ts",
+    "src/features/flow-collaboration/search.ts",
+    "src/features/flow-spec/attachments.ts",
+    "src/features/flow-spec/client.ts",
+    "src/features/flow-spec/document.ts",
+    "src/features/flow-spec/personalAccess.ts",
+    "src/features/flow-spec/schema.d.mts",
+    "src/features/flow-spec/schema.mjs",
+    "src/features/flow-spec/types.ts",
+    "src/features/flow-spec/useSpecWorkspace.ts",
+    "src/features/marketing-email/appIconMetadata.ts",
+    "src/features/marketing-email/catalog.ts",
+    "src/features/marketing-email/compileClient.ts",
+    "src/features/marketing-email/compiler.ts",
+    "src/features/marketing-email/compiler.worker.ts",
+    "src/features/marketing-email/export.ts",
+    "src/features/marketing-email/iconCatalog.ts",
+    "src/features/marketing-email/mjml-browser.d.ts",
+    "src/features/marketing-email/model.ts",
+    "src/features/marketing-email/storage.ts",
+    "src/features/marketing-email/transforms.ts",
+    "src/features/marketing-email/validation.ts",
+    "src/main.tsx",
+    "tests/features/flow-spec-client.test.ts",
+    "tests/features/flow-spec-permissions.test.tsx",
+    "tests/features/flow-spec-workspace.test.tsx",
+    "tests/features/flow-spec.test.ts",
+    "tests/features/marketing-email.test.ts",
+    "tests/flows/flow-preview-loading.test.tsx",
+    "tests/flows/flow-search.test.ts",
+    "tests/helpers/flowPlatformTransport.ts",
+    "tests/screens/flow-account.test.tsx",
+    "tests/screens/flow-collaboration.test.tsx",
+    "tests/screens/flow-handoff.test.ts",
+    "tests/screens/flow-library.test.tsx",
+    "tests/screens/flow-module-ownership-keyboard.test.tsx",
+    "tests/screens/flow-spec-editor.test.tsx",
+    "tests/screens/flow-spec-history.test.tsx",
+    "tests/screens/investments-bulk-approval-flow.test.tsx",
+    "tests/screens/marketing-email-builder.test.tsx",
+    "tests/screens/rs-property-insurance.test.tsx",
+    "tests/screens/tools-screen.test.tsx",
+    "tests/tooling/flow-spec-cloud.test.mjs",
+    "tests/tooling/flow-spec-personal-access.test.mjs",
+    "tests/tooling/flow-spec-store.test.mjs",
+    "tests/tooling/flow-spec-validation.test.mjs",
+    "vite.config.ts"
+  ]
+}

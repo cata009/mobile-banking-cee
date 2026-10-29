@@ -19,6 +19,7 @@ export function BaselineBottomNavigation({
   iconOverrides,
   onTabChange,
   dark = false,
+  width,
 }: {
   activeTab?: NavItem;
   items?: readonly NavItem[];
@@ -27,6 +28,7 @@ export function BaselineBottomNavigation({
   iconOverrides?: Partial<Record<NavItem, string>>;
   onTabChange?: (tab: NavItem) => void;
   dark?: boolean;
+  width?: number;
 }) {
   const [internalTab, setInternalTab] = useState<NavItem>('home');
   const activeTab = controlledTab ?? internalTab;
@@ -43,7 +45,7 @@ export function BaselineBottomNavigation({
     setInternalTab(selection.internalTab);
   };
   const barStyle = {
-    width: geometry.width,
+    width: width ?? geometry.width,
     height: geometry.height,
     flexDirection: 'row' as const,
     alignItems: 'flex-start' as const,

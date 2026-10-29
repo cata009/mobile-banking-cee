@@ -272,6 +272,16 @@ export default function Documents(host: CurrentScreenProps) {
     <MoreServicePage
       host={host}
       title={t('runtime.documents.title', config.title)}
+      sticky={
+        <View style={styles.search}>
+          <BaselineSearchBar
+            value={query}
+            onValueChange={setQuery}
+            placeholder={t('runtime.actions.search', 'Search')}
+            dark={dark}
+          />
+        </View>
+      }
       overlay={overlay}
       onHelpPress={
         host.onHelpRequest ??
@@ -280,14 +290,6 @@ export default function Documents(host: CurrentScreenProps) {
           : undefined)
       }
     >
-      <View style={styles.search}>
-        <BaselineSearchBar
-          value={query}
-          onValueChange={setQuery}
-          placeholder={t('runtime.actions.search', 'Search')}
-          dark={dark}
-        />
-      </View>
       <View style={styles.groups}>
         {groups.map(group => (
           <View key={group.year} style={styles.group}>

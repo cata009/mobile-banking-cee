@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
+  DuoColumns,
+  DuoPane,
+  DuoOnlyView,
+  DuoReadable,
+  useDuoWide,
+} from '../../../../../universal/DuoPreview';
+import {
   Platform,
   ScrollView,
   StyleSheet,
@@ -31,6 +38,7 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../../contracts';
 import { FaceIdOverlay } from '../FaceIdOverlay';
 import { RasterImage } from './RasterImage';
+import VirtualCardFlow from '../virtual-card/VirtualCardFlow';
 
 const images: Record<ProductDetailImageKey, string> = {
   'activate-account': activateAccount,
@@ -62,51 +70,53 @@ function ProductSign({
   const [pin, setPin] = useState('******');
   const [authenticating, setAuthenticating] = useState(false);
   return (
-    <View
-      testID="ro-product-sign"
-      style={[
-        styles.screen,
-        { backgroundColor: sourceColor('var(--uc-surface)', dark) },
-      ]}
-    >
-      <BaselinePageHeader
-        title={`Apply for ${title}`}
-        onBack={onBack}
-        includeSafeArea
-        showHelp={false}
-        safeAreaReserve={host.screenTopInset}
-        dark={dark}
-      />
-      <View style={styles.signBody}>
-        <BaselineTextField
-          label="Mobile banking PIN"
-          value={pin}
-          onChange={setPin}
-          helperText="Confirm you want to send this request."
-          visualState="on-focus"
+    <DuoReadable>
+      <View
+        testID="ro-product-sign"
+        style={[
+          styles.screen,
+          { backgroundColor: sourceColor('var(--uc-surface)', dark) },
+        ]}
+      >
+        <BaselinePageHeader
+          title={`Apply for ${title}`}
+          onBack={onBack}
+          includeSafeArea
+          showHelp={false}
+          safeAreaReserve={host.screenTopInset}
           dark={dark}
         />
+        <View style={styles.signBody}>
+          <BaselineTextField
+            label="Mobile banking PIN"
+            value={pin}
+            onChange={setPin}
+            helperText="Confirm you want to send this request."
+            visualState="on-focus"
+            dark={dark}
+          />
+        </View>
+        <View style={styles.footer}>
+          <PrimaryButton
+            label="Send request"
+            disabled={authenticating}
+            dark={dark}
+            onPress={() => {
+              if (!authenticating) setAuthenticating(true);
+            }}
+          />
+        </View>
+        {authenticating ? (
+          <FaceIdOverlay
+            success={sourceColor('var(--uc-green-success)', dark)}
+            onComplete={() => {
+              setAuthenticating(false);
+              onSign();
+            }}
+          />
+        ) : null}
       </View>
-      <View style={styles.footer}>
-        <PrimaryButton
-          label="Send request"
-          disabled={authenticating}
-          dark={dark}
-          onPress={() => {
-            if (!authenticating) setAuthenticating(true);
-          }}
-        />
-      </View>
-      {authenticating ? (
-        <FaceIdOverlay
-          success={sourceColor('var(--uc-green-success)', dark)}
-          onComplete={() => {
-            setAuthenticating(false);
-            onSign();
-          }}
-        />
-      ) : null}
-    </View>
+    </DuoReadable>
   );
 }
 
@@ -123,41 +133,56 @@ function ProductSuccess({
   const text = sourceColor('var(--uc-text)', dark),
     olive = sourceColor('var(--uc-green-olive)', dark);
   return (
-    <View
-      testID="ro-product-success"
-      style={[
-        styles.screen,
-        { backgroundColor: sourceColor('var(--uc-surface)', dark) },
-      ]}
-    >
-      <View style={styles.successHeading}>
-        <Text
-          accessibilityRole="header"
-          style={[styles.largeTitleText, { color: text }]}
-        >
-          Request sent
-        </Text>
-      </View>
-      <View style={styles.successBody}>
-        <View style={styles.checkPosition}>
-          <View style={[styles.check, { borderColor: olive }]}>
-            <SourceCustomIcon name="prime-check" size={64} color={olive} />
-          </View>
+    <DuoReadable>
+      <View
+        testID="ro-product-success"
+        style={[
+          styles.screen,
+          { backgroundColor: sourceColor('var(--uc-surface)', dark) },
+        ]}
+      >
+        <View style={styles.successHeading}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.largeTitleText, { color: text }]}
+          >
+            Request sent
+          </Text>
         </View>
-        <Text
-          style={[styles.successMessage, { color: text }]}
-        >{`We received your request for ${title}. You can follow it in My applications.`}</Text>
+        <View style={styles.successBody}>
+          <View style={styles.checkPosition}>
+            <View style={[styles.check, { borderColor: olive }]}>
+              <SourceCustomIcon name="prime-check" size={64} color={olive} />
+            </View>
+          </View>
+          <Text
+            style={[styles.successMessage, { color: text }]}
+          >{`We received your request for ${title}. You can follow it in My applications.`}</Text>
+        </View>
+        <View style={styles.footer}>
+          <PrimaryButton
+            label="Back to products"
+            onPress={onDone}
+            dark={dark}
+          />
+        </View>
       </View>
-      <View style={styles.footer}>
-        <PrimaryButton label="Back to products" onPress={onDone} dark={dark} />
-      </View>
-    </View>
+    </DuoReadable>
   );
 }
 
 /** RO baseline keeps Source ProductDetailScreen's content helpers, geometry and apply lifecycle. */
 export default function Detail(host: CurrentScreenProps) {
-  const [step, setStep] = useState<'detail' | 'sign' | 'success'>('detail');
+  const wide = useDuoWide();
+  const directVirtualCard =
+    host.country === 'RO' &&
+    host.release === 'release-current' &&
+    host.scenario === 'active' &&
+    host.route.params?.optionId === 'virtual-card' &&
+    !host.onProductDetailAction;
+  const [step, setStep] = useState<
+    'detail' | 'sign' | 'success' | 'virtual-card'
+  >(directVirtualCard ? 'virtual-card' : 'detail');
   const [progress, setProgress] = useState(0);
   const presentation = host.productDetailPresentation;
   const params = host.route.params ?? {};
@@ -176,6 +201,7 @@ export default function Detail(host: CurrentScreenProps) {
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const registerBack = host.onBackHandlerChange;
   useEffect(() => {
+    if (step === 'virtual-card') return;
     registerBack?.(() => {
       if (step !== 'sign') return false;
       setStep('detail');
@@ -183,6 +209,20 @@ export default function Detail(host: CurrentScreenProps) {
     });
     return () => registerBack?.(null);
   }, [registerBack, step]);
+  if (step === 'virtual-card')
+    return (
+      <VirtualCardFlow
+        host={host}
+        mode="issue"
+        onCancel={() => (directVirtualCard ? host.onBack() : setStep('detail'))}
+        onDone={id =>
+          host.onNavigate({
+            screen: 'card',
+            params: { productId: id, cardId: id },
+          })
+        }
+      />
+    );
   if (step === 'sign')
     return (
       <ProductSign
@@ -255,59 +295,82 @@ export default function Detail(host: CurrentScreenProps) {
             {title}
           </Text>
         </View>
-        <View style={styles.main}>
-          <View
-            testID="ro-product-detail-image-frame"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={[
-              styles.imageFrame,
-              { backgroundColor: sourceColor('var(--uc-surface-muted)', dark) },
-            ]}
-          >
-            {/* Source's percentage height resolves to the illustration's 327x160
+        <View
+          style={[
+            styles.main,
+            wide ? { maxWidth: '100%', paddingHorizontal: 0 } : undefined,
+          ]}
+        >
+          <DuoColumns>
+            <DuoPane>
+              <DuoOnlyView style={wide ? { paddingHorizontal: 24 } : undefined}>
+                <View
+                  testID="ro-product-detail-image-frame"
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                  style={[
+                    styles.imageFrame,
+                    {
+                      backgroundColor: sourceColor(
+                        'var(--uc-surface-muted)',
+                        dark,
+                      ),
+                    },
+                  ]}
+                >
+                  {/* Source's percentage height resolves to the illustration's 327x160
                 intrinsic ratio; the 12:5 grid clips its bottom rather than centering a crop. */}
-            <RasterImage
-              source={typeof image === 'number' ? image : { uri: image }}
-              resizeMode="cover"
-              objectPosition={heroImagePosition ?? 'center'}
-              style={[
-                styles.image,
-                heroImage ? { aspectRatio: 12 / 5 } : undefined,
-              ]}
-            />
-          </View>
-          <Text
-            accessibilityRole="header"
-            style={[styles.heading, { color: text }]}
-          >
-            {headline ?? content.heading}
-          </Text>
-          {intro ? (
-            <Text
-              style={[
-                styles.intro,
-                { color: sourceColor('var(--uc-text-muted)', dark) },
-              ]}
-            >
-              {intro}
-            </Text>
-          ) : null}
-          {headline && content.heading !== headline ? (
-            <Text
-              accessibilityRole="header"
-              style={[styles.subheading, { color: text }]}
-            >
-              {content.heading}
-            </Text>
-          ) : null}
-          <View style={styles.paragraphs}>
-            {content.body.map(paragraph => (
-              <Text key={paragraph} style={[styles.paragraph, { color: text }]}>
-                {paragraph}
-              </Text>
-            ))}
-          </View>
+                  <RasterImage
+                    source={typeof image === 'number' ? image : { uri: image }}
+                    resizeMode="cover"
+                    objectPosition={heroImagePosition ?? 'center'}
+                    style={[
+                      styles.image,
+                      heroImage ? { aspectRatio: 12 / 5 } : undefined,
+                    ]}
+                  />
+                </View>
+              </DuoOnlyView>
+            </DuoPane>
+            <DuoPane>
+              <DuoOnlyView style={wide ? { paddingHorizontal: 24 } : undefined}>
+                <Text
+                  accessibilityRole="header"
+                  style={[styles.heading, { color: text }]}
+                >
+                  {headline ?? content.heading}
+                </Text>
+                {intro ? (
+                  <Text
+                    style={[
+                      styles.intro,
+                      { color: sourceColor('var(--uc-text-muted)', dark) },
+                    ]}
+                  >
+                    {intro}
+                  </Text>
+                ) : null}
+                {headline && content.heading !== headline ? (
+                  <Text
+                    accessibilityRole="header"
+                    style={[styles.subheading, { color: text }]}
+                  >
+                    {content.heading}
+                  </Text>
+                ) : null}
+                <View style={styles.paragraphs}>
+                  {content.body.map(paragraph => (
+                    <Text
+                      key={paragraph}
+                      style={[styles.paragraph, { color: text }]}
+                    >
+                      {paragraph}
+                    </Text>
+                  ))}
+                </View>
+              </DuoOnlyView>
+            </DuoPane>
+          </DuoColumns>
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -316,7 +379,15 @@ export default function Detail(host: CurrentScreenProps) {
           dark={dark}
           onPress={() => {
             if (host.onProductDetailAction) host.onProductDetailAction();
-            else setStep('sign');
+            else
+              setStep(
+                host.country === 'RO' &&
+                  host.release === 'release-current' &&
+                  host.scenario === 'active' &&
+                  optionId === 'virtual-card'
+                  ? 'virtual-card'
+                  : 'sign',
+              );
           }}
         />
       </View>
