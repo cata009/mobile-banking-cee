@@ -63,6 +63,17 @@ export function deriveProductCategories({
           ? (countedProducts.find((p) => p.id === product.linkedAccountId) ??
             countedProducts.find((p) => p.type === 'current_account'))
           : undefined
+      const linkedCurrentAccountAvailable =
+        linkedAccount?.type === 'current_account'
+          ? isCzApp2027
+            ? { balance: linkedAccount.balance, currency: linkedAccount.currency }
+            : {
+                balance: roundMoney(
+                  roundMoney(convertCurrency(linkedAccount.balance, linkedAccount.currency, localCurrency)) + 20000,
+                ),
+                currency: localCurrency,
+              }
+          : undefined
       const sourceBalance = linkedAccount
         ? linkedAccount.balance
         : isCard && product.type !== 'credit_card'
@@ -90,11 +101,22 @@ export function deriveProductCategories({
       return {
         ...product,
         accountNumber: formattedAccountNumber,
-        // Convert balance to local currency and add 20,000 local currency boost
-        // (demo-only uplift so the current account shows a comfortable balance)
-        balance: product.type === 'current_account' ? roundMoney(convertedBalance + 20000) : convertedBalance,
-        // Update currency to local
-        currency: preserveCzApp2027ForeignDebitCard ? sourceCurrency : localCurrency,
+        // Debit cards expose the same available funds as their linked current account.
+        // CZ Evo accounts keep their source balance; current baseline accounts
+        // include the demo-only 20,000 local-currency uplift after conversion.
+        balance:
+          product.type === 'current_account'
+            ? roundMoney(convertedBalance + 20000)
+            : product.type === 'debit_card' && linkedCurrentAccountAvailable
+              ? linkedCurrentAccountAvailable.balance
+              : convertedBalance,
+        // Update currency, preserving the linked account currency for debit cards.
+        currency:
+          product.type === 'debit_card' && linkedCurrentAccountAvailable
+            ? linkedCurrentAccountAvailable.currency
+            : preserveCzApp2027ForeignDebitCard
+              ? sourceCurrency
+              : localCurrency,
       }
     }),
   }))

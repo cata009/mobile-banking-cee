@@ -1,6 +1,7 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { TextInput } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
+import { EMPTY_ACCOUNT_TRANSACTION_FILTERS } from '@/features/accounts-payments/evoTransactionFilters';
 import {
   authenticateNativeBiometric,
   nativeBiometricAvailable,
@@ -16,9 +17,12 @@ import { readCategoryOverrides } from '../src/experiences/pi/current/banking/cat
 import { CURRENT_BANKING_ADAPTER } from '../src/experiences/pi/current/banking/adapter';
 import { BaselinePaymentHero } from '../src/universal/BaselinePaymentHero';
 import { BaselineTransactionRow } from '../src/universal/BaselineTransactionRow';
+import { BaselineTextField } from '../src/universal/BaselineTextField';
 import { FaceIdOverlay } from '../src/experiences/pi/current/baseline/FaceIdOverlay';
 import { RoBaselineTransactions } from '../src/experiences/pi/current/baseline/Transactions';
 import { RoBaselineTransactionsScreen } from '../src/experiences/pi/current/baseline/TransactionsScreen';
+import { RoBaselineTransactionFilters } from '../src/experiences/pi/current/baseline/TransactionFilters';
+import { Text } from '../src/universal/Typography';
 import {
   bankingProducts,
   productTransactions,
@@ -311,7 +315,11 @@ test.each<CountryId>(['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'])(
         typeof node.props.onPress === 'function' &&
         String(node.props.accessibilityLabel)
           .toLowerCase()
-          .includes('domestic payment'),
+          .includes(
+            country === 'RO'
+              ? 'payment to new beneficiary'
+              : 'domestic payment',
+          ),
     )[0]!;
     await act(() => domestic.props.onPress());
     expect(props.onNavigate).toHaveBeenCalledWith({ screen: 'payment-create' });
@@ -336,6 +344,38 @@ test('zero-holding context has usable empty lists and the payment form stays inv
     if (screen === 'payment-create')
       expect(press(tree, 'Next').props.disabled).toBe(true);
     await act(() => tree.unmount());
+  }
+});
+
+test('baseline transaction amount filter renders currency in UniCredit typography', () => {
+  const props = host('account');
+  let tree!: Renderer.ReactTestRenderer;
+  act(() => {
+    tree = Renderer.create(
+      <RoBaselineTransactionFilters
+        host={props}
+        currency="RON"
+        filters={EMPTY_ACCOUNT_TRANSACTION_FILTERS}
+        onApply={jest.fn()}
+        onClose={jest.fn()}
+      />,
+    );
+  });
+  try {
+    const currencyValues = tree.root
+      .findAllByType(Text)
+      .filter(node => node.props.children === 'RON');
+    const currencyLabels = tree.root
+      .findAllByType(Text)
+      .filter(node => node.props.children === 'Currency');
+    expect(currencyValues).toHaveLength(2);
+    expect(currencyLabels).toHaveLength(2);
+    for (const currency of [...currencyValues, ...currencyLabels])
+      expect(StyleSheet.flatten(currency.props.style).fontFamily).toBe(
+        'UniCredit-regular',
+      );
+  } finally {
+    act(() => tree.unmount());
   }
 });
 
@@ -365,9 +405,11 @@ test('redo payment carries the selected Source transaction and payer into its ed
     product,
   );
   expect(field(form, 'Beneficiary').props.value).toBe(expected.beneficiaryName);
-  expect(field(form, 'Account number').props.value).toBe(
-    expected.payerAccountNumber,
-  );
+  expect(
+    form.root
+      .findAllByType(BaselineTextField)
+      .find(input => input.props.selectionControl)?.props.value,
+  ).toBe(expected.payerAccountNumber);
   expect(field(form, 'Amount limit').props.value).toBe(expected.amount);
   await act(() => form.unmount());
 });

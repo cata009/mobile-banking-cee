@@ -4,6 +4,10 @@ import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
+import {
+  useDuoLocalViewport,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 import { ToggleButton } from '../../../../../universal/ToggleButton';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { SearchField } from '../../../../../universal/SearchField';
@@ -136,25 +140,25 @@ export function initialPaymentDraft(props: CzechNativeScreenProps) {
   let draft = movement
     ? createRedoDomesticPaymentDraft(movement, 'CZ', payer)
     : template
-    ? createTemplateDomesticPaymentDraft(
-        {
-          ...template,
-          beneficiaryName: getEvo2027TemplateBeneficiaryName(template, 'CZ'),
-        },
-        'CZ',
-        payer,
-      )
-    : person
-    ? {
-        ...empty,
-        beneficiaryName: person.name,
-        recipientKind: person.recipientKind,
-        prefix: person.paymentAccountPrefix ?? '',
-        accountNumber: person.paymentAccountNumber,
-        bankCode: person.paymentBankCode,
-        currency: person.currency,
-      }
-    : empty;
+      ? createTemplateDomesticPaymentDraft(
+          {
+            ...template,
+            beneficiaryName: getEvo2027TemplateBeneficiaryName(template, 'CZ'),
+          },
+          'CZ',
+          payer,
+        )
+      : person
+        ? {
+            ...empty,
+            beneficiaryName: person.name,
+            recipientKind: person.recipientKind,
+            prefix: person.paymentAccountPrefix ?? '',
+            accountNumber: person.paymentAccountNumber,
+            bankCode: person.paymentBankCode,
+            currency: person.currency,
+          }
+        : empty;
   const chosen =
     products.find(
       p =>
@@ -184,13 +188,16 @@ export function initialPaymentDraft(props: CzechNativeScreenProps) {
   return draft;
 }
 function PaymentFlowContent(props: CzechPaymentScreenProps) {
+  const duo = useDuoPreview();
+  const local = useDuoLocalViewport();
+  const bounded = !!duo && !!local && local.width >= 600;
   const [countrySearch, setCountrySearch] = useState('');
   const [currencySearch, setCurrencySearch] = useState('');
   const controlled = props.paymentFlow !== undefined;
   const controlledFlow =
     (props.paymentFlow as ControlledPaymentFlow | null | undefined) ?? null;
   const [initial] = useState(() =>
-    controlled ? controlledFlow?.draft ?? null : initialPaymentDraft(props),
+    controlled ? (controlledFlow?.draft ?? null) : initialPaymentDraft(props),
   );
   const [draft, setDraft] = useState(
     initial ?? createEmptyDomesticPaymentDraft('CZ'),
@@ -207,8 +214,8 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
     controlledFlow
       ? internalStepForFlow(controlledFlow)
       : props.route.params?.beneficiaryId || initial?.amount
-      ? 'amount'
-      : 'recipient',
+        ? 'amount'
+        : 'recipient',
   );
   const [pin, setPin] = useState(''),
     [busy, setBusy] = useState(false),
@@ -398,7 +405,15 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
   };
   if (!(controlled ? props.paymentFlow?.draft : initial))
     return (
-      <Page title="New Payment" onBack={props.onBack}>
+      <Page
+        title="New Payment"
+        onBack={props.onBack}
+        style={
+          bounded
+            ? { width: '100%', maxWidth: 640, alignSelf: 'center' }
+            : undefined
+        }
+      >
         <View style={s.alert}>
           <Copy>Payment target not found</Copy>
         </View>
@@ -408,12 +423,12 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
     step === 'recipient'
       ? 'Add beneficiary'
       : step === 'amount'
-      ? draft.beneficiaryName || 'Amount'
-      : step === 'review'
-      ? 'Review transfer'
-      : step === 'sign'
-      ? 'Sign'
-      : 'Successful payment';
+        ? draft.beneficiaryName || 'Amount'
+        : step === 'review'
+          ? 'Review transfer'
+          : step === 'sign'
+            ? 'Sign'
+            : 'Successful payment';
   const field = (
     label: string,
     key: keyof DomesticPaymentDraft,
@@ -450,35 +465,30 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       open: () => void;
       expanded: boolean;
       label: string;
-    }) =>
-      (
-        <View style={extractedStyles.selectField}>
-          <Copy size={16}>
-            {fieldLabel === 'Recipient country'
-              ? 'Country / region of recipient’s account'
-              : fieldLabel === 'Payment currency'
+    }) => (
+      <View style={extractedStyles.selectField}>
+        <Copy size={16}>
+          {fieldLabel === 'Recipient country'
+            ? 'Country / region of recipient’s account'
+            : fieldLabel === 'Payment currency'
               ? 'Currency'
               : fieldLabel}
+        </Copy>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={fieldLabel}
+          accessibilityValue={{ text: label }}
+          accessibilityState={{ expanded }}
+          onPress={open}
+          style={extractedStyles.selectTrigger}
+        >
+          <Copy size={17}>
+            {fieldLabel === 'Payment currency' ? draft.currency : label}
           </Copy>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={fieldLabel}
-            accessibilityValue={{ text: label }}
-            accessibilityState={{ expanded }}
-            onPress={open}
-            style={extractedStyles.selectTrigger}
-          >
-            <Copy size={17}>
-              {fieldLabel === 'Payment currency' ? draft.currency : label}
-            </Copy>
-            <SourceCustomIcon
-              name="chevron-down"
-              size={20}
-              color={tokens.text}
-            />
-          </Pressable>
-        </View>
-      );
+          <SourceCustomIcon name="chevron-down" size={20} color={tokens.text} />
+        </Pressable>
+      </View>
+    );
   const paymentSelectPanel =
     (
       title: string,
@@ -533,7 +543,16 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       active={props.isActive}
       topInset={props.screenTopInset}
       style={
-        step === 'recipient' ? { backgroundColor: tokens.surface } : undefined
+        bounded
+          ? [
+              step === 'recipient'
+                ? { backgroundColor: tokens.surface }
+                : undefined,
+              { width: '100%', maxWidth: 640, alignSelf: 'center' },
+            ]
+          : step === 'recipient'
+            ? { backgroundColor: tokens.surface }
+            : undefined
       }
       headerBackground={step === 'recipient' ? tokens.surface : undefined}
       titleStyle={

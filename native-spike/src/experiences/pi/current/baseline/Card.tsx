@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Platform,
-  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -25,6 +24,7 @@ import { SoftShadow } from '../../../../universal/SoftShadow';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { carouselOffsets } from '../../cz/evo-2027/accounts/Carousel';
+import { useMouseCarousel } from '../../cz/evo-2027/mouseCarousel';
 import type { CurrentScreenProps } from '../contracts';
 import {
   bankingProducts,
@@ -79,9 +79,8 @@ function CardCarousel({
   renderItem: (card: BankingCard) => React.ReactNode;
 }) {
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null),
-    scrollLeft = useRef(0),
-    dragOrigin = useRef(0),
-    suppressClickUntil = useRef(0);
+    scrollLeft = useRef(0);
+  const suppressClickUntil = useRef(0);
   const [viewport, setViewport] = useState(375),
     offsets = useMemo(
       () => carouselOffsets(items.length, viewport, CARD_GEOMETRY),
@@ -89,6 +88,18 @@ function CardCarousel({
     );
   const selectedIndex = useRef(items.findIndex(card => card.id === selectedId));
   selectedIndex.current = items.findIndex(card => card.id === selectedId);
+  const { containerRef, panHandlers, trackOffset } = useMouseCarousel({
+    rail,
+    offsets,
+    onSelect: index => {
+      const card = items[index];
+      if (card) {
+        suppressClickUntil.current = Date.now() + 80;
+        scrollLeft.current = offsets[index] ?? 0;
+        onSelect(card);
+      }
+    },
+  });
   const nearest = (x: number) =>
     offsets.reduce(
       (best, offset, index) =>
@@ -100,55 +111,25 @@ function CardCarousel({
   const select = (index: number, animated = true) => {
     const card = items[index];
     if (card) {
+      const offset = offsets[index] ?? 0;
       onRequestSelect(card);
-      rail.current?.scrollTo({ x: offsets[index] ?? 0, y: 0, animated });
+      scrollLeft.current = offset;
+      trackOffset(offset);
+      rail.current?.scrollTo({ x: offset, y: 0, animated });
     }
   };
-  const latest = useRef({ offsets, nearest, select });
-  latest.current = { offsets, nearest, select };
-  const drag = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_event, gesture) =>
-          Platform.OS === 'web' &&
-          Math.abs(gesture.dx) > 4 &&
-          Math.abs(gesture.dx) > Math.abs(gesture.dy),
-        onPanResponderGrant: () => {
-          dragOrigin.current = scrollLeft.current;
-          suppressClickUntil.current = Infinity;
-        },
-        onPanResponderMove: (_event, gesture) =>
-          rail.current?.scrollTo({
-            x: Math.max(
-              0,
-              Math.min(
-                latest.current.offsets.at(-1) ?? 0,
-                dragOrigin.current - gesture.dx,
-              ),
-            ),
-            y: 0,
-            animated: false,
-          }),
-        onPanResponderRelease: () => {
-          suppressClickUntil.current = Date.now() + 80;
-          latest.current.select(latest.current.nearest(scrollLeft.current));
-        },
-        onPanResponderTerminate: () => {
-          suppressClickUntil.current = Date.now() + 80;
-          latest.current.select(latest.current.nearest(scrollLeft.current));
-        },
-      }),
-    [],
-  );
   useEffect(() => {
+    const offset = offsets[selectedIndex.current] ?? 0;
+    scrollLeft.current = offset;
+    trackOffset(offset);
     rail.current?.scrollTo({
-      x: offsets[selectedIndex.current] ?? 0,
+      x: offset,
       y: 0,
       animated: selectionRequest > 0,
     });
-  }, [offsets, selectionRequest]);
+  }, [offsets, selectionRequest, trackOffset]);
   return (
-    <View {...drag.panHandlers}>
+    <View ref={containerRef} {...panHandlers}>
       <ScrollView
         ref={rail}
         horizontal
@@ -167,6 +148,7 @@ function CardCarousel({
         contentContainerStyle={styles.rail}
         onScroll={event => {
           scrollLeft.current = event.nativeEvent.contentOffset.x;
+          trackOffset(scrollLeft.current);
           const card = items[nearest(scrollLeft.current)];
           if (card && card.id !== selectedId) onSelect(card);
         }}
@@ -231,6 +213,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
   );
   useEffect(() => {
     setSelected(initial);
+    setSelectionRequest(value => value + 1);
     setAuthCard(null);
     setSensitiveCard(null);
   }, [initial, host.country]);

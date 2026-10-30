@@ -3,6 +3,8 @@ export interface DuoPreviewViewport {
   width: number
   height: number
   rightInset: number
+  /** Space above the app controls for the illustrative system strip. */
+  systemRailTop?: number
   /** Existing authoring/reference unit for bounded components, not a universal app-column width. */
   referenceWidth: number
 }
@@ -22,7 +24,12 @@ export function duoPreviewViewport(
 ): DuoPreviewViewport | undefined {
   if (!isDuoPreview(id)) return undefined
   const innerPortrait = id === 'apple-foldable-open' && size.height > size.width
-  return { ...size, rightInset: innerPortrait ? 0 : 84, referenceWidth: 375 }
+  return {
+    ...size,
+    rightInset: innerPortrait ? 0 : 84,
+    referenceWidth: 375,
+    systemRailTop: innerPortrait ? 0 : id === 'apple-foldable-closed' ? 152 : 110,
+  }
 }
 
 export function resolveDuoContent(viewport: DuoPreviewViewport, screen?: string) {

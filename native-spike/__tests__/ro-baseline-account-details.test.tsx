@@ -461,6 +461,24 @@ test('account information carries source current-account figures and its connect
   await act(() => tree.unmount());
 });
 
+test('account information fields sit 16px below the title frame', async () => {
+  const props = host({
+    route: { screen: 'account-info', params: { productId: 'acc-1' } },
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
+  });
+  const fieldsFrame = tree.root.findAll(
+    node =>
+      typeof node.type === 'string' &&
+      node.props.style &&
+      StyleSheet.flatten(node.props.style).paddingHorizontal === 24,
+  )[0]!;
+  expect(StyleSheet.flatten(fieldsFrame.props.style).paddingTop).toBe(16);
+  await act(() => tree.unmount());
+});
+
 test.each([
   ['saving_account', 3],
   ['term_deposit', 13],

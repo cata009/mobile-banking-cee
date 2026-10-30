@@ -1,6 +1,11 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
+import { StyleSheet } from 'react-native';
 import Home from '../src/experiences/pi/cz/evo-2027/home/Home';
+import {
+  DuoPreviewProvider,
+  DuoLocalViewportProvider,
+} from '../src/universal/DuoPreview';
 import {
   DEFAULT_CZECH_COUNTS,
   type CzechNativeScreenProps,
@@ -46,6 +51,41 @@ async function render(extra: Partial<CzechNativeScreenProps> = {}) {
 }
 afterEach(async () => {
   await act(() => mounted.splice(0).forEach(t => t.unmount()));
+});
+test('Duo layout adapts product groups to available width and preserves the selected tab', async () => {
+  const input = props({
+    route: { screen: 'home', params: { tab: 'accounts' } },
+  });
+  const renderPose = (width: number, height: number, rightInset: number) => (
+    <DuoPreviewProvider
+      value={{ width, height, rightInset, referenceWidth: 375 }}
+    >
+      <DuoLocalViewportProvider
+        value={{ width: width - rightInset, height, left: 0, top: 0 }}
+      >
+        <Home {...input} />
+      </DuoLocalViewportProvider>
+    </DuoPreviewProvider>
+  );
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(renderPose(951, 669, 84));
+  });
+  mounted.push(tree);
+  expect(
+    StyleSheet.flatten(
+      tree.root.findByProps({ testID: 'evo-home-product-grid' }).props.style,
+    ).flexDirection,
+  ).toBe('row');
+  await act(() => button(tree, 'Savings').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Total savings');
+  await act(() => tree.update(renderPose(669, 951, 0)));
+  expect(
+    StyleSheet.flatten(
+      tree.root.findByProps({ testID: 'evo-home-product-grid' }).props.style,
+    ).flexDirection,
+  ).toBeUndefined();
+  expect(JSON.stringify(tree.toJSON())).toContain('Total savings');
 });
 test('CZ Source account fixtures and exact currency balances open the matching account', async () => {
   const { tree, input } = await render({

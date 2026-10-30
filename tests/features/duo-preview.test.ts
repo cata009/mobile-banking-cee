@@ -60,4 +60,9 @@ describe('Duo baseline adaptation geometry', () => {
     expect(duoPreviewViewport('apple-foldable-open', { width: 951, height: 669 })?.rightInset).toBe(84)
     expect(duoPreviewViewport('iphone-16', { width: 393, height: 852 })).toBeUndefined()
   })
+  it('reserves enough space for the camera and system status on the cover', () => {
+    expect(duoPreviewViewport('apple-foldable-closed', { width: 466, height: 678 })?.systemRailTop).toBe(152)
+    expect(duoPreviewViewport('apple-foldable-open', { width: 951, height: 669 })?.systemRailTop).toBe(110)
+    expect(duoPreviewViewport('apple-foldable-open', { width: 669, height: 951 })?.systemRailTop).toBe(0)
+  })
 })

@@ -4,6 +4,7 @@ import { Text } from './Typography';
 import type { Themed } from './types';
 import { styles } from './styles';
 import { resolveHeaderTitleAccessibility } from '@/app/components/contracts/headerTitleAccessibility';
+import { useEvoDuoBackAction } from './EvoDuoNavigation';
 
 export function Header({
   tokens,
@@ -22,6 +23,7 @@ export function Header({
   headerSubtitle,
   collapsedTitleOpacity,
   largeTitleColor,
+  duoActionActive = true,
 }: Themed & {
   title: string;
   onBack: () => void;
@@ -38,7 +40,9 @@ export function Header({
   headerSubtitle?: React.ReactNode;
   collapsedTitleOpacity?: number;
   largeTitleColor?: string;
+  duoActionActive?: boolean;
 }) {
+  const duoBack = useEvoDuoBackAction(onBack, showBack && duoActionActive);
   const progress = Math.max(0, Math.min(1, collapsedTitleProgress));
   const titleOpacity =
     collapsedTitleOpacity ?? (renderLargeTitle ? progress : 1);
@@ -57,7 +61,7 @@ export function Header({
           }}
         >
           <View style={s.currentNavigation}>
-            {showBack ? (
+            {showBack && !duoBack ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={backLabel}
@@ -168,7 +172,7 @@ export function Header({
         { borderBottomColor: tokens.border },
       ]}
     >
-      {showBack ? (
+      {showBack && !duoBack ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={backLabel}

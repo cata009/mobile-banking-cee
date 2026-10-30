@@ -9,6 +9,7 @@ import { sourceColor } from './sourceColor';
 import { Text } from './Typography';
 import { resolveHeaderTitleAccessibility } from '@/app/components/contracts/headerTitleAccessibility';
 import { HEADER_ACTIONS_CONTRACT } from '@/app/components/contracts/headerActions';
+import { useEvoDuoBackAction } from './EvoDuoNavigation';
 
 /** Isolated Native geometry; sticky anchoring/blur and safe area belong to the host. */
 export function BaselinePageHeader({
@@ -31,6 +32,7 @@ export function BaselinePageHeader({
   headerSubtitle,
   safeAreaReserve,
   dark = false,
+  duoActionActive = true,
   ...options
 }: PageHeaderOptions & {
   title: string;
@@ -55,8 +57,13 @@ export function BaselinePageHeader({
   headerSubtitle?: React.ReactNode;
   safeAreaReserve?: number;
   dark?: boolean;
+  duoActionActive?: boolean;
 }) {
   const contract = resolvePageHeader(options);
+  const duoBack = useEvoDuoBackAction(
+    onBack,
+    contract.showBack && duoActionActive,
+  );
   const titleAccessibility = resolveHeaderTitleAccessibility({
     largeTitleRendered: contract.shouldRenderLargeTitle,
     largeTitleOpacity: contract.largeTitleOpacity,
@@ -87,7 +94,7 @@ export function BaselinePageHeader({
   const stickyStyle: ViewStyle = {
     width: '100%',
     paddingTop: contract.includeSafeArea
-      ? safeAreaReserve ?? contract.safeAreaFallback
+      ? (safeAreaReserve ?? contract.safeAreaFallback)
       : 0,
     backgroundColor:
       contract.variant === 'dark'
@@ -150,18 +157,19 @@ export function BaselinePageHeader({
       {title}
     </Text>
   );
-  const backAction = contract.showBack ? (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={backLabel}
-      onPress={onBack}
-      style={actionStyle}
-    >
-      <SourceCustomIcon name={backIconName} size={20} color={iconColor} />
-    </Pressable>
-  ) : (
-    <View style={actionStyle} />
-  );
+  const backAction =
+    contract.showBack && !duoBack ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={backLabel}
+        onPress={onBack}
+        style={actionStyle}
+      >
+        <SourceCustomIcon name={backIconName} size={20} color={iconColor} />
+      </Pressable>
+    ) : (
+      <View style={actionStyle} />
+    );
   return (
     <>
       <View style={stickyStyle}>

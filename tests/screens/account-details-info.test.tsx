@@ -232,6 +232,32 @@ describe("Native account information in the Web host", () => {
     expect(screen.queryByRole("heading", { name: "Accounts" })).not.toBeInTheDocument();
   });
 
+  it("selects the next Native account when its carousel is dragged with a mouse", async () => {
+    const { container } = render(
+      <AccountDetailScreen
+        selectedProductId="acc-1"
+        onBack={() => undefined}
+        onDetailsClick={() => undefined}
+        onOptionsClick={() => undefined}
+      />,
+      { wrapper: AppProviders },
+    );
+    await asyncNativeReady(container);
+
+    const rail = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel"]');
+    const first = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel-acc-1"]');
+    const second = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel-acc-2"]');
+    expect(rail).toBeInTheDocument();
+    expect(first).toHaveAttribute('aria-selected', 'true');
+    expect(second).toHaveAttribute('aria-selected', 'false');
+
+    fireEvent.mouseDown(rail!, { button: 0, clientX: 350, clientY: 100 });
+    fireEvent.mouseMove(document, { buttons: 1, clientX: 20, clientY: 100 });
+    fireEvent.mouseUp(document, { button: 0, clientX: 20, clientY: 100 });
+
+    await waitFor(() => expect(second).toHaveAttribute('aria-selected', 'true'));
+  });
+
   it("copies from the account product carousel", async () => {
     const { container } = render(
       <AccountDetailScreen

@@ -27,11 +27,49 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('plain data shell to Native root bridge', () => {
+  it.each([
+    ['CZ', 'release-future-evo-2027', true],
+    ['CZ', 'release-future-cz-robo', false],
+    ['RS', 'release-future-evo-2027', false],
+  ] as const)(
+    'passes Duo geometry only to the intended Evo experience for %s %s',
+    async (country, release, expected) => {
+      render(
+        <DemoProvider initialState={{ product: 'PI', country, release, scenario: 'active', designSystem: 'current' }}>
+          <LanguageProvider>
+            <NavigationProvider initialScreen="homepage">
+              <DevicePreviewProvider initialProfileId="apple-foldable-open">
+                <NativeDemoSurface deviceMode={false} />
+              </DevicePreviewProvider>
+            </NavigationProvider>
+          </LanguageProvider>
+        </DemoProvider>,
+      )
+      await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(1))
+      const snapshot = mock.mount.mock.calls[0]![1] as NativeDemoSnapshot
+      expect(Boolean(snapshot.duoPreview)).toBe(expected)
+      if (expected) expect(snapshot.duoPreview).toMatchObject({ width: 951, height: 669, rightInset: 84 })
+    },
+  )
   it('keeps the current view mounted until a rebuilt Native module is ready', async () => {
-    render(<DemoProvider><LanguageProvider><NavigationProvider initialScreen="homepage"><DevicePreviewProvider><NativeDemoSurface deviceMode={false} /></DevicePreviewProvider></NavigationProvider></LanguageProvider></DemoProvider>)
+    render(
+      <DemoProvider>
+        <LanguageProvider>
+          <NavigationProvider initialScreen="homepage">
+            <DevicePreviewProvider>
+              <NativeDemoSurface deviceMode={false} />
+            </DevicePreviewProvider>
+          </NavigationProvider>
+        </LanguageProvider>
+      </DemoProvider>,
+    )
     await waitFor(() => expect(mock.mount).toHaveBeenCalledTimes(1))
     let finish!: (module: { version: 1; mountCurrentApplication: typeof mock.mount }) => void
-    mock.load.mockReturnValueOnce(new Promise(resolve => { finish = resolve }))
+    mock.load.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve
+      }),
+    )
     act(() => window.dispatchEvent(new Event('native-demo:built')))
     expect(mock.unmount).not.toHaveBeenCalled()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()

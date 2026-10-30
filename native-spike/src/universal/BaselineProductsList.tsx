@@ -1,6 +1,11 @@
 import React, { Children, useEffect, useRef } from 'react';
 import { Animated, Easing, View } from 'react-native';
-import { resolveProductsList } from '@/app/components/contracts/productsList';
+import {
+  resolveProductListStackRole,
+  resolveProductsList,
+} from '@/app/components/contracts/productsList';
+import type { ProductCardStackRole } from '@/app/components/contracts/productCard';
+import { BaselineProductCard } from './BaselineProductCard';
 import type {
   ProductCardVariant,
   ProductCardStyle,
@@ -35,6 +40,11 @@ export function BaselineProductsList({
       showTotal,
       hasTotalData: Boolean(totalData),
     });
+  const isProductCardStack =
+    products.length > 1 &&
+    products.every(
+      child => React.isValidElement(child) && child.type === BaselineProductCard,
+    );
   const progress = useRef(new Animated.Value(isOpen ? 1 : 0)).current;
   useEffect(() => {
     const motion = Animated.timing(progress, {
@@ -75,20 +85,27 @@ export function BaselineProductsList({
     opacity: progress,
     paddingTop: progress.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, state.evolution ? 0 : 2],
+      outputRange: [0, isProductCardStack || state.evolution ? 0 : 2],
     }),
+  };
+  const stackSeparator = {
+    borderTopWidth: 0.5,
+    borderColor: sourceColor('var(--uc-border-muted)', dark),
   };
   const borderStyle = state.evolution
     ? {
         borderTopWidth: 1,
         borderColor: sourceColor('var(--uc-border-muted)', dark),
       }
-    : undefined;
+    : isProductCardStack
+      ? stackSeparator
+      : undefined;
   const legacyTotalStyle = {
     padding: 16,
     gap: 4,
     borderBottomLeftRadius: 4,
     borderBottomRightRadius: 4,
+    ...(isProductCardStack ? stackSeparator : {}),
     backgroundColor: sourceColor('var(--uc-surface)', dark),
   };
   const total = totalData ? (
@@ -100,12 +117,29 @@ export function BaselineProductsList({
       dark={dark}
     />
   ) : null;
+  const hasTotal = Boolean(state.showTotal && total);
+  const withStackRole = (child: React.ReactNode, productIndex: number) => {
+    if (
+      !React.isValidElement<{ stackRole?: ProductCardStackRole }>(child) ||
+      child.type !== BaselineProductCard
+    ) {
+      return child;
+    }
+    return React.cloneElement(child, {
+      stackRole: resolveProductListStackRole({
+        productIndex,
+        productCount: products.length,
+        isOpen,
+        hasTotal,
+      }),
+    });
+  };
   if (state.single) return <View style={gutter}>{children}</View>;
   const viewStyle1 = { position: 'relative' } as const;
-  const viewStyle2 = { gap: state.gap } as const;
+  const viewStyle2 = { gap: isProductCardStack ? 0 : state.gap } as const;
   return (
     <View>
-      <View style={gutter}>{products[0]}</View>
+      <View style={gutter}>{withStackRole(products[0], 0)}</View>
       <View style={viewStyle1}>
         <Animated.View
           pointerEvents={isOpen ? 'none' : 'auto'}
@@ -129,7 +163,7 @@ export function BaselineProductsList({
           <View style={viewStyle2}>
             {products.slice(1).map((child, index) => (
               <View key={index} style={borderStyle}>
-                {child}
+                {withStackRole(child, index + 1)}
               </View>
             ))}
             {state.showTotal ? (

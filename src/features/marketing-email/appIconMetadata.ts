@@ -346,7 +346,7 @@ export const APP_ICON_METADATA: readonly AppIconMetadata[] = [
     source: 'custom',
     width: 20,
     height: 20,
-    usage: ['Evo2027PaymentsHub'],
+    usage: ['Evo2027PaymentsHub', 'PI Baseline Payments shortcut'],
   },
   {
     name: 'payment-card-repayment',

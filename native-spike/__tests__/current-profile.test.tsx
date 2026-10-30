@@ -14,6 +14,7 @@ import {
 } from '@/app/config/documentsConfig';
 import { getMessagesConfigForCountry } from '@/app/config/messagesConfig';
 import { DeleteActionReveal } from '../src/universal/DeleteActionReveal';
+import { BaselineMoreCard } from '../src/universal/BaselineMoreCard';
 import { getTutorialsForCountry } from '@/app/config/tutorialsConfig';
 import {
   getAvailableLanguages,
@@ -149,6 +150,9 @@ test.each(countries)(
   async country => {
     const { tree, props } = await render('profile', country);
     const prefix = 'ro-more-card-';
+    const expectedCards = getMoreCardsForCountry(country);
+    if (country === 'RO')
+      expectedCards.splice(expectedCards.indexOf('tutorial'), 0, 'my-requests');
     expect(
       tree.root
         .findAll(
@@ -157,7 +161,15 @@ test.each(countries)(
             n.props.testID?.startsWith(prefix),
         )
         .map(n => n.props.testID),
-    ).toEqual(getMoreCardsForCountry(country).map(id => `${prefix}${id}`));
+    ).toEqual(expectedCards.map(id => `${prefix}${id}`));
+    if (country === 'RO') {
+      const contractWithdrawal = tree.root
+        .findAllByType(BaselineMoreCard)
+        .find(card => card.props.variant === 'my-requests');
+      expect(contractWithdrawal?.props.title).toBe(
+        translation(country, 'en', 'more.cards.contractWithdrawal'),
+      );
+    }
     const documentsTitle = translation(country, 'en', 'more.cards.documents');
     await press(
       tree,

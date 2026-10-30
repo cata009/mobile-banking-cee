@@ -18,6 +18,7 @@ export default createMarketEnglishTranslations({
     thirdPartyConsent: 'Third party consents',
     digitalActivities: 'Digital activity record',
     myRequests: 'Product applications and cancellations',
+    contractWithdrawal: 'Contract withdrawal',
     tutorial: 'Tutorials',
   },
   advisor: {

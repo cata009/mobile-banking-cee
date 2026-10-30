@@ -48,6 +48,13 @@ export default function More(host: CurrentScreenProps) {
   const [width, setWidth] = useState(375);
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const onPrimaryNavigationChange = host.onPrimaryNavigationChange;
+  const configuredCards = getMoreCardsForCountry(host.country);
+  const cards: MoreCardType[] =
+    host.country === 'RO' && !configuredCards.includes('my-requests')
+      ? configuredCards.flatMap(card =>
+          card === 'tutorial' ? ['my-requests', card] : [card],
+        )
+      : configuredCards;
   useEffect(() => {
     onPrimaryNavigationChange?.(overlay !== 'logout');
     return () => onPrimaryNavigationChange?.(true);
@@ -88,14 +95,18 @@ export default function More(host: CurrentScreenProps) {
         contentContainerStyle={s.grid}
         showsVerticalScrollIndicator={false}
       >
-        {getMoreCardsForCountry(host.country).map(card => (
+        {cards.map(card => (
           <RoMoreCard
             key={card}
             card={card}
-            title={host.t(
-              `more.cards.${labels[card].key}`,
-              labels[card].fallback,
-            )}
+            title={
+              host.country === 'RO' && card === 'my-requests'
+                ? host.t('more.cards.contractWithdrawal', 'Contract withdrawal')
+                : host.t(
+                    `more.cards.${labels[card].key}`,
+                    labels[card].fallback,
+                  )
+            }
             width={(width - 32 - 15 * (columns - 1)) / columns}
             dark={dark}
             badgeCount={

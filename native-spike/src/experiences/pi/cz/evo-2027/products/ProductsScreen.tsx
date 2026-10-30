@@ -25,14 +25,13 @@ import { evoTokens as tokens } from '../home/tokens';
 import { Glyph, IconAction, textStyles as t } from '../home/Primitives';
 import { SourcePhoto } from './SourcePhoto';
 import Prime from './Prime';
+import {
+  useDuoPreview,
+  useDuoLocalViewport,
+} from '../../../../../universal/DuoPreview';
 
 type ViewKind =
-  | 'shelf'
-  | 'category'
-  | 'search'
-  | 'shopsmart'
-  | 'partner-offers'
-  | 'prime';
+  'shelf' | 'category' | 'search' | 'shopsmart' | 'partner-offers' | 'prime';
 const viewKind = (value?: string): ViewKind =>
   ['category', 'search', 'shopsmart', 'partner-offers', 'prime'].includes(
     value ?? '',
@@ -79,6 +78,9 @@ function ProductRail({
 }
 
 export default function ProductsScreen(host: CzechNativeScreenProps) {
+  const duo = useDuoPreview();
+  const viewport = useDuoLocalViewport();
+  const wide = !!duo && !!viewport && viewport.width >= duo.referenceWidth * 2;
   const [view, setView] = useState<ViewKind>(() =>
     viewKind(host.route.params?.view),
   );
@@ -203,12 +205,12 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
     view === 'search'
       ? 'Search products'
       : view === 'category'
-      ? category.title
-      : view === 'shopsmart'
-      ? 'ShopSmart'
-      : view === 'partner-offers'
-      ? 'Partner offers'
-      : 'Offers';
+        ? category.title
+        : view === 'shopsmart'
+          ? 'ShopSmart'
+          : view === 'partner-offers'
+            ? 'Partner offers'
+            : 'Offers';
   return (
     <View style={[s.root, { paddingTop: host.screenTopInset ?? 0 }]}>
       <Header
@@ -256,7 +258,10 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
       <ScrollView
         key={view + categoryId}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.content}
+        contentContainerStyle={[
+          s.content,
+          wide && (view === 'shelf' || offersView) && s.wideContent,
+        ]}
       >
         {view === 'shelf' ? (
           <>
@@ -381,31 +386,37 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                 { value: 'home', label: 'Home & living' },
               ]}
             />
-            {offers.map(offer => (
-              <Pressable
-                key={offer.id}
-                accessibilityRole="button"
-                onPress={() => {}}
-                style={s.offer}
-              >
-                <SourcePhoto asset={offer.imageSrc} height={130} />
-                <View style={s.cardCopy}>
-                  <Text style={[t.body, t.strong]}>{offer.merchant}</Text>
-                  <Text style={[t.title, sourceStyles.fontSize22lineHeight26]}>
-                    {offer.title}
-                  </Text>
-                  {offer.pillLabel && (
-                    <Text style={[t.body, t.strong, { color: tokens.accent }]}>
-                      {offer.pillLabel}
+            <View style={[s.offersList, wide && s.wideOffersList]}>
+              {offers.map(offer => (
+                <Pressable
+                  key={offer.id}
+                  accessibilityRole="button"
+                  onPress={() => {}}
+                  style={[s.offer, wide && s.wideOffer]}
+                >
+                  <SourcePhoto asset={offer.imageSrc} height={130} />
+                  <View style={s.cardCopy}>
+                    <Text style={[t.body, t.strong]}>{offer.merchant}</Text>
+                    <Text
+                      style={[t.title, sourceStyles.fontSize22lineHeight26]}
+                    >
+                      {offer.title}
                     </Text>
-                  )}
-                  <Text style={[t.body, t.muted]}>{offer.statusText}</Text>
-                  {offer.distance && (
-                    <Text style={[t.body, t.muted]}>{offer.distance}</Text>
-                  )}
-                </View>
-              </Pressable>
-            ))}
+                    {offer.pillLabel && (
+                      <Text
+                        style={[t.body, t.strong, { color: tokens.accent }]}
+                      >
+                        {offer.pillLabel}
+                      </Text>
+                    )}
+                    <Text style={[t.body, t.muted]}>{offer.statusText}</Text>
+                    {offer.distance && (
+                      <Text style={[t.body, t.muted]}>{offer.distance}</Text>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+            </View>
             {offers.length === 0 && (
               <Text style={[t.body, t.muted]}>No offers found</Text>
             )}
@@ -427,6 +438,10 @@ const s = StyleSheet.create({
     paddingBottom: 24,
     gap: 28,
   },
+  wideContent: { maxWidth: '100%' },
+  offersList: { gap: 16 },
+  wideOffersList: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  wideOffer: { width: '48%' },
   card: {
     borderRadius: 8,
     borderWidth: 1,

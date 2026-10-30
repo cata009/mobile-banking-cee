@@ -16,6 +16,8 @@ import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
 import { RoPayIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoPayIcon';
 import { RoPaymentOptionIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoPaymentOptionIcon';
 import { RoBillIcon } from '../src/experiences/pi/current/baseline/payments/hub/RoBillIcon';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
+import { sourceColor } from '../src/universal/sourceColor';
 
 function host(view = 'overview'): CurrentScreenProps {
   return {
@@ -64,6 +66,29 @@ function mount(h: CurrentScreenProps) {
   });
   return tree;
 }
+it('uses the foreign-payment action glyph and the recurrent-payment glyph in white shortcut bubbles', () => {
+  const tree = mount(host());
+  try {
+    const shortcutColor = sourceColor('var(--uc-text-inverse)', false);
+    const shortcutIcons = tree.root.findAllByType(SourceCustomIcon);
+    expect(
+      shortcutIcons.some(
+        icon =>
+          icon.props.name === 'new-payment-foreign' &&
+          icon.props.color === shortcutColor,
+      ),
+    ).toBe(true);
+    expect(
+      shortcutIcons.some(
+        icon =>
+          icon.props.name === 'payment-recurrent' &&
+          icon.props.color === shortcutColor,
+      ),
+    ).toBe(true);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
 it('retains Source baseline template metadata and passes the complete selection identity to the domestic route', () => {
   const h = host('templates'),
     tree = mount(h);

@@ -168,7 +168,7 @@ export const PAYMENTS_CUSTOM_ICONS = {
     /* Artwork is drawn on a 32 grid but only occupies 6→26; cropping to that box
        is what makes it read at the same size as its neighbours on the hub grid. */
     viewBox: '6 6 20 20',
-    usage: ['Evo2027PaymentsHub'],
+    usage: ['Evo2027PaymentsHub', 'PI Baseline Payments shortcut'],
     notes:
       'Recurrent payments had been borrowing the Templates glyph, so two different journeys sat on the hub grid under the same mark.',
     render: () => (

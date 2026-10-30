@@ -313,7 +313,25 @@ test.each(['credit_card', 'debit_card'] as const)(
   },
 );
 
-test('card carousel selects continuously during scroll and desktop pointer drag settles on Source offsets', async () => {
+test('card information fields sit 16px below the title frame', async () => {
+  const props = host({
+    route: { screen: 'card-info', params: { productId: 'card-credit-1' } },
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(React.createElement(CardInfo!, props));
+  });
+  const fieldsFrame = tree.root.findAll(
+    node =>
+      typeof node.type === 'string' &&
+      node.props.style &&
+      StyleSheet.flatten(node.props.style).paddingHorizontal === 24,
+  )[0]!;
+  expect(StyleSheet.flatten(fieldsFrame.props.style).paddingTop).toBe(16);
+  await act(() => tree.unmount());
+});
+
+test('card carousel selects continuously during scroll and touch responder drag settles on Source offsets', async () => {
   const original = Platform.OS;
   Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
   const create = jest.spyOn(PanResponder, 'create');
@@ -335,30 +353,35 @@ test('card carousel selects continuously during scroll and desktop pointer drag 
       screen: 'card-options',
       params: { productId: cards[1]!.id },
     });
-    const gesture = create.mock.calls[0]![0];
+    const gesture = create.mock.calls.at(-1)![0];
+    const event = { nativeEvent: { pageX: 300 } } as never;
     expect(
-      gesture.onMoveShouldSetPanResponder?.(
-        {} as never,
+      gesture.onMoveShouldSetPanResponderCapture?.(
+        event,
         { dx: 24, dy: 1 } as never,
       ),
     ).toBe(true);
     expect(
-      gesture.onMoveShouldSetPanResponder?.(
-        {} as never,
+      gesture.onMoveShouldSetPanResponderCapture?.(
+        event,
         { dx: 1, dy: 24 } as never,
       ),
     ).toBe(false);
     await act(() => {
-      gesture.onPanResponderGrant?.({} as never, {} as never);
-    });
-    await act(() => {
-      gesture.onPanResponderMove?.({} as never, { dx: -150, dy: 0 } as never);
+      gesture.onStartShouldSetPanResponderCapture?.(event, {} as never);
+      gesture.onPanResponderMove?.(
+        event,
+        { dx: -150, dy: 0, moveX: 150 } as never,
+      );
     });
     await act(() =>
       rail!.props.onScroll({ nativeEvent: { contentOffset: { x: 378 } } }),
     );
     await act(() => {
-      gesture.onPanResponderRelease?.({} as never, {} as never);
+      gesture.onPanResponderRelease?.(
+        event,
+        { dx: -150, dy: 0, moveX: 150 } as never,
+      );
     });
     await act(() => button(tree, 'Options').props.onPress());
     expect(props.onNavigate).toHaveBeenLastCalledWith({

@@ -31,6 +31,10 @@ import {
 import { czechBankingHost } from '../../../current/banking/czechHost';
 import { assistantAvailable } from '../../../current/coapping/model';
 import { openCurrentForYou } from '../../../current/coapping/contextHelp';
+import {
+  useDuoPreview,
+  useDuoLocalViewport,
+} from '../../../../../universal/DuoPreview';
 export interface CzechCardPorts {
   authenticate: typeof authenticateNativeBiometric;
   privacy: typeof setNativeScreenshotsAllowed;
@@ -79,6 +83,9 @@ const cardArtwork = StyleSheet.create({
     gap: 16,
     alignItems: 'center',
   },
+  wideOverview: { flexDirection: 'row', alignItems: 'center' },
+  wideCarousel: { width: '55%', minWidth: 0 },
+  wideSummary: { width: '45%' },
   amount: {
     alignSelf: 'stretch',
     gap: 2,
@@ -100,6 +107,9 @@ export default function CardScreen(
     ports?: CzechCardPorts;
   },
 ) {
+  const duo = useDuoPreview();
+  const viewport = useDuoLocalViewport();
+  const wide = !!duo && !!viewport && viewport.width >= duo.referenceWidth * 2;
   const {
     route,
     productCounts,
@@ -123,8 +133,8 @@ export default function CardScreen(
     route.screen === 'card-info'
       ? 'info'
       : route.screen === 'card-options'
-      ? 'options'
-      : 'main',
+        ? 'options'
+        : 'main',
   );
   const [movement, setMovement] = useState<AccountTransaction | null>(null),
     [verified, setVerified] = useState(false),
@@ -144,8 +154,8 @@ export default function CardScreen(
       sourceRows !== undefined
         ? sourceRows.map(row => row.transaction)
         : card
-        ? cardMovements(card, products)
-        : [],
+          ? cardMovements(card, products)
+          : [],
     ledger = ledgerSource.map(transaction => {
       const override =
         props.bankingPresentation?.transactionCategoryOverrides?.[
@@ -215,18 +225,18 @@ export default function CardScreen(
         selection.source === 'card' &&
         selection.transaction.id === route.params?.transactionId
           ? selection.transaction
-          : entryLedger.find(tx => tx.id === route.params?.transactionId) ??
-            null;
+          : (entryLedger.find(tx => tx.id === route.params?.transactionId) ??
+            null);
       setMovement(selectedTransaction);
     }
     setView(
       route.screen === 'transaction'
         ? 'movement'
         : route.screen === 'card-info'
-        ? 'info'
-        : route.screen === 'card-options'
-        ? 'options'
-        : 'main',
+          ? 'info'
+          : route.screen === 'card-options'
+            ? 'options'
+            : 'main',
     );
     setVerified(false);
     generation.current++;
@@ -360,63 +370,69 @@ export default function CardScreen(
               {formatMaskedCardNumber(card.accountNumber)}
             </Copy>
           </View>
-          <Carousel
-            items={cards}
-            selectedId={card.id}
-            geometry={CARD_GEOMETRY}
-            onSelect={value => setId(value.id)}
-            label={value => `Card ${value.id}`}
-            renderItem={value => (
-              <View style={cardArtwork.frame}>
-                <SoftShadow
-                  width={219}
-                  height={138}
-                  radius={5.67}
-                  offsetY={11.265}
-                  blur={11.265}
-                  color="#000000"
-                  opacity={0.2}
-                />
-                <View
-                  style={[
-                    cardArtwork.clip,
-                    Platform.OS !== 'android' && cardArtwork.shadow,
-                  ]}
-                >
-                  <CardArt card={value} />
-                </View>
-              </View>
-            )}
-          />
-          <View style={cardArtwork.summary}>
-            <View style={cardArtwork.amount}>
-              <Copy muted strong size={14} lineHeight={15.5}>
-                Free To Spend
-              </Copy>
-              <Copy strong size={30} lineHeight={30}>
-                {money(available, '', amountsHidden).trim()}{' '}
-                <Copy size={20} lineHeight={30}>
-                  CZK
-                </Copy>
-              </Copy>
+          <View style={wide ? cardArtwork.wideOverview : undefined}>
+            <View style={wide ? cardArtwork.wideCarousel : undefined}>
+              <Carousel
+                items={cards}
+                selectedId={card.id}
+                geometry={CARD_GEOMETRY}
+                onSelect={value => setId(value.id)}
+                label={value => `Card ${value.id}`}
+                renderItem={value => (
+                  <View style={cardArtwork.frame}>
+                    <SoftShadow
+                      width={219}
+                      height={138}
+                      radius={5.67}
+                      offsetY={11.265}
+                      blur={11.265}
+                      color="#000000"
+                      opacity={0.2}
+                    />
+                    <View
+                      style={[
+                        cardArtwork.clip,
+                        Platform.OS !== 'android' && cardArtwork.shadow,
+                      ]}
+                    >
+                      <CardArt card={value} />
+                    </View>
+                  </View>
+                )}
+              />
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Show card details"
-              disabled={busy}
-              onPress={reveal}
-              style={cardArtwork.reveal}
+            <View
+              style={[cardArtwork.summary, wide && cardArtwork.wideSummary]}
             >
-              <Copy strong size={14} lineHeight={15.5} color={tokens.accent}>
-                SHOW CARD DETAILS
-              </Copy>
-            </Pressable>
-            <Indicator
-              ids={cards.map(c => c.id)}
-              selectedId={card.id}
-              onSelect={setId}
-              label="card"
-            />
+              <View style={cardArtwork.amount}>
+                <Copy muted strong size={14} lineHeight={15.5}>
+                  Free To Spend
+                </Copy>
+                <Copy strong size={30} lineHeight={30}>
+                  {money(available, '', amountsHidden).trim()}{' '}
+                  <Copy size={20} lineHeight={30}>
+                    CZK
+                  </Copy>
+                </Copy>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Show card details"
+                disabled={busy}
+                onPress={reveal}
+                style={cardArtwork.reveal}
+              >
+                <Copy strong size={14} lineHeight={15.5} color={tokens.accent}>
+                  SHOW CARD DETAILS
+                </Copy>
+              </Pressable>
+              <Indicator
+                ids={cards.map(c => c.id)}
+                selectedId={card.id}
+                onSelect={setId}
+                label="card"
+              />
+            </View>
           </View>
           <View style={[s.horizontal, extractedStyles.item4]}>
             {[

@@ -37,8 +37,8 @@ const otherIcons = {
   qr: 'payment-create-qr',
   templates: 'payment-templates',
   card: 'payment-card-repayment',
-  standing: 'payment-templates',
-  foreign: 'payment-exchange-rates',
+  standing: 'payment-recurrent',
+  foreign: 'new-payment-foreign',
   exchange: 'payment-exchange-rates',
 };
 const actionIcons = {

@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { Text } from '../../../../../universal/Typography';
 import { Header } from '../../../../../universal/Header';
+import { useEvoDuoCloseAction } from '../../../../../universal/EvoDuoNavigation';
 import { ActionButton } from '../../../../../universal/ActionButton';
 import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { BaselinePill } from '../../../../../universal/BaselinePill';
@@ -160,6 +161,9 @@ export function Page({
   showBack?: boolean;
   backGlyph?: 'back-heavy' | 'close-flow';
 }) {
+  const duoClose = useEvoDuoCloseAction(
+    onClose ?? (showBack && backGlyph === 'close-flow' ? onBack : undefined),
+  );
   const [progress, setProgress] = useState(0);
   const pageScroll = useRef<React.ElementRef<typeof ScrollView>>(null);
   useLayoutEffect(() => {
@@ -192,17 +196,19 @@ export function Page({
         title={progress > 0 ? title : ''}
         collapsedTitleProgress={progress}
         onBack={onBack}
-        showBack={showBack}
+        showBack={showBack && !(duoClose && backGlyph === 'close-flow')}
         trailing={
           onClose ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-              onPress={onClose}
-              style={ui.headerControl}
-            >
-              <InvestmentGlyph name="close-flow" size={20} />
-            </Pressable>
+            !duoClose ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                onPress={onClose}
+                style={ui.headerControl}
+              >
+                <InvestmentGlyph name="close-flow" size={20} />
+              </Pressable>
+            ) : undefined
           ) : onHelp ? (
             <Pressable
               accessibilityRole="button"

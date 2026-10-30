@@ -151,6 +151,17 @@ export interface TranslationKeys {
         useBeneficiary: string;
         sendMoney: string;
         forBeneficiary: string;
+        templateActions: string;
+        beneficiaryActions: string;
+        deleteTemplate: string;
+        deleteBeneficiary: string;
+        deleteDialog: {
+          templateTitle: string;
+          templateBody: string;
+          beneficiaryTitle: string;
+          beneficiaryBody: string;
+          confirm: string;
+        };
       };
       exchangeRates: {
         title: string;
@@ -402,6 +413,7 @@ export interface TranslationKeys {
       thirdPartyConsent: string;
       digitalActivities: string;
       myRequests: string;
+      contractWithdrawal: string;
       tutorial: string;
     };
   };

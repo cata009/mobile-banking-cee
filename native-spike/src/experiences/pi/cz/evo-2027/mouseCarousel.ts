@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { PanResponder, Platform, ScrollView, View } from 'react-native';
 import type React from 'react';
 import { useDemoCanvas } from '../../../../universal/DemoViewport';
@@ -145,11 +145,12 @@ export function useMouseCarousel({
       mouseActive.current = false;
     };
   }, [controller]);
+  const trackOffset = useCallback((x: number) => {
+    current.current = x;
+  }, []);
   return {
     containerRef,
     panHandlers: controller.drag.panHandlers,
-    trackOffset: (x: number) => {
-      current.current = x;
-    },
+    trackOffset,
   };
 }

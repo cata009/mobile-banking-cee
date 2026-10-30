@@ -22,6 +22,7 @@ function normalized(html: string) {
   return html
     .replace(/:[\w]+:/g, ':generated:')
     .replace(/-r[\w]+-/g, '-generated-')
+    .replace(/class="([^"]*)"/g, (_, value: string) => `class="${value.trim()}"`)
     .replace(/\s+/g, ' ')
 }
 const data = {
@@ -34,6 +35,30 @@ const data = {
 }
 const account = { accountName: 'Current account', accountNumber: 'RO12 UNCR 1234', subAccount: '01' }
 describe('banking composition frozen preservation', () => {
+  it('joins expanded legacy products and leaves only the stack ends rounded', () => {
+    const { container, unmount } = render(
+      <ProductsList
+        isOpen
+        showTotal
+        totalData={{ integer: '2,400', decimals: '.00', currency: 'RON' }}
+      >
+        <ProductCard {...data} title="First" />
+        <ProductCard {...data} title="Second" />
+      </ProductsList>,
+    )
+    const cards = Array.from(container.querySelectorAll('div[class*="rounded-"]'))
+    expect(cards.map(card => card.className)).toEqual([
+      expect.stringContaining('rounded-t-[8px]'),
+      expect.stringContaining('rounded-none'),
+    ])
+    expect(container.querySelector('div[class*="border-t-[0.5px]"]')).toBeTruthy()
+    expect(container.querySelector('div[style*="border-top"]')?.getAttribute('style')).toContain(
+      '0.5px solid var(--uc-border-muted)',
+    )
+    const totalSurface = container.querySelector('div[style*="border-radius"]')
+    expect(totalSurface?.getAttribute('style')).toContain('border-radius: 0 0 4px 4px')
+    unmount()
+  })
   it.each(['legacy', 'evolution'] as const)('retains %s PI/SME stack/action/footer and privacy strings', (variant) => {
     for (const productStyle of ['pi', 'sme'] as const)
       for (const stackRole of ['single', 'first', 'middle', 'last'] as const)
@@ -54,6 +79,17 @@ describe('banking composition frozen preservation', () => {
             })),
           }
           const { container, rerender, unmount } = render(<FrozenProduct {...props} />)
+          if (variant === 'legacy' && stackRole !== 'single') {
+            const frozenCard = container.firstElementChild as HTMLElement
+            frozenCard.classList.replace(
+              'rounded-[8px]',
+              stackRole === 'first'
+                ? 'rounded-t-[8px]'
+                : stackRole === 'last'
+                  ? 'rounded-b-[8px]'
+                  : 'rounded-none',
+            )
+          }
           // Only the approved original Figma deltas; the frozen fixture stays intact.
           if (variant === 'evolution') {
             const title = screen.getByText(props.title)

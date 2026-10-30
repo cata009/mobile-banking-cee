@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import Renderer, { act } from 'react-test-renderer';
 import { BaselineProductCard } from '../src/universal/BaselineProductCard';
 import { BaselineProductsList } from '../src/universal/BaselineProductsList';
@@ -49,6 +50,44 @@ describe('isolated Native banking compositions', () => {
     });
     expect(JSON.stringify(tree.toJSON())).toContain('Single');
     expect(JSON.stringify(tree.toJSON())).not.toContain('999');
+    act(() => tree.unmount());
+  });
+  it('joins expanded legacy products and their total into one rounded stack', () => {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <BaselineProductsList
+          isOpen
+          showTotal
+          totalData={{ integer: '300', decimals: '.00', currency: 'RON' }}
+        >
+          <BaselineProductCard title="First" icon={null} accountNumber="RO1" amount="100" decimals=".00" currency="RON" />
+          <BaselineProductCard title="Second" icon={null} accountNumber="RO2" amount="200" decimals=".00" currency="RON" />
+        </BaselineProductsList>,
+      );
+    });
+    expect(
+      tree.root.findAllByType(BaselineProductCard).map(card => card.props.stackRole),
+    ).toEqual(['first', 'middle']);
+    const cards = tree.root.findAllByType(BaselineProductCard);
+    const firstShell = cards[0].findAllByType(View).find(node => node.props.style?.borderTopLeftRadius !== undefined);
+    const secondShell = cards[1].findAllByType(View).find(node => node.props.style?.borderTopLeftRadius !== undefined);
+    expect(firstShell?.props.style).toMatchObject({ borderTopLeftRadius: 8, borderBottomLeftRadius: 0 });
+    expect(secondShell?.props.style).toMatchObject({ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 });
+    const separators = tree.root
+      .findAllByType(View)
+      .filter(node => node.props.style?.borderTopWidth === 0.5);
+    expect(separators).toHaveLength(2);
+    expect(
+      separators.every(node => typeof node.props.style.borderColor === 'string'),
+    ).toBe(true);
+    const totalSurface = tree.root.findAllByType(View).find(
+      node => node.props.style?.borderBottomLeftRadius === 4,
+    );
+    expect(totalSurface?.props.style).toMatchObject({
+      borderBottomLeftRadius: 4,
+      borderBottomRightRadius: 4,
+    });
     act(() => tree.unmount());
   });
   it('stops action and copy activation from reaching owners', () => {

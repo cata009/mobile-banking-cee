@@ -130,6 +130,7 @@ const sk: TranslationKeys = {
       thirdPartyConsent: 'Suhlas s tretimi stranami',
       digitalActivities: 'Zaznam digitalnej aktivity',
       myRequests: 'Moje ziadosti',
+      contractWithdrawal: 'Odstúpenie od zmluvy',
       tutorial: 'Navody',
     },
   },

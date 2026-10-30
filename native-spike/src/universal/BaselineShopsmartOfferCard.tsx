@@ -59,6 +59,9 @@ export function BaselineShopsmartOfferCard({
     flexDirection: 'column',
     overflow: 'hidden',
     borderRadius: contract.radius,
+    borderStyle: 'solid',
+    borderWidth: contract.borderWidth,
+    borderColor: contract.borderColor,
     backgroundColor: sourceColor('var(--uc-surface)', dark),
     boxShadow: variant === 'partner' ? '0 1px 2px rgba(0,0,0,.08)' : undefined,
   };

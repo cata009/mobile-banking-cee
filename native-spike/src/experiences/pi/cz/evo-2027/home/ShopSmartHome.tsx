@@ -18,19 +18,26 @@ import { SourcePhoto } from '../products/SourcePhoto';
 import { evoTokens as tokens } from './tokens';
 import { textStyles as t } from './Primitives';
 import { useMouseCarousel } from '../mouseCarousel';
+import {
+  useDuoLocalViewport,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 
 export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
   const [filter, setFilter] = useState<'popular' | ShopSmartOfferCategory>(
     'popular',
   );
   const { width } = useWindowDimensions();
+  const duo = useDuoPreview();
+  const localViewport = useDuoLocalViewport();
   const copy = createEvoTranslations(host.language ?? 'en').shopsmart;
   const offers = getProductsMenuForCountry('CZ').shopSmartOfferCards;
   const visible =
     filter === 'popular'
       ? offers
       : offers.filter(offer => offer.categories.includes(filter));
-  const cardWidth = Math.min(528, width - 32) - 24;
+  const availableWidth = duo && localViewport ? localViewport.width : width;
+  const cardWidth = Math.max(0, Math.min(528, availableWidth - 32) - 24);
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const mouse = useMouseCarousel({
     rail,

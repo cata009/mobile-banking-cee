@@ -20,6 +20,7 @@ const market = {
     thirdPartyConsent: 'Third party consent',
     digitalActivities: 'Digital activity record',
     myRequests: 'My applications',
+    contractWithdrawal: 'Contract withdrawal',
     tutorial: 'Tutorials',
   },
   advisor: {

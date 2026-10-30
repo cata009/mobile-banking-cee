@@ -154,7 +154,7 @@ export default function ProductCard({
 
   return (
     <div 
-      className={`flex flex-col items-start gap-[4px] self-stretch rounded-[8px] bg-[var(--uc-surface-raised)] transition-opacity ${onClick ? "cursor-pointer hover:opacity-90" : ""}`}
+      className={`flex flex-col items-start gap-[4px] self-stretch ${state.radiusClass} bg-[var(--uc-surface-raised)] transition-opacity${onClick ? " cursor-pointer hover:opacity-90" : ""}`}
       style={{
         padding: '16px'
       }}

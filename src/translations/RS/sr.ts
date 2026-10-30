@@ -106,6 +106,7 @@ const sr: TranslationKeys = {
       thirdPartyConsent: 'Saglasnost za trece strane',
       digitalActivities: 'Zapis digitalnih aktivnosti',
       myRequests: 'Moje prijave',
+      contractWithdrawal: 'Povlačenje ugovora',
       tutorial: 'Tutorijali',
     },
   },

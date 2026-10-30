@@ -75,6 +75,7 @@ export const STANDARD_ENGLISH_MORE_CARDS: TranslationKeys['more']['cards'] = {
   thirdPartyConsent: 'Consent to third parties',
   digitalActivities: 'Digital activity record',
   myRequests: 'My applications',
+  contractWithdrawal: 'Contract withdrawal',
   tutorial: 'Tutorials',
 }
 

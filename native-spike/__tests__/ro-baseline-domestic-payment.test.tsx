@@ -73,16 +73,15 @@ async function change(
   label: string,
   value: string,
 ) {
-  await act(() =>
-    fields(tree)
-      .find(f => f.props.label === label)!
-      .props.onChange(value),
-  );
+  const input =
+    fields(tree).find(f => f.props.ariaLabel === label) ??
+    fields(tree).find(f => f.props.label === label)!;
+  await act(() => input.props.onChange(value));
 }
 beforeEach(() => jest.useFakeTimers());
 afterEach(() => jest.useRealTimers());
 
-test('empty RO draft preserves Source figures, editable payer and mandatory legacy prefix', async () => {
+test('empty RO draft preserves Source figures and uses a single beneficiary IBAN field', async () => {
   const { tree, props } = await render();
   const draft = createEmptyDomesticPaymentDraft(
     'RO',
@@ -93,16 +92,16 @@ test('empty RO draft preserves Source figures, editable payer and mandatory lega
   expect(action(tree).props.disabled).toBe(true);
   for (const [label, value] of [
     ['Beneficiary', 'Alice'],
-    ['Account number (mandatory)', 'abc'],
-    ['Bank code (mandatory)', 'bank'],
+    ['IBAN (mandatory)', 'RO49BACX000008204119876'],
     ['Amount limit', 'word'],
   ])
     await change(tree, label!, value!);
-  expect(action(tree).props.disabled).toBe(true);
-  await change(tree, 'Prefix', 'arbitrary');
   expect(action(tree).props.disabled).toBe(false);
+  expect(fields(tree).some(f => f.props.label === 'Prefix')).toBe(false);
+  expect(fields(tree).some(f => f.props.label === 'Bank code')).toBe(false);
+  expect(fields(tree).some(f => f.props.trailingIconName === 'camera')).toBe(false);
   expect(fields(tree).some(f => f.props.label === 'Due date')).toBe(false);
-  expect(fields(tree).some(f => f.props.trailingIconAction)).toBe(false);
+  expect(fields(tree).some(f => f.props.trailingIconAction)).toBe(true);
   await change(tree, 'Account number', 'custom payer');
   await act(() => action(tree).props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain('custom payer');
@@ -126,8 +125,11 @@ test('redo uses selected Source transaction and retains edits across review back
   expect(
     fields(tree).find(f => f.props.label === 'Amount limit')!.props.value,
   ).toBe(expected.amount);
-  expect(action(tree).props.disabled).toBe(true);
-  await change(tree, 'Prefix', '19');
+  expect(fields(tree).find(f => f.props.label === 'IBAN')!.props.value).toBe(
+    expected.accountNumber,
+  );
+  expect(action(tree).props.disabled).toBe(false);
+  await change(tree, 'IBAN (mandatory)', 'RO49BACX000008204119876');
   await change(tree, 'Amount limit', '1 234,56');
   await act(() => action(tree).props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain(
@@ -162,7 +164,7 @@ test('template selection retains canonical amount and note; signing waits for So
     fields(tree).find(f => f.props.label === 'Information for beneficiary')!
       .props.value,
   ).toBe(expected.informationForBeneficiary);
-  await change(tree, 'Prefix', '19');
+  await change(tree, 'IBAN (mandatory)', 'RO49BACX000008204119876');
   await act(() => action(tree).props.onPress());
   const save = tree.root.findByType(ToggleButton);
   await act(() => save.props.onToggle(true));
@@ -192,7 +194,7 @@ test('host Back consumes review, sign and success steps; remounted review resets
   const localBack = () => register.mock.calls.at(-1)![0] as () => boolean;
   expect(register).toHaveBeenCalledWith(expect.any(Function));
   expect(localBack()()).toBe(false);
-  await change(tree, 'Prefix', '19');
+  await change(tree, 'IBAN (mandatory)', 'RO49BACX000008204119876');
   await act(() => action(tree).props.onPress());
   await act(() => tree.root.findByType(ToggleButton).props.onToggle(true));
   expect(tree.root.findByType(ToggleButton).props.checked).toBe(true);
@@ -200,8 +202,8 @@ test('host Back consumes review, sign and success steps; remounted review resets
   await act(() => expect(localBack()()).toBe(true));
   expect(tree.root.findByType(ToggleButton).props.checked).toBe(false);
   await act(() => expect(localBack()()).toBe(true));
-  expect(fields(tree).find(f => f.props.label === 'Prefix')!.props.value).toBe(
-    '19',
+  expect(fields(tree).find(f => f.props.label === 'IBAN')!.props.value).toBe(
+    'RO49BACX000008204119876',
   );
   expect(localBack()()).toBe(false);
   await act(() => action(tree).props.onPress());

@@ -23,12 +23,18 @@ export default function CzechPrimaryNavigation({
   mode,
   bottomInset,
   onSelect,
+  vertical = false,
+  verticalActionCount = 0,
+  verticalTop = 110,
 }: {
   screen: CzechNativeScreen;
   language: 'en' | 'cs';
   mode: 'light' | 'dark' | 'system';
   bottomInset: number;
   onSelect: (screen: CzechNativeScreen) => void;
+  vertical?: boolean;
+  verticalActionCount?: number;
+  verticalTop?: number;
 }) {
   const system = useColorScheme();
   const dark = mode === 'dark' || (mode === 'system' && system === 'dark');
@@ -39,9 +45,12 @@ export default function CzechPrimaryNavigation({
   return (
     <View
       style={[
-        s.dock,
+        vertical ? s.verticalDock : s.dock,
         {
-          bottom: bottomInset + (screen === 'home' || screen === 'pfm' ? 8 : 0),
+          ...(vertical ? { top: verticalTop + verticalActionCount * 60 } : {}),
+          bottom: vertical
+            ? 12
+            : bottomInset + (screen === 'home' || screen === 'pfm' ? 8 : 0),
         },
       ]}
     >
@@ -49,7 +58,7 @@ export default function CzechPrimaryNavigation({
         accessibilityLabel={
           language === 'cs' ? 'Hlavní navigace' : 'Primary navigation'
         }
-        style={[s.bar, { backgroundColor }]}
+        style={[vertical ? s.verticalBar : s.bar, { backgroundColor }]}
       >
         {items.map(item => {
           const selected = item.screen === screen;
@@ -62,10 +71,12 @@ export default function CzechPrimaryNavigation({
               accessibilityState={{ selected }}
               aria-selected={selected}
               onPress={() => onSelect(item.screen)}
-              style={s.item}
+              style={vertical ? s.verticalItem : s.item}
             >
               <SourceCustomIcon name={item.icon} size={22} color={color} />
-              <Text style={[s.label, { color }]}>{labels[item.key]}</Text>
+              {!vertical && (
+                <Text style={[s.label, { color }]}>{labels[item.key]}</Text>
+              )}
             </Pressable>
           );
         })}
@@ -80,6 +91,30 @@ const s = StyleSheet.create({
     right: 6,
     bottom: 0,
     alignItems: 'center',
+  },
+  verticalDock: {
+    position: 'absolute',
+    right: 0,
+    top: 110,
+    width: 84,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  verticalBar: {
+    flexDirection: 'column',
+    width: 64,
+    borderRadius: 26,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: '#cccccc80',
+    alignItems: 'center',
+  },
+  verticalItem: {
+    width: 56,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
   },
   bar: {
     flexDirection: 'row',
