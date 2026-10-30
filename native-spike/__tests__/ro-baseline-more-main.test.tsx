@@ -7,9 +7,13 @@ import {
   createCurrentTranslator,
 } from '../src/experiences/pi/current/context';
 import { BaselineDialog } from '../src/universal/BaselineDialog';
+import { BaselineMoreCard } from '../src/universal/BaselineMoreCard';
+import { BaselineNavigationRow } from '../src/universal/BaselineNavigationRow';
+import { SETTINGS_SECTIONS } from '@/app/config/settingsConfig';
 import More, {
   RoMoreCard,
 } from '../src/experiences/pi/current/baseline/more/More';
+import Settings from '../src/experiences/pi/current/baseline/more/Settings';
 import Tutorials from '../src/experiences/pi/current/baseline/more/Tutorials';
 import { moreAssets } from '../src/experiences/pi/current/profile/assets';
 import { resolveMoreCard } from '@/app/components/contracts/moreCard';
@@ -64,6 +68,26 @@ function mount(props = host()) {
   });
   return tree;
 }
+
+it('renders baseline Settings item titles in uppercase while preserving descriptions', () => {
+  const h = host();
+  let tree!: Renderer.ReactTestRenderer;
+  act(() => {
+    tree = Renderer.create(<Settings {...h} />);
+  });
+  try {
+    const expectedTitles = SETTINGS_SECTIONS.flatMap(section =>
+      section.items.map(item =>
+        h.t(`runtime.settings.items.${item.id}.title`, item.title).toUpperCase(),
+      ),
+    );
+    const rows = tree.root.findAllByType(BaselineNavigationRow);
+    expect(rows.map(row => row.props.title)).toEqual(expectedTitles);
+    expect(rows[0]?.props.description).not.toBe(rows[0]?.props.title);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
 
 it.each([
   'contacts',
@@ -175,7 +199,7 @@ it('anchors the GDPR repeating artwork to the original right and bottom offsets 
   }
 });
 
-it('keeps the five Romanian cards ordered, preserves the document badge and routes only implemented actions', () => {
+it('adds Contract withdrawal before Tutorials in RO and preserves the document badge and implemented routes', () => {
   const h = host(),
     tree = mount(h);
   try {
@@ -185,8 +209,16 @@ it('keeps the five Romanian cards ordered, preserves the document badge and rout
       'documents',
       'settings',
       'gdpr-consent',
+      'my-requests',
       'tutorial',
     ]);
+    const contractWithdrawal = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(card => card.props.variant === 'my-requests')!;
+    expect(contractWithdrawal.props.title).toBe('Contract withdrawal');
+    expect(contractWithdrawal.findByType(Image).props.source).toBe(
+      moreAssets['my-requests'],
+    );
     expect(
       tree.root.findByProps({ testID: 'ro-more-documents-badge' }).props
         .children,
@@ -205,6 +237,18 @@ it('keeps the five Romanian cards ordered, preserves the document badge and rout
     expect(h.onNavigate).toHaveBeenNthCalledWith(2, { screen: 'documents' });
     expect(h.onNavigate).toHaveBeenNthCalledWith(3, { screen: 'settings' });
     expect(h.onNavigate).toHaveBeenNthCalledWith(4, { screen: 'messages' });
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('localizes the Romanian Contract withdrawal card title', () => {
+  const tree = mount(host('ro'));
+  try {
+    const card = tree.root
+      .findAllByType(RoMoreCard)
+      .find(node => node.props.card === 'my-requests');
+    expect(card?.props.title).toBe('Retragerea contractului');
   } finally {
     act(() => tree.unmount());
   }

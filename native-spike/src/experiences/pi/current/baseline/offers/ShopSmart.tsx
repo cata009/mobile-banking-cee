@@ -57,11 +57,12 @@ export default function ShopSmart({
   );
   const dark = host.tokens.background === '#121212';
   const stickySearchStyle =
-    Platform.OS === 'web' && preview?.stickySearchTop
+    Platform.OS === 'web'
       ? ({
           position: 'sticky',
-          top: preview.stickySearchTop,
+          top: preview?.stickySearchTop ?? 0,
           zIndex: 1,
+          backgroundColor: sourceColor('var(--uc-surface)', dark),
         } as unknown as ViewStyle)
       : undefined;
   return (
@@ -104,7 +105,7 @@ export default function ShopSmart({
           <View
             style={[
               styles.searchBand,
-              preview?.searchSurface
+              preview?.searchSurface && Platform.OS !== 'web'
                 ? { backgroundColor: sourceColor('var(--uc-surface)', dark) }
                 : null,
               stickySearchStyle,

@@ -4,6 +4,10 @@ import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
+import {
+  useDuoLocalViewport,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 import { getEvoSavingAddMoneyReadiness } from '@/features/accounts-payments/evoAccountActions';
 import { toIsoDateOnly } from '@/app/utils/scheduleFormatting';
 import type { CurrentAccount, SavingAccount } from '@/data/products';
@@ -29,6 +33,9 @@ export default function SavingsAddMoney({
   active?: boolean;
   topInset?: number;
 }) {
+  const duo = useDuoPreview();
+  const local = useDuoLocalViewport();
+  const wide = !!duo && !!local && local.width >= 600;
   const [amountText, setAmount] = useState(''),
     [sourceId, setSource] = useState(sourceAccounts[0]?.id ?? ''),
     [schedule, setSchedule] = useState<StandingOrderDraft | null>(null),
@@ -41,6 +48,9 @@ export default function SavingsAddMoney({
     });
   return (
     <Page
+      style={
+        wide ? { width: '100%', maxWidth: 640, alignSelf: 'center' } : undefined
+      }
       title={
         complete
           ? schedule

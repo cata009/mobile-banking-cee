@@ -36,9 +36,13 @@ vi.mock('@/hooks/useProducts', () => ({
 function AppProviders({
   children,
   release = 'release-current',
-}: PropsWithChildren<{ release?: 'release-current' | 'release-future-evo-2027' }>) {
+  country = 'CZ',
+}: PropsWithChildren<{
+  release?: 'release-current' | 'release-future-evo-2027'
+  country?: 'CZ' | 'RO'
+}>) {
   return (
-    <DemoProvider initialState={{ country: 'CZ', product: 'PI', release }}>
+    <DemoProvider initialState={{ country, product: 'PI', release }}>
       <LanguageProvider initialLanguage="en">{children}</LanguageProvider>
     </DemoProvider>
   )
@@ -140,6 +144,30 @@ describe('card-detail boundaries on the Native Web host', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Go to account 3' }))
     await waitFor(() => expect(onActiveCardChange).toHaveBeenLastCalledWith(secondDebitCard))
+  })
+
+  it('selects another RO card when its Native carousel is dragged with a mouse', async () => {
+    mockedProductState.categories = [{ key: 'cards', title: 'Cards', products: mockProducts }]
+    const sourceCards = mockProducts.filter(product => product.type === 'debit_card' || product.type === 'credit_card')
+    const { container } = render(
+      <CardDetailScreen selectedCardId={sourceCards[0]!.id} onBack={() => undefined} />,
+      { wrapper: ({ children }) => <AppProviders country="RO">{children}</AppProviders> },
+    )
+    await waitForNativeScreen(container)
+
+    const rail = container.querySelector<HTMLElement>('[data-testid="ro-card-carousel"]')
+    const selectedBefore = container.querySelector<HTMLElement>('[data-testid^="ro-card-carousel-"][aria-selected="true"]')
+    expect(rail).toBeInTheDocument()
+    expect(selectedBefore).toBeInTheDocument()
+
+    fireEvent.mouseDown(rail!, { button: 0, clientX: 300, clientY: 100 })
+    fireEvent.mouseMove(document, { buttons: 1, clientX: 0, clientY: 100 })
+    fireEvent.mouseUp(document, { button: 0, clientX: 0, clientY: 100 })
+
+    await waitFor(() => {
+      const selectedAfter = container.querySelector<HTMLElement>('[data-testid^="ro-card-carousel-"][aria-selected="true"]')
+      expect(selectedAfter).not.toBe(selectedBefore)
+    })
   })
 
   it('keeps the Native card carousel shadow lane above its transaction search', async () => {

@@ -14,6 +14,31 @@ const button = (tree: Renderer.ReactTestRenderer, label?: string) =>
       (!label || node.props.accessibilityLabel === label),
   );
 describe('isolated Native marketing leaves', () => {
+  it('renders a one-pixel ShopSmart card stroke in the canonical charcoal', () => {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <BaselineShopsmartOfferCard
+          merchant="Merchant"
+          title="Title"
+          statusText="Ends soon"
+          imageSrc="original-photo.jpg"
+        />,
+      );
+    });
+    const root = tree.root.findAll(
+      node =>
+        node.props.style &&
+        StyleSheet.flatten(node.props.style).borderRadius === 8,
+    )[0];
+    expect(StyleSheet.flatten(root.props.style)).toMatchObject({
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: '#666666',
+    });
+    act(() => tree.unmount());
+  });
+
   it('uses the shared 350ms timing for animated prelogin entry and selection', () => {
     const timing = jest.spyOn(Animated, 'timing');
     const products = [

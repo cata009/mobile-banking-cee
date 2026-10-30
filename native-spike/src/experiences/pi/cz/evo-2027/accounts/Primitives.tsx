@@ -293,6 +293,7 @@ export function Page({
         renderLargeTitle={false}
         title={offset > 64 ? title : ''}
         onBack={onBack}
+        duoActionActive={active}
         backIcon={<Glyph name="back-heavy" />}
         trailing={trailing}
       />

@@ -85,11 +85,10 @@ async function change(
   label: string,
   value: string,
 ) {
-  await act(() =>
-    fields(tree)
-      .find(field => field.props.label === label)!
-      .props.onChange(value),
-  );
+  const input =
+    fields(tree).find(field => field.props.ariaLabel === label) ??
+    fields(tree).find(field => field.props.label === label)!;
+  await act(() => input.props.onChange(value));
 }
 
 beforeEach(() => jest.useFakeTimers());
@@ -233,9 +232,7 @@ test('keeps the current autonomous flow when no Source event is supplied', async
 
   expect(action(tree).props.label).toBe('Next');
   await change(tree, 'Beneficiary', 'Alice');
-  await change(tree, 'Prefix', '19');
-  await change(tree, 'Account number (mandatory)', '2000145399');
-  await change(tree, 'Bank code (mandatory)', '0292');
+  await change(tree, 'IBAN (mandatory)', 'RO49BACX000008204119876');
   await change(tree, 'Amount limit', '125');
   await act(() => action(tree).props.onPress());
   expect(action(tree).props.label).toBe('Sign');

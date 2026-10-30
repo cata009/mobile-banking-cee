@@ -128,11 +128,13 @@ export function RoBaselineTransactionFilters({
       width: 66,
     } as const;
     const sourceStyle8 = {
+      fontFamily: 'UniCredit-regular',
       fontSize: 14,
       lineHeight: 16,
       color: host.tokens.muted,
     } as const;
     const sourceStyle9 = {
+      fontFamily: 'UniCredit-regular',
       fontSize: 18,
       lineHeight: 22,
       color: host.tokens.text,

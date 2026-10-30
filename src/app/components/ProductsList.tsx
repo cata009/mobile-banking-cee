@@ -1,7 +1,12 @@
-import { ReactNode, Children } from 'react';
+import { Children, cloneElement, isValidElement, type ReactNode } from 'react';
 import StackedProductShadow from '@/app/components/StackedProductShadow';
 import TotalRow from '@/app/components/TotalRow';
-import { resolveProductsList } from '@/app/components/contracts/productsList';
+import ProductCard from '@/app/components/ProductCard';
+import {
+  resolveProductListStackRole,
+  resolveProductsList,
+} from '@/app/components/contracts/productsList';
+import type { ProductCardStackRole } from '@/app/components/contracts/productCard';
 
 interface ProductsListProps {
   children: ReactNode;
@@ -30,6 +35,23 @@ export default function ProductsList({
   const productCount = childrenArray.length;
   const state = resolveProductsList({ productCount, isOpen, variant, showTotal, hasTotalData: Boolean(totalData) });
   const isEvolution = state.evolution;
+  const isProductCardStack =
+    productCount > 1 &&
+    childrenArray.every(child => isValidElement(child) && child.type === ProductCard);
+  const hasTotal = state.showTotal && Boolean(totalData);
+  const withStackRole = (child: ReactNode, productIndex: number) => {
+    if (!isValidElement<{ stackRole?: ProductCardStackRole }>(child) || child.type !== ProductCard) {
+      return child;
+    }
+    return cloneElement(child, {
+      stackRole: resolveProductListStackRole({
+        productIndex,
+        productCount,
+        isOpen,
+        hasTotal,
+      }),
+    });
+  };
 
   // If single product, always show it fully (no total shown even if showTotal is true)
   if (state.single) {
@@ -45,7 +67,7 @@ export default function ProductsList({
     <div>
       {/* First product - always visible */}
       <div className="px-[24px]">
-        {childrenArray[0]}
+        {withStackRole(childrenArray[0], 0)}
       </div>
 
       <div className="relative">
@@ -61,14 +83,23 @@ export default function ProductsList({
           style={{
             maxHeight: `${state.maxHeight}px`,
             opacity: state.opacity,
-            paddingTop: `${state.paddingTop}px`,
+            paddingTop: `${isProductCardStack || isEvolution ? 0 : state.paddingTop}px`,
           }}
           aria-hidden={!isOpen}
         >
-          <div className={isEvolution ? "flex flex-col gap-0" : "flex flex-col gap-[2px]"}>
+          <div className={isEvolution || isProductCardStack ? "flex flex-col gap-0" : "flex flex-col gap-[2px]"}>
             {childrenArray.slice(1).map((child, index) => (
-              <div key={index} className={isEvolution ? "border-t border-[var(--uc-border-muted)]" : undefined}>
-                {child}
+              <div
+                key={index}
+                className={
+                  isProductCardStack
+                    ? 'border-t-[0.5px] border-[var(--uc-border-muted)]'
+                    : isEvolution
+                      ? 'border-t border-[var(--uc-border-muted)]'
+                      : undefined
+                }
+              >
+                {withStackRole(child, index + 1)}
               </div>
             ))}
 
@@ -89,7 +120,10 @@ export default function ProductsList({
                   style={{
                     padding: '16px',
                     gap: '4px',
-                    borderRadius: '0 0 4px 4px'
+                    borderRadius: '0 0 4px 4px',
+                    ...(isProductCardStack
+                      ? { borderTop: '0.5px solid var(--uc-border-muted)' }
+                      : {}),
                   }}
                 >
                   <TotalRow

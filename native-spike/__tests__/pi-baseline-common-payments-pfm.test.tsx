@@ -1,6 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { Image, Platform, StyleSheet } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet } from 'react-native';
 import {
   getPaymentsMenuForCountry,
   getHeroSheetForRelease,
@@ -36,6 +36,10 @@ import { BaselinePaymentHero } from '../src/universal/BaselinePaymentHero';
 import { BaselinePaymentImage } from '../src/universal/BaselinePaymentImage';
 import { BaselineBanner } from '../src/universal/BaselineBanner';
 import { BaselineTextField } from '../src/universal/BaselineTextField';
+import { BaselineSectionDivider } from '../src/universal/BaselineSectionDivider';
+import { BaselineDialog } from '../src/universal/BaselineDialog';
+import { DeleteActionReveal } from '../src/universal/DeleteActionReveal';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { BaselineAmountField } from '../src/universal/BaselineAmountField';
 import { BaselineTransactionRow } from '../src/universal/BaselineTransactionRow';
 import { PrimaryButton } from '../src/universal/PrimaryButton';
@@ -374,6 +378,142 @@ it.each(countries)(
   },
 );
 
+it.each(countries)(
+  '%s pins template search and renders beneficiary profile glyphs at template size',
+  country => {
+    const h = host(country),
+      tree = mount(
+        <RoBaselinePaymentTemplates
+          host={h}
+          onBack={h.onBack}
+          onSelect={jest.fn()}
+        />,
+      );
+    try {
+      expect(tree.root.findByType(ScrollView).props.stickyHeaderIndices).toEqual([
+        1,
+      ]);
+      const icons = tree.root
+        .findAllByType(SourceCustomIcon)
+        .filter(icon => icon.props.name === 'header-profile');
+      const template = tree.root
+        .findAllByType(SourceCustomIcon)
+        .find(icon => icon.props.name === 'payment-templates');
+      expect(icons).toHaveLength(getSavedBeneficiaries(country, false).length);
+      expect(template).toBeDefined();
+      expect(template!.props.width).toBe(20);
+      expect(template!.props.height).toBe(20);
+      expect(
+        icons.every(
+          icon =>
+            icon.props.width === template!.props.width &&
+            icon.props.height === template!.props.height,
+        ),
+      ).toBe(true);
+    } finally {
+      act(() => tree.unmount());
+    }
+  },
+);
+
+it('opens and confirms Delete from the template and beneficiary three-dot actions', () => {
+  const h = host('RO'),
+    template = getPaymentTemplates('RO')[0]!,
+    beneficiary = getSavedBeneficiaries('RO', false)[0]!;
+  const tree = mount(
+    <RoBaselinePaymentTemplates
+      host={h}
+      onBack={h.onBack}
+      onSelect={jest.fn()}
+    />,
+  );
+  try {
+    for (const item of [template, beneficiary]) {
+      const kind = item.kind === 'template' ? 'Template' : 'Beneficiary';
+      const actionsLabel = `${kind} actions ${item.title}`;
+      act(() => button(tree, actionsLabel).props.onPress());
+      const reveal = tree.root
+        .findAllByType(DeleteActionReveal)
+        .find(row => row.props.actionsOpen);
+      expect(reveal).toBeDefined();
+      const deleteLabel = `Delete ${kind.toLowerCase()} ${item.title}`;
+      act(() => button(tree, deleteLabel).props.onPress());
+      const dialog = tree.root.findByType(BaselineDialog);
+      expect(dialog.props.body).toContain(
+        item.kind === 'template' ? item.title : item.beneficiaryName,
+      );
+      act(() => dialog.props.onConfirm());
+      expect(
+        tree.root.findAllByType(Text).some(node => node.props.children === item.title),
+      ).toBe(false);
+    }
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it.each(countries)(
+  '%s uses the shared domestic payment entry layout and grouped account scan affordance',
+  country => {
+    const h = host(country),
+      tree = mount(<RoBaselinePaymentCreateScreen {...h} />);
+    try {
+      expect(
+        tree.root.findAllByType(Text).some(node => node.props.children === 'New beneficiary'),
+      ).toBe(true);
+      expect(tree.root.findAllByType(BaselineSectionDivider)).toHaveLength(0);
+      const beneficiary = field(tree, 'Beneficiary');
+      expect(beneficiary.props.trailingIconAction).toBeDefined();
+      if (country === 'CZ') {
+        for (const label of ['Prefix', 'Account number', 'Bank code'])
+          expect(field(tree, label)).toBeDefined();
+        expect(
+          tree.root
+            .findAllByType(SourceCustomIcon)
+            .filter(node => node.props.name === 'payment-photo-camera'),
+        ).toHaveLength(1);
+      } else {
+        expect(field(tree, 'IBAN')).toBeDefined();
+        expect(
+          tree.root.findAllByType(BaselineTextField).some(node =>
+            ['Prefix', 'Bank code', 'Account number (mandatory)'].includes(
+              node.props.label,
+            ),
+          ),
+        ).toBe(false);
+        expect(
+          tree.root
+            .findAllByType(SourceCustomIcon)
+            .filter(node => node.props.name === 'payment-photo-camera'),
+        ).toHaveLength(0);
+      }
+      expect(
+        tree.root
+          .findAllByType(BaselineTextField)
+          .filter(node => node.props.trailingIconName === 'camera'),
+      ).toHaveLength(0);
+      act(() => beneficiary.props.trailingIconAction.onClick());
+      expect(
+        tree.root.findByType(RoBaselinePaymentTemplates).props.host.country,
+      ).toBe(country);
+    } finally {
+      act(() => tree.unmount());
+    }
+  },
+);
+
+it.each(countries.filter(country => country !== 'CZ'))(
+  '%s keeps the beneficiary IBAN intact when opening a saved beneficiary',
+  country => {
+    const selection = getSavedBeneficiaries(country, false)[0]!;
+    const draft = createTemplateDomesticPaymentDraft(selection, country);
+    expect(draft.recipientAccountMode).toBe('iban');
+    expect(draft.accountNumber).toBe(selection.accountNumber);
+    expect(draft.prefix).toBe('');
+    expect(draft.bankCode).toBe('');
+  },
+);
+
 it.each(['scan-pay', 'between-accounts'] as const)(
   'CZ %s preserves its specific sheet actions and literal banner fallback',
   heroId => {
@@ -508,20 +648,16 @@ it.each(countries)(
       tree = mount(<RoBaselinePaymentCreateScreen {...h} />);
     try {
       act(() => field(tree, 'Beneficiary').props.onChange('Ada'));
-      if (country !== 'CZ')
-        act(() => field(tree, 'Prefix').props.onChange('19'));
-      act(() =>
-        field(
-          tree,
-          country === 'CZ' ? 'Account number' : 'Account number (mandatory)',
-        ).props.onChange('2000145399'),
-      );
-      act(() =>
-        field(
-          tree,
-          country === 'CZ' ? 'Bank code' : 'Bank code (mandatory)',
-        ).props.onChange('2700'),
-      );
+      if (country === 'CZ') {
+        act(() => field(tree, 'Account number').props.onChange('2000145399'));
+        act(() => field(tree, 'Bank code').props.onChange('2700'));
+      } else {
+        act(() =>
+          field(tree, 'IBAN').props.onChange(
+            `${country}49BACX000009310001`,
+          ),
+        );
+      }
       act(() =>
         tree.root.findByType(BaselineAmountField).props.onChange('12,50'),
       );

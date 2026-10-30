@@ -13,6 +13,7 @@ import { futureGainEnabled } from '../future-gain/model';
 import { BaselineL1Header } from '../../../../universal/BaselineL1Header';
 import { BaselineHomeHeader } from './Header';
 import { BaselineHomeBody } from './Body';
+import { useDuoPreview } from '../../../../universal/DuoPreview';
 export function isRoBaselineHome(
   context: Pick<CurrentContext, 'country' | 'release' | 'scenario'>,
 ) {
@@ -32,6 +33,7 @@ export function BaselineHomeFrame({
   primeEntry?: React.ReactNode;
 }) {
   const dark = host.tokens.background === '#121212';
+  const duo = useDuoPreview();
   const page = [styles.page, { backgroundColor: host.tokens.background }];
   const safeAreaInsets = React.useContext(SafeAreaInsetsContext);
   const futureGainPadding: ViewStyle | undefined = futureGainEnabled(host)
@@ -42,7 +44,7 @@ export function BaselineHomeFrame({
       : { paddingBottom: 40 + (safeAreaInsets?.bottom ?? 34) }
     : undefined;
   const reserve = {
-    height: host.screenTopInset,
+    height: duo ? host.screenTopInset : 54,
     backgroundColor: host.tokens.background,
   };
   return (

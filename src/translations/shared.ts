@@ -211,6 +211,17 @@ const EN_RUNTIME: RuntimeTranslations = {
       useBeneficiary: "Use beneficiary",
       sendMoney: "Send money",
       forBeneficiary: "for",
+      templateActions: "Template actions",
+      beneficiaryActions: "Beneficiary actions",
+      deleteTemplate: "Delete template",
+      deleteBeneficiary: "Delete beneficiary",
+      deleteDialog: {
+        templateTitle: "Delete template?",
+        templateBody: "Are you sure you want to delete the payment template ‘{item}’?",
+        beneficiaryTitle: "Delete beneficiary?",
+        beneficiaryBody: "Are you sure you want to delete the saved beneficiary ‘{item}’?",
+        confirm: "Delete",
+      },
     },
     exchangeRates: {
       title: "Exchange rates",
@@ -404,6 +415,23 @@ const EN_RUNTIME: RuntimeTranslations = {
 
 const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslations>>> = {
   it: {
+    payments: {
+      ...EN_RUNTIME.payments,
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Azioni modello',
+        beneficiaryActions: 'Azioni beneficiario',
+        deleteTemplate: 'Elimina modello',
+        deleteBeneficiary: 'Elimina beneficiario',
+        deleteDialog: {
+          templateTitle: 'Eliminare il modello?',
+          templateBody: 'Vuoi eliminare il modello di pagamento “{item}”?',
+          beneficiaryTitle: 'Eliminare il beneficiario?',
+          beneficiaryBody: 'Vuoi eliminare il beneficiario salvato “{item}”?',
+          confirm: 'Elimina',
+        },
+      },
+    },
     messages: {
       ...EN_RUNTIME.messages,
       title: "Messaggi",
@@ -442,7 +470,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
       moneyIn: "Bani intrați",
       noTransactionsForPeriod: "Nu există tranzacții pentru această perioadă",
     },
-    payments: { ...EN_RUNTIME.payments, title: "Plăți", other: "Altele" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Plăți",
+      other: "Altele",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Acțiuni șablon',
+        beneficiaryActions: 'Acțiuni beneficiar',
+        deleteTemplate: 'Șterge șablonul',
+        deleteBeneficiary: 'Șterge beneficiarul',
+        deleteDialog: {
+          templateTitle: 'Ștergi șablonul?',
+          templateBody: 'Sigur vrei să ștergi șablonul de plată „{item}”?',
+          beneficiaryTitle: 'Ștergi beneficiarul?',
+          beneficiaryBody: 'Sigur vrei să ștergi beneficiarul salvat „{item}”?',
+          confirm: 'Șterge',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Oferte" },
     messages: {
       ...EN_RUNTIME.messages,
@@ -467,7 +513,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Zpět", messages: "Zprávy", help: "Nápověda", search: "Hledat", filters: "Filtry", next: "Další", sign: "Podepsat", okGotIt: "Rozumím" },
     accounts: { ...EN_RUNTIME.accounts, title: "Účty" },
     analytics: { ...EN_RUNTIME.analytics, title: "Výdaje", dataFor: "Data pro", moneyOut: "Výdaje", moneyIn: "Příjmy", noTransactionsForPeriod: "Žádné transakce pro toto období" },
-    payments: { ...EN_RUNTIME.payments, title: "Platby", other: "Ostatní" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Platby",
+      other: "Ostatní",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Akce šablony',
+        beneficiaryActions: 'Akce příjemce',
+        deleteTemplate: 'Smazat šablonu',
+        deleteBeneficiary: 'Smazat příjemce',
+        deleteDialog: {
+          templateTitle: 'Smazat šablonu?',
+          templateBody: 'Opravdu chcete smazat platební šablonu „{item}“?',
+          beneficiaryTitle: 'Smazat příjemce?',
+          beneficiaryBody: 'Opravdu chcete smazat uloženého příjemce „{item}“?',
+          confirm: 'Smazat',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Nabídky" },
     messages: {
       ...EN_RUNTIME.messages,
@@ -493,7 +557,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Späť", messages: "Správy", help: "Pomoc", search: "Hľadať", filters: "Filtre", next: "Ďalej", sign: "Podpísať", okGotIt: "Rozumiem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Účty" },
     analytics: { ...EN_RUNTIME.analytics, title: "Výdavky", dataFor: "Dáta pre", moneyOut: "Výdavky", moneyIn: "Príjmy", noTransactionsForPeriod: "Žiadne transakcie za toto obdobie" },
-    payments: { ...EN_RUNTIME.payments, title: "Platby", other: "Ostatné" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Platby",
+      other: "Ostatné",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Akcie šablóny',
+        beneficiaryActions: 'Akcie príjemcu',
+        deleteTemplate: 'Odstrániť šablónu',
+        deleteBeneficiary: 'Odstrániť príjemcu',
+        deleteDialog: {
+          templateTitle: 'Odstrániť šablónu?',
+          templateBody: 'Naozaj chcete odstrániť platobnú šablónu „{item}“?',
+          beneficiaryTitle: 'Odstrániť príjemcu?',
+          beneficiaryBody: 'Naozaj chcete odstrániť uloženého príjemcu „{item}“?',
+          confirm: 'Odstrániť',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponuky" },
     messages: {
       ...EN_RUNTIME.messages,
@@ -519,7 +601,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Vissza", messages: "Üzenetek", help: "Súgó", search: "Keresés", filters: "Szűrők", next: "Tovább", sign: "Aláírás", okGotIt: "Rendben" },
     accounts: { ...EN_RUNTIME.accounts, title: "Számlák" },
     analytics: { ...EN_RUNTIME.analytics, title: "Költések", dataFor: "Adatok", moneyOut: "Kiadások", moneyIn: "Bevételek", noTransactionsForPeriod: "Nincs tranzakció ebben az időszakban" },
-    payments: { ...EN_RUNTIME.payments, title: "Fizetések", other: "Egyéb" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Fizetések",
+      other: "Egyéb",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Sablonműveletek',
+        beneficiaryActions: 'Kedvezményezett-műveletek',
+        deleteTemplate: 'Sablon törlése',
+        deleteBeneficiary: 'Kedvezményezett törlése',
+        deleteDialog: {
+          templateTitle: 'Törli a sablont?',
+          templateBody: 'Biztosan törölni szeretné a(z) „{item}” fizetési sablont?',
+          beneficiaryTitle: 'Törli a kedvezményezettet?',
+          beneficiaryBody: 'Biztosan törölni szeretné a(z) „{item}” mentett kedvezményezettet?',
+          confirm: 'Törlés',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ajánlatok" },
     messages: {
       ...EN_RUNTIME.messages,
@@ -545,7 +645,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Nazad", messages: "Poruke", help: "Pomoć", search: "Pretraga", filters: "Filteri", next: "Dalje", sign: "Potpiši", okGotIt: "Razumem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
     analytics: { ...EN_RUNTIME.analytics, title: "Potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
-    payments: { ...EN_RUNTIME.payments, title: "Plaćanja", other: "Ostalo" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Plaćanja",
+      other: "Ostalo",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Radnje šablona',
+        beneficiaryActions: 'Radnje korisnika',
+        deleteTemplate: 'Obriši šablon',
+        deleteBeneficiary: 'Obriši korisnika',
+        deleteDialog: {
+          templateTitle: 'Obrisati šablon?',
+          templateBody: 'Da li ste sigurni da želite da obrišete šablon plaćanja „{item}”?',
+          beneficiaryTitle: 'Obrisati korisnika?',
+          beneficiaryBody: 'Da li ste sigurni da želite da obrišete sačuvanog korisnika „{item}”?',
+          confirm: 'Obriši',
+        },
+      },
+    },
     investments: {
       ...EN_RUNTIME.investments,
       title: "Investicije",
@@ -595,7 +713,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Nazad", messages: "Poruke", help: "Pomoć", search: "Pretraga", filters: "Filteri", next: "Dalje", sign: "Potpiši", okGotIt: "Razumijem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
     analytics: { ...EN_RUNTIME.analytics, title: "Potrošnja", dataFor: "Podaci za", moneyOut: "Odliv", moneyIn: "Priliv", noTransactionsForPeriod: "Nema transakcija za ovaj period" },
-    payments: { ...EN_RUNTIME.payments, title: "Plaćanja", other: "Ostalo" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Plaćanja",
+      other: "Ostalo",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Radnje šablona',
+        beneficiaryActions: 'Radnje korisnika',
+        deleteTemplate: 'Izbriši šablon',
+        deleteBeneficiary: 'Izbriši korisnika',
+        deleteDialog: {
+          templateTitle: 'Izbrisati šablon?',
+          templateBody: 'Jeste li sigurni da želite izbrisati predložak plaćanja „{item}”?',
+          beneficiaryTitle: 'Izbrisati korisnika?',
+          beneficiaryBody: 'Jeste li sigurni da želite izbrisati spremljenog korisnika „{item}”?',
+          confirm: 'Obriši',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponude" },
     messages: {
       ...EN_RUNTIME.messages,
@@ -621,7 +757,25 @@ const LOCAL_OVERRIDES: Partial<Record<AppLanguage, DeepPartial<RuntimeTranslatio
     actions: { ...EN_RUNTIME.actions, back: "Nazaj", messages: "Sporočila", help: "Pomoč", search: "Iskanje", filters: "Filtri", next: "Naprej", sign: "Podpiši", okGotIt: "Razumem" },
     accounts: { ...EN_RUNTIME.accounts, title: "Računi" },
     analytics: { ...EN_RUNTIME.analytics, title: "Poraba", dataFor: "Podatki za", moneyOut: "Odlivi", moneyIn: "Prilivi", noTransactionsForPeriod: "Ni transakcij za to obdobje" },
-    payments: { ...EN_RUNTIME.payments, title: "Plačila", other: "Ostalo" },
+    payments: {
+      ...EN_RUNTIME.payments,
+      title: "Plačila",
+      other: "Ostalo",
+      templates: {
+        ...EN_RUNTIME.payments.templates,
+        templateActions: 'Dejanja predloge',
+        beneficiaryActions: 'Dejanja upravičenca',
+        deleteTemplate: 'Izbriši predlogo',
+        deleteBeneficiary: 'Izbriši upravičenca',
+        deleteDialog: {
+          templateTitle: 'Izbrišem predlogo?',
+          templateBody: 'Ali ste prepričani, da želite izbrisati plačilno predlogo »{item}«?',
+          beneficiaryTitle: 'Izbrišem upravičenca?',
+          beneficiaryBody: 'Ali ste prepričani, da želite izbrisati shranjenega upravičenca »{item}«?',
+          confirm: 'Izbriši',
+        },
+      },
+    },
     productsMenu: { ...EN_RUNTIME.productsMenu, title: "Ponudbe" },
     messages: {
       ...EN_RUNTIME.messages,

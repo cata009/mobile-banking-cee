@@ -73,6 +73,11 @@ export default function ShopsmartOfferCard({
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={`relative flex h-full w-full max-w-none flex-col overflow-hidden rounded-[8px] bg-[var(--uc-surface)] text-left text-[var(--uc-text)] ${variant === "partner" ? "shadow-[0_1px_2px_rgb(var(--uc-shadow-rgb)/0.08)]" : ""}`}
+      style={{
+        borderStyle: 'solid',
+        borderWidth: contract.borderWidth,
+        borderColor: contract.borderColor,
+      }}
       data-component="ShopsmartOfferCard"
       data-figma-schema={SHOPSMART_OFFER_CARD_SOURCE.schema}
       data-source-node={`${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers1} ${SHOPSMART_OFFER_CARD_SOURCE.sourceNodeIds.offers2}`}

@@ -29,8 +29,11 @@ export interface DomesticPaymentDraft {
   payerAccountNumber: string;
   payerBalance: string;
   beneficiaryName: string;
+  /** CZ local-account part only; blank when the recipient account is an IBAN. */
   prefix: string;
+  /** The full IBAN outside CZ; the main local-account part in CZ. */
   accountNumber: string;
+  /** CZ local-account bank code only; blank when the recipient account is an IBAN. */
   bankCode: string;
   bankName: string;
   amount: string;
@@ -141,6 +144,7 @@ export function createEmptyDomesticPaymentDraft(
 
   return {
     entry: "new",
+    recipientAccountMode: country === "CZ" ? "local" : "iban",
     payerAccountName: payer.name,
     payerAccountNumber: payer.number,
     payerBalance: payer.balance,
@@ -165,12 +169,20 @@ export function createTemplateDomesticPaymentDraft(
   product?: Product | null,
 ): DomesticPaymentDraft {
   const isSavedBeneficiary = selection.kind === "beneficiary";
+  const czechLocalAccount = country === "CZ";
   return {
     ...createEmptyDomesticPaymentDraft(country, product),
+    recipientAccountMode: czechLocalAccount ? "local" : "iban",
     beneficiaryName: selection.beneficiaryName,
-    prefix: isSavedBeneficiary ? selection.paymentAccountPrefix ?? "" : "",
-    accountNumber: isSavedBeneficiary ? selection.paymentAccountNumber ?? selection.accountNumber : selection.accountNumber,
-    bankCode: selection.bankCode,
+    prefix:
+      czechLocalAccount && isSavedBeneficiary
+        ? selection.paymentAccountPrefix ?? ""
+        : "",
+    accountNumber:
+      czechLocalAccount && isSavedBeneficiary
+        ? selection.paymentAccountNumber ?? selection.accountNumber
+        : selection.accountNumber,
+    bankCode: czechLocalAccount ? selection.bankCode : "",
     bankName: selection.bankName,
     recipientKind: selection.recipientKind,
     amount: selection.kind === "template" ? selection.amount : "",
@@ -223,16 +235,22 @@ export function createRedoDomesticPaymentDraft(
   const localRecipientAccount = country === "CZ"
     ? transaction.beneficiaryAccountNumber?.match(/^(\d{2,10})\/(\d{4})$/)
     : null;
+  const czechLocalAccount = country === "CZ";
 
   return {
     entry: "redo",
+    recipientAccountMode: czechLocalAccount ? "local" : "iban",
     payerAccountName: payer.name,
     payerAccountNumber: payer.number,
     payerBalance: payer.balance,
     beneficiaryName: transaction.label,
-    prefix: localRecipientAccount ? "" : country === "CZ" ? "19" : "",
-    accountNumber: localRecipientAccount?.[1] ?? "2000145399",
-    bankCode: localRecipientAccount?.[2] ?? COUNTRY_BANK_CODES[country],
+    prefix: czechLocalAccount ? (localRecipientAccount ? "" : "19") : "",
+    accountNumber: czechLocalAccount
+      ? localRecipientAccount?.[1] ?? "2000145399"
+      : transaction.beneficiaryAccountNumber ?? beneficiaryAccount(country),
+    bankCode: czechLocalAccount
+      ? localRecipientAccount?.[2] ?? COUNTRY_BANK_CODES[country]
+      : "",
     bankName: transaction.beneficiaryBankName ?? COUNTRY_BANK_NAMES[country],
     amount: amount % 1 === 0 ? String(amount) : amount.toFixed(2).replace(".", ","),
     currency: config.currency,

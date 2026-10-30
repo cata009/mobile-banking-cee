@@ -106,6 +106,7 @@ const hu: TranslationKeys = {
       thirdPartyConsent: 'Hozzajarulasok harmadik felekhez',
       digitalActivities: 'Digitalis tevekenysegi naplo',
       myRequests: 'Termek igenylesek es lemondasok',
+      contractWithdrawal: 'Elállás a szerződéstől',
       tutorial: 'Utmutatok',
     },
   },

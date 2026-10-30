@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -36,6 +35,7 @@ import { BaselineCarouselIndicator } from '../../../../universal/BaselineCarouse
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { carouselOffsets } from '../../cz/evo-2027/accounts/Carousel';
+import { useMouseCarousel } from '../../cz/evo-2027/mouseCarousel';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
 
@@ -65,7 +65,6 @@ function AccountCarousel({
   const rail = useRef<React.ElementRef<typeof ScrollView>>(null);
   const [viewport, setViewport] = useState(375);
   const scrollLeft = useRef(0);
-  const dragOrigin = useRef(0);
   const suppressClickUntil = useRef(0);
   const offsets = useMemo(
     () => carouselOffsets(products.length, viewport, geometry),
@@ -73,10 +72,23 @@ function AccountCarousel({
   );
   const selectedIndex = useRef(activeIndex);
   selectedIndex.current = activeIndex;
+  const { containerRef, panHandlers, trackOffset } = useMouseCarousel({
+    rail,
+    offsets,
+    onSelect: index => {
+      const clamped = Math.max(0, Math.min(products.length - 1, index));
+      suppressClickUntil.current = Date.now() + 80;
+      scrollLeft.current = offsets[clamped] ?? 0;
+      onSelect(clamped);
+    },
+  });
   const select = (index: number, animated = true) => {
     const clamped = Math.max(0, Math.min(products.length - 1, index));
+    const offset = offsets[clamped] ?? 0;
     onSelect(clamped);
-    rail.current?.scrollTo({ x: offsets[clamped] ?? 0, y: 0, animated });
+    scrollLeft.current = offset;
+    trackOffset(offset);
+    rail.current?.scrollTo({ x: offset, y: 0, animated });
   };
   const nearest = (x: number) =>
     offsets.reduce(
@@ -86,49 +98,20 @@ function AccountCarousel({
           : best,
       0,
     );
-  const latest = useRef({ select, nearest, offsets });
-  latest.current = { select, nearest, offsets };
-  const drag = useMemo(
-    () =>
-      PanResponder.create({
-        onMoveShouldSetPanResponder: (_event, gesture) =>
-          Platform.OS === 'web' &&
-          Math.abs(gesture.dx) > 4 &&
-          Math.abs(gesture.dx) > Math.abs(gesture.dy),
-        onPanResponderGrant: () => {
-          dragOrigin.current = scrollLeft.current;
-          suppressClickUntil.current = Infinity;
-        },
-        onPanResponderMove: (_event, gesture) => {
-          const max = latest.current.offsets.at(-1) ?? 0;
-          rail.current?.scrollTo({
-            x: Math.max(0, Math.min(max, dragOrigin.current - gesture.dx)),
-            y: 0,
-            animated: false,
-          });
-        },
-        onPanResponderRelease: () => {
-          suppressClickUntil.current = Date.now() + 80;
-          latest.current.select(latest.current.nearest(scrollLeft.current));
-        },
-        onPanResponderTerminate: () => {
-          suppressClickUntil.current = Date.now() + 80;
-          latest.current.select(latest.current.nearest(scrollLeft.current));
-        },
-      }),
-    [],
-  );
   // Indicator/route requests move the rail; the scroll callback only updates selection.
   // Layout changes also recalculate Source's centering and end-clamp.
   useEffect(() => {
+    const offset = offsets[selectedIndex.current] ?? 0;
+    scrollLeft.current = offset;
+    trackOffset(offset);
     rail.current?.scrollTo({
-      x: offsets[selectedIndex.current] ?? 0,
+      x: offset,
       y: 0,
       animated: selectionRequest > 0,
     });
-  }, [offsets, selectionRequest]);
+  }, [offsets, selectionRequest, trackOffset]);
   return (
-    <View {...drag.panHandlers}>
+    <View ref={containerRef} {...panHandlers}>
       <ScrollView
         ref={rail}
         testID="ro-account-carousel"
@@ -146,6 +129,7 @@ function AccountCarousel({
         contentContainerStyle={styles.rail}
         onScroll={event => {
           scrollLeft.current = event.nativeEvent.contentOffset.x;
+          trackOffset(scrollLeft.current);
           onSelect(nearest(scrollLeft.current));
         }}
         onMomentumScrollEnd={() => select(nearest(scrollLeft.current))}

@@ -56,6 +56,10 @@ import {
   BaselineLocalAccountFields,
   type BaselineLocalAccountTouched,
 } from './LocalAccountFields';
+import {
+  BaselineDomesticAccountFields,
+  type BaselineDomesticAccountPart,
+} from './BaselineDomesticAccountFields';
 import { RoBaselinePaymentTemplates } from '../hub/Templates';
 import { AccountSelectionSheet } from '../../AccountSelectionSheet';
 import { isPiBaselineContext } from '../../policy';
@@ -158,6 +162,8 @@ export default function RoBaselinePaymentCreateScreen(
   }, [host.paymentFlow?.draft, host.paymentFlow?.step]);
   const localAccount =
     host.country === 'CZ' && host.release === 'release-current';
+  const czechDomestic = host.country === 'CZ';
+  const recipientPickerAvailable = host.release === 'release-current';
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const flow = (key: string, fallback: string) =>
@@ -262,7 +268,7 @@ export default function RoBaselinePaymentCreateScreen(
     );
   if (step === 'success')
     return <RoBaselinePaymentSuccess host={host} onDone={done} />;
-  if (localAccount && recipientPicker)
+  if (recipientPickerAvailable && recipientPicker)
     return (
       <RoBaselinePaymentTemplates
         host={host}
@@ -297,12 +303,12 @@ export default function RoBaselinePaymentCreateScreen(
     <View
       style={[
         styles.section,
-        localAccount && step === 'create' && key === 'fromAccount'
+        step === 'create' && key === 'fromAccount'
           ? styles.localPayerSection
           : undefined,
       ]}
     >
-      {localAccount && step === 'create' ? (
+      {step === 'create' ? (
         <Text style={strong}>{flow(key, fallback)}</Text>
       ) : (
         <BaselineSectionDivider title={flow(key, fallback)} dark={dark} />
@@ -317,7 +323,7 @@ export default function RoBaselinePaymentCreateScreen(
     <View
       style={[
         styles.field,
-        localAccount && key === 'payerAccountNumber'
+        step === 'create' && key === 'payerAccountNumber'
           ? styles.localPayerField
           : undefined,
       ]}
@@ -351,9 +357,11 @@ export default function RoBaselinePaymentCreateScreen(
         'runtime.transactionDetail.beneficiaryAccountNumber',
         'Beneficiary account number',
       ),
-      [draft.prefix, draft.accountNumber, draft.bankCode]
-        .filter(Boolean)
-        .join('-') || '-',
+      czechDomestic
+        ? [draft.prefix, draft.accountNumber, draft.bankCode]
+            .filter(Boolean)
+            .join('-') || '-'
+        : draft.accountNumber || '-',
     ],
     [
       host.t('runtime.transactionDetail.amount', 'Amount'),
@@ -387,7 +395,7 @@ export default function RoBaselinePaymentCreateScreen(
           onBack={back}
           includeSafeArea
           safeAreaReserve={host.screenTopInset}
-          showHelp={localAccount && step === 'create'}
+          showHelp={step === 'create'}
           renderLargeTitle={false}
           collapsedTitleProgress={progress}
           dark={dark}
@@ -411,7 +419,7 @@ export default function RoBaselinePaymentCreateScreen(
       >
         <View style={{ height: host.screenTopInset + 48 }} />
         <View style={styles.title}>
-          {localAccount && step === 'create' ? (
+          {step === 'create' ? (
             <>
               <Text
                 accessibilityRole="header"
@@ -434,7 +442,7 @@ export default function RoBaselinePaymentCreateScreen(
               { color: color('--uc-text'), opacity: 1 - progress },
             ]}
           >
-            {localAccount && step === 'create'
+            {step === 'create'
               ? flow('newBeneficiary', 'New beneficiary')
               : title}
           </Text>
@@ -456,7 +464,7 @@ export default function RoBaselinePaymentCreateScreen(
                     host.amountsHidden,
                   ),
                   trailingIconName: 'chevron-down-wide',
-                  trailingIconPlacement: localAccount ? 'floating' : 'inline',
+                  trailingIconPlacement: 'floating',
                   ...(isPiBaselineContext(host) && payerAccounts.length
                     ? {
                         selectionControl: {
@@ -469,8 +477,8 @@ export default function RoBaselinePaymentCreateScreen(
                 },
               )}
               {section(
-                localAccount ? 'toBeneficiary' : 'beneficiary',
-                localAccount ? 'TO BENEFICIARY' : 'BENEFICIARY',
+                'toBeneficiary',
+                'TO BENEFICIARY',
               )}
               {field(
                 'beneficiaryName',
@@ -478,17 +486,17 @@ export default function RoBaselinePaymentCreateScreen(
                   'runtime.transactionDetail.beneficiaryName',
                   'Beneficiary',
                 ),
-                localAccount
+                recipientPickerAvailable
                   ? {
-                      trailingIconName: 'chevron-down-wide',
-                      trailingIconPlacement: 'floating',
-                      trailingIconAction: {
-                        ariaLabel: host.t(
-                          'runtime.payments.templates.open',
-                          'Choose beneficiary or template',
-                        ),
-                        onClick: () => setRecipientPicker(true),
-                      },
+                  trailingIconName: 'chevron-down-wide',
+                  trailingIconPlacement: 'floating',
+                  trailingIconAction: {
+                    ariaLabel: host.t(
+                      'runtime.payments.templates.open',
+                      'Choose beneficiary or template',
+                    ),
+                    onClick: () => setRecipientPicker(true),
+                  },
                     }
                   : {},
               )}
@@ -506,23 +514,48 @@ export default function RoBaselinePaymentCreateScreen(
                   }
                   dark={dark}
                 />
+              ) : czechDomestic ? (
+                <BaselineDomesticAccountFields
+                  fields={[
+                    {
+                      id: 'prefix',
+                      label: flow('prefix', 'Prefix'),
+                      value: draft.prefix,
+                      onChange: value => update('prefix', value),
+                    },
+                    {
+                      id: 'accountNumber',
+                      label: host.t(
+                        'runtime.accounts.detailsInfo.accountNumber',
+                        'Account number',
+                      ),
+                      ariaLabel: flow(
+                        'accountNumberMandatory',
+                        'Account number (mandatory)',
+                      ),
+                      value: draft.accountNumber,
+                      onChange: value => update('accountNumber', value),
+                    },
+                    {
+                      id: 'bankCode',
+                      label: flow('bankCode', 'Bank code'),
+                      ariaLabel: flow('bankCodeMandatory', 'Bank code (mandatory)'),
+                      value: draft.bankCode,
+                      onChange: value => update('bankCode', value),
+                    },
+                  ] satisfies BaselineDomesticAccountPart[]}
+                  bankName={draft.bankName}
+                  dark={dark}
+                />
               ) : (
-                <>
-                  {field('prefix', flow('prefix', 'Prefix'))}
-                  {field(
-                    'accountNumber',
-                    flow(
-                      'accountNumberMandatory',
-                      'Account number (mandatory)',
-                    ),
-                    { trailingIconName: 'camera' },
-                  )}
-                  {field(
-                    'bankCode',
-                    flow('bankCodeMandatory', 'Bank code (mandatory)'),
-                    { helperText: draft.bankName, trailingIconName: 'camera' },
-                  )}
-                </>
+                field(
+                  'accountNumber',
+                  host.t('runtime.accounts.detailsInfo.iban', 'IBAN'),
+                  {
+                    ariaLabel: flow('ibanMandatory', 'IBAN (mandatory)'),
+                    helperText: draft.bankName,
+                  },
+                )
               )}
               {section('paymentDetails', 'PAYMENT DETAILS')}
               <View style={styles.field}>

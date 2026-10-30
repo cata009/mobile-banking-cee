@@ -57,12 +57,10 @@ export function BaselineProductCard({
     padding: state.padding,
     gap: state.gap,
     backgroundColor: color(state.backgroundToken),
-    borderTopLeftRadius: state.evolution ? state.topRadius : state.radius,
-    borderTopRightRadius: state.evolution ? state.topRadius : state.radius,
-    borderBottomLeftRadius: state.evolution ? state.bottomRadius : state.radius,
-    borderBottomRightRadius: state.evolution
-      ? state.bottomRadius
-      : state.radius,
+    borderTopLeftRadius: state.topRadius,
+    borderTopRightRadius: state.topRadius,
+    borderBottomLeftRadius: state.bottomRadius,
+    borderBottomRightRadius: state.bottomRadius,
     borderTopWidth: state.hasSeparator ? 0.5 : 0,
     borderColor: color('--uc-border-muted'),
   };

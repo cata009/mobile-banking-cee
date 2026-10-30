@@ -137,5 +137,5 @@ const styles = StyleSheet.create({
   webScroll: { transform: 'none' as never },
   title: { paddingHorizontal: 16, paddingVertical: 8 },
   titleText: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 31 },
-  fields: { paddingHorizontal: 24, paddingTop: 46, paddingBottom: 40 },
+  fields: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 },
 });

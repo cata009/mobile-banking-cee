@@ -11,6 +11,8 @@ export const useDuoPreview = () => useContext(Context);
 const LocalContext = createContext<
   ReturnType<typeof resolveDuoContent> | undefined
 >(undefined);
+/** Allows adaptive experience shells to provide their actual content bounds. */
+export const DuoLocalViewportProvider = LocalContext.Provider;
 export const useDuoLocalViewport = () => useContext(LocalContext);
 
 /** Adds grouping only in Duo; the normal phone keeps its original native view tree. */

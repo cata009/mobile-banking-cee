@@ -7,6 +7,9 @@ import {
 } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { CZECH_ACCOUNTS_ADAPTER } from '../src/experiences/pi/cz/evo-2027/accounts/adapter';
 import AccountScreen from '../src/experiences/pi/cz/evo-2027/accounts/AccountScreen';
+import Carousel from '../src/experiences/pi/cz/evo-2027/accounts/Carousel';
+import { DuoPreviewProvider } from '../src/universal/DuoPreview';
+import { View } from 'react-native';
 import SavingsAddMoney from '../src/experiences/pi/cz/evo-2027/payments/SavingsAddMoney';
 import { MovementDetail } from '../src/experiences/pi/cz/evo-2027/accounts/Movements';
 import TransactionsScreen, {
@@ -36,6 +39,44 @@ export const propsFor = (
   onProfile: jest.fn(),
   onAmountsToggle: jest.fn(),
   onChanged: jest.fn(),
+});
+test('Duo carousel scales inactive product uniformly and preserves selection', async () => {
+  const onSelect = jest.fn();
+  const items = [{ id: 'one' }, { id: 'two' }];
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <DuoPreviewProvider
+        value={{ width: 951, height: 669, rightInset: 84, referenceWidth: 375 }}
+      >
+        <Carousel
+          items={items}
+          selectedId="one"
+          onSelect={onSelect}
+          geometry={{
+            width: 311,
+            height: 197,
+            gap: 16,
+            gutter: 24,
+            inactiveScale: 0.84,
+          }}
+          label={item => item.id}
+          renderItem={() => <View />}
+        />
+      </DuoPreviewProvider>,
+    );
+  });
+  const second = tree.root.findAll(
+    node =>
+      node.props.accessibilityLabel === 'two' &&
+      typeof node.props.onPress === 'function',
+  )[0]!;
+  expect(StyleSheet.flatten(second.props.style).transform).toEqual([
+    { scale: 0.84 },
+  ]);
+  await act(() => second.props.onPress());
+  expect(onSelect).toHaveBeenCalledWith(items[1]);
+  await act(() => tree.unmount());
 });
 export const press = (tree: Renderer.ReactTestRenderer, label: string) =>
   tree.root

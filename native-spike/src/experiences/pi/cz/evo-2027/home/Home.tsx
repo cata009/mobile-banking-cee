@@ -34,8 +34,16 @@ import {
 import { ProductCard } from './ProductCards';
 import { CardComparison } from './CardComparison';
 import { useMouseCarousel } from '../mouseCarousel';
+import {
+  useDuoPreview,
+  useDuoLocalViewport,
+} from '../../../../../universal/DuoPreview';
 
 export default function Home(host: CzechNativeScreenProps) {
+  const duo = useDuoPreview();
+  const localViewport = useDuoLocalViewport();
+  const wide =
+    !!duo && !!localViewport && localViewport.width >= duo.referenceWidth * 2;
   const copy = createEvoTranslations(host.language ?? 'en');
   const {
     productCounts,
@@ -77,30 +85,30 @@ export default function Home(host: CzechNativeScreenProps) {
     tab === 'accounts'
       ? copy.summary.totalAvailable
       : tab === 'savings'
-      ? copy.summary.totalSavings
-      : tab === 'credits'
-      ? copy.summary.totalOwed
-      : copy.summary.covered;
+        ? copy.summary.totalSavings
+        : tab === 'credits'
+          ? copy.summary.totalOwed
+          : copy.summary.covered;
   const amount =
     tab === 'accounts'
       ? summary.available
       : tab === 'savings'
-      ? summary.savings
-      : summary.debt;
+        ? summary.savings
+        : summary.debt;
   const secondaryTitle =
     tab === 'accounts'
       ? copy.summary.spentThisMonth
       : tab === 'savings'
-      ? copy.summary.interestEarned
-      : tab === 'credits'
-      ? copy.summary.dueThisMonth
-      : copy.summary.nextRenewal;
+        ? copy.summary.interestEarned
+        : tab === 'credits'
+          ? copy.summary.dueThisMonth
+          : copy.summary.nextRenewal;
   const secondaryAmount =
     tab === 'accounts'
       ? summary.spentThisMonth
       : tab === 'savings'
-      ? summary.interestEarned
-      : summary.dueThisMonth;
+        ? summary.interestEarned
+        : summary.dueThisMonth;
   const group = (
     label: string,
     products: Product[],
@@ -208,7 +216,7 @@ export default function Home(host: CzechNativeScreenProps) {
         ref={scroll}
         style={s.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={s.content}
+        contentContainerStyle={[s.content, wide ? s.wideContent : undefined]}
       >
         <Tabs
           tokens={tokens}
@@ -265,10 +273,10 @@ export default function Home(host: CzechNativeScreenProps) {
               tab === 'accounts'
                 ? s.artAccounts
                 : tab === 'credits'
-                ? s.artCredits
-                : tab === 'insurance'
-                ? s.artInsurance
-                : s.art
+                  ? s.artCredits
+                  : tab === 'insurance'
+                    ? s.artInsurance
+                    : s.art
             }
           >
             <AssetGlyph
@@ -277,79 +285,104 @@ export default function Home(host: CzechNativeScreenProps) {
                 tab === 'accounts'
                   ? 96
                   : tab === 'credits'
-                  ? 174
-                  : tab === 'insurance'
-                  ? 210
-                  : 184
+                    ? 174
+                    : tab === 'insurance'
+                      ? 210
+                      : 184
               }
               height={
                 tab === 'accounts'
                   ? 239.25
                   : tab === 'credits'
-                  ? 170
-                  : tab === 'insurance'
-                  ? 186
-                  : 220
+                    ? 170
+                    : tab === 'insurance'
+                      ? 186
+                      : 220
               }
             />
           </View>
         </Pressable>
         {tab === 'accounts' && (
-          <>
-            {group(copy.groups.accounts, accounts, 'current-account', true)}
-            {model.products.filter(product => product.type === 'debit_card')
-              .length >= 2 ? (
-              <CardComparison
-                products={model.products}
-                model={model}
-                host={host}
-              />
-            ) : (
-              group(
-                copy.groups.cards,
-                model.products.filter(p => p.type === 'debit_card'),
-                'debit-card',
-              )
-            )}
-          </>
+          <View
+            testID="evo-home-product-grid"
+            style={[s.productGroups, wide ? s.productGroupsWide : undefined]}
+          >
+            <View style={wide ? s.productColumn : undefined}>
+              {group(copy.groups.accounts, accounts, 'current-account', true)}
+            </View>
+            <View style={wide ? s.productColumn : undefined}>
+              {model.products.filter(product => product.type === 'debit_card')
+                .length >= 2 ? (
+                <CardComparison
+                  products={model.products}
+                  model={model}
+                  host={host}
+                />
+              ) : (
+                group(
+                  copy.groups.cards,
+                  model.products.filter(p => p.type === 'debit_card'),
+                  'debit-card',
+                )
+              )}
+            </View>
+          </View>
         )}
         {tab === 'savings' && (
-          <>
-            {group(
-              copy.groups.investmentPortfolios,
-              model.products.filter(p => p.type === 'investment_account'),
-              'mutual-funds',
-            )}
-            {group(
-              copy.groups.savingAccounts,
-              model.products.filter(p => p.type === 'saving_account'),
-              'saving-account',
-            )}
-            {group(
-              copy.groups.deposits,
-              model.products.filter(p => p.type === 'term_deposit'),
-              'term-deposit',
-            )}
-          </>
+          <View
+            testID="evo-home-product-grid"
+            style={[s.productGroups, wide ? s.productGroupsWide : undefined]}
+          >
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.investmentPortfolios,
+                model.products.filter(p => p.type === 'investment_account'),
+                'mutual-funds',
+              )}
+            </View>
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.savingAccounts,
+                model.products.filter(p => p.type === 'saving_account'),
+                'saving-account',
+              )}
+            </View>
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.deposits,
+                model.products.filter(p => p.type === 'term_deposit'),
+                'term-deposit',
+              )}
+            </View>
+          </View>
         )}
         {tab === 'credits' && (
-          <>
-            {group(
-              copy.groups.creditCards,
-              model.products.filter(p => p.type === 'credit_card'),
-              'credit-card',
-            )}
-            {group(
-              copy.groups.loans,
-              model.products.filter(p => p.type === 'loan'),
-              'personal-loan',
-            )}
-            {group(
-              copy.groups.mortgages,
-              model.products.filter(p => p.type === 'mortgage'),
-              'mortgage-loan',
-            )}
-          </>
+          <View
+            testID="evo-home-product-grid"
+            style={[s.productGroups, wide ? s.productGroupsWide : undefined]}
+          >
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.creditCards,
+                model.products.filter(p => p.type === 'credit_card'),
+                'credit-card',
+              )}
+            </View>
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.loans,
+                model.products.filter(p => p.type === 'loan'),
+                'personal-loan',
+              )}
+            </View>
+            <View style={wide ? s.productColumn : undefined}>
+              {group(
+                copy.groups.mortgages,
+                model.products.filter(p => p.type === 'mortgage'),
+                'mortgage-loan',
+              )}
+            </View>
+          </View>
         )}
         {tab === 'insurance' && (
           <Rail
@@ -462,6 +495,15 @@ const s = StyleSheet.create({
     maxWidth: 560,
     alignSelf: 'center',
   },
+  wideContent: { maxWidth: '100%' },
+  productGroups: { gap: 28 },
+  productGroupsWide: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 24,
+    alignItems: 'flex-start',
+  },
+  productColumn: { width: '48%', minWidth: 0 },
   prime: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -160,6 +160,9 @@ it('CZ R1 keeps Source generic mandatory-prefix form and its nonempty-only legac
   const field = (label: string) =>
     tree.root
       .findAllByType(BaselineTextField)
+      .find(node => node.props.ariaLabel === label) ??
+    tree.root
+      .findAllByType(BaselineTextField)
       .find(node => node.props.label === label)!;
   try {
     expect(tree.root.findAllByType(BaselineLocalAccountFields)).toHaveLength(0);

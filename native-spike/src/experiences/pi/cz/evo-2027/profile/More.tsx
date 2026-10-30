@@ -13,6 +13,10 @@ import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import ProfileTutorialsSheet from './TutorialsSheet';
+import {
+  useDuoPreview,
+  useDuoLocalViewport,
+} from '../../../../../universal/DuoPreview';
 const keys: Record<MoreCardType, string> = {
   contacts: 'contacts',
   documents: 'documents',
@@ -24,11 +28,16 @@ const keys: Record<MoreCardType, string> = {
   tutorial: 'tutorial',
 };
 export default function More(props: CzechNativeScreenProps) {
+  const duo = useDuoPreview();
+  const viewport = useDuoLocalViewport();
+  const columns =
+    duo && viewport && viewport.width >= duo.referenceWidth * 2 ? 3 : 2;
   const t = useCzechTranslation(),
     tokens = useCurrentTokens();
   const [logout, setLogout] = useState(false),
     [tutorialsOpen, setTutorialsOpen] = useState(false),
     [width, setWidth] = useState(375);
+  const gridWidth = duo && viewport ? viewport.width : width;
   const navigate = (card: MoreCardType) => {
     if (card === 'contacts' || card === 'documents' || card === 'settings')
       props.onNavigate({ screen: card });
@@ -108,7 +117,10 @@ export default function More(props: CzechNativeScreenProps) {
             accessibilityRole="button"
             accessibilityLabel={t(`more.cards.${keys[card]}`)}
             onPress={() => navigate(card)}
-            style={[styles.card, { width: (width - 47) / 2 }]}
+            style={[
+              styles.card,
+              { width: (gridWidth - 32 - (columns - 1) * 15) / columns },
+            ]}
           >
             <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
               <Defs>

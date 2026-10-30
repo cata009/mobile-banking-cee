@@ -131,7 +131,11 @@ describe('marketing frozen Source preservation', () => {
       const { container, rerender } = render(<BeforeShop {...props} />)
       const before = dom(container)
       rerender(<Shop {...props} />)
-      expect(dom(container)).toBe(before)
+      // Keep every prior surface detail frozen while allowing the approved
+      // root stroke; its dimensions and color are checked in a focused test.
+      const withoutRootStroke = container.cloneNode(true) as HTMLElement
+      withoutRootStroke.firstElementChild?.removeAttribute('style')
+      expect(dom(withoutRootStroke)).toBe(before)
       expect(container.firstElementChild?.tagName).toBe(interactive ? 'BUTTON' : 'ARTICLE')
       if (onClick) {
         fireEvent.click(screen.getByRole('button'))
@@ -139,6 +143,24 @@ describe('marketing frozen Source preservation', () => {
       }
     })
   }
+  it.each(['default', 'partner'] as const)(
+    'renders the canonical one-pixel charcoal stroke around the ShopSmart %s card',
+    (variant) => {
+      const { container } = render(
+        <Shop
+          merchant="Merchant"
+          title="Offer"
+          statusText="Ends soon"
+          imageSrc="/source.png"
+          variant={variant}
+        />,
+      )
+      const root = container.firstElementChild as HTMLElement
+      expect(root.style.borderStyle).toBe('solid')
+      expect(root.style.borderWidth).toBe('1px')
+      expect(root.style.borderColor).toBe('rgb(102, 102, 102)')
+    },
+  )
   const morePairs: Array<
     [
       string,

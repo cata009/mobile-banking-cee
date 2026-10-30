@@ -71,6 +71,11 @@ import Schedule from './Schedule';
 import BankAvatar from './BankAvatar';
 import { disabledBankingActions } from '../../../current/banking/model';
 import { sourceColor } from '../../../../../universal/sourceColor';
+import {
+  DuoOnlyView,
+  useDuoLocalViewport,
+  useDuoPreview,
+} from '../../../../../universal/DuoPreview';
 const actions = [
   {
     id: 'new-payment',
@@ -189,6 +194,11 @@ function DetailFact({
   );
 }
 export default function PaymentsScreen(props: CzechNativeScreenProps) {
+  const duo = useDuoPreview();
+  const local = useDuoLocalViewport();
+  // Use the space provided by the shell, after it has reserved system/navigation areas.
+  const wide = !!duo && !!local && local.width >= 600;
+  const columnWidth = wide && local ? (local.width - 64) / 2 : undefined;
   const [gridWidth, setGridWidth] = useState(335);
   const disabledActions = disabledBankingActions({
     country: 'CZ',
@@ -372,6 +382,9 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       onBack={onBack}
       active={props.isActive}
       topInset={props.screenTopInset}
+      style={
+        wide ? { width: '100%', maxWidth: 640, alignSelf: 'center' } : undefined
+      }
       footer={options?.footer}
       showLargeTitle={options?.showLargeTitle}
       trailing={options?.trailing}
@@ -583,7 +596,13 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
       <View
         style={[extractedStyles.item3, view !== 'hub' && extractedStyles.item4]}
       >
-        <View style={[s.page, hubStyles.reserve]}>
+        <View
+          style={[
+            s.page,
+            hubStyles.reserve,
+            duo ? { paddingTop: props.screenTopInset ?? 54 } : undefined,
+          ]}
+        >
           <MainNavigationHeader
             tokens={tokens}
             brand={
@@ -623,12 +642,13 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
             }
           />
           <ScrollView
+            testID="evo-payments-hub-scroll"
             keyboardShouldPersistTaps="handled"
             stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={hubStyles.hubContent}
           >
-            <View style={extractedStyles.item5}>
+            <View style={[extractedStyles.item5]}>
               <SearchField
                 tokens={{ ...tokens, text: tokens.muted }}
                 label="Search beneficiaries"
@@ -653,87 +673,111 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                 }
               />
             </View>
-            <View
-              style={extractedStyles.item6}
-              onLayout={event => setGridWidth(event.nativeEvent.layout.width)}
+            <DuoOnlyView
+              testID="evo-payments-columns"
+              style={wide ? hubStyles.wideHub : undefined}
             >
-              {layout
-                .map(id => actions.find(a => a.id === id)!)
-                .map(a => (
-                  <Pressable
-                    key={a.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={a.label.replace('\n', ' ')}
-                    disabled={actionDisabled(a.id)}
-                    onPress={() => handle(a.id)}
-                    style={[
-                      extractedStyles.item7,
-                      [
-                        {
-                          width: Math.max(0, (gridWidth - 24) / 4),
-                        },
-                        actionDisabled(a.id)
-                          ? parityStyles.item0
-                          : parityStyles.item1,
-                      ],
-                    ]}
-                  >
-                    <View
+              <View
+                testID="evo-payments-actions"
+                style={[
+                  extractedStyles.item6,
+                  wide
+                    ? { width: columnWidth, marginHorizontal: 0 }
+                    : undefined,
+                ]}
+                onLayout={event => setGridWidth(event.nativeEvent.layout.width)}
+              >
+                {layout
+                  .map(id => actions.find(a => a.id === id)!)
+                  .map(a => (
+                    <Pressable
+                      key={a.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={a.label.replace('\n', ' ')}
+                      disabled={actionDisabled(a.id)}
+                      onPress={() => handle(a.id)}
                       style={[
-                        extractedStyles.item8,
-                        {
-                          backgroundColor: tokens.surface,
-                        },
+                        extractedStyles.item7,
+                        [
+                          {
+                            width: Math.max(0, (gridWidth - 24) / 4),
+                          },
+                          actionDisabled(a.id)
+                            ? parityStyles.item0
+                            : parityStyles.item1,
+                        ],
                       ]}
                     >
-                      <Glyph name={a.icon} />
-                    </View>
-                    <Text style={hubStyles.tileLabel}>{a.label}</Text>
-                  </Pressable>
-                ))}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="More payments"
-                onPress={() => setMore(true)}
-                style={[
-                  extractedStyles.item9,
-                  {
-                    width: Math.max(0, (gridWidth - 24) / 4),
-                  },
-                ]}
-              >
-                <View
+                      <View
+                        style={[
+                          extractedStyles.item8,
+                          {
+                            backgroundColor: tokens.surface,
+                          },
+                        ]}
+                      >
+                        <Glyph name={a.icon} />
+                      </View>
+                      <Text style={hubStyles.tileLabel}>{a.label}</Text>
+                    </Pressable>
+                  ))}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="More payments"
+                  onPress={() => setMore(true)}
                   style={[
-                    extractedStyles.item10,
+                    extractedStyles.item9,
                     {
-                      backgroundColor: tokens.surface,
+                      width: Math.max(0, (gridWidth - 24) / 4),
                     },
                   ]}
                 >
-                  <Glyph name="more-horizontal" />
-                </View>
-                <Text style={hubStyles.tileLabel}>More{'\n'}payments</Text>
-              </Pressable>
-            </View>
-            <View style={hubStyles.recipients}>
-              <Copy strong size={24} lineHeight={26.5}>
-                Recipients
-              </Copy>
-              {filtered.some(p => favoriteIds.includes(p.id)) && (
-                <View style={hubStyles.group}>
-                  {filtered
-                    .filter(p => favoriteIds.includes(p.id))
-                    .map(beneficiaryRow)}
-                </View>
-              )}
-              {filtered.some(p => !favoriteIds.includes(p.id)) && (
-                <View style={hubStyles.group}>
-                  {filtered
-                    .filter(p => !favoriteIds.includes(p.id))
-                    .map(beneficiaryRow)}
-                </View>
-              )}
-            </View>
+                  <View
+                    style={[
+                      extractedStyles.item10,
+                      {
+                        backgroundColor: tokens.surface,
+                      },
+                    ]}
+                  >
+                    <Glyph name="more-horizontal" />
+                  </View>
+                  <Text style={hubStyles.tileLabel}>More{'\n'}payments</Text>
+                </Pressable>
+              </View>
+              <View
+                testID="evo-payments-recipients"
+                style={[
+                  hubStyles.recipients,
+                  wide
+                    ? {
+                        width: columnWidth,
+                        marginHorizontal: 0,
+                        marginTop: 0,
+                        marginLeft: 24,
+                      }
+                    : undefined,
+                ]}
+              >
+                <Copy strong size={24} lineHeight={26.5}>
+                  Recipients
+                </Copy>
+                {filtered.some(p => favoriteIds.includes(p.id)) && (
+                  <View style={hubStyles.group}>
+                    {filtered
+                      .filter(p => favoriteIds.includes(p.id))
+                      .map(beneficiaryRow)}
+                  </View>
+                )}
+                {filtered.some(p => !favoriteIds.includes(p.id)) && (
+                  <View style={hubStyles.group}>
+                    {filtered
+                      .filter(p => !favoriteIds.includes(p.id))
+                      .map(beneficiaryRow)}
+                  </View>
+                )}
+              </View>
+            </DuoOnlyView>
             {filtered.length === 0 && (
               <View style={s.alert}>
                 <Copy>Nobody matches this search</Copy>
@@ -1814,6 +1858,11 @@ const hubStyles = StyleSheet.create({
   hubContent: {
     paddingTop: 20,
     paddingBottom: 96,
+  },
+  wideHub: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 20,
   },
   searchField: {
     height: 40,

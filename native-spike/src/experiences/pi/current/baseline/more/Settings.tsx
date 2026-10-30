@@ -144,10 +144,9 @@ export default function Settings(host: CurrentScreenProps) {
                 {section.items.map(item => (
                   <BaselineNavigationRow
                     key={item.id}
-                    title={host.t(
-                      `runtime.settings.items.${item.id}.title`,
-                      item.title,
-                    )}
+                    title={host
+                      .t(`runtime.settings.items.${item.id}.title`, item.title)
+                      .toLocaleUpperCase(host.language)}
                     description={host.t(
                       `runtime.settings.items.${item.id}.description`,
                       item.description,

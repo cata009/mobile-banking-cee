@@ -217,23 +217,6 @@ export default function Products(host: CurrentScreenProps) {
         host={host}
         title={localized(host, 'runtime.productsMenu.title', config.title)}
       />
-      {config.hasShopSmartTab && (
-        <BaselineProductsTabs
-          host={host}
-          activeTab={tab}
-          bankingLabel={localized(
-            host,
-            'runtime.productsMenu.banking',
-            config.bankingTabLabel,
-          )}
-          shopSmartLabel={localized(
-            host,
-            'runtime.productsMenu.shopSmart',
-            config.shopSmartTabLabel,
-          )}
-          onChange={setTab}
-        />
-      )}
       <ScrollView
         testID="ro-offers-content"
         style={[s.body, Platform.OS === 'web' && s.webScroll]}
@@ -241,6 +224,23 @@ export default function Products(host: CurrentScreenProps) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {config.hasShopSmartTab && (
+          <BaselineProductsTabs
+            host={host}
+            activeTab={tab}
+            bankingLabel={localized(
+              host,
+              'runtime.productsMenu.banking',
+              config.bankingTabLabel,
+            )}
+            shopSmartLabel={localized(
+              host,
+              'runtime.productsMenu.shopSmart',
+              config.shopSmartTabLabel,
+            )}
+            onChange={setTab}
+          />
+        )}
         {tab === 'banking' ? (
           <RoOffersCatalog host={host} onProductCardPress={setSelected} />
         ) : (

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { View } from 'react-native';
 import { useMouseCarousel } from '../mouseCarousel';
+import { useDuoPreview } from '../../../../../universal/DuoPreview';
 export interface CarouselGeometry {
   width: number;
   height: number;
@@ -38,14 +39,14 @@ export function carouselOffsets(
       index === 0
         ? 0
         : index === count - 1
-        ? max
-        : Math.max(
-            0,
-            Math.min(
-              max,
-              gutter + index * (width + gap) - (viewport - width) / 2,
+          ? max
+          : Math.max(
+              0,
+              Math.min(
+                max,
+                gutter + index * (width + gap) - (viewport - width) / 2,
+              ),
             ),
-          ),
   );
 }
 export default function Carousel<
@@ -67,6 +68,7 @@ export default function Carousel<
   renderItem: (value: T) => React.ReactNode;
   label: (value: T) => string;
 }) {
+  const duo = useDuoPreview();
   const [viewport, setViewport] = useState(375),
     ref = useRef<React.ElementRef<typeof ScrollView>>(null),
     offsets = useMemo(
@@ -151,11 +153,19 @@ export default function Carousel<
                 height: geometry.height,
                 filter:
                   item.id === selectedId ? undefined : geometry.inactiveFilter,
-                transform: [
-                  {
-                    scaleY: item.id === selectedId ? 1 : geometry.inactiveScale,
-                  },
-                ],
+                transform: duo
+                  ? [
+                      {
+                        scale:
+                          item.id === selectedId ? 1 : geometry.inactiveScale,
+                      },
+                    ]
+                  : [
+                      {
+                        scaleY:
+                          item.id === selectedId ? 1 : geometry.inactiveScale,
+                      },
+                    ],
               },
             ]}
           >

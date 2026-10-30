@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import {
   getCzechPaymentBankName,
   isValidCzechPrefix,
@@ -9,10 +9,12 @@ import {
 } from '@/data/czechDomesticAccount';
 import type { DomesticPaymentDraft } from '@/data/paymentFlow';
 import type { CurrentScreenProps } from '../../../contracts';
-import { BaselineTextField } from '../../../../../../universal/BaselineTextField';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../../../universal/Typography';
-import { sourceColor } from '../../../../../../universal/sourceColor';
+import {
+  BaselineDomesticAccountFields,
+  type BaselineDomesticAccountPart,
+} from './BaselineDomesticAccountFields';
 
 const limits = { prefix: 6, accountNumber: 10, bankCode: 4 } as const;
 type Part = keyof typeof limits;
@@ -43,7 +45,6 @@ export function BaselineLocalAccountFields({
   const setTouched = onTouchedChange ?? setLocalTouched;
   const [clipboard, setClipboard] =
     useState<ReturnType<typeof parseCzechDomesticAccountClipboard>>(null);
-  const color = (token: string) => sourceColor(`var(${token})`, dark);
   const labels = {
     prefix: host.t('runtime.payments.domesticFlow.prefix', 'Prefix'),
     accountNumber: host.t(
@@ -80,75 +81,48 @@ export function BaselineLocalAccountFields({
     }
   };
   const bankName = getCzechPaymentBankName(draft.bankCode.trim());
+  const fields = (Object.keys(limits) as Part[]).map(
+    (key): BaselineDomesticAccountPart => ({
+      id: key,
+      label: labels[key],
+      value: draft[key],
+      onChange: raw => {
+        const value = raw.replace(/\D/g, '').slice(0, limits[key]);
+        onChange({
+          [key]: value,
+          ...(key === 'bankCode'
+            ? { bankName: getCzechPaymentBankName(value) ?? '' }
+            : {}),
+        });
+      },
+      inputMode: 'numeric',
+      maxLength: limits[key],
+      ariaInvalid: touched[key] && !valid[key],
+      ariaDescribedBy: errors.length ? 'cz-account-validation' : undefined,
+      visualState:
+        touched[key] && !valid[key]
+          ? key === 'prefix' || draft[key].trim()
+            ? 'error-filled'
+            : 'error-empty'
+          : undefined,
+      onFocus: checkClipboard,
+      onBlur: () => setTouched({ ...touched, [key]: true }),
+    }),
+  );
+  const errorMessage = errors.length
+    ? `${host.t(
+        'runtime.payments.domesticFlow.czechAccountValidation',
+        'Check the highlighted account details',
+      )}: ${errors.map(key => labels[key]).join(', ')}.`
+    : undefined;
   return (
-    <View style={s.group}>
-      <View style={s.parts}>
-        {(Object.keys(limits) as Part[]).map(key => (
-          <View key={key} style={partStyles[key]}>
-            <BaselineTextField
-              label={labels[key]}
-              value={draft[key]}
-              onChange={raw => {
-                const value = raw.replace(/\D/g, '').slice(0, limits[key]);
-                onChange({
-                  [key]: value,
-                  ...(key === 'bankCode'
-                    ? { bankName: getCzechPaymentBankName(value) ?? '' }
-                    : {}),
-                });
-              }}
-              inputMode="numeric"
-              maxLength={limits[key]}
-              forceFloatLabel
-              suffixOutsideDivider
-              ariaInvalid={touched[key] && !valid[key]}
-              ariaDescribedBy={
-                errors.length ? 'cz-account-validation' : undefined
-              }
-              visualState={
-                touched[key] && !valid[key]
-                  ? key === 'prefix' || draft[key].trim()
-                    ? 'error-filled'
-                    : 'error-empty'
-                  : undefined
-              }
-              onFocus={checkClipboard}
-              onBlur={() => setTouched({ ...touched, [key]: true })}
-              dark={dark}
-            />
-          </View>
-        ))}
-        <View style={s.icon}>
-          <SourceCustomIcon
-            name="payment-photo-camera"
-            size={32}
-            color={color('--uc-text')}
-          />
-        </View>
-      </View>
-      {bankName ? (
-        <Text style={[s.helper, s.bank, { color: color('--uc-text-muted') }]}>
-          {bankName}
-        </Text>
-      ) : null}
-      {errors.length ? (
-        <Text
-          nativeID="cz-account-validation"
-          accessibilityRole="alert"
-          style={[
-            s.helper,
-            bankName ? s.errorAfterBank : s.errorWithoutBank,
-            { color: color('--uc-status-red') },
-          ]}
-        >
-          {host.t(
-            'runtime.payments.domesticFlow.czechAccountValidation',
-            'Check the highlighted account details',
-          )}
-          : {errors.map(key => labels[key]).join(', ')}.
-        </Text>
-      ) : null}
-      {clipboard ? (
+    <BaselineDomesticAccountFields
+      fields={fields}
+      dark={dark}
+      bankName={bankName}
+      errorMessage={errorMessage}
+      errorId="cz-account-validation"
+      footer={clipboard ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Use account from clipboard: ${
@@ -178,23 +152,10 @@ export function BaselineLocalAccountFields({
           </Text>
         </Pressable>
       ) : null}
-    </View>
+    />
   );
 }
 const s = StyleSheet.create({
-  group: { minHeight: 80, justifyContent: 'center', gap: 6 },
-  parts: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-  icon: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  helper: { fontFamily: 'UniCredit-regular', fontSize: 14 },
-  bank: { marginTop: 6 },
-  errorAfterBank: { marginTop: 4 },
-  // Source explicitly places errors on grid row 3, retaining the empty bank row gap.
-  errorWithoutBank: { marginTop: 10 },
   clipboard: {
     minHeight: 32,
     borderRadius: 16,
@@ -210,9 +171,4 @@ const s = StyleSheet.create({
     color: '#000',
   },
   bold: { fontFamily: 'UniCredit-bold' },
-});
-const partStyles = StyleSheet.create({
-  prefix: { flex: 6, minWidth: 56 },
-  accountNumber: { flex: 10, minWidth: 100 },
-  bankCode: { flex: 4, minWidth: 66 },
 });

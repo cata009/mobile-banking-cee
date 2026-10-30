@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 31 },
-  fields: { paddingHorizontal: 24, paddingTop: 46, paddingBottom: 40 },
+  fields: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 },
   copy: {
     width: 40,
     height: 40,

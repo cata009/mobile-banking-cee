@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Text } from '../../../../../universal/Typography';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
+import { useEvoDuoBackAction } from '../../../../../universal/EvoDuoNavigation';
 import {
   themeChoices,
   type HomeTheme,
@@ -172,6 +173,7 @@ export default function Appearance({
   onApply,
   onBack,
 }: Props) {
+  const duoBack = useEvoDuoBackAction(onBack);
   const system = useColorScheme(),
     light = mode === 'light' || (mode === 'system' && system !== 'dark'),
     carousel = useRef<React.ElementRef<typeof ScrollView>>(null);
@@ -190,18 +192,22 @@ export default function Appearance({
   return (
     <View style={styles.page}>
       <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          style={styles.back}
-        >
-          <SourceCustomIcon
-            name="back-heavy"
-            size={22}
-            color={light ? '#262626' : '#ffffff'}
-          />
-        </Pressable>
+        {!duoBack ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={onBack}
+            style={styles.back}
+          >
+            <SourceCustomIcon
+              name="back-heavy"
+              size={22}
+              color={light ? '#262626' : '#ffffff'}
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.back} />
+        )}
         <View style={s.grow}>
           <Copy strong size={20}>
             Home appearance
@@ -309,8 +315,8 @@ export default function Appearance({
             applied === draft
               ? 'Apply current theme'
               : draft === 'standard'
-              ? 'Apply without theme'
-              : `Apply ${theme.name}`
+                ? 'Apply without theme'
+                : `Apply ${theme.name}`
           }
           onPress={onApply}
         />

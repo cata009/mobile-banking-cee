@@ -106,6 +106,7 @@ const ro: TranslationKeys = {
       thirdPartyConsent: 'Consimtamant catre terti',
       digitalActivities: 'Registru de activitate digitala',
       myRequests: 'Cererile mele',
+      contractWithdrawal: 'Retragerea contractului',
       tutorial: 'Tutoriale',
     },
   },

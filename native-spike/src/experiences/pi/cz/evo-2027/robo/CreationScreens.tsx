@@ -31,6 +31,7 @@ import { ProductLogo } from '../investments/ProductRow';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { BaselineNavigationLink } from '../../../../../universal/BaselineNavigationLink';
+import { useEvoDuoCloseAction } from '../../../../../universal/EvoDuoNavigation';
 import { PortfolioCarousel } from './PortfolioCarousel';
 import { useMouseCarousel } from '../mouseCarousel';
 import { InvestmentContract } from './InvestmentContract';
@@ -245,6 +246,7 @@ export function CreationScreens({
   onBasketDetailsOpen: () => void;
   onBasketDetailsClose: () => void;
 }) {
+  const duoClose = useEvoDuoCloseAction(onExit, view.step === 'intro');
   const [termsOpen, setTermsOpen] = useState(false);
   const [profileUpdateInfoOpen, setProfileUpdateInfoOpen] = useState(false);
   const [contactHelpOpen, setContactHelpOpen] = useState(false);
@@ -363,18 +365,20 @@ export function CreationScreens({
             </View>
           </View>
         </ScrollView>
-        <Pressable
-          testID="cz-intro-close"
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={onExit}
-          style={[
-            styles.introClose,
-            { top: Math.max(24, screenTopInset - 16) },
-          ]}
-        >
-          <InvestmentGlyph name="close-flow" color="#262626" size={24} />
-        </Pressable>
+        {!duoClose && (
+          <Pressable
+            testID="cz-intro-close"
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            onPress={onExit}
+            style={[
+              styles.introClose,
+              { top: Math.max(24, screenTopInset - 16) },
+            ]}
+          >
+            <InvestmentGlyph name="close-flow" color="#262626" size={24} />
+          </Pressable>
+        )}
         <View testID="cz-intro-footer" style={[ui.footer, styles.introFooter]}>
           <Button label="Create Goal" onPress={() => navigate('contact')} />
         </View>
@@ -608,12 +612,12 @@ export function CreationScreens({
                   type.id === 'build-wealth'
                     ? 'robo-goal-wealth'
                     : type.id === 'inflation-protection'
-                    ? 'robo-goal-inflation'
-                    : type.id === 'unforeseen-circumstances'
-                    ? 'robo-goal-unforeseen'
-                    : type.id === 'major-purchase'
-                    ? 'robo-goal-purchase'
-                    : 'robo-goal-retirement'
+                      ? 'robo-goal-inflation'
+                      : type.id === 'unforeseen-circumstances'
+                        ? 'robo-goal-unforeseen'
+                        : type.id === 'major-purchase'
+                          ? 'robo-goal-purchase'
+                          : 'robo-goal-retirement'
                 }
               />
             }

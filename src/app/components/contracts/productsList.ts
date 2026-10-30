@@ -1,4 +1,21 @@
-import type { ProductCardVariant } from './productCard'
+import type { ProductCardStackRole, ProductCardVariant } from './productCard'
+export function resolveProductListStackRole({
+  productIndex,
+  productCount,
+  isOpen,
+  hasTotal,
+}: {
+  productIndex: number
+  productCount: number
+  isOpen: boolean
+  hasTotal: boolean
+}): ProductCardStackRole {
+  if (!isOpen || productCount < 2) return 'single'
+  if (productIndex === 0) return 'first'
+  if (productIndex < productCount - 1 || hasTotal) return 'middle'
+  return 'last'
+}
+
 export function resolveProductsList({
   productCount,
   isOpen,

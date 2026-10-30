@@ -41,12 +41,13 @@ describe('baseline marketing contracts', () => {
     })
     expect(resolveMoreCard({ variant: 'third-party-consent' }).image.transform).toBe('rotate(-156deg) scaleY(-1)')
   })
-  it('keeps actual ShopSmart flexible width/no border and decorative states', () => {
+  it('keeps the fine ShopSmart border and decorative states', () => {
     expect(resolveShopsmartOfferCard({ interactive: false })).toMatchObject({
       rootTag: 'article',
       imageHeight: 130,
       radius: 8,
-      borderWidth: 0,
+      borderWidth: 1,
+      borderColor: '#666666',
       titleFontSize: 18,
       titleLineHeight: 23,
       pillWidth: 120,

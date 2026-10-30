@@ -1,6 +1,6 @@
 import React, { Children } from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { ScrollView, Text as NativeText } from 'react-native';
+import { ScrollView, StyleSheet, Text as NativeText } from 'react-native';
 import { DEFAULT_VISIBLE_PRODUCT_OVERRIDES } from '@/app/platform/banking/productDataAuthority';
 import { CURRENT_HOME_ADAPTER } from '../src/experiences/pi/current/adapter';
 import NativeCurrentApp from '../src/experiences/pi/current/NativeCurrentApp';
@@ -24,6 +24,7 @@ import { BaselineBottomNavigation } from '../src/universal/BaselineBottomNavigat
 import { BaselineAccordion } from '../src/universal/BaselineAccordion';
 import { BaselineProductsList } from '../src/universal/BaselineProductsList';
 import { BaselineProductCard } from '../src/universal/BaselineProductCard';
+import { DuoPreviewProvider } from '../src/universal/DuoPreview';
 
 const HomeRoute = CURRENT_HOME_ADAPTER.screens.home;
 if (!HomeRoute) throw new Error('Actual current Homepage adapter must exist');
@@ -91,7 +92,33 @@ function hiddenOwner(node: Renderer.ReactTestInstance) {
   );
 }
 
+function homeTopReserveHeight(tree: Renderer.ReactTestRenderer) {
+  const fixedHeader = tree.root
+    .findAllByType(BaselineL1Header)
+    .find(node => node.props.variant === 'home' && node.props.showTitle === false);
+  if (!fixedHeader?.parent?.parent)
+    throw new Error('Fixed Home L1 header must be inside the Home frame');
+  const reserve = fixedHeader.parent.parent.children[0] as Renderer.ReactTestInstance;
+  return StyleSheet.flatten(reserve.props.style).height;
+}
+
 describe('actual PI/RO/current Homepage canonical integration', () => {
+  it('keeps the Home L1 top reserve aligned in standalone and Duo previews', () => {
+    const standalone = mounted(
+      <HomeRoute {...host({ screenTopInset: 12 })} />,
+    );
+    expect(homeTopReserveHeight(standalone)).toBe(54);
+
+    const duo = mounted(
+      <DuoPreviewProvider
+        value={{ width: 951, height: 669, rightInset: 84, referenceWidth: 375 }}
+      >
+        <HomeRoute {...host({ screenTopInset: 12 })} />
+      </DuoPreviewProvider>,
+    );
+    expect(homeTopReserveHeight(duo)).toBe(12);
+  });
+
   it.each([false, true])(
     'maps fixed actions and scrolling title to shared L1 leaves dark=%s',
     dark => {

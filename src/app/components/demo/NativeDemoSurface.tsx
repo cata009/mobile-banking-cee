@@ -127,7 +127,7 @@ export function NativeDemoSurface({
     !!deviceGeometry &&
     demo.product === 'PI' &&
     demo.designSystem === 'current' &&
-    demo.release === 'release-current'
+    (demo.release === 'release-current' || (demo.country === 'CZ' && demo.release === 'release-future-evo-2027'))
   const element = useRef<HTMLDivElement>(null),
     mounted = useRef<NativeDemoMount | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -423,12 +423,17 @@ export function NativeDemoSurface({
     let generation = 0
     const update = () => {
       const current = ++generation
-      void loadNativeDemoModule().then(() => {
-        if (!disposed && current === generation) retry((value) => value + 1)
-      }).catch((error) => console.error('Native demo update failed', error))
+      void loadNativeDemoModule()
+        .then(() => {
+          if (!disposed && current === generation) retry((value) => value + 1)
+        })
+        .catch((error) => console.error('Native demo update failed', error))
     }
     window.addEventListener('native-demo:built', update)
-    return () => { disposed = true; window.removeEventListener('native-demo:built', update) }
+    return () => {
+      disposed = true
+      window.removeEventListener('native-demo:built', update)
+    }
   }, [])
   const serialized = JSON.stringify(snapshot)
   useEffect(() => {

@@ -1,6 +1,9 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { StyleSheet } from 'react-native';
+import { Platform, ScrollView, StyleSheet } from 'react-native';
+import RoProducts, {
+  BaselineProductsTabs,
+} from '../src/experiences/pi/current/baseline/offers/Products';
 import ShopSmart from '../src/experiences/pi/current/baseline/offers/ShopSmart';
 import { BaselineShopsmartOfferCard } from '../src/universal/BaselineShopsmartOfferCard';
 import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
@@ -56,6 +59,14 @@ const merchants = (tree: Renderer.ReactTestRenderer) =>
   tree.root
     .findAllByType(BaselineShopsmartOfferCard)
     .map(card => card.props.merchant);
+const isDescendantOf = (
+  node: Renderer.ReactTestInstance,
+  ancestor: Renderer.ReactTestInstance,
+) => {
+  for (let parent = node.parent; parent; parent = parent.parent)
+    if (parent === ancestor) return true;
+  return false;
+};
 
 it('renders the canonical RO offer order and summary even with amount privacy enabled', () => {
   const tree = mount();
@@ -110,6 +121,47 @@ it('renders each original offer photo through the Source raster image layer at t
         height: '100%',
       });
     });
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('keeps the ShopSmart search sticky in the standalone Web experience', () => {
+  const original = Platform.OS;
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
+  const tree = mount();
+  try {
+    const search = tree.root.findByType(BaselineSearchBar),
+      band = search.parent;
+    expect(band).not.toBeNull();
+    expect(StyleSheet.flatten(band!.props.style)).toMatchObject({
+      position: 'sticky',
+      top: 0,
+      zIndex: 1,
+    });
+  } finally {
+    act(() => tree.unmount());
+    Object.defineProperty(Platform, 'OS', {
+      configurable: true,
+      value: original,
+    });
+  }
+});
+
+it('scrolls the Banking/ShopSmart tabs away while the ShopSmart search remains sticky', () => {
+  let tree!: Renderer.ReactTestRenderer;
+  act(() => {
+    tree = Renderer.create(<RoProducts {...host()} />);
+  });
+  try {
+    act(() => tree.root.findByType(BaselineProductsTabs).props.onChange('shopsmart'));
+    const scroll = tree.root.findAllByType(ScrollView).find(
+      node => node.props.testID === 'ro-offers-content',
+    )!;
+    const tabs = tree.root.findByType(BaselineProductsTabs);
+    const search = tree.root.findByType(BaselineSearchBar);
+    expect(isDescendantOf(tabs, scroll)).toBe(true);
+    expect(isDescendantOf(search, scroll)).toBe(true);
   } finally {
     act(() => tree.unmount());
   }

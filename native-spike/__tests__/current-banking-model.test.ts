@@ -143,6 +143,22 @@ test('Czech baseline draft rejects invalid bank/account checksum and permits emp
     }),
   ).toBe(false);
 });
+it.each(['RO', 'HU', 'RS', 'SI', 'SK', 'BA', 'BA_BL', 'IT'] as const)(
+  '%s baseline domestic payment needs its single IBAN without Czech account parts',
+  country => {
+    const empty = createEmptyDomesticPaymentDraft(country);
+    const ready = {
+      ...empty,
+      beneficiaryName: 'Jane Doe',
+      accountNumber: `${country}49BACX000009310001`,
+      amount: '120,50',
+      prefix: '',
+      bankCode: '',
+    };
+    expect(paymentDraftValid(country, 'release-current', empty)).toBe(false);
+    expect(paymentDraftValid(country, 'release-current', ready)).toBe(true);
+  },
+);
 test('baseline template uses Source Czech local account extraction and original draft fields elsewhere', () => {
   const template = getPaymentTemplates('CZ')[0]!;
   const draft = paymentTemplateDraft(template, 'CZ', 'release-current');
