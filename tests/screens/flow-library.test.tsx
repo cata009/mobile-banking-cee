@@ -235,8 +235,9 @@ describe('flow definitions integrity', () => {
   })
 })
 
+/** Specifications open fully by default; this only expands them if a reader has collapsed them. */
 function expandAllSections() {
-  screen.getAllByRole('button', { name: 'Expand all' }).forEach((button) => fireEvent.click(button))
+  screen.queryAllByRole('button', { name: 'Expand all' }).forEach((button) => fireEvent.click(button))
 }
 
 describe('flow-library screen', () => {
@@ -549,9 +550,10 @@ describe('flow-library screen', () => {
     // The document, then the screen-by-screen detail and the flow-level rules:
     // this flow specifies both, and a reviewer needs both.
     expect(screen.getByText('Business analysis specification')).toBeInTheDocument()
-    // 'Screen spec' is both a panel heading and an entry in the sticky section nav.
+    // 'Screen spec' is a section of the same document and an entry in its contents list.
     expect(screen.getByRole('heading', { name: 'Screen spec' })).toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: 'Specification sections' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Specification contents' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Specification sections' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /4\. Choose a package/ })).toBeInTheDocument()
     // The title now appears twice: once in the jump strip, once on the block.
     expect(screen.getAllByText('Key decision rules').length).toBeGreaterThan(0)

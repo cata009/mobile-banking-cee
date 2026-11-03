@@ -88,6 +88,7 @@ export interface TranslationKeys {
         investmentAccount: string;
       };
     };
+    contractWithdrawal: Record<string, string | Record<string, string>>;
     analytics: {
       title: string;
       dataFor: string;
@@ -100,6 +101,21 @@ export interface TranslationKeys {
       moneyIn: string;
       showingDataFor: string;
       addTransaction: string;
+      showMoreCategories: string;
+      showLessCategories: string;
+      noIncome: string;
+      noExpenses: string;
+      cashTransactionTitle: string;
+      cashTransactionAmount: string;
+      cashTransactionDate: string;
+      cashTransactionDescription: string;
+      cashTransactionCategory: string;
+      cashTransactionCurrency: string;
+      cashTransactionOk: string;
+      cashTransactionRequired: string;
+      cashTransactionInvalidAmount: string;
+      allCategories: string;
+      cashTransactionCategories: Record<string, string>;
       subcategoryBreakdown: string;
       filterOutSubcategory: string;
       includeSubcategory: string;

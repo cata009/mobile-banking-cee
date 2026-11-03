@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavigationInset';
 import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
   getMoreCardsForCountry,
@@ -28,6 +29,7 @@ const keys: Record<MoreCardType, string> = {
   tutorial: 'tutorial',
 };
 export default function More(props: CzechNativeScreenProps) {
+  const navigationInset = usePrimaryNavigationInset();
   const duo = useDuoPreview();
   const viewport = useDuoLocalViewport();
   const columns =
@@ -108,7 +110,10 @@ export default function More(props: CzechNativeScreenProps) {
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.grid}
+        contentContainerStyle={[
+          styles.grid,
+          { paddingBottom: 16 + navigationInset },
+        ]}
       >
         {getMoreCardsForCountry('CZ').map(card => (
           <Pressable

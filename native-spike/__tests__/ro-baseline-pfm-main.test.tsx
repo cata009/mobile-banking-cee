@@ -5,6 +5,12 @@ import { createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import RoBaselinePfmScreen from '../src/experiences/pi/current/baseline/spending/PfmScreen';
 import { RoBaselinePfmOverview } from '../src/experiences/pi/current/baseline/spending/Overview';
 import { BaselinePfmPeriodCarousel } from '../src/experiences/pi/current/baseline/spending/PeriodCarousel';
+import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
+import { BaselineDropdownField } from '../src/universal/BaselineDropdownField';
+import { BaselineTextField } from '../src/universal/BaselineTextField';
+import { DateField } from '../src/universal/DateField';
+import { RadioButton } from '../src/universal/RadioButton';
+import { PrimaryButton } from '../src/universal/PrimaryButton';
 import { RoBaselinePfmCategoryDetail } from '../src/experiences/pi/current/baseline/spending/details';
 import {
   createCurrentProducts,
@@ -91,12 +97,43 @@ it('starts at canonical latest April data, ignores Evo hints and preserves Sourc
         String(node.props.testID).startsWith('ro-pfm-category-out-'),
     );
     expect(rows.map(row => row.props.testID)).toEqual(
-      timeline.summariesByPeriodKey[
-        timeline.activePeriodKey
-      ].moneyOutCategories.map(
-        category => `ro-pfm-category-out-${category.category}`,
-      ),
+      timeline.summariesByPeriodKey[timeline.activePeriodKey].moneyOutCategories
+        .slice(0, 4)
+        .map(category => `ro-pfm-category-out-${category.category}`),
     );
+    const moreCategories = tree.root
+      .findAllByType(PrimaryButton)
+      .find(node => node.props.label === 'Show more categories');
+    expect(moreCategories?.props.variant).toBe('secondary');
+    act(() => moreCategories?.props.onPress());
+    expect(
+      tree.root.findAll(
+        node =>
+          typeof node.props.onPress === 'function' &&
+          String(node.props.testID).startsWith('ro-pfm-category-out-'),
+      ),
+    ).toHaveLength(
+      timeline.summariesByPeriodKey[timeline.activePeriodKey]!
+        .moneyOutCategories.length,
+    );
+    expect(
+      tree.root
+        .findAllByType(PrimaryButton)
+        .some(node => node.props.label === 'Show fewer categories'),
+    ).toBe(true);
+    const incomeCategory =
+      timeline.summariesByPeriodKey[timeline.activePeriodKey]!
+        .moneyInCategories[0]!.category;
+    const incomeContent = tree.root.findByProps({
+      testID: `ro-pfm-category-content-in-${incomeCategory}`,
+    });
+    expect(StyleSheet.flatten(incomeContent.props.style).justifyContent).toBe(
+      'flex-start',
+    );
+    const incomePill = tree.root.findByProps({
+      testID: `ro-pfm-category-pill-in-${incomeCategory}`,
+    });
+    expect(StyleSheet.flatten(incomePill.props.style).left).toBe(44);
     const spacer = tree.root.findAllByProps({ testID: 'ro-pfm-top-spacer' })[0];
     expect(StyleSheet.flatten(spacer.props.style).height).toBe(54);
     expect(tree.root.findAllByType(RoBaselinePfmCategoryDetail)).toHaveLength(
@@ -116,11 +153,82 @@ it('keeps overview amounts visible under privacy and retains inert Source action
     expect(json).not.toContain('***');
     act(() => button(tree, 'Profile').props.onPress());
     act(() => button(tree, 'Help').props.onPress());
-    act(() => button(tree, 'Card Transaction').props.onPress());
+    act(() => button(tree, 'Add Transaction').props.onPress());
     expect(h.onNavigate).not.toHaveBeenCalled();
     expect(h.onProfile).not.toHaveBeenCalled();
     act(() => button(tree, 'Messages').props.onPress());
     expect(h.onNavigate).toHaveBeenCalledWith({ screen: 'messages' });
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('adds a dated cash transaction to the PFM overview through the category radio sheet', () => {
+  const h = host();
+  const tree = mount(h);
+  try {
+    const initial = tree.root.findByType(RoBaselinePfmOverview).props.summary;
+    act(() => button(tree, 'Add Transaction').props.onPress());
+    expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+      'Add cash transaction to spending overview',
+    );
+    expect(tree.root.findByType(DateField).props.displayFormat).toBe(
+      'long-month',
+    );
+    const amount = tree.root
+      .findAllByType(BaselineTextField)
+      .find(field => field.props.label === 'Amount');
+    const description = tree.root
+      .findAllByType(BaselineTextField)
+      .find(field => field.props.label === 'Description');
+    act(() => amount?.props.onChange('25,50'));
+    act(() => description?.props.onChange('Fresh market'));
+    act(() => tree.root.findByType(DateField).props.onChange('2026-04-20'));
+
+    const categoryField = tree.root.findByType(BaselineDropdownField);
+    act(() => categoryField.props.onOpen());
+    expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+      'Choose category',
+    );
+    expect(
+      tree.root.findAllByType(RadioButton).map(option => option.props.label),
+    ).toEqual([
+      'Income',
+      'Household',
+      'Utilities',
+      'Cars & Transportation',
+      'Children',
+      'Health & Beauty',
+      'Shopping',
+      'Leisure',
+      'Education',
+      'Vacation & Travel',
+      'Uncategorized expenses',
+      'Groceries',
+    ]);
+    const household = tree.root
+      .findAllByType(RadioButton)
+      .find(option => option.props.label === 'Household');
+    act(() => household?.props.onPress());
+    act(() => button(tree, 'OK').props.onPress());
+    act(() => button(tree, 'ADD TRANSACTION').props.onPress());
+
+    expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
+    const overview = tree.root.findByType(RoBaselinePfmOverview);
+    expect(overview.props.summary.spendingTotal).toBeCloseTo(
+      initial.spendingTotal + 25.5,
+      2,
+    );
+    expect(overview.props.summary.sourceTransactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Fresh market',
+          amount: -25.5,
+          pfmCategory: 'Home',
+        }),
+      ]),
+    );
+    expect(h.onChanged).toHaveBeenCalled();
   } finally {
     act(() => tree.unmount());
   }

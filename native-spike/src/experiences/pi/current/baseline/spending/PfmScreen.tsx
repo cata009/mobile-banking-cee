@@ -1,14 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  appendSpendingAnalyticsTransactions,
   createSpendingAnalytics,
   createSpendingAnalyticsTimeline,
   type SpendingAnalyticsTransaction,
 } from '@/data/spendingAnalytics';
+import { getCountryCurrency } from '@/data/exchangeRates';
+import {
+  createManualCashTransaction,
+  type ManualCashTransactionDraft,
+} from '@/features/analytics/manualCashTransaction';
 import { PFM_CATEGORIES, type PfmCategoryName } from '@/data/pfmCategories';
 import type { CurrentScreenProps } from '../../contracts';
 import { createCurrentProducts } from '../../context';
 import { readCategoryOverrides } from '../../banking/categoryOverrides';
 import { RoBaselinePfmOverview } from './Overview';
+import AddTransactionFlow from './AddTransactionFlow';
 import { RoBaselinePfmCategoryDetail } from './details';
 
 export interface RoBaselinePfmScreenProps extends CurrentScreenProps {
@@ -17,6 +24,11 @@ export interface RoBaselinePfmScreenProps extends CurrentScreenProps {
 
 /** Source LegacyAnalyticsScreen state and composition, hosted by the current app. */
 export default function RoBaselinePfmScreen(host: RoBaselinePfmScreenProps) {
+  const [manualCashTransactions, setManualCashTransactions] = useState<
+    SpendingAnalyticsTransaction[]
+  >([]);
+  const [addCashTransactionOpen, setAddCashTransactionOpen] = useState(false);
+  const { country, isActive, onChanged } = host;
   const model = useMemo(
     () =>
       createCurrentProducts({
@@ -32,13 +44,18 @@ export default function RoBaselinePfmScreen(host: RoBaselinePfmScreenProps) {
     ...readCategoryOverrides(host),
     ...host.bankingPresentation?.transactionCategoryOverrides,
   };
-  const timeline =
+  const sourceTimeline =
     host.bankingPresentation?.analyticsTimeline ??
     createSpendingAnalyticsTimeline(
       host.country,
       model.products,
       categoryOverrides,
     );
+  const timeline = appendSpendingAnalyticsTransactions(
+    sourceTimeline,
+    host.country,
+    manualCashTransactions,
+  );
   const requestedCategory = host.route.params?.category;
   const requestedDirection = host.route.params?.direction;
   const initialCategory = PFM_CATEGORIES.some(
@@ -74,6 +91,30 @@ export default function RoBaselinePfmScreen(host: RoBaselinePfmScreenProps) {
     if (externalDetail) onBack();
     else setSelectedCategory(null);
   }, [externalDetail, onBack]);
+  const openCashTransaction = useCallback(() => {
+    if (!isActive) return;
+    setAddCashTransactionOpen(true);
+  }, [isActive]);
+  const closeCashTransaction = useCallback(
+    () => setAddCashTransactionOpen(false),
+    [],
+  );
+  const submitCashTransaction = useCallback(
+    (draft: ManualCashTransactionDraft) => {
+      if (!isActive) return;
+      const transaction = createManualCashTransaction(
+        draft,
+        `cash-${Date.now()}-${manualCashTransactions.length + 1}`,
+        getCountryCurrency(country),
+      );
+      if (!transaction) return;
+      setManualCashTransactions(current => [...current, transaction]);
+      setSelectedPeriodKey(transaction.monthKey);
+      setAddCashTransactionOpen(false);
+      onChanged();
+    },
+    [country, isActive, manualCashTransactions.length, onChanged],
+  );
   useEffect(() => {
     if (!host.route.params?.periodKey)
       setSelectedPeriodKey(timeline.activePeriodKey);
@@ -97,16 +138,27 @@ export default function RoBaselinePfmScreen(host: RoBaselinePfmScreenProps) {
 
   if (selectedCategory) {
     return (
-      <RoBaselinePfmCategoryDetail
-        host={host}
-        category={selectedCategory.category}
-        direction={selectedCategory.direction}
-        timeline={timeline}
-        activePeriodKey={selectedPeriodKey}
-        onPeriodChange={changePeriod}
-        onBack={closeCategory}
-        onTransactionClick={host.onTransactionClick}
-      />
+      <>
+        <RoBaselinePfmCategoryDetail
+          host={host}
+          category={selectedCategory.category}
+          direction={selectedCategory.direction}
+          timeline={timeline}
+          activePeriodKey={selectedPeriodKey}
+          onPeriodChange={changePeriod}
+          onBack={closeCategory}
+          onTransactionClick={host.onTransactionClick}
+          onAddTransaction={openCashTransaction}
+        />
+        {addCashTransactionOpen ? (
+          <AddTransactionFlow
+            host={host}
+            currency={getCountryCurrency(host.country)}
+            onClose={closeCashTransaction}
+            onSubmit={submitCashTransaction}
+          />
+        ) : null}
+      </>
     );
   }
   const firstPeriod = timeline.periods[0];
@@ -118,15 +170,26 @@ export default function RoBaselinePfmScreen(host: RoBaselinePfmScreenProps) {
       : undefined) ??
     createSpendingAnalytics(host.country, model.products);
   return (
-    <RoBaselinePfmOverview
-      host={host}
-      timeline={timeline}
-      activePeriodKey={selectedPeriodKey}
-      summary={summary}
-      onPeriodChange={changePeriod}
-      onCategoryClick={(category, direction) =>
-        setSelectedCategory({ category, direction })
-      }
-    />
+    <>
+      <RoBaselinePfmOverview
+        host={host}
+        timeline={timeline}
+        activePeriodKey={selectedPeriodKey}
+        summary={summary}
+        onPeriodChange={changePeriod}
+        onAddTransaction={openCashTransaction}
+        onCategoryClick={(category, direction) =>
+          setSelectedCategory({ category, direction })
+        }
+      />
+      {addCashTransactionOpen ? (
+        <AddTransactionFlow
+          host={host}
+          currency={getCountryCurrency(host.country)}
+          onClose={closeCashTransaction}
+          onSubmit={submitCashTransaction}
+        />
+      ) : null}
+    </>
   );
 }

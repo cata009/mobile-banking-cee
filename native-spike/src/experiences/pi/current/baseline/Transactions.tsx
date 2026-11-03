@@ -119,7 +119,7 @@ export function RoBaselineTransactions({
     search: query,
     filters: kind === 'account' ? filters : EMPTY_ACCOUNT_TRANSACTION_FILTERS,
     accountNumber: product.accountNumber,
-    currency: getCountryConfig(host.country).currency,
+    currency,
   });
   const active = kind === 'account' && hasAccountTransactionFilters(filters);
   const hasSearch = Boolean(query.trim());
@@ -304,6 +304,13 @@ export function RoBaselineTransactions({
           host={host}
           currency={getCountryConfig(host.country).currency}
           filters={filters}
+          categories={Array.from(
+            new Set(
+              scoped
+                .map(transaction => transaction.category)
+                .filter(category => category.length > 0),
+            ),
+          )}
           onClose={() => {
             return setFiltersOpen(false);
           }}

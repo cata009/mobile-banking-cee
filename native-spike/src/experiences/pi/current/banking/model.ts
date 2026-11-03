@@ -7,6 +7,7 @@ import {
   type AccountTransaction,
 } from '@/data/accountDetails';
 import { getCountryConfig } from '@/app/registry/countryConfig';
+import { convertCurrency, roundMoney } from '@/data/exchangeRates';
 import {
   isAccountDetailProduct,
   type CreditCard,
@@ -19,6 +20,7 @@ import {
 } from '@/data/paymentFlow';
 import { getCzechPaymentBankName } from '@/data/czechDomesticAccount';
 import { applyCreditLimitOverride } from '@/features/cards/credit-limit/model';
+import { getAccountNameOverride } from '@/features/accounts-payments/accountNameOverrides';
 import type {
   BankingScenarioId,
   BankingActionId,
@@ -79,7 +81,14 @@ export function bankingProducts(
     virtualCards?: CurrentContext['virtualCards'];
   },
 ) {
-  const { categories } = createCurrentProducts(context);
+  const sourceCategories = createCurrentProducts(context).categories;
+  const categories = sourceCategories.map(category => ({
+    ...category,
+    products: category.products.map(product => {
+      const customName = getAccountNameOverride(product.id);
+      return customName ? { ...product, name: customName } : product;
+    }),
+  }));
   const products = categories.flatMap(category => category.products);
   return {
     categories,
@@ -122,7 +131,7 @@ export function productTransactions(
         : 0;
     return getCardTransactions(context.country, product, currency, linkedIndex);
   }
-  return getAccountTransactions(
+  const transactions = getAccountTransactions(
     context.country,
     getAccountTransactionProfileIndex(
       product,
@@ -133,6 +142,14 @@ export function productTransactions(
     ),
     currency,
   );
+  if (product.currency === currency) return transactions;
+  return transactions.map(transaction => ({
+    ...transaction,
+    amount: roundMoney(
+      convertCurrency(transaction.amount, currency, product.currency),
+    ),
+    currency: product.currency,
+  }));
 }
 export function allAccountTransactions(
   context: Pick<CurrentContext, 'country' | 'release' | 'productCounts'>,

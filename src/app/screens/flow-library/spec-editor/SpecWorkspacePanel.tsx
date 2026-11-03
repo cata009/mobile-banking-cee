@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Menu from '@radix-ui/react-dropdown-menu'
 import { ChevronRight, FileText, History, MoreHorizontal, Pencil, Settings2, Download } from 'lucide-react'
@@ -7,6 +7,7 @@ import TextField from '@/app/components/TextField'
 import type { SpecWorkspace } from '@/features/flow-spec/useSpecWorkspace'
 import { documentText, renderSpecHtml, specOutline } from '@/features/flow-spec/document'
 import type { SpecAsset, SpecDocument } from '@/features/flow-spec/types'
+import SpecContentsNav, { type SpecContentsItem } from './SpecContentsNav'
 import SpecHistoryDialog from './SpecHistoryDialog'
 import SpecWorkspaceNotices from './SpecWorkspaceNotices'
 import SpecSaveStatus, { saveStatusLabel } from './SpecSaveStatus'
@@ -28,12 +29,28 @@ function backup(document: SpecDocument, assets: SpecAsset[]) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+/**
+ * Sections that live beside the editable document (flow-level and screen
+ * specifications) but belong to the same reading order, so they share its
+ * contents list and its column.
+ */
+export interface SpecAppendix {
+  contents: SpecContentsItem[]
+  onJump(id: string): void
+  content: ReactNode
+  /** Whether every collapsible section in the appendix is open, and the control that changes that. */
+  allOpen: boolean
+  onToggleAll(): void
+}
+
 export default function SpecWorkspacePanel({
   workspace: w,
   onCapture,
+  appendix,
 }: {
   workspace: SpecWorkspace
   onCapture(): Promise<SpecAsset>
+  appendix?: SpecAppendix
 }) {
   const [editing, setEditing] = useState(false)
   const canEdit = w.access?.canEdit ?? true
@@ -60,6 +77,25 @@ export default function SpecWorkspacePanel({
   const [operation, setOperation] = useState(false)
   const [actionError, setActionError] = useState('')
   const outline = useMemo(() => specOutline(w.document), [w.document])
+  // Headings deeper than level 2 nest under the heading above them in the contents list.
+  const headingContents = useMemo(() => {
+    const items: SpecContentsItem[] = []
+    outline.forEach((entry, index) => {
+      const item: SpecContentsItem = { id: `spec-heading-${index}`, label: entry.title }
+      const parent = items[items.length - 1]
+      if (entry.level > 2 && parent) parent.children = [...(parent.children ?? []), item]
+      else items.push(item)
+    })
+    return items
+  }, [outline])
+  const contents = [...headingContents, ...(appendix?.contents ?? [])]
+  const selectContents = (id: string) => {
+    if (id.startsWith('spec-heading-')) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+    appendix?.onJump(id)
+  }
   const html = useMemo(() => (editing ? '' : renderSpecHtml(w.document, w.assets)), [editing, w.document, w.assets])
   const words = documentText(w.document).trim().split(/\s+/).filter(Boolean).length
   const act = async (action: () => Promise<unknown>) => {
@@ -146,12 +182,7 @@ export default function SpecWorkspacePanel({
   return (
     <div className="spec-workspace" data-testid="card-guard-spec-workspace">
       <div className="spec-page-topbar">
-        <div className="spec-page-breadcrumb">
-          <FileText size={16} aria-hidden="true" />
-          <span>Card guard</span>
-          <ChevronRight size={13} aria-hidden="true" />
-          <span>Specification</span>
-        </div>
+        <h2 className="spec-page-title">Business analysis specification</h2>
         <div className="spec-page-actions">
           <SpecSaveStatus workspace={w} />
           <button
@@ -187,7 +218,6 @@ export default function SpecWorkspacePanel({
         </div>
       </div>
       <header className="spec-page-header">
-        <h2>Business analysis specification</h2>
         <div className="spec-page-byline">
           <span className="spec-author-avatar" aria-hidden="true">
             {(w.history[0]?.author ?? 'Workspace').slice(0, 1)}
@@ -204,34 +234,27 @@ export default function SpecWorkspacePanel({
       </header>
       {!editing && notices}
       <div className="spec-document-layout spec-read-layout">
-        <nav aria-label="Business analysis contents" className="spec-outline">
-          <span className="spec-outline-title">Contents</span>
-          {outline.map((entry, index) => (
-            <button
-              type="button"
-              key={entry.index}
-              className={entry.level > 2 ? 'spec-outline-child' : ''}
-              onClick={(event) =>
-                event.currentTarget
-                  .closest('.spec-document-layout')
-                  ?.querySelector(`[data-spec-heading="${index}"]`)
-                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
-            >
-              {entry.title}
-            </button>
-          ))}
-        </nav>
+        <SpecContentsNav
+          items={contents}
+          onSelect={selectContents}
+          allOpen={appendix?.allOpen}
+          onToggleAll={appendix?.onToggleAll}
+          label="Business analysis contents"
+        />
         <article className="spec-document-main">
           <div
             className="spec-prose spec-read-document"
             ref={(element) => {
               element
                 ?.querySelectorAll(':scope > h1, :scope > h2, :scope > h3, :scope > h4')
-                .forEach((heading, index) => heading.setAttribute('data-spec-heading', String(index)))
+                .forEach((heading, index) => {
+                  heading.setAttribute('data-spec-heading', String(index))
+                  heading.id = `spec-heading-${index}`
+                })
             }}
             dangerouslySetInnerHTML={{ __html: html }}
           />
+          {appendix?.content}
         </article>
       </div>
       <div className="spec-document-footer">

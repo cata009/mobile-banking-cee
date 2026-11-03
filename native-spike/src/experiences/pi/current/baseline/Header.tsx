@@ -37,24 +37,26 @@ export function BaselineHomeHeader({
       dark={dark}
       actions={
         <>
-          {primeEntry ?? <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Prime"
-            onPress={() => host.onNavigate({ screen: 'prime' })}
-            onHoverIn={() => setHovered(true)}
-            onHoverOut={() => setHovered(false)}
-            style={primeStyle}
-          >
-            <PrimeBackground dark={dark} />
-            <View style={styles.diamond}>
-              <SourceVector
-                node={PrimeDiamondMark({ color: '#ffffff' })}
-                color="#ffffff"
-                size={16}
-              />
-            </View>
-            <Text style={styles.primeLabel}>Prime</Text>
-          </Pressable>}
+          {primeEntry ?? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Prime"
+              onPress={() => host.onNavigate({ screen: 'prime' })}
+              onHoverIn={() => setHovered(true)}
+              onHoverOut={() => setHovered(false)}
+              style={primeStyle}
+            >
+              <PrimeBackground dark={dark} />
+              <View style={styles.diamond}>
+                <SourceVector
+                  node={PrimeDiamondMark({ color: '#ffffff' })}
+                  color="#ffffff"
+                  size={16}
+                />
+              </View>
+              <Text style={styles.primeLabel}>Prime</Text>
+            </Pressable>
+          )}
           <BaselineHeaderActionRail>
             <BaselineAmountVisibility
               hidden={host.amountsHidden}
@@ -64,6 +66,7 @@ export function BaselineHomeHeader({
             <BaselineHeaderActionButton
               icon="profile"
               label="Profile"
+              onPress={host.country === 'RO' ? host.onProfile : undefined}
               dark={dark}
             />
             <BaselineHeaderActionButton

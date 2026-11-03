@@ -256,9 +256,10 @@ function TransactionFactRow({
             accessibilityRole="button"
             accessibilityLabel={`Copy ${label}`}
             onPress={() => onCopy?.(value, label)}
+            hitSlop={10}
             style={transactionDetailStyles.copyButton}
           >
-            <Glyph name="copy-documents" />
+            <Glyph name="copy-documents" size={16} />
           </Pressable>
         ) : null}
       </View>
@@ -1168,7 +1169,7 @@ const transactionDetailStyles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 18,
     backgroundColor: tokens.surface,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   factRow: {
     flexDirection: 'row',
@@ -1205,8 +1206,8 @@ const transactionDetailStyles = StyleSheet.create({
     color: tokens.text,
   },
   copyButton: {
-    width: 32,
-    height: 32,
+    width: 20,
+    height: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

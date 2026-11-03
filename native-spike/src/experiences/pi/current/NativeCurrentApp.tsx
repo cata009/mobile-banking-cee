@@ -57,6 +57,7 @@ import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 import PrimeBackground from './baseline/more/PrimeBackground';
 import { ProfileHost } from './profile/Host';
 import { isPiClassicCompositionContext } from './baseline/policy';
+import { getProfileIconRoute } from './profile/profileNavigation';
 import type { NativeDemoControl } from '@/features/demo-native/contracts';
 import type {
   CurrentAdapter,
@@ -371,7 +372,9 @@ export default function NativeCurrentApp({
   };
   const host: CurrentScreenProps = {
     virtualCards:
-      (country === 'RO' && release === 'release-current' && effectiveScenario === 'active') ||
+      (country === 'RO' &&
+        release === 'release-current' &&
+        effectiveScenario === 'active') ||
       cardGuardVirtualCardPreview
         ? localVirtualCards
         : undefined,
@@ -442,7 +445,8 @@ export default function NativeCurrentApp({
         nativeCreditLimits.record({ country, bankingScenario }, cardId, limit);
     },
     onCardSecuritySettingChange: control?.events.onCardSecuritySettingChange
-      ? change => controlRef.current?.events.onCardSecuritySettingChange?.(change)
+      ? change =>
+          controlRef.current?.events.onCardSecuritySettingChange?.(change)
       : undefined,
     activeFeatures: control?.activeFeatures,
     coAppingContext: control?.coAppingContext,
@@ -528,7 +532,7 @@ export default function NativeCurrentApp({
     isActive: true,
     onBack,
     onNavigate: navigate,
-    onProfile: () => navigate({ screen: 'profile' }),
+    onProfile: () => navigate(getProfileIconRoute(country)),
     onSearch: () => {
       setQuery('');
       navigate({ screen: 'search' });
@@ -569,6 +573,11 @@ export default function NativeCurrentApp({
   );
   const primaryVisible =
     !isComponentPreview &&
+    !(
+      country === 'RO' &&
+      current.screen === 'profile' &&
+      current.params?.area === 'my-data'
+    ) &&
     suppressedPrimary !== current &&
     effectiveScenario === 'active' &&
     primary.some(item => item.screen === current.screen);

@@ -50,7 +50,6 @@ async function renderPrototype() {
   return within(document.querySelector('[data-flow-preview-scrollable="true"]') as HTMLElement)
 }
 
-
 /** Reviewer navigation follows canonical screen titles; phone assertions stay independent. */
 function jumpToScreen(kind: RsPropertyInsuranceScreenKind) {
   const title = screenTitle(RS_PROPERTY_INSURANCE_FLOW, kind)
@@ -177,10 +176,17 @@ describe('RS property insurance prototype', () => {
     expect(within(packageSummary as HTMLElement).getByText('Cover period')).toBeInTheDocument()
     expect(preview.getAllByText('Insurance duration')).toHaveLength(1)
     expect(preview.getAllByText('Cover period')).toHaveLength(1)
-    expect(within(packageSummary as HTMLElement).getByRole('switch', { name: 'I have read when the cover actually starts.' })).toBeInTheDocument()
+    expect(
+      within(packageSummary as HTMLElement).getByRole('switch', {
+        name: 'I have read when the cover actually starts.',
+      }),
+    ).toBeInTheDocument()
     expect(within(packageSummary as HTMLElement).getByText('Cover period').parentElement).not.toHaveClass('border-b')
     expect(
-      preview.getByText('I have read when the cover actually starts.').closest('[data-component="NavigationRow"]')?.closest('[data-rs-duration-package-summary]'),
+      preview
+        .getByText('I have read when the cover actually starts.')
+        .closest('[data-component="NavigationRow"]')
+        ?.closest('[data-rs-duration-package-summary]'),
     ).toBe(packageSummary)
     expect(preview.queryByText('Selected package')).not.toBeInTheDocument()
   })
@@ -226,7 +232,9 @@ describe('RS property insurance prototype', () => {
 
     jumpToScreen('rs-pi-product-cover')
 
-    const benefits = preview.getByText('What you are covered for').closest('[data-ds-label="SectionHeadingDivider"]')?.nextElementSibling
+    const benefits = preview
+      .getByText('What you are covered for')
+      .closest('[data-ds-label="SectionHeadingDivider"]')?.nextElementSibling
     const rows = benefits?.querySelectorAll('li')
 
     expect(rows).toHaveLength(3)
@@ -302,9 +310,13 @@ describe('RS property insurance prototype', () => {
     jumpToScreen('rs-pi-insured-object')
 
     const homeAddressToggle = preview.getByRole('switch', { name: 'I want to insure my home address' })
-    const addressDivider = preview.getByText('Address', { exact: true }).closest('[data-ds-label="SectionHeadingDivider"]')
+    const addressDivider = preview
+      .getByText('Address', { exact: true })
+      .closest('[data-ds-label="SectionHeadingDivider"]')
     expect(homeAddressToggle).toHaveAttribute('aria-checked', 'false')
-    expect(homeAddressToggle.closest('[data-component="NavigationRow"]')?.compareDocumentPosition(addressDivider as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(
+      homeAddressToggle.closest('[data-component="NavigationRow"]')?.compareDocumentPosition(addressDivider as Node),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
     expect(preview.getByText('Bulevar Arsenija Čarnojevića 137/42, Beograd')).toBeInTheDocument()
     expect(preview.getByLabelText('Street')).toHaveValue('')
     expect(preview.getByLabelText('House number')).toHaveValue('')
@@ -345,7 +357,9 @@ describe('RS property insurance prototype', () => {
 
     jumpToScreen('rs-pi-policyholder')
 
-    expect(preview.queryByText('Taken from your verified profile. To change it, update your profile details.')).not.toBeInTheDocument()
+    expect(
+      preview.queryByText('Taken from your verified profile. To change it, update your profile details.'),
+    ).not.toBeInTheDocument()
   })
 
   it('shows travel, property and life insurance in a closable insurance sheet', async () => {
@@ -463,7 +477,11 @@ describe('RS property insurance prototype', () => {
     expect(preview.getByText('Protect the people who count on you')).toBeInTheDocument()
     expect(RS_PROPERTY_INSURANCE_FLOW.scenarios[0]!.steps.some((step) => step.title === 'Life insurance')).toBe(false)
     expect(RS_PROPERTY_INSURANCE_FLOW.prototype?.nodes['rs-pi-life-insurance']).toBeUndefined()
-    expect(RS_PROPERTY_INSURANCE_FLOW.screenSpecs['rs-pi-life-insurance' as keyof typeof RS_PROPERTY_INSURANCE_FLOW.screenSpecs]).toBeUndefined()
+    expect(
+      RS_PROPERTY_INSURANCE_FLOW.screenSpecs[
+        'rs-pi-life-insurance' as keyof typeof RS_PROPERTY_INSURANCE_FLOW.screenSpecs
+      ],
+    ).toBeUndefined()
   })
 
   it('treats insufficient balance as a separate pre-package case', async () => {
@@ -502,9 +520,8 @@ describe('RS property insurance prototype', () => {
   it('keeps the Flow Library scroll position when the prototype timeline changes', async () => {
     await renderPrototype()
 
-    const outerScroller = Array.from(document.querySelectorAll('div')).find(
-      (element) => element.className === 'h-full overflow-y-auto bg-[var(--uc-app-bg)] text-[var(--uc-text)] scrollbar-hide',
-    ) as HTMLElement
+    const outerScroller = document.querySelector<HTMLElement>('[data-flow-library-screen="true"]')
+    expect(outerScroller).toBeInTheDocument()
     let outerScrollTop = 0
     Object.defineProperty(outerScroller, 'scrollTop', {
       configurable: true,
@@ -538,7 +555,9 @@ describe('RS property insurance prototype', () => {
     jumpToScreen('rs-pi-package-must-read')
 
     expect(preview.getByRole('heading', { name: 'Must read' })).toHaveClass('!text-[28px]', '!leading-[34px]')
-    expect(preview.getByRole('button', { name: 'I have read this' }).closest('[data-bottom-sheet-footer="true"]')).toBeInTheDocument()
+    expect(
+      preview.getByRole('button', { name: 'I have read this' }).closest('[data-bottom-sheet-footer="true"]'),
+    ).toBeInTheDocument()
   })
 
   it('removes select-all and uses document actions without divider rows', async () => {
@@ -549,7 +568,13 @@ describe('RS property insurance prototype', () => {
     expect(preview.queryByRole('button', { name: 'Select all options' })).not.toBeInTheDocument()
     expect(preview.getAllByRole('button', { name: /^Open document / })).toHaveLength(4)
     expect(preview.queryByLabelText('Download document')).not.toBeInTheDocument()
-    expect(preview.getByText('I agree that Generali Osiguranje Srbija a.d.o. may contact me and send me useful information, offers and notifications about insurance products and services.').closest('button')).not.toHaveClass('border-b')
+    expect(
+      preview
+        .getByText(
+          'I agree that Generali Osiguranje Srbija a.d.o. may contact me and send me useful information, offers and notifications about insurance products and services.',
+        )
+        .closest('button'),
+    ).not.toHaveClass('border-b')
   })
 
   it('removes the privacy helper paragraph from terms and consents', async () => {

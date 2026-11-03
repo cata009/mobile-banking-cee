@@ -7,11 +7,29 @@ import Products, { currentProductSearch } from './products/Products';
 import Detail from './products/Detail';
 import RoProducts from './baseline/offers/Products';
 import RoProductDetail from './baseline/offers/Detail';
+import GeniusProtectFlow from './baseline/offers/GeniusProtectFlow';
+import GeniusProtectPolicyDetails from './baseline/offers/GeniusProtectPolicyDetails';
 import { isPiClassicCompositionContext } from './baseline/policy';
 import Pfm from './analytics/Pfm';
 import Investments, {
   currentInvestmentSearch,
 } from './investments/Investments';
+
+function ProductDetailScreen(props: CurrentScreenProps) {
+  if (!isPiClassicCompositionContext(props))
+    return React.createElement(Detail, props);
+  if (
+    props.country === 'RO' &&
+    props.route.params?.optionId === 'genius-protect-policy'
+  )
+    return React.createElement(GeniusProtectPolicyDetails, props);
+  if (
+    props.country === 'RO' &&
+    props.route.params?.optionId === 'genius-protect'
+  )
+    return React.createElement(GeniusProtectFlow, props);
+  return React.createElement(RoProductDetail, props);
+}
 export const CURRENT_HOME_ADAPTER: CurrentAdapter = {
   id: 'pi-current-home-products-pfm-investments',
   screens: {
@@ -25,11 +43,7 @@ export const CURRENT_HOME_ADAPTER: CurrentAdapter = {
         isPiClassicCompositionContext(props) ? RoProducts : Products,
         props,
       ),
-    'product-detail': (props: CurrentScreenProps) =>
-      React.createElement(
-        isPiClassicCompositionContext(props) ? RoProductDetail : Detail,
-        props,
-      ),
+    'product-detail': ProductDetailScreen,
     pfm: Pfm,
     investments: Investments,
   },
