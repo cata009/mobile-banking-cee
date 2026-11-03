@@ -229,6 +229,11 @@ export default function NativeCurrentApp({
     nativeVirtualCards.subscribe,
     () => nativeVirtualCards.read({ country, bankingScenario }),
   );
+  const cardGuardVirtualCardPreview =
+    control?.route.params?.cardGuardVirtualCardIssue === 'true' &&
+    (country === 'BA' || country === 'BA_BL') &&
+    release === 'release-current' &&
+    effectiveScenario === 'active';
   useLayoutEffect(() => {
     if (current.screen !== 'investments') return;
     // Source clears the coordinator selection when the portfolio route exits.
@@ -366,17 +371,17 @@ export default function NativeCurrentApp({
   };
   const host: CurrentScreenProps = {
     virtualCards:
-      country === 'RO' &&
-      release === 'release-current' &&
-      effectiveScenario === 'active'
+      (country === 'RO' && release === 'release-current' && effectiveScenario === 'active') ||
+      cardGuardVirtualCardPreview
         ? localVirtualCards
         : undefined,
-    onIssueVirtualCard: (account, design, tier) =>
+    onIssueVirtualCard: (account, design, tier, demoPreview) =>
       nativeVirtualCards.issue(
         { country, bankingScenario },
         account,
         design,
         tier,
+        demoPreview,
       ),
     onChangeVirtualCardPicture: (id, design) =>
       nativeVirtualCards.change({ country, bankingScenario }, id, design),
@@ -436,6 +441,9 @@ export default function NativeCurrentApp({
       else
         nativeCreditLimits.record({ country, bankingScenario }, cardId, limit);
     },
+    onCardSecuritySettingChange: control?.events.onCardSecuritySettingChange
+      ? change => controlRef.current?.events.onCardSecuritySettingChange?.(change)
+      : undefined,
     activeFeatures: control?.activeFeatures,
     coAppingContext: control?.coAppingContext,
     futureGainSimulatorResumeState: control?.futureGainSimulatorResumeState,
@@ -732,6 +740,11 @@ export default function NativeCurrentApp({
           onCreditLimitOfferComplete: (cardId, limit) => {
             if (canAct()) host.onCreditLimitOfferComplete?.(cardId, limit);
           },
+          onCardSecuritySettingChange: host.onCardSecuritySettingChange
+            ? change => {
+                if (canAct()) host.onCardSecuritySettingChange?.(change);
+              }
+            : undefined,
           onInvestmentHistoryTabChange: host.onInvestmentHistoryTabChange
             ? tab => {
                 if (canAct()) host.onInvestmentHistoryTabChange?.(tab);

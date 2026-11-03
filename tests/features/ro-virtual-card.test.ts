@@ -32,6 +32,17 @@ describe('Romanian virtual cards', () => {
     expect(changeVirtualCardPicture(state, scope, 'unknown', 'clean-green')).toBe(state)
   })
 
+  it('creates a BA virtual card only for the explicit Card guard demo preview', () => {
+    const baScope = { country: 'BA' as const, bankingScenario: 'retail-single-account' as const }
+    const baAccount: CurrentAccount = { ...account, id: 'ba-account', accountNumber: 'BA00', currency: 'BAM' }
+    const previewDraft = { account: baAccount, design: 'clean-green' as const, termsAccepted: true, demoPreview: true }
+    const standardDraft = { account: baAccount, design: 'clean-green' as const, termsAccepted: true }
+
+    expect(issueVirtualCard({}, baScope, standardDraft)).toEqual({})
+    const previewState = issueVirtualCard({}, baScope, previewDraft)
+    expect(readVirtualCards(previewState, baScope)).toMatchObject([{ linkedAccountId: 'ba-account', currency: 'BAM' }])
+  })
+
   it('rejects ineligible currency and limits issue to two cards per day', () => {
     const draft = { account, design: 'blue' as const, termsAccepted: true, issuedOn: '2026-10-29' }
     expect(

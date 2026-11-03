@@ -23,6 +23,7 @@ export const nativeVirtualCards = {
     account: CurrentAccount,
     design: VirtualCardDesign,
     tier: VirtualCardTier,
+    demoPreview = false,
   ) {
     const before = readVirtualCards(state, scope);
     const next = issueVirtualCard(state, scope, {
@@ -30,6 +31,7 @@ export const nativeVirtualCards = {
       design,
       tier,
       termsAccepted: true,
+      demoPreview,
     });
     const after = readVirtualCards(next, scope);
     publish(next);

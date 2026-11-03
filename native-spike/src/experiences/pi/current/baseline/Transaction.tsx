@@ -494,7 +494,9 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
             {pending || declined ? (
               <View style={sourceStyle13}>
                 <View style={sourceStyle14} />
-                <Text style={[strong, sourceStyle15]}>{declined ? 'Declined' : 'Pending'}</Text>
+                <Text style={[strong, sourceStyle15]}>
+                  {declined ? 'Declined' : host.transactionPresentation?.pendingStatusLabel ?? 'Pending'}
+                </Text>
               </View>
             ) : host.transactionPresentation?.showSpendingInsights === false ? null : (
               <>
@@ -517,6 +519,11 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                 </View>
               </>
             )}
+            {pending && host.transactionPresentation?.pendingStatusDescription ? (
+              <Text style={[regular, sourceStyle16]}>
+                {host.transactionPresentation.pendingStatusDescription}
+              </Text>
+            ) : null}
           </View>
           {!pending && host.transactionPresentation?.showActions !== false ? (
             <View style={sourceStyle19}>

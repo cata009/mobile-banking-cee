@@ -20,6 +20,8 @@ export function fraudScreenFixture(
     [
       'fraud-case-status',
       'fraud-claim-sent',
+      'fraud-virtual-card-offer',
+      'fraud-virtual-card',
       'fraud-card-security',
       'fraud-replace-confirm',
       'fraud-replacement-status',
@@ -35,10 +37,10 @@ export function fraudScreenFixture(
     parameters.transaction,
   )
   if (parameters.transaction) state = fraudReducer(state, { type: 'select', transactionId: parameters.transaction })
-  if (['fraud-claim-details', 'fraud-claim-review', 'fraud-attempt'].includes(screen))
-    state = fraudReducer(state, { type: 'report', transactionId: state.selectedId })
+  if (['fraud-claim-details', 'fraud-claim-review', 'fraud-attempt', 'fraud-dispute-intro'].includes(screen))
+    state = fraudReducer(state, { type: 'report', transactionId: state.selectedId, blockCardOnSubmit: true })
   if (screen === 'fraud-attempt' && !parameters.transaction) {
-    state = fraudReducer(state, { type: 'report', transactionId: 'vienna' })
+    state = fraudReducer(state, { type: 'report', transactionId: 'vienna', blockCardOnSubmit: true })
   }
   if (screen === 'fraud-claim-review')
     state = fraudReducer(state, { type: 'draft', note: 'I have my card and did not authorise this payment.' })
@@ -74,12 +76,14 @@ export function FraudJourney({
   const [state, dispatch] = useReducer(fraudReducer, undefined, () => fraudScreenFixture(initialScreen, parameters))
   const [screen, setScreen] = useState<FraudScreen>(initialScreen)
   const [replacementOrigin, setReplacementOrigin] = useState<FraudScreen>('fraud-card-security')
+  const [securityOrigin, setSecurityOrigin] = useState<FraudScreen>('fraud-cards')
   const visibleScreen = screen === 'fraud-attempt' ? 'fraud-claim-details' : screen
   const failedOnce = useRef(false)
   const parameterKey = JSON.stringify(parameters)
   const previousParameters = useRef(parameterKey)
   const root = useRef<HTMLDivElement>(null)
   const go = (next: FraudScreen) => {
+    if (next === 'fraud-card-security' || next === 'fraud-geo-settings') setSecurityOrigin(screen)
     if (next === 'fraud-replace-confirm')
       setReplacementOrigin(screen === 'fraud-card-options' ? 'fraud-card-options' : 'fraud-card-security')
     setScreen(next)
@@ -111,11 +115,14 @@ export function FraudJourney({
       'fraud-claim-details': 'fraud-transaction',
       'fraud-claim-review': 'fraud-claim-details',
       'fraud-claim-sent': 'fraud-transaction',
+      'fraud-dispute-intro': 'fraud-transaction',
+      'fraud-virtual-card-offer': 'fraud-claim-sent',
+      'fraud-virtual-card': 'fraud-virtual-card-offer',
       'fraud-case-status': 'fraud-baseline-transaction',
-      'fraud-card-security': 'fraud-card-options',
+      'fraud-card-security': securityOrigin,
       'fraud-replace-confirm': replacementOrigin,
       'fraud-replacement-status': 'fraud-card-security',
-      'fraud-geo-settings': 'fraud-card-options',
+      'fraud-geo-settings': securityOrigin,
     }
     go(target[screen] ?? 'fraud-push')
   }
@@ -136,12 +143,16 @@ export function FraudJourney({
           'fraud-card-options',
           'fraud-baseline-transaction',
           'fraud-transaction',
+          'fraud-card-security',
+          'fraud-geo-settings',
+          'fraud-virtual-card',
         ].includes(visibleScreen) ? (
         <FraudBaselineScreen
           screen={visibleScreen}
           state={state}
           dispatch={dispatch}
           go={go}
+          onBackScreen={securityOrigin}
           select={(transactionId) => dispatch({ type: 'select', transactionId })}
         />
       ) : (

@@ -11,11 +11,14 @@ export type FraudScreen =
   | 'fraud-push'
   | 'fraud-alerts'
   | 'fraud-transaction'
+  | 'fraud-dispute-intro'
   | 'fraud-recognised'
   | 'fraud-attempt'
   | 'fraud-claim-details'
   | 'fraud-claim-review'
   | 'fraud-claim-sent'
+  | 'fraud-virtual-card-offer'
+  | 'fraud-virtual-card'
   | 'fraud-case-status'
   | 'fraud-card-security'
   | 'fraud-replace-confirm'
@@ -108,6 +111,8 @@ export interface FraudSession {
   selectedId: string
   /** An editable report intent; it is committed only by successful submission. */
   reportingId: string | null
+  /** Explicit card-block choice, committed only with a successful report or dispute. */
+  blockCardOnSubmit: boolean
   recognised: string[]
   reported: string[]
   cardStatus: 'active' | 'frozen' | 'closed'
@@ -124,7 +129,8 @@ export interface FraudSession {
 export type FraudAction =
   | { type: 'preview-fixture'; state: FraudSession; reset?: boolean }
   | { type: 'select'; transactionId: string }
-  | { type: 'recognise' | 'report'; transactionId: string }
+  | { type: 'recognise'; transactionId: string }
+  | { type: 'report'; transactionId: string; blockCardOnSubmit?: boolean }
   | { type: 'draft'; note?: string; hasCard?: boolean; declaration?: boolean; reason?: FraudReason }
   | { type: 'attach'; attachment: FraudAttachment; transactionId?: string }
   | { type: 'remove-attachment'; name: string }
@@ -142,6 +148,7 @@ export function createFraudSession(fixture?: 'case' | 'booked' | 'report', trans
   const state: FraudSession = {
     selectedId,
     reportingId: null,
+    blockCardOnSubmit: false,
     ledgerOverrides: fixture === 'case' || fixture === 'booked' ? { [selectedId]: 'booked' } : {},
     recognised: [],
     reported: [],
@@ -160,6 +167,7 @@ export function createFraudSession(fixture?: 'case' | 'booked' | 'report', trans
     {
       ...state,
       reportingId: selectedId,
+      blockCardOnSubmit: true,
       draft: {
         ...EMPTY_DRAFT,
         note: 'I have my card and did not authorise this payment.',
@@ -268,6 +276,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
             ...state,
             selectedId: action.transactionId,
             reportingId: action.transactionId === state.selectedId ? state.reportingId : null,
+            blockCardOnSubmit: action.transactionId === state.selectedId ? state.blockCardOnSubmit : false,
             draft: action.transactionId === state.selectedId ? state.draft : { ...EMPTY_DRAFT },
             submitError: false,
           }
@@ -283,6 +292,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
         ...state,
         selectedId: action.transactionId,
         reportingId: null,
+        blockCardOnSubmit: false,
         recognised: [...new Set([...state.recognised, action.transactionId])],
       }
     case 'report': {
@@ -292,6 +302,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
         ...state,
         selectedId: action.transactionId,
         reportingId: action.transactionId,
+        blockCardOnSubmit: action.blockCardOnSubmit === true,
         draft: action.transactionId === state.selectedId ? state.draft : { ...EMPTY_DRAFT },
         submitError: false,
       }
@@ -350,7 +361,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
         reportingId: null,
         recognised: state.recognised.filter((id) => id !== state.selectedId),
         reported: [...new Set([...state.reported, state.selectedId])],
-        cardStatus: state.cardStatus === 'closed' ? 'closed' : 'frozen',
+        cardStatus: state.cardStatus === 'closed' || !state.blockCardOnSubmit ? state.cardStatus : 'frozen',
         submitError: false,
       }
     }

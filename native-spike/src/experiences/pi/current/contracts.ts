@@ -44,6 +44,7 @@ export interface CurrentScreenProps extends CurrentContext {
     account: CurrentAccount,
     design: VirtualCardDesign,
     tier: VirtualCardTier,
+    demoPreview?: boolean,
   ) => string | null;
   onChangeVirtualCardPicture?: (
     id: string,
@@ -94,6 +95,7 @@ export interface CurrentScreenProps extends CurrentContext {
   creditLimitOffer?: NativeDemoControl['creditLimitOffer'];
   onCreditLimitOfferCancel?: NativeDemoEvents['onCreditLimitOfferCancel'];
   onCreditLimitOfferComplete?: NativeDemoEvents['onCreditLimitOfferComplete'];
+  onCardSecuritySettingChange?: NativeDemoEvents['onCardSecuritySettingChange'];
   investmentHistoryOverrides?: NativeDemoControl['investmentHistoryOverrides'];
   investmentPresentation?: NativeDemoControl['investmentPresentation'];
   bankingPresentation?: NativeDemoControl['bankingPresentation'];

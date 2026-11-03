@@ -24,7 +24,7 @@ import type { CzChatHelpArea } from '@/app/chat/cz/helpers'
 import type { AccountTransaction } from '@/data/accountDetails'
 import type { PfmCategorySelection } from '@/data/pfmCategories'
 import type { CreditCard } from '@/data/products'
-import type { NativeBankingPresentation } from './bankingPresentation'
+import type { NativeBankingPresentation, NativeCardSecurityChange } from './bankingPresentation'
 import type { NativeProductsPreview, NativeProductsPreviewAction } from './productsPreviewContracts'
 import type { NativeProductDetailPresentation } from './productDetailPresentation'
 import type { ProductsShelfFocusRequest } from '@/features/products/shelfFocus'
@@ -172,6 +172,7 @@ export interface NativeDemoEvents {
   onTransactionCategoryChange?: (transaction: AccountTransaction, selection: PfmCategorySelection) => void
   onCreditLimitOfferCancel?: () => void
   onCreditLimitOfferComplete?: (cardId: string, limit: number) => void
+  onCardSecuritySettingChange?: (change: NativeCardSecurityChange) => void
   onPaymentEntryRequest?: (route: NativeDemoRoute) => void
   onInvestmentHistoryTabChange?: (tab: InvestmentHistoryTabId) => void
   onInvestmentHistoryToApprove?: () => void

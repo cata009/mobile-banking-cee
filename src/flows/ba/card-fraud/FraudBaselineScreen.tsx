@@ -23,12 +23,14 @@ function BaselineContent({
   go,
   select,
   dispatch,
+  onBackScreen,
 }: {
   screen: FraudScreen
   state: FraudSession
   go: (screen: FraudScreen) => void
   select: (id: string) => void
   dispatch: Dispatch<FraudAction>
+  onBackScreen?: FraudScreen
 }) {
   const ledger = (id: string) => fraudLedgerTransaction(id, state.ledgerOverrides[id])
   const { categories } = useProducts()
@@ -48,20 +50,40 @@ function BaselineContent({
       ? { screen: 'home' }
       : screen === 'fraud-card-options'
         ? { screen: 'card-options', params: { productId: card?.id ?? '' } }
-        : screen === 'fraud-baseline-transaction' || screen === 'fraud-transaction'
-          ? {
-              screen: 'transaction',
-              params: { productId: card?.id ?? '', source: 'card', transactionId: state.selectedId },
-            }
-          : { screen: 'card', params: { productId: card?.id ?? '' } }
+        : screen === 'fraud-card-security' || screen === 'fraud-geo-settings'
+          ? { screen: 'card-options', params: { productId: card?.id ?? '', cardSecurityPage: 'true' } }
+          : screen === 'fraud-virtual-card'
+            ? {
+                screen: 'product-detail',
+                params: {
+                  title: 'Virtual card',
+                  optionId: 'virtual-card',
+                  cardGuardVirtualCardIssue: 'true',
+                },
+              }
+            : screen === 'fraud-baseline-transaction' || screen === 'fraud-transaction'
+              ? {
+                  screen: 'transaction',
+                  params: { productId: card?.id ?? '', source: 'card', transactionId: state.selectedId },
+                }
+              : { screen: 'card', params: { productId: card?.id ?? '' } }
   const item = state.cases[state.selectedId]
   const unreviewedCount = FRAUD_TRANSACTIONS.filter((payment) => !isFraudActivityReviewed(state, payment.id)).length
   const rows = FRAUD_TRANSACTIONS.filter((payment) => payment.status !== 'declined').map((payment) => ({
     transaction: ledger(payment.id),
     displayLabel: payment.merchant,
   }))
-  const back = () =>
+  const back = () => {
+    if (screen === 'fraud-card-security' || screen === 'fraud-geo-settings') {
+      go(onBackScreen ?? 'fraud-cards')
+      return
+    }
+    if (screen === 'fraud-virtual-card') {
+      go('fraud-virtual-card-offer')
+      return
+    }
     go(screen === 'fraud-transaction' ? 'fraud-alerts' : screen === 'fraud-cards' ? 'fraud-home' : 'fraud-cards')
+  }
   return (
     <div className="fraud-baseline-shell">
       <div className="fraud-baseline-native">
@@ -74,6 +96,15 @@ function BaselineContent({
             activeFeatures: [],
             language: 'en',
             primaryNavigationVisible: screen === 'fraud-home',
+            ...(screen === 'fraud-virtual-card'
+              ? {
+                  productDetailPresentation: {
+                    title: 'Virtual card',
+                    optionId: 'virtual-card',
+                    intro: 'Choose whether to issue a virtual card for eligible card payments.',
+                  },
+                }
+              : {}),
             bankingPresentation: {
               rows,
               productId: card?.id,
@@ -87,9 +118,19 @@ function BaselineContent({
                     }
                   : undefined,
               cardSecurityRoutes: {
-                block: { screen: 'card-options', params: { fraudAction: 'protect-card' } },
+                block: { screen: 'card-options', params: { productId: card?.id ?? '', cardSecurityPage: 'true' } },
                 replacement: { screen: 'card-options', params: { fraudAction: 'replace-card' } },
               },
+              ...(screen === 'fraud-card-security' || screen === 'fraud-geo-settings'
+                ? {
+                    cardSecurityPreview: {
+                      channels: state.channels,
+                      countryProtectionEnabled: state.geoEnabled,
+                      cardStatus: state.cardStatus,
+                      location: state.location,
+                    },
+                  }
+                : {}),
             },
             transactionSelection: card
               ? { productId: card.id, source: 'card', transaction: ledger(state.selectedId) }
@@ -119,6 +160,13 @@ function BaselineContent({
                     : undefined,
                   postingTime: transaction.date.split(' · ')[1],
                   activityStatus: transaction.status === 'declined' ? 'declined' : undefined,
+                  ...(transaction.status === 'pending'
+                    ? {
+                        pendingStatusLabel: 'Authorised · awaiting settlement',
+                        pendingStatusDescription:
+                          'The amount is reserved. If the merchant completes the payment, your account will be debited.',
+                      }
+                    : {}),
                   merchantEnrichment: {
                     cleanMerchantName: transaction.merchant,
                     categoryLabel: 'Merchant Category',
@@ -158,7 +206,20 @@ function BaselineContent({
               : undefined,
           }}
           onBack={back}
+          events={{
+            onCardSecuritySettingChange: (change) => {
+              if (change.kind === 'channel') {
+                dispatch({ type: 'channel', channel: change.channel, enabled: change.enabled })
+              } else {
+                dispatch({ type: 'geo', enabled: change.enabled })
+              }
+            },
+          }}
           onNavigate={(target, action) => {
+            if (target.params?.cardSecurityPage === 'true') {
+              go('fraud-card-security')
+              return true
+            }
             if (target.params?.fraudAction === 'view-case') {
               go('fraud-case-status')
               return true
@@ -192,7 +253,15 @@ function BaselineContent({
           }}
         />
       </div>
-      {!item && screen !== 'fraud-home' && screen !== 'fraud-cards' && screen !== 'fraud-card-options' ? (
+      {!item &&
+      ![
+        'fraud-home',
+        'fraud-cards',
+        'fraud-card-options',
+        'fraud-card-security',
+        'fraud-geo-settings',
+        'fraud-virtual-card',
+      ].includes(screen) ? (
         <div className="fraud-baseline-actions">
           {screen === 'fraud-transaction' ? (
             state.recognised.includes(transaction.id) ? (
@@ -203,14 +272,14 @@ function BaselineContent({
               </PrimaryButton>
             ) : (
               <>
-                <p>Your card will be temporarily frozen after you successfully submit the report.</p>
+                <p>This choice blocks your card only after you sign and successfully submit the report.</p>
                 <PrimaryButton
                   onClick={() => {
-                    dispatch({ type: 'report', transactionId: transaction.id })
-                    go('fraud-claim-details')
+                    dispatch({ type: 'report', transactionId: transaction.id, blockCardOnSubmit: true })
+                    go('fraud-dispute-intro')
                   }}
                 >
-                  Report unrecognised payment
+                  I don't recognise this payment. Block my card
                 </PrimaryButton>
                 <PrimaryButton
                   variant="secondary"
@@ -243,6 +312,7 @@ export function FraudBaselineScreen(props: {
   screen: FraudScreen
   state: FraudSession
   go: (screen: FraudScreen) => void
+  onBackScreen?: FraudScreen
   select: (id: string) => void
   dispatch: Dispatch<FraudAction>
 }) {

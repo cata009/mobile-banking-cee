@@ -39,7 +39,13 @@ export function FraudActivityList({ state, onSelect }: { state: FraudSession; on
                       detailsLabel={payment.status === 'declined' ? 'Declined attempt · No money debited' : undefined}
                       amountSign={payment.status === 'declined' ? '' : undefined}
                       showStatus
-                      statusLabel={payment.status === 'declined' ? 'Declined' : undefined}
+                      statusLabel={
+                        payment.status === 'declined'
+                          ? 'Declined'
+                          : payment.status === 'pending'
+                            ? 'Authorised · not settled'
+                            : undefined
+                      }
                       leadingVisual={
                         payment.id === 'berlin' ? (
                           <MerchantLogo merchant="carrefour" size={32} />

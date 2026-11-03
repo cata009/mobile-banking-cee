@@ -38,8 +38,7 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-home',
   },
   'fraud-card-options': {
-    primary: { label: 'Card security', to: 'fraud-card-security' },
-    secondary: { label: 'Reissue Card', to: 'fraud-replace-confirm' },
+    primary: { label: 'Reissue Card', to: 'fraud-replace-confirm' },
     back: 'fraud-cards',
   },
   'fraud-baseline-transaction': {
@@ -55,13 +54,17 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-home',
   },
   'fraud-transaction': {
-    primary: { label: 'Report unrecognised payment', to: 'fraud-claim-details' },
+    primary: { label: "I don't recognise this payment. Block my card", to: 'fraud-dispute-intro' },
     secondary: { label: 'I recognise this payment', to: 'fraud-recognised' },
     extra: [
       { label: 'View existing dispute', to: 'fraud-case-status' },
       { label: 'Card used', to: 'fraud-cards' },
     ],
     back: 'fraud-alerts',
+  },
+  'fraud-dispute-intro': {
+    primary: { label: 'Continue to the appropriate form', to: 'fraud-claim-details' },
+    back: 'fraud-transaction',
   },
   'fraud-recognised': { primary: { label: 'Review other activity', to: 'fraud-alerts' }, back: 'fraud-alerts' },
   'fraud-attempt': { primary: { label: 'Review report', to: 'fraud-claim-review' }, back: 'fraud-transaction' },
@@ -74,16 +77,26 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-claim-details',
   },
   'fraud-claim-sent': {
-    primary: { label: 'Track this case', to: 'fraud-case-status' },
-    secondary: { label: 'Protect my card', to: 'fraud-card-security' },
+    primary: { label: 'Continue', to: 'fraud-virtual-card-offer' },
+    secondary: { label: 'Track this case', to: 'fraud-case-status' },
+    extra: [{ label: 'Protect my card', to: 'fraud-card-security' }],
     back: 'fraud-transaction',
+  },
+  'fraud-virtual-card-offer': {
+    primary: { label: 'Create a virtual card', to: 'fraud-virtual-card' },
+    secondary: { label: 'Not now', to: 'fraud-case-status' },
+    back: 'fraud-claim-sent',
+  },
+  'fraud-virtual-card': {
+    primary: { label: 'View virtual card', to: 'fraud-cards' },
+    back: 'fraud-virtual-card-offer',
   },
   'fraud-case-status': {
     primary: { label: 'Ok I got it', to: 'fraud-baseline-transaction' },
     back: 'fraud-baseline-transaction',
   },
   'fraud-card-security': {
-    back: 'fraud-card-options',
+    back: 'fraud-cards',
   },
   'fraud-replace-confirm': {
     primary: { label: 'Confirm closure and replacement', to: 'fraud-replacement-status' },
@@ -94,13 +107,13 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-card-security',
   },
   'fraud-geo-settings': {
-    back: 'fraud-card-options',
+    back: 'fraud-cards',
   },
 }
 
 export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
   id: 'ba-card-fraud',
-  title: 'Card guard · Fraud alerts & disputes',
+  title: 'Card guard',
   label: 'Bosnia · Card guard',
   summary:
     'A complete baseline journey from suspicious card activity to a guided dispute, transparent case tracking and card protection.',
@@ -144,8 +157,14 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         },
       ],
       versionContext:
-        'Version 1.0 · 22 October 2026 · User-approved Bosnia baseline concept. UI-complete demonstration; production fraud, dispute and card-service integrations require bank contracts.',
+        'Version 1.1 · 3 November 2026 · Bosnia baseline concept updated for explicit card blocking, booked-only disputes, settlement clarity and a virtual-card choice. UI-complete demonstration; production fraud, dispute and card-service integrations require bank contracts.',
       versionHistory: [
+        {
+          version: '1.1',
+          date: '3 November 2026',
+          detail:
+            'Clarified authorised payments awaiting settlement, made card blocking an explicit choice, added the booked-payment Open dispute step, updated Card security to Native baseline composition, and added a virtual-card offer after submission.',
+        },
         {
           version: '1.0',
           date: '22 October 2026',
@@ -175,6 +194,13 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           detail:
             'The phone signal is a proposed additional control. Production needs fresh-signal limits, privacy consent, offline handling, travel and cross-border policy, not a guarantee of fraud detection.',
         },
+        {
+          reference: 'BA-F04',
+          status: 'Open',
+          title: 'Virtual card availability in Bosnia',
+          detail:
+            'The Card guard uses an illustrative demo-only BA virtual-card issue route. Confirm product availability, eligible accounts, terms and how it behaves while the physical card is frozen before production.',
+        },
       ],
       requirements: [
         {
@@ -182,7 +208,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           items: [
             'Aggregate suspicious events for one masked card, with distinct booked, pending and declined states.',
             'Recognising an event resolves only that alert and never submits a claim or retries a payment.',
-            'Explain protective freezing before the unrecognised-activity action.',
+            'Ask explicitly whether to block the card with the unrecognised-payment action; freeze it only after successful submission.',
           ],
         },
         {
@@ -225,8 +251,8 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           title: 'Detect → Respond → Follow → Protect',
           items: [
             'A notification opens an activity inbox; each item has its own identity and ledger status.',
-            'Unrecognised activity opens an editable report. Successful submission freezes the card and creates the linked report or booked-payment dispute.',
-            'The completed receipt leads to an ongoing case and separate security/replacement controls.',
+            'The customer explicitly chooses to report an unrecognised payment and block the card. Successful submission creates a report or booked-payment dispute and applies that block choice.',
+            'The booked-payment path offers Open dispute; pending and declined activity remain reports. The submitted receipt leads to a virtual-card choice and separate case tracking.',
             'The professional modal provides four conceptual chapters around the same interactive phone; presenter fixtures are explicitly labelled.',
           ],
         },
@@ -286,7 +312,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         id: 'F3',
         group: 'Protection',
         statement:
-          'Opening the form creates only an editable intent. Successful submission commits the report and temporarily freezes the card; returning or a failed submission does not freeze it. An already closed card stays closed.',
+          'Opening the form creates only an editable intent. The customer explicitly chooses to block the card. Successful submission commits the report and freezes the card only when that choice was made; returning or a failed submission does not freeze it. An already closed card stays closed.',
       },
       {
         id: 'F4',
@@ -324,6 +350,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       'Linked report or dispute case',
       'Activity inbox',
       'Card protection',
+      'Virtual-card demo issue',
       'Independent replacement status',
     ],
     analyticsEvents: [
@@ -338,6 +365,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     ],
     openQuestions: [
       'Production SLA, evidence requirements, authentication and integration contracts need bank approval; the demo is fully executable without those services.',
+      'Confirm BA virtual-card availability, eligible accounts and supported payments before treating the demo-only issue route as product policy.',
     ],
     notes: [
       {
@@ -356,7 +384,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     sessionModel: {
       name: 'FraudSession',
       shape:
-        'selectedId; reportingId (editable intent); ledgerOverrides; recognised[]; reported[] (submitted only); cases[transactionId]{kind,reference,status,reason,note,attachments}; draft{reason,note,attachments,declaration}; cardStatus; replacement; channels{atm,internet,pos}; geoEnabled; location; phoneCountry',
+        'selectedId; reportingId (editable intent); blockCardOnSubmit; ledgerOverrides; recognised[]; reported[] (submitted only); cases[transactionId]{kind,reference,status,reason,note,attachments}; draft{reason,note,attachments,declaration}; cardStatus; replacement; channels{atm,internet,pos}; geoEnabled; location; phoneCountry',
       description:
         'A single session owns independent event, case, card and preference states. Business transitions live in the fraud feature reducer.',
     },
@@ -406,6 +434,9 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
                   'fraud-card-options',
                   'fraud-baseline-transaction',
                   'fraud-transaction',
+                  'fraud-card-security',
+                  'fraud-geo-settings',
+                  'fraud-virtual-card',
                 ].includes(screen)
               ? 'FraudBaselineScreen'
               : 'FraudScreens',
@@ -425,27 +456,24 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-authenticate',
         'fraud-alerts',
         'fraud-transaction',
+        'fraud-dispute-intro',
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
+        'fraud-virtual-card-offer',
+        'fraud-virtual-card',
         'fraud-case-status',
+        'fraud-cards',
         'fraud-card-security',
       ],
-      'Review the three current activities: pending Carrefour, declined ATM and pending YouTube. Report attempts and protect the card.',
+      'Review the three current activities. Pending payments are explained as awaiting settlement; choose to block the card, submit a report and then decide about a virtual card.',
     ),
     scenario(
       'baseline-context',
       'Existing application · Home, Cards and Card options',
       'happy',
-      [
-        'fraud-home',
-        'fraud-cards',
-        'fraud-card-options',
-        'fraud-card-security',
-        'fraud-baseline-transaction',
-        'fraud-case-status',
-      ],
-      'Explore the actual baseline application screens and their new security entry points.',
+      ['fraud-home', 'fraud-cards', 'fraud-card-options', 'fraud-baseline-transaction', 'fraud-case-status'],
+      'Explore the actual baseline Home, Cards, Card options and transaction screens.',
     ),
     scenario(
       'report-and-track',
@@ -456,13 +484,17 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-authenticate',
         'fraud-alerts',
         'fraud-transaction',
+        'fraud-dispute-intro',
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
+        'fraud-virtual-card-offer',
+        'fraud-virtual-card',
         'fraud-case-status',
+        'fraud-cards',
         'fraud-card-security',
       ],
-      'A booked suspicious purchase is reported once and remains traceable from its transaction.',
+      'A booked suspicious purchase can be explicitly blocked and disputed once; the customer can then choose whether to start virtual-card setup.',
       { ledger: 'booked' },
     ),
     scenario(
@@ -479,10 +511,14 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       [
         'fraud-alerts',
         'fraud-transaction',
+        'fraud-dispute-intro',
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
+        'fraud-virtual-card-offer',
+        'fraud-virtual-card',
         'fraud-case-status',
+        'fraud-cards',
         'fraud-card-security',
       ],
       'A declined attempt has no money to charge back.',
@@ -494,10 +530,14 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       'alternate',
       [
         'fraud-transaction',
+        'fraud-dispute-intro',
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
+        'fraud-virtual-card-offer',
+        'fraud-virtual-card',
         'fraud-case-status',
+        'fraud-cards',
         'fraud-card-security',
       ],
       'Report a pending online authorisation without pretending it has settled.',

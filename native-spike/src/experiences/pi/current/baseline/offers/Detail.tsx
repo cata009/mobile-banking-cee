@@ -175,11 +175,13 @@ function ProductSuccess({
 export default function Detail(host: CurrentScreenProps) {
   const wide = useDuoWide();
   const directVirtualCard =
-    host.country === 'RO' &&
     host.release === 'release-current' &&
     host.scenario === 'active' &&
     host.route.params?.optionId === 'virtual-card' &&
-    !host.onProductDetailAction;
+    !host.onProductDetailAction &&
+    (host.country === 'RO' ||
+      ((host.country === 'BA' || host.country === 'BA_BL') &&
+        host.route.params?.cardGuardVirtualCardIssue === 'true'));
   const [step, setStep] = useState<
     'detail' | 'sign' | 'success' | 'virtual-card'
   >(directVirtualCard ? 'virtual-card' : 'detail');

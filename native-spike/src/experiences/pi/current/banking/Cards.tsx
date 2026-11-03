@@ -100,6 +100,7 @@ export function CardScreen(host: CurrentScreenProps) {
     card.type === 'debit_card' &&
     card.id === firstDebit?.id &&
     card.linkedAccountId === data.currentAccounts[0]?.id;
+  const cardSecurityRoute = host.bankingPresentation?.cardSecurityRoutes?.block;
   return (
     <View style={parityStyles.item3}>
       <Page
@@ -270,6 +271,9 @@ export function CardScreen(host: CurrentScreenProps) {
                 'runtime.cards.actions.blockCard',
                 'Block Card',
               ),
+              onPress: cardSecurityRoute
+                ? () => host.onNavigate(cardSecurityRoute)
+                : undefined,
             },
             {
               id: 'view-pin',
