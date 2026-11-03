@@ -1,5 +1,11 @@
 import React from 'react';
-import { Pressable, StyleSheet, View, useColorScheme } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from 'react-native';
 import cs from '@/translations/CZ/cs';
 import en from '@/translations/CZ/en';
 import { SourceCustomIcon } from '../universal/SourceCustomIcon';
@@ -40,7 +46,20 @@ export default function CzechPrimaryNavigation({
   const dark = mode === 'dark' || (mode === 'system' && system === 'dark');
   const accent = dark ? '#65d9d2' : '#007a91';
   const muted = dark ? '#b9b9b9' : '#666666';
-  const backgroundColor = dark ? '#262d31' : '#ffffff';
+  // Glass: translucent fill so the page stays visible underneath, with a blur on web.
+  const glass = {
+    backgroundColor: dark ? 'rgba(19,22,23,0.68)' : 'rgba(246,247,247,0.62)',
+    borderColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.70)',
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(26px) saturate(1.22)',
+          WebkitBackdropFilter: 'blur(26px) saturate(1.22)',
+          boxShadow: dark
+            ? 'inset 0 1px 0 rgba(255,255,255,0.16), 0 18px 42px rgba(0,0,0,0.30)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.92), 0 18px 42px rgba(17,30,31,0.16)',
+        }
+      : {}),
+  };
   const labels = (language === 'cs' ? cs : en).navigation;
   return (
     <View
@@ -50,7 +69,7 @@ export default function CzechPrimaryNavigation({
           ...(vertical ? { top: verticalTop + verticalActionCount * 60 } : {}),
           bottom: vertical
             ? 12
-            : bottomInset + (screen === 'home' || screen === 'pfm' ? 8 : 0),
+            : bottomInset + 8,
         },
       ]}
     >
@@ -58,7 +77,7 @@ export default function CzechPrimaryNavigation({
         accessibilityLabel={
           language === 'cs' ? 'Hlavní navigace' : 'Primary navigation'
         }
-        style={[vertical ? s.verticalBar : s.bar, { backgroundColor }]}
+        style={[vertical ? s.verticalBar : s.bar, glass]}
       >
         {items.map(item => {
           const selected = item.screen === screen;

@@ -6,6 +6,7 @@ import {
   View,
   type StyleProp,
   type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { Text } from '../../../../universal/Typography';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
@@ -162,15 +163,29 @@ export function Fact({
   label,
   value,
   trailing,
+  labelTrailing,
   information = false,
   sensitive = false,
+  labelSize,
+  valueSize,
+  labelStrong = false,
+  labelStyle,
+  valueStyle,
+  containerStyle,
 }: {
   host: CurrentScreenProps;
   label: string;
   value: React.ReactNode;
   trailing?: React.ReactNode;
+  labelTrailing?: React.ReactNode;
   information?: boolean;
   sensitive?: boolean;
+  labelSize?: number;
+  valueSize?: number;
+  labelStrong?: boolean;
+  labelStyle?: StyleProp<TextStyle>;
+  valueStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
 }) {
   return (
     <View
@@ -178,22 +193,42 @@ export function Fact({
         s.fact,
         information && parityStyles.item0,
         sensitive && parityStyles.item1,
+        containerStyle,
       ]}
     >
       <View style={s.factText}>
-        <Label
-          host={host}
-          muted={!information && !sensitive}
-          size={information || sensitive ? 16 : 14}
-          style={parityStyles.item2}
-        >
-          {information ? label.toUpperCase() : label}
-        </Label>
+        {labelTrailing ? (
+          <View style={s.factLabelRow}>
+            <Label
+              host={host}
+              strong={labelStrong}
+              muted={!information && !sensitive}
+              size={labelSize ?? (information || sensitive ? 16 : 14)}
+              style={[parityStyles.item2, labelStyle]}
+            >
+              {information ? label.toUpperCase() : label}
+            </Label>
+            {labelTrailing}
+          </View>
+        ) : (
+          <Label
+            host={host}
+            strong={labelStrong}
+            muted={!information && !sensitive}
+            size={labelSize ?? (information || sensitive ? 16 : 14)}
+            style={[parityStyles.item2, labelStyle]}
+          >
+            {information ? label.toUpperCase() : label}
+          </Label>
+        )}
         <Label
           host={host}
           strong
-          size={sensitive ? 18 : 16}
-          style={sensitive ? parityStyles.item3 : parityStyles.item2}
+          size={valueSize ?? (sensitive ? 18 : 16)}
+          style={[
+            sensitive ? parityStyles.item3 : parityStyles.item2,
+            valueStyle,
+          ]}
         >
           {value}
         </Label>
@@ -415,6 +450,11 @@ const s = StyleSheet.create({
   },
   factText: {
     flex: 1,
+    gap: 4,
+  },
+  factLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   row: {

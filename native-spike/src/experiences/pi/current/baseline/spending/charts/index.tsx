@@ -129,12 +129,14 @@ export function BaselineSubcategoryBubbles({
   colorVar,
   inactiveSubcategories,
   onToggle,
+  emptyLabel,
 }: {
   host: CurrentScreenProps;
   subcategories: readonly SpendingSubcategorySummary[];
   colorVar: string;
   inactiveSubcategories: ReadonlySet<string>;
   onToggle: (label: string) => void;
+  emptyLabel?: string;
 }) {
   const maxTotal = Math.max(...subcategories.map(sub => sub.total), 1);
   const count = subcategories.length;
@@ -142,6 +144,8 @@ export function BaselineSubcategoryBubbles({
     sub => !inactiveSubcategories.has(sub.label),
   ).length;
   const dark = host.tokens.background === '#121212';
+  const noDataLabel =
+    emptyLabel ?? host.t('runtime.analytics.noIncome', 'No income');
   return (
     <View
       testID="baseline-pfm-bubbles"
@@ -153,139 +157,153 @@ export function BaselineSubcategoryBubbles({
       {...{ dataSet: { pfmBubbleCount: String(count) } }}
       style={s.bubbles}
     >
-      {subcategories.map(sub => {
-        const ratio = Math.sqrt(sub.total / Math.max(maxTotal, 1));
-        const diameter =
-          count === 1
-            ? 150
-            : count === 2
-            ? Math.round(108 + ratio * 30)
-            : count <= 4
-            ? Math.round(82 + ratio * 26)
-            : count <= 6
-            ? Math.round(72 + ratio * 22)
-            : Math.round(64 + ratio * 16);
-        const inactive = inactiveSubcategories.has(sub.label);
-        const disabled = !inactive && activeCount <= 1;
-        const visibleLabel =
-          sub.label.length > 24
-            ? `${sub.label.slice(0, 21).trim()}…`
-            : sub.label;
-        const displayedTotal = maskFormattedAmount(
-          formatEvo2027Number(sub.total),
-          host.amountsHidden,
-        );
-        const actionLabel = `${host.t(
-          inactive
-            ? 'runtime.analytics.includeSubcategory'
-            : 'runtime.analytics.filterOutSubcategory',
-          inactive ? 'Include subcategory' : 'Filter out subcategory',
-        )}: ${sub.label}`;
-        const title = `${sub.label}: ${displayedTotal} ${getCountryCurrency(
-          host.country,
-        )}`;
-        const backgroundColor = sourceColor(
-          inactive ? 'var(--uc-neutral-400)' : `var(${colorVar})`,
-          dark,
-        );
-        if (Platform.OS === 'web') {
-          return React.createElement(
-            'button',
-            {
-              key: sub.label,
-              type: 'button',
-              title,
-              disabled,
-              'data-testid': `baseline-pfm-bubble-${sub.label}`,
-              'data-pfm-subcategory-bubble': sub.label,
-              'data-pfm-subcategory-total': host.amountsHidden
-                ? undefined
-                : sub.total,
-              'data-pfm-subcategory-active': inactive ? 'false' : 'true',
-              'aria-label': actionLabel,
-              'aria-pressed': inactive,
-              onClick: () => onToggle(sub.label),
-              style: {
-                display: 'grid',
-                placeItems: 'center',
-                flexShrink: 0,
-                width: diameter,
-                height: diameter,
-                borderRadius: 'calc(infinity * 1px)',
-                borderWidth: 0,
-                borderStyle: 'solid',
-                borderColor: host.tokens.border,
-                appearance: 'button',
-                WebkitFontSmoothing: 'antialiased',
-                margin: 0,
-                padding: '0 8px',
-                textAlign: 'center',
-                color: '#FFFFFF',
-                backgroundColor,
-                cursor: disabled ? 'default' : 'pointer',
-                transition: 'transform 150ms',
+      {subcategories.length ? (
+        subcategories.map(sub => {
+          const ratio = Math.sqrt(sub.total / Math.max(maxTotal, 1));
+          const diameter =
+            count === 1
+              ? 150
+              : count === 2
+              ? Math.round(108 + ratio * 30)
+              : count <= 4
+              ? Math.round(82 + ratio * 26)
+              : count <= 6
+              ? Math.round(72 + ratio * 22)
+              : Math.round(64 + ratio * 16);
+          const inactive = inactiveSubcategories.has(sub.label);
+          const disabled = !inactive && activeCount <= 1;
+          const visibleLabel =
+            sub.label.length > 24
+              ? `${sub.label.slice(0, 21).trim()}…`
+              : sub.label;
+          const displayedTotal = maskFormattedAmount(
+            formatEvo2027Number(sub.total),
+            host.amountsHidden,
+          );
+          const actionLabel = `${host.t(
+            inactive
+              ? 'runtime.analytics.includeSubcategory'
+              : 'runtime.analytics.filterOutSubcategory',
+            inactive ? 'Include subcategory' : 'Filter out subcategory',
+          )}: ${sub.label}`;
+          const title = `${sub.label}: ${displayedTotal} ${getCountryCurrency(
+            host.country,
+          )}`;
+          const backgroundColor = sourceColor(
+            inactive ? 'var(--uc-neutral-400)' : `var(${colorVar})`,
+            dark,
+          );
+          if (Platform.OS === 'web') {
+            return React.createElement(
+              'button',
+              {
+                key: sub.label,
+                type: 'button',
+                title,
+                disabled,
+                'data-testid': `baseline-pfm-bubble-${sub.label}`,
+                'data-pfm-subcategory-bubble': sub.label,
+                'data-pfm-subcategory-total': host.amountsHidden
+                  ? undefined
+                  : sub.total,
+                'data-pfm-subcategory-active': inactive ? 'false' : 'true',
+                'aria-label': actionLabel,
+                'aria-pressed': inactive,
+                onClick: () => onToggle(sub.label),
+                style: {
+                  display: 'grid',
+                  placeItems: 'center',
+                  flexShrink: 0,
+                  width: diameter,
+                  height: diameter,
+                  borderRadius: 'calc(infinity * 1px)',
+                  borderWidth: 0,
+                  borderStyle: 'solid',
+                  borderColor: host.tokens.border,
+                  appearance: 'button',
+                  WebkitFontSmoothing: 'antialiased',
+                  margin: 0,
+                  padding: '0 8px',
+                  textAlign: 'center',
+                  color: '#FFFFFF',
+                  backgroundColor,
+                  cursor: disabled ? 'default' : 'pointer',
+                  transition: 'transform 150ms',
+                },
+                onMouseEnter: event => {
+                  event.currentTarget.style.transform = 'scale(1.03)';
+                },
+                onMouseLeave: event => {
+                  event.currentTarget.style.transform = '';
+                },
               },
-              onMouseEnter: event => {
-                event.currentTarget.style.transform = 'scale(1.03)';
-              },
-              onMouseLeave: event => {
-                event.currentTarget.style.transform = '';
-              },
-            },
-            React.createElement(
-              'span',
-              { style: { display: 'grid', maxWidth: '100%', gap: 2 } },
               React.createElement(
                 'span',
-                {
-                  style: {
-                    maxWidth: '100%',
-                    fontFamily: 'UniCredit-bold',
-                    fontSize: 14,
-                    lineHeight: 'normal',
-                    letterSpacing: 0,
-                    textTransform: 'uppercase',
+                { style: { display: 'grid', maxWidth: '100%', gap: 2 } },
+                React.createElement(
+                  'span',
+                  {
+                    style: {
+                      maxWidth: '100%',
+                      fontFamily: 'UniCredit-bold',
+                      fontSize: 14,
+                      lineHeight: 'normal',
+                      letterSpacing: 0,
+                      textTransform: 'uppercase',
+                    },
                   },
-                },
-                visibleLabel,
+                  visibleLabel,
+                ),
               ),
-            ),
+            );
+          }
+          return (
+            <Pressable
+              key={sub.label}
+              testID={`baseline-pfm-bubble-${sub.label}`}
+              accessibilityRole="button"
+              accessibilityLabel={actionLabel}
+              accessibilityState={{ selected: inactive, disabled }}
+              aria-pressed={inactive}
+              {...{
+                title,
+                dataSet: {
+                  pfmSubcategoryBubble: sub.label,
+                  pfmSubcategoryTotal: host.amountsHidden
+                    ? undefined
+                    : String(sub.total),
+                  pfmSubcategoryActive: inactive ? 'false' : 'true',
+                },
+              }}
+              disabled={disabled}
+              onPress={() => onToggle(sub.label)}
+              style={[
+                s.bubble,
+                {
+                  width: diameter,
+                  height: diameter,
+                  borderRadius: diameter / 2,
+                  backgroundColor,
+                },
+              ]}
+            >
+              <Text style={s.bubbleLabel}>{visibleLabel}</Text>
+            </Pressable>
           );
-        }
-        return (
-          <Pressable
-            key={sub.label}
-            testID={`baseline-pfm-bubble-${sub.label}`}
-            accessibilityRole="button"
-            accessibilityLabel={actionLabel}
-            accessibilityState={{ selected: inactive, disabled }}
-            aria-pressed={inactive}
-            {...{
-              title,
-              dataSet: {
-                pfmSubcategoryBubble: sub.label,
-                pfmSubcategoryTotal: host.amountsHidden
-                  ? undefined
-                  : String(sub.total),
-                pfmSubcategoryActive: inactive ? 'false' : 'true',
-              },
-            }}
-            disabled={disabled}
-            onPress={() => onToggle(sub.label)}
-            style={[
-              s.bubble,
-              {
-                width: diameter,
-                height: diameter,
-                borderRadius: diameter / 2,
-                backgroundColor,
-              },
-            ]}
-          >
-            <Text style={s.bubbleLabel}>{visibleLabel}</Text>
-          </Pressable>
-        );
-      })}
+        })
+      ) : (
+        <View
+          testID="baseline-pfm-empty-bubble"
+          accessible
+          accessibilityLabel={noDataLabel}
+          style={[
+            s.emptyBubble,
+            { backgroundColor: sourceColor(`var(${colorVar})`, dark) },
+          ]}
+        >
+          <Text style={s.emptyBubbleLabel}>{noDataLabel}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -439,6 +457,22 @@ const s = StyleSheet.create({
     lineHeight: 15,
     letterSpacing: 0,
     textTransform: 'uppercase',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  emptyBubble: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  emptyBubbleLabel: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    lineHeight: 18,
+    letterSpacing: 0,
     color: '#FFFFFF',
     textAlign: 'center',
   },

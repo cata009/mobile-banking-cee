@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useReducer, useRef } from 'react';
+import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavigationInset';
 import {
   BackHandler,
   Pressable,
@@ -47,7 +48,13 @@ import { createEvoTranslations } from '@/translations/evo';
 import type { Currency } from '@/data/products';
 import type { CzechNativeScreenProps } from '../contracts';
 import { czechProducts } from '../accounts/source';
-import { Glyph, IconAction, Money, textStyles as t } from '../home/Primitives';
+import {
+  Glyph,
+  IconAction,
+  L1Header,
+  Money,
+  textStyles as t,
+} from '../home/Primitives';
 import { evoTokens as tokens } from '../home/tokens';
 import { Bars, Donut } from './Charts';
 import { CategoryMark } from './CategoryMark';
@@ -148,6 +155,7 @@ function AddTransaction({ onPress }: { onPress: () => void }) {
 }
 
 export default function PfmScreen(host: CzechNativeScreenProps) {
+  const navigationInset = usePrimaryNavigationInset();
   const duo = useDuoPreview();
   const local = useDuoLocalViewport();
   const wideOverview = !!duo && (local?.width ?? 0) >= 720;
@@ -381,31 +389,37 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
   );
   const transactions =
     view.breakdownDetail?.transactions ?? view.visibleExpenses;
+  const headerActions = (
+    <>
+      <IconAction
+        label={hidden ? 'Show amounts' : 'Hide amounts'}
+        name={hidden ? 'show' : 'hide'}
+        onPress={host.onAmountsToggle}
+      />
+      <IconAction label="Profile" name="profile" onPress={onProfile} />
+    </>
+  );
   return (
     <View style={[s.root, { paddingTop: screenTopInset }]}>
-      <Header
-        tokens={tokens}
-        variant="current"
-        title={title}
-        onBack={back}
-        backIcon={<Glyph name="back" size={16} />}
-        trailing={
-          <View style={s.actions}>
-            <IconAction
-              label={hidden ? 'Show amounts' : 'Hide amounts'}
-              name={hidden ? 'show' : 'hide'}
-              onPress={host.onAmountsToggle}
-            />
-            <IconAction label="Profile" name="profile" onPress={onProfile} />
-          </View>
-        }
-      />
+      {state.view === 'overview' ? (
+        <L1Header title={title} actions={headerActions} />
+      ) : (
+        <Header
+          tokens={tokens}
+          variant="current"
+          title={title}
+          onBack={back}
+          backIcon={<Glyph name="back" size={16} />}
+          trailing={<View style={s.actions}>{headerActions}</View>}
+        />
+      )}
       <ScrollView
         ref={scroll}
         contentContainerStyle={[
           s.content,
           state.view === 'analysis' && s.analysisContent,
           state.view === 'overview' && wideOverview && { maxWidth: 840 },
+          { paddingBottom: 24 + navigationInset },
         ]}
         showsVerticalScrollIndicator={false}
       >

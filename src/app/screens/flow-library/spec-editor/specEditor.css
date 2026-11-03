@@ -68,34 +68,67 @@
   min-width: 0;
 }
 .spec-outline {
-  flex: 0 0 190px;
+  flex: 0 0 232px;
   display: grid;
-  gap: 3px;
+  align-content: start;
+  gap: 2px;
   position: sticky;
   top: 16px;
-  max-height: 70vh;
-  overflow: auto;
-  padding: 12px 12px 12px 0;
-  border-right: 1px solid var(--uc-border);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--uc-border) transparent;
+  padding: 4px 16px 16px 0;
+  border-right: 1px solid var(--uc-border-muted);
+}
+.spec-outline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.spec-outline .spec-outline-toggle {
+  padding: 0;
+  font-size: 12px;
+  color: var(--uc-action);
+  background: transparent;
 }
 .spec-outline button {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   border: 0;
   background: transparent;
   text-align: left;
-  padding: 7px 8px;
-  border-radius: 4px;
+  padding: 6px 10px;
+  border-left: 2px solid transparent;
+  border-radius: 0 6px 6px 0;
   font-size: 13px;
-  line-height: 1.5;
-  color: var(--uc-action);
+  line-height: 1.45;
+  color: var(--uc-text-muted);
   cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
 }
 .spec-outline button:hover {
+  color: var(--uc-text);
   background: var(--uc-surface-muted);
 }
-.spec-outline .spec-outline-child {
-  padding-left: 20px;
-  font-size: 12px;
+.spec-outline button[aria-current='true'] {
+  color: var(--uc-text);
+  font-weight: 700;
+  border-left-color: var(--uc-action);
+  background: color-mix(in srgb, var(--uc-action) 8%, transparent);
+}
+.spec-outline .spec-outline-number {
+  flex: 0 0 auto;
+  font-family: monospace;
+  font-size: 11px;
   color: var(--uc-text-muted);
+}
+.spec-outline .spec-outline-child {
+  padding-left: 22px;
+  font-size: 12px;
 }
 .spec-document-main {
   flex: 1;
@@ -485,15 +518,17 @@
   align-items: center;
   gap: 7px;
 }
-.spec-page-header {
-  padding: 32px 40px 18px;
-}
-.spec-page-header h2 {
+.spec-page-title {
+  min-width: 0;
   margin: 0;
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 28px;
+  color: var(--uc-text);
+}
+.spec-page-header {
+  padding: 16px 24px 0;
 }
 .spec-page-byline {
   display: flex;
@@ -527,7 +562,7 @@
   margin-left: 4px;
 }
 .spec-read-layout {
-  padding: 16px 40px 40px;
+  padding: 20px 24px 32px;
 }
 .spec-outline-title {
   font-size: 12px;

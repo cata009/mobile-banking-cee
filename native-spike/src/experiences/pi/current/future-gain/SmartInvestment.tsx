@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { formatMoneyNumber } from '@/app/registry/countryConfig';
 import {
   SMART_INVESTMENT_CURRENCIES,
@@ -18,7 +18,6 @@ import type { CurrentScreenProps } from '../contracts';
 import { futureGainAvailableBalance, futureGainEnabled } from './model';
 import {
   Page,
-  Title,
   Label,
   Button,
   Sheet,
@@ -46,6 +45,7 @@ export function SmartInvestment(host: CurrentScreenProps) {
   const balanceDecimals = `,${balanceFraction}`;
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const textColor = sourceColor('var(--uc-text)', dark);
+  const pageSurface = dark ? host.tokens.surface : host.tokens.inverse;
   const handleOverviewBack = () => {
     if (host.futureGainSimulatorResumeState && host.onSmartInvestmentBack) {
       host.onSmartInvestmentBack();
@@ -97,8 +97,14 @@ export function SmartInvestment(host: CurrentScreenProps) {
   ];
   return (
     <Page
-      host={{ ...host, onBack: handleOverviewBack }}
+      host={{
+        ...host,
+        onBack: handleOverviewBack,
+        screenTopInset: 20,
+        tokens: { ...host.tokens, surface: pageSurface },
+      }}
       title="Smart investment"
+      contentContainerStyle={overviewStyles.content}
       trailing={
         <IconAction
           host={host}
@@ -108,15 +114,17 @@ export function SmartInvestment(host: CurrentScreenProps) {
         />
       }
     >
-      <Title host={host}>Smart investment</Title>
-      <Label host={host} size={14}>
-        Explore investment opportunities and make informed decisions
-      </Label>
+      <View style={overviewStyles.intro}>
+        <Label host={host} size={16} style={overviewStyles.description}>
+          Explore investment opportunities and make informed decisions
+        </Label>
+      </View>
       <View
         style={[
           s.panel,
+          overviewStyles.balancePanelSlot,
           {
-            minHeight: 105,
+            height: 105,
             backgroundColor: sourceColor(
               'var(--uc-investment-reference-panel, #F5F5F5)',
               dark,
@@ -124,124 +132,107 @@ export function SmartInvestment(host: CurrentScreenProps) {
           },
         ]}
       >
-        <View style={s.two}>
-          <View style={s.grow}>
-            <Label host={host} strong>
-              Available balance in {currency} from your current accounts and
-              AVISTA savings
-            </Label>
+        <View style={overviewStyles.balanceLabelBlock}>
+          <Label host={host} strong style={overviewStyles.balanceLabel}>
+            Available balance in {currency} from your current accounts and
+            AVISTA savings
+          </Label>
+          <View style={overviewStyles.balanceInfoAction}>
+            <IconAction
+              host={host}
+              name="info-circle"
+              label="More information about your available balance"
+              onPress={() => setInformation('balance')}
+              slotSize={24}
+            />
           </View>
-          <IconAction
-            host={host}
-            name="info-circle"
-            label="More information about your available balance"
-            onPress={() => setInformation('balance')}
-          />
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Select currency. Available balance in ${currency}`}
           onPress={() => setPicker(true)}
-          style={{
-            minHeight: 34,
-            width: '100%',
-            justifyContent: 'flex-start',
-          }}
+          style={overviewStyles.balanceValueButton}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              gap: 8,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'flex-end',
-                gap: 2,
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: 'UniCredit-regular',
-                  fontSize: 48,
-                  lineHeight: 48,
-                  color: textColor,
-                }}
-              >
+          <View style={overviewStyles.balanceValueRow}>
+            <View style={overviewStyles.amountRow}>
+              <Text style={[overviewStyles.amount, { color: textColor }]}>
                 {host.amountsHidden ? '••••••' : balanceInteger}
               </Text>
               {!host.amountsHidden ? (
-                <Text
-                  style={{
-                    fontFamily: 'UniCredit-bold',
-                    fontSize: 20,
-                    lineHeight: 20,
-                    color: textColor,
-                  }}
-                >
+                <Text style={[overviewStyles.decimals, { color: textColor }]}>
                   {balanceDecimals} {currency}
                 </Text>
               ) : null}
             </View>
-            <View
-              style={{
-                width: 20,
-                height: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 4,
-              }}
-            >
+            <View style={overviewStyles.currencyChevron}>
               <SourceCustomIcon
                 name="chevron-down"
-                size={20}
+                size={16}
                 color={textColor}
               />
             </View>
           </View>
         </Pressable>
       </View>
-      {options.map(option => (
-        <Pressable
-          key={option.id}
-          accessibilityRole="button"
-          accessibilityLabel={option.title}
-          onPress={() => setView(option.id)}
-          style={s.row}
-        >
-          <AssetGlyph asset={option.icon} size={24} />
-          <View style={s.copy}>
-            <Label host={host} strong>
-              {option.title}
-            </Label>
-            {option.description ? (
-              <Label host={host} size={14}>
-                {option.description}
-              </Label>
-            ) : null}
-            <View style={[s.risk, { backgroundColor: option.background }]}>
-              <Label
-                host={{
-                  ...host,
-                  tokens: { ...host.tokens, text: option.color },
-                }}
-                strong
-                size={14}
-              >
-                {option.risk}
-              </Label>
+      <View style={[overviewStyles.options, { backgroundColor: pageSurface }]}>
+        {options.map(option => (
+          <Pressable
+            key={option.id}
+            accessibilityRole="button"
+            accessibilityLabel={option.title}
+            onPress={() => setView(option.id)}
+            style={[
+              overviewStyles.optionRow,
+              { backgroundColor: pageSurface },
+            ]}
+          >
+            <View style={overviewStyles.optionIcon}>
+              <AssetGlyph asset={option.icon} size={24} />
             </View>
-          </View>
-          <SourceCustomIcon
-            name="chevron-link"
-            size={32}
-            color={host.tokens.text}
-          />
-        </Pressable>
-      ))}
-      <Label host={host} size={14} muted>
+            <View style={overviewStyles.optionCopy}>
+              <Label host={host} strong style={overviewStyles.optionTitle}>
+                {option.title}
+              </Label>
+              {option.description ? (
+                <Label
+                  host={host}
+                  size={14}
+                  style={overviewStyles.optionDescription}
+                >
+                  {option.description}
+                </Label>
+              ) : null}
+              <View
+                style={[
+                  s.risk,
+                  overviewStyles.risk,
+                  { backgroundColor: option.background },
+                ]}
+              >
+                <Label
+                  host={{
+                    ...host,
+                    tokens: { ...host.tokens, text: option.color },
+                  }}
+                  strong
+                  size={14}
+                  style={overviewStyles.riskLabel}
+                >
+                  {option.risk}
+                </Label>
+              </View>
+            </View>
+            <View style={overviewStyles.trailingIcon}>
+              <SourceCustomIcon
+                name="chevron-right"
+                size={16}
+                color={host.tokens.text}
+              />
+            </View>
+          </Pressable>
+        ))}
+      </View>
+      <Label host={host} size={14} muted style={overviewStyles.disclaimer}>
         {SMART_INVESTMENT_DISCLAIMER}
       </Label>
       {picker ? (
@@ -296,3 +287,72 @@ export function SmartInvestment(host: CurrentScreenProps) {
     </Page>
   );
 }
+
+const overviewStyles = StyleSheet.create({
+  content: { padding: 0, paddingBottom: 34, gap: 0 },
+  intro: { paddingHorizontal: 24, paddingTop: 8, gap: 12 },
+  description: { lineHeight: 18 },
+  balancePanelSlot: {
+    marginTop: 24,
+    marginHorizontal: 24,
+    padding: 16,
+    gap: 4,
+    justifyContent: 'center',
+  },
+  balanceLabelBlock: { position: 'relative', width: '100%' },
+  balanceLabel: { lineHeight: 18 },
+  balanceInfoAction: { position: 'absolute', left: 190, top: 14 },
+  balanceValueButton: {
+    minHeight: 33,
+    width: '100%',
+    justifyContent: 'flex-start',
+  },
+  balanceValueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  amountRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
+  amount: { fontFamily: 'UniCredit-bold', fontSize: 30, lineHeight: 33 },
+  decimals: { fontFamily: 'UniCredit-bold', fontSize: 20, lineHeight: 22 },
+  currencyChevron: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  options: { marginTop: 24, width: '100%' },
+  optionRow: {
+    height: 96,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingLeft: 24,
+    paddingRight: 16,
+  },
+  optionIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trailingIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionCopy: { flex: 1, minWidth: 0, gap: 4 },
+  optionTitle: { lineHeight: 18 },
+  optionDescription: { lineHeight: 15 },
+  risk: { paddingVertical: 3 },
+  riskLabel: { lineHeight: 15 },
+  disclaimer: {
+    marginTop: 24,
+    paddingHorizontal: 24,
+    textAlign: 'center',
+    lineHeight: 15,
+  },
+});

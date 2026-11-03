@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppIcon } from "@/app/components/icons";
+import { PlatformPageHeader } from "@/app/components/platform/PlatformPage";
 import { FLOW_DEFINITIONS, FLOW_ORDER } from "../flows";
 import type { FlowDefinition, FlowPreviewId } from "../flows/types";
 import { searchFlows, type SearchEntry } from '@/features/flow-collaboration/search';
-
-type ViewMode = "grid" | "table";
 
 /** How many country chips are shown inline before collapsing into a "+N" pill. */
 const VISIBLE_COUNTRIES = 4;
@@ -28,7 +27,6 @@ export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFl
   // Empty selection means "no filter applied" for both facets.
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
-  const [view, setView] = useState<ViewMode>("grid");
 
   const flows = useMemo(() => FLOW_ORDER.map((id) => FLOW_DEFINITIONS[id]), []);
   const results = useMemo(() => searchFlows(flows, query), [flows, query]);
@@ -55,12 +53,10 @@ export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFl
 
   return (
     <div className="grid gap-[24px]">
-      <header className="max-w-[760px]">
-        <h1 className="text-[34px] font-bold leading-[40px] text-[var(--uc-text)]">Future flows, spec-ready</h1>
-        <p className="mt-[12px] uc-type-n4 text-[var(--uc-text-muted)]">
-          Explore each journey visually, then use its clear screen-by-screen notes to align product, design and delivery.
-        </p>
-      </header>
+      <PlatformPageHeader
+        title="Future flows, spec-ready"
+        description="Explore each journey visually, then use its clear screen-by-screen notes to align product, design and delivery."
+      />
 
       <div className="flex flex-wrap items-center gap-[10px]">
         <div className="flex h-[44px] min-w-[240px] flex-1 items-center gap-[10px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] shadow-sm focus-within:border-[var(--uc-action)]">
@@ -90,8 +86,6 @@ export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFl
           onToggle={(value) => setSelectedCountries((current) => toggleValue(current, value))}
           onClear={() => setSelectedCountries([])}
         />
-
-        <ViewToggle view={view} onChange={setView} />
       </div>
 
       <div className="flex flex-wrap items-center gap-[10px]">
@@ -118,12 +112,6 @@ export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFl
           <p className="uc-type-n4-strong text-[var(--uc-text)]">No flows match these filters</p>
           <p className="mt-[6px] uc-type-n5 text-[var(--uc-text-muted)]">Clear the search or filters to see every flow.</p>
         </div>
-      ) : view === "grid" ? (
-        <div className="grid gap-[16px] md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((flow) => (
-            <FlowCard key={flow.id} flow={flow} onOpen={() => onOpenFlow(flow.id)} />
-          ))}
-        </div>
       ) : (
         <FlowTable flows={filtered} onOpenFlow={onOpenFlow} />
       )}
@@ -139,32 +127,6 @@ export default function FlowLibraryIndex({ onOpenFlow, onOpenMatch }: { onOpenFl
           {!allMatches && filtered.some((flow) => (results.find((r) => r.flowId === flow.id)?.matches.length ?? 0) > 5) && <button type="button" className="min-h-[44px] underline" onClick={() => setAllMatches(true)}>Show all matched passages</button>}
         </section>
       ) : null}
-    </div>
-  );
-}
-
-function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (next: ViewMode) => void }) {
-  return (
-    <div
-      role="group"
-      aria-label="View mode"
-      className="flex h-[44px] items-center gap-[4px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[4px] shadow-sm"
-    >
-      {(["grid", "table"] as const).map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          aria-pressed={view === mode}
-          onClick={() => onChange(mode)}
-          className={`h-[34px] rounded-[6px] px-[14px] uc-type-n5-strong capitalize transition-colors ${
-            view === mode
-              ? "bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]"
-              : "text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface-muted)]"
-          }`}
-        >
-          {mode}
-        </button>
-      ))}
     </div>
   );
 }
@@ -290,26 +252,6 @@ function CountryChips({ countries }: { countries: readonly string[] }) {
         </span>
       ) : null}
     </span>
-  );
-}
-
-function FlowCard({ flow, onOpen }: { flow: FlowDefinition; onOpen: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group flex h-full flex-col rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] text-left shadow-sm transition-colors hover:border-[var(--uc-action)]"
-    >
-      <div className="flex items-center justify-between gap-[8px]">
-        <CategoryChip domain={flow.domain} />
-        <span className="uc-type-n5 text-[var(--uc-text-muted)]">{scopeSummary(flow)}</span>
-      </div>
-      <h3 className="mt-[12px] uc-type-h2 text-[var(--uc-text)]">{flow.title}</h3>
-      <p className="mt-[10px] flex-1 uc-type-n5 text-[var(--uc-text-muted)]">{flow.summary}</p>
-      <div className="mt-[16px] border-t border-[var(--uc-border)] pt-[12px]">
-        <CountryChips countries={flow.countryScope} />
-      </div>
-    </button>
   );
 }
 

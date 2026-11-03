@@ -27,8 +27,26 @@ export function validIsoDate(value: string) {
     date.getDate() === day
   );
 }
-export function displayIsoDate(value: string) {
-  return validIsoDate(value) ? value.split('-').reverse().join('/') : value;
+export type DateFieldDisplayFormat = 'numeric' | 'long-month';
+
+export function displayIsoDate(
+  value: string,
+  separator: '/' | '.' = '/',
+  locale = 'en-GB',
+  format: DateFieldDisplayFormat = 'numeric',
+) {
+  if (!validIsoDate(value)) return value;
+  if (format === 'long-month') {
+    const year = value.slice(0, 4);
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long' }).format(
+      new Date(`${value}T12:00:00`),
+    );
+    const formattedMonth = `${monthName
+      .charAt(0)
+      .toLocaleUpperCase(locale)}${monthName.slice(1)}`;
+    return `${value.slice(8, 10)}-${formattedMonth}-${year}`;
+  }
+  return value.split('-').reverse().join(separator);
 }
 export function parseDisplayDate(value: string) {
   if (validIsoDate(value)) return value;
@@ -316,6 +334,8 @@ export function DateField({
   min,
   max,
   locale,
+  separator = '/',
+  displayFormat = 'numeric',
   calendarIcon,
   error,
   containerStyle,
@@ -330,6 +350,8 @@ export function DateField({
   min?: string;
   max?: string;
   locale?: string;
+  separator?: '/' | '.';
+  displayFormat?: DateFieldDisplayFormat;
   calendarIcon?: React.ReactNode;
   error?: string;
   containerStyle?: StyleProp<ViewStyle>;
@@ -340,18 +362,21 @@ export function DateField({
     'value' | 'onChangeText' | 'secureTextEntry'
   >;
 }) {
-  const [raw, setRaw] = useState(displayIsoDate(value)),
+  const displayLocale = locale ?? 'en-GB';
+  const [raw, setRaw] = useState(
+      displayIsoDate(value, separator, displayLocale, displayFormat),
+    ),
     [open, setOpen] = useState(false);
   const emitted = useRef(value);
   useEffect(() => {
     if (value !== emitted.current) {
       emitted.current = value;
-      setRaw(displayIsoDate(value));
+      setRaw(displayIsoDate(value, separator, displayLocale, displayFormat));
     }
-  }, [value]);
+  }, [value, separator, displayLocale, displayFormat]);
   const select = (iso: string) => {
     emitted.current = iso;
-    setRaw(displayIsoDate(iso));
+    setRaw(displayIsoDate(iso, separator, displayLocale, displayFormat));
     onChange(iso);
     setOpen(false);
   };
@@ -375,7 +400,7 @@ export function DateField({
             inputProps={{
               placeholder: 'gg/mm/aaaa',
               keyboardType: 'numbers-and-punctuation',
-              maxLength: 10,
+              maxLength: displayFormat === 'long-month' ? 32 : 10,
               autoCorrect: false,
               autoCapitalize: 'none',
               ...inputProps,

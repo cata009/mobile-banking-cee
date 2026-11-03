@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Platform,
   ScrollView,
@@ -21,6 +21,7 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 import { BaselineMoreCard } from '../../../../../universal/BaselineMoreCard';
 import Logout from './Logout';
 import Tutorials from './Tutorials';
+import ContractWithdrawalFlow from './ContractWithdrawalFlow';
 import { useDuoPreview } from '../../../../../universal/DuoPreview';
 
 const labels: Record<MoreCardType, { key: string; fallback: string }> = {
@@ -44,7 +45,16 @@ const labels: Record<MoreCardType, { key: string; fallback: string }> = {
 export default function More(host: CurrentScreenProps) {
   const duo = useDuoPreview();
   const columns = 2;
-  const [overlay, setOverlay] = useState<'logout' | 'tutorials' | null>(null);
+  const [overlay, setOverlay] = useState<
+    'logout' | 'tutorials' | 'contract-withdrawal' | null
+  >(null);
+  const withdrawalBack = useRef<(() => boolean) | null>(null);
+  const registerWithdrawalBack = useCallback(
+    (handler: (() => boolean) | null) => {
+      withdrawalBack.current = handler;
+    },
+    [],
+  );
   const [width, setWidth] = useState(375);
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const onPrimaryNavigationChange = host.onPrimaryNavigationChange;
@@ -56,13 +66,17 @@ export default function More(host: CurrentScreenProps) {
         )
       : configuredCards;
   useEffect(() => {
-    onPrimaryNavigationChange?.(overlay !== 'logout');
+    onPrimaryNavigationChange?.(
+      overlay !== 'logout' && overlay !== 'contract-withdrawal',
+    );
     return () => onPrimaryNavigationChange?.(true);
   }, [onPrimaryNavigationChange, overlay]);
   useEffect(() => {
     const register = host.onBackHandlerChange;
     register?.(() => {
       if (!overlay) return false;
+      if (overlay === 'contract-withdrawal')
+        return withdrawalBack.current?.() ?? true;
       setOverlay(null);
       return true;
     });
@@ -72,6 +86,8 @@ export default function More(host: CurrentScreenProps) {
     if (card === 'contacts' || card === 'documents' || card === 'settings')
       host.onNavigate({ screen: card });
     else if (card === 'tutorial') setOverlay('tutorials');
+    else if (card === 'my-requests' && host.country === 'RO')
+      setOverlay('contract-withdrawal');
   };
   return (
     <View
@@ -127,6 +143,13 @@ export default function More(host: CurrentScreenProps) {
       )}
       {overlay === 'tutorials' && (
         <Tutorials host={host} onClose={() => setOverlay(null)} />
+      )}
+      {overlay === 'contract-withdrawal' && (
+        <ContractWithdrawalFlow
+          host={host}
+          onClose={() => setOverlay(null)}
+          registerBack={registerWithdrawalBack}
+        />
       )}
     </View>
   );

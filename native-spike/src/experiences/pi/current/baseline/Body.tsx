@@ -1,6 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import lighthouse from '@/assets/6f4a518088433560480f90c7a7448fdc1d294def.png';
+import geniusProtectHomeIcon from '@/assets/pi/ro/genius-protect/genius-protect-home-insurance.svg';
 import { getCurrencySymbol } from '@/app/registry/countryConfig';
 import { getProductIcon } from '@/app/components/products/productGlyph';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
@@ -12,13 +19,21 @@ import { BaselineAccordion } from '../../../../universal/BaselineAccordion';
 import { BaselineProductsList } from '../../../../universal/BaselineProductsList';
 import { BaselineProductCard } from '../../../../universal/BaselineProductCard';
 import { BaselineBanner } from '../../../../universal/BaselineBanner';
+import { AssetGlyph } from '../../../../universal/AssetGlyph';
 import { BaselineCarouselIndicator } from '../../../../universal/BaselineCarouselIndicator';
-import { SourceVector } from '../../../../universal/SourceCustomIcon';
+import {
+  SourceCustomIcon,
+  SourceVector,
+} from '../../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { sourceLinearGradient } from '../../../../universal/sourceLinearGradient';
 import { Text } from '../../../../universal/Typography';
 import { FutureGainBanner } from '../future-gain/FutureGainBanner';
 import { futureGainEnabled } from '../future-gain/model';
+import {
+  getGeniusProtectSnapshot,
+  subscribeGeniusProtect,
+} from '@/features/insurance/geniusProtect';
 
 function FutureGainBannerSlot({
   host,
@@ -46,6 +61,10 @@ export function BaselineHomeBody({
   redesigned?: boolean;
 }) {
   const securityNotice = host.bankingPresentation?.homeSecurityNotice;
+  const geniusProtect = useSyncExternalStore(
+    subscribeGeniusProtect,
+    getGeniusProtectSnapshot,
+  );
   const summaryRail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const [summaryWidth, setSummaryWidth] = useState(327);
   const [summaryIndex, setSummaryIndex] = useState(0);
@@ -386,13 +405,95 @@ export function BaselineHomeBody({
           </React.Fragment>
         );
       })}
+      {host.country === 'RO' &&
+      host.release === 'release-current' &&
+      host.scenario === 'active' ? (
+        <View style={styles.category}>
+          <BaselineAccordion
+            title={host.language === 'ro' ? 'Asigurări' : 'Insurance'}
+            defaultOpen={false}
+            dark={dark}
+          >
+            <BaselineProductsList
+              isOpen={false}
+              showTotal={false}
+              variant="legacy"
+              productStyle="pi"
+              dark={dark}
+            >
+              {geniusProtect.policy ? (
+                <BaselineProductCard
+                  icon={<AssetGlyph asset={geniusProtectHomeIcon} size={32} />}
+                  title="Genius Protect"
+                  accountNumber={
+                    host.language === 'ro'
+                      ? 'Poliță de asigurare de viață'
+                      : 'Life insurance policy'
+                  }
+                  thirdLine={geniusProtect.policy.number}
+                  amount=""
+                  decimals=""
+                  currency=""
+                  showAmount={false}
+                  variant="legacy"
+                  productStyle="pi"
+                  onPress={() =>
+                    host.onNavigate({
+                      screen: 'product-detail',
+                      params: {
+                        title: 'Genius Protect',
+                        cardId: 'insurance',
+                        optionId: 'genius-protect-policy',
+                      },
+                    })
+                  }
+                  dark={dark}
+                />
+              ) : (
+                <BaselineBanner
+                  variant="ghost"
+                  title={
+                    host.language === 'ro'
+                      ? 'Obține Genius Protect'
+                      : 'Get Genius Protect'
+                  }
+                  description={
+                    host.language === 'ro'
+                      ? 'Află despre soluția noastră accesibilă de asigurare de viață pentru situații neprevăzute.'
+                      : 'Check our most affordable life insurance solution for unexpected situations.'
+                  }
+                  iconNode={
+                    <SourceCustomIcon
+                      name="add-circle"
+                      size={24}
+                      color={sourceColor('var(--uc-action)', dark)}
+                    />
+                  }
+                  onPress={() =>
+                    host.onNavigate({
+                      screen: 'product-detail',
+                      params: {
+                        title: 'Genius Protect',
+                        cardId: 'insurance',
+                        optionId: 'genius-protect',
+                      },
+                    })
+                  }
+                  presentation={{ width: '100%' }}
+                  dark={dark}
+                />
+              )}
+            </BaselineProductsList>
+          </BaselineAccordion>
+        </View>
+      ) : null}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   summaryGutter: { paddingHorizontal: 24 },
-  futureGainBannerSlot: { paddingTop: 16 },
+  futureGainBannerSlot: { paddingTop: 16, alignItems: 'center' },
   summary: {
     width: '100%',
     borderRadius: 8,

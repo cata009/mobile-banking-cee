@@ -13,20 +13,111 @@ import {
   ACCOUNT_PRODUCT_OPTIONS,
 } from '@/data/accountDetails';
 import type { CurrentScreenProps } from '../contracts';
-import { copy } from '../banking/model';
+import { bankingProducts, copy } from '../banking/model';
 import { optionArt } from '../banking/assets';
 import { BaselinePageHeader } from '../../../../universal/BaselinePageHeader';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
+import { AccountPushNotifications } from './AccountPushNotifications';
+import { AccountStatementFlow } from './AccountStatementFlow';
+import { AccountDetailsShareSheet } from './AccountDetailsShareSheet';
+import { AccountNameFlow } from './AccountNameFlow';
+import {
+  DEFAULT_ACCOUNT_PUSH_NOTIFICATION_PREFERENCES,
+  type AccountPushNotificationScreen,
+  type AccountPushNotificationPreferences,
+} from '@/features/accounts-payments/accountPushNotifications';
+import {
+  getAccountNameOverride,
+  saveAccountNameOverride,
+} from '@/features/accounts-payments/accountNameOverrides';
 
-/** Original account options are presentation-only; their missing callbacks stay inert. */
+/** Account options retain their source layout and own the push-notification journey. */
 export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
   const [progress, setProgress] = useState(0),
-    shadeId = useId().replace(/:/g, '');
+    shadeId = useId().replace(/:/g, ''),
+    [notificationScreen, setNotificationScreen] =
+      useState<AccountPushNotificationScreen | null>(null),
+    [notificationPreferences, setNotificationPreferences] =
+      useState<AccountPushNotificationPreferences>(
+        DEFAULT_ACCOUNT_PUSH_NOTIFICATION_PREFERENCES,
+      ),
+    [statementFlowOpen, setStatementFlowOpen] = useState(false),
+    [accountInfoShareOpen, setAccountInfoShareOpen] = useState(false),
+    [accountNameOpen, setAccountNameOpen] = useState(false);
+  const products = bankingProducts(host);
+  const requestedAccountId =
+    host.route.params?.productId ?? host.route.params?.accountId;
+  const account =
+    products.accounts.find(item => item.id === requestedAccountId) ??
+    products.accounts[0];
+  const productTitleKey =
+    account?.type === 'saving_account'
+      ? 'savingAccount'
+      : account?.type === 'term_deposit'
+        ? 'termDeposit'
+        : account?.type === 'loan'
+          ? 'loan'
+          : account?.type === 'mortgage'
+            ? 'mortgage'
+            : 'currentAccount';
+  const accountTitle =
+    (account ? getAccountNameOverride(account.id) : undefined) ??
+    copy(
+      host,
+      `runtime.accounts.productTitles.${productTitleKey}`,
+      account?.type.replace(/_/g, ' ').toUpperCase() ?? '',
+    );
+  const accountOwner = 'IACOB MIHAI-CATALIN';
+  const bic = host.country === 'RO' ? 'BACXROBU' : undefined;
   const title = copy(host, 'runtime.accountOptions.title', 'Account options');
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true),
     surface = sourceColor('var(--uc-surface)', dark);
+  if (notificationScreen) {
+    return (
+      <AccountPushNotifications
+        host={host}
+        screen={notificationScreen}
+        preferences={notificationPreferences}
+        onPreferencesChange={setNotificationPreferences}
+        onNavigate={setNotificationScreen}
+        onClose={() => setNotificationScreen(null)}
+      />
+    );
+  }
+  if (accountInfoShareOpen) {
+    return (
+      <AccountDetailsShareSheet
+        host={host}
+        accountTitle={accountTitle}
+        accountOwner={accountOwner}
+        iban={account?.accountNumber ?? ''}
+        bic={bic}
+        onClose={() => setAccountInfoShareOpen(false)}
+      />
+    );
+  }
+  if (accountNameOpen && account) {
+    return (
+      <AccountNameFlow
+        host={host}
+        currentName={accountTitle}
+        onClose={() => setAccountNameOpen(false)}
+        onSave={name => {
+          if (saveAccountNameOverride(account.id, name)) host.onChanged();
+        }}
+      />
+    );
+  }
+  if (statementFlowOpen) {
+    return (
+      <AccountStatementFlow
+        host={host}
+        onClose={() => setStatementFlowOpen(false)}
+      />
+    );
+  }
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
       <ScrollView
@@ -71,6 +162,17 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
                   `runtime.accountOptions.items.${item.id}.title`,
                   item.title,
                 )}
+                onPress={
+                  item.id === 'share-account-info'
+                    ? () => setAccountInfoShareOpen(true)
+                    : item.id === 'push-notifications'
+                      ? () => setNotificationScreen('overview')
+                      : item.id === 'account-statement'
+                        ? () => setStatementFlowOpen(true)
+                        : item.id === 'change-account-name' && account
+                          ? () => setAccountNameOpen(true)
+                          : undefined
+                }
                 style={styles.option}
               >
                 <View style={styles.icon}>
@@ -79,10 +181,10 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
                       item.id === 'share-account-info'
                         ? 'share-info'
                         : item.id === 'account-statement'
-                        ? 'statement'
-                        : item.id === 'change-account-name'
-                        ? 'change-name'
-                        : item.id
+                          ? 'statement'
+                          : item.id === 'change-account-name'
+                            ? 'change-name'
+                            : item.id
                     }`}
                     size={20}
                     color={host.tokens.text}

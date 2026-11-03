@@ -14,11 +14,13 @@ import {
 } from '@/features/accounts-payments/evoTransactionFilters';
 import type { CurrentScreenProps } from '../contracts';
 import { ModalPortal } from '../../../../universal/ModalPortal';
+import { BaselineBottomSheet } from '../../../../universal/BaselineBottomSheet';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { useDuoPreview } from '../../../../universal/DuoPreview';
 import { Text } from '../../../../universal/Typography';
 import { BaselineTextField } from '../../../../universal/BaselineTextField';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
+import { RadioButton } from '../../../../universal/RadioButton';
 import { resolveRadioButton } from '@/app/components/contracts/radioButton';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -30,17 +32,24 @@ export function RoBaselineTransactionFilters({
   host,
   currency,
   filters,
+  categories = [],
   onApply,
   onClose,
 }: {
   host: CurrentScreenProps;
   currency: string;
   filters: AccountTransactionFilterState;
+  categories?: readonly string[];
   onApply: (filters: AccountTransactionFilterState) => void;
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState(filters),
-    { height } = useDemoViewport(),
+    [selectionSheet, setSelectionSheet] = useState<
+      'status' | 'transactionType' | 'category' | null
+    >(null),
+    [selectionDraft, setSelectionDraft] = useState<string | null>(null),
+    viewport = useDemoViewport(),
+    { height } = viewport,
     dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const duo = useDuoPreview();
   const surface = sourceColor('var(--uc-surface)', dark);
@@ -51,6 +60,10 @@ export function RoBaselineTransactionFilters({
         ...change,
       };
     });
+  };
+  const openSelection = (field: 'status' | 'transactionType' | 'category') => {
+    setSelectionDraft(draft[field]);
+    setSelectionSheet(field);
   };
   const section = (title: string, children: React.ReactNode) => {
     const sourceStyle0 = {
@@ -160,7 +173,7 @@ export function RoBaselineTransactionFilters({
       </View>
     );
   };
-  const inert = (label: string, value: string) => {
+  const inert = (label: string, value: string, onPress: () => void) => {
     const sourceStyle10 = {
       height: 96,
     } as const;
@@ -199,11 +212,14 @@ export function RoBaselineTransactionFilters({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        onPress={onPress}
         style={sourceStyle10}
       >
         <View
           style={
-            duo ? { ...sourceStyle11, width: undefined, right: 64 } : sourceStyle11
+            duo
+              ? { ...sourceStyle11, width: undefined, right: 64 }
+              : sourceStyle11
           }
         >
           <Text style={sourceStyle12}>{label}</Text>
@@ -212,7 +228,9 @@ export function RoBaselineTransactionFilters({
         </View>
         <View
           style={
-            duo ? { ...sourceStyle15, left: undefined, right: 24 } : sourceStyle15
+            duo
+              ? { ...sourceStyle15, left: undefined, right: 24 }
+              : sourceStyle15
           }
         >
           <SourceCustomIcon
@@ -313,7 +331,11 @@ export function RoBaselineTransactionFilters({
               />
             </Pressable>
           </View>
-          <ScrollView style={sourceStyle21} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={sourceStyle21}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
             <View style={sourceStyle22}>
               {section(
                 'SEARCH BY TRANSACTION DETAIL',
@@ -360,13 +382,19 @@ export function RoBaselineTransactionFilters({
               {section(
                 'BY STATUS',
                 <View>
-                  {inert('Select status', draft.status)}
-                  {inert('Transaction type', draft.transactionType)}
+                  {inert('Select status', draft.status, () =>
+                    openSelection('status'),
+                  )}
+                  {inert('Transaction type', draft.transactionType, () =>
+                    openSelection('transactionType'),
+                  )}
                 </View>,
               )}
               {section(
                 'SEARCH BY CATEGORY',
-                inert('Select category', draft.category),
+                inert('Select category', draft.category, () =>
+                  openSelection('category'),
+                ),
               )}
             </View>
           </ScrollView>
@@ -390,10 +418,88 @@ export function RoBaselineTransactionFilters({
             <View style={sourceStyle25} />
           </View>
         </View>
+        {selectionSheet ? (
+          <ModalPortal
+            visible
+            transparent
+            animationType="none"
+            onRequestClose={() => setSelectionSheet(null)}
+          >
+            <BaselineBottomSheet
+              title={`Choose ${
+                selectionSheet === 'transactionType'
+                  ? 'transaction type'
+                  : selectionSheet
+              }`}
+              onClose={() => setSelectionSheet(null)}
+              width={viewport.width}
+              height={viewport.height}
+              fillHeight
+              dark={dark}
+              footer={
+                <View style={selectionFooterStyle}>
+                  <PrimaryButton
+                    label="OK"
+                    labelSize="18"
+                    disabled={selectionDraft === null}
+                    onPress={() => {
+                      if (selectionDraft !== null) {
+                        if (selectionSheet === 'status') {
+                          patch({
+                            status:
+                              selectionDraft as AccountTransactionFilterState['status'],
+                          });
+                        } else if (selectionSheet === 'transactionType') {
+                          patch({
+                            transactionType:
+                              selectionDraft as AccountTransactionFilterState['transactionType'],
+                          });
+                        } else {
+                          patch({ category: selectionDraft });
+                        }
+                      }
+                      setSelectionSheet(null);
+                    }}
+                    dark={dark}
+                  />
+                </View>
+              }
+            >
+              {(selectionSheet === 'status'
+                ? ['All transactions', 'Booked', 'Pending']
+                : selectionSheet === 'transactionType'
+                  ? ['All transactions', 'Incoming', 'Outgoing']
+                  : [
+                      'All categories',
+                      ...new Set(
+                        [draft.category, ...categories].filter(
+                          category => category && category !== 'All categories',
+                        ),
+                      ),
+                    ]
+              ).map(option => (
+                <RadioButton
+                  key={option}
+                  label={option}
+                  selected={selectionDraft === option}
+                  variant="standard"
+                  onPress={() => setSelectionDraft(option)}
+                  dark={dark}
+                />
+              ))}
+            </BaselineBottomSheet>
+          </ModalPortal>
+        ) : null}
       </View>
     </ModalPortal>
   );
 }
+
+const selectionFooterStyle = {
+  paddingHorizontal: 16,
+  paddingTop: 8,
+  paddingBottom: 16,
+} as const;
 
 /** Source date-filter composition on its already-painted panel surface; selection remains owned above. */
 function DateOption({

@@ -31,6 +31,7 @@ export interface RoBaselinePfmCategoryDetailProps {
   direction: 'out' | 'in';
   onPeriodChange: (periodKey: string) => void;
   onBack: () => void;
+  onAddTransaction?: () => void;
   onTransactionClick?: (transaction: SpendingAnalyticsTransaction) => void;
 }
 
@@ -52,6 +53,7 @@ export function RoBaselinePfmCategoryDetail({
   onPeriodChange,
   onBack,
   onTransactionClick,
+  onAddTransaction,
 }: RoBaselinePfmCategoryDetailProps) {
   const [showUncategorizedTip, setShowUncategorizedTip] = useState(true);
   const [excludedSubcategories, setExcludedSubcategories] = useState<
@@ -61,6 +63,9 @@ export function RoBaselinePfmCategoryDetail({
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const categoryDefinition = getPfmCategory(category);
   const categoryLabel = getAnalyticsCategoryDisplayLabel(category, host.t);
+  const categoryTitle = categoryLabel
+    .toLocaleLowerCase(host.language)
+    .replace(/^./u, character => character.toLocaleUpperCase(host.language));
   const activeIndex = Math.max(
     timeline.periods.findIndex(period => period.key === activePeriodKey),
     0,
@@ -135,6 +140,12 @@ export function RoBaselinePfmCategoryDetail({
           subcategories={complete.subcategories}
           colorVar={categoryDefinition.colorVar}
           inactiveSubcategories={excludedSubcategories}
+          emptyLabel={host.t(
+            direction === 'in'
+              ? 'runtime.analytics.noIncome'
+              : 'runtime.analytics.noExpenses',
+            direction === 'in' ? 'No income' : 'No expenses',
+          )}
           onToggle={toggleSubcategory}
         />
       </>
@@ -147,7 +158,7 @@ export function RoBaselinePfmCategoryDetail({
     >
       <DuoFullWidthSection backgroundColor={color('--uc-app-bg')}>
         <BaselinePageHeader
-          title={categoryLabel}
+          title={categoryTitle}
           onBack={onBack}
           includeSafeArea
           safeAreaReserve={host.screenTopInset}
@@ -190,7 +201,7 @@ export function RoBaselinePfmCategoryDetail({
                   'runtime.analytics.addTransaction',
                   'Add Transaction',
                 ),
-                onPress: host.onAddTransaction,
+                onPress: onAddTransaction ?? host.onAddTransaction,
               },
             ]}
             style={styles.actionBar}
@@ -199,6 +210,7 @@ export function RoBaselinePfmCategoryDetail({
         <DuoFullWidthSection backgroundColor={color('--uc-surface')}>
           {activeSummary && detail ? (
             <View
+              testID="ro-pfm-transactions"
               style={[
                 styles.transactions,
                 { backgroundColor: color('--uc-surface') },
@@ -208,7 +220,7 @@ export function RoBaselinePfmCategoryDetail({
                 title={
                   activePeriod?.kind === 'year'
                     ? activePeriod.year
-                    : (activePeriod?.label ?? activeSummary.periodLabel)
+                    : activePeriod?.label ?? activeSummary.periodLabel
                 }
                 total={formatAmount(
                   direction === 'out' ? -detail.total : detail.total,
@@ -277,7 +289,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, width: '100%' },
   scroll: { flex: 1 },
   webScroll: { transform: 'none' },
-  hero: { paddingHorizontal: 24, paddingTop: 6 },
+  hero: { paddingHorizontal: 16, paddingTop: 6 },
   showingData: { fontFamily: 'UniCredit-bold', fontSize: 16, letterSpacing: 0 },
   periodTitle: {
     fontFamily: 'UniCredit-bold',
@@ -292,7 +304,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   actionBar: { paddingHorizontal: 16, paddingVertical: 0, paddingBottom: 8 },
-  transactions: { paddingBottom: 24 },
+  transactions: { paddingTop: 16, paddingBottom: 24 },
   helper: { paddingHorizontal: 16, paddingVertical: 8 },
   empty: {
     fontFamily: 'UniCredit-regular',

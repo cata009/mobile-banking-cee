@@ -110,8 +110,8 @@ describe.each(contexts)(
             key === 'home.totalBalance'
               ? 'Total Balance'
               : key === 'home.totalAvailable'
-              ? 'Total Available'
-              : key,
+                ? 'Total Available'
+                : key,
         }),
         model = createCurrentProducts(value),
         tree = render(<RedesignedBaselineHome host={value} />),
@@ -159,16 +159,16 @@ describe.each(contexts)(
           product.type === 'investment_account'
             ? { screen: 'investments' }
             : product.type === 'debit_card' || product.type === 'credit_card'
-            ? {
-                screen: 'card',
-                params: { productId: product.id, cardId: product.id },
-              }
-            : isAccountDetailProduct(product)
-            ? {
-                screen: 'account',
-                params: { productId: product.id, accountId: product.id },
-              }
-            : undefined,
+              ? {
+                  screen: 'card',
+                  params: { productId: product.id, cardId: product.id },
+                }
+              : isAccountDetailProduct(product)
+                ? {
+                    screen: 'account',
+                    params: { productId: product.id, accountId: product.id },
+                  }
+                : undefined,
         );
       }
 
@@ -192,7 +192,7 @@ it('keeps header actions and caller-owned amount privacy', () => {
   });
   expect(value.onNavigate).toHaveBeenNthCalledWith(1, { screen: 'prime' });
   expect(value.onNavigate).toHaveBeenNthCalledWith(2, { screen: 'messages' });
-  expect(value.onProfile).not.toHaveBeenCalled();
+  expect(value.onProfile).toHaveBeenCalledTimes(1);
   expect(value.onBack).not.toHaveBeenCalled();
 
   const hidden = { ...value, amountsHidden: true };

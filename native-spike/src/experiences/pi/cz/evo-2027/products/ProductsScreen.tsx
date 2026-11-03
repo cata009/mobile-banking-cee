@@ -1,5 +1,7 @@
 import { useMouseCarousel } from '../mouseCarousel';
+import { BaselineCarouselIndicator } from '../../../../../universal/BaselineCarouselIndicator';
 import React, { useEffect, useRef, useState } from 'react';
+import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavigationInset';
 import {
   BackHandler,
   Pressable,
@@ -22,7 +24,12 @@ import {
 } from '@/app/config/productsMenuConfig';
 import type { CzechNativeScreenProps } from '../contracts';
 import { evoTokens as tokens } from '../home/tokens';
-import { Glyph, IconAction, textStyles as t } from '../home/Primitives';
+import {
+  Glyph,
+  IconAction,
+  L1Header,
+  textStyles as t,
+} from '../home/Primitives';
 import { SourcePhoto } from './SourcePhoto';
 import Prime from './Prime';
 import {
@@ -55,9 +62,11 @@ function ProductRail({
   children: React.ReactNode;
 }) {
   const rail = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const [page, setPage] = useState(0);
   const mouse = useMouseCarousel({
     rail,
     offsets: Array.from({ length: count }, (_, index) => index * 252),
+    onSelect: setPage,
   });
   return (
     <View ref={mouse.containerRef} {...mouse.panHandlers}>
@@ -68,16 +77,33 @@ function ProductRail({
         snapToInterval={252}
         decelerationRate="fast"
         contentContainerStyle={s.rail}
-        onScroll={event => mouse.trackOffset(event.nativeEvent.contentOffset.x)}
+        onScroll={event => {
+          const x = event.nativeEvent.contentOffset.x;
+          mouse.trackOffset(x);
+          setPage(Math.max(0, Math.min(count - 1, Math.round(x / 252))));
+        }}
         scrollEventThrottle={16}
       >
         {children}
       </ScrollView>
+      {count > 1 && (
+        <BaselineCarouselIndicator
+          count={count}
+          activeIndex={Math.min(page, count - 1)}
+          itemLabel="product"
+          withBackdropBlur={false}
+          onSelect={index => {
+            setPage(index);
+            rail.current?.scrollTo({ x: index * 252, y: 0, animated: true });
+          }}
+        />
+      )}
     </View>
   );
 }
 
 export default function ProductsScreen(host: CzechNativeScreenProps) {
+  const navigationInset = usePrimaryNavigationInset();
   const duo = useDuoPreview();
   const viewport = useDuoLocalViewport();
   const wide = !!duo && !!viewport && viewport.width >= duo.referenceWidth * 2;
@@ -213,14 +239,10 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
             : 'Offers';
   return (
     <View style={[s.root, { paddingTop: host.screenTopInset ?? 0 }]}>
-      <Header
-        tokens={tokens}
-        variant="current"
-        title={title}
-        onBack={back}
-        backIcon={<Glyph name="back" size={16} />}
-        trailing={
-          view === 'shelf' ? (
+      {view === 'shelf' ? (
+        <L1Header
+          title={title}
+          actions={
             <IconAction
               label="Search products"
               name="search"
@@ -229,15 +251,17 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                 setView('search');
               }}
             />
-          ) : (
-            <IconAction
-              label="Profile"
-              name="profile"
-              onPress={host.onProfile}
-            />
-          )
-        }
-      />
+          }
+        />
+      ) : (
+        <Header
+          tokens={tokens}
+          variant="current"
+          title={title}
+          onBack={back}
+          backIcon={<Glyph name="back" size={16} />}
+        />
+      )}
       {(view === 'search' || offersView) && (
         <View style={s.search}>
           <SearchField
@@ -261,6 +285,7 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
         contentContainerStyle={[
           s.content,
           wide && (view === 'shelf' || offersView) && s.wideContent,
+          { paddingBottom: 24 + navigationInset },
         ]}
       >
         {view === 'shelf' ? (
@@ -321,12 +346,6 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                 <ProductRail count={itemCategory.items.length}>
                   {itemCategory.items.map(item => itemCard(item))}
                 </ProductRail>
-                <Text
-                  accessibilityLabel={`${itemCategory.items.length} products`}
-                  style={s.dots}
-                >
-                  {itemCategory.items.map(() => '•').join('  ')}
-                </Text>
               </View>
             ))}
           </>
@@ -457,12 +476,6 @@ const s = StyleSheet.create({
     minHeight: 32,
   },
   rail: { gap: 12, paddingTop: 12 },
-  dots: {
-    fontSize: 18,
-    color: tokens.accent,
-    textAlign: 'center',
-    paddingTop: 6,
-  },
   partners: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
   partner: {
     flex: 1,

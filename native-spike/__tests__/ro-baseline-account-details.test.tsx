@@ -1,6 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { ScrollView, StyleSheet, TextInput } from 'react-native';
+import { ScrollView, Share, StyleSheet, TextInput } from 'react-native';
 import RoBaselineAccount from '../src/experiences/pi/current/baseline/Account';
 import {
   bankingProducts,
@@ -8,6 +8,7 @@ import {
 } from '../src/experiences/pi/current/banking/model';
 import {
   currentTokens,
+  createCurrentProducts,
   createCurrentTranslator,
 } from '../src/experiences/pi/current/context';
 import type { CurrentScreenProps } from '../src/experiences/pi/current/contracts';
@@ -19,9 +20,39 @@ import RoBaselineAccountInfo from '../src/experiences/pi/current/baseline/Accoun
 import RoBaselineAccountOptions from '../src/experiences/pi/current/baseline/AccountOptions';
 import { BaselineAccountInfoField } from '../src/universal/BaselineAccountInfoField';
 import { BaselineCardNavigationRow } from '../src/universal/BaselineCardNavigationRow';
+import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
+import { RadioButton } from '../src/universal/RadioButton';
 import NativeCurrentApp from '../src/experiences/pi/current/NativeCurrentApp';
 import { CURRENT_BANKING_ADAPTER } from '../src/experiences/pi/current/banking/adapter';
 import { DuoPreviewProvider } from '../src/universal/DuoPreview';
+import {
+  DEFAULT_ACCOUNT_PUSH_NOTIFICATION_PREFERENCES,
+  isValidAccountPushNotificationLimit,
+} from '../../src/features/accounts-payments/accountPushNotifications';
+import {
+  ACCOUNT_STATEMENTS,
+  filterAccountStatements,
+  formatAccountStatementPeriod,
+} from '../../src/features/accounts-payments/accountStatements';
+import {
+  clearAccountNameOverride,
+  getAccountNameOverride,
+  MAX_ACCOUNT_NAME_LENGTH,
+  saveAccountNameOverride,
+} from '../../src/features/accounts-payments/accountNameOverrides';
+import {
+  ADD_MONEY_PRESET_AMOUNTS,
+  isValidAddMoneyAmount,
+  isValidAddMoneyCardPayment,
+} from '../../src/features/accounts-payments/addMoney';
+import {
+  MCASH_PRESET_AMOUNTS,
+  isValidMcashWithdrawal,
+} from '../../src/features/accounts-payments/mcash';
+import {
+  convertCurrency,
+  getCountryCurrency,
+} from '../../src/data/exchangeRates';
 
 const counts = {
   accounts: 2,
@@ -409,6 +440,50 @@ test('applied account filters survive visiting the deposit which has no ledger',
   await act(() => tree.unmount());
 });
 
+test('account filter dropdowns open full-height option sheets over the filters', async () => {
+  const { tree } = await render();
+  await act(() => press(tree, 'Filters').props.onPress());
+
+  const choose = async (
+    field: string,
+    option: string | null,
+    expectedOptions: string[],
+  ) => {
+    await act(() => press(tree, field).props.onPress());
+    const sheet = tree.root.findAllByType(BaselineBottomSheet).at(-1)!;
+    expect(sheet.props.title).toBe(
+      `Choose ${field === 'Select status' ? 'status' : field === 'Transaction type' ? 'transaction type' : 'category'}`,
+    );
+    expect(sheet.props.fillHeight).toBe(true);
+    const labels = sheet
+      .findAllByType(RadioButton)
+      .map(radio => radio.props.label);
+    for (const label of expectedOptions) expect(labels).toContain(label);
+    const selectedOption =
+      option ?? labels.find(label => label !== 'All categories')!;
+    const radio = sheet
+      .findAllByType(RadioButton)
+      .find(candidate => candidate.props.label === selectedOption)!;
+    await act(() => radio.props.onPress());
+    await act(() => press(tree, 'OK').props.onPress());
+    expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
+    expect(JSON.stringify(tree.toJSON())).toContain(selectedOption);
+  };
+
+  await choose('Select status', 'Pending', [
+    'All transactions',
+    'Booked',
+    'Pending',
+  ]);
+  await choose('Transaction type', 'Incoming', [
+    'All transactions',
+    'Incoming',
+    'Outgoing',
+  ]);
+  await choose('Select category', null, ['All categories']);
+  await act(() => tree.unmount());
+});
+
 test('back stays host-owned and header clamps scroll collapse even with system dark appearance', async () => {
   const props = host({
     mode: 'system',
@@ -446,18 +521,100 @@ test('account information carries source current-account figures and its connect
   await act(() => {
     tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
   });
+  expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(3);
+  await act(() => press(tree, 'Show more').props.onPress());
   const fields = tree.root.findAllByType(BaselineAccountInfoField);
   expect(fields).toHaveLength(7);
   expect(fields[0]!.props.subtitle).toBe('RO44BACX1234567890123402');
   expect(
     fields.find(field => field.props.title === 'Available funds')!.props
       .subtitle,
-  ).toBe('20.442,68 RON');
+  ).toMatch(/ EUR$/);
+  expect(bankingProducts(props).currentAccounts[1]!.currency).toBe('EUR');
   expect(tree.root.findByType(BaselineCardNavigationRow).props.card.id).toBe(
     'card-debit-2',
   );
   await act(() => press(tree, 'Back').props.onPress());
   expect(props.onBack).toHaveBeenCalledTimes(1);
+  await act(() => tree.unmount());
+});
+
+test('account information starts with three fields and follows transaction detail toggle behavior', async () => {
+  const props = host({
+    route: { screen: 'account-info', params: { productId: 'acc-1' } },
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
+  });
+
+  expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(3);
+  const showMore = press(tree, 'Show more');
+  expect(showMore).toBeDefined();
+  expect(showMore.props.accessibilityState.expanded).toBe(false);
+  expect(StyleSheet.flatten(showMore.props.style)).toEqual({
+    marginTop: 18,
+    paddingBottom: 18,
+    alignSelf: 'center',
+  });
+  expect(tree.root.findAllByType(BaselineCardNavigationRow)).toHaveLength(1);
+
+  await act(() => showMore.props.onPress());
+  expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(7);
+  expect(press(tree, 'Show less').props.accessibilityState.expanded).toBe(true);
+  await act(() => press(tree, 'Show less').props.onPress());
+  expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(3);
+  await act(() => tree.unmount());
+});
+
+test('account details share opens a selectable data sheet and shares only checked values', async () => {
+  const share = jest
+    .spyOn(Share, 'share')
+    .mockResolvedValue({ action: 'sharedAction', activityType: undefined });
+  const props = host({
+    route: { screen: 'account-info', params: { productId: 'acc-1' } },
+  });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
+  });
+
+  await act(() => press(tree, 'Share account details').props.onPress());
+  const sheet = tree.root.findByType(BaselineBottomSheet);
+  expect(sheet.props.title).toBe('Share');
+  expect(sheet.props.fillHeight).toBe(true);
+  const checkbox = (label: string) =>
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'checkbox' &&
+        node.props.accessibilityLabel === label,
+    )[0]!;
+  expect(checkbox('Account title').props.accessibilityState.checked).toBe(true);
+  expect(checkbox('Account owner').props.accessibilityState.checked).toBe(true);
+  expect(checkbox('IBAN').props.accessibilityState.checked).toBe(false);
+  expect(checkbox('BIC/SWIFT Code').props.accessibilityState.checked).toBe(
+    false,
+  );
+
+  await act(() => checkbox('Account title').props.onPress());
+  await act(() => checkbox('Account owner').props.onPress());
+  expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(true);
+  await act(() => checkbox('IBAN').props.onPress());
+  await act(() => checkbox('BIC/SWIFT Code').props.onPress());
+  expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(false);
+  await act(async () => {
+    press(tree, 'Share').props.onPress();
+    await Promise.resolve();
+  });
+
+  expect(share).toHaveBeenCalledWith(
+    {
+      title: 'Share',
+      message: 'IBAN\nRO43BACX1234567890123401\n\nBIC/SWIFT Code\nBACXROBU',
+    },
+    { dialogTitle: 'Share account details' },
+  );
+  share.mockRestore();
   await act(() => tree.unmount());
 });
 
@@ -496,6 +653,15 @@ test.each([
     await act(() => {
       tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
     });
+    expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(
+      Math.min(count, 3),
+    );
+    if (count > 3) {
+      expect(press(tree, 'Show more')).toBeDefined();
+      await act(() => press(tree, 'Show more').props.onPress());
+    } else {
+      expect(press(tree, 'Show more')).toBeUndefined();
+    }
     const fields = tree.root.findAllByType(BaselineAccountInfoField);
     expect(fields).toHaveLength(count);
     expect(fields.some(field => field.props.subtitle === '****,** RON')).toBe(
@@ -520,7 +686,29 @@ test('account options keeps canonical menu and product offers inert with host-ow
       node.props.testID?.startsWith('ro-account-option-'),
   );
   expect(menu).toHaveLength(5);
-  for (const item of menu) expect(item.props.onPress).toBeUndefined();
+  expect(press(tree, 'PUSH NOTIFICATIONS')).toBeDefined();
+  expect(press(tree, 'ACCOUNT STATEMENT')).toBeDefined();
+  expect(press(tree, 'CHANGE ACCOUNT NAME')).toBeDefined();
+  expect(press(tree, 'SHARE ACCOUNT INFO')).toBeDefined();
+  await act(() => press(tree, 'SHARE ACCOUNT INFO').props.onPress());
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe('Share');
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'checkbox' &&
+        node.props.accessibilityLabel === 'Account title',
+    )[0]!.props.accessibilityState.checked,
+  ).toBe(true);
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'checkbox' &&
+        node.props.accessibilityLabel === 'Account owner',
+    )[0]!.props.accessibilityState.checked,
+  ).toBe(true);
+  await act(() => press(tree, 'Close').props.onPress());
+  for (const label of ['CREATE PAYCODE'])
+    expect(press(tree, label)).toBeUndefined();
   expect(
     tree.root.findAll(
       node =>
@@ -531,5 +719,467 @@ test('account options keeps canonical menu and product offers inert with host-ow
   await act(() => press(tree, 'Back').props.onPress());
   expect(props.onBack).toHaveBeenCalledTimes(1);
   expect(props.onNavigate).not.toHaveBeenCalled();
+  await act(() => tree.unmount());
+});
+
+test('change account name validates, saves and updates account presentation', async () => {
+  expect(MAX_ACCOUNT_NAME_LENGTH).toBe(20);
+  expect(saveAccountNameOverride('invalid', ' '.repeat(3))).toBe(false);
+  expect(saveAccountNameOverride('invalid', '123456789012345678901')).toBe(
+    false,
+  );
+
+  const props = host({ route: { screen: 'account-options' } });
+  const originalName = bankingProducts(props).accounts[0]!.name;
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountOptions {...props} />);
+  });
+  await act(() => press(tree, 'CHANGE ACCOUNT NAME').props.onPress());
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+    'Change account name',
+  );
+  const nameInput = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Account name')!;
+  expect(nameInput.props.value).toBe('CURRENT ACCOUNT');
+  expect(
+    tree.root.findByProps({ testID: 'ro-account-name-character-count' }).props
+      .children,
+  ).toEqual([15, ' / ', 20]);
+  expect(press(tree, 'SAVE').props.accessibilityState.disabled).toBe(true);
+  await act(() => nameInput.props.onChangeText('Travel Fund'));
+  expect(press(tree, 'SAVE').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'SAVE').props.onPress());
+  expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
+  expect(getAccountNameOverride('acc-1')).toBe('Travel Fund');
+  expect(bankingProducts(props).accounts[0]!.name).toBe('Travel Fund');
+
+  const infoProps = host({
+    route: { screen: 'account-info', params: { productId: 'acc-1' } },
+  });
+  let info!: Renderer.ReactTestRenderer;
+  await act(() => {
+    info = Renderer.create(<RoBaselineAccountInfo {...infoProps} />);
+  });
+  await act(() => press(info, 'Show more').props.onPress());
+  expect(
+    info.root
+      .findAllByType(BaselineAccountInfoField)
+      .find(field => field.props.title === 'Account title')?.props.subtitle,
+  ).toBe('Travel Fund');
+  await act(() => info.unmount());
+  clearAccountNameOverride('acc-1');
+  await act(() => tree.unmount());
+  expect(bankingProducts(props).accounts[0]!.name).toBe(originalName);
+});
+
+test('add money flow covers recurrence, review terms, card validation and completion', async () => {
+  expect(ADD_MONEY_PRESET_AMOUNTS).toEqual([
+    '50.00',
+    '200.00',
+    '700.00',
+    '1000.00',
+  ]);
+  expect(isValidAddMoneyAmount('50.00')).toBe(true);
+  expect(isValidAddMoneyAmount('-5.00')).toBe(false);
+  expect(
+    isValidAddMoneyCardPayment(
+      {
+        cardholderName: 'Mihai Iacob',
+        cardNumber: '4111111111111111',
+        expiryDate: '12 / 30',
+        securityCode: '123',
+      },
+      true,
+    ),
+  ).toBe(true);
+  expect(
+    isValidAddMoneyCardPayment(
+      {
+        cardholderName: 'Mihai Iacob',
+        cardNumber: '4111111111111112',
+        expiryDate: '12 / 30',
+        securityCode: '123',
+      },
+      true,
+    ),
+  ).toBe(false);
+
+  const { tree } = await render(host({ route: { screen: 'account' } }));
+  await act(() => press(tree, 'Add money').props.onPress());
+  expect(
+    tree.root.findAll(node => node.props.testID === 'ro-add-money-form').length,
+  ).toBeGreaterThan(0);
+  const amountInput = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Amount')!;
+  expect(amountInput.props.value).toBe('50.00');
+  await act(() => amountInput.props.onChangeText('700.00'));
+  const transactionInfo = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Transaction info')!;
+  await act(() => transactionInfo.props.onChangeText('Transfer'));
+  await act(() => press(tree, 'RECURRENT PAYMENT').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('MONTHLY RECURRENCE DAY');
+  await act(() => press(tree, 'NEXT').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Review data');
+  expect(JSON.stringify(tree.toJSON())).toContain('700.00 RON');
+  expect(JSON.stringify(tree.toJSON())).toContain('MONTHLY RECURRENCE DAY');
+  expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(true);
+  await act(() =>
+    press(tree, 'I AGREE WITH TERMS AND CONDITIONS').props.onPress(),
+  );
+  expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'Confirm').props.onPress());
+  expect(
+    tree.root.findAll(node => node.props.testID === 'ro-add-money-card').length,
+  ).toBeGreaterThan(0);
+  expect(press(tree, 'Pay 700.00 RON').props.accessibilityState.disabled).toBe(
+    true,
+  );
+  await act(() =>
+    tree.root
+      .findAllByType(TextInput)
+      .find(input => input.props.accessibilityLabel === 'Cardholder name')!
+      .props.onChangeText('Mihai Iacob'),
+  );
+  await act(() =>
+    tree.root
+      .findAllByType(TextInput)
+      .find(input => input.props.accessibilityLabel === 'Card number')!
+      .props.onChangeText('4111111111111111'),
+  );
+  await act(() =>
+    tree.root
+      .findAllByType(TextInput)
+      .find(input => input.props.accessibilityLabel === 'Expiry date')!
+      .props.onChangeText('12 / 30'),
+  );
+  await act(() =>
+    tree.root
+      .findAllByType(TextInput)
+      .find(input => input.props.accessibilityLabel === 'Security code')!
+      .props.onChangeText('123'),
+  );
+  await act(() => press(tree, 'CARD DETAILS CONSENT').props.onPress());
+  expect(press(tree, 'Pay 700.00 RON').props.accessibilityState.disabled).toBe(
+    false,
+  );
+  await act(() => press(tree, 'Pay 700.00 RON').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('will be added');
+  await act(() => press(tree, 'OK, GOT IT').props.onPress());
+  await act(() => tree.unmount());
+});
+
+test('Romanian mCash creates, shares and invalidates a cash withdrawal code', async () => {
+  expect(MCASH_PRESET_AMOUNTS).toEqual([50, 100, 300, 500, 1000]);
+  expect(isValidMcashWithdrawal('50.00', 4000, 264.08)).toBe(true);
+  expect(isValidMcashWithdrawal('45.00', 4000, 264.08)).toBe(false);
+  expect(isValidMcashWithdrawal('300.00', 4000, 264.08)).toBe(false);
+
+  const share = jest
+    .spyOn(Share, 'share')
+    .mockResolvedValue({ action: 'sharedAction', activityType: undefined });
+  const { tree } = await render(host({ route: { screen: 'account' } }));
+  expect(press(tree, 'mCash')).toBeDefined();
+  expect(press(tree, 'Internal transfer')).toBeUndefined();
+  await act(() => press(tree, 'mCash').props.onPress());
+  expect(tree.root.findAllByType(BaselineBottomSheet)[0]!.props.title).toBe(
+    'Withdrawal amount',
+  );
+  const amountInput = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Amount to withdraw')!;
+  expect(amountInput.props.value).toBe('50.00');
+  expect(press(tree, 'CREATE CODE').props.accessibilityState.disabled).toBe(
+    false,
+  );
+  await act(() => amountInput.props.onChangeText('45'));
+  expect(press(tree, 'CREATE CODE').props.accessibilityState.disabled).toBe(
+    true,
+  );
+  await act(() => amountInput.props.onChangeText('50'));
+  await act(() => press(tree, 'CREATE CODE').props.onPress());
+  const sheets = tree.root.findAllByType(BaselineBottomSheet);
+  expect(sheets.at(-1)!.props.title).toBe('mCash code');
+  expect(JSON.stringify(tree.toJSON())).toContain('50.00');
+  expect(JSON.stringify(tree.toJSON())).toContain('CLOSEST ATM WITH CASH');
+  await act(async () => {
+    press(tree, 'Share mCash code').props.onPress();
+    await Promise.resolve();
+  });
+  expect(share).toHaveBeenCalledWith(
+    expect.objectContaining({
+      title: 'mCash code',
+      message: expect.stringContaining('Amount: 50.00 RON'),
+    }),
+  );
+  await act(() => press(tree, 'INVALIDATE').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Are you sure you want to invalidate',
+  );
+  await act(() => press(tree, 'No').props.onPress());
+  expect(tree.root.findAllByType(BaselineBottomSheet).at(-1)!.props.title).toBe(
+    'mCash code',
+  );
+  await act(() => press(tree, 'INVALIDATE').props.onPress());
+  await act(() => press(tree, 'Yes').props.onPress());
+  expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(1);
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+    'Withdrawal amount',
+  );
+  share.mockRestore();
+  await act(() => tree.unmount());
+});
+
+test('mCash replaces Internal transfer only on Romanian current accounts', async () => {
+  const props = host({ country: 'HU', route: { screen: 'account' } });
+  const { tree } = await render(props);
+  expect(press(tree, 'mCash')).toBeUndefined();
+  expect(press(tree, 'Internal transfer')).toBeDefined();
+  await act(() => press(tree, 'Internal transfer').props.onPress());
+  expect(props.onNavigate).not.toHaveBeenCalled();
+  await act(() => tree.unmount());
+});
+
+test.each(['RO', 'HU', 'RS', 'CZ', 'BA', 'BA_BL'] as const)(
+  '%s uses EUR for the second current account and converts the available total',
+  country => {
+    const products = createCurrentProducts(host({ country }));
+    const all = products.categories.flatMap(category => category.products);
+    const currentAccounts = all.filter(
+      product => product.type === 'current_account',
+    );
+    expect(currentAccounts[1]!.currency).toBe('EUR');
+    expect(currentAccounts[0]!.currency).toBe(getCountryCurrency(country));
+    const secondAccountTransactions = productTransactions(
+      host({ country }),
+      currentAccounts[1]!,
+    );
+    expect(
+      secondAccountTransactions.every(
+        transaction => transaction.currency === 'EUR',
+      ),
+    ).toBe(true);
+
+    const localCurrency = getCountryCurrency(country);
+    const liquidTotal = all
+      .filter(
+        product =>
+          product.type === 'current_account' ||
+          product.type === 'saving_account',
+      )
+      .reduce(
+        (total, product) =>
+          total +
+          convertCurrency(product.balance, product.currency, localCurrency),
+        0,
+      );
+    expect(products.calculateTotalAvailableAmount()).toBeCloseTo(
+      liquidTotal,
+      2,
+    );
+    expect(products.calculateTotalAvailable().currency).toBe(localCurrency);
+    expect(products.calculateTotalAvailableAmount()).toBeGreaterThan(
+      currentAccounts.reduce(
+        (total, account) =>
+          total +
+          convertCurrency(account.balance, account.currency, localCurrency),
+        0,
+      ),
+    );
+  },
+);
+
+test('second current account details keep a scrollable viewport through the ledger end', async () => {
+  const props = host({
+    route: { screen: 'account', params: { accountId: 'acc-2' } },
+  });
+  const { tree } = await render(props);
+  const page = tree.root
+    .findAllByType(ScrollView)
+    .find(node => node.props.testID === 'ro-account-page')!;
+  expect(StyleSheet.flatten(page.props.style)).toMatchObject({
+    flex: 1,
+    minHeight: 0,
+  });
+  expect(StyleSheet.flatten(page.props.contentContainerStyle)).toMatchObject({
+    flexGrow: 1,
+    paddingBottom: 32,
+  });
+  await act(() => tree.unmount());
+});
+
+test('push notification flow updates account and card limits and preserves toggles', async () => {
+  expect(
+    DEFAULT_ACCOUNT_PUSH_NOTIFICATION_PREFERENCES.accountTransactions
+      .minimumAmount,
+  ).toBe('5.00');
+  expect(
+    DEFAULT_ACCOUNT_PUSH_NOTIFICATION_PREFERENCES.cardTransactions
+      .minimumAmount,
+  ).toBe('50.00');
+  expect(isValidAccountPushNotificationLimit('12.50')).toBe(true);
+  expect(isValidAccountPushNotificationLimit('0')).toBe(false);
+  expect(isValidAccountPushNotificationLimit('12.501')).toBe(false);
+
+  const props = host({ route: { screen: 'account-options' } });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountOptions {...props} />);
+  });
+  const switchControl = (label: string) =>
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'switch' &&
+        node.props.accessibilityLabel === label,
+    )[0]!;
+
+  await act(() => press(tree, 'PUSH NOTIFICATIONS').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Push notifications');
+  expect(switchControl('NOTIFICATIONS').props.accessibilityState.checked).toBe(
+    true,
+  );
+  await act(() => switchControl('NOTIFICATIONS').props.onPress());
+  expect(switchControl('NOTIFICATIONS').props.accessibilityState.checked).toBe(
+    false,
+  );
+  expect(press(tree, 'Accounts transaction notifications')).toBeUndefined();
+  expect(press(tree, 'Card transactions notifications')).toBeUndefined();
+  await act(() => switchControl('NOTIFICATIONS').props.onPress());
+  await act(() =>
+    press(tree, 'Accounts transaction notifications').props.onPress(),
+  );
+  expect(
+    switchControl('REJECTED ACCOUNTS TRANSACTION NOTIFICATIONS').props
+      .accessibilityState.checked,
+  ).toBe(true);
+  expect(
+    switchControl('TERM DEPOSIT MATURITY NOTIFICATIONS').props
+      .accessibilityState.checked,
+  ).toBe(true);
+  await act(() => press(tree, 'Notification limit').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('5.00');
+  expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(true);
+  const accountAmount = tree.root
+    .findAllByType(TextInput)
+    .find(
+      node => node.props.accessibilityLabel === 'Minimum notification amount',
+    )!;
+  await act(() => accountAmount.props.onChangeText('12.50'));
+  expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'Confirm').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('12.50 RON');
+  await act(() => press(tree, 'Back').props.onPress());
+  await act(() =>
+    press(tree, 'Card transactions notifications').props.onPress(),
+  );
+  expect(
+    switchControl('CARD TRANSACTIONS NOTIFICATIONS').props.accessibilityState
+      .checked,
+  ).toBe(true);
+  expect(
+    switchControl('REJECTED CARD TRANSACTION NOTIFICATIONS').props
+      .accessibilityState.checked,
+  ).toBe(true);
+  await act(() => press(tree, 'Notification limit').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('50.00');
+  const cardAmount = tree.root
+    .findAllByType(TextInput)
+    .find(
+      node => node.props.accessibilityLabel === 'Minimum notification amount',
+    )!;
+  await act(() => cardAmount.props.onChangeText('75.00'));
+  await act(() => press(tree, 'Confirm').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('75.00 RON');
+  await act(() => press(tree, 'Back').props.onPress());
+  await act(() => press(tree, 'Back').props.onPress());
+  expect(press(tree, 'PUSH NOTIFICATIONS')).toBeDefined();
+  await act(() => tree.unmount());
+});
+
+test('account statement model filters the source statement periods', () => {
+  expect(ACCOUNT_STATEMENTS).toHaveLength(11);
+  expect(formatAccountStatementPeriod('2025-11-03', '2026-11-03')).toBe(
+    'NOV 2025 - NOV 2026',
+  );
+  expect(
+    filterAccountStatements({
+      query: '',
+      from: '2026-04-01',
+      to: '2026-06-30',
+    }).map(statement => statement.statementNumber),
+  ).toEqual([6, 5, 4]);
+  expect(
+    filterAccountStatements({
+      query: 'statement 9',
+      from: '2025-11-03',
+      to: '2026-11-03',
+    }).map(statement => statement.id),
+  ).toEqual(['2026-09']);
+});
+
+test('account statement flow selects and shares statements and completes an on-demand email request', async () => {
+  const share = jest
+    .spyOn(Share, 'share')
+    .mockResolvedValue({ action: 'sharedAction', activityType: undefined });
+  const props = host({ route: { screen: 'account-options' } });
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(<RoBaselineAccountOptions {...props} />);
+  });
+
+  await act(() => press(tree, 'ACCOUNT STATEMENT').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('NOV 2025 - NOV 2026');
+  expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(true);
+  const statement = press(tree, 'Statement number 9, 30 SEP 2026');
+  expect(statement.props.accessibilityState.checked).toBe(false);
+  await act(() => statement.props.onPress());
+  expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(false);
+  await act(async () => {
+    press(tree, 'Share').props.onPress();
+    await Promise.resolve();
+  });
+  expect(share).toHaveBeenCalledWith({
+    title: 'Account statement',
+    message: 'Statement number 9 · 30 SEP 2026',
+  });
+
+  await act(() => press(tree, 'Generate statement').props.onPress());
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+    'Account statement',
+  );
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'mihaicatalin.iacob@gmail.com',
+  );
+  expect(JSON.stringify(tree.toJSON())).toContain('03-November-2025');
+  expect(JSON.stringify(tree.toJSON())).toContain('03-November-2026');
+  const statementEmail = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'Statement email')!;
+  await act(() => statementEmail.props.onChangeText('not-an-email'));
+  expect(press(tree, 'SEND').props.accessibilityState.disabled).toBe(true);
+  await act(() =>
+    statementEmail.props.onChangeText('mihaicatalin.iacob@gmail.com'),
+  );
+  expect(press(tree, 'SEND').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'SEND').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'The statement will be soon sent',
+  );
+  await act(() => press(tree, 'OK, GOT IT').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('NOV 2025 - NOV 2026');
+  await act(() => press(tree, 'Advanced search').props.onPress());
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+    'Advanced search',
+  );
+  const fromDate = tree.root
+    .findAllByType(TextInput)
+    .find(input => input.props.accessibilityLabel === 'From date')!;
+  await act(() => fromDate.props.onChangeText('01-04-2026'));
+  await act(() => press(tree, 'Apply').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('APR 2026 - NOV 2026');
+  share.mockRestore();
   await act(() => tree.unmount());
 });

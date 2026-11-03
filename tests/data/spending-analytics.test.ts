@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { COUNTRY_META } from '@/app/registry/demoConfig'
 import {
+  appendSpendingAnalyticsTransactions,
   createSpendingAnalytics,
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
+  type SpendingAnalyticsTransaction,
 } from '@/data/spendingAnalytics'
 import { getAccountTransactions } from '@/data/accountDetails'
 import { mockProducts, type Currency, type Product } from '@/data/products'
@@ -12,10 +14,48 @@ import { mockProducts, type Currency, type Product } from '@/data/products'
 const COUNTRIES = ['RO', 'CZ', 'SK', 'HU', 'RS', 'BA', 'BA_BL', 'SI'] as const
 
 describe('spending analytics data', () => {
+  it('appends a manual cash transaction to its month and year without mutating the source timeline', () => {
+    const base = createSpendingAnalyticsTimeline('RO', [])
+    const transaction: SpendingAnalyticsTransaction = {
+      id: 'cash-transaction-1',
+      day: '03',
+      month: 'NOV',
+      monthKey: '2026-11',
+      monthTitle: 'NOVEMBER 2026',
+      label: 'Fresh market',
+      details: 'Fresh market',
+      currency: 'RON',
+      amount: -25.5,
+      type: 'debit',
+      category: 'HOUSEHOLD',
+      pfmCategory: 'Home',
+      pfmSubcategory: 'HOME SERVICES',
+      status: 'Booked',
+      source: 'account',
+      sourceProductId: 'cash-transaction',
+      sourceProductName: 'Cash transaction',
+    }
+
+    const updated = appendSpendingAnalyticsTransactions(base, 'RO', [transaction])
+
+    expect(updated.activePeriodKey).toBe('2026-11')
+    expect(updated.periods.map((period) => period.key)).toContain('2026-11')
+    expect(updated.summariesByPeriodKey['2026-11']).toMatchObject({
+      spendingTotal: 25.5,
+      netTotal: -25.5,
+      moneyOutCategories: [expect.objectContaining({ category: 'Home', total: 25.5 })],
+      sourceTransactions: [expect.objectContaining({ id: 'cash-transaction-1' })],
+    })
+    expect(updated.summariesByPeriodKey['year-2026']?.spendingTotal).toBe(25.5)
+    expect(base.activePeriodKey).toBe('2026-04')
+    expect(base.summariesByPeriodKey['2026-11']).toBeUndefined()
+  })
+
   it('provides two PFM-excluded pending reservations for the primary current-account profile in every country', () => {
     for (const country of COUNTRIES) {
-      const pending = getAccountTransactions(country, 0, COUNTRY_META[country].currency as Currency)
-        .filter((transaction) => transaction.status === 'Pending')
+      const pending = getAccountTransactions(country, 0, COUNTRY_META[country].currency as Currency).filter(
+        (transaction) => transaction.status === 'Pending',
+      )
       const analytics = createSpendingAnalytics(country, mockProducts, '2026-04')
 
       expect(pending, `${country}/pending`).toHaveLength(2)
@@ -63,7 +103,9 @@ describe('spending analytics data', () => {
 
     const summary = createSpendingAnalytics('CZ', account ? [account] : ([] as Product[]), '2026-04')
     const ownTransfer = summary.sourceTransactions.find((transaction) => transaction.label === 'Transfer to savings')
-    const genuineTransfer = summary.sourceTransactions.find((transaction) => transaction.details === 'Incoming transfer')
+    const genuineTransfer = summary.sourceTransactions.find(
+      (transaction) => transaction.details === 'Incoming transfer',
+    )
     const outgoingTotal = summary.moneyOutCategories.reduce((sum, category) => sum + category.total, 0)
     const incomingTotal = summary.moneyInCategories.reduce((sum, category) => sum + category.total, 0)
 
@@ -136,10 +178,11 @@ describe('spending analytics data', () => {
     const income = createSpendingCategoryDetail(summary, 'Income', 'in')
     const incomeAsOutflow = createSpendingCategoryDetail(summary, 'Income', 'out')
 
-    expect(income.total).toBeCloseTo(summary.moneyInCategories.find((item) => item.category === 'Income')?.total ?? 0, 2)
-    expect(income.subcategories).toEqual([
-      expect.objectContaining({ label: 'SALARY', transactionCount: 1 }),
-    ])
+    expect(income.total).toBeCloseTo(
+      summary.moneyInCategories.find((item) => item.category === 'Income')?.total ?? 0,
+      2,
+    )
+    expect(income.subcategories).toEqual([expect.objectContaining({ label: 'SALARY', transactionCount: 1 })])
     expect(income.transactions.every((transaction) => transaction.amount > 0)).toBe(true)
     expect(incomeAsOutflow).toMatchObject({ total: 0, subcategories: [], transactions: [] })
   })
@@ -172,9 +215,7 @@ describe('spending analytics data', () => {
 
   it('orders yearly drill-down transactions by month and then by day', () => {
     const summary = createSpendingAnalytics('RO', mockProducts, 'year-2026')
-    const monthDayKeys = summary.sourceTransactions.map(
-      (transaction) => `${transaction.monthKey}-${transaction.day}`,
-    )
+    const monthDayKeys = summary.sourceTransactions.map((transaction) => `${transaction.monthKey}-${transaction.day}`)
 
     expect(monthDayKeys).toEqual([...monthDayKeys].sort((a, b) => b.localeCompare(a)))
   })
@@ -182,12 +223,7 @@ describe('spending analytics data', () => {
   it('recalculates category totals and transactions when a subcategory is filtered out', () => {
     const summary = createSpendingAnalytics('RO', mockProducts, '2026-04')
     const fullDetail = createSpendingCategoryDetail(summary, 'Finance', 'out')
-    const withoutMortgage = createSpendingCategoryDetail(
-      summary,
-      'Finance',
-      'out',
-      new Set(['MORTGAGE']),
-    )
+    const withoutMortgage = createSpendingCategoryDetail(summary, 'Finance', 'out', new Set(['MORTGAGE']))
     const mortgageTotal = fullDetail.subcategories.find((item) => item.label === 'MORTGAGE')?.total ?? 0
 
     expect(withoutMortgage.subcategories.some((item) => item.label === 'MORTGAGE')).toBe(false)

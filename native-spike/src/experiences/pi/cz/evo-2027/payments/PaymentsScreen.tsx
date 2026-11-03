@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavigationInset';
 import { Pressable, ScrollView, View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
@@ -194,6 +195,7 @@ function DetailFact({
   );
 }
 export default function PaymentsScreen(props: CzechNativeScreenProps) {
+  const navigationInset = usePrimaryNavigationInset();
   const duo = useDuoPreview();
   const local = useDuoLocalViewport();
   // Use the space provided by the shell, after it has reserved system/navigation areas.
@@ -646,7 +648,10 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
             keyboardShouldPersistTaps="handled"
             stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={hubStyles.hubContent}
+            contentContainerStyle={[
+              hubStyles.hubContent,
+              { paddingBottom: 12 + navigationInset },
+            ]}
           >
             <View style={[extractedStyles.item5]}>
               <SearchField

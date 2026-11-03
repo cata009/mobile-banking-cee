@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PlatformPageShell } from "@/app/components/platform/PlatformPage";
 import { ToolErrorBoundary } from "@/app/screens/tools/toolsUi";
 import type { FlowPreviewId } from "@/app/registry/flowPreviewRegistry";
 import FlowDetail from "./components/FlowDetail";
@@ -60,11 +61,7 @@ export default function FlowLibraryScreen({
   };
 
   return (
-    <div
-      className="h-full overflow-y-auto bg-[var(--uc-app-bg)] text-[var(--uc-text)] scrollbar-hide"
-      data-flow-library-screen="true"
-    >
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-[24px] px-[40px] py-[32px]">
+    <PlatformPageShell className="scrollbar-hide" data-flow-library-screen="true">
         {view === "index" ? (
           <FlowLibraryIndex onOpenFlow={openFlow} onOpenMatch={(id, entry) => { openFlow(id); setMatch(entry); }} />
         ) : (
@@ -80,7 +77,6 @@ export default function FlowLibraryScreen({
             />
           </ToolErrorBoundary>
         )}
-      </div>
-    </div>
+    </PlatformPageShell>
   );
 }

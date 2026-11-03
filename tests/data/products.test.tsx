@@ -23,6 +23,7 @@ const PRODUCT_TYPE_BY_COUNT_KEY: Record<ProductCountKey, ProductType> = {
   mortgages: 'mortgage',
   investments: 'investment_account',
 }
+const EUR_SECOND_CURRENT_ACCOUNT_COUNTRIES = new Set(['RO', 'HU', 'RS', 'CZ', 'BA', 'BA_BL'])
 
 function wrapper({ children }: PropsWithChildren) {
   return <DemoProvider>{children}</DemoProvider>
@@ -77,24 +78,113 @@ describe('product data', () => {
     }))
 
     expect(projection).toEqual([
-      { id: 'acc-1', type: 'current_account', name: 'Primary Account', accountNumber: '1234567890123456', balance: 2850.5, currency: 'CZK' },
-      { id: 'acc-2', type: 'current_account', name: 'Primary Account 2', accountNumber: '2345678901234567', balance: 2052.36, currency: 'CZK' },
-      { id: 'card-2', type: 'credit_card', name: 'Credit Card', accountNumber: '5173500087654321', balance: 3200, currency: 'CZK', cardType: 'Standard', cardNumber: '5173500087654321', expiryDate: '12/29', cardHolderName: 'PETER JAGODIĆ', securityCode: '990', creditLimit: 10000, availableCredit: 3200 },
-      { id: 'card-1', type: 'debit_card', name: 'Debit Card', accountNumber: '5173400012345678', balance: 0, currency: 'CZK', cardType: 'Gold', cardNumber: '5173400012345678', expiryDate: '12/29', cardHolderName: 'PETER JAGODIĆ', securityCode: '214', linkedAccountId: 'acc-1' },
-      { id: 'card-3', type: 'debit_card', name: 'Debit Card Plus', accountNumber: '5173400012345699', balance: 0, currency: 'CZK', cardType: 'Standard', cardNumber: '5173400012345699', expiryDate: '12/29', cardHolderName: 'PETER JAGODIĆ', securityCode: '782', linkedAccountId: 'acc-2' },
-      { id: 'sav-1', type: 'saving_account', name: 'Emergency Fund', accountNumber: '5678901234567890', balance: 15000, currency: 'CZK' },
-      { id: 'term-1', type: 'term_deposit', name: '12-Month Term Deposit', accountNumber: '4567890123456789', balance: 8500, currency: 'EUR' },
-      { id: 'loan-1', type: 'loan', name: 'Personal Loan', accountNumber: '5678901234567890', balance: -45000, currency: 'CZK' },
-      { id: 'mort-1', type: 'mortgage', name: 'Home Mortgage', accountNumber: '6789012345678901', balance: -2850000, currency: 'CZK' },
-      { id: 'inv-1', type: 'investment_account', name: 'Investment Portfolio', accountNumber: '7890123456789012', balance: 42500, currency: 'CZK', portfolioValue: 42500, totalGainLoss: 728.45, totalGainLossPercentage: 1.74 },
+      {
+        id: 'acc-1',
+        type: 'current_account',
+        name: 'Primary Account',
+        accountNumber: '1234567890123456',
+        balance: 2850.5,
+        currency: 'CZK',
+      },
+      {
+        id: 'acc-2',
+        type: 'current_account',
+        name: 'Primary Account 2',
+        accountNumber: '2345678901234567',
+        balance: 2052.36,
+        currency: 'CZK',
+      },
+      {
+        id: 'card-2',
+        type: 'credit_card',
+        name: 'Credit Card',
+        accountNumber: '5173500087654321',
+        balance: 3200,
+        currency: 'CZK',
+        cardType: 'Standard',
+        cardNumber: '5173500087654321',
+        expiryDate: '12/29',
+        cardHolderName: 'PETER JAGODIĆ',
+        securityCode: '990',
+        creditLimit: 10000,
+        availableCredit: 3200,
+      },
+      {
+        id: 'card-1',
+        type: 'debit_card',
+        name: 'Debit Card',
+        accountNumber: '5173400012345678',
+        balance: 0,
+        currency: 'CZK',
+        cardType: 'Gold',
+        cardNumber: '5173400012345678',
+        expiryDate: '12/29',
+        cardHolderName: 'PETER JAGODIĆ',
+        securityCode: '214',
+        linkedAccountId: 'acc-1',
+      },
+      {
+        id: 'card-3',
+        type: 'debit_card',
+        name: 'Debit Card Plus',
+        accountNumber: '5173400012345699',
+        balance: 0,
+        currency: 'CZK',
+        cardType: 'Standard',
+        cardNumber: '5173400012345699',
+        expiryDate: '12/29',
+        cardHolderName: 'PETER JAGODIĆ',
+        securityCode: '782',
+        linkedAccountId: 'acc-2',
+      },
+      {
+        id: 'sav-1',
+        type: 'saving_account',
+        name: 'Emergency Fund',
+        accountNumber: '5678901234567890',
+        balance: 15000,
+        currency: 'CZK',
+      },
+      {
+        id: 'term-1',
+        type: 'term_deposit',
+        name: '12-Month Term Deposit',
+        accountNumber: '4567890123456789',
+        balance: 8500,
+        currency: 'EUR',
+      },
+      {
+        id: 'loan-1',
+        type: 'loan',
+        name: 'Personal Loan',
+        accountNumber: '5678901234567890',
+        balance: -45000,
+        currency: 'CZK',
+      },
+      {
+        id: 'mort-1',
+        type: 'mortgage',
+        name: 'Home Mortgage',
+        accountNumber: '6789012345678901',
+        balance: -2850000,
+        currency: 'CZK',
+      },
+      {
+        id: 'inv-1',
+        type: 'investment_account',
+        name: 'Investment Portfolio',
+        accountNumber: '7890123456789012',
+        balance: 42500,
+        currency: 'CZK',
+        portfolioValue: 42500,
+        totalGainLoss: 728.45,
+        totalGainLossPercentage: 1.74,
+      },
     ])
   })
 
   it('generates every count from zero through nine in every country without invalid products', () => {
-    const { result } = renderHook(
-      () => ({ demo: useDemo(), products: useProducts() }),
-      { wrapper },
-    )
+    const { result } = renderHook(() => ({ demo: useDemo(), products: useProducts() }), { wrapper })
 
     for (const country of COUNTRIES) {
       for (let count = 0; count <= 9; count += 1) {
@@ -109,20 +199,36 @@ describe('product data', () => {
         ) as Record<ProductType, number>
 
         expect(products, `${country}/count=${count}`).toHaveLength(count * PRODUCT_COUNT_KEYS.length)
-        expect(new Set(products.map((product) => product.id)).size, `${country}/count=${count}/ids`).toBe(products.length)
+        expect(new Set(products.map((product) => product.id)).size, `${country}/count=${count}/ids`).toBe(
+          products.length,
+        )
 
         for (const [type, expectedCount] of Object.entries(expectedCounts)) {
-          expect(products.filter((product) => product.type === type), `${country}/${type}/count=${count}`).toHaveLength(expectedCount)
+          expect(
+            products.filter((product) => product.type === type),
+            `${country}/${type}/count=${count}`,
+          ).toHaveLength(expectedCount)
         }
 
         for (const product of products) {
-          expect(product.currency, `${country}/${product.id}/currency`).toBe(getCountryCurrency(country))
+          const linkedSecondAccount = product.id === 'acc-2' || product.id === 'card-debit-2'
+          const expectedCurrency =
+            linkedSecondAccount && EUR_SECOND_CURRENT_ACCOUNT_COUNTRIES.has(country)
+              ? 'EUR'
+              : getCountryCurrency(country)
+          expect(product.currency, `${country}/${product.id}/currency`).toBe(expectedCurrency)
           expect(Number.isFinite(product.balance), `${country}/${product.id}/balance`).toBe(true)
 
           if (product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card') {
             expect(product.cardNumber, `${country}/${product.id}/card number`).toMatch(/^\d{16}$/)
-            expect('cardHolderName' in product ? product.cardHolderName : undefined, `${country}/${product.id}/holder`).toBe('PETER JAGODIĆ')
-            expect('securityCode' in product ? product.securityCode : undefined, `${country}/${product.id}/CVC`).toMatch(/^\d{3}$/)
+            expect(
+              'cardHolderName' in product ? product.cardHolderName : undefined,
+              `${country}/${product.id}/holder`,
+            ).toBe('PETER JAGODIĆ')
+            expect(
+              'securityCode' in product ? product.securityCode : undefined,
+              `${country}/${product.id}/CVC`,
+            ).toMatch(/^\d{3}$/)
           }
         }
       }

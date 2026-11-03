@@ -7,8 +7,13 @@ import {
   createCurrentTranslator,
 } from '../src/experiences/pi/current/context';
 import { BaselineDialog } from '../src/universal/BaselineDialog';
+import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
+import { BaselineDropdownField } from '../src/universal/BaselineDropdownField';
 import { BaselineMoreCard } from '../src/universal/BaselineMoreCard';
 import { BaselineNavigationRow } from '../src/universal/BaselineNavigationRow';
+import { BaselineTextField } from '../src/universal/BaselineTextField';
+import { DateField } from '../src/universal/DateField';
+import { ModalPortal } from '../src/universal/ModalPortal';
 import { SETTINGS_SECTIONS } from '@/app/config/settingsConfig';
 import More, {
   RoMoreCard,
@@ -78,7 +83,9 @@ it('renders baseline Settings item titles in uppercase while preserving descript
   try {
     const expectedTitles = SETTINGS_SECTIONS.flatMap(section =>
       section.items.map(item =>
-        h.t(`runtime.settings.items.${item.id}.title`, item.title).toUpperCase(),
+        h
+          .t(`runtime.settings.items.${item.id}.title`, item.title)
+          .toUpperCase(),
       ),
     );
     const rows = tree.root.findAllByType(BaselineNavigationRow);
@@ -249,6 +256,409 @@ it('localizes the Romanian Contract withdrawal card title', () => {
       .findAllByType(RoMoreCard)
       .find(node => node.props.card === 'my-requests');
     expect(card?.props.title).toBe('Retragerea contractului');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('opens the contract-withdrawal intro from the RO More card and hides primary navigation', () => {
+  const h = host(),
+    tree = mount(h);
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    expect(tree.root.findAllByType(ModalPortal)).toHaveLength(1);
+    const sheet = tree.root.findByType(BaselineBottomSheet);
+    expect(sheet.props.width).toBeGreaterThan(0);
+    expect(sheet.props.height).toBeGreaterThan(0);
+    expect(sheet.props.maxHeightOffsetPx).toBeGreaterThanOrEqual(64);
+    expect(sheet.props.footer).toBeDefined();
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-flow' }),
+    ).toBeDefined();
+    expect(h.onPrimaryNavigationChange).toHaveBeenLastCalledWith(false);
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-source' }),
+    ).toBeDefined();
+    expect(
+      tree.root
+        .findAllByType(BaselineNavigationRow)
+        .map(row => row.props.title),
+    ).toContain('UNICREDIT CONSUMER FINANCING');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('localizes the contract-withdrawal flow in Romanian', () => {
+  const h = host('ro'),
+    tree = mount(h);
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    expect(button(tree, 'Inițiază cererea de retragere')).toBeDefined();
+    act(() => button(tree, 'Inițiază cererea de retragere').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-source' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node =>
+        node.children?.includes('De la ce entitate ai obținut produsul?'),
+      ).length,
+    ).toBeGreaterThan(0);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('keeps the existing My requests card inert outside RO', () => {
+  const h = { ...host(), country: 'CZ' as const },
+    tree = mount(h);
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    expect(
+      tree.root.findAll(
+        node => node.props.testID === 'contract-withdrawal-flow',
+      ),
+    ).toHaveLength(0);
+    expect(h.onNavigate).not.toHaveBeenCalled();
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('routes a UniCredit Bank single product into its product list and back', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const bank = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT BANK');
+    expect(bank).toBeDefined();
+    act(() => bank?.props.onPress());
+    const kindLabels = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .map(row => row.props.title);
+    expect(kindLabels).toEqual(
+      expect.arrayContaining(['SINGLE PRODUCT', 'PACKAGE']),
+    );
+    const single = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'SINGLE PRODUCT');
+    expect(single).toBeDefined();
+    act(() => single?.props.onPress());
+    const productLabels = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .map(row => row.props.title);
+    expect(productLabels).toContain('CURRENT ACCOUNT');
+    expect(productLabels).toContain('DEBIT CARD');
+    const currentAccount = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'CURRENT ACCOUNT');
+    act(() => currentAccount?.props.onPress());
+    expect(
+      tree.root.findByProps({
+        testID: 'contract-withdrawal-step-product-details',
+      }),
+    ).toBeDefined();
+
+    act(() => button(tree, 'Back').props.onPress());
+    expect(
+      tree.root.findByProps({
+        testID: 'contract-withdrawal-step-product-selection',
+      }),
+    ).toBeDefined();
+    act(() => button(tree, 'Back').props.onPress());
+    expect(
+      tree.root.findByProps({
+        testID: 'contract-withdrawal-step-product-kind',
+      }),
+    ).toBeDefined();
+    expect(
+      tree.root
+        .findAllByType(BaselineNavigationRow)
+        .map(row => row.props.title),
+    ).toContain('PACKAGE');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('routes the UniCredit Bank package choice directly to package details', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const bank = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT BANK');
+    act(() => bank?.props.onPress());
+    const packageChoice = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'PACKAGE');
+    act(() => packageChoice?.props.onPress());
+    expect(
+      tree.root.findByProps({
+        testID: 'contract-withdrawal-step-product-details',
+      }),
+    ).toBeDefined();
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('routes Consumer Financing to credit card, cash loan, and life insurance products', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const ucfin = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT CONSUMER FINANCING');
+    expect(ucfin).toBeDefined();
+    act(() => ucfin?.props.onPress());
+    const productLabels = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .map(row => row.props.title);
+    expect(productLabels).toEqual([
+      'CREDIT CARD',
+      'CASH LOAN',
+      'CREDIT LIFE INSURANCE',
+    ]);
+    const cashLoan = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'CASH LOAN');
+    act(() => cashLoan?.props.onPress());
+    expect(
+      tree.root.findByProps({
+        testID: 'contract-withdrawal-step-product-details',
+      }),
+    ).toBeDefined();
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('takes the UniCredit Bank package through the shared contact and review steps', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const bank = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT BANK');
+    act(() => bank?.props.onPress());
+    const packageChoice = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'PACKAGE');
+    act(() => packageChoice?.props.onPress());
+
+    const dropdowns = tree.root.findAllByType(BaselineDropdownField);
+    expect(
+      dropdowns.some(field => field.props.label === 'Product identifier'),
+    ).toBe(false);
+    const channel = dropdowns.find(
+      field => field.props.label === 'Product was requested in the channel',
+    );
+    act(() => tree.root.findByType(DateField).props.onChange('2026-10-20'));
+    act(() => channel?.props.onChange('mobile-banking'));
+    act(() => button(tree, 'Continue').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-contact' }),
+    ).toBeDefined();
+    act(() => button(tree, 'Continue').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-review' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node => node.children?.includes('PACKAGE')).length,
+    ).toBeGreaterThan(0);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('takes a Consumer Financing cash loan through the shared contact and review steps', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const ucfin = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT CONSUMER FINANCING');
+    act(() => ucfin?.props.onPress());
+    const cashLoan = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'CASH LOAN');
+    act(() => cashLoan?.props.onPress());
+
+    const dropdowns = tree.root.findAllByType(BaselineDropdownField);
+    const identifier = dropdowns.find(
+      field => field.props.label === 'Product identifier',
+    );
+    const channel = dropdowns.find(
+      field => field.props.label === 'Product was requested in the channel',
+    );
+    expect(identifier?.props.options[0]?.label).toBe('Credit 50,000 RON');
+    act(() => identifier?.props.onChange(identifier.props.options[0]!.value));
+    act(() => tree.root.findByType(DateField).props.onChange('2026-10-20'));
+    act(() => channel?.props.onChange('mobile-banking'));
+    act(() => button(tree, 'Continue').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-contact' }),
+    ).toBeDefined();
+    act(() => button(tree, 'Continue').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-review' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node =>
+        node.children?.includes('UniCredit Consumer Financing'),
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      tree.root.findAll(node => node.children?.includes('CASH LOAN')).length,
+    ).toBeGreaterThan(0);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+it('completes the RO single-account request through review, PDF, PIN, and receipt', () => {
+  const tree = mount();
+  try {
+    const card = tree.root
+      .findAllByType(BaselineMoreCard)
+      .find(node => node.props.variant === 'my-requests')!;
+    act(() => card.props.onPress());
+    act(() => button(tree, 'Initiate cancellation request').props.onPress());
+    const bank = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'UNICREDIT BANK');
+    act(() => bank?.props.onPress());
+    const single = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'SINGLE PRODUCT');
+    act(() => single?.props.onPress());
+    const currentAccount = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => row.props.title === 'CURRENT ACCOUNT');
+    act(() => currentAccount?.props.onPress());
+
+    const dropdowns = tree.root.findAllByType(BaselineDropdownField);
+    const productIdentifier = dropdowns.find(
+      field => field.props.label === 'Product identifier',
+    );
+    const channel = dropdowns.find(
+      field => field.props.label === 'Product was requested in the channel',
+    );
+    expect(productIdentifier).toBeDefined();
+    expect(channel).toBeDefined();
+    expect(button(tree, 'Continue').props.accessibilityState.disabled).toBe(
+      true,
+    );
+    expect(tree.root.findByType(DateField).props.separator).toBe('.');
+    const selectedProductLabel = productIdentifier!.props.options[0]!.label;
+    act(() =>
+      productIdentifier?.props.onChange(
+        productIdentifier.props.options[0]!.value,
+      ),
+    );
+    const date = tree.root.findByType(DateField);
+    act(() => date.props.onChange('2026-10-20'));
+    act(() => channel?.props.onChange('mobile-banking'));
+    act(() => button(tree, 'Continue').props.onPress());
+
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-contact' }),
+    ).toBeDefined();
+    const email = tree.root
+      .findAllByType(BaselineTextField)
+      .find(field => field.props.label === 'Your email address');
+    act(() => email?.props.onChange('invalid'));
+    expect(button(tree, 'Continue').props.accessibilityState.disabled).toBe(
+      true,
+    );
+    act(() => email?.props.onChange('ion.popescu@gmail.com'));
+    act(() => button(tree, 'Continue').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-review' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node => node.children?.includes(selectedProductLabel))
+        .length,
+    ).toBeGreaterThan(0);
+    const declaration = tree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(row => String(row.props.title).startsWith('I NOTIFY THE BANK'));
+    expect(declaration).toBeDefined();
+    expect(button(tree, 'Confirm').props.accessibilityState.disabled).toBe(
+      true,
+    );
+    act(() => declaration?.props.onToggle(true));
+    act(() => button(tree, 'Confirm').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-document' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node => node.children?.includes('PDF DOCUMENT')),
+    ).toHaveLength(1);
+
+    act(() => button(tree, 'I agree').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-review' }),
+    ).toBeDefined();
+    act(() => button(tree, 'Confirm').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-sign' }),
+    ).toBeDefined();
+    const pin = tree.root
+      .findAllByType(BaselineTextField)
+      .find(field => field.props.label === 'Enter pin code');
+    expect(pin).toBeDefined();
+    expect(button(tree, 'Sign').props.accessibilityState.disabled).toBe(true);
+    act(() => pin?.props.onChange('123456'));
+    act(() => button(tree, 'Sign').props.onPress());
+    expect(
+      tree.root.findByProps({ testID: 'contract-withdrawal-step-success' }),
+    ).toBeDefined();
+    expect(
+      tree.root.findAll(node =>
+        node.children?.includes(
+          'The product cancellation request was successfully submitted',
+        ),
+      ),
+    ).toHaveLength(1);
+    act(() => button(tree, 'Ok, I got it').props.onPress());
+    expect(
+      tree.root.findAll(
+        node => node.props.testID === 'contract-withdrawal-flow',
+      ),
+    ).toHaveLength(0);
   } finally {
     act(() => tree.unmount());
   }
