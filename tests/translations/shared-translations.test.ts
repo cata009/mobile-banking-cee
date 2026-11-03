@@ -14,9 +14,7 @@ function collectLeafPaths(value: unknown, prefix = ''): string[] {
     return [prefix]
   }
 
-  return Object.entries(value).flatMap(([key, child]) =>
-    collectLeafPaths(child, prefix ? `${prefix}.${key}` : key),
-  )
+  return Object.entries(value).flatMap(([key, child]) => collectLeafPaths(child, prefix ? `${prefix}.${key}` : key))
 }
 
 describe('shared runtime translations', () => {
@@ -71,6 +69,17 @@ describe('shared runtime translations', () => {
     })
     expect(base).toEqual(baseSnapshot)
     expect(merged).not.toBe(base)
+  })
+
+  it('localizes the Romania Spending category controls and empty states', () => {
+    const english = getTranslations('RO', 'en')!.runtime.analytics
+    const romanian = getTranslations('RO', 'ro')!.runtime.analytics
+
+    expect(english.addTransaction).toBe('Add Transaction')
+    expect(romanian.addTransaction).toBe('Adaugă tranzacție')
+    expect(romanian.showMoreCategories).toBe('Arată mai multe categorii')
+    expect(romanian.noIncome).toBe('Fără venituri')
+    expect(romanian.noExpenses).toBe('Fără cheltuieli')
   })
 
   it('keeps a safe prototype when an override contains an own __proto__ data property', () => {

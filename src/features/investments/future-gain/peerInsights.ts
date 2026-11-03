@@ -8,7 +8,7 @@ import {
 } from '@/data/myBankerCore'
 
 export type FutureGainPeerUsage = 'more-than-65' | 'less-than-50' | null
-export type FutureGainPeerSimulatorKind = Exclude<MyBankerProductKey, 'overdraft'>
+export type FutureGainPeerSimulatorKind = MyBankerProductKey | 'energy-efficiency-loan' | 'car-loan' | 'leasing'
 
 export interface FutureGainPeerProduct {
   id: string
@@ -24,13 +24,14 @@ export interface FutureGainPeerProduct {
     | 'personal-loan'
     | 'term-deposit'
     | 'investment-fund'
+    | 'overdraft'
   simulator: FutureGainPeerSimulatorKind
 }
 
 export interface FutureGainPeerGoal {
   id: FutureGainPeerGoalId
   title: string
-  icon: 'home' | 'car' | 'personal-goals' | 'saving'
+  icon: 'home' | 'car' | 'travel-lifestyle' | 'saving'
   sectionTitle: string
   products: readonly FutureGainPeerProduct[]
 }
@@ -46,6 +47,7 @@ export interface FutureGainPeerSimulationInput {
   currency: MyBankerCurrency
   termMonths: number
   rateMode?: 'combined' | 'variable'
+  loanInsurance?: boolean
 }
 
 export interface FutureGainPeerSimulationResult {
@@ -53,16 +55,58 @@ export interface FutureGainPeerSimulationResult {
   variableRatePercent: number | null
   monthlyPayment: number | null
   monthlyPaymentAfterFixedPeriod: number | null
+  monthlyLoanInsurance: number | null
   monthlyInterest: number | null
   estimatedReturn: number | null
   totalAmount: number | null
+}
+
+export const FUTURE_GAIN_ENERGY_EFFICIENCY_LOAN = {
+  currency: 'RSD' as const,
+  quickAmounts: [100_000, 600_000, 1_600_000, 5_000_000],
+  termMonths: { min: 60, max: 360, suggested: 120, step: 12 },
+  monthlyInsuranceRatePercent: 0.20055,
+}
+
+export const FUTURE_GAIN_CAR_LOAN = {
+  currency: 'RSD' as const,
+  quickAmounts: [100_000, 600_000, 700_000, 5_000_000],
+  quickAmountsEur: [1_000, 6_000, 7_000, 30_000],
+  termMonths: { min: 6, max: 71, suggested: 24, step: 1 },
+  quickTerms: [12, 24, 36, 48, 60],
+  monthlyInsuranceRatePercent: 0.0346667,
+}
+
+export const FUTURE_GAIN_LEASING = {
+  currency: 'RSD' as const,
+  quickAmounts: [100_000, 600_000, 700_000, 5_000_000],
+  quickAmountsEur: [1_000, 6_000, 7_000, 30_000],
+  termMonths: { min: 6, max: 71, suggested: 24, step: 1 },
+  quickTerms: [12, 24, 36, 48, 60],
+  monthlyInsuranceRatePercent: 0.0346667,
+  representativeExample: [
+    ['Gross Vehicle Price', '10.000,00 EUR'],
+    ['Net Vehicle Price', '8.333,33 EUR'],
+    ['Down Payment', '20%'],
+    ['Down Payment Amount', '2.000,00 EUR'],
+    ['Financed Amount', '8.000,00 EUR'],
+    ['Processing Fee', '200,00 EUR'],
+    ['Interest Rate', '7,99%'],
+    ['Monthly installment', '162,17 EUR'],
+    ['EKS (Effective interest rate)', '11,68%'],
+    ['Total Contract Value', '10.063,53 EUR'],
+  ] as const,
 }
 
 const SIMULATOR_PRESETS: Record<FutureGainPeerSimulatorKind, { amount: number; termMonths: number }> = {
   'term-deposit': { amount: 5_000, termMonths: 12 },
   'cash-loan': { amount: 8_000, termMonths: 48 },
   mortgage: { amount: 70_000, termMonths: 120 },
+  'energy-efficiency-loan': { amount: 100_000, termMonths: 120 },
+  'car-loan': { amount: 600_000, termMonths: 24 },
+  leasing: { amount: 600_000, termMonths: 24 },
   'credit-card': { amount: 1_300, termMonths: 0 },
+  overdraft: { amount: 65_000, termMonths: 0 },
   'investment-fund': { amount: 3_000, termMonths: 60 },
 }
 
@@ -71,7 +115,37 @@ export function getFutureGainPeerSimulatorPreset(kind: FutureGainPeerSimulatorKi
 }
 
 function getSimulatorModel(kind: FutureGainPeerSimulatorKind): MyBankerCatalogueProduct {
-  return MY_BANKER_RETAIL_CATALOGUE.find((product) => product.key === kind) ?? MY_BANKER_RETAIL_CATALOGUE[0]!
+  const catalogueKey =
+    kind === 'energy-efficiency-loan' || kind === 'car-loan' || kind === 'leasing' ? 'cash-loan' : kind
+  return MY_BANKER_RETAIL_CATALOGUE.find((product) => product.key === catalogueKey) ?? MY_BANKER_RETAIL_CATALOGUE[0]!
+}
+
+function resolveEnergyEfficiencyRate(
+  model: MyBankerCatalogueProduct,
+  amount: number,
+  currency: MyBankerCurrency,
+): number | null {
+  if (currency !== FUTURE_GAIN_ENERGY_EFFICIENCY_LOAN.currency) return null
+  const rows = model.rateCard.filter((row) => row.currency === currency)
+  const matching = rows.find((row) => amount >= row.minAmount && amount <= row.maxAmount)
+  if (matching) return matching.ratePercent
+  return rows.sort((a, b) => b.maxAmount - a.maxAmount)[0]?.ratePercent ?? null
+}
+
+function resolveCarLoanRate(
+  model: MyBankerCatalogueProduct,
+  amount: number,
+  currency: MyBankerCurrency,
+): number | null {
+  const rows = model.rateCard.filter((row) => row.currency === currency)
+  const matchingRows = rows.filter((row) => amount >= row.minAmount && amount <= row.maxAmount)
+  const candidates = matchingRows.length > 0 ? matchingRows : rows
+  if (candidates.length === 0) return null
+  if (matchingRows.length > 0) {
+    const selected = matchingRows.find((row) => row.minTermMonths <= 24 && row.maxTermMonths >= 24)
+    if (selected) return selected.ratePercent
+  }
+  return [...candidates].sort((a, b) => b.maxAmount - a.maxAmount)[0]?.ratePercent ?? null
 }
 
 function resolvePeerSimulatorRate(
@@ -119,7 +193,13 @@ export function calculateFutureGainPeerSimulation(
   if (input.amount <= 0 || !Number.isFinite(input.amount)) return null
 
   const model = getSimulatorModel(input.kind)
-  const ratePercent = resolvePeerSimulatorRate(model, input.amount, input.currency, input.termMonths)
+  const energyEfficiencyLoan = input.kind === 'energy-efficiency-loan'
+  const carLoan = input.kind === 'car-loan' || input.kind === 'leasing'
+  const ratePercent = energyEfficiencyLoan
+    ? resolveEnergyEfficiencyRate(model, input.amount, input.currency)
+    : carLoan
+      ? resolveCarLoanRate(model, input.amount, input.currency)
+      : resolvePeerSimulatorRate(model, input.amount, input.currency, input.termMonths)
   if (ratePercent === null) return null
 
   if (model.simulation === 'installment') {
@@ -150,11 +230,34 @@ export function calculateFutureGainPeerSimulation(
           : null
     const totalAmount = fixedMonths * monthlyPayment + (monthlyPaymentAfterFixedPeriod ?? 0) * remainingMonths
 
+    if (energyEfficiencyLoan || carLoan) {
+      const monthlyPayment = monthlyAnnuity(input.amount, initialRatePercent, input.termMonths)
+      return {
+        ratePercent: initialRatePercent,
+        variableRatePercent: variableRatePercent === initialRatePercent ? null : variableRatePercent,
+        monthlyPayment,
+        monthlyPaymentAfterFixedPeriod: null,
+        monthlyLoanInsurance: input.loanInsurance
+          ? (input.amount *
+              (input.kind === 'leasing'
+                ? FUTURE_GAIN_LEASING.monthlyInsuranceRatePercent
+                : carLoan
+                  ? FUTURE_GAIN_CAR_LOAN.monthlyInsuranceRatePercent
+                  : FUTURE_GAIN_ENERGY_EFFICIENCY_LOAN.monthlyInsuranceRatePercent)) /
+            100
+          : null,
+        monthlyInterest: null,
+        estimatedReturn: null,
+        totalAmount: monthlyPayment * input.termMonths,
+      }
+    }
+
     return {
       ratePercent: initialRatePercent,
       variableRatePercent: variableRatePercent === initialRatePercent ? null : variableRatePercent,
       monthlyPayment,
       monthlyPaymentAfterFixedPeriod,
+      monthlyLoanInsurance: null,
       monthlyInterest: null,
       estimatedReturn: null,
       totalAmount,
@@ -167,6 +270,7 @@ export function calculateFutureGainPeerSimulation(
       variableRatePercent: null,
       monthlyPayment: null,
       monthlyPaymentAfterFixedPeriod: null,
+      monthlyLoanInsurance: null,
       monthlyInterest: (input.amount * ratePercent) / 100 / 12,
       estimatedReturn: null,
       totalAmount: null,
@@ -179,6 +283,7 @@ export function calculateFutureGainPeerSimulation(
     variableRatePercent: null,
     monthlyPayment: null,
     monthlyPaymentAfterFixedPeriod: null,
+    monthlyLoanInsurance: null,
     monthlyInterest: null,
     estimatedReturn: grossReturn,
     totalAmount: input.amount + grossReturn,
@@ -206,7 +311,7 @@ export const FUTURE_GAIN_PEER_GOALS: readonly FutureGainPeerGoal[] = [
         title: 'Energy efficiency loan',
         usage: 'less-than-50',
         icon: 'energy-efficiency',
-        simulator: 'cash-loan',
+        simulator: 'energy-efficiency-loan',
       },
       {
         id: 'credit-cards',
@@ -223,21 +328,22 @@ export const FUTURE_GAIN_PEER_GOALS: readonly FutureGainPeerGoal[] = [
     icon: 'car',
     sectionTitle: 'Financing options for your car',
     products: [
-      { id: 'car-loan', title: 'Car loan', usage: null, icon: 'car-loan', simulator: 'cash-loan' },
-      { id: 'cash-loan', title: 'Cash loan', usage: null, icon: 'cash-loan', simulator: 'cash-loan' },
+      { id: 'car-loan', title: 'Car loan', usage: null, icon: 'car-loan', simulator: 'car-loan' },
+      { id: 'cash-loan', title: 'Leasing', usage: null, icon: 'car-loan', simulator: 'leasing' },
     ],
   },
   {
     id: 'personal-goals',
-    title: 'Personal Goals',
-    icon: 'personal-goals',
-    sectionTitle: 'Financing options for your goals',
+    title: 'Travel & Lifestyle',
+    icon: 'travel-lifestyle',
+    sectionTitle: 'Finance your next trip and personal aspirations.',
     products: [
-      { id: 'personal-loan', title: 'Personal loan', usage: null, icon: 'personal-loan', simulator: 'cash-loan' },
+      { id: 'personal-loan', title: 'Cash Loan', usage: 'more-than-65', icon: 'cash-loan', simulator: 'cash-loan' },
+      { id: 'overdraft', title: 'Overdraft', usage: 'less-than-50', icon: 'overdraft', simulator: 'overdraft' },
       {
         id: 'credit-cards-personal',
-        title: 'Credit cards',
-        usage: null,
+        title: 'Credit Card',
+        usage: 'less-than-50',
         icon: 'credit-card',
         simulator: 'credit-card',
       },

@@ -1,26 +1,14 @@
 .ds-workspace {
-  --ds-line: #e2e5e5;
-  --ds-muted: #5c6567;
-  --ds-teal: #006f7a;
-  color: #242929;
-  background: #f7f8f8;
+  --ds-line: var(--uc-border);
+  --ds-muted: var(--uc-text-muted);
+  --ds-teal: var(--uc-action);
+  color: var(--uc-text);
+  background: var(--uc-app-bg);
   font-family: 'UniCredit:Regular', sans-serif;
 }
 .ds-workspace :is(button, a, select, input):focus-visible {
   outline: 2px solid var(--ds-teal);
   outline-offset: 4px;
-}
-.ds-page-shell {
-  max-width: 1724px;
-  margin-inline: auto;
-  padding: 32px 40px 64px;
-}
-.ds-library-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 8px 0 30px;
 }
 .ds-eyebrow {
   font-size: 11px;
@@ -28,19 +16,6 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ds-muted);
-}
-.ds-library-heading h1 {
-  margin: 8px 0 10px;
-  font-family: 'UniCredit:Bold', sans-serif;
-  font-size: clamp(32px, 3vw, 44px);
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-}
-.ds-library-heading p {
-  max-width: 580px;
-  font-size: 15px;
-  line-height: 23px;
   color: var(--ds-muted);
 }
 .ds-text-link {
@@ -72,7 +47,7 @@
   font-weight: 700;
 }
 .ds-inventory-tab[aria-selected='true'] {
-  color: #171b1c;
+  color: var(--uc-text);
 }
 .ds-inventory-tab[aria-selected='true']::after {
   content: '';
@@ -96,7 +71,7 @@
   z-index: 20;
   margin: 0 -2px 32px;
   padding: 18px 2px 0;
-  background: #f7f8f8;
+  background: var(--uc-app-bg);
   border-bottom: 1px solid var(--ds-line);
 }
 .ds-search-row {
@@ -157,15 +132,15 @@
   overflow: hidden;
   border: 1px solid var(--ds-line);
   border-radius: 4px;
-  background: #fff;
+  background: var(--uc-surface);
   transition: border-color 160ms ease;
 }
 .ds-specimen:hover {
-  border-color: #a8b5b7;
+  border-color: var(--uc-action);
 }
 .ds-specimen-header {
   padding: 18px 20px;
-  border-bottom: 1px solid #edf0f0;
+  border-bottom: 1px solid var(--uc-border-muted);
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -195,7 +170,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  border-top: 1px solid #edf0f0;
+  border-top: 1px solid var(--uc-border-muted);
   color: var(--ds-muted);
   font-size: 11px;
 }
@@ -205,8 +180,8 @@
 }
 .ds-empty {
   padding: 56px 24px;
-  border: 1px dashed #cbd3d4;
-  background: #fff;
+  border: 1px dashed var(--uc-border);
+  background: var(--uc-surface);
   text-align: center;
 }
 .ds-empty h2 {
@@ -269,7 +244,7 @@
   gap: 20px;
   border: 1px solid var(--ds-line);
   border-top: 0;
-  background: #fff;
+  background: var(--uc-surface);
   padding: 0 20px;
 }
 .ds-detail-tabs {
@@ -289,7 +264,7 @@
 }
 .ds-inspector-button {
   min-height: 36px;
-  border: 1px solid #cad3d4;
+  border: 1px solid var(--uc-border);
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 13px;
@@ -343,7 +318,7 @@
   gap: 24px;
 }
 .ds-doc-section {
-  background: #fff;
+  background: var(--uc-surface);
   border: 1px solid var(--ds-line);
   padding: 28px 32px 32px;
   scroll-margin-top: 24px;
@@ -372,8 +347,8 @@
 .ds-document-preview {
   padding: 28px;
   margin-top: 24px;
-  border: 1px solid #dce3e3;
-  background: #f7f9f9;
+  border: 1px solid var(--uc-border);
+  background: var(--uc-surface-muted);
   overflow-x: auto;
 }
 .ds-document-preview-label {
@@ -391,7 +366,7 @@
 .ds-checklist li {
   padding: 15px 0 15px 28px;
   position: relative;
-  border-top: 1px solid #edf0f0;
+  border-top: 1px solid var(--uc-border-muted);
   font-size: 14px;
   line-height: 22px;
 }
@@ -418,7 +393,7 @@
 }
 .ds-spec-table td {
   padding: 15px 14px;
-  border-bottom: 1px dotted #cdd5d6;
+  border-bottom: 1px dotted var(--uc-border);
   vertical-align: top;
   line-height: 20px;
 }
@@ -454,8 +429,8 @@
   min-width: 0;
   overflow-x: auto;
   padding: 16px;
-  background: #f8f9f9;
-  border: 1px dotted #cdd5d6;
+  background: var(--uc-surface-muted);
+  border: 1px dotted var(--uc-border);
 }
 .ds-reference-grid {
   display: grid;
@@ -488,7 +463,7 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--ds-muted);
-  background: #fff;
+  background: var(--uc-surface);
 }
 .ds-code-platforms button[aria-pressed='true'] {
   background: #e7f3f3;
@@ -528,9 +503,6 @@
   font-size: 11px;
 }
 @media (max-width: 1000px) {
-  .ds-page-shell {
-    padding: 24px;
-  }
   .ds-doc-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
@@ -559,13 +531,6 @@
   }
 }
 @media (max-width: 600px) {
-  .ds-page-shell {
-    padding: 20px 16px 40px;
-  }
-  .ds-library-heading {
-    align-items: start;
-    flex-direction: column;
-  }
   .ds-inventory-tabs {
     gap: 18px;
   }
@@ -644,7 +609,7 @@
   font-family: 'UniCredit:Bold', sans-serif;
   font-size: 30px;
   line-height: 36px;
-  color: #242929;
+  color: var(--uc-text);
 }
 .ds-figma-summary span {
   font-size: 13px;
@@ -678,10 +643,10 @@
   min-width: 200px;
   max-width: 100%;
   padding: 8px 32px 8px 12px;
-  border: 1px solid #c8cecf;
+  border: 1px solid var(--uc-border);
   border-radius: 4px;
   background: white;
-  color: #242929;
+  color: var(--uc-text);
   font-size: 14px;
 }
 .ds-figma-layout {
@@ -710,11 +675,11 @@
   text-align: left;
   font-size: 13px;
   line-height: 20px;
-  color: #4d5759;
+  color: var(--uc-text-muted);
 }
 .ds-figma-page-nav button:hover {
   background: #edf1f1;
-  color: #171b1c;
+  color: var(--uc-text);
 }
 .ds-figma-page-nav button[aria-current='page'] {
   background: #e1eded;
@@ -722,7 +687,7 @@
   font-family: 'UniCredit:Bold', sans-serif;
 }
 .ds-figma-page-nav span {
-  color: #627072;
+  color: var(--uc-text-muted);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -781,7 +746,7 @@
   padding: 20px;
 }
 .ds-figma-mapping-status {
-  color: #5c6567;
+  color: var(--uc-text-muted);
   font-size: 11px;
   line-height: 16px;
   text-transform: uppercase;
@@ -826,7 +791,7 @@
 }
 .ds-source-note h3 {
   font-size: 20px;
-  color: #242929;
+  color: var(--uc-text);
   font-family: 'UniCredit:Bold', sans-serif;
   margin-bottom: 12px;
 }
@@ -844,7 +809,7 @@
   line-height: 20px;
 }
 .ds-figma-variant-row > a {
-  color: #006f7a;
+  color: var(--uc-action);
   overflow-wrap: anywhere;
 }
 .ds-figma-variant-row > span,
@@ -884,7 +849,7 @@
   font-size: 13px;
 }
 .ds-figma-alignment li a {
-  color: #006f7a;
+  color: var(--uc-action);
 }
 .ds-figma-alignment li span {
   color: var(--ds-muted);

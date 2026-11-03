@@ -21,6 +21,7 @@ export function BaselineProductCard({
   decimals,
   currency,
   thirdLine,
+  showAmount = true,
   actions,
   footer,
   onPress,
@@ -34,6 +35,7 @@ export function BaselineProductCard({
   decimals: string;
   currency: string;
   thirdLine?: string;
+  showAmount?: boolean;
   actions?: readonly BaselineProductAction[];
   footer?: React.ReactNode;
   onPress?: () => void;
@@ -154,12 +156,14 @@ export function BaselineProductCard({
           </View>
           {state.evolution ? <View style={leading}>{icon}</View> : null}
         </View>
-        <View style={amountShell}>
-          <Text style={amountStyle}>{amount}</Text>
-          <Text style={decimalStyle}>
-            {decimals} {currency}
-          </Text>
-        </View>
+        {showAmount ? (
+          <View style={amountShell}>
+            <Text style={amountStyle}>{amount}</Text>
+            <Text style={decimalStyle}>
+              {decimals} {currency}
+            </Text>
+          </View>
+        ) : null}
       </View>
       {state.hasActions ? (
         <View style={viewStyle1}>

@@ -245,7 +245,7 @@ export type SmartInvestmentCurrency = 'EUR' | 'RSD' | 'USD'
 export const SMART_INVESTMENT_CURRENCIES: readonly SmartInvestmentCurrency[] = ['EUR', 'RSD', 'USD']
 
 export const SMART_INVESTMENT_DISCLAIMER =
-  'The information provided is for informational purposes only and does not constitute investment advice or a personal recommendation within the meaning of the Capital Market Law. It is based on aggregated statistical data and does not take into account your investment objectives, financial situation, or experience. Investing involves the risk of loss of capital, and past performance is not a guarantee of future results.'
+  'The information presented is for informational purposes only and does not constitute investment advice or a personal recommendation within the meaning of the Capital Market Law. It is based on aggregated statistical data and does not take into account your investment objectives, financial situation, or investment experience. Investing involves the risk of loss of capital, and past performance is not a guarantee of future results.'
 
 export const SMART_INVESTMENT_STEPS = [
   {

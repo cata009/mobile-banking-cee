@@ -149,6 +149,30 @@ test('subcategory exclusions preserve bubble geometry, expose pressed state and 
   }
 });
 
+test('an empty income subcategory breakdown shows a normal-size labeled bubble', () => {
+  const tree = mount(
+    <BaselineSubcategoryBubbles
+      host={host}
+      subcategories={[]}
+      colorVar="--uc-pfm-income"
+      inactiveSubcategories={new Set()}
+      emptyLabel="No income"
+      onToggle={() => {}}
+    />,
+  );
+  try {
+    const empty = node(tree, 'baseline-pfm-empty-bubble');
+    expect(StyleSheet.flatten(empty.props.style)).toMatchObject({
+      width: 150,
+      height: 150,
+      borderRadius: 75,
+    });
+    expect(JSON.stringify(tree.toJSON())).toContain('No income');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
 test('subcategory tooltips use Source formatting and hide monetary values with the app privacy setting', () => {
   const props = {
     subcategories: [{ label: 'Shopping', total: 1234.56, transactionCount: 2 }],

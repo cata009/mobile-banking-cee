@@ -92,9 +92,11 @@ describe('PFM transaction recategorization entry points', () => {
     expect(decemberReport).toHaveTextContent(/Monthly report/i)
     expect(decemberReport).not.toHaveTextContent(/Net cashflow/i)
     expect(decemberReport).not.toHaveTextContent(/Net cashflow/i)
-    expect(decemberReport).toHaveTextContent('4.399,84 CZK')
-    const monthlyBars = Array.from(decemberReport!.querySelectorAll<HTMLElement>('*'))
-      .filter((element) => window.getComputedStyle(element).height === '172px')
+    expect(decemberReport).toHaveTextContent('20.398,58 CZK')
+    expect(decemberReport).toHaveTextContent('10.937,51 CZK')
+    const monthlyBars = Array.from(decemberReport!.querySelectorAll<HTMLElement>('*')).filter(
+      (element) => window.getComputedStyle(element).height === '172px',
+    )
     expect(monthlyBars.length).toBeGreaterThan(0)
     fireEvent.click(within(decemberReport!).getByRole('button', { name: /Open December 2025 spending/i }))
     await waitFor(() => expect(onOpenSpending).toHaveBeenCalledTimes(1))
@@ -138,8 +140,9 @@ describe('PFM transaction recategorization entry points', () => {
     const evoReport = screen.getByRole('button', { name: /Open Total December 2025 spending/i }).parentElement
     expect(evoReport).toHaveTextContent(/Net cashflow/i)
     expect(evoReport).toHaveTextContent(/December 2025/i)
-    const flowBars = Array.from(evoReport?.querySelectorAll<HTMLElement>('*') ?? [])
-      .filter(element => getComputedStyle(element).height === '12px')
+    const flowBars = Array.from(evoReport?.querySelectorAll<HTMLElement>('*') ?? []).filter(
+      (element) => getComputedStyle(element).height === '12px',
+    )
     expect(flowBars.length).toBeGreaterThanOrEqual(2)
   })
 
@@ -184,9 +187,10 @@ describe('PFM transaction recategorization entry points', () => {
   })
 
   it('uses the same Native picker from Transaction Details and emits the full connected selection', async () => {
-    const transaction = getAccountTransactions('RO', 0, 'RON').find((item) =>
-      item.type === 'debit' &&
-      getPfmCategorySelection(item.pfmCategory, item.pfmSubcategory).subcategory !== 'MORTGAGE',
+    const transaction = getAccountTransactions('RO', 0, 'RON').find(
+      (item) =>
+        item.type === 'debit' &&
+        getPfmCategorySelection(item.pfmCategory, item.pfmSubcategory).subcategory !== 'MORTGAGE',
     )
     if (!transaction) throw new Error('RO fixture must expose a debit transaction')
     const onCategoryChange = vi.fn()

@@ -10,6 +10,7 @@ import { Text } from '../../../../../universal/Typography';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { NavigationRow } from '../../../../../universal/controls';
+import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
 import MovementAvatar from '../accounts/MovementAvatar';
 import type { AccountTransaction } from '@/data/accountDetails';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
@@ -106,6 +107,33 @@ export function IconAction({
     >
       <Glyph name={name} size={20} />
     </Pressable>
+  );
+}
+/** First-level (tab) header: left title, actions on the right, no back arrow. Same primitive as Home, Payments and More. */
+export function L1Header({
+  title,
+  actions,
+}: {
+  title: string;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <MainNavigationHeader
+      tokens={tokens}
+      label={title}
+      items={[]}
+      value={title}
+      onChange={() => {}}
+      tabsGap={0}
+      actionsRowHeight={40}
+      actionsPaddingHorizontal={16}
+      brand={
+        <Text accessibilityRole="header" style={s.l1Title}>
+          {title}
+        </Text>
+      }
+      actions={actions}
+    />
   );
 }
 export function Money({
@@ -240,7 +268,7 @@ export function Rail({
             onPress={onAdd}
             style={s.add}
           >
-            <Text style={s.addLabel}>+</Text>
+            <SourceCustomIcon name="plus" size={16} color={tokens.muted} />
           </Pressable>
         )}
       </View>
@@ -354,6 +382,12 @@ export function TransactionRow({
   );
 }
 const s = StyleSheet.create({
+  l1Title: {
+    fontFamily: tokens.strongFont,
+    fontSize: 28,
+    lineHeight: 32,
+    color: tokens.text,
+  },
   icon: {
     width: 32,
     height: 32,
@@ -380,19 +414,16 @@ const s = StyleSheet.create({
   },
   groupLabel: { flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   count: { fontSize: 13, lineHeight: 16 },
+  // Fixed 32px roundel with a bare centred plus, as App2027GroupAddButton.
   add: {
     width: 32,
     height: 32,
+    flexShrink: 0,
     borderRadius: 16,
     backgroundColor: tokens.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  addLabel: {
-    color: tokens.muted,
-    fontSize: 24,
-    lineHeight: 26,
-    fontFamily: tokens.font,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
   },
   rail: { gap: 12 },
   rowTitle: { fontSize: 14, lineHeight: 18 },

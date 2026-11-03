@@ -439,7 +439,7 @@ export function CardOptionsScreen(host: CurrentScreenProps) {
       ]}
     >
       <View style={parityStyles.item21}>
-        <SourceCustomIcon name={icon} size={24} color={host.tokens.text} />
+        <SourceCustomIcon name={icon} size={20} color={host.tokens.text} />
       </View>
       <View style={parityStyles.item22}>
         <Label host={host} strong style={parityStyles.item23}>

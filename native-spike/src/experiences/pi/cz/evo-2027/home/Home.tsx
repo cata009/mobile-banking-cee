@@ -33,6 +33,7 @@ import {
 } from './Primitives';
 import { ProductCard } from './ProductCards';
 import { CardComparison } from './CardComparison';
+import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavigationInset';
 import { useMouseCarousel } from '../mouseCarousel';
 import {
   useDuoPreview,
@@ -41,6 +42,7 @@ import {
 
 export default function Home(host: CzechNativeScreenProps) {
   const duo = useDuoPreview();
+  const navigationInset = usePrimaryNavigationInset();
   const localViewport = useDuoLocalViewport();
   const wide =
     !!duo && !!localViewport && localViewport.width >= duo.referenceWidth * 2;
@@ -216,7 +218,11 @@ export default function Home(host: CzechNativeScreenProps) {
         ref={scroll}
         style={s.scroll}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[s.content, wide ? s.wideContent : undefined]}
+        contentContainerStyle={[
+          s.content,
+          wide ? s.wideContent : undefined,
+          { paddingBottom: 24 + navigationInset },
+        ]}
       >
         <Tabs
           tokens={tokens}
@@ -460,6 +466,7 @@ export default function Home(host: CzechNativeScreenProps) {
                   />
                   <View style={s.campaignCopy}>
                     <Text
+                      numberOfLines={1}
                       style={[
                         t.body,
                         t.strong,
@@ -468,9 +475,8 @@ export default function Home(host: CzechNativeScreenProps) {
                     >
                       {campaign.title}
                     </Text>
-                    <Text style={[t.body, t.muted]}>{campaign.body}</Text>
-                    <Text style={[t.body, t.muted, sourceStyles.fontSize13]}>
-                      {campaign.caption}
+                    <Text numberOfLines={2} style={[t.body, t.muted]}>
+                      {campaign.body}
                     </Text>
                   </View>
                 </Pressable>

@@ -95,18 +95,19 @@ function hiddenOwner(node: Renderer.ReactTestInstance) {
 function homeTopReserveHeight(tree: Renderer.ReactTestRenderer) {
   const fixedHeader = tree.root
     .findAllByType(BaselineL1Header)
-    .find(node => node.props.variant === 'home' && node.props.showTitle === false);
+    .find(
+      node => node.props.variant === 'home' && node.props.showTitle === false,
+    );
   if (!fixedHeader?.parent?.parent)
     throw new Error('Fixed Home L1 header must be inside the Home frame');
-  const reserve = fixedHeader.parent.parent.children[0] as Renderer.ReactTestInstance;
+  const reserve = fixedHeader.parent.parent
+    .children[0] as Renderer.ReactTestInstance;
   return StyleSheet.flatten(reserve.props.style).height;
 }
 
 describe('actual PI/RO/current Homepage canonical integration', () => {
   it('keeps the Home L1 top reserve aligned in standalone and Duo previews', () => {
-    const standalone = mounted(
-      <HomeRoute {...host({ screenTopInset: 12 })} />,
-    );
+    const standalone = mounted(<HomeRoute {...host({ screenTopInset: 12 })} />);
     expect(homeTopReserveHeight(standalone)).toBe(54);
 
     const duo = mounted(
@@ -169,20 +170,21 @@ describe('actual PI/RO/current Homepage canonical integration', () => {
     );
   });
 
-  it('preserves Prime/Messages navigation and leaves Profile enabled and inert', () => {
+  it('preserves Prime/Messages navigation and routes Profile to the existing owner', () => {
     const owner = host(),
       tree = mounted(<HomeRoute {...owner} />);
     const profile = namedPressable(tree, 'Profile');
     expect(profile.props.disabled).not.toBe(true);
-    expect(profile.props.onPress).toBeUndefined();
+    expect(profile.props.onPress).toBeDefined();
     act(() => {
+      profile.props.onPress();
       namedPressable(tree, 'Prime').props.onPress();
       namedPressable(tree, 'Messages').props.onPress();
     });
     expect(owner.onNavigate).toHaveBeenCalledTimes(2);
     expect(owner.onNavigate).toHaveBeenNthCalledWith(1, { screen: 'prime' });
     expect(owner.onNavigate).toHaveBeenNthCalledWith(2, { screen: 'messages' });
-    expect(owner.onProfile).not.toHaveBeenCalled();
+    expect(owner.onProfile).toHaveBeenCalledTimes(1);
   });
 
   it('retains authoritative product counts and real accordion visibility ownership', () => {
@@ -193,11 +195,12 @@ describe('actual PI/RO/current Homepage canonical integration', () => {
       category => category.products.length > 0,
     );
     const groups = tree.root.findAllByType(BaselineAccordion);
-    expect(groups).toHaveLength(expected.length);
+    expect(groups).toHaveLength(expected.length + 1);
     const lists = tree.root.findAllByType(BaselineProductsList);
-    expect(lists.map(node => Children.count(node.props.children))).toEqual(
-      expected.map(category => category.products.length),
-    );
+    expect(lists.map(node => Children.count(node.props.children))).toEqual([
+      ...expected.map(category => category.products.length),
+      1,
+    ]);
     // ProductsList retains hidden descendants; test the controlling props and accessibility owner,
     // rather than treating every product node in the renderer tree as visible.
     const group = groups.find(

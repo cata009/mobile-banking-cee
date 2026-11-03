@@ -244,7 +244,7 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
                     : product.type === 'loan' || product.type === 'mortgage'
                     ? 'Reimbursement'
                     : 'Internal transfer',
-                icon: 'mcash',
+                icon: 'transaction-transfer',
                 run: () => {},
                 disabled: true,
               },
@@ -273,7 +273,7 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
                   <View style={a.bubble}>
                     <Glyph name={action.icon} />
                   </View>
-                  <Copy size={14} lineHeight={16}>
+                  <Copy size={14} lineHeight={16} center>
                     {action.label}
                   </Copy>
                 </Pressable>
@@ -433,10 +433,12 @@ const a = StyleSheet.create({
   bubble: {
     width: 48,
     height: 48,
+    flexShrink: 0,
     borderRadius: 24,
     backgroundColor: tokens.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
   },
 });
 const ACCOUNT_GEOMETRY: CarouselGeometry = {

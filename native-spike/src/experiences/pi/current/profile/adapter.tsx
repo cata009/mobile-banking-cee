@@ -22,6 +22,7 @@ import RoAppointment from '../baseline/more/Appointment';
 import RoCallRequest from '../baseline/more/CallRequest';
 import { isPiClassicCompositionContext } from '../baseline/policy';
 import { ProfileHost, translateProfile } from './Host';
+import { RomanianPersonalProfile } from '../baseline/profile/RomanianPersonalProfile';
 function Support(props: CurrentScreenProps) {
   return props.route.params?.area === 'tutorials' ? (
     <Tutorials {...props} />
@@ -32,6 +33,7 @@ function Support(props: CurrentScreenProps) {
 function hosted(
   Screen: React.ComponentType<CurrentScreenProps>,
   RoScreen?: React.ComponentType<CurrentScreenProps>,
+  RoPersonalDataScreen?: React.ComponentType<CurrentScreenProps>,
 ) {
   return function CurrentProfileScreen(props: CurrentScreenProps) {
     const inactivePrelogin =
@@ -39,9 +41,16 @@ function hosted(
     return (
       <ProfileHost host={props}>
         {React.createElement(
-          RoScreen && !inactivePrelogin && isPiClassicCompositionContext(props)
-            ? RoScreen
-            : Screen,
+          RoPersonalDataScreen &&
+            props.country === 'RO' &&
+            props.route.params?.area === 'my-data' &&
+            isPiClassicCompositionContext(props)
+            ? RoPersonalDataScreen
+            : RoScreen &&
+                !inactivePrelogin &&
+                isPiClassicCompositionContext(props)
+              ? RoScreen
+              : Screen,
           {
             ...props,
             // Source document deletions are explicitly keyed by country inside one mounted view.
@@ -55,7 +64,7 @@ function hosted(
 export const CURRENT_PROFILE_ADAPTER: CurrentAdapter = {
   id: 'pi.current.profile',
   screens: {
-    profile: hosted(More, RoMore),
+    profile: hosted(More, RoMore, RomanianPersonalProfile),
     settings: hosted(Settings, RoSettings),
     language: hosted(Language, RoLanguage),
     documents: hosted(Documents, RoDocuments),

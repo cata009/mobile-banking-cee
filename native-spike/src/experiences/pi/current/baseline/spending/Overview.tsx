@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Platform,
   Pressable,
@@ -23,6 +23,7 @@ import {
   BaselineHeaderActionRail,
 } from '../../../../../universal/BaselineHeaderActions';
 import { BaselineAccountActionBar } from '../../../../../universal/BaselineAccountActionBar';
+import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import {
@@ -132,7 +133,13 @@ function CategoryAmount({
   const formatted = formatMoneyNumber(amount, host.country);
   const parts = formatted.match(/^(.+?)([,.])(\d{2})$/);
   return (
-    <Text style={[styles.amount, { color: host.tokens.text }]}>
+    <Text
+      style={[
+        styles.amount,
+        direction === 'in' ? styles.amountIncome : undefined,
+        { color: host.tokens.text },
+      ]}
+    >
       {direction === 'out' ? '-' : ''}
       {parts?.[1] ?? formatted}
       {parts?.[2] ?? ''}
@@ -158,7 +165,11 @@ function MoneyCategorySection({
   direction: 'out' | 'in';
   onCategoryClick: (category: PfmCategoryName, direction: 'out' | 'in') => void;
 }) {
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const maxTotal = Math.max(...categories.map(category => category.total), 1);
+  const visibleCategories = showAllCategories
+    ? categories
+    : categories.slice(0, 4);
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   return (
     <View testID={`ro-pfm-money-${direction}`} style={styles.section}>
@@ -170,11 +181,13 @@ function MoneyCategorySection({
       </Text>
       {categories.length ? (
         <View style={styles.categories}>
-          {categories.map(category => {
+          {visibleCategories.map(category => {
             const label = getAnalyticsCategoryDisplayLabel(
               category.category,
               host.t,
             );
+            const income = direction === 'in';
+            const pillWidth = categoryPillWidth(category.total, maxTotal);
             return (
               <Pressable
                 key={`${direction}-${category.category}`}
@@ -188,12 +201,20 @@ function MoneyCategorySection({
                 style={styles.category}
               >
                 <CategoryIcon category={category.category} dark={dark} />
-                <View style={styles.categoryContent}>
+                <View
+                  testID={`ro-pfm-category-content-${direction}-${category.category}`}
+                  style={[
+                    styles.categoryContent,
+                    income ? styles.categoryContentIncome : undefined,
+                  ]}
+                >
                   <View
+                    testID={`ro-pfm-category-pill-${direction}-${category.category}`}
                     style={[
                       styles.pill,
+                      income ? styles.pillIncome : undefined,
                       {
-                        width: categoryPillWidth(category.total, maxTotal),
+                        width: pillWidth,
                         backgroundColor: categoryPillColor(
                           category.colorVar,
                           dark,
@@ -201,10 +222,18 @@ function MoneyCategorySection({
                       },
                     ]}
                   />
-                  <View style={styles.categoryCopy}>
+                  <View
+                    style={[
+                      styles.categoryCopy,
+                      income
+                        ? { width: pillWidth, maxWidth: pillWidth }
+                        : undefined,
+                    ]}
+                  >
                     <Text
                       style={[
                         styles.categoryLabel,
+                        income ? styles.categoryLabelIncome : undefined,
                         { color: host.tokens.muted },
                       ]}
                     >
@@ -230,6 +259,25 @@ function MoneyCategorySection({
           )}
         </Text>
       )}
+      {categories.length > 4 ? (
+        <View style={styles.showMoreCategories}>
+          <PrimaryButton
+            variant="secondary"
+            labelSize="16"
+            label={host.t(
+              showAllCategories
+                ? 'runtime.analytics.showLessCategories'
+                : 'runtime.analytics.showMoreCategories',
+              showAllCategories
+                ? 'Show fewer categories'
+                : 'Show more categories',
+            )}
+            onPress={() => setShowAllCategories(value => !value)}
+            dark={dark}
+            style={styles.showMoreButton}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -241,6 +289,7 @@ export function RoBaselinePfmOverview({
   summary,
   onPeriodChange,
   onCategoryClick,
+  onAddTransaction,
 }: {
   host: CurrentScreenProps;
   timeline: SpendingAnalyticsTimeline;
@@ -248,6 +297,7 @@ export function RoBaselinePfmOverview({
   summary: SpendingAnalyticsSummary;
   onPeriodChange: (key: string) => void;
   onCategoryClick: (category: PfmCategoryName, direction: 'out' | 'in') => void;
+  onAddTransaction?: () => void;
 }) {
   const duo = useDuoPreview();
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
@@ -344,9 +394,9 @@ export function RoBaselinePfmOverview({
                   iconName: 'add-money',
                   iconColor: 'var(--uc-icon)',
                   label: host
-                    .t('runtime.actions.cardTransaction', 'Card Transaction')
+                    .t('runtime.analytics.addTransaction', 'Add Transaction')
                     .replace(' ', '\n'),
-                  onPress: host.onAddTransaction,
+                  onPress: onAddTransaction ?? host.onAddTransaction,
                 },
               ]}
             />
@@ -428,6 +478,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
+  categoryContentIncome: { justifyContent: 'flex-start' },
   pill: {
     position: 'absolute',
     right: -18,
@@ -436,6 +487,7 @@ const styles = StyleSheet.create({
     height: 78,
     borderRadius: 28,
   },
+  pillIncome: { left: 44, right: undefined },
   categoryCopy: {
     position: 'relative',
     zIndex: 1,
@@ -448,8 +500,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     textAlign: 'right',
   },
+  categoryLabelIncome: { textAlign: 'left' },
   amount: { fontFamily: 'UniCredit-bold', fontSize: 20, textAlign: 'right' },
+  amountIncome: { textAlign: 'left' },
   decimals: { fontFamily: 'UniCredit-regular', fontSize: 14 },
+  showMoreCategories: {
+    marginTop: 8,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  showMoreButton: { width: 'auto', minWidth: 200, maxWidth: '100%' },
   empty: {
     fontFamily: 'UniCredit-regular',
     fontSize: 14,

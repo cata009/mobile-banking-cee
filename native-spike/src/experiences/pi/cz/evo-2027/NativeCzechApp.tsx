@@ -44,6 +44,7 @@ import {
   type CzechNavigation,
 } from '../../../../app/czechNavigation';
 import { CZECH_NATIVE_ADAPTERS } from '../../../../app/czechAdapters';
+import { PrimaryNavigationInsetContext } from '../../../../universal/PrimaryNavigationInset';
 import CzechPrimaryNavigation, {
   isCzechPrimaryScreen,
 } from '../../../../app/CzechPrimaryNavigation';
@@ -694,14 +695,18 @@ export default function NativeCzechApp({
                         !['prelogin', 'login'].includes(route.screen) && {
                           right: duo?.rightInset,
                         },
-                      isCzechPrimaryScreen(route.screen) &&
-                        suppressedPrimary !== route &&
-                        !verticalNavigation && {
-                          bottom: 84 + bottomInset,
-                        },
                       !active && s.hidden,
                     ]}
                   >
+                    <PrimaryNavigationInsetContext.Provider
+                      value={
+                        isCzechPrimaryScreen(route.screen) &&
+                        suppressedPrimary !== route &&
+                        !verticalNavigation
+                          ? 84 + bottomInset
+                          : 0
+                      }
+                    >
                     <EvoDuoNavigationScope active={active}>
                       {route.screen === 'search' ? (
                         <ScrollView
@@ -775,6 +780,7 @@ export default function NativeCzechApp({
                         </View>
                       )}
                     </EvoDuoNavigationScope>
+                    </PrimaryNavigationInsetContext.Provider>
                   </View>
                 );
               })
