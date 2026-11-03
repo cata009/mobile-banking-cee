@@ -124,9 +124,11 @@ export function Page({
         }
       />
       <ScrollView
+        role="main"
         onScroll={onScroll}
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
         style={s.scroll}
         contentContainerStyle={[s.content, contentContainerStyle]}
       >

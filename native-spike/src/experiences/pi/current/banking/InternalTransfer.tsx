@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Text, TextInput } from '../../../../universal/Typography';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -56,6 +56,9 @@ export interface InternalTransferProps {
   onEditSchedule?: (draft: InternalTransferDraft) => void;
   onComplete?: (receipt: TransferReceipt) => void;
 }
+// The amount field takes focus on entry; its caret is the focus cue, so the browser ring would only add noise.
+const webNoOutline = Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {};
+
 export function InternalTransfer({
   host,
   onBack,
@@ -383,6 +386,7 @@ export function InternalTransfer({
           placeholderTextColor={color('--uc-text-subtle')}
           style={[
             s.input,
+            webNoOutline,
             {
               fontFamily: host.tokens.strongFont,
               color: host.tokens.muted,

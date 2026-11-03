@@ -80,6 +80,44 @@ test('native date typing keeps partial text while canonical incomplete values st
   );
   expect(changed).toHaveBeenLastCalledWith('2000-01-01');
 });
+
+test('date fields can match the Figma day.month.year format without changing the default', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <DateField
+        tokens={tokens}
+        label="Contract date"
+        value="2026-02-15"
+        separator="."
+        inputProps={{ placeholder: 'dd.mm.yyyy' }}
+        onChange={() => {}}
+      />,
+    );
+  });
+  expect(tree.root.findByType(TextInput).props.value).toBe('15.02.2026');
+  expect(tree.root.findByType(TextInput).props.placeholder).toBe('dd.mm.yyyy');
+});
+
+test('date fields can display a localized long month for cash transaction entry', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <DateField
+        tokens={tokens}
+        label="Choose date"
+        value="2026-11-03"
+        locale="en-GB"
+        displayFormat="long-month"
+        inputProps={{ editable: false, maxLength: 32 }}
+        onChange={() => {}}
+      />,
+    );
+  });
+  expect(tree.root.findByType(TextInput).props.value).toBe('03-November-2026');
+  expect(tree.root.findByType(TextInput).props.editable).toBe(false);
+});
+
 test('hidden dates are masked and do not expose a date-selection panel', async () => {
   let tree!: Renderer.ReactTestRenderer;
   await act(() => {

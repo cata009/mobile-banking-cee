@@ -16,10 +16,11 @@ import type { Currency } from '@/data/products';
 import type { CurrentScreenProps } from '../../../contracts';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
 import { BaselineSectionDivider } from '../../../../../../universal/BaselineSectionDivider';
+import { BaselineTextField } from '../../../../../../universal/BaselineTextField';
 import { PaymentIcon } from './Icon';
 import { PrimaryButton } from '../../../../../../universal/PrimaryButton';
 import { RadioButton } from '../../../../../../universal/RadioButton';
-import { Text, TextInput } from '../../../../../../universal/Typography';
+import { Text } from '../../../../../../universal/Typography';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 import { PaymentsSheet } from './Sheet';
 import { DuoReadable } from '../../../../../../universal/DuoPreview';
@@ -98,22 +99,20 @@ export function RoBaselineExchangeRates({
               />
             </View>
             <View style={s.fields}>
-              <View style={[s.amount, { borderColor: color('--uc-border') }]}>
-                <Text style={[s.label, { color: color('--uc-text-muted') }]}>
-                  {t(
-                    'runtime.payments.exchangeRates.amount',
-                    'AMOUNT',
-                  ).toUpperCase()}
-                </Text>
-                <TextInput
-                  accessibilityLabel={t(
+              <View style={s.amount}>
+                <BaselineTextField
+                  ariaLabel={t(
                     'runtime.payments.exchangeRates.amount',
                     'Amount',
                   )}
+                  label={t(
+                    'runtime.payments.exchangeRates.amount',
+                    'Amount',
+                  ).toUpperCase()}
                   value={value}
-                  onChangeText={setValue}
-                  keyboardType="decimal-pad"
-                  style={[s.input, { color: color('--uc-text') }]}
+                  onChange={setValue}
+                  inputMode="decimal"
+                  dark={dark}
                 />
               </View>
               <Pressable
@@ -129,7 +128,7 @@ export function RoBaselineExchangeRates({
                   setDraft(currency);
                   setChooser(true);
                 }}
-                style={[s.currency, { borderColor: color('--uc-border') }]}
+                style={s.currency}
               >
                 <View>
                   <Text style={[s.label, { color: color('--uc-text-muted') }]}>
@@ -279,16 +278,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 20,
   },
-  // Source's inline input leaves a 3px baseline gap before the 6px label padding.
-  amount: { flex: 1, minWidth: 0, borderBottomWidth: 1, paddingBottom: 9 },
+  amount: { flex: 1, minWidth: 0 },
   label: { fontFamily: 'UniCredit-regular', fontSize: 14 },
-  input: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 20,
-    padding: 0,
-    marginTop: 4,
-    outlineWidth: 0,
-  },
   currency: {
     width: 96,
     minHeight: 44,
@@ -296,7 +287,6 @@ const s = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     gap: 4,
-    borderBottomWidth: 1,
     paddingBottom: 6,
   },
   currencyValue: {

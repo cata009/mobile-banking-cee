@@ -78,6 +78,7 @@ export function Copy({
   size = 16,
   lineHeight,
   color,
+  center = false,
 }: {
   children: React.ReactNode;
   strong?: boolean;
@@ -85,6 +86,7 @@ export function Copy({
   size?: number;
   lineHeight?: number;
   color?: string;
+  center?: boolean;
 }) {
   return (
     <Text
@@ -118,6 +120,7 @@ export function Copy({
               : {}),
           },
         ],
+        center ? { textAlign: 'center' as const } : null,
       ]}
     >
       {children}

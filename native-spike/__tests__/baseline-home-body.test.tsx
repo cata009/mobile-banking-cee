@@ -10,9 +10,15 @@ import type { CurrentScreenProps } from '../src/experiences/pi/current/contracts
 import { BaselineAccordion } from '../src/universal/BaselineAccordion';
 import { BaselineProductsList } from '../src/universal/BaselineProductsList';
 import { BaselineProductCard } from '../src/universal/BaselineProductCard';
+import { BaselineBanner } from '../src/universal/BaselineBanner';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { DEFAULT_VISIBLE_PRODUCT_OVERRIDES } from '@/app/platform/banking/productDataAuthority';
 import type { ProductCounts } from '@/app/state/demoTypes';
+import {
+  completeGeniusProtectRequest,
+  resetGeniusProtect,
+  startGeniusProtectRequest,
+} from '@/features/insurance/geniusProtect';
 
 const emptyCounts: ProductCounts = {
   accounts: 0,
@@ -35,7 +41,7 @@ function host(overrides: Partial<CurrentScreenProps> = {}): CurrentScreenProps {
     route: { screen: 'home' },
     tokens: currentTokens(),
     t: (key, fallback) =>
-      key === 'home.totalAvailable' ? 'Total Available' : fallback ?? key,
+      key === 'home.totalAvailable' ? 'Total Available' : (fallback ?? key),
     amountsHidden: false,
     screenTopInset: 0,
     isActive: true,
@@ -99,19 +105,75 @@ describe('scoped RO current Native Home body', () => {
     );
     act(() => tree.unmount());
   });
+  it('shows the Genius Protect offer before issue and the active policy card after issue', () => {
+    resetGeniusProtect();
+    const onNavigate = jest.fn();
+    const context = host({ onNavigate });
+    const tree = renderBody(context);
+
+    try {
+      const insuranceSection = tree.root
+        .findAllByType(BaselineAccordion)
+        .find(section => section.props.title === 'Insurance');
+      expect(insuranceSection).toBeDefined();
+      expect(
+        tree.root
+          .findAllByType(BaselineBanner)
+          .some(banner => banner.props.title === 'Get Genius Protect'),
+      ).toBe(true);
+
+      act(() => {
+        startGeniusProtectRequest();
+      });
+      act(() => {
+        completeGeniusProtectRequest();
+      });
+
+      const policyCard = tree.root
+        .findAllByType(BaselineProductCard)
+        .find(card => card.props.title === 'Genius Protect');
+      expect(policyCard).toMatchObject({
+        props: {
+          accountNumber: 'Life insurance policy',
+          thirdLine: '3431424',
+          showAmount: false,
+        },
+      });
+      expect(
+        tree.root
+          .findAllByType(BaselineBanner)
+          .some(banner => banner.props.title === 'Get Genius Protect'),
+      ).toBe(false);
+      act(() => policyCard?.props.onPress?.());
+      expect(onNavigate).toHaveBeenCalledWith({
+        screen: 'product-detail',
+        params: {
+          title: 'Genius Protect',
+          cardId: 'insurance',
+          optionId: 'genius-protect-policy',
+        },
+      });
+    } finally {
+      act(() => tree.unmount());
+      resetGeniusProtect();
+    }
+  });
   it.each([0, 1, 2])(
     'keeps source category-count behavior for %s accounts',
     accounts => {
       const context = host({ productCounts: { ...emptyCounts, accounts } }),
         tree = renderBody(context);
       expect(tree.root.findAllByType(BaselineAccordion)).toHaveLength(
-        accounts ? 1 : 0,
+        accounts ? 2 : 1,
       );
       expect(tree.root.findAllByType(BaselineProductCard)).toHaveLength(
         accounts,
       );
       if (accounts) {
-        const section = tree.root.findByType(BaselineAccordion);
+        const section = tree.root
+          .findAllByType(BaselineAccordion)
+          .find(item => item.props.title === 'Accounts');
+        if (!section) throw new Error('Accounts accordion is missing');
         const controls = section.findAll(
           node =>
             node.props?.accessibilityRole === 'button' &&
@@ -135,7 +197,7 @@ describe('scoped RO current Native Home body', () => {
           act(() => {
             controls[0].props.onPress();
           });
-          expect(tree.root.findByType(BaselineProductsList).props.isOpen).toBe(
+          expect(section.findByType(BaselineProductsList).props.isOpen).toBe(
             true,
           );
           expect(tree.root.findAllByType(BaselineProductCard)).toHaveLength(2);
@@ -143,7 +205,7 @@ describe('scoped RO current Native Home body', () => {
           act(() => {
             controls[0].props.onPress();
           });
-          expect(tree.root.findByType(BaselineProductsList).props.isOpen).toBe(
+          expect(section.findByType(BaselineProductsList).props.isOpen).toBe(
             false,
           );
         }
@@ -183,14 +245,14 @@ describe('scoped RO current Native Home body', () => {
         product.type === 'investment_account'
           ? { screen: 'investments' }
           : product.type === 'debit_card' || product.type === 'credit_card'
-          ? {
-              screen: 'card',
-              params: { productId: product.id, cardId: product.id },
-            }
-          : {
-              screen: 'account',
-              params: { productId: product.id, accountId: product.id },
-            };
+            ? {
+                screen: 'card',
+                params: { productId: product.id, cardId: product.id },
+              }
+            : {
+                screen: 'account',
+                params: { productId: product.id, accountId: product.id },
+              };
       expect(context.onNavigate).toHaveBeenLastCalledWith(expected);
     }
     act(() => tree.unmount());

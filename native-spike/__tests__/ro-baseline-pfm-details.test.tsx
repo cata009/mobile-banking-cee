@@ -1,5 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
+import { StyleSheet } from 'react-native';
 import {
   createSpendingAnalyticsTimeline,
   createSpendingCategoryDetail,
@@ -108,6 +109,44 @@ test('category detail displays Source analytics transaction objects, reporting c
   await act(() => rows[0]!.props.onPress(rows[0]!.props.transaction));
   expect(p.onTransactionClick).toHaveBeenCalledWith(expected.transactions[0]);
   expect(tree.root.findByType(BaselinePageHeader).props.showHelp).toBe(false);
+  await act(() => tree.unmount());
+});
+
+test('category detail uses a title-case heading, aligned summary inset and clear gap before the transaction divider', async () => {
+  const p = props('Income');
+  p.direction = 'in';
+  const { tree } = await render(p);
+  expect(tree.root.findByType(BaselinePageHeader).props.title).toBe('Income');
+  const hero = tree.root.findByProps({
+    testID: `ro-pfm-category-hero-${p.activePeriodKey}`,
+  });
+  expect(StyleSheet.flatten(hero.props.style).paddingHorizontal).toBe(16);
+  const transactions = tree.root.findByProps({ testID: 'ro-pfm-transactions' });
+  expect(StyleSheet.flatten(transactions.props.style).paddingTop).toBe(16);
+  await act(() => tree.unmount());
+});
+
+test('an empty income breakdown displays a no-income bubble instead of an empty chart', async () => {
+  const p = props('Income');
+  p.direction = 'in';
+  p.activePeriodKey = p.timeline.periods.find(
+    period =>
+      createSpendingCategoryDetail(
+        p.timeline.summariesByPeriodKey[period.key]!,
+        'Income',
+        'in',
+      ).subcategories.length === 0,
+  )!.key;
+  const { tree } = await render(p);
+  const emptyBubbles = tree.root.findAllByProps({
+    testID: 'baseline-pfm-empty-bubble',
+  });
+  expect(emptyBubbles.length).toBeGreaterThan(0);
+  expect(
+    emptyBubbles.every(
+      bubble => bubble.props.accessibilityLabel === 'No income',
+    ),
+  ).toBe(true);
   await act(() => tree.unmount());
 });
 

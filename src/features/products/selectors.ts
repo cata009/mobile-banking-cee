@@ -15,6 +15,8 @@ function formatProductIban(country: string, productId: string, baseNumber: strin
   return `${prefix}${checkDigits}BACX${baseNumber}`
 }
 
+const EUR_SECOND_CURRENT_ACCOUNT_COUNTRIES = new Set<CountryId>(['RO', 'HU', 'RS', 'CZ', 'BA', 'BA_BL'])
+
 export type DeriveProductCategoriesInput = {
   country: CountryId
   release: ReleaseId
@@ -33,6 +35,20 @@ export function deriveProductCategories({
     ? applyCzApp2027DebitCards(applyCzApp2027CurrentAccounts(applyCzApp2027TermDeposits(baseCountedCategories)))
     : baseCountedCategories
   const countedProducts = countedCategories.flatMap((category) => category.products)
+  const secondCurrentAccountId = countedProducts.filter((product) => product.type === 'current_account')[1]?.id
+  const shouldUseEurForSecondAccount = EUR_SECOND_CURRENT_ACCOUNT_COUNTRIES.has(country) && !isCzApp2027
+  const getAvailableCurrentAccount = (account: (typeof countedProducts)[number]) => {
+    if (account.type !== 'current_account') return undefined
+    const localAvailableBalance = roundMoney(
+      roundMoney(convertCurrency(account.balance, account.currency, localCurrency)) + 20000,
+    )
+    return shouldUseEurForSecondAccount && account.id === secondCurrentAccountId
+      ? {
+          balance: roundMoney(convertCurrency(localAvailableBalance, localCurrency, 'EUR')),
+          currency: 'EUR' as const,
+        }
+      : { balance: localAvailableBalance, currency: localCurrency }
+  }
 
   // Get base categories and convert all products to local currency
   return countedCategories.map((category) => ({
@@ -67,13 +83,10 @@ export function deriveProductCategories({
         linkedAccount?.type === 'current_account'
           ? isCzApp2027
             ? { balance: linkedAccount.balance, currency: linkedAccount.currency }
-            : {
-                balance: roundMoney(
-                  roundMoney(convertCurrency(linkedAccount.balance, linkedAccount.currency, localCurrency)) + 20000,
-                ),
-                currency: localCurrency,
-              }
+            : getAvailableCurrentAccount(linkedAccount)
           : undefined
+      const currentAccountAvailable =
+        product.type === 'current_account' ? getAvailableCurrentAccount(product) : undefined
       const sourceBalance = linkedAccount
         ? linkedAccount.balance
         : isCard && product.type !== 'credit_card'
@@ -106,17 +119,19 @@ export function deriveProductCategories({
         // include the demo-only 20,000 local-currency uplift after conversion.
         balance:
           product.type === 'current_account'
-            ? roundMoney(convertedBalance + 20000)
+            ? currentAccountAvailable!.balance
             : product.type === 'debit_card' && linkedCurrentAccountAvailable
               ? linkedCurrentAccountAvailable.balance
               : convertedBalance,
         // Update currency, preserving the linked account currency for debit cards.
         currency:
-          product.type === 'debit_card' && linkedCurrentAccountAvailable
-            ? linkedCurrentAccountAvailable.currency
-            : preserveCzApp2027ForeignDebitCard
-              ? sourceCurrency
-              : localCurrency,
+          product.type === 'current_account'
+            ? currentAccountAvailable!.currency
+            : product.type === 'debit_card' && linkedCurrentAccountAvailable
+              ? linkedCurrentAccountAvailable.currency
+              : preserveCzApp2027ForeignDebitCard
+                ? sourceCurrency
+                : localCurrency,
       }
     }),
   }))

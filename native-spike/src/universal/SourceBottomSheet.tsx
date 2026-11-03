@@ -23,6 +23,7 @@ export function SourceBottomSheet({
   maxHeightOffsetPx = 54,
   stickyHeader = false,
   footer,
+  fixedHeight = false,
 }: {
   title: string;
   children: React.ReactNode;
@@ -34,8 +35,14 @@ export function SourceBottomSheet({
   stickyHeader?: boolean;
   /** Optional fixed actions remain visible when the sheet contents scroll. */
   footer?: React.ReactNode;
+  /** Keep the sheet at its maximum height so filtering a list never resizes it. */
+  fixedHeight?: boolean;
 }) {
   const { height } = useDemoViewport();
+  const maxSheetHeight = Math.max(
+    0,
+    height - maxHeightOffsetPx - (footer ? 140 : 0),
+  );
   return (
     <ModalPortal
       visible
@@ -61,10 +68,8 @@ export function SourceBottomSheet({
           style={[
             s.sheet,
             {
-              maxHeight: Math.max(
-                0,
-                height - maxHeightOffsetPx - (footer ? 140 : 0),
-              ),
+              maxHeight: maxSheetHeight,
+              ...(fixedHeight ? { height: maxSheetHeight } : null),
               backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
             },
             scrollStyle,

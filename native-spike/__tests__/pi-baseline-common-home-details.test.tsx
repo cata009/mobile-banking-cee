@@ -186,10 +186,10 @@ function text(tree: Renderer.ReactTestRenderer): string {
     typeof node === 'string'
       ? node
       : Array.isArray(node)
-      ? node.map(collect).join('')
-      : node
-      ? (node.children ?? []).map(collect).join('')
-      : '';
+        ? node.map(collect).join('')
+        : node
+          ? (node.children ?? []).map(collect).join('')
+          : '';
   return collect(tree.toJSON());
 }
 const press = (tree: Renderer.ReactTestRenderer, label: string) =>
@@ -277,13 +277,11 @@ describe.each(cases)(
         }
       }
       const lists = tree.root.findAllByType(BaselineProductsList);
-      expect(lists.map(list => list.props.showTotal)).toEqual([
-        true,
-        false,
-        true,
-        true,
-        true,
-      ]);
+      const expectedTotalFlags = [true, false, true, true, true];
+      if (country === 'RO') expectedTotalFlags.push(false);
+      expect(lists.map(list => list.props.showTotal)).toEqual(
+        expectedTotalFlags,
+      );
       expect(
         model.products
           .filter(p => !p.type.endsWith('_card'))
@@ -323,9 +321,12 @@ describe.each(cases)(
         tree.root.findByType(BaselineAmountVisibility).props.onToggle(),
       );
       expect(props.onAmountsToggle).toHaveBeenCalledTimes(1);
-      expect(
-        tree.root.findAllByType(BaselineHeaderActionButton)[0]!.props.onPress,
-      ).toBeUndefined();
+      const profileAction = tree.root.findAllByType(
+        BaselineHeaderActionButton,
+      )[0];
+      expect(profileAction?.props.onPress).toBe(
+        country === 'RO' ? props.onProfile : undefined,
+      );
       const language = LOCAL_LANGUAGE_BY_COUNTRY[country],
         local = host(country, {
           language,

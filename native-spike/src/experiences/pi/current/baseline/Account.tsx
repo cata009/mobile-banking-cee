@@ -38,6 +38,8 @@ import { carouselOffsets } from '../../cz/evo-2027/accounts/Carousel';
 import { useMouseCarousel } from '../../cz/evo-2027/mouseCarousel';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
+import { AccountAddMoneyFlow } from './AccountAddMoneyFlow';
+import { AccountMcashFlow } from './AccountMcashFlow';
 
 const geometry = {
   width: 311,
@@ -115,7 +117,7 @@ function AccountCarousel({
       <ScrollView
         ref={rail}
         testID="ro-account-carousel"
-        style={Platform.OS === 'web' ? styles.webScroll : undefined}
+        style={Platform.OS === 'web' ? styles.carouselWebScroll : undefined}
         horizontal
         onLayout={event => {
           if (event.nativeEvent.layout.width > 0)
@@ -241,6 +243,8 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
   );
   const product = data.accounts[activeIndex];
   const [progress, setProgress] = useState(0);
+  const [addMoneyOpen, setAddMoneyOpen] = useState(false);
+  const [mcashOpen, setMcashOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const measuredScrollY = useRef(0);
   const [query, setQuery] = useState('');
@@ -302,28 +306,37 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
         product?.type === 'saving_account' ||
         product?.type === 'loan' ||
         product?.type === 'mortgage',
+      onPress: () => {
+        if (product) setAddMoneyOpen(true);
+      },
     },
     {
       id: 'mcash',
       iconName: 'mcash',
       label:
-        product?.type === 'term_deposit'
-          ? copy(
-              host,
-              'runtime.accounts.actions.closeTermDeposit',
-              'Close term deposit',
-            )
-          : product?.type === 'loan' || product?.type === 'mortgage'
+        host.country === 'RO' && product?.type === 'current_account'
+          ? 'mCash'
+          : product?.type === 'term_deposit'
             ? copy(
                 host,
-                'runtime.accounts.actions.reimbursement',
-                'Reimbursement',
+                'runtime.accounts.actions.closeTermDeposit',
+                'Close term deposit',
               )
-            : copy(
-                host,
-                'runtime.accounts.actions.internalTransfer',
-                'Internal transfer',
-              ),
+            : product?.type === 'loan' || product?.type === 'mortgage'
+              ? copy(
+                  host,
+                  'runtime.accounts.actions.reimbursement',
+                  'Reimbursement',
+                )
+              : copy(
+                  host,
+                  'runtime.accounts.actions.internalTransfer',
+                  'Internal transfer',
+                ),
+      onPress:
+        host.country === 'RO' && product?.type === 'current_account'
+          ? () => setMcashOpen(true)
+          : undefined,
     },
   ];
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -348,7 +361,7 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
       <ScrollView
         ref={page}
         testID="ro-account-page"
-        style={Platform.OS === 'web' ? styles.webScroll : undefined}
+        style={Platform.OS === 'web' ? styles.webScroll : styles.scroll}
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
@@ -449,6 +462,26 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
       {overlays}
     </>
   );
+  if (addMoneyOpen && product) {
+    return (
+      <AccountAddMoneyFlow
+        host={host}
+        accounts={data.accounts}
+        initialAccountId={product.id}
+        onClose={() => setAddMoneyOpen(false)}
+      />
+    );
+  }
+  if (mcashOpen && product) {
+    return (
+      <AccountMcashFlow
+        host={host}
+        accounts={data.currentAccounts}
+        initialAccountId={product.id}
+        onClose={() => setMcashOpen(false)}
+      />
+    );
+  }
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
       {product && product.type !== 'term_deposit' ? (
@@ -498,7 +531,8 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  content: { paddingBottom: 32 },
+  scroll: { flex: 1, minHeight: 0 },
+  content: { flexGrow: 1, paddingBottom: 32 },
   titleFrame: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -507,7 +541,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 31 },
-  webScroll: { transform: 'none' },
+  webScroll: { flex: 1, minHeight: 0, transform: 'none' },
+  carouselWebScroll: { transform: 'none' },
   rail: {
     paddingLeft: 16,
     paddingRight: 16,

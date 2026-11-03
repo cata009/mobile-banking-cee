@@ -11,6 +11,7 @@ import {
 import { ToggleButton } from '../../../../../universal/ToggleButton';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { SearchField } from '../../../../../universal/SearchField';
+import { CountryFlag } from '../../../../../universal/CountryFlag';
 import { FaceIdOverlay } from '../../../current/baseline/FaceIdOverlay';
 import type { authenticateNativeBiometric } from '../../../../../platform/biometrics';
 import {
@@ -482,9 +483,22 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
           onPress={open}
           style={extractedStyles.selectTrigger}
         >
-          <Copy size={17}>
-            {fieldLabel === 'Payment currency' ? draft.currency : label}
-          </Copy>
+          {fieldLabel === 'Recipient country' ||
+          fieldLabel === 'Payment currency' ? (
+            <View style={extractedStyles.selectFlag}>
+              <CountryFlag
+                size={24}
+                {...(fieldLabel === 'Payment currency'
+                  ? { currency: draft.currency }
+                  : { country: draft.recipientCountry ?? 'CZ' })}
+              />
+            </View>
+          ) : null}
+          <View style={extractedStyles.selectValue}>
+            <Copy size={17}>
+              {fieldLabel === 'Payment currency' ? draft.currency : label}
+            </Copy>
+          </View>
           <SourceCustomIcon name="chevron-down" size={20} color={tokens.text} />
         </Pressable>
       </View>
@@ -510,6 +524,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       visible ? (
         <SourceBottomSheet
           title={title}
+          fixedHeight={!!search}
           onClose={() => {
             search?.setValue('');
             onClose();
@@ -650,6 +665,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
               items={RECIPIENT_COUNTRIES.map(c => ({
                 value: c.code,
                 label: c.name,
+                leading: <CountryFlag country={c.code} size={32} />,
               }))}
               onChange={recipientCountry => {
                 setCountrySearch('');
@@ -699,6 +715,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
               ).map(c => ({
                 value: c.code,
                 label: `${c.code} · ${c.name}`,
+                leading: <CountryFlag currency={c.code} size={32} />,
               }))}
               onChange={currency => {
                 setCurrencySearch('');
@@ -1285,6 +1302,8 @@ const extractedStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  selectFlag: { marginRight: 10 },
+  selectValue: { flex: 1 },
   formField: { marginBottom: 12 },
   formLabel: { color: tokens.text, fontSize: 16, lineHeight: 20 },
   formInput: {

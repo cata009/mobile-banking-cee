@@ -34,7 +34,8 @@ function resolvedThemeTokenColor(element: Element, property: 'background-color' 
   const tokenValue = themeTokenValue(element, token)
   if (!tokenValue) throw new Error(`Missing shipped theme token ${token}`)
 
-  const probe = property === 'fill' ? document.createElementNS('http://www.w3.org/2000/svg', 'svg') : document.createElement('span')
+  const probe =
+    property === 'fill' ? document.createElementNS('http://www.w3.org/2000/svg', 'svg') : document.createElement('span')
   probe.style.setProperty(property, tokenValue)
   ;(element.parentElement ?? document.body).append(probe)
   const expected = getComputedStyle(probe).getPropertyValue(property)
@@ -65,16 +66,17 @@ function expectGlyphTokenStyle(container: HTMLElement, token: string) {
   const tokenReference = `var(${token})`
   const glyphs = Array.from(container.querySelectorAll('svg, svg *, img'))
   const directPaint = glyphs.some((glyph) => {
-      const style = getComputedStyle(glyph)
-      const declaredColors = ['fill', 'stroke', 'color'].flatMap((property) => [
-        style.getPropertyValue(property),
-        glyph.getAttribute(property) ?? '',
-      ])
-      return (
-        declaredColors.some((color) => color === tokenReference || (color.trim() && normalizeColor(color) === normalizeColor(expected))) ||
-        glyph.getAttribute('style')?.includes(tokenReference) === true
-      )
-    })
+    const style = getComputedStyle(glyph)
+    const declaredColors = ['fill', 'stroke', 'color'].flatMap((property) => [
+      style.getPropertyValue(property),
+      glyph.getAttribute(property) ?? '',
+    ])
+    return (
+      declaredColors.some(
+        (color) => color === tokenReference || (color.trim() && normalizeColor(color) === normalizeColor(expected)),
+      ) || glyph.getAttribute('style')?.includes(tokenReference) === true
+    )
+  })
   const filterIds = Array.from(
     container.querySelectorAll('*'),
     (element) => `${getComputedStyle(element).filter} ${element.getAttribute('style') ?? ''}`,
@@ -84,30 +86,12 @@ function expectGlyphTokenStyle(container: HTMLElement, token: string) {
     if (!filter) return false
     return Array.from(filter.querySelectorAll('feFlood')).some((flood) => {
       const values = [getComputedStyle(flood).getPropertyValue('flood-color'), flood.getAttribute('flood-color') ?? '']
-      return values.some((value) => value === tokenReference || (value.trim() && normalizeColor(value) === normalizeColor(expected)))
+      return values.some(
+        (value) => value === tokenReference || (value.trim() && normalizeColor(value) === normalizeColor(expected)),
+      )
     })
   })
   expect(directPaint || filterPaint).toBe(true)
-}
-
-function fontSizeAcrossAncestors(element: HTMLElement): number {
-  let size = 0
-  let current: Element | null = element
-  while (current) {
-    // jsdom's RN Web font shorthand can shadow a correct inline font-size longhand.
-    const currentSize = Number.parseFloat((current as HTMLElement).style.fontSize || getComputedStyle(current).fontSize)
-    if (Number.isFinite(currentSize)) size = Math.max(size, currentSize)
-    current = current.parentElement
-  }
-  return size
-}
-
-function titleVariants(titles: HTMLElement[]) {
-  const large = titles.find((title) => fontSizeAcrossAncestors(title) >= 28)
-  if (!large) throw new Error('The Native page header must retain the 28px Source title')
-  const compact = titles.find((title) => title !== large)
-  if (!compact) throw new Error('The Native page header must expose its compact title variant')
-  return { large, compact }
 }
 
 async function renderAt(url: string) {
@@ -121,7 +105,9 @@ async function renderAt(url: string) {
 async function openPeerInsights() {
   fireEvent.click(await screen.findByRole('button', { name: /Products for you!/ }))
   fireEvent.click(await screen.findByRole('switch', { name: 'I agree with the terms and conditions' }))
-  await waitFor(() => expect(screen.getByRole('switch', { name: 'I agree with the terms and conditions' })).toBeChecked())
+  await waitFor(() =>
+    expect(screen.getByRole('switch', { name: 'I agree with the terms and conditions' })).toBeChecked(),
+  )
   await waitFor(() => expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled())
   fireEvent.click(await screen.findByRole('button', { name: 'Next' }))
   await screen.findByRole('heading', { name: 'Achieve your life goals' })
@@ -136,12 +122,33 @@ beforeEach(async () => {
     'ResizeObserver',
     class ResizeObserver {
       nodes = new Set<Element>()
-      constructor(private callback: ResizeObserverCallback) { layoutObservers.add(this) }
-      observe(node: Element) { this.nodes.add(node) }
-      unobserve(node: Element) { this.nodes.delete(node) }
-      disconnect() { this.nodes.clear() }
+      constructor(private callback: ResizeObserverCallback) {
+        layoutObservers.add(this)
+      }
+      observe(node: Element) {
+        this.nodes.add(node)
+      }
+      unobserve(node: Element) {
+        this.nodes.delete(node)
+      }
+      disconnect() {
+        this.nodes.clear()
+      }
       notify() {
-        this.callback(Array.from(this.nodes, target => ({ target, contentRect: { width: (target as HTMLElement).offsetWidth || 375, height: (target as HTMLElement).offsetHeight || 812 } }) as ResizeObserverEntry), this)
+        this.callback(
+          Array.from(
+            this.nodes,
+            (target) =>
+              ({
+                target,
+                contentRect: {
+                  width: (target as HTMLElement).offsetWidth || 375,
+                  height: (target as HTMLElement).offsetHeight || 812,
+                },
+              }) as ResizeObserverEntry,
+          ),
+          this,
+        )
       }
     },
   )
@@ -160,7 +167,7 @@ describe('RS Future Gain peer insights journey', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Products for you!/ }))
 
     expect(await screen.findByRole('heading', { name: 'GDPR notice' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'mBank PRIVACY Policy' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'mBanking Privacy Policy' })).toHaveAttribute(
       'href',
       'https://www.unicreditbank.rs/en/o-nama/politika_privatnosti_mbanking.html',
     )
@@ -202,7 +209,9 @@ describe('RS Future Gain peer insights journey', () => {
     const carLoanRow = await within(main).findByRole('button', { name: 'Open Car loan simulator' })
     expect(carLoanRow).toBeVisible()
     expect(carLoanRow).toHaveTextContent('Car loan')
-    await waitFor(() => expect(within(main).queryByRole('button', { name: 'Open Housing loan simulator' })).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(within(main).queryByRole('button', { name: 'Open Housing loan simulator' })).not.toBeInTheDocument(),
+    )
 
     fireEvent.click(await within(main).findByRole('button', { name: 'Dismiss pre-approved products message' }))
     await waitFor(() => expect(screen.queryByText('Explore your pre-approved products in UCB')).not.toBeInTheDocument())
@@ -214,54 +223,44 @@ describe('RS Future Gain peer insights journey', () => {
     expect(await screen.findByRole('button', { name: /Products for you!/ })).toBeInTheDocument()
   })
 
-  it('collapses the large page title into the centered header while scrolling', async () => {
+  it('keeps one compact page title in the centered header while scrolling', async () => {
     await renderAt(FUTURE_GAIN_PRODUCTS_URL)
     await openPeerInsights()
 
     const title = 'Achieve your life goals'
     const main = await screen.findByRole('main')
     const page = main.parentElement ?? main
-    const titles = within(page).getAllByRole('heading', { name: title, hidden: true })
-    expect(titles).toHaveLength(2)
-    const { large, compact } = titleVariants(titles)
-    expect(fontSizeAcrossAncestors(large)).toBe(28)
-    expect(large).toBeVisible()
-    expect(compact).not.toBeVisible()
-    expect(within(page).getAllByRole('heading', { name: title })).toHaveLength(1)
+    const heading = within(page).getByRole('heading', { name: title })
+    expect(heading).toBeVisible()
+    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(1)
 
     fireEvent.scroll(main, { target: { scrollTop: 64 } })
 
     await waitFor(() => {
-      expect(large).not.toBeVisible()
-      expect(compact).toBeVisible()
+      expect(heading).toBeVisible()
     })
-    expect(getComputedStyle(compact).textAlign).toBe('center')
-    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(2)
+    expect(getComputedStyle(heading).textAlign).toBe('center')
+    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(1)
   })
 
-  it('collapses the GDPR notice title into the centered header while scrolling', async () => {
+  it('keeps one compact GDPR notice title in the centered header while scrolling', async () => {
     await renderAt(FUTURE_GAIN_PRODUCTS_URL)
     fireEvent.click(await screen.findByRole('button', { name: /Products for you!/ }))
 
     const title = 'GDPR notice'
     const main = await screen.findByRole('main')
     const page = main.parentElement ?? main
-    const titles = await within(page).findAllByRole('heading', { name: title, hidden: true })
-    expect(titles).toHaveLength(2)
-    const { large, compact } = titleVariants(titles)
-    expect(fontSizeAcrossAncestors(large)).toBe(28)
-    expect(large).toBeVisible()
-    expect(compact).not.toBeVisible()
-    expect(within(page).getAllByRole('heading', { name: title })).toHaveLength(1)
+    const heading = within(page).getByRole('heading', { name: title })
+    expect(heading).toBeVisible()
+    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(1)
 
     fireEvent.scroll(main, { target: { scrollTop: 64 } })
 
     await waitFor(() => {
-      expect(large).not.toBeVisible()
-      expect(compact).toBeVisible()
+      expect(heading).toBeVisible()
     })
-    expect(getComputedStyle(compact).textAlign).toBe('center')
-    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(2)
+    expect(getComputedStyle(heading).textAlign).toBe('center')
+    expect(within(page).getAllByRole('heading', { name: title, hidden: true })).toHaveLength(1)
   })
 
   it('keeps the goal carousel inset and scrolls the selected goal into view', async () => {
@@ -273,8 +272,8 @@ describe('RS Future Gain peer insights journey', () => {
     const railContent = carousel.firstElementChild
     if (!railContent) throw new Error('The Native goal rail must have a content container')
     const railContentStyle = getComputedStyle(railContent)
-    expect(Number.parseFloat(railContentStyle.paddingLeft)).toBe(17)
-    expect(Number.parseFloat(railContentStyle.paddingRight)).toBe(Math.max(17, Math.ceil((375 - 96) / 2)))
+    expect(Number.parseFloat(railContentStyle.paddingLeft)).toBe(24)
+    expect(Number.parseFloat(railContentStyle.paddingRight)).toBe(Math.max(24, Math.ceil((375 - 96) / 2)))
     const goalTabs = within(main).getAllByRole('tab')
     expect(goalTabs).toHaveLength(4)
     goalTabs.forEach((tab) => expect(Number.parseFloat(getComputedStyle(tab).height)).toBeGreaterThanOrEqual(96))
@@ -283,17 +282,22 @@ describe('RS Future Gain peer insights journey', () => {
     // jsdom has no layout engine: supply the authored geometry and deliver browser resize notifications.
     goalTabs.forEach((tab, index) => {
       Object.defineProperties(tab, {
-        offsetLeft: { configurable: true, value: 17 + index * 104 },
+        offsetLeft: { configurable: true, value: 24 + index * 104 },
         offsetWidth: { configurable: true, value: 96 },
         offsetHeight: { configurable: true, value: 96 },
       })
     })
     Object.defineProperties(carousel, {
       offsetWidth: { configurable: true, value: 375 },
-      scroll: { configurable: true, value: ({ left = 0 }: ScrollToOptions) => { carousel.scrollLeft = left } },
+      scroll: {
+        configurable: true,
+        value: ({ left = 0 }: ScrollToOptions) => {
+          carousel.scrollLeft = left
+        },
+      },
     })
     for (const observer of layoutObservers) observer.notify()
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await new Promise((resolve) => setTimeout(resolve, 10))
     const initialScrollLeft = carousel.scrollLeft
     fireEvent.click(finalGoal)
     await waitFor(() => expect(finalGoal).toHaveAttribute('aria-selected', 'true'))
@@ -304,7 +308,7 @@ describe('RS Future Gain peer insights journey', () => {
   it.each([
     ['Home & Living', '--uc-future-goal-home'],
     ['Buy a car', '--uc-future-goal-buy-a-car'],
-    ['Personal Goals', '--uc-future-goal-personal'],
+    ['Travel & Lifestyle', '--uc-future-goal-personal'],
     ['Saving', '--uc-future-goal-saving'],
   ])('uses the Figma selected color for %s', async (goal, token) => {
     await renderAt(FUTURE_GAIN_PRODUCTS_URL)
@@ -326,12 +330,12 @@ describe('RS Future Gain peer insights journey', () => {
   it.each([
     ['Home & Living', 'Housing loan', 'Housing loan'],
     ['Home & Living', 'Loan for purchasing real estate abroad', 'Loan for purchasing real estate abroad'],
-    ['Home & Living', 'Energy efficiency loan', 'Energy efficiency loan'],
+    ['Home & Living', 'Energy efficiency loan', 'Energy Efficiency Loan'],
     ['Home & Living', 'Credit cards', 'Credit Card'],
-    ['Buy a car', 'Car loan', 'Car loan'],
-    ['Buy a car', 'Cash loan', 'Cash loan'],
-    ['Personal Goals', 'Personal loan', 'Personal loan'],
-    ['Personal Goals', 'Credit cards', 'Credit Card'],
+    ['Buy a car', 'Car loan', 'Cash Loan'],
+    ['Buy a car', 'Leasing', 'Leasing'],
+    ['Travel & Lifestyle', 'Cash Loan', 'Cash Loan'],
+    ['Travel & Lifestyle', 'Credit Card', 'Credit Card'],
     ['Saving', 'Term deposit', 'Term deposit'],
     ['Saving', 'Investment funds', 'Investment funds'],
   ])('opens the %s simulator for %s', async (goal, product, heading) => {
@@ -364,25 +368,20 @@ describe('RS Future Gain peer insights journey', () => {
   })
 
   it.each([
-    ['Terms & conditions & collateral', 'The final conditions, eligibility and any collateral requirements'],
-    ['Representative example', 'The estimate uses the amount, currency, duration and indicative rate'],
-    ['Early payment', 'Early repayment conditions and any applicable costs'],
-    ['Client’s rights to withdraw from a concluded agreement', 'Your rights, deadlines and the process for withdrawal'],
-  ])('opens %s in a bottom sheet instead of expanding inline', async (title, content) => {
+    ['REPRESENTATIVE EXAMPLE', 'Illustration based on a'],
+    ['ADDITIONAL INFORMATION ABOUT HOUSING LOAN', 'Eligibility, collateral, fees'],
+  ])('expands %s inline', async (title, content) => {
     await renderAt(FUTURE_GAIN_PRODUCTS_URL)
     await openPeerInsights()
     fireEvent.click(await screen.findByRole('button', { name: 'Open Housing loan simulator' }))
 
     const disclosureButton = await screen.findByRole('button', { name: title })
+    expect(disclosureButton).toHaveAttribute('aria-expanded', 'false')
     fireEvent.click(disclosureButton)
 
-    const disclosureSheet = await screen.findByRole('dialog')
-    expect(disclosureSheet).toHaveTextContent(title)
-    expect(disclosureSheet).toHaveTextContent(content)
-    expect(disclosureButton).not.toHaveAttribute('aria-expanded')
-    const close = await within(disclosureSheet).findByRole('button', { name: 'Close sheet' })
-    fireEvent.click(close)
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() => expect(disclosureButton).toHaveAttribute('aria-expanded', 'true'))
+    expect(screen.getByText(new RegExp(content))).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('matches the credit card selection and product details from Figma', async () => {
@@ -402,9 +401,18 @@ describe('RS Future Gain peer insights journey', () => {
 
     fireEvent.click(platinum)
     await waitFor(() => expect(platinum).toHaveAttribute('aria-selected', 'true'))
-    await waitFor(() => expect(creditCardSimulator).toHaveTextContent('Why should Mastercard Platinum be your first choice?'))
+    await waitFor(() =>
+      expect(creditCardSimulator).toHaveTextContent('Why should Mastercard Platinum be your first choice?'),
+    )
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Credit card features' }))
-    expect(await screen.findByRole('dialog')).toHaveTextContent('Credit card features')
+    const additionalInformation = screen.getByRole('button', {
+      name: 'ADDITIONAL INFORMATION ABOUT CREDIT CARD',
+    })
+    expect(additionalInformation).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(additionalInformation)
+    await waitFor(() => expect(additionalInformation).toHaveAttribute('aria-expanded', 'true'))
+    expect(creditCardSimulator).toHaveTextContent(
+      'Eligibility, fees, interest and other terms are confirmed by UniCredit Bank in the offer and final card agreement.',
+    )
   })
 })

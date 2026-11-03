@@ -34,8 +34,11 @@ import { buildFlowDocument, copyConfluenceDocument, downloadFlowDocx } from '../
 import { stateTransitions } from '../handoff/referencePackage'
 import { seedAnalysisDocument } from '@/features/flow-spec/document'
 import { createSpecRepository } from '@/features/flow-spec/client'
-import { useSpecWorkspace } from '@/features/flow-spec/useSpecWorkspace'
+import { useSpecWorkspace, type SpecWorkspace } from '@/features/flow-spec/useSpecWorkspace'
+import type { SpecAsset } from '@/features/flow-spec/types'
 import SpecWorkspacePanel from '../spec-editor/SpecWorkspacePanel'
+import SpecContentsNav, { type SpecContentsItem } from '../spec-editor/SpecContentsNav'
+import '../spec-editor/specEditor.css'
 import { usePersonalSpecAccess } from '@/features/flow-spec/personalAccess'
 import { buildFlowSearchEntries, resolveSelectedPassage, type SearchEntry } from '@/features/flow-collaboration/search'
 import { DiscussionPanel } from '@/features/flow-collaboration/DiscussionPanel'
@@ -402,7 +405,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
         />
       ) : null}
 
-      {activeTab === 'spec' ? <div ref={specContent}>
+      {activeTab === 'spec' ? <div ref={specContent} className="overflow-hidden rounded-[12px] border border-[var(--uc-border)] bg-[var(--uc-surface)] shadow-sm">
         <SpecPanel
           flow={flow}
           scenario={scenario}
@@ -413,7 +416,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
           onStepSelect={setStepIndex}
           onOpenInPrototype={flow.prototype ? openInPrototype : undefined}
           onOpenRule={openRule}
-          analysisContent={flow.id === 'ba-card-fraud' ? <SpecWorkspacePanel workspace={specWorkspace} onCapture={captureCurrentScreen} /> : undefined}
+          analysisWorkspace={flow.id === 'ba-card-fraud' ? { workspace: specWorkspace, onCapture: captureCurrentScreen } : undefined}
         />
       </div> : null}
 
@@ -1773,6 +1776,39 @@ function TimelineArrow({
   )
 }
 
+/** Business analysis sections a flow actually shows, in document order. */
+function presentBaSections(analysis: FlowBusinessAnalysisSpec) {
+  // Sections a flow leaves empty are not shown, and the ones that remain are
+  // numbered in the order they appear: a contents list reading 01, 02, 04 says
+  // something is missing when nothing is.
+  return BA_SECTION_TITLES.filter((entry) => {
+    if (entry.key === 'requirements') return analysis.requirements.length > 0
+    if (entry.key === 'proposed-solution') return analysis.proposedSolution.length > 0
+    if (entry.key === 'non-functional') return analysis.nonFunctionalRequirements.length > 0
+    return true
+  })
+}
+
+/** Flow-level block titles, in the order the Flow specification shows them. */
+function flowBlockTitles(flow: FlowDefinition): string[] {
+  return [
+    'Key decision rules',
+    'Preconditions',
+    'Expected result',
+    'Analytics events',
+    'Questions to close',
+    ...flow.overview.notes.map((note) => note.title),
+  ]
+}
+
+const flowBlockId = (title: string) => `spec-block-${slugify(title)}`
+
+/**
+ * One specification document per flow. The business analysis comes first, then
+ * the flow specification and the screen specifications, all under one contents
+ * list in one column. Flows that specify their screens carry the last two; a
+ * document-only flow stops after its analysis.
+ */
 function SpecPanel({
   flow,
   scenario,
@@ -1783,7 +1819,7 @@ function SpecPanel({
   onStepSelect,
   onOpenInPrototype,
   onOpenRule,
-  analysisContent,
+  analysisWorkspace,
 }: {
   flow: FlowDefinition
   scenario: FlowScenario
@@ -1794,43 +1830,46 @@ function SpecPanel({
   onStepSelect: (index: number) => void
   onOpenInPrototype?: (screen: FlowScreenKind) => void
   onOpenRule?: (ruleId: string) => void
-  analysisContent?: ReactNode
+  /** The editable business analysis, when the flow has one. */
+  analysisWorkspace?: { workspace: SpecWorkspace; onCapture(): Promise<SpecAsset> }
 }) {
   const analysis = flow.overview.businessAnalysis
   const spec = activeStep ? flow.screenSpecs[activeStep.screen] : undefined
-  // A BA document is the whole specification unless the flow says otherwise; a
-  // flow that also specifies its screens shows the document first and the
-  // screen-by-screen detail underneath it.
   const showScreenSpecs = !analysis || flow.specLayout === 'document-and-screens'
-
-  if (analysis && !showScreenSpecs) {
-    return (
-      <Panel id={SPEC_SECTION_IDS.businessAnalysis} title="Business analysis specification">
-        {analysisContent ?? <BusinessAnalysisContent analysis={analysis} />}
-      </Panel>
-    )
+  const baSections = analysis ? presentBaSections(analysis) : []
+  const baNumber = (key: BaSectionKey) => String(baSections.findIndex((entry) => entry.key === key) + 1).padStart(2, '0')
+  const baDisclosure = useSectionDisclosure(baSections.map((entry) => `ba-section-${entry.key}`), true)
+  const blockTitles = flow.id === 'investments-bulk-approval' ? [] : flowBlockTitles(flow)
+  const flowDisclosure = useSectionDisclosure(blockTitles.map(flowBlockId), true)
+  const jump = (id: string) => (id.startsWith('spec-block-') ? flowDisclosure.jump(id) : baDisclosure.jump(id))
+  // One control for every collapsible section in the document, whichever list it belongs to.
+  const baIds = baSections.map((entry) => `ba-section-${entry.key}`)
+  const flowIds = blockTitles.map(flowBlockId)
+  const allSectionsOpen =
+    baIds.length + flowIds.length > 0 && [...baIds, ...flowIds].every((id) => baDisclosure.isOpen(id) || flowDisclosure.isOpen(id))
+  const toggleAllSections = () => {
+    const open = !allSectionsOpen
+    if (baIds.length > 0 && baDisclosure.allOpen !== open) baDisclosure.toggleAll()
+    if (flowIds.length > 0 && flowDisclosure.allOpen !== open) flowDisclosure.toggleAll()
   }
 
-  const navSections = [
-    ...(analysis ? [{ id: SPEC_SECTION_IDS.businessAnalysis, label: 'Business analysis' }] : []),
-    { id: SPEC_SECTION_IDS.flowSpec, label: 'Flow specification' },
-    { id: SPEC_SECTION_IDS.screenSpec, label: 'Screen spec' },
-  ]
+  const flowContents: SpecContentsItem = {
+    id: SPEC_SECTION_IDS.flowSpec,
+    label: 'Flow specification',
+    children: blockTitles.map((title) => ({ id: flowBlockId(title), label: title })),
+  }
+  const screenContents: SpecContentsItem = { id: SPEC_SECTION_IDS.screenSpec, label: 'Screen spec' }
+  const specContents = showScreenSpecs ? [flowContents, screenContents] : []
 
-  return (
-    <div className="grid gap-[24px]">
-      <SpecSectionNav sections={navSections} />
+  const specSections = showScreenSpecs ? (
+    <>
+      {flow.id === 'investments-bulk-approval' ? (
+        <BulkApprovalFlowSpec flow={flow} />
+      ) : (
+        <FlowLevelSpec flow={flow} disclosure={flowDisclosure} />
+      )}
 
-      {analysis ? (
-        analysisContent ? <section id={SPEC_SECTION_IDS.businessAnalysis} className="spec-document-surface">{analysisContent}</section> :
-        <Panel id={SPEC_SECTION_IDS.businessAnalysis} title="Business analysis specification">
-          <BusinessAnalysisContent analysis={analysis} />
-        </Panel>
-      ) : null}
-
-      {flow.id === 'investments-bulk-approval' ? <BulkApprovalFlowSpec flow={flow} /> : <FlowLevelSpec flow={flow} />}
-
-      <Panel id={SPEC_SECTION_IDS.screenSpec} title="Screen spec">
+      <SpecDocumentSection id={SPEC_SECTION_IDS.screenSpec} title="Screen spec">
         <ScenarioChips scenarios={flow.scenarios} selectedScenarioId={scenario.id} onSelect={onScenarioSelect} />
         {scenario.steps.length > 0 ? (
           <div className="mt-[12px] flex flex-wrap items-center gap-[6px] border-t border-[var(--uc-border)] pt-[12px]">
@@ -1869,20 +1908,112 @@ function SpecPanel({
         ) : (
           <EmptyState message="No structured spec is attached to this screen yet." />
         )}
-      </Panel>
+      </SpecDocumentSection>
+    </>
+  ) : null
 
+  if (analysisWorkspace) {
+    return (
+      <SpecWorkspacePanel
+        workspace={analysisWorkspace.workspace}
+        onCapture={analysisWorkspace.onCapture}
+        appendix={{
+          contents: specContents,
+          onJump: jump,
+          content: specSections,
+          allOpen: allSectionsOpen,
+          onToggleAll: toggleAllSections,
+        }}
+      />
+    )
+  }
+
+  const contents: SpecContentsItem[] = [
+    ...baSections.map((entry) => ({ id: `ba-section-${entry.key}`, label: entry.title, number: baNumber(entry.key) })),
+    ...specContents,
+  ]
+
+  return (
+    <SpecDocumentFrame
+      title={analysis ? 'Business analysis specification' : undefined}
+      contents={contents}
+      onJump={jump}
+      allOpen={allSectionsOpen}
+      onToggleAll={toggleAllSections}
+    >
+      {analysis ? <BusinessAnalysisContent analysis={analysis} disclosure={baDisclosure} /> : null}
+      {specSections}
+    </SpecDocumentFrame>
+  )
+}
+
+/**
+ * The reading frame shared by every specification: a heading, a contents list on
+ * the left and the document on the right. The same frame the business analysis
+ * editor uses, so a flow reads the same whichever section it opens on.
+ */
+function SpecDocumentFrame({
+  title,
+  contents,
+  onJump,
+  allOpen,
+  onToggleAll,
+  children,
+}: {
+  title?: string
+  contents: SpecContentsItem[]
+  onJump: (id: string) => void
+  allOpen: boolean
+  onToggleAll: () => void
+  children: ReactNode
+}) {
+  return (
+    <div className="grid gap-[20px]">
+      {title ? (
+        <div className="spec-page-topbar">
+          <h2 className="spec-page-title">{title}</h2>
+        </div>
+      ) : null}
+      <div className="spec-document-layout spec-read-layout">
+        <SpecContentsNav items={contents} onSelect={onJump} allOpen={allOpen} onToggleAll={onToggleAll} />
+        <article className="spec-document-main grid gap-[32px]">{children}</article>
+      </div>
     </div>
+  )
+}
+
+/** A top-level section of the specification document: heading, description, body. */
+function SpecDocumentSection({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id?: string
+  title: string
+  description?: string
+  children: ReactNode
+}) {
+  return (
+    <section id={id} className="scroll-mt-[24px] grid gap-[14px] border-t border-[var(--uc-border)] pt-[28px]">
+      <div>
+        <h2 className="uc-type-h2 text-[var(--uc-text)]">{title}</h2>
+        {description ? <p className="mt-[6px] max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">{description}</p> : null}
+      </div>
+      {children}
+    </section>
   )
 }
 
 function BulkApprovalFlowSpec({ flow }: { flow: FlowDefinition }) {
   const { overview } = flow
   return (
-    <Panel id={SPEC_SECTION_IDS.flowSpec} title="Flow specification">
-      <p className="max-w-[820px] uc-type-n5 text-[var(--uc-text-muted)]">
-        One concise contract for product, BA and delivery. Screen-specific layout and control detail lives in the screen contracts below.
-      </p>
-      <div className="mt-[16px] grid gap-[18px]">
+    <SpecDocumentSection
+      id={SPEC_SECTION_IDS.flowSpec}
+      title="Flow specification"
+      description="One concise contract for product, BA and delivery. Screen-specific layout and control detail lives in the screen contracts below."
+    >
+      <div className="grid gap-[18px]">
         <SpecSection title="Purpose and scope">
           <p className="uc-type-n5 text-[var(--uc-text)]">{overview.purpose}</p>
           <p className="mt-[6px] uc-type-n5 text-[var(--uc-text-muted)]">{overview.scopeNote}</p>
@@ -1913,7 +2044,7 @@ function BulkApprovalFlowSpec({ flow }: { flow: FlowDefinition }) {
           </div>
         </SpecSection>
       </div>
-    </Panel>
+    </SpecDocumentSection>
   )
 }
 
@@ -2090,113 +2221,21 @@ const SPEC_SECTION_IDS = {
 } as const
 
 /**
- * Sticky section switcher for the Specification tab.
- *
- * The tab is three long documents stacked on one page; without this the only way
- * between them is scrolling, and readers stop looking past the first one. It
- * sticks to the top of the library's own scroller and highlights the section
- * currently under the reader.
+ * The flow-level blocks. Each one is collapsible; the open state comes from the
+ * flow document, so its contents list can open and reach them.
  */
-function SpecSectionNav({ sections }: { sections: Array<{ id: string; label: string }> }) {
-  const [activeId, setActiveId] = useState(sections[0]?.id ?? '')
-  const navRef = useRef<HTMLElement | null>(null)
-  // The caller rebuilds the list every render; the spy only needs to resubscribe
-  // when the set of anchors actually changes.
-  const sectionKey = sections.map((section) => section.id).join('|')
-  const sectionsRef = useRef(sections)
-  sectionsRef.current = sections
-
-  useEffect(() => {
-    const sections = sectionsRef.current
-    const scroller = navRef.current?.closest('[data-flow-library-screen]')
-    if (!scroller) return
-
-    let frame = 0
-    const sync = () => {
-      frame = 0
-      const anchorTop = scroller.getBoundingClientRect().top + 96
-      let current = sections[0]?.id ?? ''
-      for (const section of sections) {
-        const element = document.getElementById(section.id)
-        if (element && element.getBoundingClientRect().top <= anchorTop) current = section.id
-      }
-      setActiveId(current)
-    }
-    const onScroll = () => {
-      if (frame) return
-      frame = requestAnimationFrame(sync)
-    }
-
-    sync()
-    scroller.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      if (frame) cancelAnimationFrame(frame)
-      scroller.removeEventListener('scroll', onScroll)
-    }
-  }, [sectionKey])
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
-  return (
-    <nav
-      ref={navRef}
-      aria-label="Specification sections"
-      className="sticky top-[6px] z-30 flex w-fit max-w-full flex-wrap items-center gap-[2px] rounded-full border border-[color-mix(in_srgb,var(--uc-border)_70%,transparent)] bg-[color-mix(in_srgb,var(--uc-surface)_80%,transparent)] p-[4px] shadow-[0_6px_20px_-8px_rgba(0,0,0,0.28)] backdrop-blur-md"
-    >
-      {sections.map((section) => {
-        const active = section.id === activeId
-        return (
-          <button
-            key={section.id}
-            type="button"
-            onClick={() => scrollTo(section.id)}
-            aria-current={active ? 'true' : undefined}
-            className={`rounded-full px-[16px] py-[7px] uc-type-n5-strong transition-all duration-200 ${
-              active
-                ? 'bg-[var(--uc-action-strong)] text-[var(--uc-static-white)] shadow-[0_2px_8px_-2px_color-mix(in_srgb,var(--uc-action-strong)_60%,transparent)]'
-                : 'text-[var(--uc-text-muted)] hover:bg-[color-mix(in_srgb,var(--uc-action)_8%,transparent)] hover:text-[var(--uc-text)]'
-            }`}
-          >
-            {section.label}
-          </button>
-        )
-      })}
-    </nav>
-  )
-}
-
-function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
+function FlowLevelSpec({ flow, disclosure }: { flow: FlowDefinition; disclosure: SectionDisclosure }) {
   const { overview } = flow
-  const fixedBlocks = [
-    'Key decision rules',
-    'Preconditions',
-    'Expected result',
-    'Analytics events',
-    'Questions to close',
-  ]
-  const blockTitles = [...fixedBlocks, ...overview.notes.map((note) => note.title)]
+  const blockTitles = flowBlockTitles(flow)
   const badgeFor = (title: string) => String(blockTitles.indexOf(title) + 1).padStart(2, '0')
-  const jumpItems = blockTitles.map((title) => ({
-    id: `spec-block-${slugify(title)}`,
-    label: title,
-  }))
-  const disclosure = useSectionDisclosure(jumpItems.map((item) => item.id))
 
   return (
-    <Panel id={SPEC_SECTION_IDS.flowSpec} title="Flow specification">
-      <p className="max-w-[860px] uc-type-n5 text-[var(--uc-text-muted)]">
-        A practical reference for review and implementation. Each rule describes the expected customer-facing outcome
-        and the data that must stay unchanged.
-      </p>
-      <SectionJump
-        items={jumpItems}
-        onJump={disclosure.jump}
-        allOpen={disclosure.allOpen}
-        onToggleAll={disclosure.toggleAll}
-      />
-      <div className="mt-[14px] grid gap-[12px]">
+    <SpecDocumentSection
+      id={SPEC_SECTION_IDS.flowSpec}
+      title="Flow specification"
+      description="A practical reference for review and implementation. Each rule describes the expected customer-facing outcome and the data that must stay unchanged."
+    >
+      <div className="grid gap-[12px]">
         <SpecBlock
           badge={badgeFor('Key decision rules')}
           disclosure={disclosure}
@@ -2262,7 +2301,7 @@ function FlowLevelSpec({ flow }: { flow: FlowDefinition }) {
           </SpecBlock>
         ))}
       </div>
-    </Panel>
+    </SpecDocumentSection>
   )
 }
 
@@ -2277,34 +2316,14 @@ const BA_SECTION_TITLES: Array<{ key: BaSectionKey; title: string }> = [
   { key: 'non-functional', title: 'Non-functional requirements' },
 ]
 
-function BusinessAnalysisContent({ analysis }: { analysis: FlowBusinessAnalysisSpec }) {
-  // Sections a flow leaves empty are not shown, and the ones that remain are
-  // numbered in the order they appear: a contents list reading 01, 02, 04 says
-  // something is missing when nothing is.
-  const present = BA_SECTION_TITLES.filter((entry) => {
-    if (entry.key === 'requirements') return analysis.requirements.length > 0
-    if (entry.key === 'proposed-solution') return analysis.proposedSolution.length > 0
-    if (entry.key === 'non-functional') return analysis.nonFunctionalRequirements.length > 0
-    return true
-  })
+function BusinessAnalysisContent({ analysis, disclosure }: { analysis: FlowBusinessAnalysisSpec; disclosure: SectionDisclosure }) {
+  const present = presentBaSections(analysis)
   const numberOf = (key: BaSectionKey) =>
     String(present.findIndex((entry) => entry.key === key) + 1).padStart(2, '0')
-  const disclosure = useSectionDisclosure(present.map((entry) => `ba-section-${entry.key}`))
   return (
     <div data-testid="business-analysis-document" className="max-w-[1120px]">
-      {/* Eight sections is a document, not a page: it needs a way in other than
-          scrolling from the top every time. */}
-      <SectionJump
-        items={present.map((entry) => ({
-          id: `ba-section-${entry.key}`,
-          label: entry.title,
-          badge: numberOf(entry.key),
-        }))}
-        onJump={disclosure.jump}
-        allOpen={disclosure.allOpen}
-        onToggleAll={disclosure.toggleAll}
-      />
-      <div className="mt-[14px] grid gap-[12px]">
+      <div className="grid gap-[12px]">
+
         <BusinessAnalysisSection
           sectionKey="general"
           number={numberOf('general')}
@@ -2487,60 +2506,6 @@ function BusinessAnalysisSection({
   )
 }
 
-/**
- * A jump strip for a long document. Scrolling is deliberate rather than instant:
- * a section that appears without any movement leaves the reader unsure whether
- * the page went anywhere, and an anchor jump that lands under a sticky header is
- * worse than no jump at all, so each target carries its own scroll margin.
- */
-/**
- * A contents list, not a row of filters. Stacked and link-styled on purpose: a
- * strip of pills reads as a set of options to choose between, and these are not
- * options — they are the document's own headings, and every one of them is
- * somewhere you can go.
- */
-function SectionJump({
-  items,
-  onJump,
-  allOpen,
-  onToggleAll,
-}: {
-  items: Array<{ id: string; label: string; badge?: string }>
-  onJump: (id: string) => void
-  allOpen: boolean
-  onToggleAll: () => void
-}) {
-  return (
-    <div className="mt-[4px] rounded-[10px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[14px]">
-      <div className="flex flex-wrap items-baseline justify-between gap-[10px]">
-        <p className="uc-type-n6-strong uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">Contents</p>
-        <button
-          type="button"
-          onClick={onToggleAll}
-          className="uc-type-n5-strong text-[var(--uc-action)] underline-offset-[3px] hover:underline"
-        >
-          {allOpen ? 'Collapse all' : 'Expand all'}
-        </button>
-      </div>
-      <nav aria-label="Jump to a section" className="mt-[10px] grid gap-[6px]">
-        {items.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onJump(item.id)}
-            className="flex w-fit items-baseline gap-[10px] text-left uc-type-n4-strong text-[var(--uc-action)] underline-offset-[3px] hover:underline"
-          >
-            <span className="shrink-0 font-mono text-[12px] text-[var(--uc-text-muted)]">
-              {item.badge ?? String(index + 1).padStart(2, '0')}
-            </span>
-            {item.label}
-          </button>
-        ))}
-      </nav>
-    </div>
-  )
-}
-
 interface SectionDisclosure {
   isOpen: (id: string) => boolean
   toggle: (id: string) => void
@@ -2554,11 +2519,11 @@ interface SectionDisclosure {
  * opens a section before scrolling to it. Landing on a collapsed heading is not
  * arriving anywhere.
  *
- * Everything starts closed: a document of this length opens as its own contents
- * page, and the reader chooses what to read rather than scrolling past it.
+ * A specification is read, not browsed: it starts fully open, the contents list
+ * moves the reader through it, and collapsing is there for skimming.
  */
-function useSectionDisclosure(ids: string[]): SectionDisclosure {
-  const [open, setOpen] = useState<Set<string>>(() => new Set())
+function useSectionDisclosure(ids: string[], startOpen = false): SectionDisclosure {
+  const [open, setOpen] = useState<Set<string>>(() => new Set(startOpen ? ids : []))
   const signature = ids.join('|')
   useEffect(() => {
     const reveal = (event: Event) => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Platform, Pressable, ScrollView } from 'react-native';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
 import { Text } from './Typography';
 import { ModalPanel } from './ModalPanel';
 import type { Choice } from './types';
@@ -106,9 +106,13 @@ export function Select<T extends string>({
               },
             ]}
           >
+            {item.leading ? (
+              <View style={{ marginRight: 12 }}>{item.leading}</View>
+            ) : null}
             <Text
               style={[
                 styles.largeLabel,
+                item.leading ? { flex: 1 } : null,
                 {
                   fontFamily: isSelected(item.value)
                     ? tokens.strongFont

@@ -8,6 +8,7 @@
 
 import { lazy, Suspense, useState } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
+import { PlatformPageShell } from "@/app/components/platform/PlatformPage";
 import { ToolErrorBoundary } from "./toolsUi";
 import { SideBySideTool } from "./SideBySideTool";
 import { TranslationTesterTool } from "./TranslationTesterTool";
@@ -88,8 +89,7 @@ export default function ToolsScreen() {
   const activeTool = TOOLS.find((tool) => tool.id === activeToolId) ?? null;
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-[var(--uc-app-bg)]" data-tools-screen="true">
-      <div className="mx-auto w-full max-w-[1500px] px-[24px] py-[28px] lg:px-[40px]">
+    <PlatformPageShell data-tools-screen="true">
         {activeTool ? (
           <header>
             <button
@@ -119,7 +119,7 @@ export default function ToolsScreen() {
         )}
 
         {activeToolId === null ? (
-          <div className="mt-[20px] grid gap-[16px] md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-[16px] md:grid-cols-2 xl:grid-cols-3">
             {TOOLS.map((tool) => (
               <button
                 key={tool.id}
@@ -145,7 +145,7 @@ export default function ToolsScreen() {
               ))}
           </div>
         ) : (
-          <div className="mt-[20px]">
+          <div>
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
               {activeToolId === "marketing-email" ? (
                 <Suspense fallback={<p role="status">Se încarcă editorul de emailuri…</p>}><MarketingEmailBuilderTool /></Suspense>
@@ -163,7 +163,6 @@ export default function ToolsScreen() {
             </ToolErrorBoundary>
           </div>
         )}
-      </div>
-    </div>
+    </PlatformPageShell>
   );
 }

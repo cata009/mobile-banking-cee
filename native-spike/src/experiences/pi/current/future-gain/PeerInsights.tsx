@@ -17,8 +17,8 @@ import age from '@/assets/investments/future-gain-peer-insights/age.svg';
 import income from '@/assets/investments/future-gain-peer-insights/monthly-income.svg';
 import home from '@/assets/investments/future-gain-peer-insights/goal-home.svg';
 import car from '@/assets/investments/future-gain-peer-insights/goal-car.svg';
-import personal from '@/assets/investments/future-gain-peer-insights/goal-personal-goals.svg';
 import saving from '@/assets/investments/future-gain-peer-insights/goal-saving.svg';
+import airplane from '@/assets/investments/future-gain-peer-insights/travel-airplane.svg';
 import housing from '@/assets/investments/future-gain-peer-insights/housing-loan.svg';
 import externalLink from '@/assets/investments/future-gain-peer-insights/external-link.svg';
 import insightsInfo from '@/assets/investments/future-gain-peer-insights/insights-info.svg';
@@ -27,7 +27,6 @@ import { AssetGlyph } from '../../../../universal/AssetGlyph';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { ToggleButton } from '../../../../universal/ToggleButton';
-import { MoreServicePage } from '../baseline/more/ServicePrimitives';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { sourceColor } from '../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../contracts';
@@ -47,7 +46,7 @@ const goalColors: Record<FutureGainPeerGoalId, string> = {
   'personal-goals': '#5E3D32',
   saving: '#363338',
 };
-const goalIcons = { home, car, 'personal-goals': personal, saving };
+const goalIcons = { home, car, 'travel-lifestyle': airplane, saving };
 const productIcons = {
   'housing-loan': housing,
   'real-estate-abroad': abroad,
@@ -58,6 +57,7 @@ const productGlyphs = {
   'credit-card': 'credit-card',
   'cash-loan': 'circle-dollar-sign',
   'personal-loan': 'user-round',
+  overdraft: 'wallet-cards',
   'term-deposit': 'piggy-bank',
   'investment-fund': 'chart-donut',
 };
@@ -87,6 +87,7 @@ const layout = StyleSheet.create({
   },
   consentTermsText: { maxWidth: 259 },
   consentToggle: { width: 60, height: 30 },
+  pageContent: { padding: 0, paddingBottom: 96, gap: 0 },
   intro: { paddingHorizontal: 24, paddingTop: 4, paddingBottom: 12 },
   introDescription: { fontSize: 14, lineHeight: 20 },
   profileCard: {
@@ -109,6 +110,7 @@ const layout = StyleSheet.create({
   },
   profileStatDivider: { borderRightWidth: 1 },
   goalCarousel: { flexDirection: 'row', paddingHorizontal: 17 },
+  goalHeading: { paddingHorizontal: 24, paddingTop: 4, paddingBottom: 8 },
   goalTab: { marginLeft: 8 },
   productsSection: {
     paddingHorizontal: 24,
@@ -180,10 +182,18 @@ export function PeerInsights(host: CurrentScreenProps) {
     );
   if (page === 'consent')
     return (
-      <MoreServicePage
+      <Page
         host={host}
         title="GDPR notice"
-        hideCollapsedTitleWhenHidden
+        contentContainerStyle={layout.pageContent}
+        trailing={
+          <IconAction
+            host={host}
+            name="help-circle"
+            label="Help"
+            onPress={host.onHelpRequest}
+          />
+        }
         footer={
           <Footer host={host}>
             <View style={layout.consentTerms}>
@@ -250,7 +260,7 @@ export function PeerInsights(host: CurrentScreenProps) {
             } : {})}
             testID="future-gain-peer-consent-policy-link"
             accessibilityRole="link"
-            accessibilityLabel="mBank PRIVACY Policy"
+            accessibilityLabel="mBanking Privacy Policy"
             onPress={event => {
               if (Platform.OS === 'web') event?.preventDefault();
               Linking.openURL(
@@ -259,22 +269,38 @@ export function PeerInsights(host: CurrentScreenProps) {
             }}
             style={layout.consentPolicyLink}
           >
-            <Text style={{ color: host.tokens.accent, fontSize: 16, lineHeight: 24 }}>
-              mBank PRIVACY Policy
+            <Text
+              style={{
+                color: host.tokens.accent,
+                fontFamily: host.tokens.strongFont,
+                fontSize: 14,
+                lineHeight: 18,
+                textTransform: 'uppercase',
+              }}
+            >
+              mBanking PRIVACY POLICY
             </Text>
             <AssetGlyph asset={externalLink} size={16} tintColor={host.tokens.accent} />
           </Pressable>
         </View>
-      </MoreServicePage>
+      </Page>
     );
   const goal =
     FUTURE_GAIN_PEER_GOALS.find(item => item.id === goalId) ??
     FUTURE_GAIN_PEER_GOALS[0]!;
   return (
-    <MoreServicePage
+    <Page
       host={{ ...host, onBack: () => setPage('consent') }}
       title="Achieve your life goals"
-      hideCollapsedTitleWhenHidden
+      contentContainerStyle={layout.pageContent}
+      trailing={
+        <IconAction
+          host={host}
+          name="help-circle"
+          label="Help"
+          onPress={host.onHelpRequest}
+        />
+      }
     >
       <View style={layout.intro}>
         <Label host={host} size={14} style={layout.introDescription}>
@@ -337,9 +363,11 @@ export function PeerInsights(host: CurrentScreenProps) {
           </View>
         </View>
       </View>
-      <Label host={host} strong size={14}>
-        What are you looking to achieve?
-      </Label>
+      <View style={layout.goalHeading}>
+        <Label host={host} strong size={14}>
+          What are you looking to achieve?
+        </Label>
+      </View>
       <ScrollView
         ref={goalRail}
         role="tablist"
@@ -348,7 +376,10 @@ export function PeerInsights(host: CurrentScreenProps) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
           layout.goalCarousel,
-          { paddingRight: Math.max(17, Math.ceil((viewportWidth - 96) / 2)) },
+          {
+            paddingLeft: 24,
+            paddingRight: Math.max(24, Math.ceil((viewportWidth - 96) / 2)),
+          },
         ]}
       >
         {FUTURE_GAIN_PEER_GOALS.map((item, index) => {
@@ -470,7 +501,7 @@ export function PeerInsights(host: CurrentScreenProps) {
                 <View style={layout.productChevron}>
                   <SourceCustomIcon
                     name="chevron-link"
-                    size={32}
+                    size={16}
                     color={host.tokens.text}
                   />
                 </View>
@@ -526,6 +557,6 @@ export function PeerInsights(host: CurrentScreenProps) {
           nor a guarantee of future results.
         </Label>
       </View>
-    </MoreServicePage>
+    </Page>
   );
 }

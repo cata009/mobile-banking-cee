@@ -186,13 +186,12 @@ test.each(
   },
 );
 
-test('changing simulator currency is staged until confirmation and cancel keeps the original draft', async () => {
+test('changing stock currency is staged until confirmation and cancel keeps the original draft', async () => {
   const { tree } = await render('smart-investment', {
     route: {
       screen: 'smart-investment',
       params: {
-        view: 'fund',
-        securityId: 'climate-focus',
+        view: 'stock',
         amountInput: '1000',
         currency: 'EUR',
       },

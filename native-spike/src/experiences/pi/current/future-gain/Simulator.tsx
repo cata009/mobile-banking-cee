@@ -23,7 +23,6 @@ import { sourceColor } from '../../../../universal/sourceColor';
 import { futureGainAvailableBalance } from './model';
 import {
   Page,
-  Title,
   Label,
   Fact,
   Section,
@@ -164,7 +163,6 @@ export function Simulator({
         </Footer>
       }
     >
-      <Title host={host}>{title}</Title>
       <Section
         host={host}
         title={kind === 'fund' ? 'FUND CALCULATION' : 'STOCKS CALCULATION'}
@@ -193,6 +191,7 @@ export function Simulator({
         value={amountInput}
         onChange={setAmount}
         currency={currency}
+        currencyPresentation={kind === 'fund' ? 'suffix' : 'selector'}
         currencyLabel="Currency"
         currencyAriaLabel={`Change currency, currently ${currency}`}
         currencyIconName="chevron-down-wide"

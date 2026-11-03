@@ -309,6 +309,75 @@ export function createSpendingAnalyticsTimeline(
   };
 }
 
+/** Adds caller-owned demo rows without mutating the source timeline. */
+export function appendSpendingAnalyticsTransactions(
+  timeline: SpendingAnalyticsTimeline,
+  country: CountryId,
+  transactions: readonly SpendingAnalyticsTransaction[],
+): SpendingAnalyticsTimeline {
+  if (transactions.length === 0) return timeline;
+
+  const periodsByKey = new Map(
+    timeline.periods.map(period => [period.key, period] as const),
+  );
+  transactions.forEach(transaction => {
+    const year = getYearFromMonthKey(transaction.monthKey);
+    if (!periodsByKey.has(transaction.monthKey)) {
+      periodsByKey.set(transaction.monthKey, {
+        key: transaction.monthKey,
+        kind: 'month',
+        label: transaction.monthTitle.split(' ')[0] ?? transaction.monthTitle,
+        year,
+      });
+    }
+    const yearKey = `year-${year}`;
+    if (!periodsByKey.has(yearKey)) {
+      periodsByKey.set(yearKey, {
+        key: yearKey,
+        kind: 'year',
+        label: year,
+        year,
+      });
+    }
+  });
+
+  const monthPeriods = Array.from(periodsByKey.values())
+    .filter(period => period.kind === 'month')
+    .sort((a, b) => a.key.localeCompare(b.key));
+  const yearPeriods = Array.from(periodsByKey.values())
+    .filter(period => period.kind === 'year')
+    .sort((a, b) => Number(b.year) - Number(a.year));
+  const periods = [...monthPeriods, ...yearPeriods];
+  const summariesByPeriodKey = periods.reduce<
+    Record<string, SpendingAnalyticsSummary>
+  >((summaries, period) => {
+    const existing = timeline.summariesByPeriodKey[period.key];
+    const additions = transactions.filter(transaction =>
+      period.kind === 'month'
+        ? transaction.monthKey === period.key
+        : getYearFromMonthKey(transaction.monthKey) === period.year,
+    );
+    const rows = new Map<string, SpendingAnalyticsTransaction>();
+    existing?.sourceTransactions.forEach(transaction =>
+      rows.set(transaction.id, transaction),
+    );
+    additions.forEach(transaction => rows.set(transaction.id, transaction));
+    summaries[period.key] = summarizeTransactions(
+      period,
+      existing?.currency ?? getCountryCurrency(country),
+      Array.from(rows.values()),
+    );
+    return summaries;
+  }, {});
+
+  return {
+    periods,
+    activePeriodKey:
+      monthPeriods.at(-1)?.key ?? timeline.activePeriodKey,
+    summariesByPeriodKey,
+  };
+}
+
 /**
  * A summary over an arbitrary run of months.
  *

@@ -8,6 +8,7 @@ import {
   parseComponentDetailHash,
   type InventoryTab,
 } from './inventoryNav'
+import { PlatformPageHeader, PlatformPageShell } from '@/app/components/platform/PlatformPage'
 import FigmaLibraryInventory from './FigmaLibraryInventory'
 import { ColorInventory, IconInventory, TypographyInventory } from './inventories'
 import ComponentDetailScreen from './ComponentDetailScreen'
@@ -42,19 +43,17 @@ export default function DesignSystemPage() {
     window.dispatchEvent(new Event('hashchange'))
   }
   return (
-    <div ref={scrollContainer} className="ds-workspace h-full w-full self-stretch overflow-y-auto">
-      <div className="ds-page-shell">
+    <PlatformPageShell ref={scrollContainer} className="ds-workspace w-full self-stretch">
         {!detailComponentId ? (
-          <header className="ds-library-heading">
-            <div>
-              <span className="ds-eyebrow">UniCredit / Mobile banking CEE</span>
-              <h1>Design system</h1>
-              <p>Explore the shared components, their variants and the source behind every interface.</p>
-            </div>
-            <a className="ds-text-link" href={DESIGN_SYSTEM_FIGMA_URL} target="_blank" rel="noreferrer">
-              Design documentation ↗
-            </a>
-          </header>
+          <PlatformPageHeader
+            title="Design system"
+            description="Explore the shared components, their variants and the source behind every interface."
+            action={
+              <a className="ds-text-link" href={DESIGN_SYSTEM_FIGMA_URL} target="_blank" rel="noreferrer">
+                Design documentation ↗
+              </a>
+            }
+          />
         ) : null}
         <div className="ds-inventory-tabs" role="tablist" aria-label="Design system inventory tabs">
           {inventoryTabs.map((tab) => (
@@ -90,7 +89,6 @@ export default function DesignSystemPage() {
             <TypographyInventory />
           )}
         </main>
-      </div>
-    </div>
+    </PlatformPageShell>
   )
 }

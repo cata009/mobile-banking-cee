@@ -26,6 +26,8 @@ import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDiv
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
+import { AccountDetailsShareSheet } from './AccountDetailsShareSheet';
+import { getAccountNameOverride } from '@/features/accounts-payments/accountNameOverrides';
 
 /** Source account information: identity stays visible; only financial values are private. */
 export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
@@ -36,7 +38,9 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
         item.id ===
         (host.route.params?.productId ?? host.route.params?.accountId),
     ) ?? data.accounts[0];
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0),
+    [expanded, setExpanded] = useState(false),
+    [shareOpen, setShareOpen] = useState(false);
   const { copy: copyAccount, toast } = useBankingCopy();
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const title = copy(
@@ -44,7 +48,7 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
     'runtime.accounts.detailsInfo.title',
     'Account Details',
   );
-  const currency = getCountryConfig(host.country).currency;
+  const currency = product?.currency ?? getCountryConfig(host.country).currency;
   const amount = (value: number) =>
     `${maskFormattedAmount(
       formatMoneyNumber(value, host.country),
@@ -64,20 +68,22 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
     product?.type === 'saving_account'
       ? 'savingAccount'
       : product?.type === 'term_deposit'
-      ? 'termDeposit'
-      : product?.type === 'loan'
-      ? 'loan'
-      : product?.type === 'mortgage'
-      ? 'mortgage'
-      : 'currentAccount';
+        ? 'termDeposit'
+        : product?.type === 'loan'
+          ? 'loan'
+          : product?.type === 'mortgage'
+            ? 'mortgage'
+            : 'currentAccount';
   const accountTitle = {
     key: 'accountTitle',
     fallback: 'Account title',
-    value: copy(
-      host,
-      `runtime.accounts.productTitles.${productTitleKey}`,
-      product?.type.replace(/_/g, ' ').toUpperCase() ?? '',
-    ),
+    value:
+      (product ? getAccountNameOverride(product.id) : undefined) ??
+      copy(
+        host,
+        `runtime.accounts.productTitles.${productTitleKey}`,
+        product?.type.replace(/_/g, ' ').toUpperCase() ?? '',
+      ),
   };
   type Field = {
     key: string;
@@ -88,175 +94,182 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
   const fields: Field[] = !product
     ? []
     : deposit
-    ? [
-        {
-          key: 'termDeposit.maturityAmount',
-          fallback: 'Maturity amount',
-          value: amount(deposit.maturityAmount),
-        },
-        {
-          key: 'termDeposit.interestAmountBeforeTax',
-          fallback: 'Interest amount before tax',
-          value: amount(deposit.interestAmountBeforeTax),
-        },
-        {
-          key: 'termDeposit.maturityDate',
-          fallback: 'Maturity date',
-          value: deposit.maturityDate,
-        },
-        {
-          key: 'termDeposit.rollover',
-          fallback: 'Rollover',
-          value: deposit.rollover,
-        },
-        accountTitle,
-        {
-          key: 'termDeposit.accountOwner',
-          fallback: 'Account owner',
-          value: deposit.accountOwner,
-        },
-        {
-          key: 'termDeposit.depositAmount',
-          fallback: 'Deposit Amount',
-          value: amount(deposit.depositAmount),
-        },
-        {
-          key: 'termDeposit.startValueDate',
-          fallback: 'Start/Value Date',
-          value: deposit.startValueDate,
-        },
-        {
-          key: 'termDeposit.maturityPeriod',
-          fallback: 'Maturity period',
-          value: deposit.maturityPeriod,
-        },
-        {
-          key: 'termDeposit.interestRatePerYear',
-          fallback: 'Interest rate/year',
-          value: deposit.interestRatePerYear,
-        },
-        {
-          key: 'termDeposit.currentAccountNumber',
-          fallback: 'Current account number',
-          value: deposit.currentAccountNumber,
-        },
-        {
-          key: 'termDeposit.decreaseAmountBy',
-          fallback: 'Decrease amount by',
-          value: amount(deposit.decreaseAmountBy),
-        },
-        {
-          key: 'termDeposit.reinvestInterest',
-          fallback: 'Reinvest the interest',
-          value: deposit.reinvestInterest,
-        },
-      ]
-    : loan
-    ? [
-        {
-          key: 'loan.nextInstallment',
-          fallback: 'Next installment',
-          value: amount(loan.nextInstallment),
-        },
-        {
-          key: 'loan.nextInstallmentDate',
-          fallback: 'Next installment date',
-          value: loan.nextInstallmentDate,
-        },
-        {
-          key: 'loan.interestRate',
-          fallback: 'Interest rate',
-          value: loan.interestRate,
-        },
-        {
-          key: 'loan.overdueAmount',
-          fallback: 'Overdue amount',
-          value: amount(loan.overdueAmount),
-        },
-        {
-          key: 'loan.overdueInterestRate',
-          fallback: 'Overdue interest rate',
-          value: loan.overdueInterestRate,
-        },
-        {
-          key: 'loan.ownedAmount',
-          fallback: 'Owned amount',
-          value: amount(loan.ownedAmount),
-        },
-        {
-          key: 'loan.originalAmount',
-          fallback: 'Original amount',
-          value: amount(loan.originalAmount),
-        },
-        accountTitle,
-        {
-          key: 'loan.iban',
-          fallback: 'IBAN',
-          value: loan.iban,
-          copyLabel: 'IBAN',
-        },
-        {
-          key: 'loan.accountOwner',
-          fallback: 'Account owner',
-          value: loan.accountOwner,
-        },
-        {
-          key: 'loan.startDate',
-          fallback: 'Start date',
-          value: loan.startDate,
-        },
-        {
-          key: 'loan.finalPayment',
-          fallback: 'Final payment',
-          value: loan.finalPayment,
-        },
-      ]
-    : [
-        {
-          key: 'accountNumber',
-          fallback: 'Account number',
-          value: product.accountNumber,
-          copyLabel: 'Account number',
-        },
-        ...(product.type === 'saving_account'
-          ? [accountTitle]
-          : [
-              {
-                key: 'availableFunds',
-                fallback: 'Available funds',
-                value: amount(product.balance),
-              },
-            ]),
-        {
-          key: 'currentBalance',
-          fallback: 'Current balance',
-          value: amount(
-            product.type === 'saving_account'
-              ? product.balance
-              : product.balance * 0.92,
-          ),
-        },
-        ...(product.type === 'saving_account'
-          ? []
-          : [
-              {
-                key: 'blockedReservedAmount',
-                fallback: 'Blocked/reserved amount',
-                value: amount(0),
-              },
-              { key: 'overdraft', fallback: 'Overdraft', value: amount(0) },
-              accountTitle,
-              {
-                key: 'offer',
-                fallback: 'Offer',
-                value: copy(
-                  host,
-                  'runtime.accounts.detailsInfo.offerValue',
-                  'Account under favorable conditions',
-                ),
-              },
-            ]),
-      ];
+      ? [
+          {
+            key: 'termDeposit.maturityAmount',
+            fallback: 'Maturity amount',
+            value: amount(deposit.maturityAmount),
+          },
+          {
+            key: 'termDeposit.interestAmountBeforeTax',
+            fallback: 'Interest amount before tax',
+            value: amount(deposit.interestAmountBeforeTax),
+          },
+          {
+            key: 'termDeposit.maturityDate',
+            fallback: 'Maturity date',
+            value: deposit.maturityDate,
+          },
+          {
+            key: 'termDeposit.rollover',
+            fallback: 'Rollover',
+            value: deposit.rollover,
+          },
+          accountTitle,
+          {
+            key: 'termDeposit.accountOwner',
+            fallback: 'Account owner',
+            value: deposit.accountOwner,
+          },
+          {
+            key: 'termDeposit.depositAmount',
+            fallback: 'Deposit Amount',
+            value: amount(deposit.depositAmount),
+          },
+          {
+            key: 'termDeposit.startValueDate',
+            fallback: 'Start/Value Date',
+            value: deposit.startValueDate,
+          },
+          {
+            key: 'termDeposit.maturityPeriod',
+            fallback: 'Maturity period',
+            value: deposit.maturityPeriod,
+          },
+          {
+            key: 'termDeposit.interestRatePerYear',
+            fallback: 'Interest rate/year',
+            value: deposit.interestRatePerYear,
+          },
+          {
+            key: 'termDeposit.currentAccountNumber',
+            fallback: 'Current account number',
+            value: deposit.currentAccountNumber,
+          },
+          {
+            key: 'termDeposit.decreaseAmountBy',
+            fallback: 'Decrease amount by',
+            value: amount(deposit.decreaseAmountBy),
+          },
+          {
+            key: 'termDeposit.reinvestInterest',
+            fallback: 'Reinvest the interest',
+            value: deposit.reinvestInterest,
+          },
+        ]
+      : loan
+        ? [
+            {
+              key: 'loan.nextInstallment',
+              fallback: 'Next installment',
+              value: amount(loan.nextInstallment),
+            },
+            {
+              key: 'loan.nextInstallmentDate',
+              fallback: 'Next installment date',
+              value: loan.nextInstallmentDate,
+            },
+            {
+              key: 'loan.interestRate',
+              fallback: 'Interest rate',
+              value: loan.interestRate,
+            },
+            {
+              key: 'loan.overdueAmount',
+              fallback: 'Overdue amount',
+              value: amount(loan.overdueAmount),
+            },
+            {
+              key: 'loan.overdueInterestRate',
+              fallback: 'Overdue interest rate',
+              value: loan.overdueInterestRate,
+            },
+            {
+              key: 'loan.ownedAmount',
+              fallback: 'Owned amount',
+              value: amount(loan.ownedAmount),
+            },
+            {
+              key: 'loan.originalAmount',
+              fallback: 'Original amount',
+              value: amount(loan.originalAmount),
+            },
+            accountTitle,
+            {
+              key: 'loan.iban',
+              fallback: 'IBAN',
+              value: loan.iban,
+              copyLabel: 'IBAN',
+            },
+            {
+              key: 'loan.accountOwner',
+              fallback: 'Account owner',
+              value: loan.accountOwner,
+            },
+            {
+              key: 'loan.startDate',
+              fallback: 'Start date',
+              value: loan.startDate,
+            },
+            {
+              key: 'loan.finalPayment',
+              fallback: 'Final payment',
+              value: loan.finalPayment,
+            },
+          ]
+        : [
+            {
+              key: 'accountNumber',
+              fallback: 'Account number',
+              value: product.accountNumber,
+              copyLabel: 'Account number',
+            },
+            ...(product.type === 'saving_account'
+              ? [accountTitle]
+              : [
+                  {
+                    key: 'availableFunds',
+                    fallback: 'Available funds',
+                    value: amount(product.balance),
+                  },
+                ]),
+            {
+              key: 'currentBalance',
+              fallback: 'Current balance',
+              value: amount(
+                product.type === 'saving_account'
+                  ? product.balance
+                  : product.balance * 0.92,
+              ),
+            },
+            ...(product.type === 'saving_account'
+              ? []
+              : [
+                  {
+                    key: 'blockedReservedAmount',
+                    fallback: 'Blocked/reserved amount',
+                    value: amount(0),
+                  },
+                  { key: 'overdraft', fallback: 'Overdraft', value: amount(0) },
+                  accountTitle,
+                  {
+                    key: 'offer',
+                    fallback: 'Offer',
+                    value: copy(
+                      host,
+                      'runtime.accounts.detailsInfo.offerValue',
+                      'Account under favorable conditions',
+                    ),
+                  },
+                ]),
+          ];
+  const visibleFields = expanded ? fields : fields.slice(0, 3),
+    canExpand = fields.length > 3,
+    expansionLabel = copy(
+      host,
+      expanded ? 'runtime.actions.showLess' : 'runtime.actions.showMore',
+      expanded ? 'Show less' : 'Show more',
+    );
   const connectedCard =
     product?.type === 'current_account'
       ? data.cards.find(
@@ -264,6 +277,8 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
             card.type === 'debit_card' && card.linkedAccountId === product.id,
         )
       : null;
+  const accountOwner = 'IACOB MIHAI-CATALIN';
+  const bic = host.country === 'RO' ? 'BACXROBU' : undefined;
   const surface = sourceColor('var(--uc-surface)', dark);
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
@@ -288,6 +303,7 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
           safeAreaReserve={host.screenTopInset}
           collapsedTitleProgress={progress}
           dark={dark}
+          onRightActionPress={() => setShareOpen(true)}
           rightActionIcon={
             product ? (
               <SourceCustomIcon
@@ -314,7 +330,7 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
               </Text>
             </View>
             <View style={styles.fields}>
-              {fields.map(field => (
+              {visibleFields.map(field => (
                 <BaselineAccountInfoField
                   key={field.key}
                   title={copy(
@@ -348,24 +364,26 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                   }
                 />
               ))}
+              {canExpand ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={expansionLabel}
+                  accessibilityState={{ expanded }}
+                  onPress={() => setExpanded(value => !value)}
+                  style={styles.expansionAction}
+                >
+                  <Text
+                    style={[
+                      styles.expansionActionLabel,
+                      { color: host.tokens.accent },
+                    ]}
+                  >
+                    {expansionLabel}
+                  </Text>
+                </Pressable>
+              ) : null}
               {product.type === 'current_account' ? (
                 <>
-                  <View style={styles.less}>
-                    <Pressable accessibilityRole="button">
-                      <Text
-                        style={[
-                          styles.lessLabel,
-                          { color: host.tokens.accent },
-                        ]}
-                      >
-                        {copy(
-                          host,
-                          'runtime.actions.showLess',
-                          'Show less',
-                        ).toUpperCase()}
-                      </Text>
-                    </Pressable>
-                  </View>
                   <BaselineSectionDivider
                     title={copy(
                       host,
@@ -394,6 +412,16 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
           </>
         ) : null}
       </ScrollView>
+      {product && shareOpen ? (
+        <AccountDetailsShareSheet
+          host={host}
+          accountTitle={accountTitle.value}
+          accountOwner={accountOwner}
+          iban={product.accountNumber}
+          bic={bic}
+          onClose={() => setShareOpen(false)}
+        />
+      ) : null}
       <BankingCopyToast toast={toast} font={host.tokens.strongFont} />
     </View>
   );
@@ -415,6 +443,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  less: { paddingVertical: 48, alignItems: 'center' },
-  lessLabel: { fontFamily: 'UniCredit-bold', fontSize: 16, lineHeight: 17 },
+  expansionAction: {
+    marginTop: 18,
+    paddingBottom: 18,
+    alignSelf: 'center',
+  },
+  expansionActionLabel: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    lineHeight: 21,
+  },
 });

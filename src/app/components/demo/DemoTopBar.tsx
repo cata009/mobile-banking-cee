@@ -369,7 +369,7 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
         </div>
 
         {showContextControls ? (
-          <div className="grid min-h-[48px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
+          <div className="grid min-h-[48px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 overflow-visible border-t border-[var(--uc-border-muted)] px-6 py-1.5 lg:px-10 xl:px-16">
             <div className="flex min-w-0 items-center gap-3 overflow-visible">
               <DropdownMenu open={isProductDropdownOpen} onOpenChange={setIsProductDropdownOpen}>
                 <DropdownMenuTrigger asChild>
@@ -552,9 +552,9 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
               )}
             </div>
 
-            <DevicePreviewSelector />
-
             <div className="flex min-w-0 items-center justify-end gap-2">
+              <DevicePreviewSelector />
+
               <HeaderIconButton icon="demo-reset" label="Refresh" onClick={handleReset} />
 
               {onOpenFocusMode && <HeaderIconButton icon="play" label="Open large demo" onClick={onOpenFocusMode} />}

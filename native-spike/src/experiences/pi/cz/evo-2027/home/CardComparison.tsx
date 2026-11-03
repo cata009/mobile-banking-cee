@@ -7,6 +7,7 @@ import type { CzechNativeScreenProps } from '../contracts';
 import { CardArtwork } from './CardArtwork';
 import { Rail, textStyles as t } from './Primitives';
 import { createHomeProducts } from './model';
+import { evoTokens as tokens } from './tokens';
 
 /** Exact Source presentation previews; Premium intentionally opens the existing standard card. */
 export function CardComparison({
@@ -80,7 +81,15 @@ export function CardComparison({
                 }
                 style={s.tile}
               >
-                <CardArtwork variant={item.variant} width={80} height={50} />
+                <View style={s.art}>
+                  <View style={s.artClip}>
+                    <CardArtwork
+                      variant={item.variant}
+                      width={80}
+                      height={50}
+                    />
+                  </View>
+                </View>
                 <View style={s.copy}>
                   <Text style={[t.body, t.strong]}>{item.title}</Text>
                   <Text style={[t.body, t.muted]}>{item.number}</Text>
@@ -94,7 +103,29 @@ export function CardComparison({
   );
 }
 const s = StyleSheet.create({
-  page: { flexDirection: 'row', backgroundColor: '#e5e5e5', borderRadius: 8 },
+  // Same white surface and lift as the Accounts card above it.
+  page: {
+    flexDirection: 'row',
+    backgroundColor: tokens.surface,
+    borderRadius: 8,
+    padding: 8,
+    gap: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  art: {
+    width: 80,
+    height: 50,
+    borderRadius: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+  },
+  artClip: { width: 80, height: 50, borderRadius: 4, overflow: 'hidden' },
   tile: {
     flex: 1,
     minHeight: 120,
