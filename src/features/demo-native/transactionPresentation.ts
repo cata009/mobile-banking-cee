@@ -11,6 +11,9 @@ export interface NativeTransactionPresentation {
   showSpendingInsights?: boolean
   postingTime?: string
   activityStatus?: 'declined'
+  /** Flow-scoped wording for an authorised transaction awaiting settlement. */
+  pendingStatusLabel?: string
+  pendingStatusDescription?: string
   showExpandableDetails?: boolean
   cardIdentityMode?: 'holder'
   /** Optional destination for the existing Card used navigation row. */

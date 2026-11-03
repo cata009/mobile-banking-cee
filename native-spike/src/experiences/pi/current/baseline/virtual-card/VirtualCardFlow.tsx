@@ -11,6 +11,7 @@ import successIllustration from '@/assets/investments/robo/goal-created-illustra
 import {
   VIRTUAL_CARD_DESIGNS,
   eligibleVirtualCardAccount,
+  eligibleVirtualCardPreviewAccount,
   isDesignAvailable,
   type VirtualCardDesign,
   type VirtualCardTier,
@@ -91,8 +92,13 @@ export default function VirtualCardFlow({
       ? 'Gold'
       : 'Standard',
   );
-  const accounts = bankingProducts(host).currentAccounts.filter(
-    eligibleVirtualCardAccount,
+  const demoPreview =
+    host.route.params?.cardGuardVirtualCardIssue === 'true' &&
+    (host.country === 'BA' || host.country === 'BA_BL');
+  const accounts = bankingProducts(host).currentAccounts.filter(account =>
+    demoPreview
+      ? eligibleVirtualCardPreviewAccount(host.country, account)
+      : eligibleVirtualCardAccount(account),
   );
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? '');
   const [accountPickerOpen, setAccountPickerOpen] = useState(false);
@@ -127,7 +133,9 @@ export default function VirtualCardFlow({
   const sign = () => {
     const id =
       mode === 'issue' && account
-        ? host.onIssueVirtualCard?.(account, design, tier)
+        ? demoPreview
+          ? host.onIssueVirtualCard?.(account, design, tier, true)
+          : host.onIssueVirtualCard?.(account, design, tier)
         : mode === 'change' &&
             cardId &&
             host.onChangeVirtualCardPicture?.(cardId, design)
@@ -145,13 +153,17 @@ export default function VirtualCardFlow({
       ? 'Select your preferred card'
       : step === 'setup'
         ? mode === 'issue'
-          ? 'Set up your card'
+          ? demoPreview
+            ? 'Set up your demo card'
+            : 'Set up your card'
           : 'Change card picture'
         : step === 'sign'
           ? 'Enter pin code'
           : step === 'success'
             ? mode === 'issue'
-              ? 'Your virtual card is ready'
+              ? demoPreview
+                ? 'Your demo virtual card is ready'
+                : 'Your virtual card is ready'
               : 'Your virtual card image was changed'
             : 'Ops, something went wrong';
   if (step === 'sign')
@@ -190,7 +202,9 @@ export default function VirtualCardFlow({
           <AssetGlyph asset={successIllustration} width={343} height={160} />
           <Text style={[styles.body, { color: host.tokens.text }]}>
             {mode === 'issue'
-              ? 'You can start using it right away for online payments or add it to your wallet.'
+              ? demoPreview
+                ? 'This demo card is ready to explore. Real availability and eligible payments depend on bank product terms.'
+                : 'You can start using it right away for online payments or add it to your wallet.'
               : 'Your selected design is now displayed on your virtual card. You can return to your cards to view the updated image.'}
           </Text>
           {mode === 'issue' && Platform.OS === 'web' ? (
@@ -365,7 +379,9 @@ export default function VirtualCardFlow({
                         { color: host.tokens.text },
                       ]}
                     >
-                      No eligible RON, EUR or USD account is available.
+                      {demoPreview
+                        ? 'No eligible BAM account is available in this demo.'
+                        : 'No eligible RON, EUR or USD account is available.'}
                     </Text>
                   )}
                   <View style={styles.configurationBody}>
@@ -390,11 +406,9 @@ export default function VirtualCardFlow({
                         <Text
                           style={[styles.body, { color: host.tokens.text }]}
                         >
-                          I confirm that I have read and agree to the
-                          contractual terms and to waive the standard 15-day
-                          review period*.
-                          {'\n'}*Alternatively, you may review and download the
-                          contract and submit a new request at a later time.
+                          {demoPreview
+                            ? 'I confirm that I have read the demo information. This preview does not create a real card or accept a bank contract.'
+                            : 'I confirm that I have read and agree to the contractual terms and to waive the standard 15-day review period*.\n*Alternatively, you may review and download the contract and submit a new request at a later time.'}
                         </Text>
                       </Pressable>
                       <ToggleButton
@@ -414,7 +428,9 @@ export default function VirtualCardFlow({
                   variant="info"
                   title="Note"
                   description={
-                    'The Virtual Card can be attached to the LEI/EUR/USD account of customers over the age of 18. Virtual cards of the "supplementary card" type cannot be issued. A maximum of 2 virtual cards can be issued per day.'
+                    demoPreview
+                      ? 'This is an illustrative BA Card guard preview. A real virtual card depends on bank availability, eligible accounts and terms.'
+                      : 'The Virtual Card can be attached to the LEI/EUR/USD account of customers over the age of 18. Virtual cards of the "supplementary card" type cannot be issued. A maximum of 2 virtual cards can be issued per day.'
                   }
                   dark={dark}
                   presentation={{ width: '100%', descriptionLines: null }}
@@ -441,8 +457,9 @@ export default function VirtualCardFlow({
           ) : null}
           {step === 'error' ? (
             <Text style={[styles.body, { color: host.tokens.text }]}>
-              We couldn’t complete your request. Please try again. You can issue
-              up to 2 virtual cards per day.
+              {demoPreview
+                ? 'This demo issue could not be completed. Return to the virtual-card choice or try again.'
+                : 'We couldn’t complete your request. Please try again. You can issue up to 2 virtual cards per day.'}
             </Text>
           ) : null}
         </View>
@@ -454,7 +471,9 @@ export default function VirtualCardFlow({
             label={
               step === 'setup'
                 ? mode === 'issue'
-                  ? 'Request card'
+                  ? demoPreview
+                    ? 'Create demo card'
+                    : 'Request card'
                   : 'Update picture'
                 : 'Ok, I got it'
             }

@@ -57,8 +57,20 @@ describe('Bosnia fraud protection policies', () => {
     expect(state.cardStatus).toBe('active')
   })
 
+  it('does not freeze the card when a report is submitted without an explicit block choice', () => {
+    let state = fraudReducer(createFraudSession(), { type: 'report', transactionId: 'berlin' })
+    state = fraudReducer(state, { type: 'draft', declaration: true })
+    state = fraudReducer(state, { type: 'submit' })
+    expect(state.cases.berlin?.kind).toBe('fraud-report')
+    expect(state.cardStatus).toBe('active')
+  })
+
   it('freezes only after successful submission and retains an active card on failure', () => {
-    let state = fraudReducer(createFraudSession('booked'), { type: 'report', transactionId: 'berlin' })
+    let state = fraudReducer(createFraudSession('booked'), {
+      type: 'report',
+      transactionId: 'berlin',
+      blockCardOnSubmit: true,
+    })
     expect(state.cardStatus).toBe('active')
     expect(state.reported).toEqual([])
     expect(canSubmitClaim(state)).toBe(false)
@@ -96,7 +108,7 @@ describe('Bosnia fraud protection policies', () => {
   })
 
   it.each(['vienna', 'online', 'berlin'])(
-    'reports %s without filing a chargeback for an unbooked item',
+    'reports %s without filing a chargeback or freezing without explicit choice',
     (transactionId) => {
       let state = fraudReducer(createFraudSession(), { type: 'report', transactionId })
       state = fraudReducer(state, {
@@ -107,7 +119,7 @@ describe('Bosnia fraud protection policies', () => {
       expect(canSubmitClaim(state)).toBe(false)
       state = fraudReducer(state, { type: 'submit' })
       expect(state.cases[transactionId]?.kind).toBe('fraud-report')
-      expect(state.cardStatus).toBe('frozen')
+      expect(state.cardStatus).toBe('active')
       expect(state.reported).toContain(transactionId)
     },
   )

@@ -43,7 +43,9 @@ async function openUnrecognisedPayment() {
   fireEvent.click(screen.getByRole('button', { name: 'Open m-ba fraud alert' }))
   expect(screen.getByRole('status', { name: 'Face ID login simulation' })).toBeTruthy()
   fireEvent.click(await screen.findByRole('button', { name: /Review Carrefour/ }))
-  fireEvent.click(screen.getByRole('button', { name: 'Report unrecognised payment' }))
+  fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+  if (screen.queryByRole('button', { name: 'Open dispute' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open dispute' }))
 }
 
 function completeClaim() {
@@ -83,7 +85,8 @@ describe('Bosnia complete fraud flow', () => {
     render(<FraudJourney initialScreen="fraud-alerts" />)
     expect(screen.getByText('Iacob Mihai')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Review Carrefour' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Report unrecognised payment' }))
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue report' }))
     expect(screen.getByRole('textbox', { name: 'What happened? (optional)' })).toBeTruthy()
     expect(screen.queryByRole('checkbox', { name: /physical card/ })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Choose report reason' }))
@@ -111,6 +114,46 @@ describe('Bosnia complete fraud flow', () => {
     expect(screen.getByText('Case reference')).toBeTruthy()
     expect(screen.getByText('BA-2026-10482')).toBeTruthy()
     expect(document.querySelector('.fraud-notice')).toBeNull()
+  })
+  it('explains the unsettled authorisation and makes the block choice explicit', async () => {
+    render(<FraudJourney initialScreen="fraud-transaction" />)
+    await asyncNativeReady(document.body)
+    expect(screen.getByText('Authorised · awaiting settlement')).toBeTruthy()
+    expect(
+      screen.getByText(
+        /The amount is reserved\. If the merchant completes the payment, your account will be debited\./,
+      ),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(/This choice blocks your card only after you sign and successfully submit the report\./),
+    ).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    expect(screen.getByText('Payment not posted')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Open dispute' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue report' }))
+    expect(screen.getByRole('button', { name: 'Review report' })).toBeTruthy()
+  })
+  it('keeps the card active when the customer backs out after choosing to block it', async () => {
+    render(<FraudJourney initialScreen="fraud-transaction" />)
+    await asyncNativeReady(document.body)
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    expect(screen.getByText('Payment not posted')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    await asyncNativeReady(document.body)
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+
+    expect(screen.queryByText('Temporarily frozen')).toBeNull()
+    expect(screen.queryByRole('button', { name: /View report status/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /Review Carrefour/ })).toBeTruthy()
+  })
+  it('offers Open dispute only for an already booked payment', async () => {
+    render(<FraudJourney initialScreen="fraud-transaction" parameters={{ ledger: 'booked' }} />)
+    await asyncNativeReady(document.body)
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    expect(screen.getByText('Payment posted')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Open dispute' }))
+    expect(screen.getByRole('button', { name: 'Review dispute' })).toBeTruthy()
   })
   it.each(['berlin', 'vienna', 'online'])('keeps the %s case linked when opening a scenario step directly', (id) => {
     const state = fraudScreenFixture('fraud-case-status', { transaction: id })
@@ -170,7 +213,9 @@ describe('Bosnia complete fraud flow', () => {
     expect(screen.getByTestId('prototype-screen').textContent).toBe('fraud-alerts')
     fireEvent.click(screen.getByRole('button', { name: 'Review Carrefour' }))
     expect(screen.getByTestId('prototype-screen').textContent).toBe('fraud-transaction')
-    fireEvent.click(screen.getByRole('button', { name: 'Report unrecognised payment' }))
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    expect(screen.getByTestId('prototype-screen').textContent).toBe('fraud-dispute-intro')
+    fireEvent.click(screen.getByRole('button', { name: 'Open dispute' }))
     expect(screen.getByTestId('prototype-screen').textContent).toBe('fraud-claim-details')
   })
   it('mounts the actual baseline Home, Cards and Card options through the same journey', async () => {
@@ -186,32 +231,31 @@ describe('Bosnia complete fraud flow', () => {
     await asyncNativeReady(document.body)
     expect((await screen.findAllByText('Cards')).length).toBeGreaterThan(0)
     fireEvent.click(screen.getByRole('button', { name: 'Block Card' }))
+    await asyncNativeReady(document.body)
     expect(screen.getAllByRole('heading', { name: 'Card security' }).length).toBeGreaterThan(0)
+    expect(screen.getByRole('switch', { name: 'Allow Internet payments' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('switch', { name: 'Allow Internet payments' }))
+    await asyncNativeReady(document.body)
+    expect(screen.getByRole('switch', { name: 'Allow Internet payments' }).getAttribute('aria-checked')).toBe('false')
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     await asyncNativeReady(document.body)
-    expect(screen.getByRole('button', { name: 'CARD SECURITY' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'CARD SECURITY' }))
-    expect(screen.getAllByRole('switch')).toHaveLength(4)
-    expect(screen.getByRole('group', { name: 'Country protection' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Options' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Options' }))
+    await asyncNativeReady(document.body)
+    expect(screen.getByText('CARD LIMITS')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'CARD SECURITY' })).toBeNull()
+    expect(screen.queryAllByRole('switch')).toHaveLength(0)
+    expect(screen.queryByRole('group', { name: 'Country protection' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Replace compromised card' })).toBeNull()
     expect(screen.queryByRole('button', { name: /View report status/ })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    await asyncNativeReady(document.body)
-    expect(screen.queryByRole('button', { name: 'Replace compromised card' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'REISSUE CARD' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'REISSUE CARD' }))
     expect(screen.getAllByRole('heading', { name: 'Replace your card' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('dialog', { name: 'Replace your card' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     await asyncNativeReady(document.body)
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    await asyncNativeReady(document.body)
-    fireEvent.click(screen.getByRole('button', { name: /^Options$/ }))
-    await asyncNativeReady(document.body)
     expect((await screen.findAllByText('Card options')).length).toBeGreaterThan(0)
-    expect(screen.queryByRole('button', { name: 'Card protection' })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'REISSUE CARD' }))
-    expect(screen.getAllByRole('heading', { name: 'Replace your card' }).length).toBeGreaterThan(0)
   })
 
   it('keeps removed market/baseline controls out of the modal and protects nested reason selection', () => {
@@ -277,9 +321,27 @@ describe('Bosnia complete fraud flow', () => {
     expect(document.querySelector('.fraud-baseline-actions')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Back to cards' })).toBeNull()
     expect(screen.queryByText('Dispute submitted')).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Report unrecognised payment' })).toBeNull()
+    expect(screen.queryByRole('button', { name: "I don't recognise this payment. Block my card" })).toBeNull()
     fireEvent.click(caseCard)
     expect(screen.getByText('6 Nov 2026')).toBeTruthy()
+  })
+
+  it('asks about a virtual card after successful submission and keeps case tracking on Not now', () => {
+    render(<FraudJourney initialScreen="fraud-claim-sent" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(screen.getByRole('heading', { name: 'Would you like a virtual card?' })).toBeTruthy()
+    expect(screen.getByText(/another way to pay from your account while you manage your physical card/)).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Not now' }))
+    expect(screen.getByText('Report status')).toBeTruthy()
+    expect(screen.getByText('Submitted')).toBeTruthy()
+  })
+
+  it('opens the existing Native virtual-card issue flow when the customer chooses yes', async () => {
+    render(<FraudJourney initialScreen="fraud-claim-sent" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create a virtual card' }))
+    await asyncNativeReady(document.body)
+    expect(await screen.findByRole('heading', { name: 'Select your preferred card' })).toBeTruthy()
   })
 
   it('recognises a booked payment without a dispute', () => {
@@ -292,9 +354,13 @@ describe('Bosnia complete fraud flow', () => {
   it('reports a declined ATM attempt without pretending money was debited', () => {
     render(<FraudJourney initialScreen="fraud-alerts" />)
     fireEvent.click(screen.getByRole('button', { name: /Review ATM cash withdrawal/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Report unrecognised payment' }))
+    fireEvent.click(screen.getByRole('button', { name: "I don't recognise this payment. Block my card" }))
+    expect(screen.getByText('Attempt declined')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Open dispute' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue report' }))
     expect(screen.getByRole('textbox', { name: 'What happened? (optional)' })).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Sign dispute' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Open dispute' })).toBeNull()
   })
 
   it('retains the review after a submission failure and succeeds on retry', async () => {
@@ -308,7 +374,7 @@ describe('Bosnia complete fraud flow', () => {
     expect(await screen.findByRole('heading', { name: 'Dispute submitted' })).toBeTruthy()
   })
 
-  it('requires replacement consent and closes channel editing on the old card', () => {
+  it('requires replacement consent and closes channel editing on the old card', async () => {
     render(<FraudJourney initialScreen="fraud-replace-confirm" />)
     const confirm = screen.getByRole('button', { name: 'Close card and request replacement' })
     expect(confirm.hasAttribute('disabled')).toBe(true)
@@ -317,16 +383,20 @@ describe('Bosnia complete fraud flow', () => {
     expect(screen.getAllByRole('heading', { name: 'Replacement requested' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: /View report status|View dispute status/ })).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Ok I got it' }))
-    for (const control of screen.getAllByRole('switch')) expect(control.hasAttribute('disabled')).toBe(true)
+    await asyncNativeReady(document.body)
+    for (const control of screen.getAllByRole('switch')) expect(control.getAttribute('aria-disabled')).toBe('true')
   })
 
-  it('keeps settings accessible and identifies the phone as the country signal', () => {
+  it('keeps settings accessible and identifies the phone as the country signal', async () => {
     render(<FraudJourney initialScreen="fraud-card-security" />)
+    await asyncNativeReady(document.body)
     expect(screen.getByText(/country reported by your phone’s latest location signal/)).toBeTruthy()
-    const section = screen.getByRole('group', { name: 'Country protection' })
-    const control = within(section).getByRole('switch')
+    const control = screen.getByRole('switch', { name: 'Limit physical payments to my country' })
     fireEvent.click(control)
-    expect(control.getAttribute('aria-checked')).toBe('true')
+    await asyncNativeReady(document.body)
+    expect(
+      screen.getByRole('switch', { name: 'Limit physical payments to my country' }).getAttribute('aria-checked'),
+    ).toBe('true')
     expect(screen.getByText(/Internet payments are not affected/)).toBeTruthy()
   })
 })

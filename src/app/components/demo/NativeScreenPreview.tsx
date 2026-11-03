@@ -61,6 +61,7 @@ const forwardedEventKeys = {
   onTransactionCategoryChange: true,
   onCreditLimitOfferCancel: true,
   onCreditLimitOfferComplete: true,
+  onCardSecuritySettingChange: true,
   onPaymentEntryRequest: true,
 } satisfies Record<ForwardedEventKey, true>
 

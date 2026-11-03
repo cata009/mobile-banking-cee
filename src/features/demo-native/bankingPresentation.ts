@@ -11,11 +11,25 @@ export type NativeTransactionLeadingVisual =
   | { kind: 'pfm'; category: AccountTransaction['pfmCategory']; variant?: 'glyph' | 'category-circle'; size?: number }
   | { kind: 'merchant-logo'; merchant: 'youtube' | 'netflix' | 'carrefour' | 'emag'; size?: 32 | 64 }
 
+export type NativeCardSecurityChannel = 'atm' | 'internet' | 'pos'
+export type NativeCardSecurityChange =
+  | { kind: 'channel'; channel: NativeCardSecurityChannel; enabled: boolean }
+  | { kind: 'country-protection'; enabled: boolean }
+
+export interface NativeCardSecurityPresentation {
+  channels: Record<NativeCardSecurityChannel, boolean>
+  countryProtectionEnabled: boolean
+  cardStatus: 'active' | 'frozen' | 'closed'
+  location: 'fresh' | 'stale' | 'unavailable'
+}
+
 export interface NativeBankingPresentation {
   /** Optional security entry composed into the existing Home summary carousel. */
   homeSecurityNotice?: { title: string; description: string; tagLabel?: string }
   /** Optional executable routes for security actions; absence preserves inert source actions. */
   cardSecurityRoutes?: { block: NativeDemoRoute; replacement: NativeDemoRoute }
+  /** Flow-owned controls for the Native Card security preview. */
+  cardSecurityPreview?: NativeCardSecurityPresentation
   /** A caller-owned ledger retains its exact amounts, periods and transaction identities. */
   analyticsTimeline?: SpendingAnalyticsTimeline
   /** Source preview authorities supply their exact holdings; absence uses the canonical demo selector. */

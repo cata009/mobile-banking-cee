@@ -82,3 +82,29 @@ test.each([false, true])('preview renders supplied merchant location for an expl
   expect(text(tree)).toContain('Street 21');
   await act(() => tree.unmount());
 });
+
+test('the Card guard settlement explanation is a presentation override and ordinary Native keeps Pending', async () => {
+  const pending = { ...transaction, status: 'Pending' as const };
+  const standard = host(customAccount, false);
+  standard.transactionSelection = { productId: customAccount.id, source: 'account', transaction: pending };
+  standard.transactionPresentation = { product: customAccount };
+  const Preview = NATIVE_TRANSACTION_PREVIEW_ADAPTER.screens.transaction!;
+  let standardTree!: Renderer.ReactTestRenderer;
+  await act(() => { standardTree = Renderer.create(<Preview {...standard} />); });
+  expect(text(standardTree)).toContain('Pending');
+  expect(text(standardTree)).not.toContain('Authorised · awaiting settlement');
+  await act(() => standardTree.unmount());
+
+  const guarded = host(customAccount, false);
+  guarded.transactionSelection = { productId: customAccount.id, source: 'account', transaction: pending };
+  guarded.transactionPresentation = {
+    product: customAccount,
+    pendingStatusLabel: 'Authorised · awaiting settlement',
+    pendingStatusDescription: 'The amount is reserved until the merchant settles the payment.',
+  };
+  let guardedTree!: Renderer.ReactTestRenderer;
+  await act(() => { guardedTree = Renderer.create(<Preview {...guarded} />); });
+  expect(text(guardedTree)).toContain('Authorised · awaiting settlement');
+  expect(text(guardedTree)).toContain('The amount is reserved until the merchant settles the payment.');
+  await act(() => guardedTree.unmount());
+});

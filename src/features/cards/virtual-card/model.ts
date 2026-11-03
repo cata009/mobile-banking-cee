@@ -33,6 +33,9 @@ const EMPTY: readonly VirtualCard[] = []
 const key = (scope: VirtualCardScope) => `${scope.country}:${scope.bankingScenario}`
 export const eligibleVirtualCardAccount = (account: CurrentAccount) =>
   account.currency === 'RON' || account.currency === 'EUR' || account.currency === 'USD'
+/** Illustrative eligibility used only by the BA Card guard prototype. */
+export const eligibleVirtualCardPreviewAccount = (country: CountryId, account: CurrentAccount) =>
+  (country === 'BA' || country === 'BA_BL') && account.currency === 'BAM'
 export function readVirtualCards(state: VirtualCardState, scope: VirtualCardScope): readonly VirtualCard[] {
   return state[key(scope)] ?? EMPTY
 }
@@ -45,14 +48,18 @@ export function issueVirtualCard(
     termsAccepted: boolean
     tier?: VirtualCardTier
     issuedOn?: string
+    /** Allows the BA Card guard demo to preview an unconfirmed product without changing RO issuance rules. */
+    demoPreview?: boolean
   },
 ): VirtualCardState {
   const date = draft.issuedOn ?? new Date().toISOString().slice(0, 10)
   const cards = readVirtualCards(state, scope)
+  const eligible = draft.demoPreview
+    ? eligibleVirtualCardPreviewAccount(scope.country, draft.account)
+    : scope.country === 'RO' && eligibleVirtualCardAccount(draft.account)
   if (
-    scope.country !== 'RO' ||
     !draft.termsAccepted ||
-    !eligibleVirtualCardAccount(draft.account) ||
+    !eligible ||
     cards.filter((card) => card.issuedOn === date).length >= 2 ||
     !isDesignAvailable(draft.design, draft.tier ?? 'Standard')
   )

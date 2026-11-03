@@ -6,6 +6,7 @@ import { sourceColor } from '../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../contracts';
 import { bankingProducts } from '../banking/model';
 import { RoBaselineCardPage } from './CardInfo';
+import CardSecurity from './CardSecurity';
 import VirtualCardFlow from './virtual-card/VirtualCardFlow';
 import CardPinFlow from './pin/CardPinFlow';
 import { isRoBaselinePinAvailable } from '@/features/cards/pin/model';
@@ -75,11 +76,13 @@ const debitSettings = [
   ],
 ] as const;
 
-/** Source rows stay inert unless a host supplies an explicit security route. */
+/** Existing options stay in place; Card security is a separate nested preview, not a Card options row. */
 export default function RoBaselineCardOptions(host: CurrentScreenProps) {
   const [changingPicture, setChangingPicture] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [demoPins, setDemoPins] = useState<Record<string, string>>({});
+  if (host.route.params?.cardSecurityPage === 'true')
+    return <CardSecurity host={host} />;
   const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
   const cards = bankingProducts(host).cards,
     card =
@@ -156,17 +159,6 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
                 <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
               </View>
               <View style={styles.rows}>
-                {securityRoutes ? (
-                  <BaselineNavigationRow
-                    title="CARD SECURITY"
-                    description="ATM, online, in-store and country protection"
-                    leadingIconName="block-card"
-                    trailingAccessory="chevron"
-                    rowHeight={80}
-                    dark={dark}
-                    onPress={() => host.onNavigate(securityRoutes.block)}
-                  />
-                ) : null}
                 {virtual ? (
                   <BaselineNavigationRow
                     title="CHANGE CARD PICTURE"

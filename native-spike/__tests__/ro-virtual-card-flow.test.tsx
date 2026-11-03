@@ -126,6 +126,44 @@ test('RO virtual card offer opens the selector directly and Back exits the flow'
   expect(onBack).toHaveBeenCalledTimes(1);
   await act(() => tree.unmount());
 });
+test('Card guard BA virtual-card route opens the local demo issue flow explicitly', async () => {
+  const issue = jest.fn(() => 'virtual-card-ba-demo');
+  const baHost: CurrentScreenProps = {
+    ...host,
+    country: 'BA',
+    t: createCurrentTranslator('BA', 'en'),
+    onIssueVirtualCard: issue,
+    route: {
+      screen: 'product-detail',
+      params: {
+        optionId: 'virtual-card',
+        title: 'Virtual card',
+        cardGuardVirtualCardIssue: 'true',
+      },
+    },
+  };
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <Detail
+        {...baHost}
+        productDetailPresentation={{ title: 'Virtual card', optionId: 'virtual-card' }}
+      />,
+    );
+  });
+  expect(tree.root.findAllByProps({ testID: 'ro-virtual-card-flow' })).not.toHaveLength(0);
+  expect(tree.root.findAllByProps({ testID: 'ro-product-detail' })).toHaveLength(0);
+  await act(() => button(tree, 'Select Clean Green').props.onPress());
+  await acceptTerms(tree);
+  await act(() => button(tree, 'Create demo card').props.onPress());
+  await act(() => button(tree, 'Sign').props.onPress());
+  await act(() => tree.root.findByType(FaceIdOverlay).props.onComplete());
+  const baAccount = bankingProducts(baHost).currentAccounts.find(account => account.currency === 'BAM');
+  expect(baAccount).toBeDefined();
+  expect(issue).toHaveBeenCalledWith(baAccount, 'clean-green', 'Standard', true);
+  expect(JSON.stringify(tree.toJSON())).toContain('Your demo virtual card is ready');
+  await act(() => tree.unmount());
+});
 test('Back from the initial virtual-card screen releases its handler before the parent navigates', async () => {
   let activeHandler: (() => boolean) | null = null;
   const popRoute = jest.fn();
