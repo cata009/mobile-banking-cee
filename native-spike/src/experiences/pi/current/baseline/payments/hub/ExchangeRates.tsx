@@ -239,6 +239,7 @@ export function RoBaselineExchangeRates({
                     label={code}
                     selected={draft === code}
                     onPress={() => setDraft(code)}
+                    paddingHorizontal={0}
                     dark={dark}
                   />
                 ))}

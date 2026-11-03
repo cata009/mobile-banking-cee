@@ -13,11 +13,14 @@ export function RadioButton({
   label,
   onPress,
   dark = false,
+  paddingHorizontal,
   ...options
 }: RadioButtonOptions & {
   label: string;
   onPress: () => void;
   dark?: boolean;
+  /** Override the row inset when its parent surface already supplies one. */
+  paddingHorizontal?: number;
 }) {
   const contract = resolveRadioButton(options);
   const [hovered, setHovered] = useState(false);
@@ -32,7 +35,7 @@ export function RadioButton({
   };
   const rowStateStyle = {
     height: contract.height,
-    paddingHorizontal: contract.paddingHorizontal,
+    paddingHorizontal: paddingHorizontal ?? contract.paddingHorizontal,
     paddingVertical: contract.paddingVertical,
     gap: contract.gap,
     backgroundColor: contract.backgroundToken
