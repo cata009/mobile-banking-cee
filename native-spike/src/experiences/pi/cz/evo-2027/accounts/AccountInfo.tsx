@@ -2,15 +2,20 @@ import {
   BankingCopyToast,
   useBankingCopy,
 } from '../../../current/banking/CopyToast';
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+  StyleSheet,
+} from 'react-native';
 import {
   getLoanDetails,
   getTermDepositDetails,
 } from '@/data/accountProductDetails';
 import type { Product } from '@/data/products';
 import {
-  Page,
   s,
   FieldValue,
   Copy,
@@ -21,7 +26,12 @@ import {
 } from './Primitives';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import { CardArt } from '../../../current/banking/CardArt';
+import { czechBankingHost } from '../../../current/banking/czechHost';
+import { AccountDetailsShareSheet } from '../../../current/baseline/AccountDetailsShareSheet';
+import { BaselinePageHeader } from '../../../../../universal/BaselinePageHeader';
+import type { CzechNativeScreenProps } from '../contracts';
 export default function AccountInfo({
+  host,
   product,
   products,
   hidden,
@@ -29,6 +39,7 @@ export default function AccountInfo({
   active,
   topInset,
 }: {
+  host: CzechNativeScreenProps;
   product: Product;
   products: Product[];
   hidden: boolean;
@@ -36,7 +47,14 @@ export default function AccountInfo({
   active?: boolean;
   topInset?: number;
 }) {
+  const [progress, setProgress] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const { copy: copyBanking, toast } = useBankingCopy();
+  const shareHost = czechBankingHost(host, {
+    screen: 'account-info',
+    params: { productId: product.id },
+  });
   const format = (amount: number) => infoMoney(amount, 'CZK', hidden),
     title = product.type.replace(/_/g, ' ').toUpperCase(),
     fields: [string, string][] = [];
@@ -107,26 +125,46 @@ export default function AccountInfo({
           p => p.type === 'debit_card' && p.linkedAccountId === product.id,
         )
       : undefined;
+  const visibleFields = expanded ? fields : fields.slice(0, 3);
+  const canExpand = fields.length > 3;
   return (
-    <View style={copyStyles.root}>
-      <Page
-        title="Account Details"
-        onBack={onBack}
-        active={active}
-        topInset={topInset}
-        style={{
-          backgroundColor: tokens.surface,
-        }}
-        trailing={
-          <IconButton
-            label="Share account details"
-            name="share-filled"
-            onPress={() => {}}
-          />
+    <View
+      style={[copyStyles.root, { backgroundColor: tokens.surface }]}
+    >
+      <ScrollView
+        testID="cz-account-info-scroll"
+        stickyHeaderIndices={[0]}
+        style={Platform.OS === 'web' ? copyStyles.webScroll : undefined}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={event =>
+          setProgress(
+            Math.min(1, Math.max(0, event.nativeEvent.contentOffset.y / 64)),
+          )
         }
       >
+        <BaselinePageHeader
+          title="Account Details"
+          onBack={onBack}
+          showHelp={false}
+          renderLargeTitle={false}
+          backIconSize={20}
+          includeSafeArea
+          safeAreaReserve={topInset}
+          collapsedTitleProgress={progress}
+          dark={host.mode === 'dark'}
+          duoActionActive={active}
+          onRightActionPress={() => setShareOpen(true)}
+          rightActionIcon={<Glyph name="share-filled" size={20} />}
+          rightActionLabel="Share account details"
+        />
+        <View style={[parityStyles.titleFrame, { opacity: 1 - progress }]}>
+          <Copy strong size={28} lineHeight={31}>
+            Account Details
+          </Copy>
+        </View>
         <View style={[s.inset, parityStyles.item0]}>
-          {fields.map(([label, value]) => (
+          {visibleFields.map(([label, value]) => (
             <FieldValue
               information
               key={label}
@@ -150,20 +188,25 @@ export default function AccountInfo({
               }
             />
           ))}
-          {null}
+          {canExpand ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={expanded ? 'Show less' : 'Show more'}
+              accessibilityState={{ expanded }}
+              onPress={() => setExpanded(value => !value)}
+              style={parityStyles.expansionAction}
+            >
+              <Copy strong color={tokens.accent}>
+                {expanded ? 'SHOW LESS' : 'SHOW MORE'}
+              </Copy>
+            </Pressable>
+          ) : null}
           {connected && (
             <>
-              <View style={parityStyles.item1}>
-                <Copy strong color={tokens.accent}>
-                  SHOW LESS
-                </Copy>
-              </View>
               <View
                 style={[
                   parityStyles.item2,
-                  {
-                    borderColor: tokens.border,
-                  },
+                  { borderColor: tokens.border },
                 ]}
               >
                 <Copy strong>CONNECTED CARDS</Copy>
@@ -183,19 +226,33 @@ export default function AccountInfo({
             </>
           )}
         </View>
-      </Page>
+      </ScrollView>
+      {shareOpen ? (
+        <AccountDetailsShareSheet
+          host={shareHost}
+          accountTitle={product.name}
+          accountOwner=""
+          accountNumber={product.accountNumber}
+          iban=""
+          onClose={() => setShareOpen(false)}
+        />
+      ) : null}
       <BankingCopyToast toast={toast} font={tokens.strongFont} />
     </View>
   );
 }
 const parityStyles = StyleSheet.create({
   item0: {
-    paddingTop: 46,
+    paddingTop: 16,
     paddingBottom: 40,
   },
-  item1: {
+  titleFrame: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  expansionAction: {
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: 24,
   },
   item2: {
     paddingBottom: 8,
@@ -216,4 +273,5 @@ const copyStyles = StyleSheet.create({
   root: {
     flex: 1,
   },
+  webScroll: { transform: 'none' },
 });

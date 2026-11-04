@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import {
   getFundingFieldVisibility,
   getPortfoliosForStrategy,
@@ -150,6 +151,7 @@ export function FundingSetup({
           value={iso}
           min={min}
           locale="en-GB"
+          calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
           onChange={value =>
             dispatch({
               type: 'draft-changed',

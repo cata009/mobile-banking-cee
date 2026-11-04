@@ -152,25 +152,34 @@ export function AccountStatementFlow({
   if (sent) {
     return (
       <View style={[styles.successRoot, { backgroundColor: surface }]}>
-        <Text
-          accessibilityRole="header"
-          style={[styles.successTitle, { color: host.tokens.text }]}
-        >
-          Success!
-        </Text>
+        <View style={styles.successHeading}>
+          <Text
+            accessibilityRole="header"
+            style={[styles.successTitle, { color: host.tokens.text }]}
+          >
+            Success!
+          </Text>
+        </View>
         <View style={styles.successBody}>
-          <SourceCustomIcon
-            name="check-circle"
-            size={100}
-            color={sourceColor('var(--uc-green-success)', dark)}
-          />
+          <View
+            style={[
+              styles.successCheck,
+              { borderColor: sourceColor('var(--uc-green-olive)', dark) },
+            ]}
+          >
+            <SourceCustomIcon
+              name="prime-check"
+              size={64}
+              color={sourceColor('var(--uc-green-olive)', dark)}
+            />
+          </View>
           <Text style={[styles.successMessage, { color: host.tokens.text }]}>
             The statement will be soon sent to the indicated e-mail address.
           </Text>
         </View>
-        <View style={styles.footer}>
+        <View style={styles.successFooter}>
           <PrimaryButton
-            label="OK, GOT IT"
+            label="Ok, got it"
             labelSize="18"
             onPress={() => setSent(false)}
             dark={dark}
@@ -386,6 +395,14 @@ export function AccountStatementFlow({
                 onChange={setDraftFrom}
                 locale="en-GB"
                 displayFormat="long-month"
+                calendarIcon={
+                  <SourceCustomIcon
+                    name="insurance-calendar"
+                    size={32}
+                    color={host.tokens.text}
+                  />
+                }
+                labelStyle={{ transform: [{ translateY: 8 }] }}
                 min="1900-01-01"
                 max={draftTo}
                 inputProps={{ accessibilityLabel: 'From date' }}
@@ -397,6 +414,14 @@ export function AccountStatementFlow({
                 onChange={setDraftTo}
                 locale="en-GB"
                 displayFormat="long-month"
+                calendarIcon={
+                  <SourceCustomIcon
+                    name="insurance-calendar"
+                    size={32}
+                    color={host.tokens.text}
+                  />
+                }
+                labelStyle={{ transform: [{ translateY: 8 }] }}
                 min={draftFrom}
                 max="2099-12-31"
                 inputProps={{ accessibilityLabel: 'To date' }}
@@ -422,7 +447,7 @@ export function AccountStatementFlow({
             footer={
               <View style={styles.sheetFooter}>
                 <PrimaryButton
-                  label="SEND"
+                  label="Send"
                   labelSize="18"
                   disabled={!canSendOnDemand}
                   onPress={sendOnDemandRequest}
@@ -443,6 +468,14 @@ export function AccountStatementFlow({
                 onChange={setRequestFrom}
                 locale="en-GB"
                 displayFormat="long-month"
+                calendarIcon={
+                  <SourceCustomIcon
+                    name="insurance-calendar"
+                    size={32}
+                    color={host.tokens.text}
+                  />
+                }
+                labelStyle={{ transform: [{ translateY: 8 }] }}
                 min="1900-01-01"
                 max={requestTo}
                 inputProps={{ accessibilityLabel: 'Request from date' }}
@@ -454,6 +487,14 @@ export function AccountStatementFlow({
                 onChange={setRequestTo}
                 locale="en-GB"
                 displayFormat="long-month"
+                calendarIcon={
+                  <SourceCustomIcon
+                    name="insurance-calendar"
+                    size={32}
+                    color={host.tokens.text}
+                  />
+                }
+                labelStyle={{ transform: [{ translateY: 8 }] }}
                 min={requestFrom}
                 max="2099-12-31"
                 inputProps={{ accessibilityLabel: 'Request to date' }}
@@ -516,9 +557,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
-    gap: 14,
+    gap: 8,
   },
-  dateColumn: { width: 38 },
+  dateColumn: { width: 32 },
   day: { fontFamily: 'UniCredit-bold', fontSize: 14, lineHeight: 16 },
   month: { fontFamily: 'UniCredit-bold', fontSize: 12, lineHeight: 15 },
   checkbox: { width: 40, alignItems: 'center' },
@@ -544,6 +585,7 @@ const styles = StyleSheet.create({
   generate: { alignSelf: 'center', paddingVertical: 20, paddingHorizontal: 12 },
   generateLabel: { fontFamily: 'UniCredit-bold', fontSize: 14, lineHeight: 18 },
   footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
+  successFooter: { paddingHorizontal: 24, paddingBottom: 42 },
   notice: { fontSize: 14, lineHeight: 20, marginBottom: 12 },
   sheetFooter: { paddingTop: 8, paddingBottom: 8 },
   filterDates: { paddingTop: 24, gap: 28 },
@@ -552,18 +594,27 @@ const styles = StyleSheet.create({
   emailDivider: { marginTop: 32, marginBottom: 20 },
   disclaimers: { gap: 18, paddingTop: 34, paddingBottom: 24 },
   disclaimer: { fontFamily: 'UniCredit-regular', fontSize: 15, lineHeight: 20 },
-  successRoot: { flex: 1, paddingTop: 80, paddingHorizontal: 20 },
+  successRoot: { flex: 1 },
+  successHeading: { paddingHorizontal: 24, paddingTop: 84 },
   successTitle: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 34 },
   successBody: {
     flex: 1,
+    minHeight: 0,
+    paddingHorizontal: 24,
+  },
+  successCheck: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 28,
-    paddingHorizontal: 4,
+    alignSelf: 'center',
+    marginTop: 58,
   },
   successMessage: {
     fontFamily: 'UniCredit-regular',
     fontSize: 16,
-    lineHeight: 22,
+    paddingTop: 58,
   },
 });

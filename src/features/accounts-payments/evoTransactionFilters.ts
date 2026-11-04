@@ -8,6 +8,8 @@ export interface AccountTransactionFilterState {
   accountNumber: string
   variableCode: string
   datePreset: AccountTransactionDateFilter
+  dateFrom?: string
+  dateTo?: string
   amountFrom: string
   amountTo: string
   status: 'All transactions' | 'Booked' | 'Pending'
@@ -20,6 +22,8 @@ export const EMPTY_ACCOUNT_TRANSACTION_FILTERS: AccountTransactionFilterState = 
   accountNumber: '',
   variableCode: '',
   datePreset: 'none',
+  dateFrom: '',
+  dateTo: '',
   amountFrom: '',
   amountTo: '',
   status: 'All transactions',
@@ -43,7 +47,6 @@ export function hasAccountTransactionFilters(filters: AccountTransactionFilterSt
 
 export type EvoTransactionFilters = AccountTransactionFilterState
 export const EMPTY_EVO_TRANSACTION_FILTERS = EMPTY_ACCOUNT_TRANSACTION_FILTERS
-/** datePreset is an existing Source no-op and is deliberately preserved. */
 export function filterEvoTransactions({
   transactions,
   search,
@@ -95,6 +98,13 @@ export function filterEvoTransactions({
           ? transaction.type === 'credit'
           : transaction.type === 'debit'
     const categoryMatches = filters.category === 'All categories' ? true : transaction.category === filters.category
+    const customDateRangeActive =
+      filters.datePreset === 'custom' &&
+      Boolean(filters.dateFrom && filters.dateTo)
+    const transactionDate = `${transaction.monthKey}-${String(Number(transaction.day)).padStart(2, '0')}`
+    const dateMatches =
+      !customDateRangeActive ||
+      (transactionDate >= filters.dateFrom! && transactionDate <= filters.dateTo!)
 
     return (
       searchMatches &&
@@ -103,6 +113,7 @@ export function filterEvoTransactions({
       variableMatches &&
       amountFromMatches &&
       amountToMatches &&
+      dateMatches &&
       statusMatches &&
       typeMatches &&
       categoryMatches

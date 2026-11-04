@@ -12,6 +12,11 @@ import { useCzechTranslation } from './features/preferences';
 import { moreAssets } from './assets';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
+import {
+  EVO_LEVEL_ONE_CONTENT_TOP,
+  EVO_LEVEL_ONE_HEADER_HEIGHT,
+  resolveEvoLevelOneTopInset,
+} from '../levelOneLayout';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import ProfileTutorialsSheet from './TutorialsSheet';
 import {
@@ -52,7 +57,10 @@ export default function More(props: CzechNativeScreenProps) {
         styles.page,
         {
           backgroundColor: tokens.surface,
-          paddingTop: props.screenTopInset ?? 0,
+          paddingTop: resolveEvoLevelOneTopInset(
+            props.screenTopInset,
+            !!duo && duo.rightInset > 0,
+          ),
         },
       ]}
     >
@@ -63,7 +71,7 @@ export default function More(props: CzechNativeScreenProps) {
           value="more"
           onChange={() => {}}
           label="More"
-          actionsRowHeight={32}
+          actionsRowHeight={EVO_LEVEL_ONE_HEADER_HEIGHT}
           actionsPaddingHorizontal={0}
           brand={
             <Copy strong size={28}>
@@ -188,7 +196,7 @@ export default function More(props: CzechNativeScreenProps) {
 const styles = StyleSheet.create({
   page: { flex: 1 },
   grow: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingBottom: 24 },
+  header: { paddingHorizontal: 16 },
   action: {
     width: 32,
     height: 32,
@@ -197,7 +205,7 @@ const styles = StyleSheet.create({
   },
   grid: {
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: EVO_LEVEL_ONE_CONTENT_TOP,
     paddingBottom: 80,
     flexDirection: 'row',
     flexWrap: 'wrap',

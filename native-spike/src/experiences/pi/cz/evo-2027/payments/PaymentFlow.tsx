@@ -1191,6 +1191,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
                   )}
                   min={toIsoDateOnly(new Date())}
                   locale="en-GB"
+                  calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
                   onChange={dueDate =>
                     update({
                       dueDate,

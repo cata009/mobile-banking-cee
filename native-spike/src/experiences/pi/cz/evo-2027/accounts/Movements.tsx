@@ -777,6 +777,7 @@ export function MovementDetail({
             variant="gray"
             largeTitleAlign="center"
             renderLargeTitle={false}
+            backIconSize={20}
             collapsedTitleProgress={headerProgress}
           />
         </View>

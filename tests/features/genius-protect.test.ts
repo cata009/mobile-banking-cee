@@ -40,7 +40,7 @@ describe('Genius Protect application policy', () => {
     expect(geniusProtectChargeCentsForMonth(1)).toBe(0)
     expect(geniusProtectChargeCentsForMonth(3)).toBe(700)
     expect(GENIUS_PROTECT_COVERAGE.map((item) => item.sum)).toEqual([40000, 1000, 40000, 4000])
-    expect(GENIUS_PROTECT_DEMO_OTP).toBe('413412')
+    expect(GENIUS_PROTECT_DEMO_OTP).toBe('123456')
   })
 
   it('requires the customer and consent disclosures before leaving the first steps', () => {
@@ -146,7 +146,7 @@ describe('Genius Protect application policy', () => {
 
   it('accepts only the demo signing OTP and completes the active policy once', () => {
     expect(verifyGeniusProtectOtp('000000')).toBe(false)
-    expect(verifyGeniusProtectOtp('413412')).toBe(true)
+    expect(verifyGeniusProtectOtp('123456')).toBe(true)
     startGeniusProtectRequest()
     expect(getGeniusProtectSnapshot().draft?.returningFromProfile).toBe(false)
     updateGeniusProtectDraft({ step: 'otp', accountId: 'main-ron' })

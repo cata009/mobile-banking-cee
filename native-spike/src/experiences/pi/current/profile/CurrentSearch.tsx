@@ -7,9 +7,13 @@ import { useProfileTranslation } from './Host';
 export function CurrentSearch({
   value,
   onChange,
+  onFilterClick,
+  filtersActive = false,
 }: {
   value: string;
   onChange: (value: string) => void;
+  onFilterClick?: () => void;
+  filtersActive?: boolean;
 }) {
   const tokens = useCurrentTokens(),
     color = useSourceColors(),
@@ -42,20 +46,22 @@ export function CurrentSearch({
             ? 'Clear search results'
             : t('runtime.actions.filters', 'Filters')
         }
+        accessibilityState={!typed ? { selected: filtersActive } : undefined}
+        aria-pressed={!typed ? filtersActive : undefined}
         onPress={
           typed
             ? () => {
                 onChange('');
                 input.current?.focus();
               }
-            : () => {}
+            : onFilterClick
         }
         style={styles.icon}
       >
         <SourceCustomIcon
           name={typed ? 'clear-results' : 'filters'}
           size={24}
-          color={tokens.text}
+          color={filtersActive && !typed ? tokens.accent : tokens.text}
         />
       </Pressable>
     </View>

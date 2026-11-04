@@ -50,6 +50,9 @@ function currentHost(
         title: presentation.title,
         ...(presentation.cardId ? { cardId: presentation.cardId } : {}),
         ...(presentation.optionId ? { optionId: presentation.optionId } : {}),
+        ...(host.route.params?.offerId
+          ? { offerId: host.route.params.offerId }
+          : {}),
       },
     },
     tokens: currentTokens(host.mode === 'dark'),
@@ -57,7 +60,10 @@ function currentHost(
     amountsHidden: host.amountsHidden,
     screenTopInset: includeSafeArea ? host.screenTopInset ?? 0 : 0,
     isActive: host.isActive ?? true,
-    onNavigate: () => undefined,
+    onNavigate: route => {
+      if (route.screen === 'products')
+        host.onNavigate({ screen: 'products', params: { view: 'shopsmart' } });
+    },
     onBack: host.onBack,
     onProfile: host.onProfile,
     onSearch: host.onSearch,
@@ -80,10 +86,23 @@ export default function ProductDetail(host: CzechNativeScreenProps) {
   const itemId = host.route.params?.itemId ?? '';
   const shelfPresentation = presentationFromShelf(itemId);
   const presentation = host.productDetailPresentation ?? shelfPresentation;
+  const offerId = host.route.params?.offerId;
   const unavailableStyles = StyleSheet.create({
     root: { flex: 1, paddingTop: host.screenTopInset ?? 0 },
     content: { padding: 24 },
   });
+
+  if (offerId) {
+    const offerPresentation: NativeProductDetailPresentation = {
+      title: host.route.params?.title ?? 'Partner offer',
+      includeSafeArea: true,
+    };
+    return (
+      <NativeBaselineProductDetail
+        {...currentHost(host, presentation ?? offerPresentation)}
+      />
+    );
+  }
 
   if (!presentation) {
     return (
@@ -92,7 +111,7 @@ export default function ProductDetail(host: CzechNativeScreenProps) {
           tokens={tokens}
           title="Product unavailable"
           onBack={host.onBack}
-          backIcon={<Glyph name="back" size={16} />}
+          backIcon={<Glyph name="back" size={20} />}
         />
         <Text style={[t.body, unavailableStyles.content]}>
           The selected product is not in this catalogue.

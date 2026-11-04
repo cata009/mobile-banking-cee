@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 import { DateField } from '../../../../../universal/DateField';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { Select } from '../../../../../universal/Select';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
 import { tokens, Button } from '../accounts/Primitives';
@@ -37,6 +38,7 @@ export default function Schedule({
           value={draft.startDate}
           min={today}
           locale="en-GB"
+          calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
           onChange={startDate =>
             setDraft(current => ({
               ...current,
@@ -95,6 +97,7 @@ export default function Schedule({
             value={draft.endsOn.date}
             min={draft.startDate}
             locale="en-GB"
+            calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
             onChange={date =>
               setDraft(current => ({
                 ...current,

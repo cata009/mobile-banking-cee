@@ -844,7 +844,7 @@ export default function NativeCzechApp({
                     >
                       <SourceCustomIcon
                         name="back-heavy"
-                        size={22}
+                        size={20}
                         color={displayMode === 'dark' ? '#ffffff' : '#262626'}
                       />
                     </Pressable>

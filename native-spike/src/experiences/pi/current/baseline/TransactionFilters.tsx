@@ -19,6 +19,7 @@ import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { useDuoPreview } from '../../../../universal/DuoPreview';
 import { Text } from '../../../../universal/Typography';
 import { BaselineTextField } from '../../../../universal/BaselineTextField';
+import { DateField, validIsoDate } from '../../../../universal/DateField';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
 import { RadioButton } from '../../../../universal/RadioButton';
 import { resolveRadioButton } from '@/app/components/contracts/radioButton';
@@ -61,6 +62,13 @@ export function RoBaselineTransactionFilters({
       };
     });
   };
+  const customDateRangeValid =
+    draft.datePreset !== 'custom' ||
+    (validIsoDate(draft.dateFrom ?? '') &&
+      validIsoDate(draft.dateTo ?? '') &&
+      draft.dateFrom! <= draft.dateTo!);
+  const canApply =
+    hasAccountTransactionFilters(draft) && customDateRangeValid;
   const openSelection = (field: 'status' | 'transactionType' | 'category') => {
     setSelectionDraft(draft[field]);
     setSelectionSheet(field);
@@ -362,14 +370,66 @@ export function RoBaselineTransactionFilters({
                         label={label}
                         selected={draft.datePreset === id}
                         onPress={() => {
-                          return patch({
-                            datePreset: draft.datePreset === id ? 'none' : id,
+                          const datePreset =
+                            draft.datePreset === id ? 'none' : id;
+                          patch({
+                            datePreset,
+                            ...(datePreset === 'custom' &&
+                            !draft.dateFrom &&
+                            !draft.dateTo
+                              ? {
+                                  dateFrom: '2025-11-03',
+                                  dateTo: '2026-11-03',
+                                }
+                              : {}),
                           });
                         }}
                         dark={dark}
                       />
                     );
                   })}
+                  {draft.datePreset === 'custom' ? (
+                    <View style={customDateRangeStyle}>
+                      <DateField
+                        tokens={host.tokens}
+                        label="FROM"
+                        value={draft.dateFrom ?? ''}
+                        onChange={dateFrom => patch({ dateFrom })}
+                        locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
+                        displayFormat="long-month"
+                        calendarIcon={
+                          <SourceCustomIcon
+                            name="insurance-calendar"
+                            size={32}
+                            color={host.tokens.text}
+                          />
+                        }
+                        labelStyle={{ transform: [{ translateY: 8 }] }}
+                        min="1900-01-01"
+                        max={draft.dateTo}
+                        inputProps={{ accessibilityLabel: 'From date' }}
+                      />
+                      <DateField
+                        tokens={host.tokens}
+                        label="TO"
+                        value={draft.dateTo ?? ''}
+                        onChange={dateTo => patch({ dateTo })}
+                        locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
+                        displayFormat="long-month"
+                        calendarIcon={
+                          <SourceCustomIcon
+                            name="insurance-calendar"
+                            size={32}
+                            color={host.tokens.text}
+                          />
+                        }
+                        labelStyle={{ transform: [{ translateY: 8 }] }}
+                        min={draft.dateFrom}
+                        max="2099-12-31"
+                        inputProps={{ accessibilityLabel: 'To date' }}
+                      />
+                    </View>
+                  ) : null}
                 </View>,
               )}
               {section(
@@ -402,13 +462,13 @@ export function RoBaselineTransactionFilters({
             <PrimaryButton
               label="Apply"
               labelSize="18"
-              disabled={!hasAccountTransactionFilters(draft)}
+              disabled={!canApply}
               onPress={() => {
                 return onApply(draft);
               }}
               dark={dark}
               style={
-                Platform.OS === 'web' && !hasAccountTransactionFilters(draft)
+                Platform.OS === 'web' && !canApply
                   ? disabledWebButtonStyle
                   : undefined
               }
@@ -499,6 +559,11 @@ const selectionFooterStyle = {
   paddingHorizontal: 16,
   paddingTop: 8,
   paddingBottom: 16,
+} as const;
+const customDateRangeStyle = {
+  paddingHorizontal: 24,
+  paddingTop: 8,
+  gap: 16,
 } as const;
 
 /** Source date-filter composition on its already-painted panel surface; selection remains owned above. */

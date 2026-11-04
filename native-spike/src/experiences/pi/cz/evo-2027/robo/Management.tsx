@@ -771,6 +771,7 @@ export function Management({
                     tokens={czInvestmentTokens}
                     label="Monthly contribution starts"
                     value={fundingDate ? iso(fundingDate) : state.topUp.date}
+                    calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
                     onChange={value =>
                       dispatch({ type: 'date-changed', value: fromIso(value) })
                     }

@@ -23,6 +23,7 @@ export function SourceBottomSheet({
   maxHeightOffsetPx = 54,
   stickyHeader = false,
   footer,
+  showFooterDivider = true,
   fixedHeight = false,
 }: {
   title: string;
@@ -35,6 +36,8 @@ export function SourceBottomSheet({
   stickyHeader?: boolean;
   /** Optional fixed actions remain visible when the sheet contents scroll. */
   footer?: React.ReactNode;
+  /** Hide the footer separator when the source sheet's document viewer flows directly into its actions. */
+  showFooterDivider?: boolean;
   /** Keep the sheet at its maximum height so filtering a list never resizes it. */
   fixedHeight?: boolean;
 }) {
@@ -115,6 +118,7 @@ export function SourceBottomSheet({
               {
                 backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
                 borderTopColor: sourceColor('var(--uc-border-muted)', dark),
+                borderTopWidth: showFooterDivider ? 1 : 0,
               },
             ]}
           >
@@ -139,7 +143,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 24,
-    borderTopWidth: 1,
   },
   stickyContent: { paddingTop: 0 },
   stickyHeader: { paddingTop: 24, paddingBottom: 24, marginBottom: 0 },

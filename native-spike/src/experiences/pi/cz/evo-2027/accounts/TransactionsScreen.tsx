@@ -276,7 +276,7 @@ export default function TransactionsScreen(props: CzechNativeScreenProps) {
               title="Transactions"
               onBack={props.onBack}
               renderLargeTitle={false}
-              backIcon={<Glyph name="back-heavy" />}
+              backIcon={<Glyph name="back-heavy" size={20} />}
               trailing={
                 <IconButton
                   label={props.amountsHidden ? 'Show amounts' : 'Hide amounts'}

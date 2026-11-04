@@ -10,7 +10,7 @@ import {
   type ManualCashTransactionDraft,
 } from '@/features/analytics/manualCashTransaction';
 import type { CurrentScreenProps } from '../../contracts';
-import { BaselineAccountInfoField } from '../../../../../universal/BaselineAccountInfoField';
+import { BaselineAmountField } from '../../../../../universal/BaselineAmountField';
 import { BaselineBottomSheet } from '../../../../../universal/BaselineBottomSheet';
 import { BaselineDropdownField } from '../../../../../universal/BaselineDropdownField';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
@@ -105,8 +105,8 @@ export default function AddTransactionFlow({
               <PrimaryButton
                 label={copy(
                   'runtime.analytics.addTransaction',
-                  'Add Transaction',
-                ).toLocaleUpperCase(host.language)}
+                  'Add transaction',
+                )}
                 onPress={submit}
                 dark={dark}
               />
@@ -121,43 +121,40 @@ export default function AddTransactionFlow({
           }
         >
           {view === 'form' ? (
-            <View style={styles.formContent}>
+            <View
+              testID="ro-add-cash-transaction-form"
+              style={styles.formContent}
+            >
               <View style={styles.amountRow}>
-                <View style={styles.amountField}>
-                  <BaselineTextField
-                    label={copy(
-                      'runtime.analytics.cashTransactionAmount',
-                      'Amount',
-                    )}
-                    value={draft.amount}
-                    onChange={value => updateDraft('amount', value)}
-                    placeholder="0,00"
-                    inputMode="decimal"
-                    errorText={
-                      submitted && !amount
-                        ? copy(
-                            draft.amount.trim()
-                              ? 'runtime.analytics.cashTransactionInvalidAmount'
-                              : 'runtime.analytics.cashTransactionRequired',
-                            draft.amount.trim()
-                              ? 'Enter a valid amount'
-                              : 'Required',
-                          )
-                        : undefined
-                    }
-                    dark={dark}
-                  />
-                </View>
-                <View style={styles.currencyField}>
-                  <BaselineAccountInfoField
-                    title={copy(
-                      'runtime.analytics.cashTransactionCurrency',
-                      'Currency',
-                    )}
-                    subtitle={currency}
-                    dark={dark}
-                  />
-                </View>
+                <BaselineAmountField
+                  label={copy(
+                    'runtime.analytics.cashTransactionAmount',
+                    'Amount',
+                  )}
+                  value={draft.amount}
+                  onChange={value => updateDraft('amount', value)}
+                  placeholder="0,00"
+                  inputMode="decimal"
+                  errorText={
+                    submitted && !amount
+                      ? copy(
+                          draft.amount.trim()
+                            ? 'runtime.analytics.cashTransactionInvalidAmount'
+                            : 'runtime.analytics.cashTransactionRequired',
+                          draft.amount.trim()
+                            ? 'Enter a valid amount'
+                            : 'Required',
+                        )
+                      : undefined
+                  }
+                  currency={currency}
+                  currencyLabel={copy(
+                    'runtime.analytics.cashTransactionCurrency',
+                    'Currency',
+                  )}
+                  hideCurrencySelector
+                  dark={dark}
+                />
               </View>
 
               <View style={styles.dateField}>
@@ -165,16 +162,15 @@ export default function AddTransactionFlow({
                   tokens={host.tokens}
                   label={copy(
                     'runtime.analytics.cashTransactionDate',
-                    'CHOOSE DATE',
+                    'Choose date',
                   )}
                   value={draft.date}
                   onChange={value => updateDraft('date', value)}
                   displayFormat="long-month"
                   locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
-                  labelStyle={styles.dateLabel}
                   calendarIcon={
                     <SourceCustomIcon
-                      name="calendar-days"
+                      name="insurance-calendar"
                       size={32}
                       color={sourceColor('var(--uc-text)', dark)}
                     />
@@ -208,14 +204,19 @@ export default function AddTransactionFlow({
                 />
               </View>
 
-              <BaselineSectionDivider
-                title={copy(
-                  'runtime.analytics.allCategories',
-                  'ALL CATEGORIES',
-                )}
-                variant="section"
-                dark={dark}
-              />
+              <View
+                testID="ro-add-cash-transaction-categories-heading"
+                style={styles.categoryHeading}
+              >
+                <BaselineSectionDivider
+                  title={copy(
+                    'runtime.analytics.allCategories',
+                    'ALL CATEGORIES',
+                  )}
+                  variant="section"
+                  dark={dark}
+                />
+              </View>
               <BaselineDropdownField
                 label={copy(
                   'runtime.analytics.cashTransactionCategory',
@@ -260,16 +261,9 @@ export default function AddTransactionFlow({
 }
 
 const styles = StyleSheet.create({
-  formContent: { paddingTop: 64, paddingBottom: 24, gap: 64 },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 32,
-    paddingHorizontal: 24,
-  },
-  amountField: { flex: 1, minWidth: 0 },
-  currencyField: { width: 80, paddingBottom: 8 },
-  dateField: { marginTop: 16, paddingHorizontal: 24 },
-  dateLabel: { textTransform: 'uppercase' },
-  descriptionField: { marginTop: 12, paddingHorizontal: 24 },
+  formContent: { paddingTop: 32, paddingBottom: 24, gap: 16 },
+  amountRow: { paddingHorizontal: 24 },
+  dateField: { paddingHorizontal: 24 },
+  descriptionField: { paddingHorizontal: 24 },
+  categoryHeading: { paddingHorizontal: 24 },
 });

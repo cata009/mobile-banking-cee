@@ -136,6 +136,7 @@ export default function AccountScreen(props: CzechNativeScreenProps) {
   const renderInfo = () =>
     product ? (
       <AccountInfo
+        host={props}
         product={product}
         products={products}
         hidden={amountsHidden}
