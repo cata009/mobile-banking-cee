@@ -8,6 +8,11 @@ import { createEvoTranslations } from '@/translations/evo';
 import { getApp2027AccountActivityRows } from '@/features/products/evoAccountActivity';
 import { ShopSmartHome } from './ShopSmartHome';
 import {
+  EVO_LEVEL_ONE_CONTENT_TOP,
+  EVO_LEVEL_ONE_HEADER_HEIGHT,
+  resolveEvoLevelOneTopInset,
+} from '../levelOneLayout';
+import {
   EVO_HOME_INSURANCE_POLICIES,
   selectEvoHomeSummary,
 } from '@/features/products/evoHome';
@@ -55,6 +60,10 @@ export default function Home(host: CzechNativeScreenProps) {
     onAmountsToggle,
     screenTopInset = 0,
   } = host;
+  const levelOneTopInset = resolveEvoLevelOneTopInset(
+    screenTopInset,
+    !!duo && duo.rightInset > 0,
+  );
   const model = useMemo(
     () => createHomeProducts(productCounts),
     [productCounts],
@@ -167,7 +176,7 @@ export default function Home(host: CzechNativeScreenProps) {
     />
   );
   return (
-    <View style={[s.root, { paddingTop: screenTopInset }]}>
+    <View style={[s.root, { paddingTop: levelOneTopInset }]}>
       <MainNavigationHeader
         tokens={tokens}
         label="Home"
@@ -175,7 +184,7 @@ export default function Home(host: CzechNativeScreenProps) {
         value="home"
         onChange={() => {}}
         tabsGap={0}
-        actionsRowHeight={59}
+        actionsRowHeight={EVO_LEVEL_ONE_HEADER_HEIGHT}
         actionsAlignItems="flex-start"
         actionsPaddingHorizontal={24}
         brand={
@@ -195,11 +204,6 @@ export default function Home(host: CzechNativeScreenProps) {
         }
         actions={
           <>
-            <IconAction
-              label="Spending"
-              name="analytics"
-              onPress={() => onNavigate({ screen: 'pfm' })}
-            />
             <IconAction
               label={amountsHidden ? 'Show amounts' : 'Hide amounts'}
               name={amountsHidden ? 'show' : 'hide'}
@@ -494,7 +498,7 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   content: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: EVO_LEVEL_ONE_CONTENT_TOP,
     paddingBottom: 24,
     gap: 28,
     width: '100%',

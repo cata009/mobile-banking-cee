@@ -21,6 +21,7 @@ export function BaselineDropdownField({
   onOpen,
   expanded: externalExpanded,
   fillWidth = false,
+  paddingLeft = 24,
   dark = false,
 }: {
   label: string;
@@ -36,6 +37,7 @@ export function BaselineDropdownField({
   onOpen?: () => void;
   expanded?: boolean;
   fillWidth?: boolean;
+  paddingLeft?: number;
   dark?: boolean;
 }) {
   const disabled =
@@ -70,7 +72,7 @@ export function BaselineDropdownField({
             minHeight: 96,
             paddingTop: 8,
             paddingBottom: 5,
-            paddingLeft: 24,
+            paddingLeft,
             paddingRight: 56,
           }}
         >

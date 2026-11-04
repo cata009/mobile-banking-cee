@@ -15,8 +15,9 @@ import contactsIllustration from '@/assets/design-system/compositions/variant-15
 // Canonical vector from RO - DBN - Flows, node 10306:62188.
 import identityScanIllustration from '@/assets/pi/ro/personal-profile/identity-scan.svg';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
+import { BaselineCodeField } from '../../../../../universal/BaselineCodeField';
+import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
-import { TextInput } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { Button, Copy, Page, useCurrentTokens } from '../../profile/Primitives';
 import { SourceTextField } from '../../profile/SourceTextField';
@@ -137,6 +138,7 @@ function accordionChevron(open: boolean, color: string) {
 
 export function RomanianPersonalProfile(host: CurrentScreenProps) {
   const tokens = useCurrentTokens();
+  const dark = tokens.text.toLowerCase() !== '#262626';
   const profile = useSyncExternalStore(
     subscribeRomanianProfile,
     getRomanianProfileSnapshot,
@@ -290,11 +292,33 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
     />
   );
 
+  if (screen === 'success')
+    return (
+      <BaselineStandardSuccess
+        testID="ro-personal-profile-success"
+        title={
+          successKind === 'identity'
+            ? copy(
+                'Your document was sent for review',
+                'Documentul a fost trimis spre verificare',
+              )
+            : copy('Your data has been updated', 'Datele au fost actualizate')
+        }
+        message={copy(
+          'You can review your updated information in My data.',
+          'Poți verifica informațiile actualizate în Datele mele.',
+        )}
+        actionLabel={copy('Back to My data', 'Înapoi la datele mele')}
+        onDone={() => setScreen('overview')}
+        dark={dark}
+      />
+    );
+
   return (
     <Page
       title={title}
       onBack={back}
-      topInset={screen === 'overview' ? 0 : host.screenTopInset}
+      topInset={host.screenTopInset}
       active={host.isActive}
       largeTitle={screen === 'overview'}
       footer={
@@ -486,6 +510,9 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
                   : contactsIllustration
               }
               size={100}
+              tintColor={
+                screen === 'identity-intro' ? undefined : tokens.text
+              }
             />
           </View>
           <Copy strong size={28} lineHeight={32} textAlign="center">
@@ -615,27 +642,20 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
                   `Am trimis un cod de verificare la ${contactValue}.`,
                 )}
           </Copy>
-          <TextInput
-            accessibilityLabel="Verification code"
-            keyboardType="number-pad"
-            maxLength={6}
+          <BaselineCodeField
             value={otp}
-            onChangeText={setOtp}
-            style={[
-              styles.otp,
-              { color: tokens.text, borderBottomColor: tokens.border },
-            ]}
+            onChange={setOtp}
+            length={6}
+            ariaLabel="Verification code"
+            visualState={error ? 'error' : undefined}
+            errorText={error || undefined}
+            dark={dark}
           />
           <EditLink
             label={copy('Resend code', 'Retrimite codul')}
             accessibilityLabel="Resend code"
             onPress={() => setOtp('')}
           />
-          {error ? (
-            <Copy size={14} color={sourceColor('var(--uc-red-main)')}>
-              {error}
-            </Copy>
-          ) : null}
         </View>
       ) : screen === 'address-edit' ? (
         <View style={styles.content}>
@@ -760,22 +780,15 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
               'Introdu codul demonstrativ din șase cifre pentru a confirma solicitarea.',
             )}
           </Copy>
-          <TextInput
-            accessibilityLabel="Verification code"
-            keyboardType="number-pad"
-            maxLength={6}
+          <BaselineCodeField
             value={otp}
-            onChangeText={setOtp}
-            style={[
-              styles.otp,
-              { color: tokens.text, borderBottomColor: tokens.border },
-            ]}
+            onChange={setOtp}
+            length={6}
+            ariaLabel="Verification code"
+            visualState={error ? 'error' : undefined}
+            errorText={error || undefined}
+            dark={dark}
           />
-          {error ? (
-            <Copy size={14} color={sourceColor('var(--uc-red-main)')}>
-              {error}
-            </Copy>
-          ) : null}
         </View>
       ) : screen === 'identity-scan' ? (
         <View style={styles.intro}>
@@ -810,33 +823,6 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
               )}
             </Copy>
           ) : null}
-        </View>
-      ) : screen === 'success' ? (
-        <View style={styles.intro}>
-          <View style={styles.successIcon}>
-            <SourceCustomIcon name="check" size={40} color={tokens.accent} />
-          </View>
-          <Copy strong size={24} lineHeight={30} textAlign="center">
-            {successKind === 'identity'
-              ? copy(
-                  'Your document was sent for review',
-                  'Documentul a fost trimis spre verificare',
-                )
-              : copy(
-                  'Your data has been updated',
-                  'Datele au fost actualizate',
-                )}
-          </Copy>
-          <Copy size={16} lineHeight={22} textAlign="center">
-            {copy(
-              'You can review your updated information in My data.',
-              'Poți verifica informațiile actualizate în Datele mele.',
-            )}
-          </Copy>
-          <Button
-            label={copy('Back to My data', 'Înapoi la datele mele')}
-            onPress={() => setScreen('overview')}
-          />
         </View>
       ) : null}
     </Page>
@@ -876,7 +862,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  footer: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 0, gap: 8 },
+  footer: { paddingTop: 12, paddingBottom: 0, gap: 8 },
   homeIndicator: {
     alignSelf: 'center',
     width: 134,
@@ -886,7 +872,6 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   consent: {
-    paddingHorizontal: 24,
     paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -915,13 +900,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeTab: { borderBottomWidth: 2, borderBottomColor: '#007a91' },
-  otp: {
-    height: 48,
-    borderBottomWidth: 1,
-    fontSize: 24,
-    letterSpacing: 12,
-    textAlign: 'center',
-  },
   choice: {
     flexDirection: 'row',
     alignItems: 'center',

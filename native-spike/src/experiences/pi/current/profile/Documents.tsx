@@ -4,11 +4,19 @@ import {
   getDocumentsConfigForCountry,
   type DocumentListItem,
 } from '@/app/config/documentsConfig';
+import {
+  DEFAULT_DATE_PERIOD,
+  isIsoDateInRange,
+  resolveDatePeriodRange,
+  toIsoDateFromParts,
+  type DatePeriodSelection,
+} from '@/data/datePeriod';
 import { CurrentSearch } from './CurrentSearch';
 import type { CurrentScreenProps } from '../contracts';
 import { Confirm, Page, Section, s } from './Primitives';
 import { DatedRow } from './DatedRow';
 import { DeleteActionReveal } from '../../../../universal/DeleteActionReveal';
+import { BaselineDatePeriodFilterSheet } from '../../../../universal/BaselineDatePeriodFilterSheet';
 import { useProfileTranslation } from './Host';
 
 function DocumentRow({
@@ -69,7 +77,12 @@ export default function Documents(props: CurrentScreenProps) {
     [open, setOpen] = useState<string | null>(null),
     [deleted, setDeleted] = useState<ReadonlySet<string>>(() => new Set()),
     [pending, setPending] = useState<DocumentListItem | null>(null),
-    [legalInfo, setLegalInfo] = useState(false);
+    [legalInfo, setLegalInfo] = useState(false),
+    [dateFilterOpen, setDateFilterOpen] = useState(false),
+    [datePeriod, setDatePeriod] = useState<DatePeriodSelection>(
+      DEFAULT_DATE_PERIOD,
+    );
+  const appliedDateRange = resolveDatePeriodRange(datePeriod);
   const groups = getDocumentsConfigForCountry(props.country)
     .groups.map(group => ({
       ...group,
@@ -91,8 +104,8 @@ export default function Documents(props: CurrentScreenProps) {
               : undefined,
           };
         })
-        .filter(item =>
-          [
+        .filter(item => {
+          const textMatches = [
             group.year,
             item.day,
             item.month,
@@ -102,8 +115,13 @@ export default function Documents(props: CurrentScreenProps) {
           ]
             .join(' ')
             .toLowerCase()
-            .includes(query.trim().toLowerCase()),
-        ),
+            .includes(query.trim().toLowerCase());
+          const date = toIsoDateFromParts(Number(group.year), item.month, item.day);
+          const dateMatches =
+            !appliedDateRange ||
+            isIsoDateInRange(date, appliedDateRange.from, appliedDateRange.to);
+          return textMatches && dateMatches;
+        }),
     }))
     .filter(group => group.items.length);
   const cancel = () => {
@@ -140,16 +158,34 @@ export default function Documents(props: CurrentScreenProps) {
       }}
       topInset={props.screenTopInset}
       active={props.isActive}
+      overlay={
+        dateFilterOpen ? (
+          <BaselineDatePeriodFilterSheet
+            host={props}
+            initialSelection={datePeriod}
+            onClose={() => setDateFilterOpen(false)}
+            onApply={selection => {
+              setDatePeriod(selection);
+              setDateFilterOpen(false);
+            }}
+          />
+        ) : undefined
+      }
     >
       <View style={[s.pad, fidelityStyles.s0]}>
-        <CurrentSearch value={query} onChange={setQuery} />
+        <CurrentSearch
+          value={query}
+          onChange={setQuery}
+          onFilterClick={() => setDateFilterOpen(true)}
+          filtersActive={datePeriod.preset !== 'none'}
+        />
       </View>
       {groups.map((group, index) => (
         <Section
           key={group.year}
           title={group.year}
           gapBefore={index === 0 ? 0 : 18}
-          rowsGap={20}
+          rowsGap={19}
         >
           {group.items.map(item => (
             <DocumentRow
@@ -199,5 +235,5 @@ const styles = StyleSheet.create({
 });
 
 const fidelityStyles = StyleSheet.create({
-  s0: { paddingHorizontal: 16, paddingTop: 26, paddingBottom: 26 },
+  s0: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 },
 });

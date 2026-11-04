@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
+import { BaselineStandardSuccess } from '../../../../../../universal/BaselineStandardSuccess';
 import { BaselineTextField } from '../../../../../../universal/BaselineTextField';
 import { PrimaryButton } from '../../../../../../universal/PrimaryButton';
-import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
-import { Text } from '../../../../../../universal/Typography';
 import { sourceColor } from '../../../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../../../contracts';
 import { FaceIdOverlay } from '../../FaceIdOverlay';
@@ -90,51 +89,22 @@ export function RoBaselinePaymentSuccess({
   onDone: () => void;
 }) {
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
-  const text = sourceColor('var(--uc-text)', dark);
-  const olive = sourceColor('var(--uc-green-olive)', dark);
   return (
-    <View
+    <BaselineStandardSuccess
       testID="ro-payment-success"
-      style={[
-        styles.screen,
-        { backgroundColor: sourceColor('var(--uc-surface)', dark) },
-      ]}
-    >
-      <View style={styles.successHeading}>
-        <Text
-          accessibilityRole="header"
-          style={[styles.title, { color: text }]}
-        >
-          {host.t(
-            'runtime.payments.domesticFlow.successfulPayment',
-            'Successful payment',
-          )}
-        </Text>
-      </View>
-      <View style={styles.successBody}>
-        <View style={styles.checkPosition}>
-          <View
-            testID="ro-payment-success-check"
-            style={[styles.check, { borderColor: olive }]}
-          >
-            <SourceCustomIcon name="prime-check" size={64} color={olive} />
-          </View>
-        </View>
-        <Text style={[styles.message, { color: text }]}>
-          {host.t(
-            'runtime.payments.domesticFlow.paymentSentToBank',
-            'Your payment has been successfully sent to the bank',
-          )}
-        </Text>
-      </View>
-      <View style={styles.footer}>
-        <PrimaryButton
-          label={host.t('runtime.actions.okGotIt', 'Ok, got it')}
-          onPress={onDone}
-          dark={dark}
-        />
-      </View>
-    </View>
+      checkTestID="ro-payment-success-check"
+      title={host.t(
+        'runtime.payments.domesticFlow.successfulPayment',
+        'Successful payment',
+      )}
+      message={host.t(
+        'runtime.payments.domesticFlow.paymentSentToBank',
+        'Your payment has been successfully sent to the bank',
+      )}
+      actionLabel={host.t('runtime.actions.okGotIt', 'Ok, got it')}
+      onDone={onDone}
+      dark={dark}
+    />
   );
 }
 
@@ -142,18 +112,4 @@ const styles = StyleSheet.create({
   screen: { flex: 1, width: '100%', overflow: 'hidden' },
   signBody: { flex: 1, minHeight: 0, paddingHorizontal: 24, paddingTop: 150 },
   footer: { paddingHorizontal: 24, paddingBottom: 42 },
-  successHeading: { paddingHorizontal: 24, paddingTop: 84 },
-  title: { fontFamily: 'UniCredit-bold', fontSize: 28 },
-  successBody: { flex: 1, minHeight: 0, paddingHorizontal: 24 },
-  checkPosition: { alignItems: 'center', paddingTop: 58 },
-  check: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // Source uc-type-n4 overrides the utility leading-[22px] with normal font metrics.
-  message: { fontFamily: 'UniCredit-regular', fontSize: 16, paddingTop: 58 },
 });

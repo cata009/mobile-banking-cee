@@ -186,7 +186,12 @@ export function Page({
       <Header
         variant="current"
         renderLargeTitle={false}
-        backIcon={<InvestmentGlyph name={backGlyph} size={24} />}
+        backIcon={
+          <InvestmentGlyph
+            name={backGlyph}
+            size={backGlyph === 'close-flow' ? 24 : 20}
+          />
+        }
         tokens={{
           ...czInvestmentTokens,
           background: gray

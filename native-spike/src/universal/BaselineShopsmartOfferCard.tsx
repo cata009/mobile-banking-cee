@@ -239,7 +239,12 @@ export function BaselineShopsmartOfferCard({
     </>
   );
   return onPress ? (
-    <Pressable accessibilityRole="button" onPress={onPress} style={rootStyle}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open ${merchant} offer`}
+      onPress={onPress}
+      style={rootStyle}
+    >
       {content}
     </Pressable>
   ) : (

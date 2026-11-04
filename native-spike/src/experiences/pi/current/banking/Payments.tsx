@@ -361,7 +361,7 @@ export function PaymentsScreen(host: CurrentScreenProps) {
                         host.onNavigate({
                           screen: 'contacts',
                         })
-                    : undefined
+                    : host.onProfile
                 }
                 style={s.headerAction}
               >

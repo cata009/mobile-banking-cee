@@ -28,8 +28,10 @@ import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import {
   DuoFullWidthSection,
-  useDuoPreview,
 } from '../../../../../universal/DuoPreview';
+
+const CATEGORY_ICON_GUTTER = 44;
+const CATEGORY_SECTION_GUTTER = 16;
 
 export function BaselineSpendingHeader({ host }: { host: CurrentScreenProps }) {
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
@@ -44,7 +46,7 @@ export function BaselineSpendingHeader({ host }: { host: CurrentScreenProps }) {
             icon="profile"
             label={host.t('runtime.actions.profile', 'Profile')}
             dark={dark}
-            onPress={() => {}}
+            onPress={host.onProfile}
           />
           <BaselineHeaderActionButton
             icon="messages"
@@ -95,6 +97,7 @@ function CategoryIcon({
           position: 'absolute',
           left: 0,
           top: '50%',
+          zIndex: 1,
           transform: 'translateY(-50%)',
           fontFamily: 'UniCredit-regular',
           fontSize: 16,
@@ -136,7 +139,6 @@ function CategoryAmount({
     <Text
       style={[
         styles.amount,
-        direction === 'in' ? styles.amountIncome : undefined,
         { color: host.tokens.text },
       ]}
     >
@@ -203,10 +205,7 @@ function MoneyCategorySection({
                 <CategoryIcon category={category.category} dark={dark} />
                 <View
                   testID={`ro-pfm-category-content-${direction}-${category.category}`}
-                  style={[
-                    styles.categoryContent,
-                    income ? styles.categoryContentIncome : undefined,
-                  ]}
+                  style={styles.categoryContent}
                 >
                   <View
                     testID={`ro-pfm-category-pill-${direction}-${category.category}`}
@@ -233,7 +232,6 @@ function MoneyCategorySection({
                     <Text
                       style={[
                         styles.categoryLabel,
-                        income ? styles.categoryLabelIncome : undefined,
                         { color: host.tokens.muted },
                       ]}
                     >
@@ -299,7 +297,6 @@ export function RoBaselinePfmOverview({
   onCategoryClick: (category: PfmCategoryName, direction: 'out' | 'in') => void;
   onAddTransaction?: () => void;
 }) {
-  const duo = useDuoPreview();
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const activeIndex = Math.max(
     timeline.periods.findIndex(period => period.key === activePeriodKey),
@@ -322,10 +319,7 @@ export function RoBaselinePfmOverview({
       >
         <View
           testID="ro-pfm-top-spacer"
-          style={[
-            styles.topSpacer,
-            duo ? { height: host.screenTopInset } : undefined,
-          ]}
+          style={[styles.topSpacer, { height: Math.max(54, host.screenTopInset) }]}
         />
         <BaselineSpendingHeader host={host} />
       </DuoFullWidthSection>
@@ -456,11 +450,15 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 48,
   },
-  categories: { marginTop: 12, gap: 14, paddingHorizontal: 16 },
+  categories: {
+    marginTop: 12,
+    gap: 14,
+    paddingHorizontal: CATEGORY_SECTION_GUTTER,
+  },
   category: {
     minHeight: 92,
     width: '100%',
-    paddingLeft: 44,
+    paddingLeft: CATEGORY_ICON_GUTTER,
     position: 'relative',
   },
   icon: {
@@ -470,6 +468,7 @@ const styles = StyleSheet.create({
     // Source's inline-flex 32px mark participates in a 35px baseline line box.
     // The absolute wrapper centers that line box; its 32px child starts at the top.
     height: 35,
+    zIndex: 1,
     transform: [{ translateY: -17.5 }],
   },
   categoryContent: {
@@ -478,7 +477,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
-  categoryContentIncome: { justifyContent: 'flex-start' },
   pill: {
     position: 'absolute',
     right: -18,
@@ -487,7 +485,10 @@ const styles = StyleSheet.create({
     height: 78,
     borderRadius: 28,
   },
-  pillIncome: { left: 44, right: undefined },
+  pillIncome: {
+    left: -(CATEGORY_ICON_GUTTER + CATEGORY_SECTION_GUTTER),
+    right: undefined,
+  },
   categoryCopy: {
     position: 'relative',
     zIndex: 1,
@@ -500,9 +501,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     textAlign: 'right',
   },
-  categoryLabelIncome: { textAlign: 'left' },
   amount: { fontFamily: 'UniCredit-bold', fontSize: 20, textAlign: 'right' },
-  amountIncome: { textAlign: 'left' },
   decimals: { fontFamily: 'UniCredit-regular', fontSize: 14 },
   showMoreCategories: {
     marginTop: 8,

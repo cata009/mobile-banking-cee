@@ -54,6 +54,7 @@ function routeWithDeepLinkPayload(screen: Screen, parsedDeepLink: ParsedDeepLink
   if (screen === 'investments') return { screen }
   if (screen === 'investments-history') return { screen }
   if (screen === 'product-detail') return { screen }
+  if (screen === 'products') return { screen }
   if (screen === 'flow-library' && parsedDeepLink?.flowId) {
     return { screen, flowId: parsedDeepLink.flowId, view: 'detail' }
   }

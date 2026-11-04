@@ -160,11 +160,17 @@ export default function ShopSmart({
                   trailingIcon={offer.trailingIcon}
                   variant="default"
                   onPress={() => {
-                    if (preview)
+                    if (preview) {
                       onPreviewAction?.({
                         type: 'offer-open',
                         offerId: offer.id,
                       });
+                      return;
+                    }
+                    host.onNavigate({
+                      screen: 'product-detail',
+                      params: { offerId: offer.id, title: offer.merchant },
+                    });
                   }}
                   dark={dark}
                 />

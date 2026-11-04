@@ -440,7 +440,7 @@ export default function ContractWithdrawalFlow({
             locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
             calendarIcon={
               <SourceCustomIcon
-                name="calendar-days"
+                name="insurance-calendar"
                 size={32}
                 color={sourceColor('var(--uc-text)', dark)}
               />

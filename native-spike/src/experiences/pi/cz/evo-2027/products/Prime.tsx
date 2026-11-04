@@ -68,7 +68,7 @@ export default function Prime(host: CzechNativeScreenProps) {
         variant="current"
         title={copy.pageTitle}
         onBack={host.onBack}
-        backIcon={<Glyph name="back" size={16} color={tokens.text} />}
+        backIcon={<Glyph name="back" size={20} color={tokens.text} />}
       />
       <ScrollView contentContainerStyle={s.content}>
         <Tabs

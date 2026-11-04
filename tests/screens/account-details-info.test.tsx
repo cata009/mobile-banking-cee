@@ -252,7 +252,7 @@ describe('Native account information in the Web host', () => {
     expect(screen.queryByRole('heading', { name: 'Accounts' })).not.toBeInTheDocument()
   })
 
-  it('selects the next Native account when its carousel is dragged with a mouse', async () => {
+  it('keeps advancing by mouse drag from Savings through the last carousel product', async () => {
     const { container } = render(
       <AccountDetailScreen
         selectedProductId="acc-1"
@@ -265,17 +265,35 @@ describe('Native account information in the Web host', () => {
     await asyncNativeReady(container)
 
     const rail = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel"]')
-    const first = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel-acc-1"]')
-    const second = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel-acc-2"]')
+    const productCards = () => [
+      ...container.querySelectorAll<HTMLElement>(
+        '[data-testid^="ro-account-carousel-"][aria-selected]',
+      ),
+    ]
+    const selectedIndex = () =>
+      productCards().findIndex(card => card.getAttribute('aria-selected') === 'true')
     expect(rail).toBeInTheDocument()
-    expect(first).toHaveAttribute('aria-selected', 'true')
-    expect(second).toHaveAttribute('aria-selected', 'false')
+    expect(productCards().length).toBeGreaterThan(2)
+    expect(selectedIndex()).toBe(0)
 
-    fireEvent.mouseDown(rail!, { button: 0, clientX: 350, clientY: 100 })
-    fireEvent.mouseMove(document, { buttons: 1, clientX: 20, clientY: 100 })
-    fireEvent.mouseUp(document, { button: 0, clientX: 20, clientY: 100 })
+    const dragOneCardForward = async () => {
+      const currentRail = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel"]')
+      const dragTarget = productCards()[selectedIndex()]
+      expect(currentRail).toBeInTheDocument()
+      expect(dragTarget).toBeInTheDocument()
+      fireEvent.mouseDown(dragTarget, { button: 0, clientX: 350, clientY: 100 })
+      fireEvent.mouseMove(document, { buttons: 1, clientX: 20, clientY: 100 })
+      fireEvent.mouseUp(document, { button: 0, clientX: 20, clientY: 100 })
+      fireEvent.click(dragTarget)
+    }
 
-    await waitFor(() => expect(second).toHaveAttribute('aria-selected', 'true'))
+    await dragOneCardForward()
+    await waitFor(() => expect(selectedIndex()).toBe(1))
+    for (let index = 2; index < productCards().length; index += 1) {
+      await dragOneCardForward()
+      await waitFor(() => expect(selectedIndex()).toBe(index))
+    }
+    expect(selectedIndex()).toBe(productCards().length - 1)
   })
 
   it('copies from the account product carousel', async () => {

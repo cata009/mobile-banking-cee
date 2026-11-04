@@ -1,6 +1,7 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
 import { StyleSheet } from 'react-native';
+import { Text } from '../src/universal/Typography';
 import { createSpendingAnalyticsTimeline } from '@/data/spendingAnalytics';
 import RoBaselinePfmScreen from '../src/experiences/pi/current/baseline/spending/PfmScreen';
 import { RoBaselinePfmOverview } from '../src/experiences/pi/current/baseline/spending/Overview';
@@ -128,12 +129,22 @@ it('starts at canonical latest April data, ignores Evo hints and preserves Sourc
       testID: `ro-pfm-category-content-in-${incomeCategory}`,
     });
     expect(StyleSheet.flatten(incomeContent.props.style).justifyContent).toBe(
-      'flex-start',
+      'flex-end',
     );
     const incomePill = tree.root.findByProps({
       testID: `ro-pfm-category-pill-in-${incomeCategory}`,
     });
-    expect(StyleSheet.flatten(incomePill.props.style).left).toBe(44);
+    expect(StyleSheet.flatten(incomePill.props.style).left).toBe(0);
+    expect(StyleSheet.flatten(incomePill.props.style).right).toBeUndefined();
+    const incomeRow = tree.root.findByProps({
+      testID: `ro-pfm-category-in-${incomeCategory}`,
+    });
+    expect(
+      incomeRow
+        .findAllByType(Text)
+        .map(node => StyleSheet.flatten(node.props.style).textAlign)
+        .filter(Boolean),
+    ).toEqual(['right', 'right']);
     const spacer = tree.root.findAllByProps({ testID: 'ro-pfm-top-spacer' })[0];
     expect(StyleSheet.flatten(spacer.props.style).height).toBe(54);
     expect(tree.root.findAllByType(RoBaselinePfmCategoryDetail)).toHaveLength(
@@ -153,7 +164,7 @@ it('keeps overview amounts visible under privacy and retains inert Source action
     expect(json).not.toContain('***');
     act(() => button(tree, 'Profile').props.onPress());
     act(() => button(tree, 'Help').props.onPress());
-    act(() => button(tree, 'Add Transaction').props.onPress());
+    act(() => button(tree, 'Add transaction').props.onPress());
     expect(h.onNavigate).not.toHaveBeenCalled();
     expect(h.onProfile).not.toHaveBeenCalled();
     act(() => button(tree, 'Messages').props.onPress());
@@ -168,13 +179,30 @@ it('adds a dated cash transaction to the PFM overview through the category radio
   const tree = mount(h);
   try {
     const initial = tree.root.findByType(RoBaselinePfmOverview).props.summary;
-    act(() => button(tree, 'Add Transaction').props.onPress());
+    act(() => button(tree, 'Add transaction').props.onPress());
     expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
       'Add cash transaction to spending overview',
     );
     expect(tree.root.findByType(DateField).props.displayFormat).toBe(
       'long-month',
     );
+    expect(tree.root.findByType(DateField).props.label).toBe('Choose date');
+    expect(tree.root.findByType(DateField).props.calendarIcon.props.name).toBe(
+      'insurance-calendar',
+    );
+    expect(
+      StyleSheet.flatten(
+        tree.root.findByProps({ testID: 'ro-add-cash-transaction-form' }).props
+          .style,
+      ).gap,
+    ).toBe(16);
+    expect(
+      StyleSheet.flatten(
+        tree.root.findByProps({
+          testID: 'ro-add-cash-transaction-categories-heading',
+        }).props.style,
+      ).paddingHorizontal,
+    ).toBe(24);
     const amount = tree.root
       .findAllByType(BaselineTextField)
       .find(field => field.props.label === 'Amount');
@@ -211,7 +239,12 @@ it('adds a dated cash transaction to the PFM overview through the category radio
       .find(option => option.props.label === 'Household');
     act(() => household?.props.onPress());
     act(() => button(tree, 'OK').props.onPress());
-    act(() => button(tree, 'ADD TRANSACTION').props.onPress());
+    act(() =>
+      tree.root
+        .findAllByType(PrimaryButton)
+        .filter(node => node.props.label === 'Add transaction')
+        .at(-1)!.props.onPress(),
+    );
 
     expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
     const overview = tree.root.findByType(RoBaselinePfmOverview);

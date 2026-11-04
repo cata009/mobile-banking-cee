@@ -118,7 +118,6 @@ export function productTransactions(
 ): AccountTransaction[] {
   if ('virtual' in product && product.virtual === true) return [];
   const data = bankingProducts(context);
-  const currency = getCountryConfig(context.country).currency;
   if (product.type === 'debit_card' || product.type === 'credit_card') {
     const linkedIndex =
       product.type === 'debit_card'
@@ -129,8 +128,14 @@ export function productTransactions(
             ),
           )
         : 0;
-    return getCardTransactions(context.country, product, currency, linkedIndex);
+    return getCardTransactions(
+      context.country,
+      product,
+      product.currency,
+      linkedIndex,
+    );
   }
+  const currency = getCountryConfig(context.country).currency;
   const transactions = getAccountTransactions(
     context.country,
     getAccountTransactionProfileIndex(

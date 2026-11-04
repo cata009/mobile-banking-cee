@@ -492,8 +492,8 @@ export function InternalTransfer({
           ]}
         >
           <SourceCustomIcon
-            name="calendar-days"
-            size={22}
+            name="insurance-calendar"
+            size={32}
             color={schedule ? '#ffffff' : host.tokens.text}
           />
         </Pressable>
@@ -769,7 +769,7 @@ export function InternalTransfer({
                       index === rows.length - 1 ? s.noBorder : undefined,
                     ]}
                   >
-                    <TransferFlag currency={account.currency} />
+                    <TransferFlag currency={account.currency} size={28} />
                     <View style={s.flex}>
                       {txt(account.name, true, [
                         s.pickerName,

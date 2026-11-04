@@ -6,7 +6,6 @@ import {
   View,
 } from 'react-native';
 import { Text } from '../../../../../universal/Typography';
-import { Tabs } from '../../../../../universal/controls';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import {
@@ -19,6 +18,7 @@ import { SourcePhoto } from '../products/SourcePhoto';
 import { evoTokens as tokens } from './tokens';
 import { textStyles as t } from './Primitives';
 import { useMouseCarousel } from '../mouseCarousel';
+import { ShopSmartCategoryTabs } from './ShopSmartCategoryTabs';
 
 export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
   const [filter, setFilter] = useState<'popular' | ShopSmartOfferCategory>(
@@ -32,7 +32,7 @@ export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
     filter === 'popular'
       ? offers
       : offers.filter(offer => offer.categories.includes(filter));
-  const cardWidth = Math.max(0, Math.min(528, availableWidth - 32) - 24);
+  const cardWidth = Math.min(288, Math.max(0, availableWidth - 32));
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const mouse = useMouseCarousel({
     rail,
@@ -42,13 +42,10 @@ export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
   return (
     <View style={s.section}>
       <Text style={t.title}>{copy.heading}</Text>
-      <Tabs
-        tokens={{ ...tokens, background: tokens.surface }}
+      <ShopSmartCategoryTabs
         value={filter}
+        labels={copy.filters}
         label={copy.categoriesLabel}
-        items={(
-          ['popular', 'eshops', 'electronics', 'travel', 'home'] as const
-        ).map(value => ({ value, label: copy.filters[value] }))}
         onChange={setFilter}
       />
       <View ref={mouse.containerRef} {...mouse.panHandlers}>
@@ -70,8 +67,13 @@ export function ShopSmartHome({ host }: { host: CzechNativeScreenProps }) {
             <Pressable
               key={offer.id}
               accessibilityRole="button"
-              accessibilityLabel={offer.title}
-              onPress={() => host.onNavigate({ screen: 'products' })}
+              accessibilityLabel={`Open ${offer.merchant} offer`}
+              onPress={() =>
+                host.onNavigate({
+                  screen: 'product-detail',
+                  params: { offerId: offer.id, title: offer.merchant },
+                })
+              }
               style={[s.card, { width: cardWidth }]}
             >
               <View style={s.media}>
@@ -135,8 +137,7 @@ const s = StyleSheet.create({
   section: { gap: 12 },
   rail: { gap: 12 },
   card: {
-    borderWidth: 1,
-    borderColor: '#666666',
+    borderWidth: 0,
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: tokens.surface,
