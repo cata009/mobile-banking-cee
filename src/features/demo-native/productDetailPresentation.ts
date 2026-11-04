@@ -5,6 +5,7 @@ export interface NativeProductDetailPresentation {
   title: string
   cardId?: ProductsCardId
   optionId?: string
+  offerId?: string
   actionLabel?: string
   includeSafeArea?: boolean
   heroImage?: string

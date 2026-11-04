@@ -1,6 +1,6 @@
 export const GENIUS_PROTECT_MONTHLY_PREMIUM_CENTS = 700
 export const GENIUS_PROTECT_FREE_MONTHS = 2
-export const GENIUS_PROTECT_DEMO_OTP = '413412'
+export const GENIUS_PROTECT_DEMO_OTP = '123456'
 
 export const GENIUS_PROTECT_COVERAGE = [
   { id: 'accidental-death', sum: 40000 },

@@ -68,6 +68,7 @@ function AccountCarousel({
   const [viewport, setViewport] = useState(375);
   const scrollLeft = useRef(0);
   const suppressClickUntil = useRef(0);
+  const previousSelectionRequest = useRef(selectionRequest);
   const offsets = useMemo(
     () => carouselOffsets(products.length, viewport, geometry),
     [products.length, viewport],
@@ -104,16 +105,24 @@ function AccountCarousel({
   // Layout changes also recalculate Source's centering and end-clamp.
   useEffect(() => {
     const offset = offsets[selectedIndex.current] ?? 0;
+    const shouldAnimate =
+      selectionRequest > 0 &&
+      selectionRequest !== previousSelectionRequest.current;
+    previousSelectionRequest.current = selectionRequest;
     scrollLeft.current = offset;
     trackOffset(offset);
     rail.current?.scrollTo({
       x: offset,
       y: 0,
-      animated: selectionRequest > 0,
+      animated: shouldAnimate,
     });
   }, [offsets, selectionRequest, trackOffset]);
   return (
-    <View ref={containerRef} {...panHandlers}>
+    <View
+      ref={containerRef}
+      {...panHandlers}
+      style={Platform.OS === 'web' ? styles.carouselViewportWeb : undefined}
+    >
       <ScrollView
         ref={rail}
         testID="ro-account-carousel"
@@ -134,7 +143,12 @@ function AccountCarousel({
           trackOffset(scrollLeft.current);
           onSelect(nearest(scrollLeft.current));
         }}
-        onMomentumScrollEnd={() => select(nearest(scrollLeft.current))}
+        onMomentumScrollEnd={event => {
+          const x = event.nativeEvent.contentOffset.x;
+          scrollLeft.current = x;
+          trackOffset(x);
+          onSelect(nearest(x));
+        }}
       >
         {products.map((product, index) => (
           <Pressable
@@ -542,7 +556,13 @@ const styles = StyleSheet.create({
   },
   title: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 31 },
   webScroll: { flex: 1, minHeight: 0, transform: 'none' },
-  carouselWebScroll: { transform: 'none' },
+  carouselViewportWeb: { width: '100%', minWidth: 0, flexShrink: 1 },
+  carouselWebScroll: {
+    width: '100%',
+    minWidth: 0,
+    flexShrink: 1,
+    transform: 'none',
+  },
   rail: {
     paddingLeft: 16,
     paddingRight: 16,

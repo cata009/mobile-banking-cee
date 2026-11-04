@@ -27,8 +27,11 @@ export const PRODUCTS_CUSTOM_ICONS = {
     width: 32,
     height: 32,
     viewBox: '0 0 32 32',
-    usage: ['RsPropertyInsurancePreviews insurance start date'],
-    notes: 'Exact 32px calendar glyph supplied for the RS property-insurance start-date field.',
+    usage: [
+      'RS property-insurance preview',
+      'Native date fields across PI baseline and Evo screens',
+    ],
+    notes: 'Exact 19x20 calendar glyph supplied for shared native date fields.',
     render: () => (
       <path
         d="M25.125 14.125V23.5C25.125 24.8805 23.9659 25.9998 22.5361 26H7V14.125H25.125ZM9.5 23.708H12.625V20.583H9.5V23.708ZM14.5 23.708H17.625V20.583H14.5V23.708ZM9.5 19.333H12.625V16.208H9.5V19.333ZM14.5 19.333H17.625V16.208H14.5V19.333ZM19.5 19.333H22.625V16.208H19.5V19.333ZM25.125 12.25H7V8.5C7 7.11951 8.15913 6.00022 9.58887 6H25.125V12.25ZM10.2363 7.875C9.52117 7.87515 8.94238 8.43447 8.94238 9.125C8.94238 9.81491 9.52117 10.3748 10.2363 10.375C10.9516 10.375 11.5312 9.815 11.5312 9.125C11.5312 8.43438 10.9516 7.875 10.2363 7.875ZM21.8887 7.875C21.1734 7.875 20.5938 8.43438 20.5938 9.125C20.5938 9.815 21.1734 10.375 21.8887 10.375C22.6038 10.3749 23.1826 9.81491 23.1826 9.125C23.1826 8.43446 22.6038 7.87515 21.8887 7.875Z"

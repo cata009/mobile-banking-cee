@@ -1,3 +1,5 @@
+import { RO_DEMO_CUSTOMER } from '@/data/customerProfile'
+
 export interface RomanianProfileAddress {
   country: string
   sector: string
@@ -29,8 +31,8 @@ export interface RomanianPersonalProfile {
 }
 
 const initialProfile: RomanianPersonalProfile = {
-  firstName: 'Mihai Catalin',
-  lastName: 'Iacob',
+  firstName: RO_DEMO_CUSTOMER.firstName,
+  lastName: RO_DEMO_CUSTOMER.lastName,
   documentType: 'Identity card',
   documentNumber: 'RX 123456',
   documentExpiry: '15.02.2025',

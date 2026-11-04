@@ -31,7 +31,6 @@ import { RO_SHEETS } from './roSheetOptions';
 import { RoPayIcon } from './RoPayIcon';
 import { RoPaymentOptionIcon } from './RoPaymentOptionIcon';
 import { RoBillIcon } from './RoBillIcon';
-import { useDuoPreview } from '../../../../../../universal/DuoPreview';
 
 const otherIcons = {
   qr: 'payment-create-qr',
@@ -50,7 +49,6 @@ const actionIcons = {
   exchange: 'payment-exchange-rates',
 };
 export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
-  const duo = useDuoPreview();
   const [view, setView] = useState(host.route.params?.view ?? 'overview');
   const [hero, setHero] = useState<PaymentHeroId | null>(null);
   const visibility = host.onPrimaryNavigationChange;
@@ -108,7 +106,7 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   return (
     <View style={[s.page, { backgroundColor: color('--uc-surface') }]}>
       <View
-        style={[s.reserve, duo ? { height: host.screenTopInset } : undefined]}
+        style={[s.reserve, { height: Math.max(54, host.screenTopInset) }]}
       />
       <BaselineL1Header
         variant="payments"
@@ -128,7 +126,7 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
               onPress={
                 bosniaHeader
                   ? () => host.onNavigate({ screen: 'contacts' })
-                  : undefined
+                  : host.onProfile
               }
             />
             <BaselineHeaderActionButton

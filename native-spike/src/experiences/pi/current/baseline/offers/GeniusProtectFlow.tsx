@@ -43,9 +43,11 @@ import {
 } from '@/features/insurance/geniusProtect';
 import geniusProtectHero from '@/assets/pi/ro/genius-protect/genius-protect-hero.png';
 import { BaselineCheckbox } from '../../../../../universal/BaselineCheckbox';
+import { BaselineDropdownField } from '../../../../../universal/BaselineDropdownField';
 import { BaselinePageHeader } from '../../../../../universal/BaselinePageHeader';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
 import { BaselineTextField } from '../../../../../universal/BaselineTextField';
+import { AccountSelectionSheet } from '../AccountSelectionSheet';
 import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { RadioButton } from '../../../../../universal/RadioButton';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
@@ -287,11 +289,13 @@ function InfoRow({
           {description}
         </Text>
       </View>
-      <SourceCustomIcon
-        name="chevron-right"
-        size={24}
-        color={sourceColor('var(--uc-text)', dark)}
-      />
+      <View testID="genius-protect-row-chevron" style={styles.chevronSlot}>
+        <SourceCustomIcon
+          name="chevron-link"
+          size={32}
+          color={sourceColor('var(--uc-text)', dark)}
+        />
+      </View>
     </Pressable>
   );
 }
@@ -328,11 +332,13 @@ function DataRow({
         </Text>
       </View>
       {onPress ? (
-        <SourceCustomIcon
-          name="chevron-right"
-          size={24}
-          color={sourceColor('var(--uc-text)', dark)}
-        />
+        <View testID="genius-protect-row-chevron" style={styles.chevronSlot}>
+          <SourceCustomIcon
+            name="chevron-link"
+            size={32}
+            color={sourceColor('var(--uc-text)', dark)}
+          />
+        </View>
       ) : null}
     </View>
   );
@@ -548,6 +554,7 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
   });
   const [documentModal, setDocumentModal] = useState<DocumentId | null>(null);
   const [infoModal, setInfoModal] = useState<DocumentId | null>(null);
+  const [accountPicker, setAccountPicker] = useState(false);
   const [overviewAccepted, setOverviewAccepted] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
@@ -579,6 +586,10 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
     }
     if (infoModal) {
       setInfoModal(null);
+      return;
+    }
+    if (accountPicker) {
+      setAccountPicker(false);
       return;
     }
     setScreenError('');
@@ -617,7 +628,7 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
       return true;
     });
     return () => register(null);
-  }, [host.onBackHandlerChange, screen, documentModal, infoModal]);
+  }, [host.onBackHandlerChange, screen, documentModal, infoModal, accountPicker]);
 
   useEffect(() => {
     if (screen !== 'processing') return;
@@ -1420,6 +1431,9 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
     }
 
     if (screen === 'payment-account') {
+      const selectedAccount = ACCOUNT_OPTIONS.find(
+        account => account.id === draft?.accountId,
+      );
       return (
         <View style={styles.content}>
           <Text style={[styles.pageTitle, { color: ink }]}>{screenTitle}</Text>
@@ -1429,28 +1443,19 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
               'Colectarea primei de asigurare se va efectua din contul RON selectat.',
             )}
           </Text>
-          <View style={styles.accounts}>
-            {ACCOUNT_OPTIONS.map(account => (
-              <View key={account.id} style={styles.accountRow}>
-                <RadioButton
-                  label={account.name}
-                  selected={draft?.accountId === account.id}
-                  onPress={() =>
-                    updateGeniusProtectDraft({ accountId: account.id })
-                  }
-                  dark={dark}
-                  paddingHorizontal={0}
-                />
-                <View style={styles.accountDetails}>
-                  <Text style={[styles.body, { color: ink }]}>
-                    {account.number}
-                  </Text>
-                  <Text style={[styles.rowDescription, { color: muted }]}>
-                    {account.balance}
-                  </Text>
-                </View>
-              </View>
-            ))}
+          <View style={styles.accountSelector}>
+            <BaselineDropdownField
+              label={copy('Payment account', 'Cont de plată')}
+              value={draft?.accountId ?? ''}
+              options={ACCOUNT_OPTIONS.map(account => ({
+                value: account.id,
+                label: account.name,
+              }))}
+              onChange={accountId => updateGeniusProtectDraft({ accountId })}
+              onOpen={() => setAccountPicker(true)}
+              fillWidth
+              dark={dark}
+            />
           </View>
           <InfoRow
             label={copy(
@@ -1635,9 +1640,17 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
         <View style={styles.content}>
           <Text style={[styles.pageTitle, { color: ink }]}>{screenTitle}</Text>
           <Text style={[styles.bodyLarge, { color: ink }]}>
+            {copy('We sent an SMS to', 'Ți-am trimis un SMS la numărul')}{' '}
+            <Text
+              testID="genius-protect-otp-phone"
+              style={styles.otpPhone}
+            >
+              {datePhone(profile.phone).replace(/\s+/g, '')}
+            </Text>
+            .{' '}
             {copy(
-              `We sent an SMS to ${datePhone(profile.phone)}. Enter the code to sign your contract.`,
-              `Ți-am trimis un SMS la numărul ${datePhone(profile.phone)}. Introdu codul primit pentru a semna contractul.`,
+              'Enter the code to sign your contract.',
+              'Introdu codul primit pentru a semna contractul.',
             )}
           </Text>
           <BaselineTextField
@@ -1991,6 +2004,7 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
           onClose={() => setDocumentModal(null)}
           dark={dark}
           stickyHeader
+          showFooterDivider={false}
           footer={
             <View style={styles.sheetFooter}>
               <PrimaryButton
@@ -2039,6 +2053,25 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
             </View>
           </View>
         </SourceBottomSheet>
+      ) : null}
+      {accountPicker ? (
+        <AccountSelectionSheet
+          host={host}
+          title={copy('Choose account', 'Alege contul')}
+          selectedId={draft?.accountId ?? ''}
+          options={ACCOUNT_OPTIONS.map(account => ({
+            id: account.id,
+            name: account.name,
+            detail: account.number,
+            balanceText: account.balance,
+            currency: 'RON',
+          }))}
+          onClose={() => setAccountPicker(false)}
+          onConfirm={accountId => {
+            updateGeniusProtectDraft({ accountId });
+            setAccountPicker(false);
+          }}
+        />
       ) : null}
       {infoModal ? (
         <SourceBottomSheet
@@ -2138,6 +2171,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bodyLarge: { fontFamily: 'UniCredit-regular', fontSize: 18, lineHeight: 24 },
+  otpPhone: { fontFamily: 'UniCredit-bold' },
   body: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 21 },
   benefits: { gap: 0 },
   benefitRow: {
@@ -2207,6 +2241,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   infoIcon: { width: 24, alignItems: 'center' },
+  chevronSlot: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   price: {
     fontFamily: 'UniCredit-bold',
     fontSize: 18,
@@ -2241,13 +2281,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   noticesList: { gap: 18, paddingVertical: 8 },
-  accounts: { gap: 10, paddingVertical: 12 },
-  accountRow: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#d8d8d8',
-  },
-  accountDetails: { marginLeft: 40, marginTop: -14, paddingBottom: 6 },
+  accountSelector: { marginHorizontal: -24, marginTop: 12, marginBottom: 8 },
   documentRows: { gap: 8 },
   resend: { minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' },
   resendText: {

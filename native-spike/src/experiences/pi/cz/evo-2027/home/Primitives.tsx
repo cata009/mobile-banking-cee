@@ -21,6 +21,7 @@ import type { Currency } from '@/data/products';
 import { evoTokens as tokens } from './tokens';
 import { BaselineCarouselIndicator } from '../../../../../universal/BaselineCarouselIndicator';
 import { useMouseCarousel } from '../mouseCarousel';
+import { EVO_LEVEL_ONE_HEADER_HEIGHT } from '../levelOneLayout';
 
 export const textStyles = StyleSheet.create({
   body: {
@@ -125,7 +126,7 @@ export function L1Header({
       value={title}
       onChange={() => {}}
       tabsGap={0}
-      actionsRowHeight={40}
+      actionsRowHeight={EVO_LEVEL_ONE_HEADER_HEIGHT}
       actionsPaddingHorizontal={16}
       brand={
         <Text accessibilityRole="header" style={s.l1Title}>

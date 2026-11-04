@@ -201,7 +201,7 @@ export default function Appearance({
           >
             <SourceCustomIcon
               name="back-heavy"
-              size={22}
+              size={20}
               color={light ? '#262626' : '#ffffff'}
             />
           </Pressable>

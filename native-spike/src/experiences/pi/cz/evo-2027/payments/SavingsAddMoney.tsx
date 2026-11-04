@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { FormField } from '../../../../../universal/FormField';
 import { Select } from '../../../../../universal/Select';
 import { DateField } from '../../../../../universal/DateField';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
 import {
   useDuoLocalViewport,
@@ -180,6 +181,7 @@ function StandingOrder({
         value={draft.startDate}
         min={today}
         locale="en-GB"
+        calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
         onChange={startDate =>
           setDraft(current => ({
             ...current,
@@ -230,6 +232,7 @@ function StandingOrder({
           value={draft.endDate}
           min={draft.startDate}
           locale="en-GB"
+          calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
           onChange={endDate =>
             setDraft(current => ({
               ...current,

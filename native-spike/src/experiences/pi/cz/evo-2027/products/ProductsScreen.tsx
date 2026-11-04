@@ -10,7 +10,9 @@ import {
   View,
 } from 'react-native';
 import { Text } from '../../../../../universal/Typography';
-import { Header, SearchField, Tabs } from '../../../../../universal/controls';
+import { Header } from '../../../../../universal/controls';
+import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import {
   PRODUCT_SHELF_CATEGORIES,
   PRODUCT_SHELF_ENTRY_CARDS,
@@ -18,20 +20,25 @@ import {
   type ProductShelfItem,
   type ProductShelfCategoryId,
 } from '@/app/config/productsShelfConfig';
-import {
-  getProductsMenuForCountry,
-  type ShopSmartOfferCategory,
-} from '@/app/config/productsMenuConfig';
+import { getProductsMenuForCountry } from '@/app/config/productsMenuConfig';
+import { createEvoTranslations } from '@/translations/evo';
 import type { CzechNativeScreenProps } from '../contracts';
 import { evoTokens as tokens } from '../home/tokens';
 import {
   Glyph,
-  IconAction,
   L1Header,
   textStyles as t,
 } from '../home/Primitives';
 import { SourcePhoto } from './SourcePhoto';
 import Prime from './Prime';
+import {
+  ShopSmartCategoryTabs,
+  type ShopSmartCategory,
+} from '../home/ShopSmartCategoryTabs';
+import {
+  EVO_LEVEL_ONE_CONTENT_TOP,
+  resolveEvoLevelOneTopInset,
+} from '../levelOneLayout';
 import {
   useDuoPreview,
   useDuoLocalViewport,
@@ -117,9 +124,10 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
       ).id,
   );
   const [query, setQuery] = useState('');
-  const [offerCategory, setOfferCategory] = useState<
-    'popular' | ShopSmartOfferCategory
-  >('popular');
+  const [offerCategory, setOfferCategory] = useState<ShopSmartCategory>(
+    'popular',
+  );
+  const [headerProgress, setHeaderProgress] = useState(0);
   const focusRequestId = host.productsShelfFocusRequest?.requestId;
   const focusRequestRef = useRef(host.productsShelfFocusRequest);
   focusRequestRef.current = host.productsShelfFocusRequest;
@@ -134,6 +142,7 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
   heroCollapsedChangeRef.current = host.onProductsShelfHeroCollapsedChange;
   const shelfIsActive = host.isActive !== false && view !== 'prime';
   const config = getProductsMenuForCountry('CZ');
+  const shopCopy = createEvoTranslations(host.language ?? 'en').shopsmart;
   const category = getProductShelfCategory(categoryId);
   useEffect(() => {
     setView(viewKind(host.route.params?.view));
@@ -144,6 +153,7 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
         ).id,
       );
     setQuery('');
+    setHeaderProgress(0);
   }, [host.route.params?.view, host.route.params?.categoryId]);
   useEffect(() => {
     if (host.isActive === false) return;
@@ -238,19 +248,36 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
             ? 'Partner offers'
             : 'Offers';
   return (
-    <View style={[s.root, { paddingTop: host.screenTopInset ?? 0 }]}>
+    <View
+      style={[
+        s.root,
+        {
+          paddingTop: resolveEvoLevelOneTopInset(
+            host.screenTopInset,
+            !!duo && duo.rightInset > 0,
+          ),
+        },
+      ]}
+    >
       {view === 'shelf' ? (
         <L1Header
           title={title}
           actions={
-            <IconAction
-              label="Search products"
-              name="search"
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Search products"
               onPress={() => {
                 setQuery('');
                 setView('search');
               }}
-            />
+              style={s.searchAction}
+            >
+              <SourceCustomIcon
+                name="search"
+                size={20}
+                color={tokens.text}
+              />
+            </Pressable>
           }
         />
       ) : (
@@ -258,36 +285,64 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
           tokens={tokens}
           variant="current"
           title={title}
+          collapsedTitleProgress={headerProgress}
+          collapsedTitleOpacity={headerProgress}
+          renderLargeTitle={false}
           onBack={back}
-          backIcon={<Glyph name="back" size={16} />}
+          backIcon={<Glyph name="back" size={20} />}
         />
-      )}
-      {(view === 'search' || offersView) && (
-        <View style={s.search}>
-          <SearchField
-            tokens={tokens}
-            label={view === 'search' ? 'Search products' : 'Search offers'}
-            placeholder={
-              view === 'search' ? 'Search products' : 'Search offers'
-            }
-            value={query}
-            onChange={setQuery}
-            onSubmit={() => {}}
-            onClear={() => setQuery('')}
-            icon={<Glyph name="search" />}
-            autoFocus={view === 'search'}
-          />
-        </View>
       )}
       <ScrollView
         key={view + categoryId}
         showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={view === 'search' || offersView ? [1] : undefined}
+        scrollEventThrottle={16}
+        onScroll={event =>
+          setHeaderProgress(
+            Math.min(
+              1,
+              Math.max(0, event.nativeEvent.contentOffset.y / 64),
+            ),
+          )
+        }
         contentContainerStyle={[
           s.content,
+          (view === 'search' || offersView) && s.compactContent,
           wide && (view === 'shelf' || offersView) && s.wideContent,
           { paddingBottom: 24 + navigationInset },
         ]}
       >
+        {view !== 'shelf' && (
+          <Text
+            accessibilityRole="header"
+            numberOfLines={2}
+            style={[
+              t.title,
+              sourceStyles.fontSize28lineHeight31,
+              { opacity: 1 - headerProgress },
+            ]}
+          >
+            {title}
+          </Text>
+        )}
+        {(view === 'search' || offersView) && (
+          <View style={s.stickySearch}>
+            <BaselineSearchBar
+              value={query}
+              onValueChange={setQuery}
+              onClearClick={() => setQuery('')}
+              placeholder={
+                view === 'search' ? 'Search products' : 'Search offers'
+              }
+              accessibilityLabel={
+                view === 'search' ? 'Search products' : 'Search offers'
+              }
+              fieldSurface="raised"
+              fieldSize="comfortable"
+              showTrailingAction={false}
+            />
+          </View>
+        )}
         {view === 'shelf' ? (
           <>
             <View>
@@ -331,7 +386,7 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
               <View key={itemCategory.id}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`${itemCategory.title}, ${itemCategory.items.length} products`}
+                  accessibilityLabel={itemCategory.title}
                   onPress={() => {
                     setCategoryId(itemCategory.id);
                     setView('category');
@@ -351,9 +406,6 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
           </>
         ) : view === 'category' ? (
           <>
-            <Text style={[t.body, t.muted]}>
-              {category.items.length} products
-            </Text>
             {category.items.map(item => itemCard(item, true))}
           </>
         ) : view === 'search' ? (
@@ -391,26 +443,24 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
                 </Text>
               </View>
             )}
-            <Tabs
-              tokens={tokens}
-              variant="current"
-              label="Offer categories"
+            <ShopSmartCategoryTabs
               value={offerCategory}
+              labels={shopCopy.filters}
+              label={shopCopy.categoriesLabel}
               onChange={setOfferCategory}
-              items={[
-                { value: 'popular', label: 'Popular' },
-                { value: 'eshops', label: 'E-shops' },
-                { value: 'electronics', label: 'Electronics' },
-                { value: 'travel', label: 'Travel' },
-                { value: 'home', label: 'Home & living' },
-              ]}
             />
             <View style={[s.offersList, wide && s.wideOffersList]}>
               {offers.map(offer => (
                 <Pressable
                   key={offer.id}
                   accessibilityRole="button"
-                  onPress={() => {}}
+                  accessibilityLabel={`Open ${offer.merchant} offer`}
+                  onPress={() =>
+                    host.onNavigate({
+                      screen: 'product-detail',
+                      params: { offerId: offer.id, title: offer.merchant },
+                    })
+                  }
                   style={[s.offer, wide && s.wideOffer]}
                 >
                   <SourcePhoto asset={offer.imageSrc} height={130} />
@@ -447,16 +497,27 @@ export default function ProductsScreen(host: CzechNativeScreenProps) {
 }
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: tokens.background },
-  search: { paddingHorizontal: 16, paddingTop: 2, paddingBottom: 10 },
+  searchAction: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stickySearch: {
+    paddingVertical: 2,
+    backgroundColor: tokens.background,
+    zIndex: 1,
+  },
   content: {
     width: '100%',
     maxWidth: 560,
     alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 6,
+    paddingTop: EVO_LEVEL_ONE_CONTENT_TOP,
     paddingBottom: 24,
     gap: 28,
   },
+  compactContent: { gap: 16 },
   wideContent: { maxWidth: '100%' },
   offersList: { gap: 16 },
   wideOffersList: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
@@ -497,8 +558,7 @@ const s = StyleSheet.create({
   offer: {
     borderRadius: 8,
     backgroundColor: tokens.surface,
-    borderColor: '#666666',
-    borderWidth: 1,
+    borderWidth: 0,
     overflow: 'hidden',
   },
   offerSummary: {
@@ -524,4 +584,5 @@ const sourceStyles = StyleSheet.create({
   fontSize18lineHeight24: { fontSize: 18, lineHeight: 24 },
   fontSize16lineHeight20: { fontSize: 16, lineHeight: 20 },
   fontSize22lineHeight26: { fontSize: 22, lineHeight: 26 },
+  fontSize28lineHeight31: { fontSize: 28, lineHeight: 31 },
 });

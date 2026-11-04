@@ -21,6 +21,10 @@ import RoBaselineAccountOptions from '../src/experiences/pi/current/baseline/Acc
 import { BaselineAccountInfoField } from '../src/universal/BaselineAccountInfoField';
 import { BaselineCardNavigationRow } from '../src/universal/BaselineCardNavigationRow';
 import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
+import { DateField } from '../src/universal/DateField';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
+import { Text } from '../src/universal/Typography';
+import { sourceColor } from '../src/universal/sourceColor';
 import { RadioButton } from '../src/universal/RadioButton';
 import NativeCurrentApp from '../src/experiences/pi/current/NativeCurrentApp';
 import { CURRENT_BANKING_ADAPTER } from '../src/experiences/pi/current/banking/adapter';
@@ -747,10 +751,10 @@ test('change account name validates, saves and updates account presentation', as
     tree.root.findByProps({ testID: 'ro-account-name-character-count' }).props
       .children,
   ).toEqual([15, ' / ', 20]);
-  expect(press(tree, 'SAVE').props.accessibilityState.disabled).toBe(true);
+  expect(press(tree, 'Save').props.accessibilityState.disabled).toBe(true);
   await act(() => nameInput.props.onChangeText('Travel Fund'));
-  expect(press(tree, 'SAVE').props.accessibilityState.disabled).toBe(false);
-  await act(() => press(tree, 'SAVE').props.onPress());
+  expect(press(tree, 'Save').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'Save').props.onPress());
   expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
   expect(getAccountNameOverride('acc-1')).toBe('Travel Fund');
   expect(bankingProducts(props).accounts[0]!.name).toBe('Travel Fund');
@@ -826,6 +830,11 @@ test('add money flow covers recurrence, review terms, card validation and comple
   expect(JSON.stringify(tree.toJSON())).toContain('Review data');
   expect(JSON.stringify(tree.toJSON())).toContain('700.00 RON');
   expect(JSON.stringify(tree.toJSON())).toContain('MONTHLY RECURRENCE DAY');
+  expect(
+    StyleSheet.flatten(
+      tree.root.findByProps({ testID: 'ro-add-money-review-root' }).props.style,
+    ).backgroundColor,
+  ).toBe(sourceColor('var(--uc-surface)', false));
   expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(true);
   await act(() =>
     press(tree, 'I AGREE WITH TERMS AND CONDITIONS').props.onPress(),
@@ -1052,6 +1061,11 @@ test('push notification flow updates account and card limits and preserves toggl
     press(tree, 'Accounts transaction notifications').props.onPress(),
   );
   expect(
+    tree.root
+      .findAllByType(Text)
+      .some(node => node.props.children === 'Accounts transaction notifications'),
+  ).toBe(true);
+  expect(
     switchControl('REJECTED ACCOUNTS TRANSACTION NOTIFICATIONS').props
       .accessibilityState.checked,
   ).toBe(true);
@@ -1061,6 +1075,13 @@ test('push notification flow updates account and card limits and preserves toggl
   ).toBe(true);
   await act(() => press(tree, 'Notification limit').props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain('5.00');
+  const currencyLabel = tree.root
+    .findAllByType(Text)
+    .find(node => node.props.children === 'CURRENCY')!;
+  expect(currencyLabel.props.numberOfLines).toBe(1);
+  expect(
+    StyleSheet.flatten(currencyLabel.parent!.props.style).width,
+  ).toBeGreaterThanOrEqual(72);
   expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(true);
   const accountAmount = tree.root
     .findAllByType(TextInput)
@@ -1135,6 +1156,7 @@ test('account statement flow selects and shares statements and completes an on-d
   expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(true);
   const statement = press(tree, 'Statement number 9, 30 SEP 2026');
   expect(statement.props.accessibilityState.checked).toBe(false);
+  expect(StyleSheet.flatten(statement.props.style).gap).toBe(8);
   await act(() => statement.props.onPress());
   expect(press(tree, 'Share').props.accessibilityState.disabled).toBe(false);
   await act(async () => {
@@ -1159,21 +1181,32 @@ test('account statement flow selects and shares statements and completes an on-d
     .findAllByType(TextInput)
     .find(input => input.props.accessibilityLabel === 'Statement email')!;
   await act(() => statementEmail.props.onChangeText('not-an-email'));
-  expect(press(tree, 'SEND').props.accessibilityState.disabled).toBe(true);
+  expect(press(tree, 'Send').props.accessibilityState.disabled).toBe(true);
   await act(() =>
     statementEmail.props.onChangeText('mihaicatalin.iacob@gmail.com'),
   );
-  expect(press(tree, 'SEND').props.accessibilityState.disabled).toBe(false);
-  await act(() => press(tree, 'SEND').props.onPress());
+  expect(press(tree, 'Send').props.accessibilityState.disabled).toBe(false);
+  await act(() => press(tree, 'Send').props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain(
     'The statement will be soon sent',
   );
-  await act(() => press(tree, 'OK, GOT IT').props.onPress());
+  expect(
+    tree.root
+      .findAllByType(SourceCustomIcon)
+      .some(icon => icon.props.name === 'prime-check' && icon.props.size === 64),
+  ).toBe(true);
+  await act(() => press(tree, 'Ok, got it').props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain('NOV 2025 - NOV 2026');
   await act(() => press(tree, 'Advanced search').props.onPress());
   expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
     'Advanced search',
   );
+  const dateFields = tree.root.findAllByType(DateField);
+  expect(dateFields).toHaveLength(2);
+  expect(dateFields[0]!.props.calendarIcon.props.name).toBe('calendar-days');
+  expect(dateFields[0]!.props.labelStyle).toEqual({
+    transform: [{ translateY: 8 }],
+  });
   const fromDate = tree.root
     .findAllByType(TextInput)
     .find(input => input.props.accessibilityLabel === 'From date')!;

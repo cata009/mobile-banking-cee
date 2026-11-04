@@ -19,6 +19,7 @@ import {
   getProductDetailImageKey,
   type ProductDetailImageKey,
 } from '@/features/products/evoProductDetail';
+import { getProductsMenuForCountry } from '@/app/config/productsMenuConfig';
 import activateAccount from '@/assets/products/detail/img_illustration_activateaccount.png';
 import activateToken from '@/assets/products/detail/img_illustration_activatetoken.png';
 import blocking from '@/assets/products/detail/img_illustration_blocking.png';
@@ -39,6 +40,7 @@ import type { CurrentScreenProps } from '../../contracts';
 import { FaceIdOverlay } from '../FaceIdOverlay';
 import { RasterImage } from './RasterImage';
 import VirtualCardFlow from '../virtual-card/VirtualCardFlow';
+import { BaselineShopSmartOfferDetail } from '../../../../../universal/BaselineShopSmartOfferDetail';
 
 const images: Record<ProductDetailImageKey, string> = {
   'activate-account': activateAccount,
@@ -188,6 +190,12 @@ export default function Detail(host: CurrentScreenProps) {
   const [progress, setProgress] = useState(0);
   const presentation = host.productDetailPresentation;
   const params = host.route.params ?? {};
+  const offerId = params.offerId;
+  const shopSmartOffer = offerId
+    ? getProductsMenuForCountry(host.country).shopSmartOfferCards.find(
+        offer => offer.id === offerId,
+      )
+    : undefined;
   const title = presentation?.title ?? params.title ?? 'Product';
   const cardId = presentation?.cardId ?? params.cardId;
   const optionId = presentation?.optionId ?? params.optionId;
@@ -211,6 +219,8 @@ export default function Detail(host: CurrentScreenProps) {
     });
     return () => registerBack?.(null);
   }, [registerBack, step]);
+  if (shopSmartOffer)
+    return <BaselineShopSmartOfferDetail host={host} offer={shopSmartOffer} />;
   if (step === 'virtual-card')
     return (
       <VirtualCardFlow

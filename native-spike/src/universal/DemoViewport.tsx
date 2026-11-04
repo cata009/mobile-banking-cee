@@ -60,6 +60,7 @@ export function DemoViewport({
       }}
     >
       <View
+        pointerEvents={!fitContent && !size ? 'none' : 'auto'}
         style={
           fitContent
             ? exactSourceStyles.content
@@ -71,6 +72,7 @@ export function DemoViewport({
                     height: logical.height,
                     transform: [{ scale: logical.scale }],
                   },
+                  !size && exactSourceStyles.unmeasured,
                 ]
               : exactSourceStyles.inline1
         }
@@ -104,4 +106,5 @@ const exactSourceStyles = StyleSheet.create({
     left: 0,
     transformOrigin: 'top left',
   },
+  unmeasured: { opacity: 0 },
 });

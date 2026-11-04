@@ -12,7 +12,12 @@ import { Text } from '../../../../universal/Typography';
 import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 import { sourceColor } from '../../../../universal/sourceColor';
 
-type AccountShareFieldId = 'accountTitle' | 'accountOwner' | 'iban' | 'bic';
+type AccountShareFieldId =
+  | 'accountTitle'
+  | 'accountOwner'
+  | 'accountNumber'
+  | 'iban'
+  | 'bic';
 
 type AccountShareField = {
   id: AccountShareFieldId;
@@ -23,6 +28,7 @@ type AccountShareField = {
 const defaultSelection: Record<AccountShareFieldId, boolean> = {
   accountTitle: true,
   accountOwner: true,
+  accountNumber: false,
   iban: false,
   bic: false,
 };
@@ -44,6 +50,7 @@ export function AccountDetailsShareSheet({
   host,
   accountTitle,
   accountOwner,
+  accountNumber,
   iban,
   bic,
   onClose,
@@ -51,6 +58,7 @@ export function AccountDetailsShareSheet({
   host: CurrentScreenProps;
   accountTitle: string;
   accountOwner: string;
+  accountNumber?: string;
   iban: string;
   bic?: string;
   onClose: () => void;
@@ -73,6 +81,15 @@ export function AccountDetailsShareSheet({
       label: 'Account owner',
       value: accountOwner,
     },
+    ...(accountNumber
+      ? [
+          {
+            id: 'accountNumber' as const,
+            label: 'Account number',
+            value: accountNumber,
+          },
+        ]
+      : []),
     { id: 'iban' as const, label: 'IBAN', value: iban },
     ...(bic
       ? [{ id: 'bic' as const, label: 'BIC/SWIFT Code', value: bic }]

@@ -18,6 +18,7 @@ import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import { SearchField } from '../../../../../universal/SearchField';
 import { Select } from '../../../../../universal/Select';
 import { DateField, validIsoDate } from '../../../../../universal/DateField';
+import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
 import { Tabs } from '../../../../../universal/Tabs';
 import { useInvestmentBack } from './Runtime';
@@ -243,6 +244,7 @@ export function InvestmentHistory({
                 label="From date"
                 value={draft.customStartDate}
                 max={draft.customEndDate}
+                calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
                 onChange={customStartDate =>
                   setDraft(previous => ({ ...previous, customStartDate }))
                 }
@@ -253,6 +255,7 @@ export function InvestmentHistory({
                 label="To date"
                 value={draft.customEndDate}
                 min={draft.customStartDate}
+                calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
                 onChange={customEndDate =>
                   setDraft(previous => ({ ...previous, customEndDate }))
                 }

@@ -11,10 +11,9 @@ import {
 import { Text } from '../../../../../universal/Typography';
 import {
   Header,
-  ModalPanel,
   NavigationRow,
-  Tabs,
 } from '../../../../../universal/controls';
+import { Select } from '../../../../../universal/Select';
 import {
   createSpendingRangeSummary,
   listSpendingMonthKeys,
@@ -64,6 +63,16 @@ import { PeriodSheet, getPresetLabels } from './PeriodSheet';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { BaselineCarouselIndicator } from '../../../../../universal/BaselineCarouselIndicator';
 import { SpendingPeriodCarousel } from './SpendingPeriodCarousel';
+import {
+  EVO_LEVEL_ONE_CONTENT_TOP,
+  resolveEvoLevelOneTopInset,
+} from '../levelOneLayout';
+import {
+  BankingSheet,
+  SelectedMark,
+} from '../../../current/banking/Controls';
+import { czechBankingHost } from '../../../current/banking/czechHost';
+import { TransferFlag } from '../../../current/banking/TransferFlag';
 import { formatEvo2027Number } from '@/app/utils/evo2027Formatting';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import {
@@ -161,6 +170,7 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
   const wideOverview = !!duo && (local?.width ?? 0) >= 720;
   const copy = createEvoTranslations(host.language ?? 'en');
   const presetLabels = getPresetLabels(host.language ?? 'en');
+  const bankingHost = czechBankingHost(host, { screen: 'payments' });
   const {
     amountsHidden: hidden,
     onNavigate,
@@ -389,6 +399,68 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
   );
   const transactions =
     view.breakdownDetail?.transactions ?? view.visibleExpenses;
+  const accountScopeControl = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Choose accounts"
+      onPress={() =>
+        dispatch({
+          type: 'set-field',
+          field: 'scopeSheetOpen',
+          value: true,
+        })
+      }
+      style={s.analysisScope}
+    >
+      <Text style={[t.body, t.strong, sourceStyles.fontSize16]}>
+        {scope.label}
+      </Text>
+      <SourceCustomIcon
+        name="chevron-down-wide"
+        size={18}
+        color={tokens.text}
+      />
+    </Pressable>
+  );
+  const chartModeControl = (
+    <View
+      style={s.chartMode}
+      accessibilityRole="tablist"
+      accessibilityLabel="Chart type"
+    >
+      {(['donut', 'bars'] as const).map(mode => (
+        <Pressable
+          key={mode}
+          accessibilityRole="tab"
+          accessibilityLabel={mode === 'donut' ? 'Donut' : 'Bars'}
+          accessibilityState={{ selected: state.expenseChartMode === mode }}
+          onPress={() =>
+            dispatch({
+              type: 'set-field',
+              field: 'expenseChartMode',
+              value: mode,
+            })
+          }
+          style={[
+            s.chartModeButton,
+            state.expenseChartMode === mode && s.chartModeSelected,
+          ]}
+        >
+          <SourceCustomIcon
+            name={
+              mode === 'donut'
+                ? 'analytics-donut-toggle'
+                : 'analytics-bars-toggle'
+            }
+            size={16}
+            color={
+              state.expenseChartMode === mode ? tokens.inverse : tokens.muted
+            }
+          />
+        </Pressable>
+      ))}
+    </View>
+  );
   const headerActions = (
     <>
       <IconAction
@@ -400,7 +472,17 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
     </>
   );
   return (
-    <View style={[s.root, { paddingTop: screenTopInset }]}>
+    <View
+      style={[
+        s.root,
+        {
+          paddingTop: resolveEvoLevelOneTopInset(
+            screenTopInset,
+            !!duo && duo.rightInset > 0,
+          ),
+        },
+      ]}
+    >
       {state.view === 'overview' ? (
         <L1Header title={title} actions={headerActions} />
       ) : (
@@ -409,7 +491,7 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
           variant="current"
           title={title}
           onBack={back}
-          backIcon={<Glyph name="back" size={16} />}
+          backIcon={<Glyph name="back" size={20} />}
           trailing={<View style={s.actions}>{headerActions}</View>}
         />
       )}
@@ -424,70 +506,8 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
         showsVerticalScrollIndicator={false}
       >
         <View style={s.scopeRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Choose accounts"
-            onPress={() =>
-              dispatch({
-                type: 'set-field',
-                field: 'scopeSheetOpen',
-                value: true,
-              })
-            }
-            style={s.analysisScope}
-          >
-            <Text style={[t.body, t.strong, sourceStyles.fontSize16]}>
-              {scope.label}
-            </Text>
-            <SourceCustomIcon
-              name="chevron-down-wide"
-              size={18}
-              color={tokens.text}
-            />
-          </Pressable>
-          {state.view === 'analysis' && (
-            <View
-              style={s.chartMode}
-              accessibilityRole="tablist"
-              accessibilityLabel="Chart type"
-            >
-              {(['donut', 'bars'] as const).map(mode => (
-                <Pressable
-                  key={mode}
-                  accessibilityRole="tab"
-                  accessibilityLabel={mode === 'donut' ? 'Donut' : 'Bars'}
-                  accessibilityState={{
-                    selected: state.expenseChartMode === mode,
-                  }}
-                  onPress={() =>
-                    dispatch({
-                      type: 'set-field',
-                      field: 'expenseChartMode',
-                      value: mode,
-                    })
-                  }
-                  style={[
-                    s.chartModeButton,
-                    state.expenseChartMode === mode && s.chartModeSelected,
-                  ]}
-                >
-                  <SourceCustomIcon
-                    name={
-                      mode === 'donut'
-                        ? 'analytics-donut-toggle'
-                        : 'analytics-bars-toggle'
-                    }
-                    size={16}
-                    color={
-                      state.expenseChartMode === mode
-                        ? tokens.inverse
-                        : tokens.muted
-                    }
-                  />
-                </Pressable>
-              ))}
-            </View>
-          )}
+          {accountScopeControl}
+          {state.view === 'analysis' && chartModeControl}
         </View>
         {state.view !== 'overview' && (
           <View style={s.period}>
@@ -567,45 +587,22 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                       }
                       style={s.overview}
                     >
-                      <View style={s.summaryPeriod}>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={copy.spending.previousPeriod}
-                          disabled={periodRail.activeIndex <= 0}
-                          onPress={() => step(-1)}
-                          style={s.summaryArrow}
-                        >
-                          <Glyph name="back" size={16} />
-                        </Pressable>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={copy.spending.changePeriod}
-                          onPress={() =>
-                            dispatch({
-                              type: 'set-field',
-                              field: 'periodSheetOpen',
-                              value: true,
-                            })
-                          }
-                          style={s.summaryPeriodLabel}
-                        >
-                          <Text style={s.summaryPeriodText}>
-                            {item.title} {item.subtitle}
-                          </Text>
-                        </Pressable>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={copy.spending.nextPeriod}
-                          disabled={
-                            periodRail.activeIndex >=
-                            periodRail.items.length - 1
-                          }
-                          onPress={() => step(1)}
-                          style={s.summaryArrow}
-                        >
-                          <Glyph name="forward" size={16} />
-                        </Pressable>
-                      </View>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={copy.spending.changePeriod}
+                        onPress={() =>
+                          dispatch({
+                            type: 'set-field',
+                            field: 'periodSheetOpen',
+                            value: true,
+                          })
+                        }
+                        style={s.summaryPeriodLabel}
+                      >
+                        <Text style={s.summaryPeriodText}>
+                          {item.title} {item.subtitle}
+                        </Text>
+                      </Pressable>
                       <View style={s.net}>
                         <Text
                           style={[t.body, t.strong, { color: tokens.muted }]}
@@ -721,6 +718,22 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                   );
                 }}
               />
+              {periodRail.items.length > 1 && (
+                <BaselineCarouselIndicator
+                  count={periodRail.items.length}
+                  activeIndex={periodRail.activeIndex}
+                  windowSize={6}
+                  itemLabel="period"
+                  itemLabels={periodRail.items.map(item =>
+                    `${item.title} ${item.subtitle}`.trim(),
+                  )}
+                  withBackdropBlur={false}
+                  onSelect={index => {
+                    const period = periodRail.items[index];
+                    if (period) selectPeriod(period);
+                  }}
+                />
+              )}
             </View>
             <View
               testID="cz-pfm-category-columns"
@@ -856,7 +869,7 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                 </View>
               )}
             </View>
-            <Tabs
+            <Select
               tokens={tokens}
               label="Split by"
               value={view.activeSplitMode}
@@ -870,6 +883,36 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                       : 'Currencies',
               }))}
               onChange={mode => dispatch({ type: 'change-split-mode', mode })}
+              renderTrigger={({ open, expanded, label }) => (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Split by"
+                  accessibilityValue={{ text: label }}
+                  accessibilityState={{ expanded }}
+                  aria-expanded={expanded}
+                  onPress={open}
+                  style={s.analysisScope}
+                >
+                  <Text style={[t.body, t.strong]}>{label}</Text>
+                  <SourceCustomIcon
+                    name="chevron-down-wide"
+                    size={18}
+                    color={tokens.text}
+                  />
+                </Pressable>
+              )}
+              renderPanel={({ visible, onClose, children }) => (
+                <BankingSheet
+                  host={bankingHost}
+                  title="Split by"
+                  visible={visible}
+                  closeLabel="Close split options"
+                  offset={70}
+                  onClose={onClose}
+                >
+                  {children}
+                </BankingSheet>
+              )}
             />
             <View style={s.rows}>
               {view.breakdownRows.map(row =>
@@ -1008,24 +1051,35 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
           }
         />
       )}
-      <ModalPanel
-        tokens={tokens}
+      <BankingSheet
+        host={bankingHost}
         title="Choose accounts"
         visible={state.scopeSheetOpen}
+        closeLabel="Close account picker"
+        offset={70}
         onClose={() =>
           dispatch({ type: 'set-field', field: 'scopeSheetOpen', value: false })
         }
       >
-        {state.scopeSheetOpen && (
-          <ScrollView>
-            {scopes.map(item => (
+        <View style={s.scopeOptions}>
+          {scopes.map(item => {
+            const account =
+              item.products.length === 1 &&
+              item.products[0]?.type === 'current_account'
+                ? item.products[0]
+                : null;
+            const selected = item.id === state.selectedScopeId;
+            return (
               <Pressable
                 key={item.id}
                 accessibilityRole="radio"
-                accessibilityLabel={item.label}
-                accessibilityState={{
-                  checked: item.id === state.selectedScopeId,
-                }}
+                accessibilityLabel={[
+                  item.label,
+                  account?.accountNumber,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
+                accessibilityState={{ checked: selected }}
                 onPress={() => {
                   dispatch({
                     type: 'set-field',
@@ -1038,20 +1092,45 @@ export default function PfmScreen(host: CzechNativeScreenProps) {
                     value: false,
                   });
                 }}
-                style={s.scope}
+                style={s.scopeOption}
               >
-                <Text style={t.body}>{item.label}</Text>
-                {item.products.length === 1 && (
-                  <CurrencyMark
-                    currency={item.products[0].currency}
-                    size={32}
-                  />
+                {account ? (
+                  <TransferFlag currency={account.currency} size={28} />
+                ) : (
+                  <View style={s.scopeGroupMark}>
+                    <SourceCustomIcon
+                      name="users"
+                      size={16}
+                      color={tokens.muted}
+                    />
+                  </View>
+                )}
+                <View style={s.scopeCopy}>
+                  <Text
+                    style={[
+                      t.body,
+                      t.strong,
+                      selected && { color: tokens.accent },
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  {account && (
+                    <Text style={[t.body, t.muted, s.scopeDetail]}>
+                      {account.accountNumber}
+                    </Text>
+                  )}
+                </View>
+                {selected ? (
+                  <SelectedMark host={bankingHost} />
+                ) : (
+                  <View style={s.scopeMarkPlaceholder} />
                 )}
               </Pressable>
-            ))}
-          </ScrollView>
-        )}
-      </ModalPanel>
+            );
+          })}
+        </View>
+      </BankingSheet>
     </View>
   );
 }
@@ -1063,6 +1142,7 @@ const s = StyleSheet.create({
     maxWidth: 560,
     alignSelf: 'center',
     padding: 16,
+    paddingTop: EVO_LEVEL_ONE_CONTENT_TOP,
     paddingBottom: 24,
     gap: 24,
   },
@@ -1071,14 +1151,26 @@ const s = StyleSheet.create({
   categoryColumns: { flexDirection: 'row', alignItems: 'flex-start', gap: 24 },
   categoryStack: { gap: 24 },
   categoryColumn: { flex: 1, minWidth: 0 },
-  scope: {
+  scopeOptions: { borderRadius: 14, overflow: 'hidden', gap: 4 },
+  scopeOption: {
+    minHeight: 64,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 56,
-    padding: 12,
     gap: 12,
+    paddingVertical: 8,
+    paddingRight: 14,
   },
+  scopeGroupMark: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: tokens.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scopeCopy: { flex: 1 },
+  scopeDetail: { fontSize: 12, lineHeight: 13.2 },
+  scopeMarkPlaceholder: { width: 16, height: 16 },
   scopeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1120,37 +1212,30 @@ const s = StyleSheet.create({
     backgroundColor: tokens.surface,
     borderRadius: 8,
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
-  summaryPeriod: { flexDirection: 'row', alignItems: 'center' },
-  summaryPeriodLabel: { flex: 1, minHeight: 44, justifyContent: 'center' },
+  summaryPeriodLabel: { minHeight: 24, justifyContent: 'center' },
   summaryPeriodText: {
     color: tokens.accent,
     fontFamily: tokens.strongFont,
     fontSize: 18,
     textTransform: 'uppercase',
   },
-  summaryArrow: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  net: { gap: 4 },
-  flowBars: { gap: 8 },
+  net: { gap: 2 },
+  flowBars: { gap: 6 },
   flowTrack: {
-    height: 12,
-    borderRadius: 6,
+    height: 8,
+    borderRadius: 4,
     overflow: 'hidden',
     backgroundColor: tokens.border,
   },
-  flowFill: { height: 12, borderRadius: 6 },
+  flowFill: { height: 8, borderRadius: 4 },
   flowAmounts: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
-  cashflow: { gap: 4, minHeight: 48, flexShrink: 1 },
+  cashflow: { gap: 2, minHeight: 44, flexShrink: 1 },
   rows: {
     backgroundColor: tokens.surface,
     borderRadius: 8,
