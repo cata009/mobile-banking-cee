@@ -10,6 +10,7 @@ import {
   getCountryConfig,
   formatMoneyNumber,
 } from '@/app/registry/countryConfig';
+import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import {
   formatAddMoneyAmount,
   isValidAddMoneyAmount,
@@ -33,6 +34,7 @@ import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { ToggleButton } from '../../../../universal/ToggleButton';
 import { sourceColor } from '../../../../universal/sourceColor';
+import { AccountSelectionSheet } from './AccountSelectionSheet';
 
 type AddMoneyStep = 'form' | 'review' | 'card' | 'success';
 
@@ -70,6 +72,7 @@ export function AccountAddMoneyFlow({
       eligibleAccounts[0]?.accountNumber ??
       '',
   );
+  const [accountPicker, setAccountPicker] = useState(false);
   const [amount, setAmount] = useState('50.00');
   const [transactionInfo, setTransactionInfo] = useState('');
   const [recurring, setRecurring] = useState(false);
@@ -84,6 +87,7 @@ export function AccountAddMoneyFlow({
   });
   const onBackHandlerChange = host.onBackHandlerChange;
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
+  const surface = sourceColor('var(--uc-surface)', dark);
   const currency = getCountryConfig(host.country).currency;
   const selectedAccount = eligibleAccounts.find(
     account => account.accountNumber === targetAccountNumber,
@@ -111,14 +115,15 @@ export function AccountAddMoneyFlow({
 
   useEffect(() => {
     const back = () => {
-      if (step === 'form' || step === 'success') onClose();
+      if (accountPicker) setAccountPicker(false);
+      else if (step === 'form' || step === 'success') onClose();
       else if (step === 'review') setStep('form');
       else setStep('review');
       return true;
     };
     onBackHandlerChange?.(back);
     return () => onBackHandlerChange?.(null);
-  }, [onBackHandlerChange, onClose, step]);
+  }, [accountPicker, onBackHandlerChange, onClose, step]);
 
   const updateCard = (change: Partial<AddMoneyCardDetails>) =>
     setCard(current => ({ ...current, ...change }));
@@ -184,7 +189,13 @@ export function AccountAddMoneyFlow({
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: host.tokens.background }]}>
+    <View
+      testID={`ro-add-money-${step}-root`}
+      style={[
+        styles.root,
+        { backgroundColor: surface },
+      ]}
+    >
       <ScrollView
         testID={`ro-add-money-${step}`}
         stickyHeaderIndices={[0]}
@@ -215,33 +226,25 @@ export function AccountAddMoneyFlow({
             <Text style={[styles.toLabel, { color: host.tokens.text }]}>
               TO
             </Text>
-            <BaselineDropdownField
+            <BaselineTextField
               label="ACCOUNT NUMBER"
-              value={targetAccountNumber}
-              options={eligibleAccounts.map(account => ({
-                value: account.accountNumber,
-                label: account.accountNumber,
-              }))}
-              onChange={setTargetAccountNumber}
-              fillWidth
+              value={selectedAccount?.accountNumber ?? targetAccountNumber}
+              onChange={() => {}}
+              helperText={selectedAccount?.name}
+              helperText2={
+                selectedAccount
+                  ? `${maskFormattedAmount(formatMoneyNumber(selectedAccount.balance, host.country), host.amountsHidden)} ${selectedAccount.currency ?? currency}`
+                  : undefined
+              }
+              trailingIconName="chevron-down-wide"
+              trailingIconPlacement="floating"
+              selectionControl={{
+                expanded: accountPicker,
+                onPress: () => setAccountPicker(true),
+              }}
+              onActivate={() => setAccountPicker(true)}
               dark={dark}
             />
-            {selectedAccount ? (
-              <View style={styles.accountBalance}>
-                <Text style={[styles.accountName, { color: host.tokens.text }]}>
-                  {accountName.toUpperCase()}
-                </Text>
-                <Text
-                  style={[
-                    styles.accountBalanceValue,
-                    { color: host.tokens.muted },
-                  ]}
-                >
-                  {formatMoneyNumber(selectedAccount.balance, host.country)}{' '}
-                  {currency}
-                </Text>
-              </View>
-            ) : null}
             <View style={styles.paymentDetails}>
               <BaselineSectionDivider title="PAYMENT DETAILS" dark={dark} />
               <View style={styles.amountPresets}>
@@ -264,16 +267,25 @@ export function AccountAddMoneyFlow({
                             backgroundColor: sourceColor(
                               selected
                                 ? 'var(--uc-action)'
-                                : 'var(--uc-neutral-100)',
+                                : 'var(--uc-surface)',
                               dark,
                             ),
+                            borderColor: sourceColor(
+                              selected ? 'var(--uc-action)' : 'var(--uc-border)',
+                              dark,
+                            ),
+                            borderWidth: selected ? 0 : 1,
                           },
                         ]}
                       >
                         <SourceCustomIcon
                           name="check"
                           size={24}
-                          color="#FFFFFF"
+                          color={
+                            selected
+                              ? '#FFFFFF'
+                              : sourceColor('var(--uc-action)', dark)
+                          }
                         />
                       </View>
                       <Text
@@ -481,7 +493,7 @@ export function AccountAddMoneyFlow({
       <View style={styles.footer}>
         {step === 'form' ? (
           <PrimaryButton
-            label="NEXT"
+            label="Next"
             labelSize="18"
             disabled={!canReview}
             onPress={() => setStep('review')}
@@ -507,6 +519,26 @@ export function AccountAddMoneyFlow({
           />
         ) : null}
       </View>
+      {accountPicker ? (
+        <AccountSelectionSheet
+          host={host}
+          title="Choose account"
+          selectedId={selectedAccount?.id ?? ''}
+          options={eligibleAccounts.map(account => ({
+            id: account.id,
+            name: account.name,
+            detail: account.accountNumber,
+            balance: account.balance,
+            currency: account.currency,
+          }))}
+          onClose={() => setAccountPicker(false)}
+          onConfirm={id => {
+            const selected = eligibleAccounts.find(account => account.id === id);
+            if (selected) setTargetAccountNumber(selected.accountNumber);
+            setAccountPicker(false);
+          }}
+        />
+      ) : null}
     </View>
   );
 }
@@ -522,17 +554,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: 20,
     marginBottom: 8,
-  },
-  accountBalance: { paddingHorizontal: 8, marginTop: -4 },
-  accountName: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  accountBalanceValue: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 14,
-    lineHeight: 18,
   },
   paymentDetails: { marginTop: 30 },
   amountPresets: {

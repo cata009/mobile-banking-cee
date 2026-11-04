@@ -11,6 +11,8 @@ import type {
 } from '../src/experiences/pi/current/contracts';
 import { CURRENT_HOME_ADAPTER } from '../src/experiences/pi/current/adapter';
 import ProductSheet from '../src/experiences/pi/current/baseline/offers/ProductSheet';
+import { AccountSelectionSheet } from '../src/experiences/pi/current/baseline/AccountSelectionSheet';
+import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 import { mobileFirstTokens } from '../src/universal/tokens';
 import {
   completeGeniusProtectRequest,
@@ -260,6 +262,13 @@ describe('Genius Protect', () => {
       press(tree, 'Nota de informare Allianz-Țiriac');
       press(tree, 'Nota de informare Trans Sped');
       press(tree, 'Continuă');
+      const personalDataChevrons = tree.root.findAllByProps({
+        testID: 'genius-protect-row-chevron',
+      });
+      expect(personalDataChevrons.length).toBeGreaterThanOrEqual(4);
+      expect(
+        personalDataChevrons.every(icon => icon.props.style.width === 32),
+      ).toBe(true);
       press(tree, 'Confirm datele personale');
       press(tree, 'Continuă');
       press(
@@ -275,16 +284,38 @@ describe('Genius Protect', () => {
         'Sunt de acord că pentru acest produs nu voi primi consultanță',
       );
       press(tree, 'Continuă');
-      press(tree, 'Cont curent salariu');
+      press(tree, 'Open Cont de plată');
+      expect(tree.root.findByType(AccountSelectionSheet)).toBeDefined();
+      press(tree, 'Cont curent salariu, RO57BACX0000007913551234');
+      press(tree, 'Select');
+      expect(JSON.stringify(tree.toJSON())).toContain('Cont curent salariu');
+      const paymentChevrons = tree.root.findAllByProps({
+        testID: 'genius-protect-row-chevron',
+      });
+      expect(paymentChevrons.length).toBeGreaterThanOrEqual(1);
+      expect(paymentChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
       press(tree, 'Mandat pentru debitarea automată');
+      expect(
+        tree.root.findByType(SourceBottomSheet).props.showFooterDivider,
+      ).toBe(false);
       press(tree, 'Am citit și sunt de acord');
       press(tree, 'Continuă');
+      const preContractChevrons = tree.root.findAllByProps({
+        testID: 'genius-protect-row-chevron',
+      });
+      expect(preContractChevrons.length).toBeGreaterThanOrEqual(2);
+      expect(preContractChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
       press(tree, 'Oferta de asigurare Genius Protect');
       press(tree, 'Acceptă oferta de asigurare');
       press(tree, 'Documentație Trans Sped');
       press(tree, 'Am citit și sunt de acord');
       press(tree, 'Acord informare prealabilă');
       press(tree, 'Continuă');
+      const contractChevrons = tree.root.findAllByProps({
+        testID: 'genius-protect-row-chevron',
+      });
+      expect(contractChevrons.length).toBeGreaterThanOrEqual(3);
+      expect(contractChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
       press(tree, 'Contract Genius Protect');
       press(tree, 'Am citit și sunt de acord');
       press(tree, 'Mandat de debitare automată');
@@ -293,7 +324,12 @@ describe('Genius Protect', () => {
       press(tree, 'Am citit și sunt de acord');
       press(tree, 'Confirm că am citit și accept documentele contractuale');
       press(tree, 'Continuă');
-      type(tree, 'Cod OTP', '413412');
+      const otpPhone = tree.root.findByProps({
+        testID: 'genius-protect-otp-phone',
+      });
+      expect(otpPhone.props.children).toBe('+40721234567');
+      expect(otpPhone.props.style.fontFamily).toBe('UniCredit-bold');
+      type(tree, 'Cod OTP', '123456');
       press(tree, 'Semnează');
       expect(JSON.stringify(tree.toJSON())).toContain('Finalizăm semnarea');
       await act(async () => {

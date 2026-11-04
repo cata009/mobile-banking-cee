@@ -22,11 +22,12 @@ export type NavigationRoute =
   | { screen: 'investments'; initialView?: 'portfolio' | 'goals' }
   | { screen: 'investments-history'; filterByTitle?: string | null }
   | { screen: 'product-detail'; selection?: ProductDetailSelection | null }
+  | { screen: 'products'; view?: 'shopsmart' }
   | { screen: 'flow-library'; flowId?: FlowPreviewId; view?: 'index' | 'detail' }
   | { screen: CardRouteScreen; cardId?: string | null }
   | { screen: AccountRouteScreen; accountId?: string | null }
   | { screen: 'transaction-detail'; source?: 'account' | 'card'; accountId?: string | null; cardId?: string | null }
-  | { screen: Exclude<Screen, CardRouteScreen | AccountRouteScreen | 'transaction-detail' | FeatureRouteScreen> }
+  | { screen: Exclude<Screen, CardRouteScreen | AccountRouteScreen | 'transaction-detail' | 'products' | FeatureRouteScreen> }
 
 type NavigationDestination = Screen | NavigationRoute
 
@@ -41,6 +42,8 @@ function routeFromScreen(screen: Screen): NavigationRoute {
     case 'account-options':
       return { screen }
     case 'transaction-detail':
+      return { screen }
+    case 'products':
       return { screen }
     case 'analytics':
       return { screen }

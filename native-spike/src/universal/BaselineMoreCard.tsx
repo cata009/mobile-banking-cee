@@ -21,6 +21,7 @@ import { useDuoPreview, useDuoLocalViewport } from './DuoPreview';
 /** Canonical More renderer shared by active screens, RNWeb and isolated previews. */
 export function BaselineMoreCard({
   variant,
+  artworkVariant,
   title,
   onPress,
   badgeCount,
@@ -29,6 +30,7 @@ export function BaselineMoreCard({
   dark = false,
 }: {
   variant: MoreCardVariant;
+  artworkVariant?: MoreCardVariant;
   title: string;
   onPress: () => void;
   badgeCount?: number;
@@ -37,6 +39,8 @@ export function BaselineMoreCard({
   dark?: boolean;
 }) {
   const c = resolveMoreCard({ variant, badgeCount });
+  const artwork = artworkVariant ?? variant;
+  const artworkContract = resolveMoreCard({ variant: artwork });
   const duo = useDuoPreview();
   const local = useDuoLocalViewport();
   const preserveAspect = !!duo && !!local && local.width > duo.referenceWidth;
@@ -46,14 +50,20 @@ export function BaselineMoreCard({
     ? {
         top: undefined,
         left: undefined,
-        right: (parseFloat(c.image.right) / 100) * 155.5,
-        bottom: (parseFloat(c.image.bottom) / 100) * c.height,
+        right: (parseFloat(artworkContract.image.right) / 100) * 155.5,
+        bottom: (parseFloat(artworkContract.image.bottom) / 100) * artworkContract.height,
         width:
-          (1 - (parseFloat(c.image.left) + parseFloat(c.image.right)) / 100) *
+          (1 -
+            (parseFloat(artworkContract.image.left) +
+              parseFloat(artworkContract.image.right)) /
+              100) *
           155.5,
         height:
-          (1 - (parseFloat(c.image.top) + parseFloat(c.image.bottom)) / 100) *
-          c.height,
+          (1 -
+            (parseFloat(artworkContract.image.top) +
+              parseFloat(artworkContract.image.bottom)) /
+              100) *
+          artworkContract.height,
       }
     : undefined;
   const [hovered, setHovered] = useState(false);
@@ -65,14 +75,14 @@ export function BaselineMoreCard({
   )}"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#card)"/></svg>`;
   const artStyle: ViewStyle = {
     position: 'absolute',
-    top: c.image.top,
-    right: c.image.right,
-    bottom: c.image.bottom,
-    left: c.image.left,
+    top: artworkContract.image.top,
+    right: artworkContract.image.right,
+    bottom: artworkContract.image.bottom,
+    left: artworkContract.image.left,
     overflow: 'hidden',
     ...referenceArt,
   };
-  const asset = variant === 'base' ? image : moreAssets[variant];
+  const asset = artwork === 'base' ? image : moreAssets[artwork];
   const assetSource = typeof asset === 'string' ? { uri: asset } : asset;
   const imageUri =
     typeof asset === 'string'
@@ -142,9 +152,9 @@ export function BaselineMoreCard({
             />
           </View>
         ) : null
-      ) : variant === 'gdpr-consent' && Platform.OS === 'web' ? (
+      ) : artwork === 'gdpr-consent' && Platform.OS === 'web' ? (
         React.createElement('div', {
-          'data-testid': 'ro-more-art-gdpr-consent',
+          'data-testid': `ro-more-art-${variant}`,
           style: {
             ...artStyle,
             backgroundImage: `url('${imageUri}')`,
@@ -158,10 +168,10 @@ export function BaselineMoreCard({
           pointerEvents="none"
           style={[
             artStyle,
-            variant === 'third-party-consent' && s.thirdPartyFrame,
+            artwork === 'third-party-consent' && s.thirdPartyFrame,
           ]}
         >
-          {variant === 'gdpr-consent' ? (
+          {artwork === 'gdpr-consent' ? (
             Array.from(
               { length: Math.ceil((width * 0.6158) / 61.60000091791153) * 2 },
               (_, index) => {
@@ -182,7 +192,7 @@ export function BaselineMoreCard({
                 );
               },
             )
-          ) : variant === 'third-party-consent' ? (
+          ) : artwork === 'third-party-consent' ? (
             <View
               testID="ro-more-third-party-artwork"
               style={s.thirdPartyArtwork}

@@ -10,7 +10,6 @@ import {
 import { formatEvo2027Number } from '@/app/utils/evo2027Formatting';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
-import { getCountryConfig } from '@/app/registry/countryConfig';
 import { creditLimitOpportunityNudge } from '@/features/cards/credit-limit/opportunityNudge';
 import type { AccountTransaction } from '@/data/accountDetails';
 import type { CardVariant } from '@/app/components/contracts/cardArtwork';
@@ -37,6 +36,7 @@ import { CreditLimitOfferFlow } from './CreditLimitOfferFlow';
 import { BankingCopyToast, useBankingCopy } from '../banking/CopyToast';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
+import { AccountMcashFlow } from './AccountMcashFlow';
 import { assistantAvailable } from '../coapping/model';
 import { openCurrentForYou } from '../coapping/contextHelp';
 import { DuoColumns, DuoPane } from '../../../../universal/DuoPreview';
@@ -196,6 +196,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     [dismissedCreditLimitKey, setDismissedCreditLimitKey] = useState<
       string | null
     >(null),
+    [mcashOpen, setMcashOpen] = useState(false),
     [query, setQuery] = useState(''),
     [scrollOffset, setScrollOffset] = useState(0),
     [progress, setProgress] = useState(0),
@@ -320,6 +321,15 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     setAuthCard(null);
     setSensitiveCard(null);
   };
+  if (mcashOpen && card.type === 'debit_card')
+    return (
+      <AccountMcashFlow
+        host={host}
+        accounts={data.currentAccounts}
+        initialAccountId={card.linkedAccountId}
+        onClose={() => setMcashOpen(false)}
+      />
+    );
   if (host.isActive && sensitiveCard === card.id)
     return (
       <BaselineSensitiveCard
@@ -389,11 +399,25 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
         ? () => host.onNavigate(securityRoutes.block)
         : undefined,
     },
-    {
-      id: 'view-pin',
-      iconName: 'view-pin',
-      label: copy(host, 'runtime.cards.actions.viewPin', 'View PIN'),
-    },
+    card.type === 'credit_card' && host.country === 'RO'
+      ? {
+          id: 'repayment',
+          iconName: 'payment-card-repayment',
+          label: 'Repayment',
+          onPress: () => host.onNavigate({ screen: 'payments' }),
+        }
+      : card.type === 'debit_card' && host.country === 'RO'
+        ? {
+            id: 'mcash',
+            iconName: 'mcash',
+            label: copy(host, 'runtime.accounts.actions.mCash', 'mCash'),
+            onPress: () => setMcashOpen(true),
+          }
+        : {
+            id: 'view-pin',
+            iconName: 'view-pin',
+            label: copy(host, 'runtime.cards.actions.viewPin', 'View PIN'),
+          },
   ];
   const free = maskFormattedAmount(
     formatEvo2027Number(
@@ -545,7 +569,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                         >
                           {free}{' '}
                           <Text style={styles.currency}>
-                            {getCountryConfig(host.country).currency}
+                            {card.currency}
                           </Text>
                         </Text>
                       </View>

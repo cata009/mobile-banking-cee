@@ -1,6 +1,7 @@
 import { getProductsByCategory, type ProductCategory } from '@/data/products'
 import { convertCurrency, getCountryCurrency, roundMoney } from '@/data/exchangeRates'
 import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount'
+import { RO_DEMO_CUSTOMER } from '@/data/customerProfile'
 import type { CountryId, ProductCounts, ReleaseId } from '@/app/state/demoTypes'
 import { applyProductCounts } from './counts'
 import { applyCzApp2027CurrentAccounts, applyCzApp2027TermDeposits, applyCzApp2027DebitCards } from './czEvoFixtures'
@@ -108,6 +109,9 @@ export function deriveProductCategories({
           availableCredit,
           creditLimit,
           currency: localCurrency,
+          ...(country === 'RO'
+            ? { cardHolderName: RO_DEMO_CUSTOMER.fullName }
+            : {}),
         }
       }
 
@@ -132,6 +136,9 @@ export function deriveProductCategories({
               : preserveCzApp2027ForeignDebitCard
                 ? sourceCurrency
                 : localCurrency,
+        ...(isCard && country === 'RO'
+          ? { cardHolderName: RO_DEMO_CUSTOMER.fullName }
+          : {}),
       }
     }),
   }))

@@ -67,6 +67,10 @@ export default function Products(host: CurrentScreenProps) {
     ? getFutureGainProductOffers({ product: 'PI', country: host.country, release: host.release }, config.offers)
     : config.shopSmartOffers;
   useEffect(() => {
+    if (host.route.params?.view === 'shopsmart' && config.hasShopSmartTab)
+      setTab('shopsmart');
+  }, [host.route.params?.view, config.hasShopSmartTab]);
+  useEffect(() => {
     const focus = host.route.params?.focus;
     if (!focus) return;
     const item = config.products.find(card => card.id === focus);
@@ -383,6 +387,12 @@ export default function Products(host: CurrentScreenProps) {
                     key={offer.id}
                     offer={offer}
                     dark={host.tokens.background === '#121212'}
+                    onPress={() =>
+                      host.onNavigate({
+                        screen: 'product-detail',
+                        params: { offerId: offer.id, title: offer.merchant },
+                      })
+                    }
                   />
                 ))}
                 {!filtered.length && (

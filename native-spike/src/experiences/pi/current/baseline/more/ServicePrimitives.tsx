@@ -26,6 +26,7 @@ export function MoreServicePage({
   onHelpPress,
   footer,
   hideCollapsedTitleWhenHidden = false,
+  stickyGap = 22,
 }: {
   host: CurrentScreenProps;
   title: string;
@@ -35,6 +36,7 @@ export function MoreServicePage({
   onHelpPress?: () => void;
   footer?: React.ReactNode;
   hideCollapsedTitleWhenHidden?: boolean;
+  stickyGap?: number;
 }) {
   const [progress, setProgress] = useState(0);
   const dark = serviceDark(host),
@@ -68,7 +70,7 @@ export function MoreServicePage({
         <View
           style={[
             styles.titleFrame,
-            sticky ? styles.stickyGap : undefined,
+            sticky ? { marginBottom: stickyGap } : undefined,
             { opacity: 1 - progress, backgroundColor: surface },
           ]}
         >
@@ -202,7 +204,6 @@ export function ServiceDatedRow({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   webScroll: { transform: 'none' },
-  stickyGap: { marginBottom: 22 },
   titleFrame: {
     paddingHorizontal: 16,
     paddingVertical: 8,

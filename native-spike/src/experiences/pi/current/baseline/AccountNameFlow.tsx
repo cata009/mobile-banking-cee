@@ -48,7 +48,7 @@ export function AccountNameFlow({
         footer={
           <View style={styles.footer}>
             <PrimaryButton
-              label="SAVE"
+              label="Save"
               labelSize="18"
               disabled={disabled}
               onPress={() => {

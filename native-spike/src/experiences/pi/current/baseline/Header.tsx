@@ -58,21 +58,21 @@ export function BaselineHomeHeader({
             </Pressable>
           )}
           <BaselineHeaderActionRail>
-            <BaselineAmountVisibility
-              hidden={host.amountsHidden}
-              onToggle={host.onAmountsToggle}
-              dark={dark}
-            />
             <BaselineHeaderActionButton
               icon="profile"
               label="Profile"
-              onPress={host.country === 'RO' ? host.onProfile : undefined}
+              onPress={host.onProfile}
               dark={dark}
             />
             <BaselineHeaderActionButton
               icon="messages"
               label="Messages"
               onPress={() => host.onNavigate({ screen: 'messages' })}
+              dark={dark}
+            />
+            <BaselineAmountVisibility
+              hidden={host.amountsHidden}
+              onToggle={host.onAmountsToggle}
               dark={dark}
             />
           </BaselineHeaderActionRail>

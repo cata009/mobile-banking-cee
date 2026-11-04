@@ -73,6 +73,7 @@ export function BaselineProductsHeader({
                 <BaselineHeaderActionButton
                   icon="profile"
                   label={localized(host, 'runtime.actions.profile', 'Profile')}
+                  onPress={host.onProfile}
                   dark={dark}
                 />
               )}
@@ -154,7 +155,6 @@ export function BaselineProductsTabs({
 }
 
 export default function Products(host: CurrentScreenProps) {
-  const duo = useDuoPreview();
   const config = getProductsMenuForCountry(host.country);
   const [tab, setTab] = useState<ProductsMenuTab>('banking');
   const [selected, setSelected] = useState<ProductsCard | null>(null);
@@ -169,6 +169,10 @@ export default function Products(host: CurrentScreenProps) {
       : undefined);
   const onFocusHandled = host.onProductsShelfFocusHandled;
   const t = host.t;
+  useEffect(() => {
+    if (host.route.params?.view === 'shopsmart' && config.hasShopSmartTab)
+      setTab('shopsmart');
+  }, [host.route.params?.view, config.hasShopSmartTab]);
   useEffect(() => {
     if (!focus) return;
     setTab('banking');
@@ -208,10 +212,7 @@ export default function Products(host: CurrentScreenProps) {
     >
       <View
         testID="ro-offers-top-reserve"
-        style={[
-          s.topReserve,
-          duo ? { height: host.screenTopInset } : undefined,
-        ]}
+        style={[s.topReserve, { height: Math.max(54, host.screenTopInset) }]}
       />
       <BaselineProductsHeader
         host={host}

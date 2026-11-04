@@ -2,15 +2,24 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { CountryId } from '@/app/state/demoTypes';
 import {
+  DEFAULT_DATE_PERIOD,
+  isIsoDateInRange,
+  resolveDatePeriodRange,
+  toIsoDateFromParts,
+  type DatePeriodSelection,
+} from '@/data/datePeriod';
+import {
   getMessagesConfigForCountry,
   type MessageListItem,
   type MessageMailbox,
 } from '@/app/config/messagesConfig';
 import type { CurrentScreenProps } from '../../contracts';
+import { BaselineDatePeriodFilterSheet } from '../../../../../universal/BaselineDatePeriodFilterSheet';
 import { BaselineMailboxTabs } from '../../../../../universal/BaselineMailboxTabs';
 import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
 import { BaselineDialog } from '../../../../../universal/BaselineDialog';
 import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
+import { Text } from '../../../../../universal/Typography';
 import {
   MoreServicePage,
   serviceDark,
@@ -24,6 +33,10 @@ export default function Messages(host: CurrentScreenProps) {
     config = getMessagesConfigForCountry(host.country);
   const [mailbox, setMailbox] = useState<MessageMailbox>('inbox');
   const [query, setQuery] = useState('');
+  const [datePeriod, setDatePeriod] = useState<DatePeriodSelection>(
+    DEFAULT_DATE_PERIOD,
+  );
+  const [dateFilterOpen, setDateFilterOpen] = useState(false);
   const [openMessageId, setOpenMessageId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{
     country: CountryId;
@@ -32,6 +45,9 @@ export default function Messages(host: CurrentScreenProps) {
   const [deletedMessageIdsByCountry, setDeletedMessageIdsByCountry] = useState<
     Partial<Record<CountryId, ReadonlySet<string>>>
   >({});
+  const year = Number(config.sectionTitle) || 2026;
+  const dateFilterActive = datePeriod.preset !== 'none';
+  const appliedDateRange = resolveDatePeriodRange(datePeriod);
   const messages = config[mailbox]
     .filter(item => !deletedMessageIdsByCountry[host.country]?.has(item.id))
     .map(item => {
@@ -60,7 +76,12 @@ export default function Messages(host: CurrentScreenProps) {
         .join(' ')
         .toLowerCase()
         .includes(query.trim().toLowerCase()),
-    );
+    )
+    .filter(item => {
+      if (!appliedDateRange) return true;
+      const date = toIsoDateFromParts(year, item.month, item.day);
+      return isIsoDateInRange(date, appliedDateRange.from, appliedDateRange.to);
+    });
   const cancelDelete = () => {
     setPendingDelete(null);
     setOpenMessageId(null);
@@ -103,6 +124,12 @@ export default function Messages(host: CurrentScreenProps) {
           value={query}
           onValueChange={setQuery}
           placeholder={t('runtime.actions.search', 'Search')}
+          trailingLabel={t('runtime.actions.filters', 'Filters')}
+          trailingIcon="filters"
+          filtersActive={dateFilterActive}
+          onFilterClick={() => setDateFilterOpen(true)}
+          onClearClick={() => setQuery('')}
+          onRemoveFilters={() => setDatePeriod(DEFAULT_DATE_PERIOD)}
           dark={dark}
         />
       </View>
@@ -114,20 +141,33 @@ export default function Messages(host: CurrentScreenProps) {
       title={t('runtime.messages.title', config.title)}
       sticky={sticky}
       overlay={
-        pendingDelete ? (
-          <BaselineDialog
-            title={t('runtime.messages.deleteDialog.title', 'Delete message?')}
-            body={t(
-              'runtime.messages.deleteDialog.body',
-              'Are you sure you want to delete this message?',
-            )}
-            onCancel={cancelDelete}
-            onConfirm={confirmDelete}
-            confirmLabel={t('runtime.messages.deleteDialog.confirm', 'Delete')}
-            cancelLabel={t('runtime.dialogs.cancel', 'Cancel')}
-            dark={dark}
-          />
-        ) : undefined
+        <>
+          {pendingDelete ? (
+            <BaselineDialog
+              title={t('runtime.messages.deleteDialog.title', 'Delete message?')}
+              body={t(
+                'runtime.messages.deleteDialog.body',
+                'Are you sure you want to delete this message?',
+              )}
+              onCancel={cancelDelete}
+              onConfirm={confirmDelete}
+              confirmLabel={t('runtime.messages.deleteDialog.confirm', 'Delete')}
+              cancelLabel={t('runtime.dialogs.cancel', 'Cancel')}
+              dark={dark}
+            />
+          ) : null}
+          {dateFilterOpen ? (
+            <BaselineDatePeriodFilterSheet
+              host={host}
+              initialSelection={datePeriod}
+              onClose={() => setDateFilterOpen(false)}
+              onApply={next => {
+                setDatePeriod(next);
+                setDateFilterOpen(false);
+              }}
+            />
+          ) : null}
+        </>
       }
     >
       <ServiceYear
@@ -135,37 +175,43 @@ export default function Messages(host: CurrentScreenProps) {
         dark={dark}
       />
       <View style={styles.items}>
-        {messages.map(item => (
-          <DeleteActionReveal
-            key={item.id}
-            testID={`delete-reveal-${item.id}`}
-            actionsOpen={openMessageId === item.id}
-            dark={dark}
-            deleteActionLabel={t('runtime.messages.deleteAction', 'DELETE')}
-            deleteAccessibilityLabel={`${t(
-              'runtime.messages.deleteMessage',
-              'Delete message',
-            )} ${item.title}`}
-            onDelete={() =>
-              setPendingDelete({ country: host.country, message: item })
-            }
-          >
-            <ServiceDatedRow
-              item={item}
+        {messages.length ? (
+          messages.map(item => (
+            <DeleteActionReveal
+              key={item.id}
+              testID={`delete-reveal-${item.id}`}
+              actionsOpen={openMessageId === item.id}
               dark={dark}
-              label={`${t(
-                'runtime.messages.messageActions',
-                'Message actions',
+              deleteActionLabel={t('runtime.messages.deleteAction', 'DELETE')}
+              deleteAccessibilityLabel={`${t(
+                'runtime.messages.deleteMessage',
+                'Delete message',
               )} ${item.title}`}
-              actionsExpanded={openMessageId === item.id}
-              onActions={() =>
-                setOpenMessageId(current =>
-                  current === item.id ? null : item.id,
-                )
+              onDelete={() =>
+                setPendingDelete({ country: host.country, message: item })
               }
-            />
-          </DeleteActionReveal>
-        ))}
+            >
+              <ServiceDatedRow
+                item={item}
+                dark={dark}
+                label={`${t(
+                  'runtime.messages.messageActions',
+                  'Message actions',
+                )} ${item.title}`}
+                actionsExpanded={openMessageId === item.id}
+                onActions={() =>
+                  setOpenMessageId(current =>
+                    current === item.id ? null : item.id,
+                  )
+                }
+              />
+            </DeleteActionReveal>
+          ))
+        ) : (
+          <Text style={[styles.empty, { color: host.tokens.muted }]}>
+            {t('runtime.messages.noMessagesForPeriod', 'No messages in this date range')}
+          </Text>
+        )}
       </View>
     </MoreServicePage>
   );
@@ -173,5 +219,6 @@ export default function Messages(host: CurrentScreenProps) {
 const styles = StyleSheet.create({
   mailboxLabel: { overflow: 'visible' },
   search: { paddingHorizontal: 16, paddingVertical: 16 },
+  empty: { textAlign: 'center', paddingVertical: 28, fontSize: 16 },
   items: { paddingTop: 20, paddingBottom: 24 },
 });

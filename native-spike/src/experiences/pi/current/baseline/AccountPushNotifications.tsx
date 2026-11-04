@@ -46,9 +46,9 @@ export function AccountPushNotifications({
     screen === 'overview'
       ? 'Push notifications'
       : screen === 'account'
-        ? 'ACCOUNTS TRANSACTION NOTIFICATIONS'
+        ? 'Accounts transaction notifications'
         : screen === 'card'
-          ? 'CARD TRANSACTIONS NOTIFICATIONS'
+          ? 'Card transactions notifications'
           : 'Notification limit';
   const limitScreen = screen === 'account-limit' || screen === 'card-limit';
   const limitKind = screen === 'card-limit' ? 'card' : 'account';
@@ -361,6 +361,7 @@ export function AccountPushNotifications({
                 </View>
                 <View style={styles.currency}>
                   <Text
+                    numberOfLines={1}
                     style={[styles.currencyLabel, { color: host.tokens.muted }]}
                   >
                     CURRENCY
@@ -408,11 +409,11 @@ const styles = StyleSheet.create({
   amountRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 20,
+    gap: 16,
     paddingTop: 28,
   },
   amountInput: { flex: 1, minWidth: 0 },
-  currency: { width: 56, paddingBottom: 7 },
+  currency: { width: 80, paddingBottom: 7 },
   currencyLabel: { fontFamily: 'UniCredit-regular', fontSize: 14 },
   currencyValue: {
     fontFamily: 'UniCredit-regular',

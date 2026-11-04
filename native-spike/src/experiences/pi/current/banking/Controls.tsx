@@ -2,7 +2,6 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Text } from '../../../../universal/Typography';
-import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -144,11 +143,14 @@ export function BankingSheet({
               onPress={onClose}
               style={s.close}
             >
-              <SourceCustomIcon
-                name="close-x"
-                size={24}
-                color={host.tokens.text}
-              />
+              <Text
+                style={[
+                  s.closeGlyph,
+                  { color: host.tokens.text },
+                ]}
+              >
+                ×
+              </Text>
             </Pressable>
           </View>
           <ScrollView
@@ -190,6 +192,7 @@ const s = StyleSheet.create({
     marginBottom: 24,
   },
   sheetTitle: { flex: 1, fontSize: 28, lineHeight: 31 },
+  closeGlyph: { fontSize: 28, lineHeight: 32 },
   close: {
     width: 32,
     height: 32,

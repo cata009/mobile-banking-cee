@@ -35,7 +35,7 @@ export function useMouseCarousel({
       );
       target.current?.scrollTo({ x: current.current, y: 0, animated: false });
     };
-    const finish = () => {
+    const finish = (animated = true) => {
       const {
         offsets: points,
         onSelect: select,
@@ -52,7 +52,7 @@ export function useMouseCarousel({
       );
       current.current = points[index] ?? 0;
       select?.(index);
-      target.current?.scrollTo({ x: current.current, y: 0, animated: true });
+      target.current?.scrollTo({ x: current.current, y: 0, animated });
     };
     const drag = PanResponder.create({
       onStartShouldSetPanResponderCapture: event => {
@@ -75,17 +75,19 @@ export function useMouseCarousel({
         move(gesture.moveX);
         finish();
       },
-      onPanResponderTerminate: finish,
+      onPanResponderTerminate: () => finish(),
     });
     return { drag, move, finish };
   }, []);
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    const node = containerRef.current as unknown as HTMLElement | null;
-    if (!node?.addEventListener) return;
     let dragging = false,
       suppressClick = false,
       startY = 0;
+    const containsTarget = (target: EventTarget | null) => {
+      const node = containerRef.current as unknown as HTMLElement | null;
+      return Boolean(node && target instanceof Node && node.contains(target));
+    };
     let timer: ReturnType<typeof setTimeout> | undefined;
     const onMove = (event: MouseEvent) => {
       if (!mouseActive.current) return;
@@ -100,11 +102,13 @@ export function useMouseCarousel({
     };
     const onUp = (event: MouseEvent) => {
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('mouseup', onUp, true);
       mouseActive.current = false;
       if (dragging) {
+        event.preventDefault();
+        event.stopPropagation();
         controller.move(event.clientX);
-        controller.finish();
+        controller.finish(false);
         suppressClick = true;
         timer = setTimeout(() => {
           suppressClick = false;
@@ -113,34 +117,43 @@ export function useMouseCarousel({
       dragging = false;
     };
     const onDown = (event: MouseEvent) => {
+      if (!containsTarget(event.target)) return;
       if (event.button !== 0 || latest.current.offsets.length < 2) return;
       mouseActive.current = true;
       dragging = false;
-      startOffset.current = current.current;
       startX.current = event.clientX;
       startY = event.clientY;
-      const measuredScale = node.clientWidth
-        ? node.getBoundingClientRect().width / node.clientWidth
+      const railRef = latest.current.rail.current as unknown as
+        | (HTMLElement & { getScrollableNode?: () => HTMLElement | null })
+        | null;
+      const scrollNode = railRef?.getScrollableNode?.() ?? railRef;
+      const measuredScale = scrollNode?.clientWidth
+        ? scrollNode.getBoundingClientRect().width / scrollNode.clientWidth
         : 0;
       dragScale.current =
         measuredScale > 0 ? measuredScale : latest.current.scale;
+      const actualOffset = scrollNode?.scrollLeft;
+      startOffset.current = Number.isFinite(actualOffset)
+        ? actualOffset!
+        : current.current;
+      current.current = startOffset.current;
       window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
+      window.addEventListener('mouseup', onUp, true);
     };
     const onClick = (event: MouseEvent) => {
-      if (suppressClick) {
+      if (suppressClick && containsTarget(event.target)) {
         event.preventDefault();
         event.stopPropagation();
         suppressClick = false;
       }
     };
-    node.addEventListener('mousedown', onDown);
-    node.addEventListener('click', onClick, true);
+    window.addEventListener('mousedown', onDown, true);
+    window.addEventListener('click', onClick, true);
     return () => {
-      node.removeEventListener('mousedown', onDown);
-      node.removeEventListener('click', onClick, true);
+      window.removeEventListener('mousedown', onDown, true);
+      window.removeEventListener('click', onClick, true);
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('mouseup', onUp, true);
       if (timer) clearTimeout(timer);
       mouseActive.current = false;
     };

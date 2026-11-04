@@ -297,7 +297,7 @@ export function Page({
         title={offset > 64 ? title : ''}
         onBack={onBack}
         duoActionActive={active}
-        backIcon={<Glyph name="back-heavy" />}
+        backIcon={<Glyph name="back-heavy" size={20} />}
         trailing={trailing}
       />
       <ScrollView

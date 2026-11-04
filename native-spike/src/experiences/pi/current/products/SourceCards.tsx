@@ -233,15 +233,18 @@ export function SourceOfferCard({
 export function SourceShopSmartCard({
   offer,
   dark = false,
+  onPress,
 }: {
   offer: ShopSmartOfferCard;
   dark?: boolean;
+  onPress?: () => void;
 }) {
   const text = sourceColor('var(--uc-text)', dark);
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => {}}
+      accessibilityLabel={`Open ${offer.merchant} offer`}
+      onPress={onPress}
       style={[
         exactSourceStyles.inline13,
         { backgroundColor: sourceColor('var(--uc-surface)', dark) },

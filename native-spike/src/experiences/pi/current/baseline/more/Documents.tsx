@@ -11,10 +11,18 @@ import {
   getDocumentsConfigForCountry,
   type DocumentListItem,
 } from '@/app/config/documentsConfig';
+import {
+  DEFAULT_DATE_PERIOD,
+  isIsoDateInRange,
+  resolveDatePeriodRange,
+  toIsoDateFromParts,
+  type DatePeriodSelection,
+} from '@/data/datePeriod';
 import type { CurrentScreenProps } from '../../contracts';
 import { assistantAvailable } from '../../coapping/model';
 import { openCurrentContextHelp } from '../../coapping/contextHelp';
 import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
+import { BaselineDatePeriodFilterSheet } from '../../../../../universal/BaselineDatePeriodFilterSheet';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { DeleteActionReveal } from '../../../../../universal/DeleteActionReveal';
@@ -204,6 +212,11 @@ export default function Documents(host: CurrentScreenProps) {
   const [deleted, setDeleted] = useState<ReadonlySet<string>>(() => new Set());
   const [pending, setPending] = useState<DocumentListItem | null>(null);
   const [legalInfo, setLegalInfo] = useState(false);
+  const [dateFilterOpen, setDateFilterOpen] = useState(false);
+  const [datePeriod, setDatePeriod] = useState<DatePeriodSelection>(
+    DEFAULT_DATE_PERIOD,
+  );
+  const appliedDateRange = resolveDatePeriodRange(datePeriod);
   const groups = config.groups
     .map(group => ({
       ...group,
@@ -225,8 +238,8 @@ export default function Documents(host: CurrentScreenProps) {
               : undefined,
           };
         })
-        .filter(item =>
-          [
+        .filter(item => {
+          const textMatches = [
             group.year,
             item.day,
             item.month,
@@ -236,8 +249,13 @@ export default function Documents(host: CurrentScreenProps) {
           ]
             .join(' ')
             .toLowerCase()
-            .includes(query.trim().toLowerCase()),
-        ),
+            .includes(query.trim().toLowerCase());
+          const date = toIsoDateFromParts(Number(group.year), item.month, item.day);
+          const dateMatches =
+            !appliedDateRange ||
+            isIsoDateInRange(date, appliedDateRange.from, appliedDateRange.to);
+          return textMatches && dateMatches;
+        }),
     }))
     .filter(group => group.items.length > 0);
   const cancel = () => {
@@ -253,7 +271,7 @@ export default function Documents(host: CurrentScreenProps) {
       );
     cancel();
   };
-  const overlay = pending ? (
+  const dialogOverlay = pending ? (
     <DocumentAlert
       host={host}
       legal={false}
@@ -268,16 +286,39 @@ export default function Documents(host: CurrentScreenProps) {
       onConfirm={() => setLegalInfo(false)}
     />
   ) : null;
+  const overlay = (
+    <>
+      {dialogOverlay}
+      {dateFilterOpen ? (
+        <BaselineDatePeriodFilterSheet
+          host={host}
+          initialSelection={datePeriod}
+          onClose={() => setDateFilterOpen(false)}
+          onApply={selection => {
+            setDatePeriod(selection);
+            setDateFilterOpen(false);
+          }}
+        />
+      ) : null}
+    </>
+  );
   return (
     <MoreServicePage
       host={host}
       title={t('runtime.documents.title', config.title)}
+      stickyGap={0}
       sticky={
         <View style={styles.search}>
           <BaselineSearchBar
             value={query}
             onValueChange={setQuery}
             placeholder={t('runtime.actions.search', 'Search')}
+            trailingLabel={t('runtime.actions.filters', 'Filters')}
+            trailingIcon="filters"
+            filtersActive={datePeriod.preset !== 'none'}
+            onFilterClick={() => setDateFilterOpen(true)}
+            onClearClick={() => setQuery('')}
+            onRemoveFilters={() => setDatePeriod(DEFAULT_DATE_PERIOD)}
             dark={dark}
           />
         </View>
@@ -325,10 +366,10 @@ const webDialogBackground: ViewStyle & {
 } = Platform.OS === 'web' ? { WebkitBackgroundClip: 'padding-box' } : {};
 const styles = StyleSheet.create({
   row: { height: 80, overflow: 'hidden' },
-  search: { paddingHorizontal: 16, paddingVertical: 26 },
+  search: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 },
   groups: { paddingBottom: 24 },
   group: { paddingBottom: 18 },
-  items: { paddingTop: 20 },
+  items: { paddingTop: 19 },
   dialogHost: {
     position: 'absolute',
     top: 0,

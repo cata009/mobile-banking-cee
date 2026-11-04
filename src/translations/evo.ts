@@ -242,12 +242,12 @@ const EN: EvoTranslations = {
     cards: {
       roundups: {
         title: "Save as you spend",
-        body: "Round up payments and save the difference.",
+        body: "Round up each payment and move the spare change into savings automatically.",
         caption: "Set your rule and adjust it at any time.",
       },
       nextStep: {
         title: "Keep everyday money simple",
-        body: "Useful ideas that keep daily banking moving.",
+        body: "Keep everyday banking simple with helpful tools for your regular payments.",
         caption: "Choose what works for you.",
       },
       safetyNetAccounts: {
@@ -493,8 +493,8 @@ const OVERRIDES: Partial<Record<AppLanguage, DeepPartial<EvoTranslations>>> = {
       heading: "Pro vás",
       sectionTitles: { accounts: "Chytré nápady pro běžné peníze", savings: "Nápady, jak rozšířit úspory", credits: "Nápady pro váš další krok", insurance: "Ochrana pro to, na čem záleží" },
       cards: {
-        roundups: { title: "Spořte každý den kousek", body: "Zaokrouhlete běžné platby a rozdíl si uspořte.", caption: "Nastavte si pravidlo a kdykoli je upravte." },
-        nextStep: { title: "Mějte běžné peníze pod kontrolou", body: "Užitečné nápady, které udrží běžné bankovnictví v pohybu.", caption: "Vyberte si, co vám vyhovuje." },
+        roundups: { title: "Spořte každý den kousek", body: "Zaokrouhlujte platby a rozdíl si nechte automaticky převést na spoření.", caption: "Nastavte si pravidlo a kdykoli je upravte." },
+        nextStep: { title: "Mějte běžné peníze pod kontrolou", body: "Mějte běžné bankovnictví přehledné díky nástrojům pro každodenní platby.", caption: "Vyberte si, co vám vyhovuje." },
         safetyNetAccounts: { title: "Najděte svůj další chytrý krok", body: "Vytvořte si rezervu na chvíle, na kterých záleží.", caption: "Možnosti si projděte, kdykoli budete potřebovat." },
         safetyNet: { title: "Vytvořte si rezervu na to, co je důležité", body: "Odkládejte peníze automaticky, vlastním tempem.", caption: "Začněte částkou, která vám sedí." },
         growSavings: { title: "Nechte své úspory více pracovat", body: "Malé změny, které pomohou vašim úsporám růst.", caption: "Vyberte si spořicí cíl, který vám vyhovuje." },

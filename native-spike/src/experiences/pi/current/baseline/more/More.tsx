@@ -22,7 +22,6 @@ import { BaselineMoreCard } from '../../../../../universal/BaselineMoreCard';
 import Logout from './Logout';
 import Tutorials from './Tutorials';
 import ContractWithdrawalFlow from './ContractWithdrawalFlow';
-import { useDuoPreview } from '../../../../../universal/DuoPreview';
 
 const labels: Record<MoreCardType, { key: string; fallback: string }> = {
   contacts: { key: 'contacts', fallback: 'Contacts' },
@@ -43,7 +42,6 @@ const labels: Record<MoreCardType, { key: string; fallback: string }> = {
 
 /** Source MoreScreen composition. The application host owns the primary navigation. */
 export default function More(host: CurrentScreenProps) {
-  const duo = useDuoPreview();
   const columns = 2;
   const [overlay, setOverlay] = useState<
     'logout' | 'tutorials' | 'contract-withdrawal' | null
@@ -100,10 +98,7 @@ export default function More(host: CurrentScreenProps) {
     >
       <View
         testID="ro-more-top-reserve"
-        style={[
-          s.topReserve,
-          duo ? { height: host.screenTopInset } : undefined,
-        ]}
+        style={[s.topReserve, { height: Math.max(54, host.screenTopInset) }]}
       />
       <NativeMoreHeader host={host} onLogout={() => setOverlay('logout')} />
       <ScrollView
@@ -116,12 +111,22 @@ export default function More(host: CurrentScreenProps) {
             key={card}
             card={card}
             title={
-              host.country === 'RO' && card === 'my-requests'
-                ? host.t('more.cards.contractWithdrawal', 'Contract withdrawal')
-                : host.t(
-                    `more.cards.${labels[card].key}`,
-                    labels[card].fallback,
-                  )
+              host.country === 'RO' && card === 'gdpr-consent'
+                ? 'Consents'
+                : host.country === 'RO' && card === 'my-requests'
+                  ? host.t(
+                      'more.cards.contractWithdrawal',
+                      'Contract withdrawal',
+                    )
+                  : host.t(
+                      `more.cards.${labels[card].key}`,
+                      labels[card].fallback,
+                    )
+            }
+            artworkVariant={
+              host.country === 'RO' && card === 'gdpr-consent'
+                ? 'third-party-consent'
+                : undefined
             }
             width={(width - 32 - 15 * (columns - 1)) / columns}
             dark={dark}
@@ -189,6 +194,7 @@ export function NativeMoreHeader({
             <BaselineHeaderActionButton
               icon="profile"
               label="Profile"
+              onPress={host.onProfile}
               dark={dark}
             />
           )}
@@ -216,6 +222,7 @@ export function NativeMoreHeader({
 /** The shared card contract supplies geometry; retain Source img stretching in RNWeb. */
 export function RoMoreCard({
   card,
+  artworkVariant,
   title,
   width,
   dark,
@@ -223,6 +230,7 @@ export function RoMoreCard({
   badgeCount,
 }: {
   card: MoreCardType;
+  artworkVariant?: MoreCardType;
   title: string;
   width: number;
   dark: boolean;
@@ -232,6 +240,7 @@ export function RoMoreCard({
   return (
     <BaselineMoreCard
       variant={card}
+      artworkVariant={artworkVariant}
       title={title}
       width={width}
       dark={dark}

@@ -3,6 +3,11 @@ import { usePrimaryNavigationInset } from '../../../../../universal/PrimaryNavig
 import { Pressable, ScrollView, View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { MainNavigationHeader } from '../../../../../universal/MainNavigationHeader';
+import {
+  EVO_LEVEL_ONE_HEADER_HEIGHT,
+  EVO_LEVEL_ONE_PAYMENTS_CONTENT_TOP,
+  resolveEvoLevelOneTopInset,
+} from '../levelOneLayout';
 import { Text } from '../../../../../universal/Typography';
 import { SearchField } from '../../../../../universal/SearchField';
 import { ModalPanel } from '../../../../../universal/ModalPanel';
@@ -601,8 +606,12 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
         <View
           style={[
             s.page,
-            hubStyles.reserve,
-            duo ? { paddingTop: props.screenTopInset ?? 54 } : undefined,
+          {
+            paddingTop: resolveEvoLevelOneTopInset(
+              props.screenTopInset,
+              !!duo && duo.rightInset > 0,
+            ),
+          },
           ]}
         >
           <MainNavigationHeader
@@ -616,7 +625,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
             value="payments"
             onChange={() => {}}
             label="Payments"
-            actionsRowHeight={32}
+            actionsRowHeight={EVO_LEVEL_ONE_HEADER_HEIGHT}
             actionsPaddingHorizontal={20}
             actionsAlignItems="flex-start"
             actions={
@@ -627,7 +636,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                   onPress={() => setView('exchange')}
                   style={hubStyles.headerAction}
                 >
-                  <Glyph name="payment-exchange-rates" size={22} />
+                  <Glyph name="payment-exchange-rates" size={20} />
                 </Pressable>
                 <Pressable
                   accessibilityRole="button"
@@ -638,7 +647,7 @@ export default function PaymentsScreen(props: CzechNativeScreenProps) {
                     setEditor(true);
                   }}
                 >
-                  <Glyph name="edit-pencil" size={26} />
+                  <Glyph name="edit-pencil" size={20} />
                 </Pressable>
               </>
             }
@@ -1836,7 +1845,6 @@ const hubStyles = StyleSheet.create({
   },
   customiseLabel: { flex: 1, minWidth: 0 },
   customiseFooter: { gap: 8 },
-  reserve: { paddingTop: 54 },
   title: {
     fontFamily: tokens.strongFont,
     fontSize: 28,
@@ -1861,7 +1869,7 @@ const hubStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   hubContent: {
-    paddingTop: 20,
+    paddingTop: EVO_LEVEL_ONE_PAYMENTS_CONTENT_TOP,
     paddingBottom: 96,
   },
   wideHub: {

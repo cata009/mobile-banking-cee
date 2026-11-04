@@ -23,6 +23,7 @@ export function BaselinePageHeader({
   rightActions,
   toolbarLayout = 'standard',
   backIconName = 'back-heavy',
+  backIconSize = 20,
   backLabel = 'Back',
   largeTitleAlign = 'left',
   largeTitleColor,
@@ -47,6 +48,7 @@ export function BaselinePageHeader({
   /** Source L2 uses symmetric 72px rails and 32px actions; other hosts retain 40px slots. */
   toolbarLayout?: 'standard' | 'source-l2';
   backIconName?: string;
+  backIconSize?: number;
   backLabel?: string;
   largeTitleAlign?: 'left' | 'center';
   largeTitleColor?: string;
@@ -165,7 +167,11 @@ export function BaselinePageHeader({
         onPress={onBack}
         style={actionStyle}
       >
-        <SourceCustomIcon name={backIconName} size={20} color={iconColor} />
+        <SourceCustomIcon
+          name={backIconName}
+          size={backIconSize}
+          color={iconColor}
+        />
       </Pressable>
     ) : (
       <View style={actionStyle} />
