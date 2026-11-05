@@ -78,6 +78,7 @@ function RoboSurface({
 }
 
 export interface CzRoboFlowProps {
+  portfolioSwitcher?: React.ReactNode;
   onBack: () => void;
   onExit: () => void;
   initialGoal?: RoboExistingGoal;
@@ -113,6 +114,7 @@ export function CzRoboFlow({
   screenTopInset = 0,
   onOpenSecurity,
   initialEvents = [],
+  portfolioSwitcher,
 }: CzRoboFlowProps) {
   const [clock] = useState(() => demoClock ?? getCurrentRoboDemoClock());
   const [basketDetailsOpen, setBasketDetailsOpen] = useState(false);
@@ -393,6 +395,7 @@ export function CzRoboFlow({
           securityCatalog={securityCatalog}
           clock={clock}
           amountsHidden={amountsHidden}
+          screenTopInset={screenTopInset}
           onOpenSecurity={onOpenSecurity}
         />
       );
@@ -408,6 +411,7 @@ export function CzRoboFlow({
           goal={goal}
           portfolio={state.portfolio}
           onBack={onBack}
+          portfolioSwitcher={portfolioSwitcher}
           onExit={onExit}
           onAction={mode => dispatch({ type: 'management-opened', mode })}
           securityCatalog={securityCatalog}

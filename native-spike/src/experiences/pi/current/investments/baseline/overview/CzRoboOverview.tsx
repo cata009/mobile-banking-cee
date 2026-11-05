@@ -258,6 +258,7 @@ export function CzRoboOverview({
   onModuleSelect,
 }: CzRoboOverviewProps) {
   const [sortOpen, setSortOpen] = useState(false);
+  const evo = host.release === 'release-future-evo-2027';
   const currency = getCountryConfig(host.country).currency;
   const performance = snapshot.performance;
   const totalValueParts = formatInvestmentAmountParts(
@@ -330,13 +331,14 @@ export function CzRoboOverview({
   return (
     <View style={[styles.shell, { backgroundColor: investmentColor(host, '--uc-app-bg') }]}>
       <BaselinePageHeader
-        title=""
+        title={evo ? 'Portfolio details' : ''}
         onBack={host.onBack}
         variant="gray"
         backIconName="close-flow"
         backLabel="Back to mobile banking"
         includeSafeArea
-        safeAreaReserve={host.screenTopInset}
+        safeAreaReserve={evo ? 0 : host.screenTopInset}
+        collapsedTitleProgress={evo ? 1 : 0}
         renderLargeTitle={false}
         hideCollapsedTitleWhenHidden
         showHelp
@@ -346,19 +348,25 @@ export function CzRoboOverview({
       <View
         style={[
           styles.contentShell,
+          evo && styles.evoContentShell,
           { backgroundColor: investmentColor(host, '--uc-surface') },
         ]}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.contentScroll}
-          contentContainerStyle={styles.contentPadding}
+          contentContainerStyle={[
+            styles.contentPadding,
+            evo && styles.evoContentPadding,
+          ]}
         >
-          <View style={styles.pageTitleWrap}>
-            <Copy host={host} bold style={styles.pageTitle}>
-              Portfolio details
-            </Copy>
-          </View>
+          {!evo && (
+            <View style={styles.pageTitleWrap}>
+              <Copy host={host} bold style={styles.pageTitle}>
+                Portfolio details
+              </Copy>
+            </View>
+          )}
 
           <View style={styles.summary}>
             <View style={styles.summaryTotal}>
@@ -549,7 +557,18 @@ export function CzRoboOverview({
         </ScrollView>
       </View>
 
-      <ModuleNavigation value="portfolio" onChange={onModuleSelect} />
+      {evo ? (
+        <View style={styles.evoDock}>
+          <ModuleNavigation
+            value="portfolio"
+            variant="evo-2027"
+            bottomInset={0}
+            onChange={onModuleSelect}
+          />
+        </View>
+      ) : (
+        <ModuleNavigation value="portfolio" onChange={onModuleSelect} />
+      )}
 
       {sortOpen ? (
         <SourceBottomSheet
@@ -640,6 +659,9 @@ const styles = StyleSheet.create({
     boxShadow: '0 -8px 20px rgba(0,0,0,0.045)',
   },
   contentScroll: { flex: 1 },
+  evoContentShell: { marginTop: 0 },
+  evoContentPadding: { paddingBottom: 100 },
+  evoDock: { position: 'absolute', left: 0, right: 0, bottom: 8 },
   contentPadding: { paddingBottom: 28 },
   pageTitleWrap: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   pageTitle: { fontSize: 28, lineHeight: 34 },

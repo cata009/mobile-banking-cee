@@ -15,6 +15,12 @@ import {
 import { hydrateRoboGoal } from '@/features/investments/robo/goalHydration';
 import { DEFAULT_ROBO_DEMO_CLOCK } from '@/features/investments/robo/demoClock';
 import type { RoboExistingGoal } from '@/features/investments/robo/types';
+import { BaselineMailboxTabs } from '../src/universal/BaselineMailboxTabs';
+import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
+import {
+  Notice,
+  Page,
+} from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 
 function control(tree: Renderer.ReactTestRenderer, label: string) {
   return tree.root.findAll(
@@ -154,9 +160,11 @@ describe('native Robo management state families', () => {
     )!;
     const tree = mount(jest.fn(), empty);
     press(tree, 'Withdraw');
+    expect(tree.root.findByType(Page).props.onClose).toBeUndefined();
+    expect(tree.root.findAllByType(Notice)).toHaveLength(0);
     expect(
-      tree.root.findAll(node => node.props.testID === 'cz-withdraw').length,
-    ).toBeGreaterThan(0);
+      tree.root.findByProps({ testID: 'cz-withdraw-empty' }),
+    ).toBeDefined();
     act(() => tree.unmount());
   });
   it('seeds a valid existing recurring start date instead of replacing the schedule', () => {
@@ -180,10 +188,21 @@ describe('native Robo management state families', () => {
   it('opens history and model portfolio from the current goal', () => {
     const tree = mount();
     press(tree, 'History');
+    expect(tree.root.findAllByType(BaselineMailboxTabs)).toHaveLength(1);
+    expect(tree.root.findAllByType(BaselineSearchBar)).toHaveLength(1);
     expect(
-      tree.root.findAll(node => node.props.testID === 'cz-investment-history')
-        .length,
-    ).toBeGreaterThan(0);
+      tree.root.findByProps({
+        testID: 'baseline-history-row-goal-4-strategic-sell-nano-transaction',
+      }),
+    ).toBeDefined();
+    act(() => {
+      tree.root.findByType(BaselineMailboxTabs).props.onChange('orders');
+    });
+    expect(
+      tree.root.findByProps({
+        testID: 'baseline-history-row-goal-4-strategic-sell-nano-order',
+      }),
+    ).toBeDefined();
     press(tree, 'Back');
     press(tree, 'Goal settings');
     press(tree, 'Model Portfolio');

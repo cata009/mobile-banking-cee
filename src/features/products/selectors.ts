@@ -109,9 +109,7 @@ export function deriveProductCategories({
           availableCredit,
           creditLimit,
           currency: localCurrency,
-          ...(country === 'RO'
-            ? { cardHolderName: RO_DEMO_CUSTOMER.fullName }
-            : {}),
+          ...(country === 'RO' ? { cardHolderName: RO_DEMO_CUSTOMER.fullName } : {}),
         }
       }
 
@@ -136,9 +134,7 @@ export function deriveProductCategories({
               : preserveCzApp2027ForeignDebitCard
                 ? sourceCurrency
                 : localCurrency,
-        ...(isCard && country === 'RO'
-          ? { cardHolderName: RO_DEMO_CUSTOMER.fullName }
-          : {}),
+        ...(isCard && country === 'RO' ? { cardHolderName: RO_DEMO_CUSTOMER.fullName } : {}),
       }
     }),
   }))

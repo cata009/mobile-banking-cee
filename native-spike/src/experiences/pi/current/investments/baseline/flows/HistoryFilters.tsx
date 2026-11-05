@@ -310,6 +310,8 @@ function Scaffold({
         <ScrollView
           style={[baselineStyles.inline25, investmentScrollStyle()]}
           contentContainerStyle={renderStyle14}
+          showsVerticalScrollIndicator
+          persistentScrollbar
         >
           {children}
         </ScrollView>
@@ -1137,7 +1139,8 @@ const baselineStyles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   inline55: {
-    paddingHorizontal: 24,
+    marginHorizontal: 16,
+    paddingHorizontal: 8,
     paddingVertical: 12,
   },
   inline56: {

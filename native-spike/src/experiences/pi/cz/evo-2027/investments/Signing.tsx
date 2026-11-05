@@ -14,6 +14,7 @@ export function Signing({
   pinFocused = false,
   demoPresentation,
   canonicalControls,
+  demoBypass,
 }: {
   onBack: () => void;
   onExit: () => void;
@@ -26,6 +27,8 @@ export function Signing({
   pinFocused?: boolean;
   demoPresentation?: 'confirmation' | 'face-id';
   canonicalControls?: boolean;
+  /** Completes this explicitly demo-only action without the unavailable-biometrics prompt. */
+  demoBypass?: boolean;
 }) {
   const isActive = useInvestmentActive();
   return (
@@ -41,6 +44,7 @@ export function Signing({
       pinFocused={pinFocused}
       demoPresentation={demoPresentation}
       canonicalControls={canonicalControls}
+      demoBypass={demoBypass}
     />
   );
 }

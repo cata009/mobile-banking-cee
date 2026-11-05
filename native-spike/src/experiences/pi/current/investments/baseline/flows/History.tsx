@@ -545,7 +545,7 @@ const baselineStyles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     borderRadius: 3,
-    borderWidth: 1,
+    borderWidth: 2,
   },
   inline10: {
     paddingHorizontal: 6,

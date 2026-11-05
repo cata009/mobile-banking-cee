@@ -27,6 +27,8 @@ import {
   BaselineInvestmentDistributionDetail,
 } from './overview';
 import { CzRoboOverview } from './overview/CzRoboOverview';
+import { FutureInvestmentOverview } from '../../../cz/evo-2027/investments/FutureInvestmentOverview';
+import { isFutureInvestmentRelease } from '@/features/investments/future-overview/model';
 import {
   BaselineInvestmentCatalog,
   BaselineInvestmentFunds,
@@ -92,6 +94,13 @@ export default function BaselineInvestmentsController({
       ? params.view
       : 'portfolio');
   const [returnToRoboOrders, setReturnToRoboOrders] = useState(false);
+  const future = isFutureInvestmentRelease(host.country, host.release);
+  const [futureSection, setFutureSection] = useState<InvestmentSection>(
+    entry === 'history' ? 'history' : 'portfolio',
+  );
+  useEffect(() => {
+    if (future && entry === 'history') setFutureSection('history');
+  }, [entry, future]);
   const previousEntry = useRef(entry);
   useEffect(() => {
     const returnedFromApprovals =
@@ -122,8 +131,7 @@ export default function BaselineInvestmentsController({
         {
           view: 'funds',
           collection: (params?.collection ?? params?.collectionId) as
-            | InvestmentFundCollectionId
-            | undefined,
+            InvestmentFundCollectionId | undefined,
         },
       ];
     if (params?.view === 'catalog')
@@ -291,7 +299,7 @@ export default function BaselineInvestmentsController({
           ]),
         ]
       : currencies;
-  if (entry === 'history')
+  if (entry === 'history' && !future)
     return (
       <BaselineInvestmentHistory
         host={childHost}
@@ -301,8 +309,8 @@ export default function BaselineInvestmentsController({
         initialTab={
           returnToRoboOrders
             ? 'orders'
-            : historyOverrides?.initialTab ??
-              (params?.tab === 'orders' ? 'orders' : 'transactions')
+            : (historyOverrides?.initialTab ??
+              (params?.tab === 'orders' ? 'orders' : 'transactions'))
         }
         filterByTitle={
           historyOverrides?.historyFilterByTitle ?? params?.filterByTitle
@@ -459,6 +467,59 @@ export default function BaselineInvestmentsController({
       screen: 'investments',
       params: { entry: 'approvals' },
     });
+  if (future)
+    return (
+      <FutureInvestmentOverview
+        host={childHost}
+        snapshot={{
+          ...snapshot,
+          transactions: [...historyTransactions],
+          orders: [...historyOrders],
+        }}
+        state={overview}
+        onStateChange={patch => setOverview(old => ({ ...old, ...patch }))}
+        section={futureSection}
+        onSectionChange={setFutureSection}
+        historyOptions={{
+          currencies: historyCurrencies,
+          initialTab: returnToRoboOrders
+            ? 'orders'
+            : (historyOverrides?.initialTab ??
+              (params?.tab === 'orders' ? 'orders' : 'transactions')),
+          filterByTitle:
+            historyOverrides?.historyFilterByTitle ?? params?.filterByTitle,
+          filterBySecurityId:
+            historyOverrides?.historyFilterBySecurityId ??
+            params?.filterBySecurityId,
+          hideAllTimeDateOption:
+            historyOverrides?.hideAllTimeDateOption ?? false,
+          hideCurrencyFilter: historyOverrides?.hideCurrencyFilter ?? false,
+          allDatesByDefault: historyOverrides?.allDatesByDefault ?? true,
+          titleOverride:
+            historyOverrides?.titleOverride ?? params?.titleOverride,
+          approvalCount:
+            historyOverrides?.approvalCount ??
+            (showRoboActivity ? 20 : undefined),
+          onTabChange: host.onInvestmentHistoryTabChange,
+          onToApprove: () => {
+            setReturnToRoboOrders(true);
+            if (host.onInvestmentHistoryToApprove)
+              host.onInvestmentHistoryToApprove();
+            else onOpenApprovals();
+          },
+          onBack:
+            entry === 'history'
+              ? host.onBack
+              : () => setFutureSection('portfolio'),
+        }}
+        onSelectBasket={basket => push({ view: 'basket', basket })}
+        onOpenSecurity={onOpenSecurity}
+        onOpenDistribution={onOpenDistribution}
+        onOpenCatalog={onOpenCatalog}
+        onOpenHistory={onOpenHistory}
+        onOpenApprovals={onOpenApprovals}
+      />
+    );
   if (showRoboActivity)
     return (
       <CzRoboOverview

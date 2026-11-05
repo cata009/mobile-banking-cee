@@ -61,6 +61,7 @@ import { Select } from '../../../../../universal/Select';
 import { czInvestmentTokens } from './Primitives';
 import type { CzechNativeScreenProps } from '../contracts';
 import { ClassicPortfolio } from './ClassicPortfolio';
+import { FuturePortfolioSwitcher } from './FuturePortfolioSwitcher';
 
 type ViewRoute =
   | {
@@ -266,7 +267,11 @@ function CzInvestmentsComposition({
   const openSecurity = (security: InvestmentCatalogSecurity) =>
     push({ kind: 'instrument', security });
   const navigationFor = (value: InvestmentSection) => (
-    <ModuleNavigation value={value} onChange={kind => setStack([{ kind }])} />
+    <ModuleNavigation
+      value={value}
+      variant="evo-2027"
+      onChange={kind => setStack([{ kind }])}
+    />
   );
   const money = (value: number, currency = 'CZK') =>
     formatInvestmentMoney(value, 'CZ', currency, amountsHidden);
@@ -293,6 +298,27 @@ function CzInvestmentsComposition({
     return (
       <CzGoalsScreen
         goals={goals}
+        portfolioSwitcher={
+          classicHost ? (
+            <FuturePortfolioSwitcher
+              tokens={czInvestmentTokens}
+              language={classicHost.language}
+              value="goals"
+              goals={goals}
+              onChange={value => {
+                if (value === 'portfolio') {
+                  lastRoboResumeKey.current = null;
+                  onRoboResumeStateChange?.(null);
+                  classicHost.onNavigate({
+                    screen: 'investments',
+                    params: { entry: 'portfolio', view: 'portfolio' },
+                  });
+                } else if (value.startsWith('goal:'))
+                  push({ kind: 'goal', goalId: value.slice(5) });
+              }}
+            />
+          ) : undefined
+        }
         onBack={back}
         onCreateGoal={() => push({ kind: 'create' })}
         onOpenGoal={goal => push({ kind: 'goal', goalId: goal.id })}
@@ -302,6 +328,31 @@ function CzInvestmentsComposition({
   if (route.kind === 'create' || route.kind === 'goal')
     return (
       <CzRoboFlow
+        portfolioSwitcher={
+          classicHost && route.kind === 'goal' ? (
+            <FuturePortfolioSwitcher
+              tokens={czInvestmentTokens}
+              language={classicHost.language}
+              value={`goal:${route.goalId}`}
+              goals={goals}
+              onChange={value => {
+                if (value === 'portfolio') {
+                  lastRoboResumeKey.current = null;
+                  onRoboResumeStateChange?.(null);
+                  classicHost.onNavigate({
+                    screen: 'investments',
+                    params: { entry: 'portfolio', view: 'portfolio' },
+                  });
+                } else if (value === 'goals') showGoals();
+                else if (value.startsWith('goal:'))
+                  setStack([
+                    { kind: 'goals' },
+                    { kind: 'goal', goalId: value.slice(5) },
+                  ]);
+              }}
+            />
+          ) : undefined
+        }
         key={route.kind === 'goal' ? route.goalId : 'create'}
         onBack={showGoals}
         onExit={showGoals}
@@ -578,13 +629,20 @@ function CzInvestmentsComposition({
       onHelp={() => undefined}
       gray
       raised
+      compactTitle
       backGlyph="close-flow"
       gutter={16}
-      contentTop={16}
+      contentTop={0}
       footerGutter={0}
       footerTop={0}
       footerBottom={0}
-      footer={<ModuleNavigation value="portfolio" onChange={section} />}
+      footer={
+        <ModuleNavigation
+          value="portfolio"
+          variant="evo-2027"
+          onChange={section}
+        />
+      }
     >
       {persistenceMessage ? <Notice text={persistenceMessage} error /> : null}
       <Copy strong style={styles.totalLabel}>

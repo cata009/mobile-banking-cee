@@ -15,6 +15,7 @@ import { APP_2027_THEMES, type HomeTheme } from '@/features/products/evoAppearan
 import { storeApp2027Theme } from '@/features/products/evoAppearancePreferences'
 import EdgeLoadingAnimation from '@/app/components/EdgeLoadingAnimation'
 import { resolveRouteStatusBarVariant } from '@/app/navigation/routePolicy'
+import { isFutureInvestmentRelease } from '@/features/investments/future-overview/model'
 import { parseDeepLinkFromUrl } from '@/app/utils/deepLink'
 import PanelOverlay from '@/app/components/PanelOverlay'
 import { useAppCoordinators } from './coordinators/useAppCoordinators'
@@ -394,7 +395,12 @@ export function AppShell({ parsedDeepLink, deviceMode, app2027Theme }: AppShellP
             style={
               isItalyMobileFirst
                 ? ({ '--mf-text-scale': mobileFirstSettings.textSize ? '1.125' : '1' } as CSSProperties)
-                : undefined
+                : nativeOwned &&
+                    product === 'PI' &&
+                    currentScreen === 'investments' &&
+                    isFutureInvestmentRelease(country, release)
+                  ? { overflow: 'clip' }
+                  : undefined
             }
             data-app-2027-home={release === 'release-future-evo-2027' || undefined}
             data-app-2027-theme-scope={release === 'release-future-evo-2027' || undefined}

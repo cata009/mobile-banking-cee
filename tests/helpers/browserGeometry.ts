@@ -1,5 +1,17 @@
 export function installDeterministicBrowserGeometry(): void {
   if (typeof Element === 'undefined') return
+  for (const [property, fallback] of [['offsetWidth', 375], ['offsetHeight', 812]] as const) {
+    const original = Object.getOwnPropertyDescriptor(HTMLElement.prototype, property)
+    if (!original?.get || !original.configurable) continue
+    Object.defineProperty(HTMLElement.prototype, property, {
+      ...original,
+      get() {
+        const measured = original.get!.call(this) as number
+        if (measured || !this.parentElement?.hasAttribute('data-native-current-host')) return measured
+        return fallback
+      },
+    })
+  }
   const nativeBounds = Element.prototype.getBoundingClientRect
   Element.prototype.getBoundingClientRect = function () {
     if (!this.classList.contains('recharts-responsive-container')) return nativeBounds.call(this)

@@ -249,7 +249,9 @@ export function CreationScreens({
   const duoClose = useEvoDuoCloseAction(onExit, view.step === 'intro');
   const [termsOpen, setTermsOpen] = useState(false);
   const [profileUpdateInfoOpen, setProfileUpdateInfoOpen] = useState(false);
-  const [contactHelpOpen, setContactHelpOpen] = useState(false);
+  const [contactInfoOpen, setContactInfoOpen] = useState<
+    'phone' | 'email' | null
+  >(null);
   const [contactEditOpen, setContactEditOpen] = useState(false);
   const [contactPhone, setContactPhone] = useState('+420 777 123 456');
   const [contactEmail, setContactEmail] = useState('email.address@gmail.com');
@@ -379,8 +381,17 @@ export function CreationScreens({
             <InvestmentGlyph name="close-flow" color="#262626" size={24} />
           </Pressable>
         )}
+        <Pressable
+          testID="cz-intro-back"
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={onBack}
+          style={[styles.introBack, { top: Math.max(24, screenTopInset - 16) }]}
+        >
+          <InvestmentGlyph name="back-heavy" color="#262626" size={20} />
+        </Pressable>
         <View testID="cz-intro-footer" style={[ui.footer, styles.introFooter]}>
-          <Button label="Create Goal" onPress={() => navigate('contact')} />
+          <Button label="Create Goal" onPress={() => navigate('profile')} />
         </View>
       </View>
     );
@@ -389,10 +400,6 @@ export function CreationScreens({
       <Page
         {...page}
         onClose={undefined}
-        onHelp={() => setContactHelpOpen(true)}
-        helpIcon={
-          <InvestmentGlyph name="help-circle" size={24} color="#262626" />
-        }
         kind="personal-data-confirmation"
         title={"First of all,\nlet's check your data"}
         description="Please confirm or update your data before continuing with your investment account request."
@@ -405,7 +412,7 @@ export function CreationScreens({
           <>
             <Button
               label="I confirm these data"
-              onPress={() => navigate('profile')}
+              onPress={() => navigate('intro')}
             />
             <Button
               label="Edit data"
@@ -430,7 +437,14 @@ export function CreationScreens({
               {contactPhone}
             </Copy>
           </View>
-          <SourceCustomIcon name="info-circle" size={24} color="#262626" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Phone number information"
+            onPress={() => setContactInfoOpen('phone')}
+            style={styles.contactInfoButton}
+          >
+            <SourceCustomIcon name="info-circle" size={24} color="#262626" />
+          </Pressable>
         </View>
         <View
           testID="cz-contact-email"
@@ -444,24 +458,27 @@ export function CreationScreens({
               {contactEmail}
             </Copy>
           </View>
-          <SourceCustomIcon name="info-circle" size={24} color="#262626" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Email address information"
+            onPress={() => setContactInfoOpen('email')}
+            style={styles.contactInfoButton}
+          >
+            <SourceCustomIcon name="info-circle" size={24} color="#262626" />
+          </Pressable>
         </View>
-        <ModalPanel
-          tokens={czInvestmentTokens}
-          title="Contact details"
-          visible={contactHelpOpen}
-          onClose={() => setContactHelpOpen(false)}
-          closeLabel="Close contact details"
-        >
-          <Copy>
-            Check that your phone number and email address are up to date before
-            continuing.
-          </Copy>
-          <Button
-            label="I understand"
-            onPress={() => setContactHelpOpen(false)}
-          />
-        </ModalPanel>
+        {contactInfoOpen ? (
+          <SourceBottomSheet
+            title={contactInfoOpen === 'phone' ? 'Phone number' : 'Email Address'}
+            onClose={() => setContactInfoOpen(null)}
+          >
+            <Copy style={styles.contactInfoCopy}>
+              {contactInfoOpen === 'phone'
+                ? 'A phone number is required to receive one time passwords via SMS to confirm and digitally sign.'
+                : 'An email address is needed in order to send pre-contractual documentation and official periodical statements.'}
+            </Copy>
+          </SourceBottomSheet>
+        ) : null}
         <ModalPanel
           tokens={czInvestmentTokens}
           title="Edit data"
@@ -1048,9 +1065,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  introBack: {
+    position: 'absolute',
+    left: 16,
+    width: 32,
+    height: 32,
+    zIndex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   introFooter: { paddingHorizontal: 24 },
   pageDescription: { fontSize: 18, lineHeight: 24 },
   contactDescription: { fontSize: 16, lineHeight: 24 },
+  contactInfoButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactInfoCopy: { fontSize: 18, lineHeight: 24, paddingHorizontal: 24 },
   goalChoiceTitle: { fontSize: 18, lineHeight: 20 },
   goalChoiceDescription: { fontSize: 14, lineHeight: 16 },
   nameField: { width: 295, maxWidth: '100%', minHeight: 96, paddingTop: 8 },

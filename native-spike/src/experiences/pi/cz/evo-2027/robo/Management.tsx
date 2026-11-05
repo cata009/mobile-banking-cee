@@ -20,7 +20,6 @@ import {
 import { canReviewRoboTopUp } from '@/features/investments/robo/flowSelectors';
 import {
   getFundingFieldVisibility,
-  formatCzkInput,
   formatCzkInteger,
 } from '@/features/investments/robo/model';
 import {
@@ -76,6 +75,7 @@ import {
 } from '../../../../../universal/DateField';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
+import { BaselineInvestmentHistory } from '../../../current/investments/baseline/flows/History';
 import {
   Button,
   Choice,
@@ -87,8 +87,11 @@ import {
 } from '../investments/Primitives';
 import { SellOrder } from '../investments/SellOrder';
 import { Signing } from '../investments/Signing';
-import { InvestmentHistory } from '../investments/History';
+import { OrderDocuments } from '../investments/OrderDocuments';
+import { useCurrentInvestmentHost } from '../investments/hostAdapter';
+import { DEFAULT_CZECH_COUNTS } from '../contracts';
 import { PlanFields } from './CreationScreens';
+import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 
 function FundingAmount({
   label,
@@ -150,6 +153,7 @@ export function Management({
   securityCatalog,
   clock,
   amountsHidden,
+  screenTopInset = 0,
 }: {
   goal: RoboExistingGoal;
   portfolio: RoboPortfolio;
@@ -163,6 +167,7 @@ export function Management({
   securityCatalog: readonly InvestmentCatalogSecurity[];
   clock: RoboDemoClock;
   amountsHidden: boolean;
+  screenTopInset?: number;
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
 }) {
   const seed = {
@@ -180,6 +185,7 @@ export function Management({
     seed,
     createRoboManagementState,
   );
+  const [topUpTermsAccepted, setTopUpTermsAccepted] = useState(false);
   const [planState, dispatchPlan] = useReducer(roboReducer, goal, initial =>
     createRoboState(initial, clock),
   );
@@ -215,6 +221,33 @@ export function Management({
     : undefined;
   const selectedAccount =
     currentAccounts.find(account => account.id === accountId) ?? null;
+  const historyBackHandler = useRef<(() => boolean) | null>(null);
+  const registerHistoryBackHandler = useCallback(
+    (handler: (() => boolean) | null) => {
+      historyBackHandler.current = handler;
+    },
+    [],
+  );
+  const historyHost = useCurrentInvestmentHost(
+    {
+      route: { screen: 'robo' },
+      scenario: 'active',
+      language: 'en',
+      mode: 'light',
+      productCounts: DEFAULT_CZECH_COUNTS,
+      amountsHidden,
+      screenTopInset,
+      isActive: true,
+      onBack,
+      onNavigate: () => undefined,
+      onProfile: () => undefined,
+      onSearch: () => undefined,
+      onAmountsToggle: () => undefined,
+      onChanged: () => undefined,
+      onBackHandlerChange: registerHistoryBackHandler,
+    },
+    'release-future-evo-2027',
+  );
   const currentSeed = useRef(seed);
   currentSeed.current = seed;
   useEffect(() => {
@@ -222,6 +255,7 @@ export function Management({
       type: 'mode-entered',
       seed: currentSeed.current,
     });
+    if (mode === 'add-money') setTopUpTermsAccepted(false);
   }, [mode]);
   useInvestmentBack(() => {
     if (state.recurringDatePickerOpen) {
@@ -232,7 +266,7 @@ export function Management({
       closeCashAccounts();
       return true;
     }
-    if (mode === 'history') return false;
+    if (mode === 'history') return historyBackHandler.current?.() ?? false;
     if (mode === 'settings' && modelOpen) {
       setModelOpen(false);
       return true;
@@ -288,14 +322,14 @@ export function Management({
   const page = { onBack, onClose: onExit };
   if (mode === 'history')
     return (
-      <InvestmentHistory
+      <BaselineInvestmentHistory
+        host={historyHost}
         onBack={onBack}
         transactions={goal.transactions ?? []}
         orders={goal.orders ?? []}
         initialTab={state.historyTab}
         hideCurrencyFilter
         hideAllTimeDateOption
-        amountsHidden={amountsHidden}
         onTabChange={tab => dispatch({ type: 'history-tab-changed', tab })}
       />
     );
@@ -521,7 +555,7 @@ export function Management({
     ).filter(product => product.localValue > 0);
     return (
       <Page
-        {...page}
+        onBack={onBack}
         kind={mode}
         title="Withdraw money"
         description="Select an investment to start your sale. Review the quantity, estimated proceeds and order details before signing."
@@ -556,7 +590,9 @@ export function Management({
             />
           ))
         ) : (
-          <Notice text="No investments to withdraw." />
+          <View testID="cz-withdraw-empty">
+            <Copy>No investments to withdraw.</Copy>
+          </View>
         )}
       </Page>
     );
@@ -568,6 +604,10 @@ export function Management({
         pinLabel="Security code"
         pinHelper="Confirm this investment from your selected cash account. One basket order will be submitted for execution."
         actionLabel="Confirm investment"
+        pinTopSpacing={132}
+        pinFocused
+        canonicalControls
+        demoBypass
         onBack={() => dispatch({ type: 'top-up-back', to: 'review' })}
         onExit={onExit}
         onSigned={() => {
@@ -594,66 +634,89 @@ export function Management({
     );
   if (mode === 'add-money' && state.topUp.kind === 'success')
     return (
-      <Page
-        {...page}
-        kind="top-up-success"
+      <BaselineStandardSuccess
         title={
           state.topUp.method === 'regular'
             ? 'Monthly investment scheduled'
             : 'Add money request submitted'
         }
-        footer={<Button label="Back to goal" onPress={() => onMode('menu')} />}
-      >
-        <Notice
-          text={
-            state.topUp.method === 'regular'
-              ? 'Your monthly investment is scheduled. The goal value will change after the first basket order is executed.'
-              : state.topUp.method === 'combined'
+        message={
+          state.topUp.method === 'regular'
+            ? 'Your monthly investment is scheduled. The goal value will change after the first basket order is executed.'
+            : state.topUp.method === 'combined'
               ? 'Your basket order is pending and your monthly investment is scheduled. The goal value will update after the order is executed.'
               : 'Your basket order is pending. The goal value and positions will update after it is executed. You can follow its status in History.'
-          }
-        />
-      </Page>
+        }
+        actionLabel="Ok, I got it"
+        onDone={() => onMode('menu')}
+        testID="cz-top-up-success"
+      />
     );
   if (mode === 'add-money' && state.topUp.kind === 'review')
     return (
       <Page
         kind="top-up-review"
-        title="Review investment"
-        onBack={() => dispatch({ type: 'top-up-back', to: 'amount' })}
+        title="Review Data"
+        onBack={() => {
+          setTopUpTermsAccepted(false);
+          dispatch({ type: 'top-up-back', to: 'amount' });
+        }}
         onClose={onExit}
         footer={
           <Button
-            label="Continue to sign"
-            disabled={!canReview}
+            label={fields.initialAmount ? 'Buy' : 'Set up monthly investment'}
+            disabled={!canReview || !topUpTermsAccepted}
             onPress={() => dispatch({ type: 'top-up-sign-requested' })}
           />
         }
       >
-        <Row title="Goal" subtitle={goal.name} />
-        <Row title="Basket fund" subtitle={portfolio.name} />
+        <ReviewSectionHeading title="ORDER SUMMARY" />
+        <Row
+          title="Product"
+          subtitle={portfolio.basketFund?.title ?? portfolio.name}
+        />
+        <Row
+          title="Product ID"
+          subtitle={
+            portfolio.basketFund?.marketInfo.basketIsin ??
+            goal.basketIsin ??
+            'Not available'
+          }
+        />
+        <Row
+          title="Order type"
+          value={fields.initialAmount ? 'One off BUY' : 'Monthly BUY'}
+        />
         {fields.initialAmount ? (
-          <Row
-            title="Amount to add"
-            value={
-              amountsHidden ? '•••• CZK' : formatCzkInput(state.topUp.amount)
-            }
-          />
+          <>
+            <Row title="Execution" value="Next available market session" />
+            <Row
+              title="Estimated amount"
+              value={formatInvestmentMoney(initial, 'CZ', 'CZK', amountsHidden)}
+            />
+          </>
         ) : null}
         {fields.monthlyContribution ? (
           <>
+            {!fields.initialAmount ? (
+              <Row title="Frequency" value="Monthly" />
+            ) : null}
             <Row
               title="Monthly contribution"
-              value={
-                amountsHidden
-                  ? '•••• CZK'
-                  : formatCzkInput(state.topUp.monthlyAmount)
-              }
+              value={formatInvestmentMoney(monthly, 'CZ', 'CZK', amountsHidden)}
             />
             <Row title="Monthly contribution starts" value={state.topUp.date} />
           </>
         ) : null}
+        <ReviewSectionHeading title="ACCOUNTS" />
         <Row title="Cash account" subtitle={selectedAccount?.name} />
+        <OrderDocuments currency="CZK" />
+        <Choice
+          title="I have read and accept the terms and conditions."
+          label="Accept terms and conditions"
+          selected={topUpTermsAccepted}
+          onPress={() => setTopUpTermsAccepted(value => !value)}
+        />
         <Notice text="The goal value will update after the order is executed." />
       </Page>
     );
@@ -666,8 +729,8 @@ export function Management({
           mode === 'monthly'
             ? 'Manage monthly investment'
             : state.topUp.method === 'one-off'
-            ? 'Add money to your goal'
-            : 'Choose how to invest'
+              ? 'Add money to your goal'
+              : 'Choose how to invest'
         }
         description={
           mode === 'monthly'
@@ -771,7 +834,9 @@ export function Management({
                     tokens={czInvestmentTokens}
                     label="Monthly contribution starts"
                     value={fundingDate ? iso(fundingDate) : state.topUp.date}
-                    calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
+                    calendarIcon={
+                      <SourceCustomIcon name="insurance-calendar" size={32} />
+                    }
                     onChange={value =>
                       dispatch({ type: 'date-changed', value: fromIso(value) })
                     }
@@ -991,8 +1056,26 @@ export function Management({
   );
 }
 
+function ReviewSectionHeading({ title }: { title: string }) {
+  return (
+    <View style={managementStyles.reviewSectionHeading}>
+      <Copy strong style={managementStyles.reviewSectionTitle}>
+        {title}
+      </Copy>
+      <View style={managementStyles.reviewSectionDivider} />
+    </View>
+  );
+}
+
 const managementStyles = StyleSheet.create({
   settingsRow: { paddingLeft: 0, paddingRight: 0 },
+  reviewSectionHeading: { paddingTop: 16, marginBottom: 8 },
+  reviewSectionTitle: { fontSize: 14, lineHeight: 18 },
+  reviewSectionDivider: {
+    height: 1,
+    marginTop: 8,
+    backgroundColor: czInvestmentTokens.border,
+  },
 });
 
 const fundingStyles = StyleSheet.create({

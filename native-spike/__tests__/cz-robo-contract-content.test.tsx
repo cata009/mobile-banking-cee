@@ -84,12 +84,14 @@ describe('CZ Robo investment account contract document', () => {
       maxHeightOffsetPx: 72,
     });
     expect(buttons(tree, 'Download document')).not.toHaveLength(0);
+    expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
     expect(buttons(tree, 'I have read it')).toHaveLength(0);
   });
 
-  it('requires positive scrolling to the document end before showing confirmation', () => {
+  it('keeps download enabled while requiring positive scrolling to show confirmation', () => {
     const onConfirm = jest.fn();
     const tree = renderContract(onConfirm);
+    expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
     scroll(tree, 0, 600, 600);
     expect(buttons(tree, 'I have read it')).toHaveLength(0);
     scroll(tree, 10, 600, 600);
@@ -97,10 +99,12 @@ describe('CZ Robo investment account contract document', () => {
     scroll(tree, 0);
     scroll(tree, 400);
     scroll(tree, 2390);
+    expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
     expect(buttons(tree, 'I have read it')).toHaveLength(0);
     expect(onConfirm).not.toHaveBeenCalled();
 
     scroll(tree, 2400);
+    expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
     const confirm = buttons(tree, 'I have read it')[0];
     expect(confirm).toBeDefined();
     expect(confirm.props.disabled).not.toBe(true);
@@ -151,6 +155,7 @@ describe('CZ Robo investment account contract document', () => {
   it('downloads the same complete clauses as a paginated PDF without accepting them', async () => {
     const onConfirm = jest.fn();
     const tree = renderContract(onConfirm);
+    scroll(tree, 2400);
     await act(async () =>
       buttons(tree, 'Download document')[0].props.onPress(),
     );
@@ -166,13 +171,14 @@ describe('CZ Robo investment account contract document', () => {
     expect(pdf).toContain('8. Closing the account and acknowledgement');
     expect(pdf).toContain('End of demonstration document');
     expect(pdf.match(/\/Type \/Page /g)!.length).toBeGreaterThan(1);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')).toHaveLength(1);
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
   it('keeps a failed download retryable and clears the error after a successful retry', async () => {
     share.mockRejectedValueOnce(new Error('Sharing unavailable'));
     const tree = renderContract();
+    scroll(tree, 2400);
     await act(async () =>
       buttons(tree, 'Download document')[0].props.onPress(),
     );
@@ -189,6 +195,6 @@ describe('CZ Robo investment account contract document', () => {
       buttons(tree, 'Download document')[0].props.onPress(),
     );
     expect(error()).toHaveLength(0);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')).toHaveLength(1);
   });
 });

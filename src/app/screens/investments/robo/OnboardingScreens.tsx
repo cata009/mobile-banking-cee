@@ -55,11 +55,27 @@ export function GoalSelectionCard({
   )
 }
 
-export function IntroScreen({ onCreate, onExit }: { onCreate: () => void; onExit: () => void }) {
+export function IntroScreen({
+  onBack,
+  onCreate,
+  onExit,
+}: {
+  onBack: () => void
+  onCreate: () => void
+  onExit: () => void
+}) {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[var(--uc-surface)]" data-robo-screen="intro">
       <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
-        <div className="pointer-events-none sticky top-[calc(var(--uc-phone-top-reserve,54px)+4px)] z-20 -mb-[40px] flex h-[40px] justify-end px-[8px]">
+        <div className="pointer-events-none sticky top-[calc(var(--uc-phone-top-reserve,54px)+4px)] z-20 -mb-[40px] flex h-[40px] justify-between px-[8px]">
+          <button
+            type="button"
+            aria-label="Back"
+            onClick={onBack}
+            className="pointer-events-auto grid size-[40px] place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2"
+          >
+            <AppIcon name="back-heavy" color="var(--uc-text)" size={20} />
+          </button>
           <button
             type="button"
             aria-label="Close"

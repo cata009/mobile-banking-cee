@@ -1,13 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { CzechNavigationBar } from '../../../../../app/CzechPrimaryNavigation';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { Copy } from './Primitives';
+import { futureCopy } from '@/features/investments/future-overview/copy';
 export type InvestmentSection =
-  | 'portfolio'
-  | 'explore'
-  | 'catalog'
-  | 'history'
-  | 'more';
+  'portfolio' | 'explore' | 'catalog' | 'history' | 'more';
 const sections = [
   { id: 'portfolio', label: 'Portfolio', icon: 'robo-nav-portfolio' },
   { id: 'explore', label: 'Explore', icon: 'robo-nav-explore' },
@@ -18,10 +16,56 @@ const sections = [
 export function ModuleNavigation({
   value,
   onChange,
+  variant = 'classic',
+  bottomInset,
+  primaryInvest = false,
+  language = 'en',
+  dark = false,
 }: {
   value: InvestmentSection;
   onChange: (value: InvestmentSection) => void;
+  variant?: 'classic' | 'evo-2027';
+  bottomInset?: number;
+  primaryInvest?: boolean;
+  language?: 'en' | 'cs';
+  dark?: boolean;
 }) {
+  if (variant === 'evo-2027')
+    return (
+      <View
+        style={[
+          s.reserve,
+          s.evoReserve,
+          bottomInset !== undefined && { paddingBottom: bottomInset },
+        ]}
+      >
+        <CzechNavigationBar
+          items={sections.map(item => ({
+            ...item,
+            label: primaryInvest
+              ? item.id === 'portfolio'
+                ? language === 'cs'
+                  ? 'Portfolio'
+                  : 'Portfolio'
+                : item.id === 'catalog'
+                  ? futureCopy(language).invest
+                  : item.id === 'history'
+                    ? futureCopy(language).activity
+                    : item.id === 'explore'
+                      ? futureCopy(language).explore
+                      : futureCopy(language).more
+              : item.label,
+          }))}
+          value={value}
+          language={language}
+          dark={dark}
+          primaryId={primaryInvest ? 'catalog' : undefined}
+          label="Investment navigation"
+          onSelect={id => onChange(id as InvestmentSection)}
+        />
+      </View>
+    );
+
   return (
     <View style={s.reserve}>
       <View style={s.bar}>
@@ -55,6 +99,7 @@ const s = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: '#F5F5F5',
   },
+  evoReserve: { paddingTop: 0, backgroundColor: 'transparent' },
   bar: {
     height: 68,
     flexDirection: 'row',

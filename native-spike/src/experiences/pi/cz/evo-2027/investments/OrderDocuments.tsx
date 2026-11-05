@@ -62,11 +62,12 @@ const evaluations = [
 ] as const;
 
 /** Literal Source presentation fixtures; evaluations/costs are illustrative, never computed advice. */
-export function OrderDocuments({
-  security,
-}: {
-  security: InvestmentCatalogSecurity;
-}) {
+type OrderDocumentsProps =
+  | { currency: string; security?: never }
+  | { currency?: never; security: InvestmentCatalogSecurity };
+
+export function OrderDocuments({ currency, security }: OrderDocumentsProps) {
+  const orderCurrency = currency ?? security?.instrumentCurrency ?? 'CZK';
   const [expanded, setExpanded] = useState<string | null>(null);
   const [scenarioView, setScenarioView] = useState<'percent' | 'value'>(
     'value',
@@ -124,7 +125,7 @@ export function OrderDocuments({
               <View style={s.body}>
                 {section.id === 'ex-ante' ? (
                   <ExAnteDisclosure
-                    currency={security.instrumentCurrency}
+                    currency={orderCurrency}
                     view={scenarioView}
                     onView={setScenarioView}
                     periodIndex={periodIndex}

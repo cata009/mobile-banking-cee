@@ -129,7 +129,7 @@ export function ManagementInputScreen({
       }
       onBack={onBack}
       onClose={onClose}
-      headerAction={mode === 'rename' || mode === 'add-money' ? 'none' : 'close'}
+      headerAction={mode === 'rename' ? 'none' : 'close'}
       contentTopClassName={mode === 'add-money' ? 'pt-[16px]' : undefined}
       dataScreen={mode}
       overlay={

@@ -14,6 +14,7 @@ import { useEvoDuoBackAction } from './EvoDuoNavigation';
 /** Isolated Native geometry; sticky anchoring/blur and safe area belong to the host. */
 export function BaselinePageHeader({
   title,
+  titleControl,
   onBack,
   onHelpPress,
   onRightActionPress,
@@ -37,6 +38,7 @@ export function BaselinePageHeader({
   ...options
 }: PageHeaderOptions & {
   title: string;
+  titleControl?: React.ReactNode;
   onBack: () => void;
   onHelpPress?: () => void;
   onRightActionPress?: () => void;
@@ -189,7 +191,7 @@ export function BaselinePageHeader({
             backAction
           )}
           <View
-            pointerEvents="none"
+            pointerEvents={titleControl ? 'auto' : 'none'}
             aria-hidden={titleAccessibility.collapsedTitleHidden}
             accessibilityElementsHidden={
               titleAccessibility.collapsedTitleHidden
@@ -201,13 +203,15 @@ export function BaselinePageHeader({
             }
             style={collapsedStyle}
           >
-            <Text
-              accessibilityRole="header"
-              numberOfLines={1}
-              style={collapsedTextStyle}
-            >
-              {title}
-            </Text>
+            {titleControl ?? (
+              <Text
+                accessibilityRole="header"
+                numberOfLines={1}
+                style={collapsedTextStyle}
+              >
+                {title}
+              </Text>
+            )}
             {headerSubtitle && (
               <Text numberOfLines={1} style={subtitleStyle}>
                 {headerSubtitle}

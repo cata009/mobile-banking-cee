@@ -32,7 +32,14 @@ it.each([0, 1, 2])(
     const bar = tree.root
       .findAllByType(View)
       .find(n => n.props.accessibilityLabel === 'Primary navigation')!;
-    expect(StyleSheet.flatten(bar.parent!.props.style).top).toBe(
+    let dock = bar.parent;
+    while (
+      dock &&
+      StyleSheet.flatten(dock.props.style)?.position !== 'absolute'
+    ) {
+      dock = dock.parent;
+    }
+    expect(StyleSheet.flatten(dock!.props.style).top).toBe(
       152 + actionCount * 60,
     );
     expect(152 + actionCount * 60 + 268).toBeLessThanOrEqual(678 - 12);

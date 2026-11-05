@@ -4,6 +4,8 @@ import { StyleSheet } from 'react-native';
 import { getPortfoliosForStrategy } from '@/features/investments/robo/model';
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures';
 import { DEFAULT_ROBO_DEMO_CLOCK } from '@/features/investments/robo/demoClock';
+import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
+import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import {
   createRoboState,
   getRoboFlowView,
@@ -13,6 +15,7 @@ import { CreationScreens } from '../src/experiences/pi/cz/evo-2027/robo/Creation
 import { Page } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 import { ProductLogo } from '../src/experiences/pi/cz/evo-2027/investments/ProductRow';
 import { BaselineNavigationRow } from '../src/universal/BaselineNavigationRow';
+import { BaselineStandardSuccess } from '../src/universal/BaselineStandardSuccess';
 import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 
@@ -126,6 +129,59 @@ test('preserves the settings destinations while using the canonical rows', () =>
   }
 });
 
+test('uses the Buy Order review layout and completes the CZ Robo demo without authorization prompt', () => {
+  const onMode = jest.fn();
+  const onGoalUpdated = jest.fn();
+  const snapshot = createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS);
+  const tree = renderManagement({
+    mode: 'add-money',
+    currentAccounts: snapshot.accounts,
+    securityCatalog: snapshot.catalog,
+    onMode,
+    onGoalUpdated,
+  });
+  try {
+    press(tree, 'Review investment');
+    expect(tree.root.findByType(Page).props.title).toBe('Review Data');
+    const review = text(tree.root);
+    expect(review).toContain('ORDER SUMMARY');
+    expect(review).toContain(portfolio.basketFund!.title);
+    expect(review).toContain(portfolio.basketFund!.marketInfo.basketIsin);
+    expect(review).toContain('One off BUY');
+    expect(review).toContain('ACCOUNTS');
+    expect(review).toContain('Ex-Ante cost information');
+    expect(review).toContain('Product documents');
+
+    const buy = () =>
+      tree.root.findAll(
+        node =>
+          node.props.accessibilityLabel === 'Buy' &&
+          typeof node.props.onPress === 'function',
+      )[0]!;
+    expect(buy().props.disabled).toBe(true);
+    press(tree, 'Accept terms and conditions');
+    expect(buy().props.disabled).not.toBe(true);
+    press(tree, 'Buy');
+
+    expect(
+      tree.root.findByProps({ testID: 'authorization-pin-field' }),
+    ).toBeDefined();
+    expect(JSON.stringify(tree.toJSON())).not.toContain('Demo authorization');
+    press(tree, 'Confirm investment');
+    const success = tree.root.findByType(BaselineStandardSuccess);
+    expect(success.props).toMatchObject({
+      title: 'Add money request submitted',
+      actionLabel: 'Ok, I got it',
+    });
+    expect(tree.root.findAllByType(Page)).toHaveLength(0);
+    expect(onGoalUpdated).toHaveBeenCalledTimes(1);
+    press(tree, 'Ok, I got it');
+    expect(onMode).toHaveBeenLastCalledWith('menu');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
 test('shows the creation basket presentation for Model Portfolio with current goal metadata and no CTA', () => {
   const tree = renderManagement();
   try {
@@ -168,7 +224,11 @@ test('shows the creation basket presentation for Model Portfolio with current go
 });
 
 test('opens and dismisses product details above Model Portfolio without leaving the page', () => {
-  const tree = renderManagement();
+  const snapshot = createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS);
+  const tree = renderManagement({
+    currentAccounts: snapshot.accounts,
+    securityCatalog: snapshot.catalog,
+  });
   try {
     press(tree, 'Model Portfolio');
     press(tree, 'Open Nano-Chip Equity Fund product details');
@@ -181,6 +241,28 @@ test('opens and dismisses product details above Model Portfolio without leaving 
     expect(
       tree.root.findByProps({ testID: 'cz-holding-details-content' }),
     ).toBeDefined();
+    const kidRow = tree.root.findByType(BaselineNavigationRow);
+    expect(kidRow.props).toMatchObject({
+      title: 'Key Information Document (KID)',
+      description: 'Nano-Chip Equity Fund',
+      leadingIconName: 'investment-documents',
+      trailingAccessory: 'chevron',
+      chevronIconName: 'chevron-link',
+      rowHeight: 80,
+    });
+    press(tree, 'Open Key Information Document (KID)');
+    expect(
+      tree.root.findAllByType(SourceBottomSheet).some(
+        currentSheet =>
+          currentSheet.props.title === 'Key Information Document (KID)',
+      ),
+    ).toBe(true);
+    act(() => {
+      tree.root
+        .findAllByType(SourceBottomSheet)
+        .find(item => item.props.title === 'Key Information Document (KID)')
+        ?.props.onClose();
+    });
     act(() => sheet.props.onClose());
     expect(tree.root.findAllByType(SourceBottomSheet)).toHaveLength(0);
     expect(tree.root.findByType(Page).props.kind).toBe('model-portfolio');

@@ -51,8 +51,8 @@ function startFlow(
 }
 
 function reachHorizon() {
-  fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
   fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.click(screen.getByRole('radio', { name: /General build-up wealth/ }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -71,6 +71,7 @@ function reachGoalDetail(nextAction: 'View goal' | 'Add money' = 'View goal') {
   reachFundingMethod()
   fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
   fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
+  scrollContractToEnd()
   fireEvent.click(screen.getByRole('button', { name: 'I have read this' }))
   fireEvent.click(screen.getByRole('button', { name: 'Continue to sign' }))
   fireEvent.click(screen.getByRole('button', { name: 'Sign goal' }))
@@ -91,7 +92,50 @@ function startTopUp() {
   fireEvent.click(screen.getByRole('button', { name: 'Add money' }))
 }
 
+function scrollContractToEnd() {
+  const reader = screen.getByTestId('robo-contract-reader')
+  Object.defineProperties(reader, {
+    clientHeight: { configurable: true, value: 500 },
+    scrollHeight: { configurable: true, value: 1400 },
+    scrollTop: { configurable: true, writable: true, value: 900 },
+  })
+  fireEvent.scroll(reader)
+}
+
 describe('CZ Future Robo Advisor flow', () => {
+  it('opens separate phone and email information sheets', () => {
+    startFlow()
+
+    expect(screen.queryByRole('button', { name: 'Help' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Contact details' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Phone number information' }))
+    const phoneSheet = screen.getByRole('dialog', { name: 'Phone number' })
+    expect(phoneSheet).toHaveTextContent(
+      'A phone number is required to receive one time passwords via SMS to confirm and digitally sign.',
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Close phone number information' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Email address information' }))
+    const emailSheet = screen.getByRole('dialog', { name: 'Email Address' })
+    expect(emailSheet).toHaveTextContent(
+      'An email address is needed in order to send pre-contractual documentation and official periodical statements.',
+    )
+    expect(screen.queryByRole('dialog', { name: 'Phone number' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close email address information' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('keeps the existing Close action on Add money when entered from a goal', () => {
+    const onExit = vi.fn()
+    render(<CzFutureRoboAdvisorFlow initialGoal={INITIAL_CZ_ROBO_GOALS[1]} onBack={() => undefined} onExit={onExit} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Add money' }))
+
+    expect(screen.getByRole('heading', { name: 'Add money to your goal' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onExit).toHaveBeenCalledOnce()
+  })
+
   it('starts the first contribution from goal success without placing investment orders', () => {
     vi.useFakeTimers()
     const updates = vi.fn()
@@ -154,6 +198,8 @@ describe('CZ Future Robo Advisor flow', () => {
     fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
     fireEvent.click(screen.getByRole('button', { name: 'Buy' }))
     fireEvent.click(screen.getByRole('button', { name: 'Confirm investment' }))
+    expect(screen.getByRole('heading', { name: 'Add money request submitted' })).toBeInTheDocument()
+    expect(document.querySelector('[data-face-id-authenticating="true"]')).toBeNull()
     act(() => vi.advanceTimersByTime(840))
     const updated = updates.mock.calls.at(-1)![0]
     expect(updated.positions).toEqual(hydrated.positions)
@@ -161,17 +207,21 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(updated.currentDecimals).toBe(hydrated.currentDecimals)
     expect(updated.orders.filter((order: { status: string }) => order.status === 'PENDING').length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { name: 'Add money request submitted' })).toBeInTheDocument()
+    expect(document.querySelector('[data-face-id-authenticating="true"]')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Ok, I got it' })).toBeInTheDocument()
   })
   it('uses 16px subtitles and goal option titles throughout goal creation', () => {
     startFlow()
 
+    expect(screen.getAllByText(/First of all,/).length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    expect(screen.getByRole('heading', { name: 'Invest towards what matters' })).toBeInTheDocument()
     expect(
       screen.getByText(
         'Turn your plans into an investment goal. Choose a suitable portfolio, then decide when and how much to invest.',
       ),
     ).toHaveClass('text-[16px]')
     fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
-    fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
 
     expect(screen.getByText(/Your answers indicate a Moderate - V2 investor profile/)).toHaveClass('text-[16px]')
     expect(screen.getByText(/As a moderate risk investor/)).toHaveClass('text-[16px]')
@@ -185,16 +235,23 @@ describe('CZ Future Robo Advisor flow', () => {
     const onExit = vi.fn()
     startFlow('valid', onExit)
 
+    expect(screen.getAllByText(/First of all,/).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    expect(screen.getByRole('heading', { name: 'Invest towards what matters' })).toBeInTheDocument()
+    const introBack = screen.getByRole('button', { name: 'Back' })
     const introClose = screen.getByRole('button', { name: 'Close' })
     expect(introClose.querySelector('path')).toHaveAttribute(
       'd',
       'M18.1431 0L10 8.14313L1.85625 0L0 1.85687L8.14313 10L0 18.1431L1.85625 20L10 11.8569L18.1431 20L20 18.1431L11.8569 10L20 1.85687L18.1431 0Z',
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
+    fireEvent.click(introBack)
+    expect(screen.getAllByText(/First of all,/).length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Edit data' })).not.toHaveClass('uppercase')
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
 
     const flowClose = screen.getByRole('button', { name: 'Close' })
     expect(screen.queryByRole('button', { name: 'Help' })).not.toBeInTheDocument()
@@ -212,8 +269,8 @@ describe('CZ Future Robo Advisor flow', () => {
   it('keeps the five Figma goal choices', () => {
     startFlow()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
@@ -227,8 +284,8 @@ describe('CZ Future Robo Advisor flow', () => {
 
   it('collapses each Robo page title into the centered header while scrolling', () => {
     startFlow()
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
 
     const scrollContainer = document.querySelector('[data-robo-scroll-container]')
     expect(scrollContainer).toBeInTheDocument()
@@ -243,8 +300,8 @@ describe('CZ Future Robo Advisor flow', () => {
   it('blocks goal creation until an expired MiFID profile is updated', () => {
     startFlow('expired')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     expect(screen.getByRole('heading', { name: 'Your risk profile' })).toBeInTheDocument()
     expect(screen.getByText(/needs an update/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
@@ -254,8 +311,8 @@ describe('CZ Future Robo Advisor flow', () => {
   it('prefills and visibly selects a quick target amount', () => {
     startFlow()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     fireEvent.click(screen.getByRole('radio', { name: /General build-up wealth/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -310,15 +367,49 @@ describe('CZ Future Robo Advisor flow', () => {
     expect(screen.getByRole('button', { name: 'Continue to sign' })).toBeDisabled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Review terms and conditions' }))
+    scrollContractToEnd()
     fireEvent.click(screen.getByRole('button', { name: 'I have read this' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('switch', { name: 'Accept terms and conditions' })).toBeChecked()
     fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
     expect(screen.getByRole('button', { name: 'Continue to sign' })).toBeDisabled()
     fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
+    scrollContractToEnd()
     fireEvent.click(screen.getByRole('button', { name: 'I have read this' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue to sign' }))
     expect(screen.getAllByRole('heading', { name: 'Sign goal' }).length).toBeGreaterThan(0)
+  })
+
+  it('keeps download available while requiring the document end to acknowledge terms', () => {
+    startFlow()
+    reachFundingMethod()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('switch', { name: 'Accept terms and conditions' }))
+
+    const reader = screen.getByTestId('robo-contract-reader')
+    expect(reader).toHaveAttribute('role', 'region')
+    expect(reader).toHaveAccessibleName('Investment account contract document')
+    expect(reader).toHaveAttribute('tabindex', '0')
+    reader.focus()
+    expect(reader).toHaveFocus()
+    const download = screen.getByRole('button', { name: 'Download document' })
+    const accept = screen.getByRole('button', { name: 'I have read this' })
+    expect(download).toBeEnabled()
+    expect(accept).toBeDisabled()
+
+    Object.defineProperties(reader, {
+      clientHeight: { configurable: true, value: 500 },
+      scrollHeight: { configurable: true, value: 1400 },
+      scrollTop: { configurable: true, writable: true, value: 0 },
+    })
+    fireEvent.scroll(reader)
+    expect(download).toBeEnabled()
+    expect(accept).toBeDisabled()
+
+    reader.scrollTop = 900
+    fireEvent.scroll(reader)
+    expect(download).toBeEnabled()
+    expect(accept).toBeEnabled()
   })
 
   it('requires a horizon choice and uses the 16px bold separator-free Figma rows', () => {

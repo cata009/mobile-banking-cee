@@ -98,13 +98,10 @@ export function filterEvoTransactions({
           ? transaction.type === 'credit'
           : transaction.type === 'debit'
     const categoryMatches = filters.category === 'All categories' ? true : transaction.category === filters.category
-    const customDateRangeActive =
-      filters.datePreset === 'custom' &&
-      Boolean(filters.dateFrom && filters.dateTo)
+    const customDateRangeActive = filters.datePreset === 'custom' && Boolean(filters.dateFrom && filters.dateTo)
     const transactionDate = `${transaction.monthKey}-${String(Number(transaction.day)).padStart(2, '0')}`
     const dateMatches =
-      !customDateRangeActive ||
-      (transactionDate >= filters.dateFrom! && transactionDate <= filters.dateTo!)
+      !customDateRangeActive || (transactionDate >= filters.dateFrom! && transactionDate <= filters.dateTo!)
 
     return (
       searchMatches &&

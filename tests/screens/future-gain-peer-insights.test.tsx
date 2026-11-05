@@ -122,11 +122,19 @@ beforeEach(async () => {
     'ResizeObserver',
     class ResizeObserver {
       nodes = new Set<Element>()
+      private scheduled = false
       constructor(private callback: ResizeObserverCallback) {
         layoutObservers.add(this)
       }
       observe(node: Element) {
         this.nodes.add(node)
+        if (!this.scheduled) {
+          this.scheduled = true
+          queueMicrotask(() => {
+            this.scheduled = false
+            if (this.nodes.size) this.notify()
+          })
+        }
       }
       unobserve(node: Element) {
         this.nodes.delete(node)

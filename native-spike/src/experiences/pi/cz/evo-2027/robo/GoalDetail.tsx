@@ -57,6 +57,7 @@ export function GoalDetail({
   clock,
   amountsHidden,
   onOpenSecurity,
+  portfolioSwitcher,
 }: {
   goal: RoboExistingGoal;
   portfolio: RoboPortfolio;
@@ -67,6 +68,7 @@ export function GoalDetail({
   clock: RoboDemoClock;
   amountsHidden: boolean;
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
+  portfolioSwitcher?: React.ReactNode;
 }) {
   const [period, setPeriod] = useState<InvestmentPeriodId>('3y');
   const [help, setHelp] = useState(false);
@@ -107,22 +109,24 @@ export function GoalDetail({
   const emptyTitle = flags.hasPendingBuyOrders
     ? 'Your investment is being processed'
     : flags.hasRecurringPlan
-    ? 'Your recurring top-up is scheduled'
-    : flags.hasSellHistory
-    ? 'Your goal is currently empty'
-    : 'Your goal is ready to invest';
+      ? 'Your recurring top-up is scheduled'
+      : flags.hasSellHistory
+        ? 'Your goal is currently empty'
+        : 'Your goal is ready to invest';
   const emptyDescription = flags.hasPendingBuyOrders
     ? 'Your goal will show positions and value after your investment is executed. Follow its status in History.'
     : flags.hasRecurringPlan
-    ? `Your monthly contribution is set to start on ${goal.recurringContribution?.startDate}. Positions appear after the first basket order is executed.`
-    : flags.hasSellHistory
-    ? 'Your previous sales remain in History. Add money whenever you’re ready to invest again.'
-    : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.';
+      ? `Your monthly contribution is set to start on ${goal.recurringContribution?.startDate}. Positions appear after the first basket order is executed.`
+      : flags.hasSellHistory
+        ? 'Your previous sales remain in History. Add money whenever you’re ready to invest again.'
+        : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.';
   if (help) return <RoboHelp kind="detail" onBack={() => setHelp(false)} />;
   return (
     <Page
       kind="goal-detail"
       title={goal.name}
+      compactTitle={!!portfolioSwitcher}
+      headerTitle={portfolioSwitcher}
       description={goal.purpose}
       gutter={16}
       descriptionTop={4}
@@ -151,8 +155,8 @@ export function GoalDetail({
               goal.returnTone === 'positive'
                 ? investmentColors.positive
                 : goal.returnTone === 'negative'
-                ? investmentColors.negative
-                : '#262626',
+                  ? investmentColors.negative
+                  : '#262626',
           },
         ]}
       >
@@ -277,10 +281,10 @@ export function GoalDetail({
               sort === 'min-value'
                 ? left.localValue - right.localValue
                 : sort === 'max-percent'
-                ? right.percent - left.percent
-                : sort === 'min-percent'
-                ? left.percent - right.percent
-                : right.localValue - left.localValue,
+                  ? right.percent - left.percent
+                  : sort === 'min-percent'
+                    ? left.percent - right.percent
+                    : right.localValue - left.localValue,
             )
             .map(product =>
               product.security && onOpenSecurity ? (

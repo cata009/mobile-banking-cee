@@ -94,8 +94,7 @@ export function nativeRouteFromSource(
     params.categoryTitle = route.selection.categoryTitle
     if (route.selection.offerId) params.offerId = route.selection.offerId
   }
-  if (route.screen === 'products' && route.view === 'shopsmart')
-    params.view = 'shopsmart'
+  if (route.screen === 'products' && route.view === 'shopsmart') params.view = 'shopsmart'
   // Source keeps the selected transaction in its coordinator; a plain route cannot invent that identity.
   if (screen === 'transaction') return null
   return { screen, ...(Object.keys(params).length ? { params } : {}) }
@@ -125,13 +124,12 @@ export function sourceRouteFromNative(
   if (source === 'card-detail' || source === 'card-details-info' || source === 'card-options')
     return { screen: source, cardId }
   if (source === 'transaction-detail') return { screen: source, accountId }
-  if (source === 'products' && route.params?.view === 'shopsmart')
-    return { screen: 'products', view: 'shopsmart' }
+  if (source === 'products' && route.params?.view === 'shopsmart') return { screen: 'products', view: 'shopsmart' }
   if (source === 'product-detail') {
     const offerId = route.params?.offerId
     if (offerId) {
       const menu = getProductsMenuForCountry(country)
-      const offer = menu.shopSmartOfferCards.find(item => item.id === offerId)
+      const offer = menu.shopSmartOfferCards.find((item) => item.id === offerId)
       return offer
         ? {
             screen: source,

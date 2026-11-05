@@ -31,7 +31,7 @@ function InvestmentsAdapterScreen(props: CzechNativeScreenProps) {
         snapshot={snapshot}
         onBack={props.onBack}
         amountsHidden={props.amountsHidden}
-        classicHost={props.route.screen === 'robo' ? undefined : props}
+        classicHost={props}
         goals={goals}
         persistenceMessage={getCzRoboPersistenceError()}
         onRoboResumeStateChange={props.onRoboResumeStateChange}
@@ -46,13 +46,15 @@ function InvestmentsAdapterScreen(props: CzechNativeScreenProps) {
             ? props.route.params?.view === 'bulk-approval'
               ? 'bulk-approval'
               : props.route.params?.view === 'approvals'
-              ? 'approvals'
-              : 'history'
+                ? 'approvals'
+                : 'history'
             : props.route.screen === 'robo'
-            ? props.route.params?.view === 'create'
-              ? 'create'
-              : 'goals'
-            : 'portfolio'
+              ? props.route.params?.view === 'create'
+                ? 'create'
+                : 'goals'
+              : props.route.params?.view === 'goals'
+                ? 'goals'
+                : 'portfolio'
         }
         onGoalUpdated={goal => {
           saveCzRoboGoal(goal);

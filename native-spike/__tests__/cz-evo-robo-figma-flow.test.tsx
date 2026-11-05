@@ -48,6 +48,12 @@ function pressMatching(tree: TestRenderer.ReactTestRenderer, pattern: RegExp) {
   act(() => control!.props.onPress());
 }
 
+function elementText(node: TestRenderer.ReactTestInstance): string {
+  return node.children
+    .map(child => (typeof child === 'string' ? child : elementText(child)))
+    .join('');
+}
+
 function input(
   tree: TestRenderer.ReactTestRenderer,
   label: string,
@@ -62,12 +68,21 @@ function input(
 }
 
 function toContact(tree: TestRenderer.ReactTestRenderer) {
+  expect(tree.root.findByProps({ testID: 'cz-contact-phone' })).toBeDefined();
+}
+
+function toIntro(tree: TestRenderer.ReactTestRenderer) {
+  toContact(tree);
+  press(tree, 'I confirm these data');
+}
+
+function toProfile(tree: TestRenderer.ReactTestRenderer) {
+  toIntro(tree);
   press(tree, 'Create Goal');
 }
 
 function toTarget(tree: TestRenderer.ReactTestRenderer) {
-  toContact(tree);
-  press(tree, 'I confirm these data');
+  toProfile(tree);
   press(tree, 'Continue');
   pressMatching(tree, /^General build-up wealth\./);
   press(tree, 'Continue');
@@ -124,8 +139,24 @@ async function signWithFaceId(tree: TestRenderer.ReactTestRenderer) {
 }
 
 describe('CZ Robo goal creation follows the Figma flow', () => {
+  it('shows contact confirmation first and lets Back from the introduction return to it', () => {
+    const onBack = jest.fn();
+    const tree = renderFlow({ onBack });
+    expect(tree.root.findByProps({ testID: 'cz-contact-phone' })).toBeDefined();
+    expect(tree.root.findAllByProps({ testID: 'cz-intro' })).toHaveLength(0);
+
+    press(tree, 'I confirm these data');
+    expect(tree.root.findByProps({ testID: 'cz-intro' })).toBeDefined();
+    expect(tree.root.findByProps({ testID: 'cz-intro-back' })).toBeDefined();
+    press(tree, 'Back');
+    expect(tree.root.findByProps({ testID: 'cz-contact-phone' })).toBeDefined();
+    expect(onBack).not.toHaveBeenCalled();
+    act(() => tree.unmount());
+  });
+
   it('places the close control in the intro hero', () => {
     const tree = renderFlow();
+    toIntro(tree);
     const close = tree.root.findByProps({ testID: 'cz-intro-close' });
     expect(close).toBeDefined();
     expect(StyleSheet.flatten(close.props.style)).toMatchObject({
@@ -147,6 +178,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('keeps the intro close control fixed while the hero content scrolls', () => {
     const tree = renderFlow();
+    toIntro(tree);
     const intro = tree.root.findByProps({ testID: 'cz-intro' });
     const scroll = intro.findByType(ScrollView);
 
@@ -157,6 +189,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('extends the intro image to the system bar and insets the primary action', () => {
     const tree = renderFlow({ screenTopInset: 54 });
+    toIntro(tree);
     const intro = tree.root.findByProps({ testID: 'cz-intro' });
     const footer = tree.root.findByProps({ testID: 'cz-intro-footer' });
 
@@ -177,7 +210,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     expect(StyleSheet.flatten(surface().props.style)).toMatchObject({
       marginTop: -54,
       paddingTop: 54,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#F5F5F5',
     });
     toContact(tree);
     expect(StyleSheet.flatten(surface().props.style).backgroundColor).toBe(
@@ -196,7 +229,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     act(() => tree.unmount());
   });
 
-  it('matches the Figma contact layout, information icons, and help action', () => {
+  it('matches the Figma contact layout with separate information sheets and no help action', () => {
     const tree = renderFlow();
     toContact(tree);
 
@@ -222,11 +255,28 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
       tree.root
         .findAllByType(SourceCustomIcon)
         .some(icon => icon.props.name === 'help-circle'),
-    ).toBe(true);
-    expect(tree.root.findByProps({ accessibilityLabel: 'Help' })).toBeDefined();
+    ).toBe(false);
+    expect(
+      tree.root.findAllByProps({ accessibilityLabel: 'Help' }),
+    ).toHaveLength(0);
     expect(
       tree.root.findAllByProps({ accessibilityLabel: 'Close' }),
     ).toHaveLength(0);
+
+    press(tree, 'Phone number information');
+    let sheet = tree.root.findByType(SourceBottomSheet);
+    expect(sheet.props.title).toBe('Phone number');
+    expect(elementText(sheet)).toContain(
+      'A phone number is required to receive one time passwords via SMS to confirm and digitally sign.',
+    );
+    act(() => sheet.props.onClose());
+    press(tree, 'Email address information');
+    sheet = tree.root.findByType(SourceBottomSheet);
+    expect(sheet.props.title).toBe('Email Address');
+    expect(elementText(sheet)).toContain(
+      'An email address is needed in order to send pre-contractual documentation and official periodical statements.',
+    );
+    act(() => sheet.props.onClose());
 
     const label = tree.root.findAll(node =>
       node.children.includes('PHONE NUMBER'),
@@ -268,6 +318,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     expect(tree.root.findByType(Header).props.collapsedTitleProgress).toBe(1);
 
     press(tree, 'I confirm these data');
+    press(tree, 'Create Goal');
 
     expect(tree.root.findByType(Header).props.collapsedTitleProgress).toBe(0);
     expect(tree.root.findByType(Header).props.title).toBe('');
@@ -297,8 +348,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
   it('shows the Moderate - V2 profile and wires Update now to Profile', () => {
     const onProfile = jest.fn();
     const tree = renderFlow({ onProfile });
-    toContact(tree);
-    press(tree, 'I confirm these data');
+    toProfile(tree);
     expect(tree.root.findByProps({ testID: 'cz-profile-card' })).toBeDefined();
     press(tree, 'Update now');
     expect(onProfile).toHaveBeenCalledTimes(1);
@@ -307,8 +357,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('matches Figma risk-profile copy and the outlined update card', () => {
     const tree = renderFlow();
-    toContact(tree);
-    press(tree, 'I confirm these data');
+    toProfile(tree);
 
     const text = (value: string) =>
       tree.root.findAll(node => node.children.includes(value)).length;
@@ -347,8 +396,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     'keeps Continue visible but disabled for a %s profile',
     status => {
       const tree = renderFlow({ profileStatus: status });
-      toContact(tree);
-      press(tree, 'I confirm these data');
+      toProfile(tree);
       const continueButton = tree.root.findAll(
         node =>
           node.props.accessibilityLabel === 'Continue' &&
@@ -381,8 +429,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('offers the five goal purposes from Figma, including inflation protection', () => {
     const tree = renderFlow();
-    toContact(tree);
-    press(tree, 'I confirm these data');
+    toProfile(tree);
     press(tree, 'Continue');
     const purposes = [
       ...new Set(
@@ -408,8 +455,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('wraps goal name suggestions as in Figma', () => {
     const tree = renderFlow();
-    toContact(tree);
-    press(tree, 'I confirm these data');
+    toProfile(tree);
     press(tree, 'Continue');
     pressMatching(tree, /^General build-up wealth\./);
     press(tree, 'Continue');
@@ -435,8 +481,7 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
   it('selects a goal with a thicker border and teal title without tinting its description', () => {
     const tree = renderFlow();
-    toContact(tree);
-    press(tree, 'I confirm these data');
+    toProfile(tree);
     press(tree, 'Continue');
     pressMatching(tree, /^Protection for inflation\./);
     const choice = tree.root
