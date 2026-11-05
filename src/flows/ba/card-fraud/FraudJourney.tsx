@@ -77,7 +77,12 @@ export function FraudJourney({
   const [screen, setScreen] = useState<FraudScreen>(initialScreen)
   const [replacementOrigin, setReplacementOrigin] = useState<FraudScreen>('fraud-card-security')
   const [securityOrigin, setSecurityOrigin] = useState<FraudScreen>('fraud-cards')
-  const visibleScreen = screen === 'fraud-attempt' ? 'fraud-claim-details' : screen
+  const visibleScreen =
+    screen === 'fraud-attempt'
+      ? 'fraud-claim-details'
+      : screen === 'fraud-virtual-card-offer'
+        ? 'fraud-claim-sent'
+        : screen
   const failedOnce = useRef(false)
   const parameterKey = JSON.stringify(parameters)
   const previousParameters = useRef(parameterKey)
@@ -117,7 +122,7 @@ export function FraudJourney({
       'fraud-claim-sent': 'fraud-transaction',
       'fraud-dispute-intro': 'fraud-transaction',
       'fraud-virtual-card-offer': 'fraud-claim-sent',
-      'fraud-virtual-card': 'fraud-virtual-card-offer',
+      'fraud-virtual-card': 'fraud-claim-sent',
       'fraud-case-status': 'fraud-baseline-transaction',
       'fraud-card-security': securityOrigin,
       'fraud-replace-confirm': replacementOrigin,

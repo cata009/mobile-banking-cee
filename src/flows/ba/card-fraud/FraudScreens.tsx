@@ -8,6 +8,7 @@ import ToggleButton from '@/app/components/ToggleButton'
 import { AppIcon } from '@/app/components/icons'
 import UniCreditLogo from '@/app/components/UniCreditLogo'
 import NavigationCardArt from '@/app/components/cards/NavigationCardArt'
+import GhostBanner from '@/app/components/cards/GhostBanner'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import MerchantLogo from '@/app/components/merchants/MerchantLogo'
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
@@ -18,7 +19,10 @@ import { FraudActivityList } from './FraudActivityList'
 import {
   fraudCaseStatusLabel,
   FRAUD_REASONS,
+  FRAUD_TRANSACTIONS,
+  isFraudActivityReviewed,
   canSubmitReport,
+  fraudCaseKind,
   selectedFraudTransaction,
   type FraudAction,
   type FraudScreen,
@@ -76,11 +80,7 @@ function Facts({ items }: { items: readonly (readonly [string, ReactNode])[] }) 
 
 function PaymentSummary({ transaction }: { transaction: FraudTransaction }) {
   const status =
-    transaction.status === 'declined'
-      ? 'Declined'
-      : transaction.status === 'pending'
-        ? 'Authorised · not settled'
-        : 'Booked'
+    transaction.status === 'declined' ? 'Declined' : transaction.status === 'pending' ? 'Pending' : 'Booked'
   return (
     <section aria-label="Selected transaction">
       <NavigationRow
@@ -146,7 +146,7 @@ function ClaimStatus({ state, back }: Pick<ScreenProps, 'state' | 'back'>) {
           ],
           [
             'Payment',
-            `${transaction.merchant} · ${transaction.amount} · ${transaction.status === 'declined' ? 'Declined' : transaction.status === 'pending' ? 'Authorised · not settled' : 'Booked'}`,
+            `${transaction.merchant} · ${transaction.amount} · ${transaction.status === 'declined' ? 'Declined' : transaction.status === 'pending' ? 'Pending' : 'Booked'}`,
           ],
           ['Case reference', item.reference],
           ['Card used', FRAUD_CARD_LABEL],
@@ -212,7 +212,10 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
   const isCaseStatus = screen === 'fraud-case-status'
   const hasHelp = isReportForm || isActivityInbox || isCaseStatus
   const transaction = selectedFraudTransaction(state)
+  const isDispute = fraudCaseKind(transaction.status) === 'dispute'
   const item = state.cases[state.selectedId]
+  const hasUnreviewed = FRAUD_TRANSACTIONS.some((activity) => !isFraudActivityReviewed(state, activity.id))
+  const continueAfterCase = () => go(hasUnreviewed ? 'fraud-alerts' : 'fraud-home')
   const closed = state.cardStatus === 'closed'
   const titles: Record<FraudScreen, string> = {
     'fraud-authenticate': 'Secure login',
@@ -227,7 +230,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
     'fraud-recognised': 'Thanks for confirming',
     'fraud-attempt': 'Tell us what happened',
     'fraud-claim-details': 'Tell us what happened',
-    'fraud-claim-review': transaction.status === 'booked' ? 'Review your dispute' : 'Review your report',
+    'fraud-claim-review': isDispute ? 'Review your dispute' : 'Review your report',
     'fraud-claim-sent': item?.kind === 'fraud-report' ? 'Report submitted' : 'Dispute submitted',
     'fraud-virtual-card-offer': 'A card for your next payments',
     'fraud-virtual-card': 'Virtual card',
@@ -250,9 +253,22 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
       <div className="fraud-phone" data-fraud-screen={screen}>
         <StandardSuccessScreen
           title="Thanks for confirming"
-          body={<p>This activity is marked as recognised. No dispute has been opened.</p>}
+          body={
+            <p>
+              This activity is marked as recognised. No dispute has been opened. You can review your card security
+              settings to help protect future payments.
+            </p>
+          }
           actionLabel="Review other activity"
           onDone={() => go('fraud-alerts')}
+          actions={
+            <footer className="fraud-fixed-actions">
+              <PrimaryButton onClick={() => go('fraud-alerts')}>Review other activity</PrimaryButton>
+              <PrimaryButton variant="secondary" onClick={() => go('fraud-card-security')}>
+                Protect my card
+              </PrimaryButton>
+            </footer>
+          }
         />
       </div>
     )
@@ -263,31 +279,33 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
         <StandardSuccessScreen
           title={titles[screen]}
           body={
-            <p>
-              We’ve received your request and will review it.{' '}
-              {closed
-                ? 'Your card remains permanently closed.'
-                : state.cardStatus === 'frozen'
-                  ? 'Your card is temporarily frozen, as you requested.'
-                  : 'Your card remains active.'}{' '}
-              You can track its progress and updates at any time.
-            </p>
+            <div className="flex flex-col gap-5">
+              <p>
+                We’ve received your {item.kind === 'fraud-report' ? 'activity report' : 'dispute'} and will review it.{' '}
+                {closed
+                  ? 'Your card remains permanently closed.'
+                  : state.cardStatus === 'frozen'
+                    ? 'Your card is temporarily frozen, as you requested.'
+                    : 'Your card remains active.'}{' '}
+                You can track its progress and updates at any time.
+              </p>
+              <GhostBanner
+                title="Keep making payments"
+                description="Open a virtual card to continue making eligible payments."
+                onClick={() => go('fraud-virtual-card')}
+              />
+            </div>
           }
-          actionLabel="Continue"
-          onDone={() => go('fraud-virtual-card-offer')}
+          actionLabel={hasUnreviewed ? 'Review other activity' : 'Back to Home'}
+          onDone={continueAfterCase}
           actions={
             <footer className="fraud-fixed-actions">
-              <PrimaryButton onClick={() => go('fraud-virtual-card-offer')}>Continue</PrimaryButton>
+              <PrimaryButton onClick={continueAfterCase}>
+                {hasUnreviewed ? 'Review other activity' : 'Back to Home'}
+              </PrimaryButton>
               <PrimaryButton variant="secondary" onClick={() => go('fraud-case-status')}>
                 {item.kind === 'fraud-report' ? 'Track this report' : 'Track this dispute'}
               </PrimaryButton>
-              <button
-                type="button"
-                className="uc-type-n5-strong min-h-[44px] w-full rounded text-center text-[var(--uc-action)]"
-                onClick={() => go('fraud-card-security')}
-              >
-                Protect my card
-              </button>
             </footer>
           }
         />
@@ -359,7 +377,11 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 <>
                   <Notice>
                     <strong>{fraudCaseStatusLabel(item)}</strong>
-                    <p>You have already disputed this payment. Follow your case from here.</p>
+                    <p>
+                      {item.kind === 'fraud-report'
+                        ? 'You have already reported this activity. Follow your case from here.'
+                        : 'You have already disputed this payment. Follow your case from here.'}
+                    </p>
                   </Notice>
                   <PrimaryButton onClick={() => go('fraud-case-status')}>
                     {item?.kind === 'fraud-report' ? 'View report status' : 'View dispute status'}
@@ -367,9 +389,9 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 </>
               ) : state.reported.includes(transaction.id) ? (
                 <>
-                  <Notice urgent>This activity has been reported. Your card remains protected.</Notice>
+                  <Notice urgent>Your case has been submitted. Your card remains protected.</Notice>
                   <PrimaryButton onClick={() => go('fraud-claim-details')}>
-                    {transaction.status === 'booked' ? 'Continue dispute' : 'View activity report'}
+                    {isDispute ? 'Continue dispute' : 'View activity report'}
                   </PrimaryButton>
                 </>
               ) : state.recognised.includes(transaction.id) ? (
@@ -378,7 +400,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 <>
                   <h2 className="fraud-section-title">Do you recognise this?</h2>
                   <p>{transaction.reason}</p>
-                  <PrimaryButton onClick={report}>I don't recognise this payment. Block my card</PrimaryButton>
+                  <PrimaryButton onClick={report}>I don't recognise this payment</PrimaryButton>
                   <PrimaryButton
                     variant="secondary"
                     onClick={() => {
@@ -386,10 +408,10 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                       go('fraud-recognised')
                     }}
                   >
-                    I recognise this payment
+                    I made this payment
                   </PrimaryButton>
-                  <p className="fraud-footnote">
-                    This choice blocks your card only after you sign and successfully submit the report.
+                  <p className="fraud-block-choice-note">
+                    If you continue, we’ll temporarily block your card while we review your case.
                   </p>
                 </>
               )}
@@ -397,56 +419,46 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
           ) : null}
 
           {screen === 'fraud-dispute-intro' ? (
-            transaction.status === 'booked' ? (
+            isDispute ? (
               <>
                 <PaymentSummary transaction={transaction} />
-                <h2 className="fraud-section-title">Payment posted</h2>
-                <p>
-                  This payment has been debited from your account. You can ask the bank to review it as a dispute; a
-                  refund is not guaranteed.
-                </p>
+                {transaction.status === 'booked' ? (
+                  <>
+                    <h2 className="fraud-section-title">Payment posted</h2>
+                    <p>
+                      This payment has been debited from your account. You can ask the bank to review it as a dispute; a
+                      refund is not guaranteed.
+                    </p>
+                  </>
+                ) : transaction.status === 'pending' ? (
+                  <>
+                    <h2 className="fraud-section-title">Your card is temporarily blocked</h2>
+                    <p>
+                      Next, tell us what happened and submit a dispute. We’ll review it and keep you updated. You can
+                      track your case at any time.
+                    </p>
+                  </>
+                ) : null}
                 <PrimaryButton onClick={() => go('fraud-claim-details')}>Open dispute</PrimaryButton>
               </>
             ) : (
               <>
                 <PaymentSummary transaction={transaction} />
-                <h2 className="fraud-section-title">
-                  {transaction.status === 'declined' ? 'Attempt declined' : 'Payment not posted'}
-                </h2>
-                <p>
-                  {transaction.status === 'declined'
-                    ? 'No money was debited. You can still report this activity.'
-                    : 'The amount is reserved while the merchant decides whether to complete the payment. If it is posted, you can open a dispute; for now, report the activity.'}
-                </p>
+                <h2 className="fraud-section-title">Attempt declined</h2>
+                <p>No money was debited. You can still report this activity.</p>
                 <PrimaryButton onClick={() => go('fraud-claim-details')}>Continue report</PrimaryButton>
               </>
             )
           ) : null}
 
-          {screen === 'fraud-virtual-card-offer' ? (
-            <>
-              <h2 className="fraud-section-title">Would you like a virtual card?</h2>
-              <p>
-                Explore a demo virtual card as another way to pay from your account while you manage your physical card.
-                Real availability and supported payments depend on your account and the bank’s product terms.
-              </p>
-              <PrimaryButton onClick={() => go('fraud-virtual-card')}>Create a virtual card</PrimaryButton>
-              <PrimaryButton variant="secondary" onClick={() => go('fraud-case-status')}>
-                Not now
-              </PrimaryButton>
-            </>
-          ) : null}
-
           {screen === 'fraud-claim-details' || screen === 'fraud-attempt' ? (
             <>
               {state.blockCardOnSubmit ? (
-                <p className="fraud-footnote">
-                  You chose to block this card. It will be frozen after successful submission.
-                </p>
+                <p className="fraud-footnote">Your card is temporarily blocked while we review your case.</p>
               ) : null}
               <FraudEvidenceFields state={state} dispatch={dispatch} />
               <PrimaryButton onClick={() => go('fraud-claim-review')}>
-                {transaction.status === 'booked' ? 'Review dispute' : 'Review report'}
+                {isDispute ? 'Review dispute' : 'Review report'}
               </PrimaryButton>
             </>
           ) : null}
@@ -457,7 +469,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 items={[
                   [
                     'Payment',
-                    `${transaction.merchant} · ${transaction.amount} · ${transaction.status === 'declined' ? 'Declined' : transaction.status === 'pending' ? 'Authorised · not settled' : 'Booked'}`,
+                    `${transaction.merchant} · ${transaction.amount} · ${transaction.status === 'declined' ? 'Declined' : transaction.status === 'pending' ? 'Pending' : 'Booked'}`,
                   ],
                   ['Reason', FRAUD_REASONS[state.draft.reason]],
                   [
@@ -478,7 +490,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 ]}
               />
               <NavigationRow
-                title={transaction.status === 'booked' ? 'Confirm your dispute' : 'Confirm your report'}
+                title={isDispute ? 'Confirm your dispute' : 'Confirm your report'}
                 description="I did not authorise this payment and the details above are correct."
                 className="fraud-security-row"
                 trailing={
@@ -491,8 +503,8 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
               />
               {state.submitError ? (
                 <p className="fraud-error" role="alert">
-                  Your {transaction.status === 'booked' ? 'dispute' : 'report'} was not submitted. Your statement is
-                  saved here. Please try again.
+                  Your {isDispute ? 'dispute' : 'report'} was not submitted. Your statement is saved here. Please try
+                  again.
                 </p>
               ) : null}
               <PrimaryButton
@@ -500,7 +512,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 disabled={!canSubmitReport(state) || signing}
                 onClick={() => setSigning(true)}
               >
-                {transaction.status === 'booked' ? 'Sign dispute' : 'Sign report'}
+                {isDispute ? 'Sign dispute' : 'Sign report'}
               </PrimaryButton>
             </>
           ) : null}
@@ -541,7 +553,11 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 ? item?.kind === 'fraud-report'
                   ? 'About your report'
                   : 'About your dispute'
-                : 'About this report'
+                : isReportForm
+                  ? isDispute
+                    ? 'About your dispute'
+                    : 'About your report'
+                  : 'About this request'
           }
           onClose={() => setHelpOpen(false)}
           maxHeightOffsetPx={80}
@@ -562,23 +578,22 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 <section>
                   <h2 className="uc-type-n4-strong">CHECK EACH ITEM</h2>
                   <p>
-                    Open an item under To review and check its amount, date and details. An authorised payment waiting
-                    for settlement has a reserved amount; if the merchant completes it, your account will be debited.
-                    Declined attempts do not debit money.
+                    Open an item under To review and check its amount, date and details. Declined attempts do not debit
+                    money.
                   </p>
                 </section>
                 <section>
                   <h2 className="uc-type-n4-strong">IF YOU RECOGNISE IT</h2>
                   <p>
-                    Confirm it to move the item to Reviewed. No report is sent and a declined payment is not retried.
+                    Confirm it to move the item to Reviewed. No case is opened and a declined payment is not retried.
                   </p>
                 </section>
                 <section>
                   <h2 className="uc-type-n4-strong">IF YOU DO NOT RECOGNISE IT</h2>
                   <p>
-                    Choose “I don't recognise this payment. Block my card”, add the details and sign your report. The
-                    card is frozen only after successful submission. A dispute is available only after a payment is
-                    posted. You can track the case from the transaction.
+                    Choose “I don't recognise this payment”, add the details and sign your{' '}
+                    {isDispute ? 'dispute' : 'activity report'}. Your card will be temporarily blocked while we review
+                    your case. You can track it from the transaction.
                   </p>
                 </section>
               </>
@@ -628,10 +643,10 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                 <section>
                   <h2 className="uc-type-n4-strong">REVIEW AND SEND</h2>
                   <p>
-                    Check the information, confirm the declaration and tap Sign report. Face ID confirms your signature
-                    before sending.{' '}
+                    Check the information, confirm the declaration and tap Sign {isDispute ? 'dispute' : 'report'}. Face
+                    ID confirms your signature before sending.{' '}
                     {state.blockCardOnSubmit
-                      ? 'The card is frozen after successful submission, as you requested.'
+                      ? 'Your card is temporarily blocked while we review your case.'
                       : 'The card remains active unless you chose to block it.'}{' '}
                     You can follow your case status from the transaction.
                   </p>
@@ -642,7 +657,11 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
         </BottomSheet>
       ) : null}
       {signing ? (
-        <div className="absolute inset-0 z-[50]" role="status" aria-label="Face ID report signature simulation">
+        <div
+          className="absolute inset-0 z-[50]"
+          role="status"
+          aria-label={`Face ID ${isDispute ? 'dispute' : 'report'} signature simulation`}
+        >
           <FaceIdAnimation
             onComplete={() => {
               setSigning(false)

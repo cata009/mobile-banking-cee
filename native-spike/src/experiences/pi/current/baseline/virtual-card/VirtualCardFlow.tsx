@@ -61,7 +61,7 @@ const DEBIT_CARD_INFO: BankingTutorial = {
     {
       title: 'Manage your card',
       body: 'You can view and manage available card options from the Cards section.',
-      helper: 'This information is illustrative in the demo.',
+      helper: 'Review your available card settings in the app.',
       kind: 'confirmation',
     },
   ],
@@ -154,7 +154,7 @@ export default function VirtualCardFlow({
       : step === 'setup'
         ? mode === 'issue'
           ? demoPreview
-            ? 'Set up your demo card'
+            ? 'Set up your card'
             : 'Set up your card'
           : 'Change card picture'
         : step === 'sign'
@@ -162,7 +162,7 @@ export default function VirtualCardFlow({
           : step === 'success'
             ? mode === 'issue'
               ? demoPreview
-                ? 'Your demo virtual card is ready'
+                ? 'Your virtual card is ready'
                 : 'Your virtual card is ready'
               : 'Your virtual card image was changed'
             : 'Ops, something went wrong';
@@ -203,7 +203,7 @@ export default function VirtualCardFlow({
           <Text style={[styles.body, { color: host.tokens.text }]}>
             {mode === 'issue'
               ? demoPreview
-                ? 'This demo card is ready to explore. Real availability and eligible payments depend on bank product terms.'
+                ? 'You can use your virtual card for eligible online payments.'
                 : 'You can start using it right away for online payments or add it to your wallet.'
               : 'Your selected design is now displayed on your virtual card. You can return to your cards to view the updated image.'}
           </Text>
@@ -231,7 +231,7 @@ export default function VirtualCardFlow({
           >
             <BaselineDialog
               title="Apple Wallet"
-              body="Adding a card to Apple Wallet is not available in this demo."
+              body="Adding this card to Apple Wallet is currently unavailable."
               cancelLabel="Close"
               onCancel={() => setWalletInfoOpen(false)}
               onConfirm={() => setWalletInfoOpen(false)}
@@ -380,7 +380,7 @@ export default function VirtualCardFlow({
                       ]}
                     >
                       {demoPreview
-                        ? 'No eligible BAM account is available in this demo.'
+                        ? 'No eligible BAM account is available.'
                         : 'No eligible RON, EUR or USD account is available.'}
                     </Text>
                   )}
@@ -407,7 +407,7 @@ export default function VirtualCardFlow({
                           style={[styles.body, { color: host.tokens.text }]}
                         >
                           {demoPreview
-                            ? 'I confirm that I have read the demo information. This preview does not create a real card or accept a bank contract.'
+                            ? 'I confirm that I have read the information and wish to continue.'
                             : 'I confirm that I have read and agree to the contractual terms and to waive the standard 15-day review period*.\n*Alternatively, you may review and download the contract and submit a new request at a later time.'}
                         </Text>
                       </Pressable>
@@ -429,7 +429,7 @@ export default function VirtualCardFlow({
                   title="Note"
                   description={
                     demoPreview
-                      ? 'This is an illustrative BA Card guard preview. A real virtual card depends on bank availability, eligible accounts and terms.'
+                      ? 'Virtual card availability depends on your eligible accounts and applicable terms.'
                       : 'The Virtual Card can be attached to the LEI/EUR/USD account of customers over the age of 18. Virtual cards of the "supplementary card" type cannot be issued. A maximum of 2 virtual cards can be issued per day.'
                   }
                   dark={dark}
@@ -458,7 +458,7 @@ export default function VirtualCardFlow({
           {step === 'error' ? (
             <Text style={[styles.body, { color: host.tokens.text }]}>
               {demoPreview
-                ? 'This demo issue could not be completed. Return to the virtual-card choice or try again.'
+                ? 'We couldn’t complete your request. Please try again.'
                 : 'We couldn’t complete your request. Please try again. You can issue up to 2 virtual cards per day.'}
             </Text>
           ) : null}
@@ -472,7 +472,7 @@ export default function VirtualCardFlow({
               step === 'setup'
                 ? mode === 'issue'
                   ? demoPreview
-                    ? 'Create demo card'
+                    ? 'Create card'
                     : 'Request card'
                   : 'Update picture'
                 : 'Ok, I got it'

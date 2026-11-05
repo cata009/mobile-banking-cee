@@ -111,7 +111,7 @@ export interface FraudSession {
   selectedId: string
   /** An editable report intent; it is committed only by successful submission. */
   reportingId: string | null
-  /** Explicit card-block choice, committed only with a successful report or dispute. */
+  /** Explicit card-block choice, applied as soon as the customer continues to the case flow. */
   blockCardOnSubmit: boolean
   recognised: string[]
   reported: string[]
@@ -184,6 +184,10 @@ export function selectedFraudTransaction(state: FraudSession): FraudTransaction 
   return { ...transaction, status: state.ledgerOverrides[transaction.id] ?? transaction.status }
 }
 
+export function fraudCaseKind(status: FraudTransaction['status']): FraudCase['kind'] {
+  return status === 'declined' ? 'fraud-report' : 'dispute'
+}
+
 export function isFraudActivityReviewed(state: FraudSession, transactionId: string): boolean {
   return (
     Boolean(state.cases[transactionId]) ||
@@ -193,7 +197,7 @@ export function isFraudActivityReviewed(state: FraudSession, transactionId: stri
 }
 
 export function canSubmitClaim(state: FraudSession): boolean {
-  return selectedFraudTransaction(state).status === 'booked' && canSubmitReport(state)
+  return fraudCaseKind(selectedFraudTransaction(state).status) === 'dispute' && canSubmitReport(state)
 }
 
 export function canSubmitReport(state: FraudSession): boolean {
@@ -229,7 +233,7 @@ export function fraudCaseStatusLabel(item: FraudCase): string {
 function caseUpdate(item: FraudCase, status: CaseStatus): FraudCase {
   const outcome =
     item.kind === 'fraud-report' && (status === 'resolved' || status === 'declined')
-      ? 'The bank has reviewed your activity report. Card protection and any booked-payment dispute are handled separately.'
+      ? 'The bank has reviewed your activity report. Card protection is handled separately from your case.'
       : status === 'resolved'
         ? 'Your dispute was upheld. 486.98 BAM has been refunded to your account in this demo.'
         : status === 'declined'
@@ -303,6 +307,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
         selectedId: action.transactionId,
         reportingId: action.transactionId,
         blockCardOnSubmit: action.blockCardOnSubmit === true,
+        cardStatus: action.blockCardOnSubmit && state.cardStatus !== 'closed' ? 'frozen' : state.cardStatus,
         draft: action.transactionId === state.selectedId ? state.draft : { ...EMPTY_DRAFT },
         submitError: false,
       }
@@ -342,7 +347,7 @@ export function fraudReducer(state: FraudSession, action: FraudAction): FraudSes
       if (!canSubmitReport(state)) return state
       if (action.fail) return { ...state, submitError: true }
       const item: FraudCase = {
-        kind: selectedFraudTransaction(state).status === 'booked' ? 'dispute' : 'fraud-report',
+        kind: fraudCaseKind(selectedFraudTransaction(state).status),
         reference: `BA-2026-${10482 + FRAUD_TRANSACTIONS.findIndex((payment) => payment.id === state.selectedId)}`,
         transactionId: state.selectedId,
         status: 'submitted',

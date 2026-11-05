@@ -12,7 +12,7 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 const sections = [
   [
     'About this document',
-    'This demonstration document illustrates the review step for a virtual debit card. It is not a contract and does not contain the bank’s actual terms.',
+    'This sample document illustrates the review step for a virtual debit card. It is not a contract and does not contain the bank’s actual terms.',
   ],
   [
     'Card and account',
@@ -28,7 +28,7 @@ const sections = [
   ],
   [
     'Your choice',
-    'You may close this demonstration and return to the request without confirming. A separate signing step follows in the prototype.',
+    'You may close this document and return to the request without confirming. A separate signing step follows.',
   ],
 ] as const;
 const text = sections.map(([title, body]) => `${title}\n${body}`).join('\n\n');
@@ -58,9 +58,9 @@ export function VirtualCardTermsSheet({
   const download = async () => {
     try {
       await shareDemoFile(
-        'virtual-card-terms-demo.pdf',
+        'virtual-card-terms.pdf',
         'application/pdf',
-        createProfilePdf('VIRTUAL CARD TERMS — DEMONSTRATION', text),
+        createProfilePdf('VIRTUAL CARD TERMS — SAMPLE', text),
       );
       setError(false);
     } catch {
@@ -143,7 +143,7 @@ export function VirtualCardTermsSheet({
               VIRTUAL CARD{'\n'}TERMS AND CONDITIONS
             </Text>
             <Text style={[styles.caption, { color: textColor }]}>
-              Demonstration document
+              Sample document
             </Text>
             {sections.map(([title, body]) => (
               <View key={title} style={styles.section}>

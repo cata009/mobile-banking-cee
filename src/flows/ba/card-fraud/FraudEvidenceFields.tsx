@@ -6,6 +6,7 @@ import PrimaryButton from '@/app/components/PrimaryButton'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import {
   FRAUD_REASONS,
+  fraudCaseKind,
   selectedFraudTransaction,
   type FraudAction,
   type FraudReason,
@@ -19,7 +20,7 @@ export function FraudEvidenceFields({ state, dispatch }: { state: FraudSession; 
   const [error, setError] = useState('')
   const input = useRef<HTMLInputElement>(null)
   const detailsId = useId()
-  const isDispute = selectedFraudTransaction(state).status === 'booked'
+  const isDispute = fraudCaseKind(selectedFraudTransaction(state).status) === 'dispute'
   const reasonLabel = isDispute ? 'Reason for dispute' : 'Reason for report'
   const openReasons = () => {
     setPendingReason(state.draft.reason)

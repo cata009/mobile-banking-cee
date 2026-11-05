@@ -10,6 +10,10 @@ jest.mock('../src/universal/DemoViewport', () => ({
 
 it('drags a category on scaled web without selecting a card and allows direct card selection', () => {
   const oldOS = Platform.OS;
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  window.addEventListener = jest.fn();
+  window.removeEventListener = jest.fn();
   Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
   const spy = jest.spyOn(PanResponder, 'create');
   const onSelect = jest.fn();
@@ -62,5 +66,7 @@ it('drags a category on scaled web without selecting a card and allows direct ca
   expect(onSelect).toHaveBeenCalledWith('photography');
   act(() => tree.unmount());
   spy.mockRestore();
+  window.addEventListener = originalAddEventListener;
+  window.removeEventListener = originalRemoveEventListener;
   Object.defineProperty(Platform, 'OS', { configurable: true, value: oldOS });
 });

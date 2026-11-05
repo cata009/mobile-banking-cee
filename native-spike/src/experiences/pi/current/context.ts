@@ -26,7 +26,9 @@ export function createCurrentProducts(
       resolvedProductCounts: context.productCounts,
     });
   if (
-    context.country === 'RO' &&
+    (context.country === 'RO' ||
+      context.country === 'BA' ||
+      context.country === 'BA_BL') &&
     context.release === 'release-current' &&
     context.virtualCards?.length
   ) {
