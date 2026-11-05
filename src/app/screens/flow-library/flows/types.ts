@@ -94,6 +94,10 @@ export type RsDisposableCardsScreenKind =
   | 'rs-disposable-cards-face-id-disposable'
   | 'rs-disposable-cards-normal-details'
   | 'rs-disposable-cards-disposable-details'
+  | 'rs-disposable-cards-card-options'
+  | 'rs-disposable-cards-list'
+  | 'rs-disposable-cards-help'
+  | 'rs-disposable-cards-close-confirmation'
 
 /** Romania-only Genius My Car entry, vehicle registration and RCA/CASCO purchase previews. */
 export type GeniusMyCarScreenKind =

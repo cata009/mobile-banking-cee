@@ -87,13 +87,12 @@ export function VirtualCardTermsSheet({
         dark={dark}
         footer={
           <View style={styles.footer}>
-            {read && (
-              <PrimaryButton
-                label="I have read it"
-                onPress={onConfirm}
-                dark={dark}
-              />
-            )}
+            <PrimaryButton
+              label="I have read it"
+              disabled={!read}
+              onPress={onConfirm}
+              dark={dark}
+            />
             <PrimaryButton
               label="Download document"
               onPress={download}
@@ -109,7 +108,7 @@ export function VirtualCardTermsSheet({
         }
       >
         <Text style={[styles.description, { color: textColor }]}>
-          Read the document to the end to show the confirmation. You can also
+          Read the document to the end to enable confirmation. You can also
           download a copy for your records.
         </Text>
         <ScrollView

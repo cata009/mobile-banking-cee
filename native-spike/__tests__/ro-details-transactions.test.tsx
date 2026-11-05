@@ -1,7 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { TextInput } from 'react-native';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { RoBaselineTransactions } from '../src/experiences/pi/current/baseline/Transactions';
 import { RoBaselineTransaction } from '../src/experiences/pi/current/baseline/Transaction';
 import { RoBaselineMonthlyReport } from '../src/experiences/pi/current/baseline/MonthlyReport';
@@ -22,6 +21,7 @@ import { groupAccountTransactionsByMonth } from '@/data/accountDetails';
 import { createTransactionDetailData } from '@/data/paymentFlow';
 import { readCategoryOverrides } from '../src/experiences/pi/current/banking/categoryOverrides';
 import { PFM_CATEGORY_GROUPS } from '@/data/pfmCategories';
+import { sourceColor } from '../src/universal/sourceColor';
 
 const host: CurrentScreenProps = {
   country: 'RO',
@@ -361,10 +361,62 @@ test('pending physical card detail keeps exact Source amount visible and hides b
   });
   expect(JSON.stringify(tree.toJSON())).toContain(detail.amount);
   expect(JSON.stringify(tree.toJSON())).not.toContain('Spending Insight');
+  const reservedAmount = tree.root.findByProps({
+    testID: 'ro-transaction-reserved-amount',
+  });
+  expect(JSON.stringify(tree.toJSON())).toContain('RESERVED AMOUNT');
+  expect(reservedAmount.children).toHaveLength(1);
+  const reservedAmountLabel = reservedAmount.find(
+    node => node.props.children === 'RESERVED AMOUNT',
+  );
+  expect(StyleSheet.flatten(reservedAmountLabel.props.style).color).toBe(
+    host.tokens.muted,
+  );
+  expect(StyleSheet.flatten(reservedAmount.props.style).backgroundColor).toBe(
+    sourceColor('var(--uc-static-white)'),
+  );
+  expect(StyleSheet.flatten(reservedAmount.props.style).borderColor).toBe(
+    host.tokens.muted,
+  );
+  const transactionHeader = tree.root.find(node => {
+    const style = StyleSheet.flatten(node.props.style);
+    return (
+      style?.paddingBottom === 18 &&
+      style.backgroundColor === host.tokens.background
+    );
+  });
+  expect(StyleSheet.flatten(reservedAmount.props.style).marginTop).toBe(
+    StyleSheet.flatten(transactionHeader.props.style).paddingBottom,
+  );
+  expect(JSON.stringify(tree.toJSON())).not.toContain('PENDING');
   expect(button('Change category')).toBeUndefined();
   expect(JSON.stringify(tree.toJSON())).toContain('Card used');
   act(() => button('Show more').props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain('Transaction date');
+});
+test('cash withdrawal category pills keep an opaque white fill', () => {
+  const cashWithdrawal = transactions.find(
+    transaction => transaction.pfmSubcategory === 'Cash withdrawal',
+  )!;
+  act(() => {
+    tree = Renderer.create(
+      <RoBaselineTransaction
+        {...host}
+        route={{
+          screen: 'transaction',
+          params: { productId: product.id, transactionId: cashWithdrawal.id },
+        }}
+      />,
+    );
+  });
+  const categoryPill = tree.root.findByProps({
+    testID: 'ro-transaction-pfm-summary',
+  });
+  expect(JSON.stringify(tree.toJSON())).toContain('CASH WITHDRAWAL');
+  expect(StyleSheet.flatten(categoryPill.props.style).backgroundColor).toBe(
+    sourceColor('var(--uc-static-white)'),
+  );
+  act(() => tree.unmount());
 });
 
 test('empty baseline search notice preserves Source normal 17px line box with 32px vertical gutters', () => {

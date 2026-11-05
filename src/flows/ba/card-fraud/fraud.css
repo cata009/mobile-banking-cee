@@ -55,6 +55,24 @@
   font-weight: 700;
   line-height: 1.5;
 }
+.fraud-phone[data-fraud-screen='fraud-claim-sent'] [data-standard-success-screen] > div:nth-child(2) {
+  overflow-y: auto;
+}
+.fraud-virtual-offer {
+  position: relative;
+}
+.fraud-virtual-offer .fraud-virtual-offer-button {
+  width: 100%;
+  padding-right: 128px;
+}
+.fraud-virtual-offer-art {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-8deg);
+  filter: drop-shadow(0 4px 6px rgb(var(--uc-shadow-rgb) / 0.24));
+  pointer-events: none;
+}
 .fraud-form-scroll {
   flex: 1;
   min-height: 0;
@@ -299,6 +317,68 @@
   flex-shrink: 0;
   border-radius: 4px;
 }
+.fraud-next-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fraud-next-timeline li {
+  display: flex;
+  position: relative;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+.fraud-next-timeline li:last-child {
+  padding-bottom: 0;
+}
+.fraud-next-timeline li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 30px;
+  bottom: 0;
+  width: 2px;
+  background: var(--uc-border);
+}
+.fraud-next-marker {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--uc-border);
+  border-radius: 50%;
+  background: var(--uc-surface);
+  color: var(--uc-text-secondary, var(--uc-text-muted));
+  font-size: 13px;
+  font-weight: 700;
+}
+.fraud-next-timeline li[data-state='complete'] .fraud-next-marker {
+  border-color: var(--uc-action);
+  background: var(--uc-action);
+  color: var(--uc-static-white);
+}
+.fraud-next-timeline li[data-state='current'] .fraud-next-marker {
+  border: 2px solid var(--uc-action);
+  color: var(--uc-action);
+}
+.fraud-next-content {
+  min-width: 0;
+  flex: 1;
+}
+.fraud-next-content .fraud-card-identity {
+  padding: 8px 0 0;
+}
+.fraud-next-content p {
+  margin-top: 4px;
+}
+.fraud-next-label {
+  display: block;
+  color: var(--uc-action);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
 .fraud-notice {
   display: flex;
   align-items: flex-start;
@@ -409,6 +489,9 @@
   display: block;
   width: 100%;
   text-align: left;
+}
+.fraud-activity-muted .items-end > p {
+  color: var(--uc-text-muted);
 }
 .fraud-ledger-button > [data-ds-label] {
   padding-left: 0;

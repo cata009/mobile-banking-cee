@@ -108,6 +108,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
     detail = createTransactionDetailData(transaction, host.country, product),
     pending = transaction.status === 'Pending';
   const declined = host.transactionPresentation?.activityStatus === 'declined';
+  const badgeColorVar = detail.pfmCategoryColorVar;
   const displayAmount = declined ? detail.amount.replace(/^[-−]/, '') : detail.amount;
   const displayDate = host.transactionPresentation?.postingTime
     ? `${detail.bookingDate} · ${host.transactionPresentation.postingTime}`
@@ -285,7 +286,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
   } as const;
   const sourceStyle8 = {
     backgroundColor: host.tokens.background,
-    paddingBottom: host.transactionPresentation?.showSpendingInsights === false ? 16 : pending ? 11.5 : 8,
+    paddingBottom: host.transactionPresentation?.showSpendingInsights === false ? 16 : pending ? 18 : 8,
   } as const;
   const sourceStyle9 = {
     paddingHorizontal: 24,
@@ -337,21 +338,26 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
     color: host.tokens.muted,
   } as const;
   const sourceStyle17 = {
-    marginTop: 8,
+    marginTop: pending ? sourceStyle13.marginTop : 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: sourceColor(`var(${detail.pfmCategoryColorVar})`, dark),
+    borderColor: pending
+      ? host.tokens.muted
+      : sourceColor(`var(${badgeColorVar})`, dark),
+    backgroundColor: sourceColor('var(--uc-static-white)', dark),
     paddingHorizontal: 16,
     paddingVertical: 4,
   } as const;
   const sourceStyle18 = {
     fontSize: 12,
     lineHeight: 18,
-    color: sourceColor(`var(${detail.pfmCategoryColorVar})`, dark),
+    color: pending
+      ? host.tokens.muted
+      : sourceColor(`var(${badgeColorVar})`, dark),
   } as const;
   const sourceStyle19 = {
     marginTop: 31,
@@ -491,19 +497,29 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
             <Text style={[strong, sourceStyle10]}>{title}</Text>
             <Text style={[strong, sourceStyle11]}>{displayDate}</Text>
             <Text style={[strong, sourceStyle12]}>{displayAmount}</Text>
-            {pending || declined ? (
+            {declined ? (
               <View style={sourceStyle13}>
                 <View style={sourceStyle14} />
                 <Text style={[strong, sourceStyle15]}>
-                  {declined ? 'Declined' : host.transactionPresentation?.pendingStatusLabel ?? 'Pending'}
+                  Declined
                 </Text>
+              </View>
+            ) : pending ? (
+              <View
+                testID="ro-transaction-reserved-amount"
+                style={sourceStyle17}
+              >
+                <Text style={[strong, sourceStyle18]}>RESERVED AMOUNT</Text>
               </View>
             ) : host.transactionPresentation?.showSpendingInsights === false ? null : (
               <>
                 <Text style={[strong, sourceStyle16]}>
                   {detail.pfmCategoryLabel.toUpperCase()}
                 </Text>
-                <View style={sourceStyle17}>
+                <View
+                  testID="ro-transaction-pfm-summary"
+                  style={sourceStyle17}
+                >
                   <BaselineTransactionAvatar
                     identity={{
                       kind: 'category',
@@ -519,7 +535,7 @@ export function RoBaselineTransaction(host: CurrentScreenProps) {
                 </View>
               </>
             )}
-            {pending && host.transactionPresentation?.pendingStatusDescription ? (
+            {pending && !declined && host.transactionPresentation?.pendingStatusDescription ? (
               <Text style={[regular, sourceStyle16]}>
                 {host.transactionPresentation.pendingStatusDescription}
               </Text>

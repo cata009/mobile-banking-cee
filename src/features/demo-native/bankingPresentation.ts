@@ -27,7 +27,7 @@ export interface NativeBankingPresentation {
   /** Optional security entry composed into the existing Home summary carousel. */
   homeSecurityNotice?: { title: string; description: string; tagLabel?: string }
   /** Optional executable routes for security actions; absence preserves inert source actions. */
-  cardSecurityRoutes?: { block: NativeDemoRoute; replacement: NativeDemoRoute }
+  cardSecurityRoutes?: { block: NativeDemoRoute; replacement?: NativeDemoRoute }
   /** Flow-owned controls for the Native Card security preview. */
   cardSecurityPreview?: NativeCardSecurityPresentation
   /** A caller-owned ledger retains its exact amounts, periods and transaction identities. */
@@ -37,6 +37,8 @@ export interface NativeBankingPresentation {
   sensitiveCard?: DebitCard | CreditCard
   sensitiveTitle?: string
   productId?: string
+  /** Caller-owned status of the identified physical card, when a flow controls it. */
+  cardStatus?: 'active' | 'frozen' | 'closed'
   rows?: readonly {
     transaction: AccountTransaction
     displayLabel?: string

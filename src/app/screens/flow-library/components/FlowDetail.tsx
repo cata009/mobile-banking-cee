@@ -252,7 +252,8 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
     focusAfterTabSwitch(`rule-${ruleId}`)
   }
   const openInPrototype = (screen: FlowScreenKind) => {
-    setPrototypeRequest((current) => ({ screen, nonce: (current?.nonce ?? 0) + 1, parameters: steps.find((step) => step.screen === screen)?.previewParameters }))
+    const selectedStep = activeStep?.screen === screen ? activeStep : steps.find((step) => step.screen === screen)
+    setPrototypeRequest((current) => ({ screen, nonce: (current?.nonce ?? 0) + 1, parameters: selectedStep?.previewParameters }))
     setActiveTab('prototype')
     requestAnimationFrame(() => tabsRef.current?.scrollIntoView({ block: 'start' }))
   }
@@ -1297,9 +1298,10 @@ function PrototypePanel({
   const [screen, setScreen] = useState<FlowScreenKind>(request?.screen ?? prototype.start)
   const [history, setHistory] = useState<FlowScreenKind[]>([])
   const timelineRef = useRef<HTMLDivElement>(null)
-  const [parameters, setParameters] = useState<Record<string, string>>(() =>
-    Object.fromEntries((prototype.controls ?? []).map((control) => [control.key, control.defaultValue])),
-  )
+  const [parameters, setParameters] = useState<Record<string, string>>(() => ({
+    ...Object.fromEntries((prototype.controls ?? []).map((control) => [control.key, control.defaultValue])),
+    ...request?.parameters,
+  }))
   const isPrime = flow.id === 'pi-prime'
   const [phoneScale, setPhoneScale] = useState(isPrime ? 0.62 : 0.86)
   useEffect(() => {
@@ -2252,7 +2254,11 @@ function FlowLevelSpec({ flow, disclosure }: { flow: FlowDefinition; disclosure:
           badge={badgeFor('Preconditions')}
           disclosure={disclosure}
           title="Preconditions"
-          description="Data and ledger conditions that must be true before enrichment is shown."
+          description={
+            flow.id === 'rs-disposable-cards'
+              ? 'Conditions needed to start the flow.'
+              : 'Data and ledger conditions that must be true before enrichment is shown.'
+          }
         >
           <BulletList items={overview.preconditions} />
         </SpecBlock>

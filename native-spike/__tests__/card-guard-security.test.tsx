@@ -75,48 +75,16 @@ test('Card options keeps its existing limits row without a duplicate security en
   act(() => tree.unmount());
 });
 
-test('card-security route renders the security settings page instead of Card options', () => {
+test('legacy protection route opens the existing Card Limits sheet', () => {
   const props = host({
-    route: {
-      screen: 'card-options',
-      params: { ...(host().route.params ?? {}), cardSecurityPage: 'true' },
-    },
+    route: { screen: 'card-options', params: { ...(host().route.params ?? {}), cardLimitsPage: 'true' } },
   });
   const tree = renderOptions(props);
   const content = JSON.stringify(tree.toJSON());
-  expect(content).toContain('Card security');
-  expect(content).toContain('ATM withdrawals');
-  expect(content).toContain('Internet payments');
-  expect(content).not.toContain('CARD LIMITS');
+  expect(content).toContain('Card Limits');
+  expect(content).toContain('ATM DAILY LIMITS');
+  expect(content).not.toContain('Card security');
   act(() => tree.unmount());
-});
-
-test('Native security switches return changes to the caller-owned feature state', async () => {
-  const base = host();
-  const card = bankingProducts(base).cards[0]!;
-  const onCardSecuritySettingChange = jest.fn();
-  const props = host({
-    route: { screen: 'card-options', params: { productId: card.id, cardSecurityPage: 'true' } },
-    bankingPresentation: {
-      cardSecurityPreview: {
-        channels: { atm: true, internet: true, pos: true },
-        countryProtectionEnabled: false,
-        cardStatus: 'active',
-        location: 'fresh',
-      },
-    },
-    onCardSecuritySettingChange,
-  });
-  let tree!: Renderer.ReactTestRenderer;
-  await act(() => {
-    tree = Renderer.create(<CardOptions {...props} />);
-  });
-  const internet = tree.root.find(
-    node => node.props.accessibilityLabel === 'Allow Internet payments' && typeof node.props.onPress === 'function',
-  );
-  await act(() => internet.props.onPress());
-  expect(onCardSecuritySettingChange).toHaveBeenCalledWith({ kind: 'channel', channel: 'internet', enabled: false });
-  await act(() => tree.unmount());
 });
 
 test('the shared Card screen sends Block Card to the explicit Card guard security route', async () => {

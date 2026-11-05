@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { AppState, Pressable, Platform, View, StyleSheet } from 'react-native';
 import { authenticateNativeBiometric } from '../../../../../platform/biometrics';
 import { setNativeScreenshotsAllowed } from '../../../../../platform/screenPrivacy';
@@ -29,6 +35,16 @@ import {
   CardSensitiveDetailsScreen,
 } from '../../../current/banking/Cards';
 import { czechBankingHost } from '../../../current/banking/czechHost';
+import {
+  CardBlockScreen,
+  BlockedCardOverlay,
+} from '../../../current/baseline/CardBlockScreen';
+import {
+  blockedCardsSnapshot,
+  subscribeBlockedCards,
+  isCardBlocked,
+  changeCardBlocked,
+} from '../../../current/banking/blockedCardStore';
 import { assistantAvailable } from '../../../current/coapping/model';
 import { openCurrentForYou } from '../../../current/coapping/contextHelp';
 import {
@@ -129,12 +145,18 @@ export default function CardScreen(
   const [id, setId] = useState(requested ?? cards[0]?.id),
     [query, setQuery] = useState(''),
     [message, setMessage] = useState('');
+  const [blockOpen, setBlockOpen] = useState(false);
+  const blockedCards = useSyncExternalStore(
+    subscribeBlockedCards,
+    blockedCardsSnapshot,
+    blockedCardsSnapshot,
+  );
   const [view, setView] = useState(
     route.screen === 'card-info'
       ? 'info'
       : route.screen === 'card-options'
-        ? 'options'
-        : 'main',
+      ? 'options'
+      : 'main',
   );
   const [movement, setMovement] = useState<AccountTransaction | null>(null),
     [verified, setVerified] = useState(false),
@@ -154,8 +176,8 @@ export default function CardScreen(
       sourceRows !== undefined
         ? sourceRows.map(row => row.transaction)
         : card
-          ? cardMovements(card, products)
-          : [],
+        ? cardMovements(card, products)
+        : [],
     ledger = ledgerSource.map(transaction => {
       const override =
         props.bankingPresentation?.transactionCategoryOverrides?.[
@@ -225,18 +247,18 @@ export default function CardScreen(
         selection.source === 'card' &&
         selection.transaction.id === route.params?.transactionId
           ? selection.transaction
-          : (entryLedger.find(tx => tx.id === route.params?.transactionId) ??
-            null);
+          : entryLedger.find(tx => tx.id === route.params?.transactionId) ??
+            null;
       setMovement(selectedTransaction);
     }
     setView(
       route.screen === 'transaction'
         ? 'movement'
         : route.screen === 'card-info'
-          ? 'info'
-          : route.screen === 'card-options'
-            ? 'options'
-            : 'main',
+        ? 'info'
+        : route.screen === 'card-options'
+        ? 'options'
+        : 'main',
     );
     setVerified(false);
     generation.current++;
@@ -308,6 +330,22 @@ export default function CardScreen(
           <Copy>Card not found</Copy>
         </View>
       </Page>
+    );
+  if (blockOpen && card)
+    return (
+      <CardBlockScreen
+        host={currentHost}
+        blocked={isCardBlocked(blockedCards, 'CZ', card.id)}
+        onBack={() => setBlockOpen(false)}
+        onConfirm={() => {
+          changeCardBlocked(
+            'CZ',
+            card.id,
+            !isCardBlocked(blockedCards, 'CZ', card.id),
+          );
+          setBlockOpen(false);
+        }}
+      />
     );
   if (view === 'movement' && !movement)
     return (
@@ -396,6 +434,9 @@ export default function CardScreen(
                       ]}
                     >
                       <CardArt card={value} />
+                      {isCardBlocked(blockedCards, 'CZ', value.id) && (
+                        <BlockedCardOverlay />
+                      )}
                     </View>
                   </View>
                 )}
@@ -455,9 +496,11 @@ export default function CardScreen(
                   }),
               },
               {
-                label: 'Block Card',
+                label: isCardBlocked(blockedCards, 'CZ', card.id)
+                  ? 'Unblock card'
+                  : 'Block Card',
                 icon: 'block-card',
-                run: () => {},
+                run: () => setBlockOpen(true),
               },
               {
                 label: 'View PIN',

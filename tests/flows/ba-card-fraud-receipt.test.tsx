@@ -19,7 +19,10 @@ describe('fraud dispute receipt', () => {
         submit={vi.fn()}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Keep making payments' }))
+    const banner = screen.getByRole('button', { name: 'Keep making payments' })
+    expect(banner.getAttribute('data-component')).toBe('PendingActionCard')
+    expect(banner.parentElement?.querySelector('[data-card-variant="mc-virtual-standard-orange"]')).toBeTruthy()
+    fireEvent.click(banner)
     expect(go).toHaveBeenLastCalledWith('fraud-virtual-card')
     fireEvent.click(screen.getByRole('button', { name: 'Review other activity' }))
     expect(go).toHaveBeenLastCalledWith('fraud-alerts')

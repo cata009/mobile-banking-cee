@@ -4,10 +4,10 @@ import { LanguageProvider } from '@/app/contexts/LanguageContext'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import { useProducts } from '@/hooks/useProducts'
 import type { NativeDemoRoute } from '@/features/demo-native/contracts'
-import { fraudLedgerTransaction } from '@/features/cards/fraud/transactions'
+import { FRAUD_CARD_HISTORY, fraudLedgerTransaction } from '@/features/cards/fraud/transactions'
 import { FRAUD_CARD_REFERENCE } from '@/features/cards/fraud/cardFixture'
 import type { DebitCard } from '@/data/products'
-import type { Dispatch } from 'react'
+import { useState, type Dispatch } from 'react'
 import {
   FRAUD_TRANSACTIONS,
   selectedFraudTransaction,
@@ -33,6 +33,8 @@ function BaselineContent({
   dispatch: Dispatch<FraudAction>
   onBackScreen?: FraudScreen
 }) {
+  const [historyId, setHistoryId] = useState<string | null>(null)
+  const historical = FRAUD_CARD_HISTORY.find((entry) => entry.id === historyId)
   const ledger = (id: string) => fraudLedgerTransaction(id, state.ledgerOverrides[id])
   const { categories } = useProducts()
   const baselineCard = categories
@@ -47,34 +49,43 @@ function BaselineContent({
       .map((product) => (card && product.id === card.id ? card : product)),
   }))
   const route: NativeDemoRoute =
-    screen === 'fraud-home'
-      ? { screen: 'home' }
-      : screen === 'fraud-card-options'
-        ? { screen: 'card-options', params: { productId: card?.id ?? '' } }
-        : screen === 'fraud-card-security' || screen === 'fraud-geo-settings'
-          ? { screen: 'card-options', params: { productId: card?.id ?? '', cardSecurityPage: 'true' } }
-          : screen === 'fraud-virtual-card'
-            ? {
-                screen: 'product-detail',
-                params: {
-                  title: 'Virtual card',
-                  optionId: 'virtual-card',
-                  cardGuardVirtualCardIssue: 'true',
-                },
-              }
-            : screen === 'fraud-baseline-transaction' || screen === 'fraud-transaction'
+    historical && screen === 'fraud-cards'
+      ? { screen: 'transaction', params: { productId: card?.id ?? '', source: 'card', transactionId: historical.id } }
+      : screen === 'fraud-home'
+        ? { screen: 'home' }
+        : screen === 'fraud-card-options'
+          ? { screen: 'card-options', params: { productId: card?.id ?? '' } }
+          : screen === 'fraud-card-security' || screen === 'fraud-geo-settings'
+            ? { screen: 'card-options', params: { productId: card?.id ?? '', cardLimitsPage: 'true' } }
+            : screen === 'fraud-virtual-card'
               ? {
-                  screen: 'transaction',
-                  params: { productId: card?.id ?? '', source: 'card', transactionId: state.selectedId },
+                  screen: 'product-detail',
+                  params: {
+                    title: 'Virtual card',
+                    optionId: 'virtual-card',
+                    cardGuardVirtualCardIssue: 'true',
+                  },
                 }
-              : { screen: 'card', params: { productId: card?.id ?? '', cardGuardVirtualCardIssue: 'true' } }
+              : screen === 'fraud-baseline-transaction' || screen === 'fraud-transaction'
+                ? {
+                    screen: 'transaction',
+                    params: { productId: card?.id ?? '', source: 'card', transactionId: state.selectedId },
+                  }
+                : { screen: 'card', params: { productId: card?.id ?? '', cardGuardVirtualCardIssue: 'true' } }
   const item = state.cases[state.selectedId]
   const unreviewedCount = FRAUD_TRANSACTIONS.filter((payment) => !isFraudActivityReviewed(state, payment.id)).length
-  const rows = FRAUD_TRANSACTIONS.filter((payment) => payment.status !== 'declined').map((payment) => ({
-    transaction: ledger(payment.id),
-    displayLabel: payment.merchant,
-  }))
+  const rows = [
+    ...FRAUD_TRANSACTIONS.filter((payment) => payment.status !== 'declined').map((payment) => ({
+      transaction: ledger(payment.id),
+      displayLabel: payment.merchant,
+    })),
+    ...FRAUD_CARD_HISTORY.map((entry) => ({ transaction: entry, displayLabel: entry.label })),
+  ]
   const back = () => {
+    if (historical && screen === 'fraud-cards') {
+      setHistoryId(null)
+      return
+    }
     if (screen === 'fraud-card-security' || screen === 'fraud-geo-settings') {
       go(onBackScreen ?? 'fraud-cards')
       return
@@ -109,6 +120,7 @@ function BaselineContent({
             bankingPresentation: {
               rows,
               productId: card?.id,
+              cardStatus: state.cardStatus,
               productCategories: scopedCategories,
               homeSecurityNotice:
                 unreviewedCount > 0
@@ -119,103 +131,96 @@ function BaselineContent({
                     }
                   : undefined,
               cardSecurityRoutes: {
-                block: { screen: 'card-options', params: { productId: card?.id ?? '', cardSecurityPage: 'true' } },
-                replacement: { screen: 'card-options', params: { fraudAction: 'replace-card' } },
+                block: { screen: 'card-options', params: { productId: card?.id ?? '', cardLimitsPage: 'true' } },
               },
-              ...(screen === 'fraud-card-security' || screen === 'fraud-geo-settings'
-                ? {
-                    cardSecurityPreview: {
-                      channels: state.channels,
-                      countryProtectionEnabled: state.geoEnabled,
-                      cardStatus: state.cardStatus,
-                      location: state.location,
-                    },
-                  }
-                : {}),
             },
             transactionSelection: card
-              ? { productId: card.id, source: 'card', transaction: ledger(state.selectedId) }
+              ? { productId: card.id, source: 'card', transaction: historical ?? ledger(state.selectedId) }
               : undefined,
-            transactionPresentation: card
-              ? {
-                  product: card,
-                  showActions: false,
-                  showSpendingInsights: false,
-                  showExpandableDetails: false,
-                  cardIdentityMode: 'holder',
-                  cardDetailsRoute: { screen: 'card', params: { productId: card.id } },
-                  caseNotice: item
-                    ? {
-                        title:
-                          item.status === 'resolved' || item.status === 'declined'
-                            ? item.kind === 'fraud-report'
-                              ? 'Report decision available'
-                              : 'Dispute decision available'
-                            : item.kind === 'fraud-report'
-                              ? 'You have an open report'
-                              : 'You have an open dispute',
-                        description: 'Tap to view its status and updates.',
-                        accessibilityLabel: item.kind === 'fraud-report' ? 'View report status' : 'View dispute status',
-                        route: { screen: 'transaction', params: { fraudAction: 'view-case' } },
-                      }
-                    : undefined,
-                  postingTime: transaction.date.split(' · ')[1],
-                  activityStatus: transaction.status === 'declined' ? 'declined' : undefined,
-                  ...(transaction.status === 'pending'
-                    ? {
-                        pendingStatusLabel: 'Pending',
-                      }
-                    : {}),
-                  merchantEnrichment: {
-                    cleanMerchantName: transaction.merchant,
-                    categoryLabel: 'Merchant Category',
-                    ...(transaction.id === 'berlin'
-                      ? {
-                          leadingVisual: {
-                            kind: 'merchant-logo' as const,
-                            merchant: 'carrefour' as const,
-                            size: 64 as const,
-                          },
-                          location: { label: 'Merchant location', address: transaction.location },
-                          mcc: '5411 · Grocery stores, supermarkets',
-                        }
-                      : transaction.id === 'vienna'
+            transactionPresentation:
+              card && historical
+                ? {
+                    product: card,
+                    showActions: false,
+                    showSpendingInsights: false,
+                    showExpandableDetails: false,
+                    cardIdentityMode: 'holder',
+                  }
+                : card
+                  ? {
+                      product: card,
+                      showActions: false,
+                      showSpendingInsights: false,
+                      showExpandableDetails: false,
+                      cardIdentityMode: 'holder',
+                      cardDetailsRoute: { screen: 'card', params: { productId: card.id } },
+                      caseNotice: item
                         ? {
-                            leadingVisual: {
-                              kind: 'pfm' as const,
-                              category: 'Finance' as const,
-                              variant: 'category-circle' as const,
-                              size: 64 as const,
-                            },
-                            location: { label: 'ATM location', address: transaction.location },
-                            mcc: '6011 · Cash withdrawals',
+                            title:
+                              item.status === 'resolved' || item.status === 'declined'
+                                ? item.kind === 'fraud-report'
+                                  ? 'Your report decision is ready'
+                                  : 'Your dispute decision is ready'
+                                : item.kind === 'fraud-report'
+                                  ? 'Track your report'
+                                  : 'Track your dispute',
+                            description:
+                              item.status === 'resolved' || item.status === 'declined'
+                                ? 'See the decision and what happens next.'
+                                : 'See the latest progress and next steps.',
+                            accessibilityLabel:
+                              item.kind === 'fraud-report' ? 'View report status' : 'View dispute status',
+                            route: { screen: 'transaction', params: { fraudAction: 'view-case' } },
                           }
-                        : transaction.id === 'online'
+                        : undefined,
+                      postingTime: transaction.date.split(' · ')[1],
+                      activityStatus: transaction.status === 'declined' ? 'declined' : undefined,
+                      ...(transaction.status === 'pending'
+                        ? {
+                            pendingStatusLabel: 'Pending',
+                          }
+                        : {}),
+                      merchantEnrichment: {
+                        cleanMerchantName: transaction.merchant,
+                        categoryLabel: 'Merchant Category',
+                        ...(transaction.id === 'berlin'
                           ? {
                               leadingVisual: {
                                 kind: 'merchant-logo' as const,
-                                merchant: 'youtube' as const,
+                                merchant: 'carrefour' as const,
                                 size: 64 as const,
                               },
-                              mcc: '4899 · Digital subscriptions',
+                              location: { label: 'Merchant location', address: transaction.location },
+                              mcc: '5411 · Grocery stores, supermarkets',
                             }
-                          : {}),
-                  },
-                }
-              : undefined,
+                          : transaction.id === 'vienna'
+                            ? {
+                                leadingVisual: {
+                                  kind: 'pfm' as const,
+                                  category: 'Finance' as const,
+                                  variant: 'category-circle' as const,
+                                  size: 64 as const,
+                                },
+                                location: { label: 'ATM location', address: transaction.location },
+                                mcc: '6011 · Cash withdrawals',
+                              }
+                            : transaction.id === 'online'
+                              ? {
+                                  leadingVisual: {
+                                    kind: 'merchant-logo' as const,
+                                    merchant: 'youtube' as const,
+                                    size: 64 as const,
+                                  },
+                                  mcc: '4899 · Digital subscriptions',
+                                }
+                              : {}),
+                      },
+                    }
+                  : undefined,
           }}
           onBack={back}
-          events={{
-            onCardSecuritySettingChange: (change) => {
-              if (change.kind === 'channel') {
-                dispatch({ type: 'channel', channel: change.channel, enabled: change.enabled })
-              } else {
-                dispatch({ type: 'geo', enabled: change.enabled })
-              }
-            },
-          }}
           onNavigate={(target, action) => {
-            if (target.params?.cardSecurityPage === 'true') {
+            if (target.params?.cardLimitsPage === 'true') {
               go('fraud-card-security')
               return true
             }
@@ -225,10 +230,6 @@ function BaselineContent({
             }
             if (target.params?.fraudAction === 'protect-card') {
               go('fraud-card-security')
-              return true
-            }
-            if (target.params?.fraudAction === 'replace-card') {
-              go('fraud-replace-confirm')
               return true
             }
             if (target.params?.fraudAction === 'review-alerts') {
@@ -244,6 +245,10 @@ function BaselineContent({
             else if (target.screen === 'card-options') go('fraud-card-options')
             else if (target.screen === 'transaction') {
               const id = target.params?.transactionId
+              if (id && FRAUD_CARD_HISTORY.some((entry) => entry.id === id)) {
+                setHistoryId(id)
+                return true
+              }
               if (!id || !FRAUD_TRANSACTIONS.some((payment) => payment.id === id)) return false
               select(id)
               go('fraud-baseline-transaction')

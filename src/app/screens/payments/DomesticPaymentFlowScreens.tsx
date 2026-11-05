@@ -375,7 +375,7 @@ function LegacySourceTransactionDetailBody({
           renderLargeTitle={false}
         />
 
-        <div className="bg-[var(--uc-app-bg)] pb-[8px]">
+        <div className={`bg-[var(--uc-app-bg)] ${isPending ? 'pb-[18px]' : 'pb-[8px]'}`}>
           <section className="px-[24px] pt-[8px] text-center" style={{ opacity: 1 - headerProgress }}>
             {/* The block leads with who the transaction was with — the merchant
                 mark when there is one, otherwise the account pair or the
@@ -395,13 +395,17 @@ function LegacySourceTransactionDetailBody({
               {detail.amount}
             </p>
             {isPending ? (
-              <p
-                className="mt-[18px] inline-flex items-center gap-[7px] uc-type-n5-strong uppercase text-[var(--uc-text-muted)]"
-                data-pending-status
+              <div
+                className="mt-[18px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
+                style={{
+                  borderColor: 'var(--uc-text-muted)',
+                  backgroundColor: 'var(--uc-static-white)',
+                  color: 'var(--uc-text-muted)',
+                }}
+                data-testid="transaction-reserved-amount"
               >
-                <span className="size-[8px] rounded-full bg-[var(--uc-orange-status)]" aria-hidden="true" />
-                Pending
-              </p>
+                <span className="text-[12px] font-bold leading-normal">RESERVED AMOUNT</span>
+              </div>
             ) : (
               <>
                 <p className="mt-[18px] font-['UniCredit',sans-serif] text-[13px] font-bold leading-normal text-[var(--uc-text-muted)]">
@@ -411,6 +415,7 @@ function LegacySourceTransactionDetailBody({
                   className="mt-[8px] inline-flex items-center justify-center gap-[8px] rounded-full border px-[16px] py-[4px]"
                   style={{
                     borderColor: `var(${detail.pfmCategoryColorVar})`,
+                    backgroundColor: 'var(--uc-static-white)',
                     color: `var(${detail.pfmCategoryColorVar})`,
                   }}
                   data-testid="transaction-pfm-summary"

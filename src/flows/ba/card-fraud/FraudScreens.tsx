@@ -8,7 +8,8 @@ import ToggleButton from '@/app/components/ToggleButton'
 import { AppIcon } from '@/app/components/icons'
 import UniCreditLogo from '@/app/components/UniCreditLogo'
 import NavigationCardArt from '@/app/components/cards/NavigationCardArt'
-import GhostBanner from '@/app/components/cards/GhostBanner'
+import PendingActionCard from '@/app/components/cards/PendingActionCard'
+import Card from '@/app/components/cards/Card'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import MerchantLogo from '@/app/components/merchants/MerchantLogo'
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
@@ -39,7 +40,7 @@ interface ScreenProps {
   submit: () => void
 }
 
-export function CardIdentity({ state }: { state: FraudSession }) {
+export function CardIdentity({ state, showStatus = true }: { state: FraudSession; showStatus?: boolean }) {
   return (
     <div className="fraud-card-identity">
       <span className="fraud-card-symbol">
@@ -48,7 +49,7 @@ export function CardIdentity({ state }: { state: FraudSession }) {
       <div>
         <strong>{FRAUD_CARD_LABEL}</strong>
         <span>{FRAUD_CARD_REFERENCE.cardHolderName}</span>
-        {state.cardStatus !== 'active' ? (
+        {showStatus && state.cardStatus !== 'active' ? (
           <span>{state.cardStatus === 'closed' ? 'Permanently closed' : 'Temporarily frozen'}</span>
         ) : null}
       </div>
@@ -169,41 +170,6 @@ function ClaimStatus({ state, back }: Pick<ScreenProps, 'state' | 'back'>) {
   )
 }
 
-function ReplacementConfirmation({ state, dispatch, go }: Pick<ScreenProps, 'state' | 'dispatch' | 'go'>) {
-  const [consent, setConsent] = useState(false)
-  return (
-    <FraudFormLayout>
-      <CardIdentity state={state} />
-      <p>
-        The old card will be permanently closed and the replacement will have new card details. Any open report or
-        dispute will continue separately. The bank will confirm fees, delivery and activation. Update recurring payments
-        and wallets when the new card is ready.
-      </p>
-      <NavigationRow
-        title="I understand"
-        description="My old card will be permanently closed and I am requesting a replacement."
-        className="fraud-security-row"
-        trailing={
-          <ToggleButton
-            ariaLabel="I understand that my old card will be permanently closed and I am requesting a replacement."
-            checked={consent}
-            onToggle={setConsent}
-          />
-        }
-      />
-      <PrimaryButton
-        disabled={!consent}
-        onClick={() => {
-          dispatch({ type: 'replace', confirmed: consent })
-          go('fraud-replacement-status')
-        }}
-      >
-        Close card and request replacement
-      </PrimaryButton>
-    </FraudFormLayout>
-  )
-}
-
 export function FraudScreens({ screen, state, dispatch, go, back, submit }: ScreenProps) {
   const [helpOpen, setHelpOpen] = useState(false)
   const [signing, setSigning] = useState(false)
@@ -235,10 +201,10 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
     'fraud-virtual-card-offer': 'A card for your next payments',
     'fraud-virtual-card': 'Virtual card',
     'fraud-case-status': item?.kind === 'fraud-report' ? 'Your report' : 'Your dispute',
-    'fraud-card-security': 'Card security',
-    'fraud-replace-confirm': 'Replace your card',
-    'fraud-replacement-status': 'Replacement requested',
-    'fraud-geo-settings': 'Card security',
+    'fraud-card-security': 'Card Limits',
+    'fraud-replace-confirm': 'Card options',
+    'fraud-replacement-status': 'Card options',
+    'fraud-geo-settings': 'Card Limits',
   }
   const select = (id: string) => {
     dispatch({ type: 'select', transactionId: id })
@@ -255,8 +221,8 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
           title="Thanks for confirming"
           body={
             <p>
-              This activity is marked as recognised. No dispute has been opened. You can review your card security
-              settings to help protect future payments.
+              This activity is marked as recognised. No dispute has been opened. You can review your card limits to help
+              manage future payments.
             </p>
           }
           actionLabel="Review other activity"
@@ -289,11 +255,17 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
                     : 'Your card remains active.'}{' '}
                 You can track its progress and updates at any time.
               </p>
-              <GhostBanner
-                title="Keep making payments"
-                description="Open a virtual card to continue making eligible payments."
-                onClick={() => go('fraud-virtual-card')}
-              />
+              <div className="fraud-virtual-offer">
+                <PendingActionCard
+                  title="Keep making payments"
+                  description="Get a virtual card and keep paying online."
+                  className="fraud-virtual-offer-button h-auto min-h-[157px]"
+                  onClick={() => go('fraud-virtual-card')}
+                />
+                <span className="fraud-virtual-offer-art" aria-hidden="true">
+                  <Card variant="mc-virtual-standard-orange" size="medium" />
+                </span>
+              </div>
             </div>
           }
           actionLabel={hasUnreviewed ? 'Review other activity' : 'Back to Home'}
@@ -331,7 +303,7 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
               <div className="fraud-push-bank">
                 <UniCreditLogo textColor="var(--uc-text)" />
               </div>
-              <p className="fraud-eyebrow">Card security · Bosnia and Herzegovina</p>
+              <p className="fraud-eyebrow">Card protection · Bosnia and Herzegovina</p>
               <div className="fraud-push-message">
                 <span className="fraud-push-shield">
                   <AppIcon name="shield-check" size={44} color="var(--uc-action)" />
@@ -419,36 +391,64 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
           ) : null}
 
           {screen === 'fraud-dispute-intro' ? (
-            isDispute ? (
-              <>
-                <PaymentSummary transaction={transaction} />
-                {transaction.status === 'booked' ? (
-                  <>
-                    <h2 className="fraud-section-title">Payment posted</h2>
-                    <p>
-                      This payment has been debited from your account. You can ask the bank to review it as a dispute; a
-                      refund is not guaranteed.
-                    </p>
-                  </>
-                ) : transaction.status === 'pending' ? (
-                  <>
+            <>
+              <p>
+                You told us you don’t recognise the {isDispute ? 'payment' : 'activity'} below. Here’s what happens
+                next.
+              </p>
+              <PaymentSummary transaction={transaction} />
+              {transaction.status === 'booked' ? (
+                <>
+                  <h2 className="fraud-section-title">Payment posted</h2>
+                  <p>
+                    This payment has been debited from your account. You can ask the bank to review it as a dispute; a
+                    refund is not guaranteed.
+                  </p>
+                </>
+              ) : !isDispute ? (
+                <p>No money was debited.</p>
+              ) : null}
+              <ol className="fraud-next-timeline" aria-label="Next steps">
+                <li data-state="complete">
+                  <span className="fraud-next-marker" aria-hidden="true">
+                    <AppIcon name="prime-check" size={16} color="currentColor" />
+                  </span>
+                  <section className="fraud-next-content" aria-label="Card protection">
                     <h2 className="fraud-section-title">Your card is temporarily blocked</h2>
+                    <p>We’ve blocked your card to help keep it safe.</p>
+                    <CardIdentity state={state} showStatus={false} />
+                  </section>
+                </li>
+                <li data-state="current" aria-current="step">
+                  <span className="fraud-next-marker" aria-hidden="true">
+                    2
+                  </span>
+                  <div className="fraud-next-content">
+                    <span className="fraud-next-label">Next step</span>
+                    <h2 className="fraud-section-title">{isDispute ? 'Open a dispute' : 'Report this activity'}</h2>
                     <p>
-                      Next, tell us what happened and submit a dispute. We’ll review it and keep you updated. You can
-                      track your case at any time.
+                      {isDispute
+                        ? `Tell us what happened with the ${transaction.merchant} payment, then review and sign your dispute.`
+                        : 'Tell us what happened, then review and sign your report.'}
                     </p>
-                  </>
-                ) : null}
-                <PrimaryButton onClick={() => go('fraud-claim-details')}>Open dispute</PrimaryButton>
-              </>
-            ) : (
-              <>
-                <PaymentSummary transaction={transaction} />
-                <h2 className="fraud-section-title">Attempt declined</h2>
-                <p>No money was debited. You can still report this activity.</p>
-                <PrimaryButton onClick={() => go('fraud-claim-details')}>Continue report</PrimaryButton>
-              </>
-            )
+                  </div>
+                </li>
+                <li data-state="upcoming">
+                  <span className="fraud-next-marker" aria-hidden="true">
+                    3
+                  </span>
+                  <div className="fraud-next-content">
+                    <h2 className="fraud-section-title">
+                      {isDispute ? 'We review your dispute' : 'We review your report'}
+                    </h2>
+                    <p>After submitting, you can follow its progress from this transaction.</p>
+                  </div>
+                </li>
+              </ol>
+              <PrimaryButton onClick={() => go('fraud-claim-details')}>
+                {isDispute ? 'Open dispute' : 'Continue report'}
+              </PrimaryButton>
+            </>
           ) : null}
 
           {screen === 'fraud-claim-details' || screen === 'fraud-attempt' ? (
@@ -518,30 +518,6 @@ export function FraudScreens({ screen, state, dispatch, go, back, submit }: Scre
           ) : null}
 
           {screen === 'fraud-case-status' ? <ClaimStatus state={state} back={back} /> : null}
-
-          {screen === 'fraud-replace-confirm' ? (
-            <ReplacementConfirmation state={state} dispatch={dispatch} go={go} />
-          ) : null}
-
-          {screen === 'fraud-replacement-status' ? (
-            <>
-              <p>
-                Your replacement request has been received and will be processed. The bank will confirm the next steps.
-              </p>
-              <Facts
-                items={[
-                  ['Old card', 'Permanently closed'],
-                  ['Replacement', 'Requested'],
-                  ['Delivery and fees', 'Awaiting bank confirmation'],
-                  ['Activation', 'Available after the new card is issued'],
-                ]}
-              />
-              <p>
-                We will notify you when your replacement is available. Its permissions can be managed after activation.
-              </p>
-              <PrimaryButton onClick={() => go('fraud-card-security')}>Ok I got it</PrimaryButton>
-            </>
-          ) : null}
         </FraudFormLayout>
       </main>
       {helpOpen && hasHelp ? (

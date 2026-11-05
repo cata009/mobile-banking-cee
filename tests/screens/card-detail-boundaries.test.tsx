@@ -470,6 +470,57 @@ describe('card-detail boundaries on the Native Web host', () => {
     expect(secondDebit.container.querySelector('[data-testid="ro-pending-transactions"]')).not.toBeInTheDocument()
   })
 
+  it('shows pending transaction details as white Reserved Amount chips', async () => {
+    const transaction = getAccountTransactions('RO', 0, 'RON').find((item) => item.status === 'Pending')
+    if (!transaction) throw new Error('Expected a pending transaction')
+
+    const { container } = render(
+      <TransactionDetailScreen
+        country="RO"
+        product={firstDebitCard}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders country="RO">{children}</AppProviders> },
+    )
+    await asyncNativeReady(container)
+
+    const reserved = container.querySelector<HTMLElement>(
+      '[data-testid="ro-transaction-reserved-amount"]',
+    )
+    expect(reserved).toBeInTheDocument()
+    expect(reserved).toHaveTextContent('RESERVED AMOUNT')
+    expect(reserved).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' })
+    expect(reserved?.style.color).toBe(reserved?.style.borderColor)
+    expect(reserved?.querySelector('svg')).not.toBeInTheDocument()
+    expect(reserved?.style.marginTop).toBe(reserved?.parentElement?.parentElement?.style.paddingBottom)
+    expect(container.querySelector('[data-pending-status]')).not.toBeInTheDocument()
+  })
+
+  it('gives booked cash withdrawal category chips an opaque white fill', async () => {
+    const transaction = getAccountTransactions('RO', 0, 'RON').find(
+      (item) => item.pfmSubcategory === 'Cash withdrawal' && item.status === 'Booked',
+    )
+    if (!transaction) throw new Error('Expected a booked cash withdrawal')
+
+    const { container } = render(
+      <TransactionDetailScreen
+        country="RO"
+        product={firstCurrentAccount}
+        transaction={transaction}
+        onBack={() => undefined}
+        onRedoPayment={() => undefined}
+      />,
+      { wrapper: ({ children }) => <AppProviders country="RO">{children}</AppProviders> },
+    )
+    await asyncNativeReady(container)
+
+    const category = container.querySelector('[data-testid="ro-transaction-pfm-summary"]')
+    expect(category).toHaveTextContent('CASH WITHDRAWAL')
+    expect(category).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' })
+  })
+
   it('shares debit-card transactions with the linked current account but keeps credit-card activity separate', () => {
     const accountTransactions = getAccountTransactions('RO', 0, 'RON')
     const debitTransactions = getCardTransactions('RO', firstDebitCard, 'RON', 0)

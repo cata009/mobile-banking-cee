@@ -151,7 +151,7 @@ function FraudPresentation({ onClose, presentationUrl }: { onClose: () => void; 
                   ? 'Choose whether to block the card. It stays blocked while the bank reviews your case.'
                   : chapterIndex === 2
                     ? 'See the current status, next steps and expected updates.'
-                    : 'Manage card permissions and replacement in one place.'}
+                    : 'Manage card limits in one place.'}
             </p>
           </div>
           <div className="fraud-presenter-controls">
@@ -167,23 +167,6 @@ function FraudPresentation({ onClose, presentationUrl }: { onClose: () => void; 
                   <option value="needs-information">Information needed</option>
                   <option value="resolved">Resolved · outcome available</option>
                   <option value="declined">Closed · response available</option>
-                </select>
-              </label>
-            ) : null}
-            {chapterIndex === 3 ? (
-              <label>
-                Presenter location
-                <select
-                  value={parameters.location ?? 'fresh'}
-                  onChange={(event) => {
-                    setParameters({ location: event.target.value })
-                    setInitialScreen('fraud-card-security')
-                    setFixture((value) => value + 1)
-                  }}
-                >
-                  <option value="fresh">Fresh phone-country signal</option>
-                  <option value="unavailable">Location unavailable</option>
-                  <option value="stale">Location out of date</option>
                 </select>
               </label>
             ) : null}

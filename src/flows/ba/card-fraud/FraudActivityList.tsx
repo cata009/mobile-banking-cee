@@ -30,7 +30,7 @@ export function FraudActivityList({ state, onSelect }: { state: FraudSession; on
                     type="button"
                     aria-label={`Review ${payment.merchant}`}
                     onClick={() => onSelect(payment.id)}
-                    className="fraud-ledger-button"
+                    className={`fraud-ledger-button${payment.status === 'declined' ? ' fraud-activity-muted' : ''}`}
                   >
                     <AccountTransactionRow
                       transaction={fraudLedgerTransaction(payment.id, payment.status)}
@@ -38,14 +38,7 @@ export function FraudActivityList({ state, onSelect }: { state: FraudSession; on
                       currency="BAM"
                       detailsLabel={payment.status === 'declined' ? 'Declined attempt · No money debited' : undefined}
                       amountSign={payment.status === 'declined' ? '' : undefined}
-                      showStatus
-                      statusLabel={
-                        payment.status === 'declined'
-                          ? 'Declined'
-                          : payment.status === 'pending'
-                            ? 'Pending'
-                            : undefined
-                      }
+                      showStatus={false}
                       leadingVisual={
                         payment.id === 'berlin' ? (
                           <MerchantLogo merchant="carrefour" size={32} />

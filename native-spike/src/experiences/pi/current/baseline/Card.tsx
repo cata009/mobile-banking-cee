@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   Platform,
   Pressable,
@@ -32,6 +32,8 @@ import {
   type BankingCard,
 } from '../banking/model';
 import { FaceIdOverlay } from './FaceIdOverlay';
+import { CardBlockScreen, BlockedCardOverlay } from './CardBlockScreen';
+import { blockedCardsSnapshot, subscribeBlockedCards, isCardBlocked, changeCardBlocked } from '../banking/blockedCardStore';
 import { CreditLimitOfferFlow } from './CreditLimitOfferFlow';
 import { BankingCopyToast, useBankingCopy } from '../banking/CopyToast';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
@@ -197,10 +199,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
       string | null
     >(null),
     [mcashOpen, setMcashOpen] = useState(false),
+    [blockOpen, setBlockOpen] = useState(false),
     [query, setQuery] = useState(''),
     [scrollOffset, setScrollOffset] = useState(0),
     [progress, setProgress] = useState(0),
     [isOpportunityDismissed, setOpportunityDismissed] = useState(false);
+  const blockedCards = useSyncExternalStore(subscribeBlockedCards, blockedCardsSnapshot, blockedCardsSnapshot);
   const page = useRef<React.ComponentRef<typeof ScrollView>>(null),
     searchY = useRef(0),
     active = useRef(host.isActive),
@@ -308,6 +312,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
         />
       </View>
     );
+  const cardIsBlocked = (id: string) =>
+    host.bankingPresentation?.productId === id && host.bankingPresentation.cardStatus
+      ? host.bankingPresentation.cardStatus !== 'active'
+      : isCardBlocked(blockedCards, host.country, id);
+  const blocked = cardIsBlocked(card.id);
+  if (blockOpen) return <CardBlockScreen host={host} blocked={blocked} onBack={() => setBlockOpen(false)} onConfirm={() => { changeCardBlocked(host.country, card.id, !blocked); setBlockOpen(false); }} />;
   const select = (item: BankingCard) => {
     setAuthCard(null);
     setSensitiveCard(null);
@@ -394,10 +404,8 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     {
       id: 'block-card',
       iconName: 'block-card',
-      label: copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
-      onPress: securityRoutes
-        ? () => host.onNavigate(securityRoutes.block)
-        : undefined,
+      label: blocked ? 'Unblock card' : copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
+      onPress: blocked && host.bankingPresentation?.cardStatus ? undefined : securityRoutes ? () => host.onNavigate(securityRoutes.block) : () => setBlockOpen(true),
     },
     card.type === 'credit_card' && host.country === 'RO'
       ? {
@@ -533,6 +541,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                                   style={styles.artClip}
                                 />
                               )}
+                              {cardIsBlocked(item.id) && <BlockedCardOverlay />}
                             </View>
                           </View>
                         )}
@@ -796,6 +805,7 @@ export function BaselineSensitiveCard({
           <BaselinePageHeader
             title={title}
             onBack={host.onBack}
+            showHelp={host.route.params?.hideSensitiveCardHelp !== 'true'}
             renderLargeTitle={false}
             collapsedTitleProgress={progress}
             includeSafeArea

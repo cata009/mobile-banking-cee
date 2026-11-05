@@ -1,4 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import { FaceIdOverlay } from './FaceIdOverlay';
@@ -20,6 +25,19 @@ import { Fact, Label, QuickActions, Row } from './Primitives';
 import { openCurrentContextHelp } from '../coapping/adapter';
 import { Ledger } from './Ledger';
 import { CardArt } from './CardArt';
+import CardLimitsSheet from '../baseline/CardLimitsSheet';
+import CardPushNotifications from '../baseline/CardPushNotifications';
+import {
+  CardBlockScreen,
+  BlockedCardOverlay,
+} from '../baseline/CardBlockScreen';
+import {
+  blockedCardsSnapshot,
+  subscribeBlockedCards,
+  isCardBlocked,
+  changeCardBlocked,
+} from './blockedCardStore';
+import { isCardLimitsAvailable } from '@/features/cards/card-limits/model';
 export function CardsScreen(host: CurrentScreenProps) {
   const cards = bankingProducts(host).cards;
   return (
@@ -61,6 +79,12 @@ export function CardScreen(host: CurrentScreenProps) {
   const [sensitiveCardId, setSensitiveCardId] = useState<string | null>(null);
   const [auth, setAuth] = useState(false);
   const [query, setQuery] = useState('');
+  const [blockOpen, setBlockOpen] = useState(false);
+  const blockedCards = useSyncExternalStore(
+    subscribeBlockedCards,
+    blockedCardsSnapshot,
+    blockedCardsSnapshot,
+  );
   const active = useRef(host.isActive);
   active.current = host.isActive;
   useEffect(
@@ -82,6 +106,19 @@ export function CardScreen(host: CurrentScreenProps) {
   }, [host.isActive]);
   const card = data.cards.find(item => item.id === selected) ?? data.cards[0];
   if (!card) return <CardsScreen {...host} />;
+  const blocked = isCardBlocked(blockedCards, host.country, card.id);
+  if (blockOpen)
+    return (
+      <CardBlockScreen
+        host={host}
+        blocked={blocked}
+        onBack={() => setBlockOpen(false)}
+        onConfirm={() => {
+          changeCardBlocked(host.country, card.id, !blocked);
+          setBlockOpen(false);
+        }}
+      />
+    );
   const sensitive = host.isActive && sensitiveCardId === card.id;
   const localHost =
     sensitive || auth
@@ -151,6 +188,9 @@ export function CardScreen(host: CurrentScreenProps) {
                 ]}
               >
                 <CardArt card={item} height={138} />
+                {isCardBlocked(blockedCards, host.country, item.id) && (
+                  <BlockedCardOverlay />
+                )}
               </View>
             </View>
           )}
@@ -266,14 +306,12 @@ export function CardScreen(host: CurrentScreenProps) {
             {
               id: 'block-card',
               icon: 'block-card',
-              label: copy(
-                host,
-                'runtime.cards.actions.blockCard',
-                'Block Card',
-              ),
+              label: blocked
+                ? 'Unblock card'
+                : copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
               onPress: cardSecurityRoute
                 ? () => host.onNavigate(cardSecurityRoute)
-                : undefined,
+                : () => setBlockOpen(true),
             },
             {
               id: 'view-pin',
@@ -321,6 +359,7 @@ export function CardSensitiveDetailsScreen({
   );
 }
 export function CardInfoScreen(host: CurrentScreenProps) {
+  const blockedCards = useSyncExternalStore(subscribeBlockedCards, blockedCardsSnapshot, blockedCardsSnapshot);
   const card =
     bankingProducts(host).cards.find(
       item =>
@@ -346,7 +385,7 @@ export function CardInfoScreen(host: CurrentScreenProps) {
             card.type === 'credit_card' ? 'Credit card' : 'Debit card'
           }`}
         />
-        <Fact information host={host} label="Card status" value="Active" />
+        <Fact information host={host} label="Card status" value={isCardBlocked(blockedCards, host.country, card.id) ? 'Blocked' : 'Active'} />
         <Fact
           information
           host={host}
@@ -386,11 +425,21 @@ export function CardInfoScreen(host: CurrentScreenProps) {
   );
 }
 export function CardOptionsScreen(host: CurrentScreenProps) {
+  const [limitsOpen, setLimitsOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const card =
     bankingProducts(host).cards.find(
       item =>
         item.id === (host.route.params?.productId ?? host.route.params?.cardId),
     ) ?? bankingProducts(host).cards[0];
+  if (notificationsOpen && card)
+    return (
+      <CardPushNotifications
+        host={host}
+        cardId={card.id}
+        onClose={() => setNotificationsOpen(false)}
+      />
+    );
   const programs = [
     ['apple-pay', 'APPLE PAY', 'Active'],
     [
@@ -429,8 +478,21 @@ export function CardOptionsScreen(host: CurrentScreenProps) {
     description: string,
     icon: string,
   ) => (
-    <View
+    <Pressable
       key={id}
+      accessibilityRole={
+        (id === 'limits' && isCardLimitsAvailable('PI', host.country)) ||
+        (id === 'push-notifications' && host.country !== 'IT')
+          ? 'button'
+          : undefined
+      }
+      onPress={
+        id === 'limits' && isCardLimitsAvailable('PI', host.country) && card
+          ? () => setLimitsOpen(true)
+          : id === 'push-notifications' && host.country !== 'IT' && card
+          ? () => setNotificationsOpen(true)
+          : undefined
+      }
       style={[
         parityStyles.item20,
         {
@@ -456,7 +518,7 @@ export function CardOptionsScreen(host: CurrentScreenProps) {
           color={host.tokens.text}
         />
       </View>
-    </View>
+    </Pressable>
   );
   return (
     <Page
@@ -503,6 +565,19 @@ export function CardOptionsScreen(host: CurrentScreenProps) {
           )}
         </View>
       </View>
+      {limitsOpen && card ? (
+        <CardLimitsSheet
+          country={host.country}
+          cardId={card.id}
+          available={
+            card.type === 'credit_card'
+              ? card.availableCredit
+              : Math.abs(card.balance)
+          }
+          dark={host.tokens.background === '#121212'}
+          onClose={() => setLimitsOpen(false)}
+        />
+      ) : null}
     </Page>
   );
 }

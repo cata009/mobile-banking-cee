@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { formatMoneyNumber } from '@/app/registry/countryConfig';
 import { BaselinePageHeader } from '../../../../universal/BaselinePageHeader';
@@ -7,6 +7,7 @@ import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../contracts';
 import { bankingProducts } from '../banking/model';
+import { blockedCardsSnapshot, subscribeBlockedCards, isCardBlocked } from '../banking/blockedCardStore';
 
 /** Source PageHeader geometry and sticky lifecycle for card information destinations. */
 export function RoBaselineCardPage({
@@ -68,6 +69,7 @@ export function RoBaselineCardPage({
 }
 
 export default function RoBaselineCardInfo(host: CurrentScreenProps) {
+  const blockedCards = useSyncExternalStore(subscribeBlockedCards, blockedCardsSnapshot, blockedCardsSnapshot);
   const cards = bankingProducts(host).cards,
     card =
       cards.find(
@@ -98,7 +100,7 @@ export default function RoBaselineCardInfo(host: CurrentScreenProps) {
         />
         <BaselineAccountInfoField
           title="Card status"
-          subtitle="Active"
+          subtitle={(host.bankingPresentation?.productId === card.id && host.bankingPresentation.cardStatus ? host.bankingPresentation.cardStatus !== 'active' : isCardBlocked(blockedCards, host.country, card.id)) ? 'Blocked' : 'Active'}
           dark={dark}
         />
         <BaselineAccountInfoField
