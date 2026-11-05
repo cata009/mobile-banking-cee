@@ -133,6 +133,8 @@ export function Page({
   footerBottom = 34,
   titleAccessory,
   raised = false,
+  compactTitle = false,
+  headerTitle,
   showBack = true,
   backGlyph = 'back-heavy',
 }: {
@@ -158,6 +160,8 @@ export function Page({
   footerBottom?: number;
   titleAccessory?: React.ReactNode;
   raised?: boolean;
+  compactTitle?: boolean;
+  headerTitle?: React.ReactNode;
   showBack?: boolean;
   backGlyph?: 'back-heavy' | 'close-flow';
 }) {
@@ -198,8 +202,9 @@ export function Page({
             ? investmentColors.background
             : czInvestmentTokens.background,
         }}
-        title={progress > 0 ? title : ''}
-        collapsedTitleProgress={progress}
+        title={compactTitle || progress > 0 ? title : ''}
+        titleControl={headerTitle}
+        collapsedTitleProgress={compactTitle ? 1 : progress}
         onBack={onBack}
         showBack={showBack && !(duoClose && backGlyph === 'close-flow')}
         trailing={
@@ -242,14 +247,14 @@ export function Page({
           { paddingHorizontal: gutter },
         ]}
       >
-        {titleAccessory ? (
+        {!compactTitle && titleAccessory ? (
           <View style={[ui.titleRow, { opacity: 1 - progress }]}>
             <Copy strong header style={ui.accessoryTitle}>
               {title}
             </Copy>
             {titleAccessory}
           </View>
-        ) : (
+        ) : !compactTitle ? (
           <Copy
             header
             strong
@@ -261,7 +266,7 @@ export function Page({
           >
             {title}
           </Copy>
-        )}
+        ) : null}
         {description ? (
           <Copy
             muted={descriptionMuted}
@@ -567,7 +572,7 @@ export const ui = StyleSheet.create({
   },
   canonicalChipLabel: { fontSize: 14, lineHeight: 16, textTransform: 'none' },
   raised: {
-    marginTop: 8,
+    marginTop: 0,
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,

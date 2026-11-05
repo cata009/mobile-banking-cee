@@ -8,6 +8,7 @@ import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import { type RoboPortfolio } from '@/features/investments/robo/types'
 import { RoboScreen } from '@/app/screens/investments/robo/RoboScreen'
 import type * as React from 'react'
+import { useState } from 'react'
 
 export function CreationReviewScreen({
   goalType,
@@ -36,6 +37,7 @@ export function CreationReviewScreen({
   termsAccepted: boolean
   setStep: (value: CreationStep) => void
 }) {
+  const [contractRead, setContractRead] = useState(false)
   const reviewRows = buildRoboCreationReviewRows(
     goalType,
     goalName,
@@ -45,6 +47,14 @@ export function CreationReviewScreen({
   )
   const goalRows = reviewRows.filter((row) => row.section === 'goal')
   const planRows = reviewRows.filter((row) => row.section === 'plan')
+  const openTermsSheet = () => {
+    setContractRead(false)
+    setTermsSheetOpen(true)
+  }
+  const closeTermsSheet = () => {
+    setContractRead(false)
+    setTermsSheetOpen(false)
+  }
   const renderRows = (rows: typeof reviewRows) => (
     <div className="space-y-[24px] pt-[18px]">
       {rows.map((row) => (
@@ -65,22 +75,24 @@ export function CreationReviewScreen({
         termsSheetOpen ? (
           <BottomSheet
             title="Investment account contract"
-            onClose={() => setTermsSheetOpen(false)}
+            onClose={closeTermsSheet}
             closeLabel="Close investment account contract"
             fillHeight
             titleClassName="!text-[24px] !leading-[30px]"
             className="px-[24px] pb-[24px] pt-[20px]"
+            bodyClassName="overflow-hidden"
             footer={
               <div className="pt-[16px]">
                 <div className="flex justify-center pb-[16px]">
                   <LinkActionButton
-                    label="Download PDF"
-                    ariaLabel="Download PDF: Investment account contract"
+                    label="Download document"
+                    ariaLabel="Download document"
                     className="!min-h-0 !px-0"
                   />
                 </div>
                 <PrimaryButton
                   className="!w-full"
+                  disabled={!contractRead}
                   onClick={() => {
                     setTermsAccepted(true)
                     setTermsSheetOpen(false)
@@ -91,25 +103,78 @@ export function CreationReviewScreen({
               </div>
             }
           >
-            <div className="flex h-full min-h-0 w-full flex-col">
+            <div className="flex h-full min-h-0 w-full flex-col" data-testid="robo-security-account-contract">
               <div
-                className="flex min-h-0 flex-1 flex-col items-center justify-center gap-[10px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] p-[24px]"
-                data-testid="robo-security-account-contract"
+                data-testid="robo-contract-reader"
+                role="region"
+                aria-label="Investment account contract document"
+                /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Scrollable contract content needs keyboard focus. */
+                tabIndex={0}
+                onScroll={(event) => {
+                  const reader = event.currentTarget
+                  if (reader.scrollTop + reader.clientHeight >= reader.scrollHeight - 1) {
+                    setContractRead(true)
+                  }
+                }}
+                className="min-h-0 flex-1 overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface-muted)] focus-visible:outline-2 focus-visible:outline-[var(--uc-action)]"
               >
-                <svg
-                  aria-hidden="true"
-                  className="size-[32px] text-[var(--uc-text-muted)]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    clipRule="evenodd"
-                    d="M16.9132 0H3V20.25C3 22.3211 4.67893 24 6.75 24H21.75V4.8375L16.9132 0ZM6.75 15.75H18V14.25H6.75V15.75ZM18 19.5H6.75V18H18V19.5ZM6.75 12H12.75V10.5H6.75V12ZM15.75 1.5V6H20.25L15.75 1.5Z"
-                    fill="currentColor"
-                    fillRule="evenodd"
-                  />
-                </svg>
-                <p className="text-center uc-type-n5-strong leading-[20px] text-[var(--uc-text-muted)]">PDF document</p>
+                <article className="flex min-h-[960px] flex-col gap-[20px] bg-[var(--uc-surface)] p-[24px] text-[var(--uc-text)]">
+                  <div className="text-center">
+                    <h2 className="uc-type-h2 uppercase">Investment account terms</h2>
+                    <p className="uc-type-n4-strong mt-[20px]">Demonstration document</p>
+                    <p className="uc-type-n5 mt-[8px] text-[var(--uc-text-muted)]">
+                      Demo reference INV-DEMO-0001 | Version 1.0
+                    </p>
+                  </div>
+                  <p className="uc-type-n4 leading-[22px]">
+                    Sample terms for the investment goal prototype. Names, terms and amounts are fictional. This
+                    document does not open an account, place an order or provide legal or investment advice.
+                  </p>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">1. Parties and purpose</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      This sample agreement describes how a demonstration investment account may be used to support a
+                      goal. The client and service provider details shown in this preview are fictional.
+                    </p>
+                  </section>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">2. Account use</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      The account is intended to hold eligible investment products selected for the goal. Account
+                      information, available services and product eligibility would be confirmed by the bank before
+                      opening a real account.
+                    </p>
+                  </section>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">3. Orders and settlement</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      Each investment order would be reviewed and authorized separately. Execution timing, settlement
+                      and any cancellation rights depend on the applicable product terms and market conditions.
+                    </p>
+                  </section>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">4. Costs and statements</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      Applicable charges and product costs would be provided before an order is placed. Account
+                      statements and service notices would be sent to the contact details confirmed by the client.
+                    </p>
+                  </section>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">5. Investment risk</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      Investments can rise or fall in value. Returns are not guaranteed and the client may receive back
+                      less than the amount invested. Product information and suitability should be reviewed before any
+                      real order is made.
+                    </p>
+                  </section>
+                  <section className="space-y-[8px]">
+                    <h3 className="uc-type-n4-strong">6. Demonstration notice</h3>
+                    <p className="uc-type-n4 leading-[22px]">
+                      This demonstration text is illustrative only. It is not a contract, does not create a banking
+                      relationship and must not be used as the terms for a real investment account.
+                    </p>
+                  </section>
+                </article>
               </div>
             </div>
           </BottomSheet>
@@ -130,7 +195,7 @@ export function CreationReviewScreen({
           type="button"
           className="flex min-w-0 flex-1 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2"
           aria-label="Review terms and conditions"
-          onClick={() => setTermsSheetOpen(true)}
+          onClick={openTermsSheet}
         >
           <span className="uc-type-n4-strong text-[var(--uc-text)]">Terms &amp; conditions</span>
           <span className="uc-type-n4 mt-[4px] text-[var(--uc-text)]">
@@ -141,7 +206,7 @@ export function CreationReviewScreen({
           ariaLabel="Accept terms and conditions"
           checked={termsAccepted}
           onToggle={(checked) => {
-            if (checked) setTermsSheetOpen(true)
+            if (checked) openTermsSheet()
             else setTermsAccepted(false)
           }}
         />

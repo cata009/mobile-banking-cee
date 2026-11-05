@@ -41,6 +41,7 @@ import { nativeCreditLimits } from './banking/creditLimitStore';
 import { nativeVirtualCards } from './banking/virtualCardStore';
 import { isLocalVirtualCardRoute } from './banking/virtualCardRouting';
 import { currentInvestmentPresentation } from './investments/presentation';
+import { isFutureInvestmentRelease } from '@/features/investments/future-overview/model';
 import {
   createCurrentTranslator,
   currentFeature,
@@ -591,15 +592,21 @@ export default function NativeCurrentApp({
               s.page,
               {
                 backgroundColor:
-                  isPiClassicCompositionContext(host) &&
-                  ['payments', 'products', 'profile', 'pfm'].includes(
-                    current.screen,
-                  )
+                  current.screen === 'investments' &&
+                  isFutureInvestmentRelease(country, host.release)
                     ? sourceColor(
-                        'var(--uc-surface)',
+                        'var(--uc-app-bg)',
                         tokens.background === '#121212',
                       )
-                    : tokens.background,
+                    : isPiClassicCompositionContext(host) &&
+                        ['payments', 'products', 'profile', 'pfm'].includes(
+                          current.screen,
+                        )
+                      ? sourceColor(
+                          'var(--uc-surface)',
+                          tokens.background === '#121212',
+                        )
+                      : tokens.background,
               },
             ]
       }

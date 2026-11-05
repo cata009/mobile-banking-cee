@@ -27,7 +27,12 @@ export type NavigationRoute =
   | { screen: CardRouteScreen; cardId?: string | null }
   | { screen: AccountRouteScreen; accountId?: string | null }
   | { screen: 'transaction-detail'; source?: 'account' | 'card'; accountId?: string | null; cardId?: string | null }
-  | { screen: Exclude<Screen, CardRouteScreen | AccountRouteScreen | 'transaction-detail' | 'products' | FeatureRouteScreen> }
+  | {
+      screen: Exclude<
+        Screen,
+        CardRouteScreen | AccountRouteScreen | 'transaction-detail' | 'products' | FeatureRouteScreen
+      >
+    }
 
 type NavigationDestination = Screen | NavigationRoute
 

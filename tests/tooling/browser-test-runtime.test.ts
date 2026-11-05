@@ -3,6 +3,17 @@
 import { describe, expect, it } from 'vitest'
 
 describe('browser test runtime', () => {
+  it('measures the mounted Native viewport in jsdom', () => {
+    const host = document.createElement('div')
+    host.dataset.nativeCurrentHost = 'true'
+    const viewport = document.createElement('div')
+    host.append(viewport)
+    document.body.append(host)
+    expect(viewport.offsetWidth).toBe(375)
+    expect(viewport.offsetHeight).toBe(812)
+    host.remove()
+  })
+
   it('gives responsive charts deterministic positive geometry', () => {
     const element = document.createElement('div')
     element.className = 'recharts-responsive-container'

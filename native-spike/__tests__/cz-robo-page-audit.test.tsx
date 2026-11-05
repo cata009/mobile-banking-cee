@@ -28,8 +28,8 @@ function press(tree: Renderer.ReactTestRenderer, label: string) {
   act(() => button.props.onPress());
 }
 function toName(tree: Renderer.ReactTestRenderer) {
-  press(tree, 'Create Goal');
   press(tree, 'I confirm these data');
+  press(tree, 'Create Goal');
   press(tree, 'Continue');
   press(
     tree,
@@ -52,6 +52,7 @@ function change(
 
 test('intro uses the three Figma icons, exact subtitle, legal note, and canonical CTA', () => {
   const tree = render();
+  press(tree, 'I confirm these data');
   expect(
     tree.root.findAllByType(SourceCustomIcon).map(n => n.props.name),
   ).toEqual(

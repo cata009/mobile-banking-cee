@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import type { InvestmentBasketFundHolding } from '@/app/config/investmentBasketFundsConfig';
 import {
@@ -14,7 +14,7 @@ import { Amount } from '../investments/Amount';
 import { PerformanceChart } from '../investments/Charts';
 import { Copy, Notice } from '../investments/Primitives';
 import { BaselineInvestmentPeriodChips } from '../../../../../universal/BaselineInvestmentPeriodChips';
-import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
+import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigationRow';
 
 const holdingPeriods = INVESTMENT_PERIODS.filter(period => period.id !== '6m');
 
@@ -75,27 +75,17 @@ export function HoldingDetails({
               {security.description}
             </Copy>
           </View>
-          <Pressable
-            style={s.documentRow}
-            accessibilityRole="button"
-            accessibilityLabel="Open Key Information Document (KID)"
+          <BaselineNavigationRow
+            title="Key Information Document (KID)"
+            description={security.title}
+            leadingIconName="investment-documents"
+            trailingAccessory="chevron"
+            chevronIconName="chevron-link"
+            rowHeight={80}
+            ariaLabel="Open Key Information Document (KID)"
             onPress={() => setDocumentOpen(true)}
-          >
-            <SourceCustomIcon
-              name="investment-documents"
-              size={24}
-              color="#262626"
-            />
-            <View style={s.documentCopy}>
-              <Copy strong style={s.documentTitle}>
-                Key Information Document (KID)
-              </Copy>
-              <Copy muted style={s.documentSubtitle}>
-                {security.title}
-              </Copy>
-            </View>
-            <SourceCustomIcon name="chevron-right" size={24} color="#262626" />
-          </Pressable>
+            style={s.documentRow}
+          />
           <DetailField label="Last update" value={security.lastUpdate} />
         </>
       ) : (
@@ -185,8 +175,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    paddingLeft: 0,
+    paddingRight: 0,
   },
-  documentCopy: { flex: 1, gap: 4 },
-  documentTitle: { fontSize: 16, lineHeight: 18 },
-  documentSubtitle: { fontSize: 16, lineHeight: 18 },
 });

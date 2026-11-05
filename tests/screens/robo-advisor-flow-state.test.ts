@@ -10,7 +10,7 @@ import {
 describe('Robo Advisor flow state', () => {
   it('creates an empty draft for a new goal and restores an existing goal', () => {
     expect(createRoboAdvisorFlowState()).toMatchObject({
-      step: 'intro',
+      step: 'contact',
       goalName: '',
       targetAmount: '',
       selectedPortfolio: null,
@@ -43,6 +43,16 @@ describe('Robo Advisor flow state', () => {
         strategyId: 'sustainable-balanced',
       },
     })
+  })
+
+  it('places contact confirmation before the introduction and returns Back to contact', () => {
+    const navigation = {
+      previousStep: 'strategy' as const,
+      previousPortfolioStep: 'strategy' as const,
+    }
+    expect(getRoboAdvisorBackStep({ ...navigation, step: 'contact' }, true)).toBeNull()
+    expect(getRoboAdvisorBackStep({ ...navigation, step: 'intro' }, true)).toBe('contact')
+    expect(getRoboAdvisorBackStep({ ...navigation, step: 'profile' }, true)).toBe('intro')
   })
 
   it('keeps preset and manual horizons mutually exclusive', () => {

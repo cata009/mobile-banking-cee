@@ -20,6 +20,97 @@ const items = [
   { screen: 'products', key: 'products', icon: 'nav-products' },
   { screen: 'profile', key: 'more', icon: 'nav-more' },
 ] as const;
+export interface CzechNavigationBarItem {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+export function CzechNavigationBar({
+  items: navigationItems,
+  value,
+  language,
+  dark = false,
+  label,
+  vertical = false,
+  primaryId,
+  onSelect,
+}: {
+  items: readonly CzechNavigationBarItem[];
+  value: string;
+  language: 'en' | 'cs';
+  dark?: boolean;
+  label?: string;
+  vertical?: boolean;
+  primaryId?: string;
+  onSelect: (id: string) => void;
+}) {
+  const accent = dark ? '#65d9d2' : '#007a91';
+  const muted = dark ? '#b9b9b9' : '#666666';
+  const glass = {
+    backgroundColor: dark ? 'rgba(19,22,23,0.68)' : 'rgba(246,247,247,0.62)',
+    borderColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.70)',
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(26px) saturate(1.22)',
+          WebkitBackdropFilter: 'blur(26px) saturate(1.22)',
+          boxShadow: dark
+            ? 'inset 0 1px 0 rgba(255,255,255,0.16), 0 18px 42px rgba(0,0,0,0.30)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.92), 0 18px 42px rgba(17,30,31,0.16)',
+        }
+      : {}),
+  };
+  return (
+    <View
+      accessibilityLabel={
+        label ?? (language === 'cs' ? 'Hlavní navigace' : 'Primary navigation')
+      }
+      style={[vertical ? s.verticalBar : s.bar, glass]}
+    >
+      {navigationItems.map(item => {
+        const selected = item.id === value;
+        const primary = item.id === primaryId;
+        const color = primary || selected ? accent : muted;
+        return (
+          <Pressable
+            key={item.id}
+            accessibilityRole="tab"
+            accessibilityLabel={item.label}
+            accessibilityState={{ selected }}
+            aria-selected={selected}
+            onPress={() => onSelect(item.id)}
+            style={vertical ? s.verticalItem : s.item}
+          >
+            <View
+              style={
+                primary
+                  ? {
+                      width: 34,
+                      height: 28,
+                      borderRadius: 10,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: accent,
+                    }
+                  : undefined
+              }
+            >
+              <SourceCustomIcon
+                name={item.icon}
+                size={22}
+                color={primary ? (dark ? '#131617' : '#ffffff') : color}
+              />
+            </View>
+            {!vertical && (
+              <Text style={[s.label, { color }]}>{item.label}</Text>
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 export function isCzechPrimaryScreen(screen: CzechNativeScreen): boolean {
   return items.some(item => item.screen === screen);
 }
@@ -44,22 +135,6 @@ export default function CzechPrimaryNavigation({
 }) {
   const system = useColorScheme();
   const dark = mode === 'dark' || (mode === 'system' && system === 'dark');
-  const accent = dark ? '#65d9d2' : '#007a91';
-  const muted = dark ? '#b9b9b9' : '#666666';
-  // Glass: translucent fill so the page stays visible underneath, with a blur on web.
-  const glass = {
-    backgroundColor: dark ? 'rgba(19,22,23,0.68)' : 'rgba(246,247,247,0.62)',
-    borderColor: dark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.70)',
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(26px) saturate(1.22)',
-          WebkitBackdropFilter: 'blur(26px) saturate(1.22)',
-          boxShadow: dark
-            ? 'inset 0 1px 0 rgba(255,255,255,0.16), 0 18px 42px rgba(0,0,0,0.30)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.92), 0 18px 42px rgba(17,30,31,0.16)',
-        }
-      : {}),
-  };
   const labels = (language === 'cs' ? cs : en).navigation;
   return (
     <View
@@ -67,39 +142,22 @@ export default function CzechPrimaryNavigation({
         vertical ? s.verticalDock : s.dock,
         {
           ...(vertical ? { top: verticalTop + verticalActionCount * 60 } : {}),
-          bottom: vertical
-            ? 12
-            : bottomInset + 8,
+          bottom: vertical ? 12 : bottomInset + 8,
         },
       ]}
     >
-      <View
-        accessibilityLabel={
-          language === 'cs' ? 'Hlavní navigace' : 'Primary navigation'
-        }
-        style={[vertical ? s.verticalBar : s.bar, glass]}
-      >
-        {items.map(item => {
-          const selected = item.screen === screen;
-          const color = selected ? accent : muted;
-          return (
-            <Pressable
-              key={item.screen}
-              accessibilityRole="tab"
-              accessibilityLabel={labels[item.key]}
-              accessibilityState={{ selected }}
-              aria-selected={selected}
-              onPress={() => onSelect(item.screen)}
-              style={vertical ? s.verticalItem : s.item}
-            >
-              <SourceCustomIcon name={item.icon} size={22} color={color} />
-              {!vertical && (
-                <Text style={[s.label, { color }]}>{labels[item.key]}</Text>
-              )}
-            </Pressable>
-          );
-        })}
-      </View>
+      <CzechNavigationBar
+        items={items.map(item => ({
+          id: item.screen,
+          label: labels[item.key],
+          icon: item.icon,
+        }))}
+        value={screen}
+        language={language}
+        dark={dark}
+        vertical={vertical}
+        onSelect={id => onSelect(id as CzechNativeScreen)}
+      />
     </View>
   );
 }

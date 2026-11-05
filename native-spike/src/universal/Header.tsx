@@ -9,6 +9,7 @@ import { useEvoDuoBackAction } from './EvoDuoNavigation';
 export function Header({
   tokens,
   title,
+  titleControl,
   onBack,
   backLabel = 'Back',
   backIcon,
@@ -26,6 +27,7 @@ export function Header({
   duoActionActive = true,
 }: Themed & {
   title: string;
+  titleControl?: React.ReactNode;
   onBack: () => void;
   backLabel?: string;
   backIcon?: React.ReactNode;
@@ -95,19 +97,21 @@ export function Header({
                 },
               ]}
             >
-              <Text
-                accessibilityRole="header"
-                numberOfLines={1}
-                style={[
-                  s.collapsedTitle,
-                  {
-                    fontFamily: tokens.strongFont,
-                    color: tokens.text,
-                  },
-                ]}
-              >
-                {title}
-              </Text>
+              {titleControl ?? (
+                <Text
+                  accessibilityRole="header"
+                  numberOfLines={1}
+                  style={[
+                    s.collapsedTitle,
+                    {
+                      fontFamily: tokens.strongFont,
+                      color: tokens.text,
+                    },
+                  ]}
+                >
+                  {title}
+                </Text>
+              )}
               {headerSubtitle && (
                 <Text
                   numberOfLines={1}

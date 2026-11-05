@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import type { CurrentScreenProps } from '../../../contracts';
 import { Text } from '../../../../../../universal/Typography';
 import { BaselineAccountActionBar } from '../../../../../../universal/BaselineAccountActionBar';
+import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { ProductLogo } from '../../../../cz/evo-2027/investments/ProductRow';
 import { BaselineInvestmentFrame, investmentColor } from '../Frame';
 import {
@@ -68,7 +69,7 @@ export function BaselineInvestmentHistoryDetail({
   } as const;
   const renderStyle4 = {
     opacity: 1 - progress,
-    maxHeight: 280 * (1 - progress),
+    maxHeight: 320 * (1 - progress),
   } as const;
   const renderStyle5 = {
     ...text,
@@ -132,6 +133,24 @@ export function BaselineInvestmentHistoryDetail({
           </Text>
         </Text>
         <Text style={[renderStyle7, baselineStyles.inline9]}>255 PCS</Text>
+        {!isOrder ? (
+          <View style={baselineStyles.inline21}>
+            <SourceCustomIcon
+              name={
+                type === 'BUY' || type === 'COUPON'
+                  ? 'trade-buy'
+                  : 'trade-sell'
+              }
+              size={28}
+              color={investmentColor(
+                host,
+                type === 'BUY' || type === 'COUPON'
+                  ? '--uc-green-olive'
+                  : '--uc-status-red',
+              )}
+            />
+          </View>
+        ) : null}
         <Text style={[renderStyle8, baselineStyles.inline10]}>{type}</Text>
         <Text style={[renderStyle9, baselineStyles.inline11]}>{date.long}</Text>
         {selected.kind === 'order' ? (
@@ -310,5 +329,8 @@ const baselineStyles = StyleSheet.create({
   },
   inline20: {
     height: 26,
+  },
+  inline21: {
+    marginTop: 4,
   },
 });

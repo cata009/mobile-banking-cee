@@ -27,10 +27,7 @@ export const PRODUCTS_CUSTOM_ICONS = {
     width: 32,
     height: 32,
     viewBox: '0 0 32 32',
-    usage: [
-      'RS property-insurance preview',
-      'Native date fields across PI baseline and Evo screens',
-    ],
+    usage: ['RS property-insurance preview', 'Native date fields across PI baseline and Evo screens'],
     notes: 'Exact 19x20 calendar glyph supplied for shared native date fields.',
     render: () => (
       <path

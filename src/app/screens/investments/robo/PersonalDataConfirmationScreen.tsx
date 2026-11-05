@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { BottomSheet } from '@/app/components/BottomSheet'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import { AppIcon } from '@/app/components/icons'
 import { RoboScreen } from '@/app/screens/investments/robo/RoboScreen'
@@ -10,6 +12,22 @@ export function PersonalDataConfirmationScreen({
   onConfirm: () => void
   onClose?: () => void
 }) {
+  const [infoSheet, setInfoSheet] = useState<'phone' | 'email' | null>(null)
+  const infoContent =
+    infoSheet === 'phone'
+      ? {
+          title: 'Phone number',
+          body: 'A phone number is required to receive one time passwords via SMS to confirm and digitally sign.',
+          closeLabel: 'Close phone number information',
+        }
+      : infoSheet === 'email'
+        ? {
+            title: 'Email Address',
+            body: 'An email address is needed in order to send pre-contractual documentation and official periodical statements.',
+            closeLabel: 'Close email address information',
+          }
+        : null
+
   return (
     <RoboScreen
       title={"First of all,\nlet's check your data"}
@@ -19,6 +37,19 @@ export function PersonalDataConfirmationScreen({
       onClose={onBack}
       headerAction="none"
       dataScreen="personal-data-confirmation"
+      overlay={
+        infoContent ? (
+          <BottomSheet
+            title={infoContent.title}
+            onClose={() => setInfoSheet(null)}
+            closeLabel={infoContent.closeLabel}
+            className="px-[24px] pb-[24px] pt-[20px]"
+            bodyClassName="!overflow-visible"
+          >
+            <p className="text-[18px] leading-[24px] text-[var(--uc-text)]">{infoContent.body}</p>
+          </BottomSheet>
+        ) : undefined
+      }
       footer={
         <div className="space-y-[12px]">
           <PrimaryButton labelSize="18" onClick={onConfirm}>
@@ -45,9 +76,14 @@ export function PersonalDataConfirmationScreen({
                 {value}
               </dd>
             </div>
-            <span aria-hidden="true" className="shrink-0">
+            <button
+              type="button"
+              aria-label={`${label} information`}
+              onClick={() => setInfoSheet(label === 'Phone number' ? 'phone' : 'email')}
+              className="grid size-[40px] shrink-0 place-items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2"
+            >
               <AppIcon name="info-circle" size={24} color="var(--uc-text)" />
-            </span>
+            </button>
           </div>
         ))}
       </dl>

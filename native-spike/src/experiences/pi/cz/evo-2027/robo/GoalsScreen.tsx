@@ -15,12 +15,14 @@ export function CzGoalsScreen({
   onCreateGoal,
   onOpenGoal,
   amountsHidden = false,
+  portfolioSwitcher,
 }: {
   goals: readonly RoboExistingGoal[];
   onBack: () => void;
   onCreateGoal: () => void;
   onOpenGoal: (goal: RoboExistingGoal) => void;
   amountsHidden?: boolean;
+  portfolioSwitcher?: React.ReactNode;
 }) {
   const [help, setHelp] = useState(false);
   const [summarySize, setSummarySize] = useState(33.33);
@@ -39,6 +41,8 @@ export function CzGoalsScreen({
     <Page
       kind="goals"
       title="Your goals list"
+      compactTitle={!!portfolioSwitcher}
+      headerTitle={portfolioSwitcher}
       description="Track your plans, one step at a time"
       onBack={onBack}
       gray

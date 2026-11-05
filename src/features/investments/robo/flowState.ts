@@ -74,7 +74,7 @@ export function createRoboState(goal?: RoboExistingGoal, clock?: RoboDemoClock):
   const common = { draft, previousStep, previousPortfolioStep, reviewConsent: false, goalSource: 'incoming' as const }
   return goal && selectedPortfolio
     ? { ...common, kind: 'detail', goal, portfolio: selectedPortfolio, management: 'menu' }
-    : { ...common, kind: 'creation', stage: { kind: 'intro', portfolio: null }, quitOpen: false, publishedGoal: null }
+    : { ...common, kind: 'creation', stage: { kind: 'contact', portfolio: null }, quitOpen: false, publishedGoal: null }
 }
 
 export function getRoboFlowView(state: RoboState): RoboAdvisorFlowState {
@@ -95,9 +95,9 @@ export function getRoboFlowView(state: RoboState): RoboAdvisorFlowState {
 }
 
 const destinations: Partial<Record<RoboAdvisorCreationStep, readonly RoboAdvisorCreationStep[]>> = {
-  intro: ['contact'],
-  contact: ['intro', 'profile'],
-  profile: ['contact', 'goal-type'],
+  intro: ['contact', 'profile'],
+  contact: ['intro'],
+  profile: ['intro', 'goal-type'],
   'goal-type': ['profile', 'goal-name'],
   'goal-name': ['goal-type', 'target'],
   target: ['goal-name', 'portfolio', 'funding-setup', 'strategy'],

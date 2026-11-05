@@ -83,7 +83,7 @@ export function createRoboAdvisorFlowState(
   const hasPresetHorizon = [3, 5, 7, 10].includes(initialGoal?.horizonYears ?? 0)
 
   return {
-    step: initialGoal ? 'goal-detail' : 'intro',
+    step: initialGoal ? 'goal-detail' : 'contact',
     previousStep: 'strategy',
     previousPortfolioStep: 'strategy',
     goalType: '',
@@ -127,11 +127,11 @@ export function roboAdvisorFlowReducer(
 
 export function getRoboAdvisorBackStep(
   state: Pick<RoboAdvisorFlowState, 'step' | 'previousStep' | 'previousPortfolioStep'>,
-  requiresContactValidation: boolean,
+  _requiresContactValidation: boolean,
 ): RoboAdvisorCreationStep | null {
   const backMap: Partial<Record<RoboAdvisorCreationStep, RoboAdvisorCreationStep>> = {
-    contact: 'intro',
-    profile: requiresContactValidation ? 'contact' : 'intro',
+    intro: 'contact',
+    profile: 'intro',
     'goal-type': 'profile',
     'goal-name': 'goal-type',
     target: 'goal-name',

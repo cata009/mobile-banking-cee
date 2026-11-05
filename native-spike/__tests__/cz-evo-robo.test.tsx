@@ -1,4 +1,3 @@
-import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
 import { TextInput } from 'react-native';
@@ -45,7 +44,6 @@ describe('CZ Evo native Robo', () => {
       );
     });
 
-    press(tree, 'Create Goal');
     const editData = tree.root
       .findAllByType(PrimaryButton)
       .find(button => button.props.label === 'Edit data');
@@ -77,8 +75,8 @@ describe('CZ Evo native Robo', () => {
         />,
       );
     });
-    press(tree, 'Create Goal');
     press(tree, 'I confirm these data');
+    press(tree, 'Create Goal');
     press(tree, 'Continue');
     press(
       tree,
@@ -141,8 +139,9 @@ describe('CZ Evo native Robo', () => {
     press(tree, 'Add money');
     input(tree, 'Amount to invest now', '10000');
     press(tree, 'Review investment');
-    press(tree, 'Continue to sign');
-    await authorizeDemo(tree, 'Confirm investment');
+    press(tree, 'Accept terms and conditions');
+    press(tree, 'Buy');
+    press(tree, 'Confirm investment');
     expect(
       published.at(-1)!.orders!.some(order => order.status === 'PENDING'),
     ).toBe(true);
@@ -168,8 +167,8 @@ describe('CZ Evo native Robo', () => {
           />,
         );
       });
-      press(tree, 'Create Goal');
       press(tree, 'I confirm these data');
+      press(tree, 'Create Goal');
       const continueButtons = tree.root.findAll(
         node =>
           node.props.accessibilityLabel === 'Continue' &&

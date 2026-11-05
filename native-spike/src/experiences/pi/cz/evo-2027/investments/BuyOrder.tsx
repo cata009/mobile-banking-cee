@@ -147,7 +147,7 @@ export function BuyOrder({
         <Row title="Cash account" subtitle={account.name} />
         <Row title="Frequency" value="One off" />
         <Row title="Execution" value={executionLabel} />
-        <OrderDocuments security={security} />
+        <OrderDocuments currency={security.instrumentCurrency} />
         <Choice
           title="I have read and accept the terms and conditions."
           label="Accept terms and conditions"

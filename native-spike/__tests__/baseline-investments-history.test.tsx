@@ -1,6 +1,9 @@
 import React from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Renderer, { act } from 'react-test-renderer';
 import { BaselineInvestmentHistory } from '../src/experiences/pi/current/investments/baseline/flows/History';
+import { BaselineInvestmentHistoryDetail } from '../src/experiences/pi/current/investments/baseline/flows/HistoryDetail';
+import { investmentColor } from '../src/experiences/pi/current/investments/baseline/Frame';
 import { BaselineSearchBar } from '../src/universal/BaselineSearchBar';
 import { BaselineMailboxTabs } from '../src/universal/BaselineMailboxTabs';
 import { createCurrentInvestmentSnapshot } from '../src/experiences/pi/current/investments/model';
@@ -12,11 +15,15 @@ import {
   getHistoryTypesForTab,
   selectInvestmentHistoryRows,
 } from '@/features/investments/history/model';
+import type { InvestmentHistoryFilterState } from '@/app/config/investmentsPortfolioConfig';
 import { getCountryConfig } from '@/app/registry/countryConfig';
 import type { CurrentScreenProps } from '../src/experiences/pi/current/contracts';
 import type { Currency } from '@/data/products';
 import { addToRange } from 'react-day-picker';
+import { Text } from '../src/universal/Typography';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { selectHistoryCalendarDay } from '../src/experiences/pi/current/investments/baseline/flows/HistoryFilters';
+import { BaselineInvestmentHistoryFilters } from '../src/experiences/pi/current/investments/baseline/flows/HistoryFilters';
 function host(
   country: CurrentScreenProps['country'] = 'RO',
 ): CurrentScreenProps {
@@ -104,6 +111,36 @@ test.each(['RO', 'HU', 'RS', 'SI', 'CZ', 'SK', 'BA', 'BA_BL'] as const)(
     await act(() => tree.unmount());
   },
 );
+test.each([
+  ['BUY', 'trade-buy', '--uc-green-olive'],
+  ['SELL', 'trade-sell', '--uc-status-red'],
+] as const)(
+  'history transaction detail shows the %s direction icon used by its row',
+  async (type, iconName, colorToken) => {
+    const p = host('CZ'),
+      data = createCurrentInvestmentSnapshot(p),
+      transaction = data.transactions.find(item => item.type === type)!;
+    let tree!: Renderer.ReactTestRenderer;
+    await act(() => {
+      tree = Renderer.create(
+        <BaselineInvestmentHistoryDetail
+          host={p}
+          selected={{ kind: 'transaction', item: transaction }}
+          onBack={p.onBack}
+        />,
+      );
+    });
+    const direction = tree.root
+      .findAllByType(SourceCustomIcon)
+      .find(icon => icon.props.name === iconName);
+    expect(direction?.props).toMatchObject({
+      name: iconName,
+      size: 28,
+      color: investmentColor(p, colorToken),
+    });
+    await act(() => tree.unmount());
+  },
+);
 test('history filter subpage Back, clear/apply and selected detail preserve parent route', async () => {
   const p = host(),
     data = createCurrentInvestmentSnapshot(p);
@@ -140,6 +177,101 @@ test('history filter subpage Back, clear/apply and selected detail preserve pare
   expect(consumed).toBe(true);
   expect(rows(tree).length).toBeGreaterThan(0);
   expect(p.onBack).not.toHaveBeenCalled();
+  await act(() => tree.unmount());
+});
+test.each(['type', 'currency'] as const)(
+  'insets the %s select-all separator to the filter content width',
+  async mode => {
+    const p = host(),
+      filters: InvestmentHistoryFilterState = {
+        datePreset: 'last-year',
+        customStartDate: '2025-09-01',
+        customEndDate: '2026-06-30',
+        selectedTypes: [...getHistoryTypesForTab('transactions')],
+        selectedCurrencies: ['RON', 'EUR', 'USD'],
+        selectedStatuses: ['EXECUTED', 'PENDING', 'REJECTED'],
+      };
+    let tree!: Renderer.ReactTestRenderer;
+    await act(() => {
+      tree = Renderer.create(
+        <BaselineInvestmentHistoryFilters
+          host={p}
+          mode={mode}
+          filters={filters}
+          currencies={['RON', 'EUR', 'USD']}
+          tab="transactions"
+          onClose={jest.fn()}
+          onApply={jest.fn()}
+          onChange={jest.fn()}
+          onMode={jest.fn()}
+        />,
+      );
+    });
+    const selectAllRow = tree.root.findAll(
+      node => {
+        if (node.type !== View) return false;
+        return StyleSheet.flatten(node.props.style)?.borderBottomWidth === 1;
+      },
+    )[0];
+    expect(StyleSheet.flatten(selectAllRow.props.style)).toMatchObject({
+      marginHorizontal: 16,
+      paddingHorizontal: 8,
+    });
+    await act(() => tree.unmount());
+  },
+);
+test('uses a 2px outline for active history filter chips', async () => {
+  const p = host(),
+    data = createCurrentInvestmentSnapshot(p);
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <BaselineInvestmentHistory
+        host={p}
+        transactions={data.transactions}
+        orders={data.orders}
+        onBack={p.onBack}
+      />,
+    );
+  });
+  await act(() => tree.root.findByType(BaselineSearchBar).props.onFilterClick());
+  await act(() => press(tree, 'By type').props.onPress());
+  await act(() => press(tree, 'CLEAR').props.onPress());
+  await act(() => press(tree, 'BUY').props.onPress());
+  await act(() => press(tree, 'Apply').props.onPress());
+  const chip = tree.root.findAll(
+    node => {
+      if (node.type !== View) return false;
+      return (
+        StyleSheet.flatten(node.props.style)?.height === 30 &&
+        node.findAllByType(Text).some(textNode => textNode.props.children === 'BUY')
+      );
+    },
+  )[0];
+  expect(StyleSheet.flatten(chip.props.style).borderWidth).toBe(2);
+  await act(() => tree.unmount());
+});
+test('keeps a persistent vertical scrollbar on the Apply filters sheet', async () => {
+  const p = host(),
+    data = createCurrentInvestmentSnapshot(p);
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <BaselineInvestmentHistory
+        host={p}
+        transactions={data.transactions}
+        orders={data.orders}
+        onBack={p.onBack}
+      />,
+    );
+  });
+  await act(() => tree.root.findByType(BaselineSearchBar).props.onFilterClick());
+  const filterSheet = tree.root.findByProps({
+    testID: 'baseline-history-filter-Apply filters',
+  });
+  const filterScroll = filterSheet.findByType(ScrollView);
+  expect(filterScroll.props.showsVerticalScrollIndicator).toBe(true);
+  expect(filterScroll.props.persistentScrollbar).toBe(true);
   await act(() => tree.unmount());
 });
 test('restores the Source-maintained Orders tab and forwards later Native tab selections', async () => {

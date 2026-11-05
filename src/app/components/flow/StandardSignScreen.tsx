@@ -12,6 +12,7 @@ interface StandardSignScreenProps {
   actionLabel: string;
   onBack: () => void;
   onSign: () => void;
+  demoBypass?: boolean;
 }
 
 export default function StandardSignScreen({
@@ -21,12 +22,17 @@ export default function StandardSignScreen({
   actionLabel,
   onBack,
   onSign,
+  demoBypass = false,
 }: StandardSignScreenProps) {
   const [pin, setPin] = useState("******");
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const handleSign = () => {
     if (isAuthenticating) return;
+    if (demoBypass) {
+      onSign();
+      return;
+    }
     setIsAuthenticating(true);
   };
 

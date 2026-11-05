@@ -88,8 +88,9 @@ test('CZ Evo buy and sell review amounts follow the canonical Source FX quote po
         .filter(account => account.currency !== security.instrumentCurrency)
         .map(account => ({ security, account })),
     )
-    .find(({ security, account }) =>
-      buildInvestmentBuyOrderQuote(security, account, 1).hasSufficientBalance,
+    .find(
+      ({ security, account }) =>
+        buildInvestmentBuyOrderQuote(security, account, 1).hasSufficientBalance,
     );
   expect(buyCase).toBeDefined();
   if (!buyCase) return;
@@ -113,7 +114,11 @@ test('CZ Evo buy and sell review amounts follow the canonical Source FX quote po
   input(buyTree, 'Quantity', '1');
   press(buyTree, 'Next');
   expect(copy(buyTree)).toContain(
-    formatInvestmentMoney(buyQuote.productAmount, 'CZ', buyQuote.productCurrency),
+    formatInvestmentMoney(
+      buyQuote.productAmount,
+      'CZ',
+      buyQuote.productCurrency,
+    ),
   );
   expect(copy(buyTree)).toContain(
     formatInvestmentMoney(buyQuote.debitAmount, 'CZ', buyQuote.accountCurrency),
@@ -123,9 +128,7 @@ test('CZ Evo buy and sell review amounts follow the canonical Source FX quote po
   const sellCase = snapshot.catalog
     .filter(
       security =>
-        security.status === 'active' &&
-        security.owned &&
-        security.quantity > 0,
+        security.status === 'active' && security.owned && security.quantity > 0,
     )
     .flatMap(security =>
       snapshot.accounts
@@ -135,7 +138,9 @@ test('CZ Evo buy and sell review amounts follow the canonical Source FX quote po
   expect(sellCase).toBeDefined();
   if (!sellCase) return;
 
-  const quantity = Number(Math.min(sellCase.security.quantity, 0.25).toFixed(6));
+  const quantity = Number(
+    Math.min(sellCase.security.quantity, 0.25).toFixed(6),
+  );
   const unitsValue = String(quantity);
   const sellValidation = getInvestmentSellOrderValidation({
     security: sellCase.security,
@@ -176,7 +181,7 @@ test('CZ Evo buy and sell review amounts follow the canonical Source FX quote po
   act(() => sellTree.unmount());
 });
 
-test('CZ Evo investments route renders the shared Source Current baseline portfolio', async () => {
+test('CZ Evo investments route renders the Future overview inside the shared controller', async () => {
   const tree = await mount(
     <InvestmentsScreenWithClassicHost
       snapshot={createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS)}
@@ -186,9 +191,7 @@ test('CZ Evo investments route renders the shared Source Current baseline portfo
   );
 
   expect(
-    tree.root.findAll(
-      node => node.props.testID === 'baseline-investment-portfolio-chart',
-    ),
+    tree.root.findAll(node => node.props.testID === 'future-portfolio-chart'),
   ).not.toHaveLength(0);
   expect(
     tree.root.findAll(node => node.props.testID === 'cz-investment-portfolio'),
@@ -210,8 +213,9 @@ test('Source buy request enters the baseline order and is consumed once', async 
         .filter(account => account.currency !== security.instrumentCurrency)
         .map(account => ({ security, account })),
     )
-    .find(({ security, account }) =>
-      buildInvestmentBuyOrderQuote(security, account, 1).hasSufficientBalance,
+    .find(
+      ({ security, account }) =>
+        buildInvestmentBuyOrderQuote(security, account, 1).hasSufficientBalance,
     );
   expect(buyCase).toBeDefined();
   if (!buyCase) return;
@@ -288,7 +292,9 @@ test('Source investment-detail route opens the shared baseline instrument', asyn
   );
 
   expect(
-    tree.root.findAll(node => node.props.testID === 'investment-field-Product ID'),
+    tree.root.findAll(
+      node => node.props.testID === 'investment-field-Product ID',
+    ),
   ).not.toHaveLength(0);
   expect(copy(tree)).toContain(security.productId);
   await act(async () => tree.unmount());
@@ -305,7 +311,10 @@ test('Robo goals stay in the Evo investments composition when the classic host i
     />,
   );
 
-  expect(copy(tree)).toContain('Your goals list');
+  expect(
+    tree.root.findAll(node => node.props.testID === 'cz-goals').length,
+  ).toBeGreaterThan(0);
+  expect(copy(tree)).toContain('Změnit portfolio: Cíle');
   expect(
     tree.root.findAll(
       node => node.props.testID === 'baseline-investment-portfolio-chart',

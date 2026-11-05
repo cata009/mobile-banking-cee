@@ -567,7 +567,7 @@ export const APP_ICON_METADATA: readonly AppIconMetadata[] = [
     source: 'custom',
     width: 32,
     height: 32,
-    usage: ['RsPropertyInsurancePreviews insurance start date'],
+    usage: ['RS property-insurance preview', 'Native date fields across PI baseline and Evo screens'],
   },
   {
     name: 'robo-withdraw',

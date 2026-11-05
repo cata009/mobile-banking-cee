@@ -76,8 +76,6 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
   async function openGoalCreationContactStep() {
     fireEvent.click(await screen.findByRole('button', { name: 'Create New Goal' }))
-    await expectText('Invest towards what matters')
-    fireEvent.click(screen.getByRole('button', { name: 'Create Goal' }))
     await expectText('First of all')
   }
 
@@ -104,11 +102,19 @@ describe('Future CZ Homepage Investment goals routing', () => {
     await expectText('+420 777 123 456')
     await expectText('email.address@gmail.com')
     fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    await expectText('Invest towards what matters')
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(await screen.findByRole('button', { name: 'I confirm these data' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'I confirm these data' }))
+    await expectText('Invest towards what matters')
+    fireEvent.click(await screen.findByRole('button', { name: 'Create Goal' }))
     await expectText('Your risk profile')
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(await screen.findByRole('button', { name: 'Create Goal' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(await screen.findByRole('button', { name: 'I confirm these data' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
-    expect(await screen.findByRole('button', { name: 'Create Goal' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Create New Goal' })).toBeInTheDocument()
   }, 30_000)
 
   it('keeps the Source Edit data affordance on the Native contact step', async () => {

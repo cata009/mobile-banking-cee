@@ -266,12 +266,9 @@ describe('Native account information in the Web host', () => {
 
     const rail = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel"]')
     const productCards = () => [
-      ...container.querySelectorAll<HTMLElement>(
-        '[data-testid^="ro-account-carousel-"][aria-selected]',
-      ),
+      ...container.querySelectorAll<HTMLElement>('[data-testid^="ro-account-carousel-"][aria-selected]'),
     ]
-    const selectedIndex = () =>
-      productCards().findIndex(card => card.getAttribute('aria-selected') === 'true')
+    const selectedIndex = () => productCards().findIndex((card) => card.getAttribute('aria-selected') === 'true')
     expect(rail).toBeInTheDocument()
     expect(productCards().length).toBeGreaterThan(2)
     expect(selectedIndex()).toBe(0)
@@ -279,6 +276,8 @@ describe('Native account information in the Web host', () => {
     const dragOneCardForward = async () => {
       const currentRail = container.querySelector<HTMLElement>('[data-testid="ro-account-carousel"]')
       const dragTarget = productCards()[selectedIndex()]
+      if (!currentRail) throw new Error('The accounts carousel must be rendered before dragging.')
+      if (!dragTarget) throw new Error('The selected account card must be rendered before dragging.')
       expect(currentRail).toBeInTheDocument()
       expect(dragTarget).toBeInTheDocument()
       fireEvent.mouseDown(dragTarget, { button: 0, clientX: 350, clientY: 100 })

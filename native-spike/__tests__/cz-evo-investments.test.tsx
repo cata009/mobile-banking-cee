@@ -1,11 +1,14 @@
 import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { TextInput } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
+import { Header } from '../src/universal/Header';
 import { CzInvestmentsScreen } from '../src/experiences/pi/cz/evo-2027/investments';
 import { CZECH_INVESTMENTS_ADAPTER } from '../src/experiences/pi/cz/evo-2027/investments/adapter';
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
+import { ModuleNavigation } from '../src/experiences/pi/cz/evo-2027/investments/ModuleNavigation';
+import { Copy } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 
 function press(tree: Renderer.ReactTestRenderer, label: string) {
   const control = tree.root.findAll(
@@ -26,6 +29,56 @@ function input(tree: Renderer.ReactTestRenderer, label: string, value: string) {
   );
 }
 describe('CZ Evo native investments', () => {
+  it('uses a compact centered portfolio title and the Evo navigation treatment', () => {
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <CzInvestmentsScreen
+          snapshot={createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS)}
+          onBack={jest.fn()}
+        />,
+      );
+    });
+    const header = tree.root.findByType(Header);
+    expect(header.props.title).toBe('Portfolio details');
+    expect(header.props.collapsedTitleProgress).toBe(1);
+    expect(header.props.renderLargeTitle).toBe(false);
+    expect(
+      tree.root
+        .findAllByType(Copy)
+        .filter(node => node.props.children === 'Portfolio details'),
+    ).toHaveLength(0);
+    act(() => tree.unmount());
+
+    act(() => {
+      tree = Renderer.create(
+        <ModuleNavigation
+          value="portfolio"
+          variant="evo-2027"
+          onChange={jest.fn()}
+        />,
+      );
+    });
+    const [reserve, bar] = tree.root.findAllByType(View);
+    expect(StyleSheet.flatten(reserve.props.style)).toMatchObject({
+      paddingTop: 0,
+      backgroundColor: 'transparent',
+    });
+    expect(StyleSheet.flatten(bar.props.style)).toMatchObject({
+      borderColor: 'rgba(255,255,255,0.70)',
+      backgroundColor: 'rgba(246,247,247,0.62)',
+    });
+    expect(
+      tree.root
+        .findAll(
+          node =>
+            node.props.accessibilityRole === 'tab' &&
+            typeof node.props.onPress === 'function',
+        )
+        .map(node => node.props.accessibilityLabel),
+    ).toEqual(['Portfolio', 'Explore', 'Invest', 'Activity', 'More']);
+    act(() => tree.unmount());
+  });
   it('opens a canonical instrument, validates units and completes the native demo buy journey', async () => {
     const model = createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS);
     let tree!: Renderer.ReactTestRenderer;

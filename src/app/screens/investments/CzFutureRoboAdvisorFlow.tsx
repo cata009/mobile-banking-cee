@@ -373,7 +373,11 @@ export default function CzFutureRoboAdvisorFlow({
 
   if (step === 'intro') {
     return (
-      <IntroScreen onExit={requestExit} onCreate={() => setStep('contact')} />
+      <IntroScreen
+        onBack={goBackByStep}
+        onExit={requestExit}
+        onCreate={() => setStep('profile')}
+      />
     )
   }
 
@@ -381,7 +385,7 @@ export default function CzFutureRoboAdvisorFlow({
     return (
       <PersonalDataConfirmationScreen
         onBack={goBackByStep}
-        onConfirm={() => setStep('profile')}
+        onConfirm={() => setStep('intro')}
         onClose={requestExit}
       />
     )

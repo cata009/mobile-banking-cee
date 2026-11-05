@@ -15,8 +15,10 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  useColorScheme,
 } from 'react-native';
 import { Text } from '../../../../universal/Typography';
+import { sourceColor } from '../../../../universal/sourceColor';
 import { SearchField } from '../../../../universal/SearchField';
 import { ActionButton } from '../../../../universal/ActionButton';
 import { NavigationRow } from '../../../../universal/NavigationRow';
@@ -412,6 +414,10 @@ export default function NativeCzechApp({
       : 'en'
     : language;
   const displayMode = control?.mode ?? mode;
+  const systemScheme = useColorScheme();
+  const displayDark =
+    displayMode === 'dark' ||
+    (displayMode === 'system' && systemScheme === 'dark');
   const displayHomeTheme = control?.homeTheme ?? homeTheme;
   const displayAmountsHidden = control?.amountsHidden ?? amountsHidden;
   const onBackHandlerChange =
@@ -691,6 +697,12 @@ export default function NativeCzechApp({
                     style={[
                       s.page,
                       { paddingTop },
+                      route.screen === 'investments' && {
+                        backgroundColor: sourceColor(
+                          'var(--uc-app-bg)',
+                          displayDark,
+                        ),
+                      },
                       verticalNavigation &&
                         !['prelogin', 'login'].includes(route.screen) && {
                           right: duo?.rightInset,
@@ -707,79 +719,79 @@ export default function NativeCzechApp({
                           : 0
                       }
                     >
-                    <EvoDuoNavigationScope active={active}>
-                      {route.screen === 'search' ? (
-                        <ScrollView
-                          contentContainerStyle={[
-                            s.content,
-                            { paddingTop: 16 + screenTopInset },
-                          ]}
-                          keyboardShouldPersistTaps="handled"
-                        >
-                          <AdaptiveBackButton
-                            label={displayLanguage === 'cs' ? 'Zpět' : 'Back'}
-                            onBack={routeProps.onBack}
-                          />
-                          <Text style={s.title}>
-                            {displayLanguage === 'cs' ? 'Hledat' : 'Search'}
-                          </Text>
-                          <SearchField
-                            tokens={tokens}
-                            autoFocus={active}
-                            value={query}
-                            onChange={guard(setQuery)}
-                            onSubmit={() => {}}
-                            onClear={guard(() => setQuery(''))}
-                            placeholder={
-                              displayLanguage === 'cs'
-                                ? 'Hledat produkty a služby'
-                                : 'Search products and services'
-                            }
-                            label={
-                              displayLanguage === 'cs' ? 'Hledat' : 'Search'
-                            }
-                            clearLabel={
-                              displayLanguage === 'cs'
-                                ? 'Vymazat'
-                                : 'Clear search'
-                            }
-                          />
-                          {search.map(entry => (
-                            <NavigationRow
-                              key={entry.id}
-                              tokens={tokens}
-                              title={entry.label}
-                              subtitle={entry.subtitle}
-                              payload={entry.target}
-                              onSelect={routeProps.onNavigate}
+                      <EvoDuoNavigationScope active={active}>
+                        {route.screen === 'search' ? (
+                          <ScrollView
+                            contentContainerStyle={[
+                              s.content,
+                              { paddingTop: 16 + screenTopInset },
+                            ]}
+                            keyboardShouldPersistTaps="handled"
+                          >
+                            <AdaptiveBackButton
+                              label={displayLanguage === 'cs' ? 'Zpět' : 'Back'}
+                              onBack={routeProps.onBack}
                             />
-                          ))}
-                          {!search.length && (
-                            <Text style={s.body}>
-                              {displayLanguage === 'cs'
-                                ? 'Žádné dostupné výsledky.'
-                                : 'No available results.'}
+                            <Text style={s.title}>
+                              {displayLanguage === 'cs' ? 'Hledat' : 'Search'}
                             </Text>
-                          )}
-                        </ScrollView>
-                      ) : Screen ? (
-                        <Screen {...routeProps} />
-                      ) : (
-                        <View style={s.content}>
-                          <Text style={s.title}>CZ Evo 2027</Text>
-                          <Text style={s.body}>
-                            Tato obrazovka ještě není dostupná v nativní
-                            migraci: {route.screen}.
-                          </Text>
-                          <ActionButton
-                            tokens={tokens}
-                            label="Zpět"
-                            secondary
-                            onPress={onBack}
-                          />
-                        </View>
-                      )}
-                    </EvoDuoNavigationScope>
+                            <SearchField
+                              tokens={tokens}
+                              autoFocus={active}
+                              value={query}
+                              onChange={guard(setQuery)}
+                              onSubmit={() => {}}
+                              onClear={guard(() => setQuery(''))}
+                              placeholder={
+                                displayLanguage === 'cs'
+                                  ? 'Hledat produkty a služby'
+                                  : 'Search products and services'
+                              }
+                              label={
+                                displayLanguage === 'cs' ? 'Hledat' : 'Search'
+                              }
+                              clearLabel={
+                                displayLanguage === 'cs'
+                                  ? 'Vymazat'
+                                  : 'Clear search'
+                              }
+                            />
+                            {search.map(entry => (
+                              <NavigationRow
+                                key={entry.id}
+                                tokens={tokens}
+                                title={entry.label}
+                                subtitle={entry.subtitle}
+                                payload={entry.target}
+                                onSelect={routeProps.onNavigate}
+                              />
+                            ))}
+                            {!search.length && (
+                              <Text style={s.body}>
+                                {displayLanguage === 'cs'
+                                  ? 'Žádné dostupné výsledky.'
+                                  : 'No available results.'}
+                              </Text>
+                            )}
+                          </ScrollView>
+                        ) : Screen ? (
+                          <Screen {...routeProps} />
+                        ) : (
+                          <View style={s.content}>
+                            <Text style={s.title}>CZ Evo 2027</Text>
+                            <Text style={s.body}>
+                              Tato obrazovka ještě není dostupná v nativní
+                              migraci: {route.screen}.
+                            </Text>
+                            <ActionButton
+                              tokens={tokens}
+                              label="Zpět"
+                              secondary
+                              onPress={onBack}
+                            />
+                          </View>
+                        )}
+                      </EvoDuoNavigationScope>
                     </PrimaryNavigationInsetContext.Provider>
                   </View>
                 );

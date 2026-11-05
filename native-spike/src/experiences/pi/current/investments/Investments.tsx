@@ -55,6 +55,7 @@ import { CzInvestmentsScreen } from '../../cz/evo-2027/investments/InvestmentsSc
 import { ClassicPortfolio } from '../../cz/evo-2027/investments/ClassicPortfolio';
 import { createCzechInvestmentHost } from '../../cz/evo-2027/investments/hostAdapter';
 import { baselineCzRoboSession } from './RoboSession';
+import { isFutureInvestmentRelease } from '@/features/investments/future-overview/model';
 import BaselineInvestmentsController from './baseline/Controller';
 import { isPiBaselineInvestmentContext } from './baseline/policy';
 import type { CurrentAdapter, CurrentScreenProps } from '../contracts';
@@ -575,7 +576,10 @@ function RoboComposition(host: CurrentScreenProps) {
   );
 }
 export default function Investments(host: CurrentScreenProps) {
-  if (host.country === 'CZ' && currentFeature(host, 'fx_czRoboAdvisor'))
+  if (
+    (host.country === 'CZ' && currentFeature(host, 'fx_czRoboAdvisor')) ||
+    isFutureInvestmentRelease(host.country, host.release)
+  )
     return <RoboComposition {...host} />;
   if (isPiBaselineInvestmentContext(host))
     return (

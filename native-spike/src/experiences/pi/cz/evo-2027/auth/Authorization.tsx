@@ -30,6 +30,7 @@ export interface AuthorizationProps {
   isActive?: boolean;
   demoPresentation?: 'confirmation' | 'face-id';
   canonicalControls?: boolean;
+  demoBypass?: boolean;
 }
 /** Source standard-sign is a demonstration, not a PIN credential service. Device authentication is real only when the native port reports success. */
 export function Authorization({
@@ -45,6 +46,7 @@ export function Authorization({
   isActive = true,
   demoPresentation = 'confirmation',
   canonicalControls = false,
+  demoBypass = false,
 }: AuthorizationProps) {
   const tokens = useCurrentTokens();
   const [pin, setPin] = useState('******');
@@ -62,6 +64,7 @@ export function Authorization({
     setPin('******');
     onBack();
   }, [auth, onBack]);
+  const sign = demoBypass ? onSign : auth.sign;
   return (
     <Page
       title={title}
@@ -73,23 +76,25 @@ export function Authorization({
         canonicalControls ? (
           <PrimaryButton
             label={actionLabel}
-            onPress={auth.sign}
+            onPress={sign}
             disabled={
-              auth.busy ||
-              auth.demo ||
-              auth.available === null ||
-              auth.completed
+              !demoBypass &&
+              (auth.busy ||
+                auth.demo ||
+                auth.available === null ||
+                auth.completed)
             }
           />
         ) : (
           <Button
             label={actionLabel}
-            onPress={auth.sign}
+            onPress={sign}
             disabled={
-              auth.busy ||
-              auth.demo ||
-              auth.available === null ||
-              auth.completed
+              !demoBypass &&
+              (auth.busy ||
+                auth.demo ||
+                auth.available === null ||
+                auth.completed)
             }
           />
         )
