@@ -148,7 +148,7 @@ function FraudPresentation({ onClose, presentationUrl }: { onClose: () => void; 
               {chapterIndex === 0
                 ? 'Review each activity separately. Your decision applies only to that item.'
                 : chapterIndex === 1
-                  ? 'Choose whether to block the card. It freezes only after successful submission.'
+                  ? 'Choose whether to block the card. It stays blocked while the bank reviews your case.'
                   : chapterIndex === 2
                     ? 'See the current status, next steps and expected updates.'
                     : 'Manage card permissions and replacement in one place.'}

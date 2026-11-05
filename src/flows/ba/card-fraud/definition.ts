@@ -54,8 +54,8 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-home',
   },
   'fraud-transaction': {
-    primary: { label: "I don't recognise this payment. Block my card", to: 'fraud-dispute-intro' },
-    secondary: { label: 'I recognise this payment', to: 'fraud-recognised' },
+    primary: { label: "I don't recognise this payment", to: 'fraud-dispute-intro' },
+    secondary: { label: 'I made this payment', to: 'fraud-recognised' },
     extra: [
       { label: 'View existing dispute', to: 'fraud-case-status' },
       { label: 'Card used', to: 'fraud-cards' },
@@ -63,33 +63,36 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-alerts',
   },
   'fraud-dispute-intro': {
-    primary: { label: 'Continue to the appropriate form', to: 'fraud-claim-details' },
+    primary: { label: 'Open dispute', to: 'fraud-claim-details' },
     back: 'fraud-transaction',
   },
-  'fraud-recognised': { primary: { label: 'Review other activity', to: 'fraud-alerts' }, back: 'fraud-alerts' },
+  'fraud-recognised': {
+    primary: { label: 'Review other activity', to: 'fraud-alerts' },
+    secondary: { label: 'Protect my card', to: 'fraud-card-security' },
+    back: 'fraud-alerts',
+  },
   'fraud-attempt': { primary: { label: 'Review report', to: 'fraud-claim-review' }, back: 'fraud-transaction' },
   'fraud-claim-details': {
-    primary: { label: 'Review report / dispute', to: 'fraud-claim-review' },
+    primary: { label: 'Review dispute', to: 'fraud-claim-review' },
     back: 'fraud-transaction',
   },
   'fraud-claim-review': {
-    primary: { label: 'Sign report / dispute', to: 'fraud-claim-sent' },
+    primary: { label: 'Sign dispute', to: 'fraud-claim-sent' },
     back: 'fraud-claim-details',
   },
   'fraud-claim-sent': {
-    primary: { label: 'Continue', to: 'fraud-virtual-card-offer' },
+    primary: { label: 'Review other activity', to: 'fraud-alerts' },
     secondary: { label: 'Track this case', to: 'fraud-case-status' },
-    extra: [{ label: 'Protect my card', to: 'fraud-card-security' }],
+    extra: [{ label: 'Open a virtual card', to: 'fraud-virtual-card' }],
     back: 'fraud-transaction',
   },
   'fraud-virtual-card-offer': {
-    primary: { label: 'Create a virtual card', to: 'fraud-virtual-card' },
-    secondary: { label: 'Not now', to: 'fraud-case-status' },
+    primary: { label: 'Return to dispute', to: 'fraud-claim-sent' },
     back: 'fraud-claim-sent',
   },
   'fraud-virtual-card': {
     primary: { label: 'View virtual card', to: 'fraud-cards' },
-    back: 'fraud-virtual-card-offer',
+    back: 'fraud-claim-sent',
   },
   'fraud-case-status': {
     primary: { label: 'Ok I got it', to: 'fraud-baseline-transaction' },
@@ -208,13 +211,13 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           items: [
             'Aggregate suspicious events for one masked card, with distinct booked, pending and declined states.',
             'Recognising an event resolves only that alert and never submits a claim or retries a payment.',
-            'Ask explicitly whether to block the card with the unrecognised-payment action; freeze it only after successful submission.',
+            'Ask explicitly whether to block the card with the unrecognised-payment action; block it immediately when the customer continues.',
           ],
         },
         {
           title: 'Dispute submission',
           items: [
-            'Accept chargeback submissions only for booked payments.',
+            'Open a dispute case for pending or booked payments; chargeback submissions remain limited to booked payments.',
             'Collect a reason, an optional statement of up to 1000 characters and optional photos; require an explicit accuracy declaration.',
             'Provide edit/review, visible submission failure and safe retry without duplicate cases.',
           ],
@@ -251,8 +254,8 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           title: 'Detect → Respond → Follow → Protect',
           items: [
             'A notification opens an activity inbox; each item has its own identity and ledger status.',
-            'The customer explicitly chooses to report an unrecognised payment and block the card. Successful submission creates a report or booked-payment dispute and applies that block choice.',
-            'The booked-payment path offers Open dispute; pending and declined activity remain reports. The submitted receipt leads to a virtual-card choice and separate case tracking.',
+            'The customer explicitly chooses an unrecognised payment and requests a temporary card block. The card is blocked while the customer completes the case; successful submission creates a dispute for pending/booked payments or an activity report for a declined attempt.',
+            'Pending and booked payments use the dispute path; declined attempts remain activity reports. The submitted receipt leads to a virtual-card choice and separate case tracking.',
             'The professional modal provides four conceptual chapters around the same interactive phone; presenter fixtures are explicitly labelled.',
           ],
         },
@@ -318,13 +321,13 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         id: 'F4',
         group: 'Eligibility',
         statement:
-          'All three activity types use the full report form and explicit declaration. Pending/declined events create fraud reports; only a booked payment creates a dispute eligible for chargeback review.',
+          'All three activity types use the full case form and explicit declaration. Pending/booked payments create disputes; declined attempts create activity reports.',
       },
       {
         id: 'F5',
         group: 'Submission',
         statement:
-          'Sign report/dispute plays the existing Face ID signature simulation before submission. Each transaction has at most one linked case. Failure keeps the draft; retries and return navigation never create a duplicate.',
+          'Signing the dispute plays the existing Face ID signature simulation before submission. Each transaction has at most one linked case. Failure keeps the draft; retries and return navigation never create a duplicate.',
       },
       {
         id: 'F6',
@@ -460,13 +463,12 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
-        'fraud-virtual-card-offer',
         'fraud-virtual-card',
         'fraud-case-status',
         'fraud-cards',
         'fraud-card-security',
       ],
-      'Review the three current activities. Pending payments are explained as awaiting settlement; choose to block the card, submit a report and then decide about a virtual card.',
+      'Review the three current activities. Pending payments show a concise status; choose to dispute an unrecognised payment, temporarily block the card and then decide about a virtual card.',
     ),
     scenario(
       'baseline-context',
@@ -488,7 +490,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
-        'fraud-virtual-card-offer',
         'fraud-virtual-card',
         'fraud-case-status',
         'fraud-cards',
@@ -515,7 +516,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
-        'fraud-virtual-card-offer',
         'fraud-virtual-card',
         'fraud-case-status',
         'fraud-cards',
@@ -526,7 +526,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     ),
     scenario(
       'pending-authorisation',
-      'Pending authorisation · Report and monitor',
+      'Pending payment · Open dispute',
       'alternate',
       [
         'fraud-transaction',
@@ -534,13 +534,12 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         'fraud-claim-details',
         'fraud-claim-review',
         'fraud-claim-sent',
-        'fraud-virtual-card-offer',
         'fraud-virtual-card',
         'fraud-case-status',
         'fraud-cards',
         'fraud-card-security',
       ],
-      'Report a pending online authorisation without pretending it has settled.',
+      'Open a dispute for a pending online payment and track its status.',
       { transaction: 'online' },
     ),
     scenario(

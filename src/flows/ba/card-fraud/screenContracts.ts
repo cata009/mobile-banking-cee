@@ -101,7 +101,7 @@ export const FRAUD_SCREEN_SPECS = {
         type: 'List',
         required: true,
         notes:
-          'Baseline merchant row, date, circular logo, amount in BAM, and an authorised/not-settled or declined status. Reviewed activity is grouped under its section without a redundant row badge.',
+          'Baseline merchant row, date, circular logo, amount in BAM, and a Pending or Declined status. Reviewed activity is grouped under its section without a redundant row badge.',
       },
     ],
     actions: [
@@ -134,10 +134,11 @@ export const FRAUD_SCREEN_SPECS = {
       },
     ],
     actions: [
-      { label: 'I recognise this payment', result: 'Resolve only this recognition alert.', rule: 'F2' },
+      { label: 'I made this payment', result: 'Resolve only this recognition alert.', rule: 'F2' },
       {
-        label: "I don't recognise this payment. Block my card",
-        result: 'Record the explicit block choice, then open a booked-payment dispute introduction or the report form.',
+        label: "I don't recognise this payment",
+        result:
+          'Record the explicit block choice, then open the dispute introduction or the declined-attempt report form.',
         rule: 'F3',
       },
       {
@@ -150,20 +151,20 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F2', 'F3', 'F5'],
     acceptance: [
       'An existing case replaces the footer actions with the existing Helpers / No CTA card (715:6936) below the gray transaction summary and above Transaction details. The whole card opens the linked status page; no bottom View report/dispute status button remains.',
-      'Use the existing baseline transaction detail, merchant logo, and a Card used row matching the inbox card label and holder. Pending is presented as Authorised · awaiting settlement with a plain explanation that the reserved amount is debited if the merchant completes payment. Declined is visible in the header. POS and ATM have location; online has no map. Both the top summary and the date fact include the same time. No spending tools, Show more/less or extra Transaction date.',
-      'The combined action names both the unrecognised payment and the card block; the form says the card freezes only after successful submission.',
+      'Use the existing baseline transaction detail, merchant logo, and a Card used row matching the inbox card label and holder. Pending is shown as a concise status with no additional authorisation or settlement explanation. Declined is visible in the header. POS and ATM have location; online has no map. Both the top summary and the date fact include the same time. No spending tools, Show more/less or extra Transaction date.',
+      'The primary action says only that the customer does not recognise the payment. Black helper text explains that continuing temporarily blocks the card while the case is reviewed.',
       'A reported or disputed transaction cannot be marked as recognised afterward.',
     ],
   },
   'fraud-dispute-intro': {
     title: 'What happens next?',
-    purpose: 'Route the explicitly blocked activity to a booked-payment dispute or an unbooked activity report.',
-    fields: [{ name: 'Payment', type: 'Read-only', notes: 'Booking state controls which next action is available.' }],
+    purpose: 'Route pending and booked payments to a dispute and declined attempts to an activity report.',
+    fields: [{ name: 'Payment', type: 'Read-only', notes: 'A declined attempt remains an activity report.' }],
     actions: [
-      { label: 'Open dispute', result: 'Continue to the dispute form when the payment is booked.', rule: 'F4' },
+      { label: 'Open dispute', result: 'Continue to the dispute form for a pending or booked payment.', rule: 'F4' },
       {
         label: 'Continue report',
-        result: 'Continue to the report form while a payment is pending or declined.',
+        result: 'Continue to the report form for a declined attempt.',
         rule: 'F4',
       },
     ],
@@ -172,17 +173,21 @@ export const FRAUD_SCREEN_SPECS = {
     acceptance: [
       'The screen selects its next action from the selected transaction status.',
       'A booked payment says it has posted, offers Open dispute and does not promise a refund.',
-      'A pending or declined payment never shows Open dispute; it explains the payment state and offers Continue report.',
+      'A pending payment confirms the card is temporarily blocked, explains dispute review and follow-up, then offers Open dispute without an additional reserved-amount explanation.',
+      'A declined attempt explains that no money was debited and offers Continue report.',
     ],
   },
   'fraud-recognised': {
     title: 'Thanks for confirming',
-    purpose: 'Confirm recognition without suggesting a dispute or an automatic release of bank-side controls.',
-    actions: [{ label: 'Review other activity', result: 'Return to the inbox.' }],
+    purpose: 'Confirm recognition and offer an optional way to protect the card against future issues.',
+    actions: [
+      { label: 'Review other activity', result: 'Return to the inbox.' },
+      { label: 'Protect my card', result: 'Open card security settings.' },
+    ],
     rules: ['F2'],
     acceptance: [
-      'Use the existing StandardSuccessScreen with its large green confirmation check and a single fixed Review other activity action, rather than an informational notice card.',
-      'The body contains only the recognition confirmation, without transaction summary or declined-attempt explanation.',
+      'Use the existing StandardSuccessScreen with its large green confirmation check, a primary Review other activity action and a secondary Protect my card option.',
+      'The body confirms recognition without a transaction summary and explains that card security settings can help protect future payments.',
       'No dispute is created.',
       'The explanation does not promise that a declined payment was executed or retried.',
     ],
@@ -194,17 +199,17 @@ export const FRAUD_SCREEN_SPECS = {
     actions: [{ label: 'Review report', result: 'Review the reason, statement and optional photos before sending.' }],
     rules: ['F3', 'F4'],
     acceptance: [
-      'This route renders the same reporting form as fraud-claim-details.',
-      'Pending and declined events create fraud reports, never completed chargebacks.',
+      'This route renders the same case form as fraud-claim-details.',
+      'Pending/booked events create disputes; declined attempts create activity reports.',
     ],
   },
   'fraud-claim-details': {
     title: 'Tell us what happened',
     purpose:
-      'Collect a reason, optional notes and optional photos for any selected activity; only booked payments use the dispute path.',
+      'Collect a reason, optional notes and optional photos for any selected activity; pending/booked payments use the dispute path and declined attempts use the report path.',
     fields: [
       {
-        name: 'Reason for report / dispute',
+        name: 'Reason for dispute',
         type: 'Existing selection field and bottom sheet',
         required: true,
         validation: 'Unrecognised payment, compromised details or lost/stolen card.',
@@ -226,23 +231,23 @@ export const FRAUD_SCREEN_SPECS = {
     ],
     actions: [
       {
-        label: 'Review report / dispute',
+        label: 'Review dispute',
         result: 'Show the selected transaction and customer statement before submission.',
       },
     ],
-    back: 'Return to the transaction with the draft retained and card state unchanged; the customer can change their mind.',
+    back: 'Return to the transaction with the draft retained; the temporary card block remains active.',
     rules: ['F3', 'F4'],
     acceptance: [
-      'Review report/dispute stays active. Notes are optional and an empty or short statement never shows an error or prevents signing.',
+      'Review dispute stays active. Notes are optional and an empty or short statement never shows an error or prevents signing.',
       'The selected POS, ATM or online activity is preserved through form, review, receipt and status.',
       'The form omits the transaction summary for a simpler layout; its selected transaction stays linked and is shown during review. Photo helper copy mentions JPEG and PNG.',
       'Reason appears once in its selection field; no physical-card-possession checkbox is shown.',
-      'Opening or leaving this form does not freeze the card or mark the activity as reported. The explicit block choice is retained, and the card freezes only after successful submission. No frozen-card banner appears here.',
+      'Choosing to continue with this case temporarily blocks the card immediately. This form shows that current card state; leaving it does not undo the block.',
       'The header Help icon opens a bottom sheet explaining the page, reason selection, optional notes and photos and review/submission. It has an OK action and the standard close control.',
     ],
   },
   'fraud-claim-review': {
-    title: 'Review your report / dispute',
+    title: 'Review your dispute',
     purpose: 'Review the statement, reason and photos and obtain an explicit declaration before sending.',
     fields: [
       {
@@ -254,7 +259,7 @@ export const FRAUD_SCREEN_SPECS = {
     ],
     actions: [
       {
-        label: 'Sign report / dispute',
+        label: 'Sign dispute',
         result:
           'Play the existing Face ID signature simulation, then create one case; show confirmation only on success.',
         rule: 'F5',
@@ -269,14 +274,14 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F4', 'F5'],
     acceptance: [
       'Payment, reason, supporting photos, card used and optional statement use the same stacked label/value formatting. Empty notes show Not provided without an error; the extra submission footnote is omitted.',
-      'Confirmation uses the shared toggle control. Sign report/dispute is the only bottom action; editing uses header Back, with the draft retained.',
-      'The existing FaceIdAnimation runs after signing is pressed. Submission and any explicitly requested card freeze wait for its completion; repeat signing is disabled during the animation.',
+      'Confirmation uses the shared toggle control. Sign dispute is the only bottom action; editing uses header Back, with the draft retained.',
+      'The existing FaceIdAnimation runs after signing is pressed. Case submission waits for its completion; the chosen card block is already active and repeat signing is disabled during the animation.',
       'A failure never shows a successful case or loses the draft.',
       'A retry never creates a second case.',
     ],
   },
   'fraud-claim-sent': {
-    title: 'Report / dispute submitted',
+    title: 'Dispute submitted',
     purpose: 'Confirm receipt without implying a completed investigation or guaranteed refund.',
     fields: [
       {
@@ -287,14 +292,17 @@ export const FRAUD_SCREEN_SPECS = {
       },
     ],
     actions: [
-      { label: 'Track this report / dispute', result: 'Open the linked case.' },
-      { label: 'Protect my card', result: 'Continue to protection and replacement.' },
-      { label: 'Continue', result: 'Ask whether the customer wants to start virtual-card setup.' },
+      { label: 'Track this dispute', result: 'Open the linked case.' },
+      {
+        label: 'Review other activity / Back to Home',
+        result: 'Return to remaining activity or Home when all activity is reviewed.',
+      },
+      { label: 'Keep making payments', result: 'Open virtual-card selection directly.' },
     ],
     rules: ['F5', 'F6'],
     acceptance: [
       'A valid submitted case exists before this receipt is shown.',
-      'Successful submission commits the report and applies the explicit block choice, preserving a permanently closed state. The confirmation reflects the actual card state.',
+      'Successful submission commits the dispute; the selected temporary block is already active, preserving a permanently closed state. The confirmation reflects the actual card state.',
       'The receipt uses the same StandardSuccessScreen and large green check as recognition success. It omits the case number, merchant, amount, dates and disclaimer; the tracking action opens those details.',
       'The receipt uses shared PrimaryButton action and secondary variants: primary first, secondary below.',
       'The transaction is marked with the submitted case.',
@@ -302,23 +310,16 @@ export const FRAUD_SCREEN_SPECS = {
     ],
   },
   'fraud-virtual-card-offer': {
-    title: 'A card for your next payments',
-    purpose: 'Ask after a successful report or dispute whether the customer wants to start virtual-card setup.',
-    actions: [
-      { label: 'Create a virtual card', result: 'Open the existing virtual-card issue flow in demo-preview mode.' },
-      { label: 'Not now', result: 'Continue to the submitted report or dispute case.' },
-    ],
+    title: 'Dispute submitted',
+    purpose: 'Preserve the legacy route as an alias of the dispute receipt.',
+    actions: [{ label: 'Return to dispute', result: 'Open the dispute receipt.' }],
     rules: ['F6'],
-    acceptance: [
-      'This question appears only after a case was successfully submitted.',
-      'The yes and no choices are distinct and both remain reversible through ordinary navigation.',
-      'The virtual-card issue flow is an illustrative BA demo preview; bank-market availability and eligibility remain open product questions.',
-    ],
+    acceptance: ['The virtual-card offer is presented in the receipt banner, without a separate offer screen.'],
   },
   'fraud-virtual-card': {
     title: 'Virtual card',
     purpose: 'Reuse the existing Native virtual-card issue flow for the explicit Card guard demo choice.',
-    actions: [{ label: 'Back', result: 'Return to the virtual-card choice without changing the submitted case.' }],
+    actions: [{ label: 'Back', result: 'Return to the dispute receipt without changing the submitted case.' }],
     acceptance: [
       'The existing Native issuance composition handles account selection, design, terms and signing.',
       'The BA preview override is confined to the explicit Card guard demo route and does not change normal RO issue eligibility.',
@@ -490,7 +491,7 @@ export const FRAUD_CHAPTERS: readonly {
     label: 'Respond',
     headline: 'Clarity when it matters.',
     description:
-      'Choose to block the card, report unbooked activity, or open a dispute for a posted payment. A virtual-card offer follows successful submission.',
+      'Choose to block the card, open a dispute for a pending or booked payment, or report a declined attempt. A virtual-card offer follows successful submission.',
     screen: 'fraud-claim-details',
     screens: [
       'fraud-attempt',
@@ -498,7 +499,6 @@ export const FRAUD_CHAPTERS: readonly {
       'fraud-claim-details',
       'fraud-claim-review',
       'fraud-claim-sent',
-      'fraud-virtual-card-offer',
       'fraud-virtual-card',
     ],
   },

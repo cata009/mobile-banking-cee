@@ -43,7 +43,7 @@ export function FraudActivityList({ state, onSelect }: { state: FraudSession; on
                         payment.status === 'declined'
                           ? 'Declined'
                           : payment.status === 'pending'
-                            ? 'Authorised · not settled'
+                            ? 'Pending'
                             : undefined
                       }
                       leadingVisual={

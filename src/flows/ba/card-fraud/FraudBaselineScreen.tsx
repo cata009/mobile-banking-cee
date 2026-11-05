@@ -12,6 +12,7 @@ import {
   FRAUD_TRANSACTIONS,
   selectedFraudTransaction,
   isFraudActivityReviewed,
+  fraudCaseKind,
   type FraudAction,
   type FraudScreen,
   type FraudSession,
@@ -66,7 +67,7 @@ function BaselineContent({
                   screen: 'transaction',
                   params: { productId: card?.id ?? '', source: 'card', transactionId: state.selectedId },
                 }
-              : { screen: 'card', params: { productId: card?.id ?? '' } }
+              : { screen: 'card', params: { productId: card?.id ?? '', cardGuardVirtualCardIssue: 'true' } }
   const item = state.cases[state.selectedId]
   const unreviewedCount = FRAUD_TRANSACTIONS.filter((payment) => !isFraudActivityReviewed(state, payment.id)).length
   const rows = FRAUD_TRANSACTIONS.filter((payment) => payment.status !== 'declined').map((payment) => ({
@@ -79,7 +80,7 @@ function BaselineContent({
       return
     }
     if (screen === 'fraud-virtual-card') {
-      go('fraud-virtual-card-offer')
+      go('fraud-claim-sent')
       return
     }
     go(screen === 'fraud-transaction' ? 'fraud-alerts' : screen === 'fraud-cards' ? 'fraud-home' : 'fraud-cards')
@@ -162,9 +163,7 @@ function BaselineContent({
                   activityStatus: transaction.status === 'declined' ? 'declined' : undefined,
                   ...(transaction.status === 'pending'
                     ? {
-                        pendingStatusLabel: 'Authorised · awaiting settlement',
-                        pendingStatusDescription:
-                          'The amount is reserved. If the merchant completes the payment, your account will be debited.',
+                        pendingStatusLabel: 'Pending',
                       }
                     : {}),
                   merchantEnrichment: {
@@ -268,18 +267,20 @@ function BaselineContent({
               <p>You confirmed that you recognise this activity.</p>
             ) : state.reported.includes(transaction.id) ? (
               <PrimaryButton onClick={() => go('fraud-claim-details')}>
-                {transaction.status === 'booked' ? 'Continue dispute' : 'Continue report'}
+                {fraudCaseKind(transaction.status) === 'dispute' ? 'Continue dispute' : 'Continue report'}
               </PrimaryButton>
             ) : (
               <>
-                <p>This choice blocks your card only after you sign and successfully submit the report.</p>
+                <p className="fraud-block-choice-note">
+                  If you continue, we’ll temporarily block your card while we review your case.
+                </p>
                 <PrimaryButton
                   onClick={() => {
                     dispatch({ type: 'report', transactionId: transaction.id, blockCardOnSubmit: true })
                     go('fraud-dispute-intro')
                   }}
                 >
-                  I don't recognise this payment. Block my card
+                  I don't recognise this payment
                 </PrimaryButton>
                 <PrimaryButton
                   variant="secondary"
@@ -288,7 +289,7 @@ function BaselineContent({
                     go('fraud-recognised')
                   }}
                 >
-                  I recognise this payment
+                  I made this payment
                 </PrimaryButton>
               </>
             )

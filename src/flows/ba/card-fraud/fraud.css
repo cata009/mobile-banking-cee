@@ -46,6 +46,15 @@
   color: var(--uc-text-muted);
   text-align: center;
 }
+.fraud-baseline-actions .fraud-block-choice-note,
+.fraud-phone-content .fraud-block-choice-note {
+  margin: 0 0 4px;
+  color: var(--uc-text);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
 .fraud-form-scroll {
   flex: 1;
   min-height: 0;

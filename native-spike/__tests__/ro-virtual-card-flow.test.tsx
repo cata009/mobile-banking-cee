@@ -128,11 +128,13 @@ test('RO virtual card offer opens the selector directly and Back exits the flow'
 });
 test('Card guard BA virtual-card route opens the local demo issue flow explicitly', async () => {
   const issue = jest.fn(() => 'virtual-card-ba-demo');
+  const navigate = jest.fn();
   const baHost: CurrentScreenProps = {
     ...host,
     country: 'BA',
     t: createCurrentTranslator('BA', 'en'),
     onIssueVirtualCard: issue,
+    onNavigate: navigate,
     route: {
       screen: 'product-detail',
       params: {
@@ -147,21 +149,58 @@ test('Card guard BA virtual-card route opens the local demo issue flow explicitl
     tree = Renderer.create(
       <Detail
         {...baHost}
-        productDetailPresentation={{ title: 'Virtual card', optionId: 'virtual-card' }}
+        productDetailPresentation={{
+          title: 'Virtual card',
+          optionId: 'virtual-card',
+        }}
       />,
     );
   });
-  expect(tree.root.findAllByProps({ testID: 'ro-virtual-card-flow' })).not.toHaveLength(0);
-  expect(tree.root.findAllByProps({ testID: 'ro-product-detail' })).toHaveLength(0);
+  expect(
+    tree.root.findAllByProps({ testID: 'ro-virtual-card-flow' }),
+  ).not.toHaveLength(0);
+  expect(
+    tree.root.findAllByProps({ testID: 'ro-product-detail' }),
+  ).toHaveLength(0);
   await act(() => button(tree, 'Select Clean Green').props.onPress());
   await acceptTerms(tree);
-  await act(() => button(tree, 'Create demo card').props.onPress());
+  await act(() => button(tree, 'Create card').props.onPress());
   await act(() => button(tree, 'Sign').props.onPress());
   await act(() => tree.root.findByType(FaceIdOverlay).props.onComplete());
-  const baAccount = bankingProducts(baHost).currentAccounts.find(account => account.currency === 'BAM');
+  const baAccount = bankingProducts(baHost).currentAccounts.find(
+    account => account.currency === 'BAM',
+  );
   expect(baAccount).toBeDefined();
-  expect(issue).toHaveBeenCalledWith(baAccount, 'clean-green', 'Standard', true);
-  expect(JSON.stringify(tree.toJSON())).toContain('Your demo virtual card is ready');
+  expect(issue).toHaveBeenCalledWith(
+    baAccount,
+    'clean-green',
+    'Standard',
+    true,
+  );
+  expect(JSON.stringify(tree.toJSON())).toContain('Your virtual card is ready');
+  const scope = {
+    country: 'BA' as const,
+    bankingScenario: 'retail-single-account' as const,
+  };
+  const issued = issueVirtualCard({}, scope, {
+    account: baAccount!,
+    design: 'clean-green',
+    termsAccepted: true,
+    demoPreview: true,
+  });
+  const virtualCards = readVirtualCards(issued, scope);
+  expect(virtualCards).toHaveLength(1);
+  expect(
+    bankingProducts({ ...baHost, virtualCards }).cards.map(card => card.id),
+  ).toContain(virtualCards[0]!.id);
+  await act(() => button(tree, 'Ok, I got it').props.onPress());
+  expect(navigate).toHaveBeenCalledWith({
+    screen: 'card',
+    params: {
+      productId: 'virtual-card-ba-demo',
+      cardId: 'virtual-card-ba-demo',
+    },
+  });
   await act(() => tree.unmount());
 });
 test('Back from the initial virtual-card screen releases its handler before the parent navigates', async () => {
@@ -346,6 +385,10 @@ test('Ferrari carousel includes additional selectable examples', async () => {
 
 test('issued card success uses the source illustration and wallet button in the web demo', async () => {
   const originalOS = Platform.OS;
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  window.addEventListener = jest.fn();
+  window.removeEventListener = jest.fn();
   Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
   let tree!: Renderer.ReactTestRenderer;
   try {
@@ -370,10 +413,12 @@ test('issued card success uses the source illustration and wallet button in the 
     });
     await act(() => wallet.props.onClick());
     expect(tree.root.findByType(BaselineDialog).props.body).toContain(
-      'not available in this demo',
+      'currently unavailable',
     );
     await act(() => tree.unmount());
   } finally {
+    window.addEventListener = originalAddEventListener;
+    window.removeEventListener = originalRemoveEventListener;
     Object.defineProperty(Platform, 'OS', {
       configurable: true,
       value: originalOS,
