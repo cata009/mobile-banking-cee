@@ -147,7 +147,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
           description:
             'Reuse the existing card transaction-detail composition and reveal only information that is safely available.',
           items: [
-            'Merchant header. Show the clean merchant name and a circular 64x64 merchant visual when a usable logo is available; pending details retain their existing PFM-free treatment.',
+            'Merchant header. Show the clean merchant name and a circular 64x64 merchant visual when a usable logo is available; pending details use a white RESERVED AMOUNT badge with a gray label and border, no category icon, and no PFM summaries or controls.',
             'In-store purchase. Show the static location and address card first under Transaction details only when verified location data is available; never show an empty placeholder.',
             'Online purchase. Do not render a map or guessed address for online, remote or addressless transactions.',
             'Field availability. Show the localized Merchant Category Code description after Posting date only when available; omit numeric-only or unavailable MCC values rather than displaying a code or inventing a label.',
@@ -222,7 +222,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
       'When a valid ETHOCA merchant display name is returned, show it instead of the raw processor descriptor (for example `Netflix`, never `Retail Netflix 343413431`). Keep the raw descriptor for support/audit data only, not as the primary customer label.',
       'A valid merchant logo renders as a circular 32x32 asset in transaction lists and as a circular 64x64 identity mark in the transaction header. Logo image failure is treated exactly as unavailable enrichment for the icon decision.',
       'List icon precedence: valid merchant logo first; otherwise the existing PFM category glyph inside a 32x32 circular K7 / #F5F5F5 container. The fallback is required even when a clean name is available but no safe logo can be rendered.',
-      'Pending card transactions use the identical merchant-logo/fallback selection. The existing orange dot and `Pending` label remain directly below the amount and are not replaced by enrichment status.',
+      'Pending card rows use the identical merchant-logo/fallback selection and retain their orange dot and `Pending` label. In transaction details, the pending state is shown with a white `RESERVED AMOUNT` badge, a gray label and border, and no category icon.',
       'PFM category remains an independent classification. ETHOCA does not overwrite the category, spending insight, recategorisation controls or category pill; it changes merchant presentation only.',
       'For an in-store transaction with a verified address/coordinates, show a static map/address card as the first item under Transaction details. Online, remote and addressless transactions do not render an empty map placeholder.',
       'Show `Merchant Category Code (MCC)` as the final Transaction details row immediately after Posting date when a localized MCC description is supplied. Display the description only; retain the numeric code in enrichment data for mapping, but never show it to the customer. If no description is available, omit the row.',
@@ -257,7 +257,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
       },
       {
         title: 'Transaction detail decision system',
-        body: 'The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details stay PFM-free.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with the localized MCC description as the final row directly after Posting date when available; the numeric code is not displayed. Card used remains visible below the detail rows.',
+        body: 'The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details show a white `RESERVED AMOUNT` badge with gray label and border and no category icon instead of PFM summaries or controls.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with the localized MCC description as the final row directly after Posting date when available; the numeric code is not displayed. Card used remains visible below the detail rows.',
       },
       {
         title: 'Data and resilience contract',
@@ -378,7 +378,8 @@ export const ETHOCA_FLOW: FlowDefinition = {
           name: 'Pending status',
           type: 'Reservation state',
           required: true,
-          validation: 'Orange dot and localized Pending label remain in the header.',
+          validation:
+            'A white RESERVED AMOUNT pill with matching gray label and border and no category icon appears in the header; no orange dot or Pending label is shown there.',
         },
         {
           name: 'Transaction details',
@@ -389,6 +390,7 @@ export const ETHOCA_FLOW: FlowDefinition = {
       ],
       acceptance: [
         'eMAG is shown as the clean merchant name.',
+        'The pending reservation is labelled RESERVED AMOUNT in a white pill with a gray label and border and no category icon.',
         'The pending detail contains no PFM summary or category controls.',
       ],
     },

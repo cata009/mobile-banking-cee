@@ -34,6 +34,7 @@ export const FRAUD_SCREEN_SPECS = {
     ],
     acceptance: [
       'The existing baseline Card screen is mounted through NativeScreenPreview.',
+      'When the fraud journey has blocked the physical card, its artwork shows Blocked even after a virtual card is created; the virtual card remains active.',
       'The existing card screen has no additional fixed security footer; its Options and transaction actions remain available.',
     ],
     rules: ['F1', 'F5'],
@@ -41,13 +42,13 @@ export const FRAUD_SCREEN_SPECS = {
   'fraud-card-options': {
     title: 'Card options · Existing baseline',
     purpose: 'Show the existing card options without adding a second security entry.',
-    actions: [{ label: 'Reissue Card', result: 'Open the full-page replacement confirmation.' }],
+    actions: [{ label: 'Card Limits', result: 'Open the existing limits sheet.' }],
     acceptance: [
       'Existing baseline option rows and icons are preserved.',
-      'The new Card security row is absent. Card Limits remains its own existing row, and Reissue Card still opens replacement.',
-      'Card security is reached from the card-level Block Card action or the Protect my card action, not from a duplicate Card options entry.',
+      'Card Limits opens the existing limits sheet.',
+      'Protect my card opens the existing Card Limits sheet.',
     ],
-    rules: ['F7', 'F8'],
+    rules: ['F3'],
   },
   'fraud-baseline-transaction': {
     title: 'Transaction details · Existing baseline',
@@ -101,7 +102,7 @@ export const FRAUD_SCREEN_SPECS = {
         type: 'List',
         required: true,
         notes:
-          'Baseline merchant row, date, circular logo, amount in BAM, and a Pending or Declined status. Reviewed activity is grouped under its section without a redundant row badge.',
+          'Baseline merchant row, date, circular logo and amount in BAM, without transaction status badges. Reviewed activity is grouped under its section.',
       },
     ],
     actions: [
@@ -115,6 +116,7 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F1', 'F2', 'F5'],
     acceptance: [
       'Every event opens its own details.',
+      'Pending and declined status labels and their indicators are not displayed in the activity list.',
       'A question-mark action in the top-right header opens About suspicious activity, using the same bottom sheet, close control and OK button as report help.',
       'Reported and recognised items move under Reviewed, preserving the transaction link without extra Reported or Confirmed by you labels.',
       'Reviewed is hidden entirely when empty; its heading, count and rows appear only after at least one activity has been reviewed.',
@@ -151,7 +153,7 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F2', 'F3', 'F5'],
     acceptance: [
       'An existing case replaces the footer actions with the existing Helpers / No CTA card (715:6936) below the gray transaction summary and above Transaction details. The whole card opens the linked status page; no bottom View report/dispute status button remains.',
-      'Use the existing baseline transaction detail, merchant logo, and a Card used row matching the inbox card label and holder. Pending is shown as a concise status with no additional authorisation or settlement explanation. Declined is visible in the header. POS and ATM have location; online has no map. Both the top summary and the date fact include the same time. No spending tools, Show more/less or extra Transaction date.',
+      'Use the existing baseline transaction detail, merchant logo, and a Card used row matching the inbox card label and holder. Pending transactions use the shared RESERVED AMOUNT badge without an additional settlement explanation. Declined is visible in the header. POS and ATM have location; online has no map. Both the top summary and the date fact include the same time. No spending tools, Show more/less or extra Transaction date.',
       'The primary action says only that the customer does not recognise the payment. Black helper text explains that continuing temporarily blocks the card while the case is reviewed.',
       'A reported or disputed transaction cannot be marked as recognised afterward.',
     ],
@@ -172,9 +174,11 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F3', 'F4'],
     acceptance: [
       'The screen selects its next action from the selected transaction status.',
+      'A subtitle introduces the unrecognised payment; the selected transaction remains visible and is named in the dispute step.',
       'A booked payment says it has posted, offers Open dispute and does not promise a refund.',
-      'A pending payment confirms the card is temporarily blocked, explains dispute review and follow-up, then offers Open dispute without an additional reserved-amount explanation.',
-      'A declined attempt explains that no money was debited and offers Continue report.',
+      'A pending payment confirms the temporary block and uses the existing Card artwork and identity within the first timeline step.',
+      'A three-step timeline shows the card block as complete, opening the dispute as the next step and the bank review as upcoming.',
+      'A declined attempt explains that no money was debited and uses the same three-step timeline with report-specific wording and Continue report.',
     ],
   },
   'fraud-recognised': {
@@ -182,12 +186,12 @@ export const FRAUD_SCREEN_SPECS = {
     purpose: 'Confirm recognition and offer an optional way to protect the card against future issues.',
     actions: [
       { label: 'Review other activity', result: 'Return to the inbox.' },
-      { label: 'Protect my card', result: 'Open card security settings.' },
+      { label: 'Protect my card', result: 'Open Card Limits.' },
     ],
     rules: ['F2'],
     acceptance: [
       'Use the existing StandardSuccessScreen with its large green confirmation check, a primary Review other activity action and a secondary Protect my card option.',
-      'The body confirms recognition without a transaction summary and explains that card security settings can help protect future payments.',
+      'The body confirms recognition without a transaction summary and explains that card limits can help manage future payments.',
       'No dispute is created.',
       'The explanation does not promise that a declined payment was executed or retried.',
     ],
@@ -302,6 +306,7 @@ export const FRAUD_SCREEN_SPECS = {
     rules: ['F5', 'F6'],
     acceptance: [
       'A valid submitted case exists before this receipt is shown.',
+      'The virtual-card action uses the approved Pending action card and existing virtual-card artwork, with an executable action to open card selection.',
       'Successful submission commits the dispute; the selected temporary block is already active, preserving a permanently closed state. The confirmation reflects the actual card state.',
       'The receipt uses the same StandardSuccessScreen and large green check as recognition success. It omits the case number, merchant, amount, dates and disclaimer; the tracking action opens those details.',
       'The receipt uses shared PrimaryButton action and secondary variants: primary first, secondary below.',
@@ -361,101 +366,35 @@ export const FRAUD_SCREEN_SPECS = {
     ],
   },
   'fraud-card-security': {
-    title: 'Card security',
-    purpose: 'Control ATM, online, in-store and country protection in the Native baseline settings style.',
+    title: 'Card Limits',
+    purpose: 'Manage daily ATM, in-store and online card limits using the existing Card Limits sheet.',
     fields: [
-      {
-        name: 'Channel permissions',
-        type: 'Switches',
-        notes: 'Independent ATM, internet and POS settings; on means allowed, subject to overall card status.',
-      },
-      { name: 'Country protection', type: 'Inline toggle and explanation' },
+      { name: 'ATM withdrawals', type: 'Switch and amount limit' },
+      { name: 'POS payments', type: 'Switch, amount limit and transaction count' },
+      { name: 'Online payments', type: 'Switch and amount limit' },
     ],
-    actions: [
-      { label: 'Limit physical payments to my country', result: 'Change country protection on this page.', rule: 'F8' },
-    ],
-    rules: ['F3', 'F7', 'F8'],
+    actions: [{ label: 'Close', result: 'Return to the originating screen.' }],
+    rules: ['F3'],
     acceptance: [
-      'The screen uses the Native baseline page shell, section divider, navigation rows and shared toggle control without card identity or a duplicate Card options entry.',
-      'All permission controls are disabled on a permanently closed card.',
-      'A frozen-card explanation says the channel settings apply when the card is active.',
-      'Country protection content and its switch are inline below the channel settings; there is no separate country page or fixed action footer.',
-      'One concise paragraph below the toggle explains the phone-country limit for ATM and in-store payments and that internet payments are unaffected; no explanatory card, country example or extra footnote is shown.',
-      'The country-protection switch sits immediately below its heading. Phone country and Location signal fields are not shown.',
-      'Replacement remains accessible through Reissue Card in Card options; report status remains linked to its transaction.',
+      'The existing Card Limits sheet and its amount editors are used, with the currency for the card market.',
+      'Limit changes remain independent from the dispute.',
     ],
   },
   'fraud-replace-confirm': {
-    title: 'Replace your card',
-    purpose: 'Get explicit agreement to permanently close the compromised card and request replacement.',
-    fields: [
-      {
-        name: 'Closure agreement',
-        type: 'Toggle button',
-        required: true,
-        validation: 'Required before requesting replacement.',
-      },
-    ],
-    actions: [
-      { label: 'Close card and request replacement', result: 'Close the old card and record one replacement request.' },
-    ],
-    back: 'Return to the originating page without permanently closing the card.',
-    rules: ['F7'],
-    acceptance: [
-      'No replacement occurs before explicit agreement.',
-      'Replacement is a full page with an unchecked acknowledgement toggle and one fixed primary action; there is no Cancel button.',
-      'Fees, delivery and fulfilment are not invented.',
-      'Customer is told card subscriptions and wallets may need updating.',
-      'One plain paragraph below the card identity explains permanent closure, new card details, the separate report/dispute, fees, delivery, activation and recurring payments; no notice card is shown.',
-    ],
+    title: 'Card options',
+    purpose: 'Legacy route returns to the existing card options.',
   },
   'fraud-replacement-status': {
-    title: 'Replacement requested',
-    purpose: 'Track the replacement independently from its related dispute.',
-    fields: [
-      { name: 'Old card', type: 'Status', notes: 'Permanently closed.' },
-      {
-        name: 'New card',
-        type: 'Status',
-        notes: 'Requested; issue, delivery and activation require bank confirmation.',
-      },
-    ],
-    actions: [{ label: 'Ok I got it', result: 'Return to card security with disabled old-card permissions.' }],
-    rules: ['F7'],
-    acceptance: [
-      'No active new-card controls are shown before issuance and activation.',
-      'The old card cannot be reactivated.',
-      'The dispute remains independently accessible.',
-      'The request confirmation is a generic plain paragraph, without a notice card, card number or holder personalization.',
-      'Ok I got it is the only bottom action; no report/dispute status action is shown on this screen.',
-    ],
+    title: 'Card options',
+    purpose: 'Legacy route returns to the existing card options.',
   },
   'fraud-geo-settings': {
-    title: 'Card security · Legacy country route',
-    purpose: 'Preserve the old route ID by rendering the Native Card security page with inline country protection.',
-    fields: [{ name: 'Physical-card country rule', type: 'Switch' }],
-    states: [
-      'Fresh location',
-      'Location unavailable',
-      'Location out of date',
-      'Protection enabled but fresh location required',
-    ],
-    actions: [
-      {
-        label: 'Limit physical payments to my country',
-        result: 'Enable only with a fresh simulated location; apply to POS/ATM, never internet.',
-      },
-    ],
-    edgeCases: [
-      'If enabled and location becomes unavailable, physical payments remain restricted until a fresh signal is available.',
-      'Device signals are fallible. This is an additional risk control, never proof of cardholder identity.',
-    ],
-    rules: ['F8'],
-    acceptance: [
-      'No browser/device location is acquired.',
-      'Unavailable location never silently enables protection.',
-      'Internet payments remain under their separate channel control.',
-    ],
+    title: 'Card Limits',
+    purpose: 'Keep the legacy route working by opening the existing Card Limits sheet.',
+    fields: [{ name: 'Card limits', type: 'Existing limits controls' }],
+    actions: [{ label: 'Close', result: 'Return to the originating screen.' }],
+    rules: ['F3'],
+    acceptance: ['The legacy route opens the same Card Limits sheet.'],
   },
 } satisfies Record<FraudScreen, FlowScreenSpec>
 
@@ -515,9 +454,8 @@ export const FRAUD_CHAPTERS: readonly {
     id: 'protect',
     label: 'Protect',
     headline: 'Your card. Your control.',
-    description:
-      'Fine-tune permissions, add country protection, or replace a compromised card. Always know what is protected.',
+    description: 'Manage the limits for your card.',
     screen: 'fraud-card-security',
-    screens: ['fraud-card-security', 'fraud-geo-settings', 'fraud-replace-confirm', 'fraud-replacement-status'],
+    screens: ['fraud-card-security'],
   },
 ]

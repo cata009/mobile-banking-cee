@@ -25,7 +25,9 @@ export function fraudScreenFixture(
       'fraud-card-security',
       'fraud-replace-confirm',
       'fraud-replacement-status',
-    ].includes(screen) || Boolean(parameters.caseStatus)
+    ].includes(screen) ||
+    Boolean(parameters.caseStatus) ||
+    parameters.cardStatus === 'frozen'
   let state = createFraudSession(
     hasCase
       ? parameters.ledger === 'booked'
@@ -45,7 +47,6 @@ export function fraudScreenFixture(
   if (screen === 'fraud-claim-review')
     state = fraudReducer(state, { type: 'draft', note: 'I have my card and did not authorise this payment.' })
   if (screen === 'fraud-recognised') state = fraudReducer(state, { type: 'recognise', transactionId: state.selectedId })
-  if (screen === 'fraud-replacement-status') state = fraudReducer(state, { type: 'replace', confirmed: true })
   if (
     parameters.caseStatus &&
     Object.prototype.hasOwnProperty.call(
@@ -75,22 +76,21 @@ export function FraudJourney({
 }) {
   const [state, dispatch] = useReducer(fraudReducer, undefined, () => fraudScreenFixture(initialScreen, parameters))
   const [screen, setScreen] = useState<FraudScreen>(initialScreen)
-  const [replacementOrigin, setReplacementOrigin] = useState<FraudScreen>('fraud-card-security')
   const [securityOrigin, setSecurityOrigin] = useState<FraudScreen>('fraud-cards')
   const visibleScreen =
     screen === 'fraud-attempt'
       ? 'fraud-claim-details'
       : screen === 'fraud-virtual-card-offer'
         ? 'fraud-claim-sent'
-        : screen
+        : screen === 'fraud-replace-confirm' || screen === 'fraud-replacement-status'
+          ? 'fraud-card-options'
+          : screen
   const failedOnce = useRef(false)
   const parameterKey = JSON.stringify(parameters)
   const previousParameters = useRef(parameterKey)
   const root = useRef<HTMLDivElement>(null)
   const go = (next: FraudScreen) => {
     if (next === 'fraud-card-security' || next === 'fraud-geo-settings') setSecurityOrigin(screen)
-    if (next === 'fraud-replace-confirm')
-      setReplacementOrigin(screen === 'fraud-card-options' ? 'fraud-card-options' : 'fraud-card-security')
     setScreen(next)
     onScreenChange?.(next)
   }
@@ -125,8 +125,8 @@ export function FraudJourney({
       'fraud-virtual-card': 'fraud-claim-sent',
       'fraud-case-status': 'fraud-baseline-transaction',
       'fraud-card-security': securityOrigin,
-      'fraud-replace-confirm': replacementOrigin,
-      'fraud-replacement-status': 'fraud-card-security',
+      'fraud-replace-confirm': 'fraud-card-options',
+      'fraud-replacement-status': 'fraud-card-options',
       'fraud-geo-settings': securityOrigin,
     }
     go(target[screen] ?? 'fraud-push')

@@ -20,7 +20,10 @@ function scenario(
       title: FRAUD_SCREEN_SPECS[screen].title,
       description: FRAUD_SCREEN_SPECS[screen].purpose,
       screen,
-      previewParameters: parameters,
+      previewParameters:
+        screen === 'fraud-cards' && screens.includes('fraud-claim-sent') && index > screens.indexOf('fraud-claim-sent')
+          ? { ...parameters, cardStatus: 'frozen' }
+          : parameters,
     })),
   }
 }
@@ -38,7 +41,7 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
     back: 'fraud-home',
   },
   'fraud-card-options': {
-    primary: { label: 'Reissue Card', to: 'fraud-replace-confirm' },
+    primary: { label: 'Card Limits', to: 'fraud-card-security' },
     back: 'fraud-cards',
   },
   'fraud-baseline-transaction': {
@@ -101,14 +104,8 @@ const nodes: Record<FraudScreen, FlowPrototypeNode> = {
   'fraud-card-security': {
     back: 'fraud-cards',
   },
-  'fraud-replace-confirm': {
-    primary: { label: 'Confirm closure and replacement', to: 'fraud-replacement-status' },
-    back: 'fraud-card-security',
-  },
-  'fraud-replacement-status': {
-    primary: { label: 'Ok I got it', to: 'fraud-card-security' },
-    back: 'fraud-card-security',
-  },
+  'fraud-replace-confirm': { back: 'fraud-card-options' },
+  'fraud-replacement-status': { back: 'fraud-card-options' },
   'fraud-geo-settings': {
     back: 'fraud-cards',
   },
@@ -131,7 +128,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     purpose:
       'Help a Bosnia retail customer understand a suspicious card event, protect their card, contest an unauthorised booked payment and follow the bank response from the transaction itself.',
     scopeNote:
-      'PI baseline/current for Bosnia and Herzegovina and Banja Luka. All screens are executable DS compositions. This is a deterministic demonstration: alerts, reports, card commands, phone country and case updates do not call a live bank. Dates illustrate the experience and are not a bank service commitment. The Figma link identifies the reused baseline component library, not a separately authored fraud flow.',
+      'PI baseline/current for Bosnia and Herzegovina and Banja Luka. All screens are executable DS compositions. This is a deterministic demonstration: alerts, reports, card commands, card limit settings and case updates do not call a live bank. Dates illustrate the experience and are not a bank service commitment. The Figma link identifies the reused baseline component library, not a separately authored fraud flow.',
     businessAnalysis: {
       generalInformation: [
         { label: 'Experience', value: 'PI · Bosnia and Herzegovina / Banja Luka · baseline · current design system' },
@@ -166,13 +163,13 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           version: '1.1',
           date: '3 November 2026',
           detail:
-            'Clarified authorised payments awaiting settlement, made card blocking an explicit choice, added the booked-payment Open dispute step, updated Card security to Native baseline composition, and added a virtual-card offer after submission.',
+            'Clarified authorised payments awaiting settlement, made card blocking an explicit choice, added the booked-payment Open dispute step, reused the existing Card Limits sheet, and added a virtual-card offer after submission.',
         },
         {
           version: '1.0',
           date: '22 October 2026',
           detail:
-            'Alert recognition, protective freeze, booked-payment dispute, per-transaction tracking, replacement and independent channel/country controls.',
+            'Alert recognition, protective freeze, booked-payment dispute, per-transaction tracking and card limits.',
         },
       ],
       openIssues: [
@@ -182,20 +179,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           title: 'Bank timing and case taxonomy',
           detail:
             'Replace illustrative dates and status labels with approved bank SLA, working-day calendar, notification and escalation rules before production.',
-        },
-        {
-          reference: 'BA-F02',
-          status: 'Open',
-          title: 'Replacement fulfilment',
-          detail:
-            'Bank must confirm fees, address verification, fulfilment, digital-card availability and authentication requirements.',
-        },
-        {
-          reference: 'BA-F03',
-          status: 'Open',
-          title: 'Country protection policy',
-          detail:
-            'The phone signal is a proposed additional control. Production needs fresh-signal limits, privacy consent, offline handling, travel and cross-border policy, not a guarantee of fraud detection.',
         },
         {
           reference: 'BA-F04',
@@ -231,11 +214,10 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
           ],
         },
         {
-          title: 'Card security',
+          title: 'Card limits',
           items: [
             'Keep dispute processing independent of card freezing, closure and reissue.',
-            'Offer confirmed replacement for possible credential compromise; do not imply possession makes the card safe.',
-            'Support independent ATM, internet and POS permissions, plus a clearly explained phone-country rule for physical transactions.',
+            'Reuse the existing Card Limits sheet for ATM, POS and online payments.',
           ],
         },
       ],
@@ -292,7 +274,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     entryPoints: [
       { label: 'Security push', intent: 'Review newly detected suspicious card activity.' },
       { label: 'Transaction details', intent: 'Report or revisit the dispute for this exact transaction.' },
-      { label: 'Card protection', intent: 'Review permissions or request replacement.' },
+      { label: 'Card protection', intent: 'Review card limits.' },
     ],
     preconditions: [
       'A Bosnia baseline debit card for Iacob Mihai and three seeded activities. The notification opens the existing Face ID login simulation.',
@@ -315,7 +297,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         id: 'F3',
         group: 'Protection',
         statement:
-          'Opening the form creates only an editable intent. The customer explicitly chooses to block the card. Successful submission commits the report and freezes the card only when that choice was made; returning or a failed submission does not freeze it. An already closed card stays closed.',
+          'The customer explicitly chooses to block the card when continuing with unrecognised activity. The block is applied immediately and remains in place if the customer returns or submission fails. A case is created only after successful submission; an already closed card stays closed.',
       },
       {
         id: 'F4',
@@ -335,18 +317,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         statement:
           'Receipt is not resolution. Show next update, estimated decision, last change, next action and an explained final decision; demo dates are not bank promises.',
       },
-      {
-        id: 'F7',
-        group: 'Replacement',
-        statement:
-          'Explicit closure confirmation requests replacement and permanently disables old-card controls, independently of the dispute.',
-      },
-      {
-        id: 'F8',
-        group: 'Country protection',
-        statement:
-          'A fresh simulated phone-country signal may restrict physical ATM/POS usage; never locate the plastic or apply this rule to internet payments. Missing/stale signals require attention.',
-      },
     ],
     businessRules: [],
     successDestinations: [
@@ -354,7 +324,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       'Activity inbox',
       'Card protection',
       'Virtual-card demo issue',
-      'Independent replacement status',
     ],
     analyticsEvents: [
       'fraud_alert_opened',
@@ -363,8 +332,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       'fraud_report_submitted',
       'dispute_submitted',
       'dispute_status_viewed',
-      'card_replacement_requested',
-      'country_protection_changed',
     ],
     openQuestions: [
       'Production SLA, evidence requirements, authentication and integration contracts need bank approval; the demo is fully executable without those services.',
@@ -373,11 +340,15 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     notes: [
       {
         title: 'Simulation boundary',
-        body: 'No live fraud detection, chargeback, refund, card freeze, replacement, geolocation or bank communication occurs. Presenter fixtures show the case lifecycle; all user-entered text remains within the mounted demo session.',
+        body: 'No live fraud detection, chargeback, refund, card freeze or bank communication occurs. Presenter fixtures show the case lifecycle; all user-entered text remains within the mounted demo session.',
       },
     ],
   },
-  screenSpecs: FRAUD_SCREEN_SPECS,
+  screenSpecs: Object.fromEntries(
+    Object.entries(FRAUD_SCREEN_SPECS).filter(
+      ([screen]) => !['fraud-replace-confirm', 'fraud-replacement-status'].includes(screen),
+    ),
+  ),
   prototype: {
     start: 'fraud-push',
     groups: FRAUD_CHAPTERS.map((chapter) => ({ title: chapter.label, screens: chapter.screens })),
@@ -387,7 +358,7 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     sessionModel: {
       name: 'FraudSession',
       shape:
-        'selectedId; reportingId (editable intent); blockCardOnSubmit; ledgerOverrides; recognised[]; reported[] (submitted only); cases[transactionId]{kind,reference,status,reason,note,attachments}; draft{reason,note,attachments,declaration}; cardStatus; replacement; channels{atm,internet,pos}; geoEnabled; location; phoneCountry',
+        'selectedId; reportingId (editable intent); blockCardOnSubmit; ledgerOverrides; recognised[]; reported[] (submitted only); cases[transactionId]{kind,reference,status,reason,note,attachments}; draft{reason,note,attachments,declaration}; cardStatus',
       description:
         'A single session owns independent event, case, card and preference states. Business transitions live in the fraud feature reducer.',
     },
@@ -407,17 +378,10 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
         test: 'tests/features/ba-card-fraud-model.test.ts',
       },
       {
-        name: 'countryProtectionDecision',
-        signature: '(input: CountryProtectionInput) => not-applied | allowed | blocked | location-required',
-        rules: ['F8'],
-        enforcedOn: ['fraud-card-security', 'fraud-geo-settings'],
-        test: 'tests/features/ba-card-fraud-model.test.ts',
-      },
-      {
         name: 'fraudReducer',
         signature: '(state: FraudSession, action: FraudAction) => FraudSession',
-        rules: ['F2', 'F3', 'F5', 'F7'],
-        enforcedOn: ['fraud-transaction', 'fraud-claim-review', 'fraud-replace-confirm'],
+        rules: ['F2', 'F3', 'F5'],
+        enforcedOn: ['fraud-transaction', 'fraud-claim-review'],
         test: 'tests/features/ba-card-fraud-model.test.ts',
       },
     ],
@@ -427,23 +391,25 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
     ],
     screenSource: {
       screens: Object.fromEntries(
-        Object.keys(FRAUD_SCREEN_SPECS).map((screen) => [
-          screen,
-          screen === 'fraud-push' || screen === 'fraud-authenticate'
-            ? 'FraudNotification'
-            : [
-                  'fraud-home',
-                  'fraud-cards',
-                  'fraud-card-options',
-                  'fraud-baseline-transaction',
-                  'fraud-transaction',
-                  'fraud-card-security',
-                  'fraud-geo-settings',
-                  'fraud-virtual-card',
-                ].includes(screen)
-              ? 'FraudBaselineScreen'
-              : 'FraudScreens',
-        ]),
+        Object.keys(FRAUD_SCREEN_SPECS)
+          .filter((screen) => !['fraud-replace-confirm', 'fraud-replacement-status'].includes(screen))
+          .map((screen) => [
+            screen,
+            screen === 'fraud-push' || screen === 'fraud-authenticate'
+              ? 'FraudNotification'
+              : [
+                    'fraud-home',
+                    'fraud-cards',
+                    'fraud-card-options',
+                    'fraud-baseline-transaction',
+                    'fraud-transaction',
+                    'fraud-card-security',
+                    'fraud-geo-settings',
+                    'fraud-virtual-card',
+                  ].includes(screen)
+                ? 'FraudBaselineScreen'
+                : 'FraudScreens',
+          ]),
       ),
       shell: 'FraudJourney',
     },
@@ -543,13 +509,6 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       { transaction: 'online' },
     ),
     scenario(
-      'replace-card',
-      'Compromised card · Confirm replacement',
-      'happy',
-      ['fraud-card-options', 'fraud-replace-confirm', 'fraud-replacement-status', 'fraud-case-status'],
-      'Replacement closes the old card; its dispute continues independently.',
-    ),
-    scenario(
       'case-progress',
       'Case lifecycle · Updates and decision',
       'alternate',
@@ -590,27 +549,11 @@ export const BA_CARD_FRAUD_FLOW: FlowDefinition = {
       { submission: 'fail-once' },
     ),
     scenario(
-      'country-controls',
-      'Channel and country controls',
+      'card-limits',
+      'Card Limits',
       'alternate',
       ['fraud-card-security'],
-      'Separate physical and internet controls; explain the phone-country signal.',
-    ),
-    scenario(
-      'location-unavailable',
-      'Location unavailable · Explain recovery',
-      'error',
-      ['fraud-card-security'],
-      'Do not silently enable a rule without a usable location.',
-      { location: 'unavailable' },
-    ),
-    scenario(
-      'location-stale',
-      'Location out of date · Keep protection visible',
-      'error',
-      ['fraud-card-security'],
-      'An enabled rule needs a fresh phone-country signal before physical payments can proceed.',
-      { location: 'stale' },
+      'Review and manage ATM, POS and online card limits.',
     ),
   ],
 }

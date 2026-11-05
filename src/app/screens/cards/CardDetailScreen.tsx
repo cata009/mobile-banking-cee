@@ -6,10 +6,7 @@ import type { NativeScreenPreviewProps } from '@/app/components/demo/NativeScree
 import { getCardMerchantEnrichment } from '@/app/components/merchants/merchantEnrichment'
 import { getCountryConfig } from '@/app/registry/countryConfig'
 import { useDemo } from '@/app/state/demoStore'
-import {
-  getCardTransactions,
-  type AccountTransaction,
-} from '@/data/accountDetails'
+import { getCardTransactions, type AccountTransaction } from '@/data/accountDetails'
 import type { NativeDemoRoute } from '@/features/demo-native/contracts'
 import type {
   NativeBankingPresentation,
@@ -42,6 +39,8 @@ interface CardDetailScreenProps {
     ctaLabel: string
   } | null
   onAiOpportunityClick?: () => void
+  /** Additional transactions supplied by a flow preview, keyed by parent card ID. */
+  additionalTransactions?: Readonly<Record<string, readonly AccountTransaction[]>>
   /** Optional presentation-only overrides used by Flow Library specifications. */
   transactionRowPresentation?: {
     displayLabel?: (transaction: AccountTransaction) => string | undefined
@@ -80,16 +79,13 @@ function isCardProduct(product: Product): product is DebitCard | CreditCard {
   return product.type === 'debit_card' || product.type === 'credit_card'
 }
 
-type CardTransactionRowPresentation =
-  NonNullable<CardDetailScreenProps['transactionRowPresentation']>
+type CardTransactionRowPresentation = NonNullable<CardDetailScreenProps['transactionRowPresentation']>
 function createNativeRows(
   transactions: readonly AccountTransaction[],
   presentation: CardTransactionRowPresentation,
 ): NonNullable<NativeBankingPresentation['rows']> {
-  const visible = presentation.transactionFilter
-    ? transactions.filter(presentation.transactionFilter)
-    : transactions
-  return visible.map(transaction => {
+  const visible = presentation.transactionFilter ? transactions.filter(presentation.transactionFilter) : transactions
+  return visible.map((transaction) => {
     const displayLabel = presentation.displayLabel?.(transaction)
     const leadingVisual =
       presentation.nativeLeadingVisual?.(transaction) ??
@@ -116,57 +112,44 @@ export default function CardDetailScreen(props: CardDetailScreenProps) {
     onHelpClick,
     aiOpportunityNudge,
     onAiOpportunityClick,
+    additionalTransactions,
     transactionRowPresentation,
   } = props
   const { country } = useDemo()
   const { categories } = useProducts()
-  const products = useMemo(
-    () => categories.flatMap(category => category.products),
-    [categories],
-  )
-  const cards = useMemo(
-    () => products.filter(isCardProduct),
-    [products],
-  )
-  const productById = useMemo(
-    () => new Map(products.map(product => [product.id, product] as const)),
-    [products],
-  )
+  const products = useMemo(() => categories.flatMap((category) => category.products), [categories])
+  const cards = useMemo(() => products.filter(isCardProduct), [products])
+  const productById = useMemo(() => new Map(products.map((product) => [product.id, product] as const)), [products])
   const [activeCardId, setActiveCardId] = useState(selectedCardId)
   useEffect(() => setActiveCardId(selectedCardId), [selectedCardId])
-  const activeCard =
-    cards.find(card => card.id === activeCardId) ?? cards[0]
+  const activeCard = cards.find((card) => card.id === activeCardId) ?? cards[0]
   const currentAccounts = products.filter(
-    (product): product is Extract<Product, { type: 'current_account' }> =>
-      product.type === 'current_account',
+    (product): product is Extract<Product, { type: 'current_account' }> => product.type === 'current_account',
   )
   const linkedAccountIndex =
     activeCard?.type === 'debit_card'
       ? Math.max(
           0,
-          currentAccounts.findIndex(
-            account => account.id === activeCard.linkedAccountId,
-          ),
+          currentAccounts.findIndex((account) => account.id === activeCard.linkedAccountId),
         )
       : 0
+  const additional = activeCard ? additionalTransactions?.[activeCard.id] : undefined
   const sourceTransactions = useMemo(
     () =>
       activeCard
-        ? getCardTransactions(
-            country,
-            activeCard,
-            getCountryConfig(country).currency,
-            linkedAccountIndex,
-          )
+        ? [
+            ...(additional ?? []),
+            ...getCardTransactions(country, activeCard, getCountryConfig(country).currency, linkedAccountIndex),
+          ]
         : [],
-    [activeCard, country, linkedAccountIndex],
+    [activeCard, country, linkedAccountIndex, additional],
   )
   const sourceRows = useMemo(
     () =>
-      transactionRowPresentation && activeCard
-        ? createNativeRows(sourceTransactions, transactionRowPresentation)
+      activeCard && (transactionRowPresentation || additional?.length)
+        ? createNativeRows(sourceTransactions, transactionRowPresentation ?? {})
         : undefined,
-    [activeCard, sourceTransactions, transactionRowPresentation],
+    [activeCard, sourceTransactions, transactionRowPresentation, additional],
   )
   const bankingPresentation = useMemo<NativeBankingPresentation>(
     () => ({
@@ -179,38 +162,31 @@ export default function CardDetailScreen(props: CardDetailScreenProps) {
   )
   const events = useMemo<NativeScreenPreviewProps['events']>(() => {
     const next: NonNullable<NativeScreenPreviewProps['events']> = {}
-    next.onActiveCardChange = productId => {
+    next.onActiveCardChange = (productId) => {
       setActiveCardId(productId)
       const product = productById.get(productId)
       if (product && isCardProduct(product)) onActiveCardChange?.(product)
     }
     if (onTransactionClick) {
-      next.onTransactionSelected = selection => {
+      next.onTransactionSelected = (selection) => {
         const product = productById.get(selection.productId)
         if (!product || !isCardProduct(product)) return
-        onTransactionClick(
-          selection.transaction,
-          product,
-          getCardMerchantEnrichment(selection.transaction, country),
-        )
+        onTransactionClick(selection.transaction, product, getCardMerchantEnrichment(selection.transaction, country))
       }
     }
     if (onShowCardDetailsRequest) {
-      next.onShowCardDetailsRequest = productId => {
+      next.onShowCardDetailsRequest = (productId) => {
         const product = productById.get(productId)
-        if (product && isCardProduct(product))
-          onShowCardDetailsRequest(product)
+        if (product && isCardProduct(product)) onShowCardDetailsRequest(product)
       }
     }
     if (onShowCardDetailsClick) {
-      next.onShowCardDetails = productId => {
+      next.onShowCardDetails = (productId) => {
         const product = productById.get(productId)
-        if (product && isCardProduct(product))
-          onShowCardDetailsClick(product)
+        if (product && isCardProduct(product)) onShowCardDetailsClick(product)
       }
     }
-    if (onAiOpportunityClick)
-      next.onAiOpportunityClick = onAiOpportunityClick
+    if (onAiOpportunityClick) next.onAiOpportunityClick = onAiOpportunityClick
     if (onHelpClick) next.onHelpRequest = onHelpClick
     return next
   }, [
@@ -243,9 +219,7 @@ export default function CardDetailScreen(props: CardDetailScreenProps) {
     <NativeScreenPreview
       route={{
         screen: 'card',
-        params: selectedCardId
-          ? { productId: selectedCardId, cardId: selectedCardId }
-          : undefined,
+        params: selectedCardId ? { productId: selectedCardId, cardId: selectedCardId } : undefined,
       }}
       snapshot={{ creditLimitOverrides, bankingPresentation }}
       events={events}
@@ -254,4 +228,3 @@ export default function CardDetailScreen(props: CardDetailScreenProps) {
     />
   )
 }
-
