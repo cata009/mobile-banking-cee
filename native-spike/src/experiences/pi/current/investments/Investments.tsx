@@ -539,7 +539,16 @@ function RoboComposition(host: CurrentScreenProps) {
   return (
     <InvestmentMarket country={host.country}>
       <InvestmentRuntime active={host.isActive}>
-        <View style={[styles.root, { paddingTop: host.screenTopInset }]}>
+        <View
+          style={[
+            styles.root,
+            { paddingTop: host.screenTopInset },
+            host.release === 'release-future-cz-robo' &&
+              params?.robo_view === 'detail' && {
+                backgroundColor: '#FFFFFF',
+              },
+          ]}
+        >
           <CzInvestmentsScreen
             snapshot={{
               ...snapshot,
@@ -552,8 +561,9 @@ function RoboComposition(host: CurrentScreenProps) {
             }}
             goals={goals}
             goalsHeaderLabel={
-              host.release === 'release-future-cz-robo' ? 'CZ Robo' : undefined
+              host.release === 'release-future-cz-robo' ? 'My goals' : undefined
             }
+            roboRelease={host.release}
             persistenceMessage={baselineCzRoboSession.getPersistenceError()}
             classicHost={czechHost}
             onRoboResumeStateChange={host.onRoboResumeStateChange}

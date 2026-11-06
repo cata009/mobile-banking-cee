@@ -8,6 +8,7 @@ import React, {
 import type {
   InvestmentCatalogSecurity,
   InvestmentDistributionItem,
+  InvestmentHistoryTransaction,
   InvestmentPortfolioTabId,
 } from '@/app/config/investmentsPortfolioConfig';
 import { buildInvestmentHistoryTransactions } from '@/app/config/investmentsPortfolioConfig';
@@ -61,12 +62,26 @@ type View =
       tab: Exclude<InvestmentPortfolioTabId, 'performance'>;
     };
 
+export interface BaselineInvestmentDetailRendererProps {
+  security: InvestmentCatalogSecurity;
+  onBack(): void;
+  onHistory(filterByTitle: string): void;
+  onBuy(): void;
+  onSell(): void;
+  hidden: boolean;
+  transactions: readonly InvestmentHistoryTransaction[];
+}
+
 export default function BaselineInvestmentsController({
   host,
   initialDraft,
+  renderInstrument,
 }: {
   host: CurrentScreenProps;
   initialDraft?: CoAppingInvestmentBuyDraft | null;
+  renderInstrument?: (
+    props: BaselineInvestmentDetailRendererProps,
+  ) => React.ReactNode;
 }) {
   const snapshot = useMemo(
     () =>
@@ -405,21 +420,32 @@ export default function BaselineInvestmentsController({
         onHistory={openHistory}
       />
     );
-  if (route.view === 'instrument')
+  if (route.view === 'instrument') {
+    const instrumentProps: BaselineInvestmentDetailRendererProps = {
+      security: route.security,
+      onBack: () => {
+        pop();
+        if (route.returnState)
+          host.onInvestmentReturnToSimulator?.(route.returnState);
+      },
+      onHistory: openHistory,
+      onBuy: () => push({ view: 'buy', security: route.security }),
+      onSell: () => push({ view: 'sell', security: route.security }),
+      hidden: host.amountsHidden,
+      transactions: historyTransactions,
+    };
+    if (renderInstrument) return renderInstrument(instrumentProps);
     return (
       <BaselineInvestmentInstrument
         host={childHost}
         security={route.security}
-        onBack={() => {
-          pop();
-          if (route.returnState)
-            host.onInvestmentReturnToSimulator?.(route.returnState);
-        }}
-        onHistory={openHistory}
-        onBuy={() => push({ view: 'buy', security: route.security })}
-        onSell={() => push({ view: 'sell', security: route.security })}
+        onBack={instrumentProps.onBack}
+        onHistory={instrumentProps.onHistory}
+        onBuy={instrumentProps.onBuy}
+        onSell={instrumentProps.onSell}
       />
     );
+  }
   if (route.view === 'buy')
     return (
       <BaselineInvestmentBuyOrder
@@ -438,6 +464,7 @@ export default function BaselineInvestmentsController({
         host={childHost}
         security={route.security}
         accounts={snapshot.accounts}
+        hideDocumentSeparators={useBaselineCzRoboInvestment}
         onBack={pop}
         onComplete={finish}
       />
@@ -515,6 +542,9 @@ export default function BaselineInvestmentsController({
               : () => setFutureSection('portfolio'),
         }}
         onSelectBasket={basket => push({ view: 'basket', basket })}
+        onOpenFundCollection={collection =>
+          push({ view: 'funds', collection })
+        }
         onOpenSecurity={onOpenSecurity}
         onOpenDistribution={onOpenDistribution}
         onOpenCatalog={onOpenCatalog}

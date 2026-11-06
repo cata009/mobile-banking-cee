@@ -57,6 +57,7 @@ import type {
 } from '@/features/investments/robo/types';
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig';
 import type { CurrentAccount } from '@/data/products';
+import type { CurrentScreenProps } from '../../../current/contracts';
 import fundingRadioSelected from '@/assets/investments/robo/funding-radio-selected.svg';
 import fundingRadioUnselected from '@/assets/investments/robo/funding-radio-unselected.svg';
 import fundingChevronDown from '@/assets/investments/robo/funding-chevron-down.svg';
@@ -76,6 +77,18 @@ import {
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
 import { BaselineInvestmentHistory } from '../../../current/investments/baseline/flows/History';
+import {
+  BaselineInvestmentField,
+  BaselineInvestmentFrame,
+  BaselineInvestmentSection,
+} from '../../../current/investments/baseline/Frame';
+import { BaselineInvestmentSellOrder } from '../../../current/investments/baseline/flows/SellOrder';
+import type { BaselineSellExecution } from '../../../current/investments/baseline/flows/contracts';
+import {
+  InvestmentOrderFooter,
+  InvestmentTerms,
+} from '../../../current/investments/baseline/flows/BuyOrder';
+import { CzRoboSecurityRow } from '../../../current/investments/baseline/overview/CzRoboOverview';
 import {
   Button,
   Choice,
@@ -154,6 +167,7 @@ export function Management({
   clock,
   amountsHidden,
   screenTopInset = 0,
+  release = 'release-future-evo-2027',
 }: {
   goal: RoboExistingGoal;
   portfolio: RoboPortfolio;
@@ -168,6 +182,7 @@ export function Management({
   clock: RoboDemoClock;
   amountsHidden: boolean;
   screenTopInset?: number;
+  release?: CurrentScreenProps['release'];
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
 }) {
   const seed = {
@@ -190,6 +205,11 @@ export function Management({
     createRoboState(initial, clock),
   );
   const plan = getRoboFlowView(planState);
+  const goalPlanChanged =
+    Number(plan.targetAmount) !==
+      Number(goal.targetInteger.replace(/\D/g, '')) ||
+    (plan.horizonYears || Number(plan.manualHorizon)) !==
+      (goal.horizonYears ?? 0);
   const [accountId, setAccountId] = useState(currentAccounts[0]?.id ?? '');
   const [draftAccountId, setDraftAccountId] = useState(accountId);
   const { width, height } = useDemoViewport();
@@ -236,7 +256,7 @@ export function Management({
       mode: 'light',
       productCounts: DEFAULT_CZECH_COUNTS,
       amountsHidden,
-      screenTopInset,
+      screenTopInset: 0,
       isActive: true,
       onBack,
       onNavigate: () => undefined,
@@ -246,8 +266,9 @@ export function Management({
       onChanged: () => undefined,
       onBackHandlerChange: registerHistoryBackHandler,
     },
-    'release-future-evo-2027',
+    release,
   );
+  const isCzRobo = release === 'release-future-cz-robo';
   const currentSeed = useRef(seed);
   currentSeed.current = seed;
   useEffect(() => {
@@ -267,6 +288,8 @@ export function Management({
       return true;
     }
     if (mode === 'history') return historyBackHandler.current?.() ?? false;
+    if (mode === 'withdraw' && state.withdrawal.kind === 'selling' && isCzRobo)
+      return historyBackHandler.current?.() ?? false;
     if (mode === 'settings' && modelOpen) {
       setModelOpen(false);
       return true;
@@ -319,7 +342,10 @@ export function Management({
   const minimumDate = `${clock.referenceDay.year}-${String(
     clock.referenceDay.month,
   ).padStart(2, '0')}-${String(clock.referenceDay.day).padStart(2, '0')}`;
-  const page = { onBack, onClose: onExit };
+  const page = {
+    onBack,
+    ...(!isCzRobo ? { onClose: onExit } : {}),
+  };
   if (mode === 'history')
     return (
       <BaselineInvestmentHistory
@@ -384,21 +410,36 @@ export function Management({
         footer={
           <Button
             label="Save name"
-            disabled={!state.renameName.trim()}
+            disabled={
+              !state.renameName.trim() ||
+              (isCzRobo && state.renameName.trim() === goal.name.trim())
+            }
             onPress={() => {
-              onGoalUpdated({ ...goal, name: state.renameName.trim() });
+              const name = state.renameName.trim();
+              if (!name || (isCzRobo && name === goal.name.trim())) return;
+              onGoalUpdated({ ...goal, name });
               onMode('menu');
             }}
           />
         }
       >
-        <FormField
-          tokens={czInvestmentTokens}
-          label="Goal name"
-          value={state.renameName}
-          onChange={value => dispatch({ type: 'rename-changed', value })}
-          inputProps={{ maxLength: 100, returnKeyType: 'done' }}
-        />
+        {isCzRobo ? (
+          <BaselineTextField
+            label="Goal name"
+            ariaLabel="Goal name"
+            value={state.renameName}
+            onChange={value => dispatch({ type: 'rename-changed', value })}
+            maxLength={100}
+          />
+        ) : (
+          <FormField
+            tokens={czInvestmentTokens}
+            label="Goal name"
+            value={state.renameName}
+            onChange={value => dispatch({ type: 'rename-changed', value })}
+            inputProps={{ maxLength: 100, returnKeyType: 'done' }}
+          />
+        )}
       </Page>
     );
   if (mode === 'goal-plan')
@@ -416,9 +457,11 @@ export function Management({
               !Number(plan.targetAmount) ||
               !isValidRoboHorizon(
                 String(plan.horizonYears || plan.manualHorizon),
-              )
+              ) ||
+              (isCzRobo && !goalPlanChanged)
             }
             onPress={() => {
+              if (isCzRobo && !goalPlanChanged) return;
               const years = plan.horizonYears || Number(plan.manualHorizon);
               onGoalUpdated({
                 ...goal,
@@ -441,7 +484,7 @@ export function Management({
         portfolio={portfolio}
         kind="model-portfolio"
         onBack={mode === 'settings' ? () => setModelOpen(false) : onBack}
-        onClose={onExit}
+        onClose={isCzRobo ? undefined : onExit}
         onOpenHolding={setModelHolding}
         marketInfo={{
           basketId: goal.basketId ?? portfolio.basketFund?.marketInfo.basketId,
@@ -488,29 +531,42 @@ export function Management({
       </Page>
     );
   if (mode === 'withdraw' && state.withdrawal.kind === 'selling')
-    return (
+  {
+    const onSaleComplete = (execution: BaselineSellExecution) => {
+      const updated = applyRoboSale(
+        goal,
+        portfolio,
+        getRoboGoalCurrentValue(goal),
+        'CZ',
+        securityCatalog,
+        state.withdrawal.productId,
+        execution,
+        { id: createRoboTradeEventId(), date: new Date().toISOString() },
+      );
+      if (updated !== goal) onGoalUpdated(updated);
+      dispatch({ type: 'sale-completed' });
+      onMode('menu');
+    };
+    const onSaleBack = () => dispatch({ type: 'sale-cancelled' });
+    return isCzRobo ? (
+      <BaselineInvestmentSellOrder
+        host={historyHost}
+        security={state.withdrawal.security}
+        accounts={currentAccounts}
+        hideDocumentSeparators
+        onBack={onSaleBack}
+        onComplete={onSaleComplete}
+      />
+    ) : (
       <SellOrder
         security={state.withdrawal.security}
         accounts={currentAccounts}
         hidden={amountsHidden}
-        onBack={() => dispatch({ type: 'sale-cancelled' })}
-        onComplete={execution => {
-          const updated = applyRoboSale(
-            goal,
-            portfolio,
-            getRoboGoalCurrentValue(goal),
-            'CZ',
-            securityCatalog,
-            state.withdrawal.productId,
-            execution,
-            { id: createRoboTradeEventId(), date: new Date().toISOString() },
-          );
-          if (updated !== goal) onGoalUpdated(updated);
-          dispatch({ type: 'sale-completed' });
-          onMode('menu');
-        }}
+        onBack={onSaleBack}
+        onComplete={onSaleComplete}
       />
     );
+  }
   if (mode === 'partial-withdrawal')
     return (
       <Page
@@ -559,35 +615,54 @@ export function Management({
         kind={mode}
         title="Withdraw money"
         description="Select an investment to start your sale. Review the quantity, estimated proceeds and order details before signing."
+        gutter={isCzRobo ? 0 : 24}
+        descriptionGutter={isCzRobo ? 24 : undefined}
+        contentGutter={isCzRobo ? 0 : undefined}
         contentTop={4}
       >
         {products.length ? (
           products.map(product => (
-            <Row
-              key={product.id}
-              title={product.name}
-              subtitle={
-                product.security
-                  ? `${product.security.quantity} PCS`
-                  : 'Current quote unavailable'
-              }
-              value={formatInvestmentMoney(
-                product.localValue,
-                'CZ',
-                'CZK',
-                amountsHidden,
-              )}
-              onPress={
-                product.security
-                  ? () =>
-                      dispatch({
-                        type: 'sale-opened',
-                        productId: product.id,
-                        security: product.security!,
-                      })
-                  : undefined
-              }
-            />
+            isCzRobo && product.security ? (
+              <CzRoboSecurityRow
+                key={product.id}
+                host={historyHost}
+                security={product.security}
+                quantityMaxDecimals={4}
+                onPress={() =>
+                  dispatch({
+                    type: 'sale-opened',
+                    productId: product.id,
+                    security: product.security!,
+                  })
+                }
+              />
+            ) : (
+              <Row
+                key={product.id}
+                title={product.name}
+                subtitle={
+                  product.security
+                    ? `${product.security.quantity} PCS`
+                    : 'Current quote unavailable'
+                }
+                value={formatInvestmentMoney(
+                  product.localValue,
+                  'CZ',
+                  'CZK',
+                  amountsHidden,
+                )}
+                onPress={
+                  product.security
+                    ? () =>
+                        dispatch({
+                          type: 'sale-opened',
+                          productId: product.id,
+                          security: product.security!,
+                        })
+                    : undefined
+                }
+              />
+            )
           ))
         ) : (
           <View testID="cz-withdraw-empty">
@@ -652,6 +727,115 @@ export function Management({
         testID="cz-top-up-success"
       />
     );
+  if (
+    isCzRobo &&
+    mode === 'add-money' &&
+    state.topUp.kind === 'review'
+  )
+    return (
+      <BaselineInvestmentFrame
+        host={historyHost}
+        title="Review Data"
+        onBack={() => {
+          setTopUpTermsAccepted(false);
+          dispatch({ type: 'top-up-back', to: 'amount' });
+        }}
+        headerOptions={{ compact: true }}
+        footer={
+          <InvestmentOrderFooter
+            host={historyHost}
+            label={fields.initialAmount ? 'Buy' : 'Set up monthly investment'}
+            disabled={!canReview || !topUpTermsAccepted}
+            onPress={() => dispatch({ type: 'top-up-sign-requested' })}
+          />
+        }
+      >
+        <BaselineInvestmentSection
+          host={historyHost}
+          title="ORDER SUMMARY"
+        />
+        <BaselineInvestmentField
+          host={historyHost}
+          label="Product"
+          value={portfolio.basketFund?.title ?? portfolio.name}
+        />
+        <BaselineInvestmentField
+          host={historyHost}
+          label="Product ID"
+          value={
+            portfolio.basketFund?.marketInfo.basketIsin ??
+            goal.basketIsin ??
+            'Not available'
+          }
+        />
+        <BaselineInvestmentField
+          host={historyHost}
+          label="Order type"
+          value={fields.initialAmount ? 'One off BUY' : 'Monthly BUY'}
+        />
+        {fields.initialAmount ? (
+          <>
+            <BaselineInvestmentField
+              host={historyHost}
+              label="Execution"
+              value="Next available market session"
+            />
+            <BaselineInvestmentField
+              host={historyHost}
+              label="Estimated amount"
+              value={formatInvestmentMoney(
+                initial,
+                'CZ',
+                'CZK',
+                amountsHidden,
+              )}
+            />
+          </>
+        ) : null}
+        {fields.monthlyContribution ? (
+          <>
+            {!fields.initialAmount ? (
+              <BaselineInvestmentField
+                host={historyHost}
+                label="Frequency"
+                value="Monthly"
+              />
+            ) : null}
+            <BaselineInvestmentField
+              host={historyHost}
+              label="Monthly contribution"
+              value={formatInvestmentMoney(
+                monthly,
+                'CZ',
+                'CZK',
+                amountsHidden,
+              )}
+            />
+            <BaselineInvestmentField
+              host={historyHost}
+              label="Monthly contribution starts"
+              value={state.topUp.date}
+            />
+          </>
+        ) : null}
+        <BaselineInvestmentSection host={historyHost} title="ACCOUNTS" />
+        <BaselineInvestmentField
+          host={historyHost}
+          label="Cash account"
+          value={selectedAccount?.name ?? 'Not available'}
+        />
+        <OrderDocuments
+          currency="CZK"
+          hideSectionSeparators
+          bleed={false}
+        />
+        <InvestmentTerms
+          host={historyHost}
+          value={topUpTermsAccepted}
+          onChange={setTopUpTermsAccepted}
+        />
+      </BaselineInvestmentFrame>
+    );
   if (mode === 'add-money' && state.topUp.kind === 'review')
     return (
       <Page
@@ -661,7 +845,6 @@ export function Management({
           setTopUpTermsAccepted(false);
           dispatch({ type: 'top-up-back', to: 'amount' });
         }}
-        onClose={onExit}
         footer={
           <Button
             label={fields.initialAmount ? 'Buy' : 'Set up monthly investment'}

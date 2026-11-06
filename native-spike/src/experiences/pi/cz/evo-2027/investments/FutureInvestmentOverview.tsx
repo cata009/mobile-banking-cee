@@ -13,6 +13,7 @@ import {
   type InvestmentPortfolioTabId,
 } from '@/app/config/investmentsPortfolioConfig';
 import type { InvestmentBasketFund } from '@/app/config/investmentBasketFundsConfig';
+import type { InvestmentFundCollectionId } from '@/app/config/investmentFundCollections';
 import {
   buildFutureHistory,
   FUTURE_PERIODS,
@@ -57,8 +58,17 @@ import { ModuleNavigation, type InvestmentSection } from './ModuleNavigation';
 import { FuturePortfolioChart } from './FuturePortfolioChart';
 import { FutureInvestmentMore, type MorePage } from './FutureInvestmentMore';
 import { FuturePortfolioSwitcher } from './FuturePortfolioSwitcher';
+import { Chips } from './Primitives';
 import { readCzRoboGoals, subscribeCzRoboGoals } from '../robo/session';
 import { baselineCzRoboSession } from '../../../current/investments/RoboSession';
+
+const EVO_PRODUCT_TYPE_CHIPS = [
+  { id: 'all', label: 'All products' },
+  { id: 'Fund', label: 'Funds' },
+  { id: 'Stock', label: 'Stocks' },
+  { id: 'Bond', label: 'Bonds' },
+  { id: 'baskets', label: 'Basket funds' },
+] as const;
 
 export function FutureInvestmentOverview({
   host,
@@ -77,6 +87,7 @@ export function FutureInvestmentOverview({
   section: InvestmentSection;
   onSectionChange(section: InvestmentSection): void;
   onSelectBasket(basket: InvestmentBasketFund): void;
+  onOpenFundCollection?: (collection: InvestmentFundCollectionId) => void;
   historyOptions?: Partial<
     Omit<
       React.ComponentProps<typeof BaselineInvestmentHistory>,
@@ -100,6 +111,8 @@ export function FutureInvestmentOverview({
   );
   const historyInitialTab = historyOptions?.initialTab ?? 'transactions';
   const [activityTab, setActivityTab] = useState(historyInitialTab);
+  const [catalogAtRoot, setCatalogAtRoot] = useState(true);
+  const [historyAtRoot, setHistoryAtRoot] = useState(true);
   useEffect(() => setActivityTab(historyInitialTab), [historyInitialTab]);
   const [morePage, setMorePage] = useState<MorePage>('menu');
   const [education, setEducation] = useState<'risk' | 'regular' | null>(null);
@@ -191,6 +204,13 @@ export function FutureInvestmentOverview({
     history: c.activity,
     more: c.more,
   };
+  const showSectionHeader =
+    section === 'catalog'
+      ? catalogAtRoot
+      : section === 'history'
+        ? historyAtRoot
+        : true;
+  const morePageIsNested = section === 'more' && morePage !== 'menu';
   const embeddedHost = {
     ...host,
     screenTopInset: 0,
@@ -268,11 +288,12 @@ export function FutureInvestmentOverview({
         { backgroundColor: investmentColor(host, '--uc-app-bg') },
       ]}
     >
-      {section !== 'catalog' && section !== 'history' && (
+      {showSectionHeader && (
         <BaselinePageHeader
           title={titles[section]}
-          onBack={goBack}
-          backIconName={section === 'portfolio' ? 'close-flow' : 'back-heavy'}
+          onBack={morePageIsNested ? goBack : host.onBack}
+          backIconName={morePageIsNested ? 'back-heavy' : 'close-flow'}
+          backLabel={morePageIsNested ? 'Back' : 'Close'}
           variant="gray"
           renderLargeTitle={false}
           collapsedTitleProgress={1}
@@ -309,6 +330,20 @@ export function FutureInvestmentOverview({
             <BaselineInvestmentCatalog
               host={embeddedHost}
               securities={snapshot.catalog}
+              showHeader={false}
+              onRootChange={setCatalogAtRoot}
+              renderProductTypeChips={
+                host.release === 'release-future-evo-2027'
+                  ? ({ value, onChange }) => (
+                      <Chips
+                        items={EVO_PRODUCT_TYPE_CHIPS}
+                        value={value}
+                        onChange={onChange}
+                        testID="evo-investment-product-type-chips"
+                      />
+                    )
+                  : undefined
+              }
               onBack={() => onSectionChange('portfolio')}
               onSelect={security => onOpenSecurity(security.id)}
               onSelectBasket={onSelectBasket}
@@ -319,6 +354,8 @@ export function FutureInvestmentOverview({
             <BaselineInvestmentHistory
               {...historyOptions}
               host={embeddedHost}
+              showHeader={!historyAtRoot}
+              onRootChange={setHistoryAtRoot}
               transactions={snapshot.transactions}
               orders={snapshot.orders}
               initialTab={activityTab}
@@ -664,6 +701,7 @@ const s = StyleSheet.create({
   body: {
     flex: 1,
     minHeight: 0,
+    marginTop: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: 'hidden',

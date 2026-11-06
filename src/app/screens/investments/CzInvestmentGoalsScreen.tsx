@@ -61,10 +61,10 @@ function GoalCard({
             <span className="text-[24px] font-bold leading-[26px]">{formatCzkInteger(goal.currentInteger)}</span>
             <span className="text-[16px] leading-[18px]">{goal.currentDecimals}</span>
           </div>
-          <p className={`mt-[2px] text-[14px] leading-[18px] ${returnClass}`}>
+          <p className={`mt-[2px] text-[14px] font-bold leading-[18px] ${returnClass}`}>
             <span className={goal.returnTone === "neutral" ? "" : "font-bold"}>{formatCzkReturnLabel(goal.returnLabel)}</span>
             {goal.returnTone === "neutral" ? null : (
-              <span className="font-normal text-[var(--uc-text-muted)]"> total return</span>
+              <span className="font-bold text-[var(--uc-text-muted)]"> total return</span>
             )}
           </p>
         </div>

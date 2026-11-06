@@ -375,7 +375,7 @@ export function CreationScreens({
             onPress={onExit}
             style={[
               styles.introClose,
-              { top: Math.max(24, screenTopInset - 16) },
+                { top: Math.max(24, screenTopInset + 18) },
             ]}
           >
             <InvestmentGlyph name="close-flow" color="#262626" size={24} />
@@ -386,7 +386,7 @@ export function CreationScreens({
           accessibilityRole="button"
           accessibilityLabel="Back"
           onPress={onBack}
-          style={[styles.introBack, { top: Math.max(24, screenTopInset - 16) }]}
+          style={[styles.introBack, { top: Math.max(24, screenTopInset + 18) }]}
         >
           <InvestmentGlyph name="back-heavy" color="#262626" size={20} />
         </Pressable>

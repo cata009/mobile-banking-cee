@@ -12,10 +12,12 @@ export function GoalCard({
   goal,
   onOpen,
   hidden,
+  boldReturnLabel = false,
 }: {
   goal: RoboExistingGoal;
   onOpen: (goal: RoboExistingGoal) => void;
   hidden: boolean;
+  boldReturnLabel?: boolean;
 }) {
   const progress = getRoboGoalProgress(goal);
   return (
@@ -45,7 +47,7 @@ export function GoalCard({
           </Copy>
         </View>
         <Copy
-          strong={goal.returnTone !== 'neutral'}
+          strong={goal.returnTone !== 'neutral' || boldReturnLabel}
           style={[
             s.returns,
             {
@@ -60,7 +62,7 @@ export function GoalCard({
         >
           {hidden ? '••••' : formatCzkReturnLabel(goal.returnLabel)}
           {goal.returnTone !== 'neutral' ? (
-            <Copy muted style={s.returns}>
+            <Copy strong={boldReturnLabel} muted style={s.returns}>
               {' '}
               total return
             </Copy>

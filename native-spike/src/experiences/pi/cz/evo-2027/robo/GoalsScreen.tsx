@@ -5,6 +5,7 @@ import { RoboHelp } from './Help';
 import { Image, StyleSheet, View } from 'react-native';
 import { getRoboGoalCurrentValue } from '@/features/investments/robo/goalModel';
 import type { RoboExistingGoal } from '@/features/investments/robo/types';
+import type { CurrentScreenProps } from '../../../current/contracts';
 import { formatInvestmentAmountParts } from '@/app/utils/investmentAmountFormatting';
 import { investmentAssets, investmentImageSource } from '../investments/assets';
 import { Button, Copy, Notice, Page } from '../investments/Primitives';
@@ -16,6 +17,7 @@ export function CzGoalsScreen({
   onOpenGoal,
   amountsHidden = false,
   portfolioSwitcher,
+  release = 'release-future-evo-2027',
 }: {
   goals: readonly RoboExistingGoal[];
   onBack: () => void;
@@ -23,6 +25,7 @@ export function CzGoalsScreen({
   onOpenGoal: (goal: RoboExistingGoal) => void;
   amountsHidden?: boolean;
   portfolioSwitcher?: React.ReactNode;
+  release?: CurrentScreenProps['release'];
 }) {
   const [help, setHelp] = useState(false);
   const [summarySize, setSummarySize] = useState(33.33);
@@ -36,13 +39,26 @@ export function CzGoalsScreen({
     'CZK',
     amountsHidden,
   );
-  if (help) return <RoboHelp kind="goals" onBack={() => setHelp(false)} />;
+  if (help)
+    return (
+      <RoboHelp
+        kind="goals"
+        onBack={() => setHelp(false)}
+        bottomSheet={release === 'release-future-cz-robo'}
+      />
+    );
   return (
     <Page
       kind="goals"
-      title="Your goals list"
-      compactTitle={!!portfolioSwitcher}
-      headerTitle={portfolioSwitcher}
+      title={
+        release === 'release-future-cz-robo' ? 'My goals' : 'Your goals list'
+      }
+      compactTitle={
+        release === 'release-future-cz-robo' ? false : !!portfolioSwitcher
+      }
+      headerTitle={
+        release === 'release-future-cz-robo' ? undefined : portfolioSwitcher
+      }
       description="Track your plans, one step at a time"
       onBack={onBack}
       gray
@@ -114,6 +130,7 @@ export function CzGoalsScreen({
             goal={goal}
             onOpen={onOpenGoal}
             hidden={amountsHidden}
+            boldReturnLabel={release === 'release-future-cz-robo'}
           />
         ))
       ) : (

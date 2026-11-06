@@ -33,6 +33,7 @@ import type {
 } from '@/features/investments/robo/types';
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig';
 import type { CurrentAccount } from '@/data/products';
+import type { CurrentScreenProps } from '../../../current/contracts';
 import { Signing } from '../investments/Signing';
 import {
   Button as InvestmentButton,
@@ -79,6 +80,7 @@ function RoboSurface({
 
 export interface CzRoboFlowProps {
   portfolioSwitcher?: React.ReactNode;
+  release?: CurrentScreenProps['release'];
   onBack: () => void;
   onExit: () => void;
   initialGoal?: RoboExistingGoal;
@@ -115,6 +117,7 @@ export function CzRoboFlow({
   onOpenSecurity,
   initialEvents = [],
   portfolioSwitcher,
+  release = 'release-future-evo-2027',
 }: CzRoboFlowProps) {
   const [clock] = useState(() => demoClock ?? getCurrentRoboDemoClock());
   const [basketDetailsOpen, setBasketDetailsOpen] = useState(false);
@@ -396,6 +399,7 @@ export function CzRoboFlow({
           clock={clock}
           amountsHidden={amountsHidden}
           screenTopInset={screenTopInset}
+          release={release}
           onOpenSecurity={onOpenSecurity}
         />
       );
@@ -417,6 +421,7 @@ export function CzRoboFlow({
           securityCatalog={securityCatalog}
           clock={clock}
           amountsHidden={amountsHidden}
+          release={release}
           onOpenSecurity={onOpenSecurity}
         />
       </RoboSurface>

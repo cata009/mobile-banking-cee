@@ -28,6 +28,7 @@ import {
   type CoAppingInvestmentBuyDraft,
 } from '@/features/investments/orders/buyOrder';
 import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
+import type { CurrentScreenProps } from '../../../current/contracts';
 import { shareDemoFile } from '../../../../../platform/nativeFiles';
 import { CzRoboFlow, CzGoalsScreen } from '../robo';
 import {
@@ -117,6 +118,7 @@ export interface CzInvestmentsScreenProps {
   initialCollection?: InvestmentFundCollectionId;
   goals?: readonly RoboExistingGoal[];
   goalsHeaderLabel?: string;
+  roboRelease?: CurrentScreenProps['release'];
   onGoalUpdated?: (goal: RoboExistingGoal) => void;
   onRoboResumeStateChange?: CzechNativeScreenProps['onRoboResumeStateChange'];
   state?: 'ready' | 'loading' | 'error';
@@ -157,6 +159,7 @@ function CzInvestmentsComposition({
   initialCollection,
   goals: suppliedGoals,
   goalsHeaderLabel,
+  roboRelease = 'release-future-evo-2027',
   onGoalUpdated,
   onRoboResumeStateChange,
   state = 'ready',
@@ -326,6 +329,7 @@ function CzInvestmentsComposition({
         onCreateGoal={() => push({ kind: 'create' })}
         onOpenGoal={goal => push({ kind: 'goal', goalId: goal.id })}
         amountsHidden={amountsHidden}
+        release={roboRelease}
       />
     );
   if (route.kind === 'create' || route.kind === 'goal')
@@ -338,6 +342,7 @@ function CzInvestmentsComposition({
               language={classicHost.language}
               value={`goal:${route.goalId}`}
               goals={goals}
+              displayLabel={goalsHeaderLabel}
               onChange={value => {
                 if (value === 'portfolio') {
                   lastRoboResumeKey.current = null;
@@ -357,6 +362,7 @@ function CzInvestmentsComposition({
           ) : undefined
         }
         key={route.kind === 'goal' ? route.goalId : 'create'}
+        release={roboRelease}
         onBack={showGoals}
         onExit={showGoals}
         initialGoal={

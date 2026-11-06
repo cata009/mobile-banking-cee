@@ -24,6 +24,7 @@ export interface CzechNavigationBarItem {
   id: string;
   label: string;
   icon: string;
+  iconSize?: number;
 }
 
 export function CzechNavigationBar({
@@ -33,7 +34,6 @@ export function CzechNavigationBar({
   dark = false,
   label,
   vertical = false,
-  primaryId,
   onSelect,
 }: {
   items: readonly CzechNavigationBarItem[];
@@ -42,7 +42,6 @@ export function CzechNavigationBar({
   dark?: boolean;
   label?: string;
   vertical?: boolean;
-  primaryId?: string;
   onSelect: (id: string) => void;
 }) {
   const accent = dark ? '#65d9d2' : '#007a91';
@@ -69,8 +68,7 @@ export function CzechNavigationBar({
     >
       {navigationItems.map(item => {
         const selected = item.id === value;
-        const primary = item.id === primaryId;
-        const color = primary || selected ? accent : muted;
+        const color = selected ? accent : muted;
         return (
           <Pressable
             key={item.id}
@@ -81,26 +79,11 @@ export function CzechNavigationBar({
             onPress={() => onSelect(item.id)}
             style={vertical ? s.verticalItem : s.item}
           >
-            <View
-              style={
-                primary
-                  ? {
-                      width: 34,
-                      height: 28,
-                      borderRadius: 10,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: accent,
-                    }
-                  : undefined
-              }
-            >
-              <SourceCustomIcon
-                name={item.icon}
-                size={22}
-                color={primary ? (dark ? '#131617' : '#ffffff') : color}
-              />
-            </View>
+            <SourceCustomIcon
+              name={item.icon}
+              size={item.iconSize ?? 22}
+              color={color}
+            />
             {!vertical && (
               <Text style={[s.label, { color }]}>{item.label}</Text>
             )}
