@@ -14,12 +14,14 @@ export function FuturePortfolioSwitcher({
   value,
   goals,
   onChange,
+  displayLabel,
 }: {
   tokens: ControlTokens;
   language?: string;
   value: string;
   goals: readonly RoboExistingGoal[];
   onChange(value: string): void;
+  displayLabel?: string;
 }) {
   const c = futureCopy(language);
   const items = [
@@ -49,29 +51,36 @@ export function FuturePortfolioSwitcher({
           </SourceBottomSheet>
         ) : null
       }
-      renderTrigger={({ open, expanded, label }) => (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${c.switchPortfolio}: ${selectedGoal?.name ?? label}`}
-          accessibilityState={{ expanded }}
-          onPress={open}
-          style={s.trigger}
-        >
-          <View style={s.label}>
-            <Text
-              numberOfLines={1}
-              style={{
-                color: tokens.text,
-                fontFamily: tokens.strongFont,
-                fontSize: 16,
-              }}
-            >
-              {selectedGoal?.name ?? label}
-            </Text>
-          </View>
-          <SourceCustomIcon name="chevron-down" size={12} color={tokens.text} />
-        </Pressable>
-      )}
+      renderTrigger={({ open, expanded, label }) => {
+        const selectedLabel = selectedGoal?.name ?? label;
+        const triggerLabel = displayLabel ?? selectedLabel;
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${c.switchPortfolio}: ${triggerLabel}`}
+            {...(displayLabel
+              ? { accessibilityValue: { text: selectedLabel } }
+              : {})}
+            accessibilityState={{ expanded }}
+            onPress={open}
+            style={s.trigger}
+          >
+            <View style={s.label}>
+              <Text
+                numberOfLines={1}
+                style={{
+                  color: tokens.text,
+                  fontFamily: tokens.strongFont,
+                  fontSize: 16,
+                }}
+              >
+                {triggerLabel}
+              </Text>
+            </View>
+            <SourceCustomIcon name="chevron-down" size={12} color={tokens.text} />
+          </Pressable>
+        );
+      }}
     />
   );
 }

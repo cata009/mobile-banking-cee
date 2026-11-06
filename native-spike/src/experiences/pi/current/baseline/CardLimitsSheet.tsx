@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   cardLimitDefaults,
   isValidCardLimit,
@@ -84,6 +84,7 @@ export default function CardLimitsSheet({
       description={description}
       rowHeight={80}
       dark={dark}
+      style={styles.inlineRow}
       trailing={
         <ToggleButton
           ariaLabel={title}
@@ -106,6 +107,7 @@ export default function CardLimitsSheet({
           : `${format(limits[kind])} ${limits.currency}`
       }
       rowHeight={80}
+      style={styles.inlineRow}
       trailingAccessory="chevron"
       onPress={() => open(kind)}
       dark={dark}
@@ -168,21 +170,30 @@ export default function CardLimitsSheet({
               </View>
               {screen !== 'posCount' && (
                 <View style={{ width: 70, paddingBottom: 5 }}>
-                  <Text style={{ color: muted, fontSize: 12 }}>CURRENCY</Text>
-                  <Text style={{ color: text, fontSize: 16, marginTop: 4 }}>
+                  <Text
+                    style={[styles.regular, { color: muted, fontSize: 12 }]}
+                  >
+                    CURRENCY
+                  </Text>
+                  <Text
+                    style={[
+                      styles.regular,
+                      { color: text, fontSize: 16, marginTop: 4 },
+                    ]}
+                  >
                     {limits.currency}
                   </Text>
                 </View>
               )}
             </View>
-            <Text style={{ color: muted, marginTop: 6 }}>
+            <Text style={[styles.regular, { color: muted, marginTop: 6 }]}>
               Maximum limit:{' '}
               {screen === 'posCount'
                 ? '100'
                 : `${format(limits[`${screen}Max`])} ${limits.currency}`}
             </Text>
             {screen !== 'posCount' && available !== undefined && (
-              <Text style={{ color: muted }}>
+              <Text style={[styles.regular, { color: muted }]}>
                 Free to spend {format(available)} {limits.currency}
               </Text>
             )}
@@ -209,6 +220,7 @@ export default function CardLimitsSheet({
               description="After midnight the previous limit will be restored"
               rowHeight={80}
               dark={dark}
+              style={styles.inlineRow}
               trailing={
                 <ToggleButton
                   ariaLabel="Set for the rest of the day"
@@ -221,7 +233,7 @@ export default function CardLimitsSheet({
           </>
         ) : (
           <>
-            <Text style={{ color: text, marginBottom: 8 }}>
+            <Text style={[styles.regular, { color: text, marginBottom: 8 }]}>
               Set your daily card limits or temporarily disable card payments
               and withdrawals.{' '}
               <Text
@@ -236,7 +248,7 @@ export default function CardLimitsSheet({
               </Text>
             </Text>
             {detailsOpen && (
-              <Text style={{ color: muted }}>
+              <Text style={[styles.regular, { color: muted }]}>
                 Changes apply to this card. You can also set a limit until the
                 end of the day.
               </Text>
@@ -269,3 +281,8 @@ export default function CardLimitsSheet({
     </ModalPortal>
   );
 }
+
+const styles = StyleSheet.create({
+  inlineRow: { paddingLeft: 0, paddingRight: 0 },
+  regular: { fontFamily: 'UniCredit-regular' },
+});

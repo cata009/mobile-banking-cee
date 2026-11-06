@@ -293,7 +293,9 @@ describe('Genius Protect', () => {
         testID: 'genius-protect-row-chevron',
       });
       expect(paymentChevrons.length).toBeGreaterThanOrEqual(1);
-      expect(paymentChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
+      expect(paymentChevrons.every(icon => icon.props.style.width === 32)).toBe(
+        true,
+      );
       press(tree, 'Mandat pentru debitarea automată');
       expect(
         tree.root.findByType(SourceBottomSheet).props.showFooterDivider,
@@ -304,7 +306,9 @@ describe('Genius Protect', () => {
         testID: 'genius-protect-row-chevron',
       });
       expect(preContractChevrons.length).toBeGreaterThanOrEqual(2);
-      expect(preContractChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
+      expect(
+        preContractChevrons.every(icon => icon.props.style.width === 32),
+      ).toBe(true);
       press(tree, 'Oferta de asigurare Genius Protect');
       press(tree, 'Acceptă oferta de asigurare');
       press(tree, 'Documentație Trans Sped');
@@ -315,7 +319,9 @@ describe('Genius Protect', () => {
         testID: 'genius-protect-row-chevron',
       });
       expect(contractChevrons.length).toBeGreaterThanOrEqual(3);
-      expect(contractChevrons.every(icon => icon.props.style.width === 32)).toBe(true);
+      expect(
+        contractChevrons.every(icon => icon.props.style.width === 32),
+      ).toBe(true);
       press(tree, 'Contract Genius Protect');
       press(tree, 'Am citit și sunt de acord');
       press(tree, 'Mandat de debitare automată');

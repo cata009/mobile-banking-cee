@@ -102,6 +102,8 @@ export default function BaselineInvestmentsController({
     if (future && entry === 'history') setFutureSection('history');
   }, [entry, future]);
   const previousEntry = useRef(entry);
+  const useBaselineCzRoboInvestment =
+    host.release === 'release-future-cz-robo';
   useEffect(() => {
     const returnedFromApprovals =
       previousEntry.current === 'approvals' && entry === 'history';
@@ -299,7 +301,7 @@ export default function BaselineInvestmentsController({
           ]),
         ]
       : currencies;
-  if (entry === 'history' && !future)
+  if (entry === 'history' && (!future || useBaselineCzRoboInvestment))
     return (
       <BaselineInvestmentHistory
         host={childHost}
@@ -467,7 +469,7 @@ export default function BaselineInvestmentsController({
       screen: 'investments',
       params: { entry: 'approvals' },
     });
-  if (future)
+  if (future && !useBaselineCzRoboInvestment)
     return (
       <FutureInvestmentOverview
         host={childHost}
@@ -520,7 +522,7 @@ export default function BaselineInvestmentsController({
         onOpenApprovals={onOpenApprovals}
       />
     );
-  if (showRoboActivity)
+  if (showRoboActivity && !useBaselineCzRoboInvestment)
     return (
       <CzRoboOverview
         host={childHost}

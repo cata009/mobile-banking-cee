@@ -45,6 +45,8 @@ type BaselineHistoryAdapterProps = BaselineHistoryProps & {
   allDatesByDefault?: boolean;
   titleOverride?: string;
   closeModuleButton?: boolean;
+  showHeader?: boolean;
+  onRootChange?: (isRoot: boolean) => void;
   onTabChange?: (tab: 'transactions' | 'orders') => void;
   approvalCount?: number;
   onToApprove?: () => void;
@@ -77,6 +79,8 @@ export function BaselineInvestmentHistory({
   allDatesByDefault = false,
   titleOverride,
   closeModuleButton = false,
+  showHeader = true,
+  onRootChange,
   onTabChange,
   approvalCount = 0,
   onToApprove,
@@ -122,6 +126,11 @@ export function BaselineInvestmentHistory({
       null,
     ),
     [draft, setDraft] = useState(defaults);
+  const isRootPage = !filterMode && !info && !selected;
+  useEffect(() => {
+    onRootChange?.(isRootPage);
+    return () => onRootChange?.(true);
+  }, [isRootPage, onRootChange]);
   useEffect(() => {
     if (typeof filterByTitle === 'string' && filterByTitle.trim())
       setQuery(filterByTitle);
@@ -364,6 +373,7 @@ export function BaselineInvestmentHistory({
       host={host}
       title={titleOverride ?? 'History'}
       onBack={onBack}
+      showHeader={showHeader}
       onHelp={() => setInfo(tab)}
       headerOptions={{
         showHelp: true,

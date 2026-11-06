@@ -278,7 +278,7 @@ test('card information uses Source fields and selected canonical credit figures 
 });
 
 test.each(['credit_card', 'debit_card'] as const)(
-  'Source card options keep all inert program and %s setting rows',
+  'Source card options retain program and %s settings with supported controls',
   async type => {
     expect(CardOptions).toBeDefined();
     const props = host(),
@@ -303,7 +303,11 @@ test.each(['credit_card', 'debit_card'] as const)(
     expect(
       rows.every(
         n =>
-          n.props.onPress === undefined &&
+          (['VIEW PIN', 'CARD LIMITS', 'PUSH NOTIFICATIONS'].includes(
+            n.props.title,
+          )
+            ? typeof n.props.onPress === 'function'
+            : n.props.onPress === undefined) &&
           n.props.rowHeight === 80 &&
           n.props.trailingAccessory === 'chevron',
       ),
@@ -333,6 +337,16 @@ test('card information fields sit 16px below the title frame', async () => {
 
 test('card carousel selects continuously during scroll and touch responder drag settles on Source offsets', async () => {
   const original = Platform.OS;
+  const originalAdd = window.addEventListener;
+  const originalRemove = window.removeEventListener;
+  Object.defineProperty(window, 'addEventListener', {
+    configurable: true,
+    value: jest.fn(),
+  });
+  Object.defineProperty(window, 'removeEventListener', {
+    configurable: true,
+    value: jest.fn(),
+  });
   Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' });
   const create = jest.spyOn(PanResponder, 'create');
   try {
@@ -356,32 +370,34 @@ test('card carousel selects continuously during scroll and touch responder drag 
     const gesture = create.mock.calls.at(-1)![0];
     const event = { nativeEvent: { pageX: 300 } } as never;
     expect(
-      gesture.onMoveShouldSetPanResponderCapture?.(
-        event,
-        { dx: 24, dy: 1 } as never,
-      ),
+      gesture.onMoveShouldSetPanResponderCapture?.(event, {
+        dx: 24,
+        dy: 1,
+      } as never),
     ).toBe(true);
     expect(
-      gesture.onMoveShouldSetPanResponderCapture?.(
-        event,
-        { dx: 1, dy: 24 } as never,
-      ),
+      gesture.onMoveShouldSetPanResponderCapture?.(event, {
+        dx: 1,
+        dy: 24,
+      } as never),
     ).toBe(false);
     await act(() => {
       gesture.onStartShouldSetPanResponderCapture?.(event, {} as never);
-      gesture.onPanResponderMove?.(
-        event,
-        { dx: -150, dy: 0, moveX: 150 } as never,
-      );
+      gesture.onPanResponderMove?.(event, {
+        dx: -150,
+        dy: 0,
+        moveX: 150,
+      } as never);
     });
     await act(() =>
       rail!.props.onScroll({ nativeEvent: { contentOffset: { x: 378 } } }),
     );
     await act(() => {
-      gesture.onPanResponderRelease?.(
-        event,
-        { dx: -150, dy: 0, moveX: 150 } as never,
-      );
+      gesture.onPanResponderRelease?.(event, {
+        dx: -150,
+        dy: 0,
+        moveX: 150,
+      } as never);
     });
     await act(() => button(tree, 'Options').props.onPress());
     expect(props.onNavigate).toHaveBeenLastCalledWith({
@@ -409,6 +425,14 @@ test('card carousel selects continuously during scroll and touch responder drag 
     await act(() => tree.unmount());
   } finally {
     create.mockRestore();
+    Object.defineProperty(window, 'addEventListener', {
+      configurable: true,
+      value: originalAdd,
+    });
+    Object.defineProperty(window, 'removeEventListener', {
+      configurable: true,
+      value: originalRemove,
+    });
     Object.defineProperty(Platform, 'OS', {
       configurable: true,
       value: original,
@@ -477,4 +501,43 @@ test('Source Face ID cancels callbacks and drawing animations when unmounted dur
   await act(() => tree.unmount());
   await act(() => jest.advanceTimersByTime(600));
   expect(done).not.toHaveBeenCalled();
+});
+
+test('keeps the requested card selected while its programmatic scroll is in progress', async () => {
+  const props = host(),
+    cards = bankingProducts(props).cards,
+    tree = await render(props);
+  const rail = tree.root.findAll(
+    node =>
+      node.props.testID === 'ro-card-carousel' &&
+      typeof node.props.onScroll === 'function',
+  )[0]!;
+  const second = tree.root.findAll(
+    node =>
+      node.props.testID === `ro-card-carousel-${cards[1]!.id}` &&
+      typeof node.props.onPress === 'function',
+  )[0]!;
+  await act(() => second.props.onPress());
+  await act(() =>
+    rail.props.onScroll({ nativeEvent: { contentOffset: { x: 0 } } }),
+  );
+  await act(() => rail.props.onMomentumScrollEnd());
+  await act(() => button(tree, 'Options').props.onPress());
+  expect(props.onNavigate).toHaveBeenLastCalledWith({
+    screen: 'card-options',
+    params: { productId: cards[1]!.id },
+  });
+  await act(() =>
+    rail.props.onScroll({ nativeEvent: { contentOffset: { x: 189 } } }),
+  );
+  await act(() => rail.props.onScrollBeginDrag());
+  await act(() =>
+    rail.props.onScroll({ nativeEvent: { contentOffset: { x: 0 } } }),
+  );
+  await act(() => button(tree, 'Options').props.onPress());
+  expect(props.onNavigate).toHaveBeenLastCalledWith({
+    screen: 'card-options',
+    params: { productId: cards[0]!.id },
+  });
+  await act(() => tree.unmount());
 });

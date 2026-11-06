@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Platform,
@@ -35,6 +35,17 @@ import {
 } from './shared';
 
 const baskets = getRecommendedInvestmentBaskets('moderate-v2');
+export type BaselineInvestmentProductCategory =
+  | 'all'
+  | 'Fund'
+  | 'Stock'
+  | 'Bond'
+  | 'baskets';
+type BaselineInvestmentPlan = 'all' | 'ONE OFF' | 'RECURRENT';
+export interface BaselineInvestmentProductCategoryChipsProps {
+  value: BaselineInvestmentProductCategory;
+  onChange: (value: BaselineInvestmentProductCategory) => void;
+}
 function BasketContent({
   host,
   basket,
@@ -198,19 +209,35 @@ export function BaselineInvestmentCatalog({
   onBack,
   onSelect,
   onSelectBasket,
+  showHeader = true,
+  onRootChange,
+  renderProductTypeChips,
 }: {
   host: Host;
   securities: readonly InvestmentCatalogSecurity[];
   onBack(): void;
   onSelect(security: InvestmentCatalogSecurity): void;
   onSelectBasket(basket: InvestmentBasketFund): void;
+  showHeader?: boolean;
+  onRootChange?: (isRoot: boolean) => void;
+  renderProductTypeChips?: (
+    props: BaselineInvestmentProductCategoryChipsProps,
+  ) => React.ReactNode;
 }) {
   const [query, setQuery] = useState(''),
     [filtersOpen, setFiltersOpen] = useState(false),
     [owned, setOwned] = useState(false),
     [currency, setCurrency] = useState<string | null>(null),
     [tab, setTab] = useState('all'),
+    [productCategory, setProductCategory] =
+      useState<BaselineInvestmentProductCategory>('all'),
+    [contributionPlan, setContributionPlan] =
+      useState<BaselineInvestmentPlan>('all'),
     [allBaskets, setAllBaskets] = useState(false);
+  useEffect(() => {
+    onRootChange?.(!allBaskets);
+    return () => onRootChange?.(true);
+  }, [allBaskets, onRootChange]);
   const viewport = useDemoViewport(),
     dark = investmentDark(host),
     cz = host.country === 'CZ';
@@ -232,11 +259,19 @@ export function BaselineInvestmentCatalog({
   const clear = () => {
     setOwned(false);
     setCurrency(null);
+    setContributionPlan('all');
   };
   const normalized = query.trim().toLowerCase();
+  const planMatches = (contributionType: string) =>
+    renderProductTypeChips
+      ? contributionPlan === 'all' || contributionType === contributionPlan
+      : tab !== 'regular' || contributionType === 'RECURRENT';
   const visible = securities.filter(
     s =>
-      (tab !== 'regular' || s.contributionType === 'RECURRENT') &&
+      planMatches(s.contributionType) &&
+      (!renderProductTypeChips ||
+        (productCategory !== 'baskets' &&
+          (productCategory === 'all' || s.productType === productCategory))) &&
       (!owned || s.owned) &&
       (!currency || s.instrumentCurrency === currency) &&
       (!normalized ||
@@ -245,11 +280,20 @@ export function BaselineInvestmentCatalog({
   const carousel = baskets
     .filter(
       b =>
-        (tab !== 'regular' || b.contributionType === 'RECURRENT') &&
+        planMatches(b.contributionType) &&
         (!normalized ||
           `${b.title} ${b.description}`.toLowerCase().includes(normalized)),
     )
     .slice(0, 5);
+  const showBasketSection =
+    cz &&
+    (!renderProductTypeChips ||
+      productCategory === 'all' ||
+      productCategory === 'baskets');
+  const showSecurities =
+    !renderProductTypeChips || productCategory !== 'baskets';
+  const showSecuritiesHeading =
+    !renderProductTypeChips || productCategory === 'all';
   if (allBaskets)
     return (
       <BaselineInvestmentFrame
@@ -333,9 +377,10 @@ export function BaselineInvestmentCatalog({
         host={host}
         title={cz ? 'Buy securities' : 'List of securities'}
         onBack={back}
+        showHeader={showHeader}
         headerOptions={{ compact: true, showHelp: true }}
       >
-        {cz ? (
+        {cz && !renderProductTypeChips ? (
           <BaselineMailboxTabs
             dark={dark}
             tabs={[
@@ -355,12 +400,25 @@ export function BaselineInvestmentCatalog({
             onValueChange={setQuery}
             onFilterClick={() => setFiltersOpen(true)}
             onRemoveFilters={clear}
-            filtersActive={owned || currency !== null}
+            filtersActive={
+              owned ||
+              currency !== null ||
+              (renderProductTypeChips !== undefined &&
+                contributionPlan !== 'all')
+            }
             showRemoveFiltersAction
             placeholder="Search"
           />
         </View>
-        {cz ? (
+        {renderProductTypeChips ? (
+          <View style={styles.productTypeChips}>
+            {renderProductTypeChips({
+              value: productCategory,
+              onChange: setProductCategory,
+            })}
+          </View>
+        ) : null}
+        {showBasketSection ? (
           <View style={styles.layout13}>
             <View style={styles.layout14}>
               <BaselineSectionDivider
@@ -404,12 +462,14 @@ export function BaselineInvestmentCatalog({
                 />
               </Pressable>
             </View>
-            <View style={styles.layout17}>
-              <BaselineSectionDivider title="ALL SECURITIES" dark={dark} />
-            </View>
+            {showSecuritiesHeading ? (
+              <View style={styles.layout17}>
+                <BaselineSectionDivider title="ALL SECURITIES" dark={dark} />
+              </View>
+            ) : null}
           </View>
         ) : null}
-        {visible.map(s => (
+        {showSecurities && visible.map(s => (
           <Pressable
             key={s.id}
             testID={`baseline-investment-catalog-row-${s.id}`}
@@ -449,7 +509,7 @@ export function BaselineInvestmentCatalog({
             </View>
           </Pressable>
         ))}
-        {!visible.length ? (
+        {showSecurities && !visible.length ? (
           <View style={styles.layout23}>
             <Copy host={host} size={18} line={27} bold>
               No securities found
@@ -492,6 +552,34 @@ export function BaselineInvestmentCatalog({
                 onPress={() => setCurrency(c)}
               />
             ))}
+            {renderProductTypeChips ? (
+              <>
+                <Copy
+                  host={host}
+                  muted
+                  bold
+                  line={21}
+                  style={styles.layout25}
+                >
+                  CONTRIBUTION PLAN
+                </Copy>
+                {[
+                  { id: 'all', label: 'All plans' },
+                  { id: 'ONE OFF', label: 'One-off investments' },
+                  { id: 'RECURRENT', label: 'Regular investments' },
+                ].map(plan => (
+                  <FilterChoice
+                    key={plan.id}
+                    host={host}
+                    label={plan.label}
+                    checked={contributionPlan === plan.id}
+                    onPress={() =>
+                      setContributionPlan(plan.id as BaselineInvestmentPlan)
+                    }
+                  />
+                ))}
+              </>
+            ) : null}
             {['Remove filters', 'Show products'].map((label, i) => (
               <Pressable
                 key={label}
@@ -594,11 +682,12 @@ const styles = StyleSheet.create({
   layout10: { textAlign: 'right' },
   layout11: { height: 34 },
   layout12: { padding: 16 },
+  productTypeChips: { paddingHorizontal: 16, paddingBottom: 8 },
   layout13: { paddingTop: 16 },
-  layout14: { paddingHorizontal: 24, paddingTop: 8 },
+  layout14: { paddingHorizontal: 16, paddingTop: 8 },
   layout15: { paddingHorizontal: 24, paddingVertical: 24 },
   layout16: { alignItems: 'center', paddingBottom: 24 },
-  layout17: { paddingHorizontal: 24, paddingTop: 8 },
+  layout17: { paddingHorizontal: 16, paddingTop: 8 },
   layout18: {
     minHeight: 105,
     padding: 16,

@@ -118,7 +118,12 @@ export function BaselineInvestmentHistoryRows({
       {[...groups].map(([year, rows]) => {
         return (
           <View key={year}>
-            <View style={baselineStyles.inline4}>
+            <View
+              style={[
+                baselineStyles.inline4,
+                host.country === 'CZ' && baselineStyles.inline4Cz,
+              ]}
+            >
               <BaselineSectionDivider
                 title={year}
                 variant="light-date"
@@ -261,6 +266,9 @@ const baselineStyles = StyleSheet.create({
   },
   inline4: {
     paddingHorizontal: 16,
+  },
+  inline4Cz: {
+    paddingHorizontal: 8,
   },
   inline5: {
     paddingTop: 16,

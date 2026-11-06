@@ -8,7 +8,9 @@ import { CZECH_INVESTMENTS_ADAPTER } from '../src/experiences/pi/cz/evo-2027/inv
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { ModuleNavigation } from '../src/experiences/pi/cz/evo-2027/investments/ModuleNavigation';
-import { Copy } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
+import { FuturePortfolioSwitcher } from '../src/experiences/pi/cz/evo-2027/investments/FuturePortfolioSwitcher';
+import { Copy, czInvestmentTokens } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
+import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures';
 
 function press(tree: Renderer.ReactTestRenderer, label: string) {
   const control = tree.root.findAll(
@@ -29,6 +31,31 @@ function input(tree: Renderer.ReactTestRenderer, label: string, value: string) {
   );
 }
 describe('CZ Evo native investments', () => {
+  it('labels the Goals switcher as CZ Robo', () => {
+    const displayLabel = { displayLabel: 'CZ Robo' };
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <FuturePortfolioSwitcher
+          {...displayLabel}
+          tokens={czInvestmentTokens}
+          language="en"
+          value="goals"
+          goals={INITIAL_CZ_ROBO_GOALS}
+          onChange={jest.fn()}
+        />,
+      );
+    });
+    const trigger = tree.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'button' &&
+        typeof node.props.onPress === 'function',
+    )[0]!;
+    expect(trigger.props.accessibilityLabel).toBe('Switch portfolio: CZ Robo');
+    expect(JSON.stringify(tree.toJSON())).toContain('CZ Robo');
+    act(() => tree.unmount());
+  });
+
   it('uses a compact centered portfolio title and the Evo navigation treatment', () => {
     let tree!: Renderer.ReactTestRenderer;
     act(() => {

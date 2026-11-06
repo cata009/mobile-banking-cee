@@ -10,6 +10,7 @@ After a Romanian customer issues Genius Protect, show the active policy in a new
 - Reuse the current Genius Protect state as the source for the active policy, plus the existing Home accordion, product card, banner, page header, bottom sheet, and product-detail route.
 - Keep current account, card, spending, investment, product menu, and other-market behavior intact.
 - The demo policy has the Figma reference number, premium, payment date, and coverage values; claim contacts are informational and do not submit a claim.
+- The default RO active baseline seeds the Figma policy as an existing customer product; an explicitly empty policy state still shows the offer banner and can enter a new request.
 - Fix the reported Genius Protect flow issues: show notices before personal data, remove the extra close and leave-flow controls, remove the duplicate email divider, enlarge row chevrons, align section headings, and disable Continue until the required needs declarations are answered.
 
 ## Approaches
@@ -21,7 +22,7 @@ Use approach 2 because the completed Genius Protect request already owns active-
 
 ## Acceptance
 
-- The active RO Homepage shows an Insurance accordion with the Genius Protect policy card after successful signing; before signing it shows the Figma offer banner.
+- The default active RO Homepage shows the Insurance accordion with the Genius Protect policy card. An empty policy state shows the Figma offer banner.
 - Selecting the policy opens its active details, coverages, claim contact information, and documents.
 - The Genius Protect flow follows Figma order and presentation and gates progression until required acknowledgments are complete.
 - Existing non-RO Home and current Genius Protect entry behavior remain unchanged.

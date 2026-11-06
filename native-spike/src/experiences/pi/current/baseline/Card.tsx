@@ -83,6 +83,7 @@ function CardCarousel({
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null),
     scrollLeft = useRef(0);
   const suppressClickUntil = useRef(0);
+  const programmaticTarget = useRef<number | null>(null);
   const [viewport, setViewport] = useState(375),
     offsets = useMemo(
       () => carouselOffsets(items.length, viewport, CARD_GEOMETRY),
@@ -96,6 +97,7 @@ function CardCarousel({
     onSelect: index => {
       const card = items[index];
       if (card) {
+        programmaticTarget.current = null;
         suppressClickUntil.current = Date.now() + 80;
         scrollLeft.current = offsets[index] ?? 0;
         onSelect(card);
@@ -114,6 +116,8 @@ function CardCarousel({
     const card = items[index];
     if (card) {
       const offset = offsets[index] ?? 0;
+      programmaticTarget.current =
+        animated && card.id !== selectedId ? offset : null;
       onRequestSelect(card);
       scrollLeft.current = offset;
       trackOffset(offset);
@@ -148,13 +152,29 @@ function CardCarousel({
         decelerationRate="fast"
         scrollEventThrottle={16}
         contentContainerStyle={styles.rail}
+        onScrollBeginDrag={() => {
+          programmaticTarget.current = null;
+        }}
         onScroll={event => {
           scrollLeft.current = event.nativeEvent.contentOffset.x;
           trackOffset(scrollLeft.current);
+          if (programmaticTarget.current !== null) {
+            if (Math.abs(scrollLeft.current - programmaticTarget.current) > 2)
+              return;
+            programmaticTarget.current = null;
+          }
           const card = items[nearest(scrollLeft.current)];
           if (card && card.id !== selectedId) onSelect(card);
         }}
-        onMomentumScrollEnd={() => select(nearest(scrollLeft.current))}
+        onMomentumScrollEnd={() => {
+          if (
+            programmaticTarget.current !== null &&
+            Math.abs(scrollLeft.current - programmaticTarget.current) > 2
+          )
+            return;
+          programmaticTarget.current = null;
+          select(nearest(scrollLeft.current));
+        }}
       >
         {items.map((card, index) => (
           <Pressable
