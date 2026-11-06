@@ -40,6 +40,9 @@ import { BaselineProductsList } from '../src/universal/BaselineProductsList';
 import { BaselineHeaderActionButton } from '../src/universal/BaselineHeaderActions';
 import { BaselineAmountVisibility } from '../src/universal/BaselineAmountVisibility';
 import { BaselineAccountBalanceCard } from '../src/universal/BaselineAccountBalanceCard';
+import { resetGeniusProtect } from '@/features/insurance/geniusProtect';
+
+beforeEach(() => resetGeniusProtect());
 import { BaselineAccountActionBar } from '../src/universal/BaselineAccountActionBar';
 import { BaselineAccountInfoField } from '../src/universal/BaselineAccountInfoField';
 import { BaselineCardNavigationRow } from '../src/universal/BaselineCardNavigationRow';

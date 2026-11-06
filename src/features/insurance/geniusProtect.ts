@@ -74,6 +74,13 @@ export interface GeniusProtectSnapshot {
   policy: GeniusProtectPolicy | null
 }
 
+export const GENIUS_PROTECT_BASELINE_POLICY: GeniusProtectPolicy = {
+  number: '3431424',
+  status: 'active',
+  nextPremiumCents: GENIUS_PROTECT_MONTHLY_PREMIUM_CENTS,
+  lastPaymentDate: '15.03.2026',
+}
+
 export type GeniusProtectDraftUpdate = Omit<
   Partial<GeniusProtectDraft>,
   'notices' | 'needs' | 'preContract' | 'contractDocumentsRead'
@@ -84,13 +91,19 @@ export type GeniusProtectDraftUpdate = Omit<
   contractDocumentsRead?: Partial<GeniusProtectContractDocuments>
 }
 
-const initialSnapshot: GeniusProtectSnapshot = {
+const emptySnapshot: GeniusProtectSnapshot = {
   draft: null,
   hasActivePolicy: false,
   policy: null,
 }
 
-let snapshot: GeniusProtectSnapshot = { ...initialSnapshot }
+const initialSnapshot: GeniusProtectSnapshot = {
+  draft: null,
+  hasActivePolicy: true,
+  policy: GENIUS_PROTECT_BASELINE_POLICY,
+}
+
+let snapshot: GeniusProtectSnapshot = initialSnapshot
 const listeners = new Set<() => void>()
 
 function publish(next: GeniusProtectSnapshot) {
@@ -126,7 +139,7 @@ function initialDraft(): GeniusProtectDraft {
 }
 
 export function resetGeniusProtect() {
-  publish({ ...initialSnapshot })
+  publish({ ...emptySnapshot })
 }
 
 export function subscribeGeniusProtect(listener: () => void) {
@@ -228,12 +241,7 @@ export function completeGeniusProtectRequest() {
     ...snapshot,
     draft: null,
     hasActivePolicy: true,
-    policy: {
-      number: '3431424',
-      status: 'active',
-      nextPremiumCents: GENIUS_PROTECT_MONTHLY_PREMIUM_CENTS,
-      lastPaymentDate: '15.03.2026',
-    },
+    policy: { ...GENIUS_PROTECT_BASELINE_POLICY },
   })
   return true
 }

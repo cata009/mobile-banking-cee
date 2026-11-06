@@ -25,10 +25,12 @@ import { BaselineAccordion } from '../src/universal/BaselineAccordion';
 import { BaselineProductsList } from '../src/universal/BaselineProductsList';
 import { BaselineProductCard } from '../src/universal/BaselineProductCard';
 import { DuoPreviewProvider } from '../src/universal/DuoPreview';
+import { resetGeniusProtect } from '@/features/insurance/geniusProtect';
 
 const HomeRoute = CURRENT_HOME_ADAPTER.screens.home;
 if (!HomeRoute) throw new Error('Actual current Homepage adapter must exist');
 const trees = new Set<Renderer.ReactTestRenderer>();
+beforeEach(() => resetGeniusProtect());
 function mounted(element: React.ReactElement) {
   let tree!: Renderer.ReactTestRenderer;
   act(() => {

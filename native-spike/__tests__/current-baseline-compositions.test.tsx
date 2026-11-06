@@ -24,6 +24,9 @@ import {
   createCurrentTranslator,
 } from '../src/experiences/pi/current/context';
 import { isPiBaselineInvestmentContext } from '../src/experiences/pi/current/investments/baseline/policy';
+import { resetGeniusProtect } from '@/features/insurance/geniusProtect';
+
+beforeEach(() => resetGeniusProtect());
 
 const productCounts = {
   accounts: 2,

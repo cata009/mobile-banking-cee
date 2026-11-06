@@ -65,6 +65,8 @@ function renderBody(value: CurrentScreenProps) {
   return tree;
 }
 describe('scoped RO current Native Home body', () => {
+  beforeEach(() => resetGeniusProtect());
+
   it('uses the canonical model and caller-owned privacy for all product figures', () => {
     const context = host(),
       model = createCurrentProducts(context),

@@ -17,6 +17,9 @@ import { CURRENT_PROFILE_ADAPTER } from '../src/experiences/pi/current/profile/a
 import Home from '../src/experiences/pi/current/Home';
 import BaselineHome from '../src/experiences/pi/current/baseline/Home';
 import { BaselineHomeBody } from '../src/experiences/pi/current/baseline/Body';
+import { resetGeniusProtect } from '@/features/insurance/geniusProtect';
+
+beforeEach(() => resetGeniusProtect());
 import BaselineAccount from '../src/experiences/pi/current/baseline/Account';
 import BaselineCard from '../src/experiences/pi/current/baseline/Card';
 import BaselineProducts from '../src/experiences/pi/current/baseline/offers/Products';

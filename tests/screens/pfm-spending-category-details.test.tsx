@@ -84,7 +84,7 @@ describe('PFM Spending category details', () => {
     expect(screen.getAllByText('Shopping')).toHaveLength(2)
     expect(screen.getAllByText('Shopping').filter((node) => node.closest('[aria-hidden="true"]'))).toHaveLength(1)
     expect(screen.getAllByText('SHOPPING (OTHER)').length).toBeGreaterThan(0)
-    expect(screen.getByRole('button', { name: 'Add Transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add transaction' })).toBeInTheDocument()
     expect(screen.getByText('APRIL')).toBeInTheDocument()
 
     fireEvent.click(screen.getAllByRole('button', { name: /eMAG/i })[0]!)

@@ -7,6 +7,7 @@ import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DEFAULT_PRODUCT_COUNTS, DemoProvider, useDemo } from '@/app/state/demoStore'
 import type { ProductCountKey, ProductCounts } from '@/app/state/demoTypes'
 import { getCountryCurrency } from '@/data/exchangeRates'
+import { RO_DEMO_CUSTOMER } from '@/data/customerProfile'
 import { mockProducts, type ProductType } from '@/data/products'
 import { deriveProductCategories, useProducts } from '@/hooks/useProducts'
 
@@ -187,6 +188,8 @@ describe('product data', () => {
     const { result } = renderHook(() => ({ demo: useDemo(), products: useProducts() }), { wrapper })
 
     for (const country of COUNTRIES) {
+      const expectedCardHolder =
+        country === 'RO' ? RO_DEMO_CUSTOMER.fullName : 'PETER JAGODIĆ'
       for (let count = 0; count <= 9; count += 1) {
         act(() => {
           result.current.demo.setCountry(country)
@@ -224,7 +227,7 @@ describe('product data', () => {
             expect(
               'cardHolderName' in product ? product.cardHolderName : undefined,
               `${country}/${product.id}/holder`,
-            ).toBe('PETER JAGODIĆ')
+            ).toBe(expectedCardHolder)
             expect(
               'securityCode' in product ? product.securityCode : undefined,
               `${country}/${product.id}/CVC`,

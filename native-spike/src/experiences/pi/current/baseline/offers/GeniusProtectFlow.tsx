@@ -628,7 +628,13 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
       return true;
     });
     return () => register(null);
-  }, [host.onBackHandlerChange, screen, documentModal, infoModal, accountPicker]);
+  }, [
+    host.onBackHandlerChange,
+    screen,
+    documentModal,
+    infoModal,
+    accountPicker,
+  ]);
 
   useEffect(() => {
     if (screen !== 'processing') return;
@@ -1641,10 +1647,7 @@ function GeniusProtectContent({ host }: { host: CurrentScreenProps }) {
           <Text style={[styles.pageTitle, { color: ink }]}>{screenTitle}</Text>
           <Text style={[styles.bodyLarge, { color: ink }]}>
             {copy('We sent an SMS to', 'Ți-am trimis un SMS la numărul')}{' '}
-            <Text
-              testID="genius-protect-otp-phone"
-              style={styles.otpPhone}
-            >
+            <Text testID="genius-protect-otp-phone" style={styles.otpPhone}>
               {datePhone(profile.phone).replace(/\s+/g, '')}
             </Text>
             .{' '}

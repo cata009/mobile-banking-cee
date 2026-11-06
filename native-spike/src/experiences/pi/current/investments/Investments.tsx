@@ -551,6 +551,9 @@ function RoboComposition(host: CurrentScreenProps) {
               ),
             }}
             goals={goals}
+            goalsHeaderLabel={
+              host.release === 'release-future-cz-robo' ? 'CZ Robo' : undefined
+            }
             persistenceMessage={baselineCzRoboSession.getPersistenceError()}
             classicHost={czechHost}
             onRoboResumeStateChange={host.onRoboResumeStateChange}

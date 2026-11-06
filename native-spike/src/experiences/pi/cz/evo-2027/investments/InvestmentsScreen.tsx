@@ -116,6 +116,7 @@ export interface CzInvestmentsScreenProps {
   initialBuyDraft?: CoAppingInvestmentBuyDraft | null;
   initialCollection?: InvestmentFundCollectionId;
   goals?: readonly RoboExistingGoal[];
+  goalsHeaderLabel?: string;
   onGoalUpdated?: (goal: RoboExistingGoal) => void;
   onRoboResumeStateChange?: CzechNativeScreenProps['onRoboResumeStateChange'];
   state?: 'ready' | 'loading' | 'error';
@@ -155,6 +156,7 @@ function CzInvestmentsComposition({
   initialBuyDraft,
   initialCollection,
   goals: suppliedGoals,
+  goalsHeaderLabel,
   onGoalUpdated,
   onRoboResumeStateChange,
   state = 'ready',
@@ -305,6 +307,7 @@ function CzInvestmentsComposition({
               language={classicHost.language}
               value="goals"
               goals={goals}
+              displayLabel={goalsHeaderLabel}
               onChange={value => {
                 if (value === 'portfolio') {
                   lastRoboResumeKey.current = null;

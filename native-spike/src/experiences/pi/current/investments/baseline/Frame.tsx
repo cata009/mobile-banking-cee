@@ -36,6 +36,7 @@ export function BaselineInvestmentFrame({
   scroll = true,
   onScroll,
   headerOptions,
+  showHeader = true,
   onHelp,
   collapseDistance = 64,
 }: {
@@ -47,6 +48,7 @@ export function BaselineInvestmentFrame({
   scroll?: boolean;
   onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   headerOptions?: PageHeaderOptions;
+  showHeader?: boolean;
   onHelp?: () => void;
   collapseDistance?: number;
 }) {
@@ -55,14 +57,16 @@ export function BaselineInvestmentFrame({
   const largeTitle =
     headerOptions?.renderLargeTitle !== false &&
     !(headerOptions?.compact && shownProgress >= 0.999);
-  const toolbar = (
+  const toolbar = showHeader ? (
     <View>
       <BaselinePageHeader
         title={title}
         onBack={onBack}
         includeSafeArea
         showHelp={false}
-        safeAreaReserve={host.screenTopInset}
+        safeAreaReserve={
+          host.release === 'release-future-evo-2027' ? 0 : host.screenTopInset
+        }
         dark={investmentDark(host)}
         collapsedTitleProgress={shownProgress}
         onHelpPress={onHelp}
@@ -70,7 +74,7 @@ export function BaselineInvestmentFrame({
         renderLargeTitle={false}
       />
     </View>
-  );
+  ) : null;
   const renderStyle1 = {
     opacity: 1 - shownProgress,
     backgroundColor: investmentColor(
@@ -81,7 +85,7 @@ export function BaselineInvestmentFrame({
   const renderStyle2 = {
     color: investmentColor(host, '--uc-text'),
   } as const;
-  const titleView = largeTitle ? (
+  const titleView = showHeader && largeTitle ? (
     <View style={[baselineStyles.inline1, renderStyle1]}>
       <Text
         accessibilityRole="header"
@@ -100,7 +104,7 @@ export function BaselineInvestmentFrame({
       {scroll ? (
         <ScrollView
           style={investmentScrollStyle()}
-          stickyHeaderIndices={[0]}
+          stickyHeaderIndices={showHeader ? [0] : undefined}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}

@@ -9,6 +9,7 @@ import { BaselineInvestmentInstrument } from '../src/experiences/pi/current/inve
 import { BaselineInvestmentBuyOrder } from '../src/experiences/pi/current/investments/baseline/flows/BuyOrder';
 import { BaselineInvestmentHistory } from '../src/experiences/pi/current/investments/baseline/flows/History';
 import { BaselineInvestmentFunds } from '../src/experiences/pi/current/investments/baseline/catalog';
+import { BaselinePageHeader } from '../src/universal/BaselinePageHeader';
 import {
   createCurrentTranslator,
   currentTokens,
@@ -69,6 +70,79 @@ it.each(['RO', 'HU', 'RS', 'SI', 'CZ', 'SK', 'BA', 'BA_BL'] as const)(
     });
   },
 );
+
+it('uses the full Source Baseline investment overview for CZ Robo Portfolio', () => {
+  const props = host({
+    country: 'CZ',
+    release: 'release-future-cz-robo',
+    t: createCurrentTranslator('CZ', 'en'),
+    activeFeatures: ['fx_czRoboAdvisor'],
+    investmentPresentation: {
+      roboAdvisorEnabled: true,
+      showBottomNavigation: true,
+    },
+  });
+  const tree = mount(props);
+
+  expect(tree.root.findAllByType(BaselineInvestmentOverview)).toHaveLength(1);
+  expect(
+    tree.root.findAll(node => node.props.testID === 'future-investment-home'),
+  ).toHaveLength(0);
+  expect(tree.root.findByType(BaselinePageHeader).props.title).toBe('Investment');
+});
+
+it('keeps Evo 2027 on its existing Future Investments overview', () => {
+  const tree = mount(
+    host({
+      country: 'CZ',
+      release: 'release-future-evo-2027',
+      t: createCurrentTranslator('CZ', 'en'),
+      activeFeatures: ['fx_czRoboAdvisor'],
+    }),
+  );
+
+  expect(
+    tree.root.findAll(node => node.props.testID === 'future-investment-home'),
+  ).not.toHaveLength(0);
+  expect(tree.root.findAllByType(BaselineInvestmentOverview)).toHaveLength(0);
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Investment profile' &&
+        typeof node.props.onPress === 'function',
+    ),
+  ).toHaveLength(1);
+});
+
+it('uses CZ Robo as the switcher label on its Goals route', () => {
+  const tree = mount(
+    host({
+      country: 'CZ',
+      release: 'release-future-cz-robo',
+      t: createCurrentTranslator('CZ', 'en'),
+      activeFeatures: ['fx_czRoboAdvisor'],
+      route: {
+        screen: 'investments',
+        params: { robo_view: 'goals' },
+      },
+    }),
+  );
+
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Switch portfolio: CZ Robo' &&
+        typeof node.props.onPress === 'function',
+    ),
+  ).toHaveLength(1);
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Switch portfolio: CZ Robo' &&
+        node.props.accessibilityValue?.text === 'Goals',
+    ),
+  ).not.toHaveLength(0);
+});
 
 it('preserves overview selections across local detail Back but pushes the standalone history route', () => {
   const props = host(),
