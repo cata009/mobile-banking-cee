@@ -21,7 +21,10 @@ import {
 } from '@/app/config/investmentsPortfolioConfig';
 import { getCountryConfig } from '@/app/registry/countryConfig';
 import { getBrandLogo } from '@/app/config/brandLogos';
-import { formatInvestmentAmountParts } from '@/app/utils/investmentAmountFormatting';
+import {
+  formatInvestmentAmountParts,
+  formatInvestmentNumber,
+} from '@/app/utils/investmentAmountFormatting';
 import type { CurrentScreenProps } from '../../../contracts';
 import type { BaselineInvestmentOverviewProps } from '../contracts';
 import { investmentColor, investmentDark } from '../Frame';
@@ -89,15 +92,22 @@ export function CzRoboSecurityRow({
   host,
   security,
   onPress,
+  quantityMaxDecimals = 3,
 }: {
   host: Pick<CurrentScreenProps, 'country' | 'tokens' | 'amountsHidden'>;
   security: InvestmentSecurity;
   onPress: () => void;
+  quantityMaxDecimals?: number;
 }) {
   const logo = getBrandLogo(security.logoId ?? 'unicredit');
   const quantity = host.amountsHidden
     ? '*,*** PCS'
-    : `${security.quantity.toFixed(3).replace('.', ',')} PCS`;
+    : `${formatInvestmentNumber(
+        security.quantity,
+        host.country,
+        0,
+        quantityMaxDecimals,
+      )} PCS`;
   const currentPrice = formatInvestmentAmountParts(
     security.marketPrice,
     host.country,

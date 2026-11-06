@@ -697,7 +697,8 @@ export default function NativeCzechApp({
                     style={[
                       s.page,
                       { paddingTop },
-                      route.screen === 'investments' && {
+                      (route.screen === 'investments' ||
+                        route.screen === 'investment-detail') && {
                         backgroundColor: sourceColor(
                           'var(--uc-app-bg)',
                           displayDark,

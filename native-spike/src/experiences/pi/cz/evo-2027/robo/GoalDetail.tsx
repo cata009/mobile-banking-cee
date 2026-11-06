@@ -25,6 +25,7 @@ import type {
   RoboPortfolio,
 } from '@/features/investments/robo/types';
 import type { RoboDemoClock } from '@/features/investments/robo/demoClock';
+import type { CurrentScreenProps } from '../../../current/contracts';
 import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import { PerformanceChart } from '../investments/Charts';
 import {
@@ -58,6 +59,7 @@ export function GoalDetail({
   amountsHidden,
   onOpenSecurity,
   portfolioSwitcher,
+  release = 'release-future-evo-2027',
 }: {
   goal: RoboExistingGoal;
   portfolio: RoboPortfolio;
@@ -69,6 +71,7 @@ export function GoalDetail({
   amountsHidden: boolean;
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
   portfolioSwitcher?: React.ReactNode;
+  release?: CurrentScreenProps['release'];
 }) {
   const [period, setPeriod] = useState<InvestmentPeriodId>('3y');
   const [help, setHelp] = useState(false);
@@ -120,13 +123,24 @@ export function GoalDetail({
       : flags.hasSellHistory
         ? 'Your previous sales remain in History. Add money whenever you’re ready to invest again.'
         : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.';
-  if (help) return <RoboHelp kind="detail" onBack={() => setHelp(false)} />;
+  if (help)
+    return (
+      <RoboHelp
+        kind="detail"
+        onBack={() => setHelp(false)}
+        bottomSheet={release === 'release-future-cz-robo'}
+      />
+    );
   return (
     <Page
       kind="goal-detail"
       title={goal.name}
-      compactTitle={!!portfolioSwitcher}
-      headerTitle={portfolioSwitcher}
+      compactTitle={
+        release === 'release-future-cz-robo' ? false : !!portfolioSwitcher
+      }
+      headerTitle={
+        release === 'release-future-cz-robo' ? undefined : portfolioSwitcher
+      }
       description={goal.purpose}
       gutter={16}
       descriptionTop={4}
@@ -166,7 +180,11 @@ export function GoalDetail({
               /\s*total return$/,
               '',
             )}
-        <Copy muted style={styles.meta}>
+        <Copy
+          strong={release === 'release-future-cz-robo'}
+          muted
+          style={styles.meta}
+        >
           {' '}
           total return
         </Copy>
@@ -296,6 +314,9 @@ export function GoalDetail({
                     amountsHidden,
                   }}
                   security={product.security}
+                  quantityMaxDecimals={
+                    release === 'release-future-cz-robo' ? 4 : 3
+                  }
                   onPress={() => onOpenSecurity(product.security!)}
                 />
               ) : (

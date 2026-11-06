@@ -63,10 +63,21 @@ const evaluations = [
 
 /** Literal Source presentation fixtures; evaluations/costs are illustrative, never computed advice. */
 type OrderDocumentsProps =
-  | { currency: string; security?: never }
-  | { currency?: never; security: InvestmentCatalogSecurity };
+  | ({ currency: string; security?: never } & {
+      hideSectionSeparators?: boolean;
+      bleed?: boolean;
+    })
+  | ({ currency?: never; security: InvestmentCatalogSecurity } & {
+      hideSectionSeparators?: boolean;
+      bleed?: boolean;
+    });
 
-export function OrderDocuments({ currency, security }: OrderDocumentsProps) {
+export function OrderDocuments({
+  currency,
+  security,
+  hideSectionSeparators = false,
+  bleed = true,
+}: OrderDocumentsProps) {
   const orderCurrency = currency ?? security?.instrumentCurrency ?? 'CZK';
   const [expanded, setExpanded] = useState<string | null>(null);
   const [scenarioView, setScenarioView] = useState<'percent' | 'value'>(
@@ -74,7 +85,7 @@ export function OrderDocuments({ currency, security }: OrderDocumentsProps) {
   );
   const [periodIndex, setPeriodIndex] = useState(5);
   return (
-    <View style={s.root}>
+    <View style={bleed ? s.root : undefined}>
       {sections.map(section => {
         const open = expanded === section.id,
           color = open ? '#007A91' : '#262626';
@@ -224,7 +235,7 @@ export function OrderDocuments({ currency, security }: OrderDocumentsProps) {
                 ) : null}
               </View>
             ) : null}
-            <View style={s.separator} />
+            {!hideSectionSeparators ? <View style={s.separator} /> : null}
           </View>
         );
       })}

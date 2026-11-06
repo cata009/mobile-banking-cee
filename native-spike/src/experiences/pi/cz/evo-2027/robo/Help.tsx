@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Copy, Page } from '../investments/Primitives';
+import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 
 const goalsHelp = [
   [
@@ -49,26 +50,26 @@ const detailHelp = [
 export function RoboHelp({
   kind,
   onBack,
+  bottomSheet = false,
 }: {
   kind: 'goals' | 'detail';
   onBack: () => void;
+  bottomSheet?: boolean;
 }) {
-  return (
-    <Page
-      kind={`${kind}-help`}
-      title={kind === 'goals' ? 'Investment goals' : 'Understanding your goal'}
-      description={
-        kind === 'detail'
-          ? 'A quick guide to your investments, progress and next steps.'
-          : undefined
-      }
-      onBack={onBack}
-      contentTop={24}
-    >
-      {(kind === 'goals' ? goalsHelp : detailHelp).map(([title, body]) => (
-        <View key={title} style={styles.section}>
+  const title =
+    kind === 'goals' ? 'Investment goals' : 'Understanding your goal';
+  const sections = kind === 'goals' ? goalsHelp : detailHelp;
+  const content = (
+    <>
+      {kind === 'detail' ? (
+        <Copy style={styles.description}>
+          A quick guide to your investments, progress and next steps.
+        </Copy>
+      ) : null}
+      {sections.map(([heading, body]) => (
+        <View key={heading} style={styles.section}>
           <Copy strong style={styles.heading}>
-            {title}
+            {heading}
           </Copy>
           <Copy style={styles.body}>{body}</Copy>
         </View>
@@ -79,11 +80,29 @@ export function RoboHelp({
           not guarantee a return.
         </Copy>
       ) : null}
+    </>
+  );
+  if (bottomSheet)
+    return (
+      <SourceBottomSheet title={title} onClose={onBack}>
+        <View style={styles.sheetBody}>{content}</View>
+      </SourceBottomSheet>
+    );
+  return (
+    <Page
+      kind={`${kind}-help`}
+      title={title}
+      onBack={onBack}
+      contentTop={24}
+    >
+      {content}
     </Page>
   );
 }
 
 const styles = StyleSheet.create({
+  sheetBody: { paddingHorizontal: 24, paddingBottom: 24 },
+  description: { fontSize: 16, lineHeight: 22, marginBottom: 24 },
   section: { marginBottom: 24 },
   heading: { fontSize: 20, lineHeight: 24 },
   body: { marginTop: 8 },

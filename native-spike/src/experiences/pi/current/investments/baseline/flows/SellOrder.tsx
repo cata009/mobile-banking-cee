@@ -39,6 +39,7 @@ export function BaselineInvestmentSellOrder({
   security,
   accounts,
   onBack,
+  hideDocumentSeparators = false,
   onComplete,
 }: BaselineSellProps) {
   const [step, setStep] = useState<
@@ -181,7 +182,11 @@ export function BaselineInvestmentSellOrder({
         </View>
         <View style={baselineStyles.inline3}>
           <BaselineInvestmentSection host={host} title="DOCUMENTS AND TERMS" />
-          <BaselineInvestmentDocuments host={host} security={security} />
+          <BaselineInvestmentDocuments
+            host={host}
+            security={security}
+            hideSectionSeparators={hideDocumentSeparators}
+          />
           <InvestmentTerms host={host} value={terms} onChange={setTerms} />
         </View>
         <View style={baselineStyles.inline4} />

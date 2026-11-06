@@ -31,6 +31,7 @@ export interface BaselineSellExecution {
 export interface BaselineSellProps extends BaselineInvestmentFlowHost {
   security: InvestmentCatalogSecurity;
   accounts: readonly CurrentAccount[];
+  hideDocumentSeparators?: boolean;
   onComplete(execution: BaselineSellExecution): void;
 }
 export interface BaselineHistoryProps extends BaselineInvestmentFlowHost {

@@ -128,9 +128,12 @@ export function InvestmentContract({
         closeLabel="Close investment account contract"
         footer={
           <View style={styles.footer}>
-            {read ? (
-              <Button canonical label="I have read it" onPress={onConfirm} />
-            ) : null}
+            <Button
+              canonical
+              label="I have read it"
+              disabled={!read}
+              onPress={onConfirm}
+            />
             <Button
               canonical
               label="Download document"

@@ -183,7 +183,7 @@ export function GoalDetail({
         >
           {resolvedReturnLabel}
           {resolvedReturnTone === 'neutral' ? null : (
-            <span className="font-normal text-[var(--uc-text-muted)]"> total return</span>
+            <span className="font-bold text-[var(--uc-text-muted)]"> total return</span>
           )}
         </p>
       </div>

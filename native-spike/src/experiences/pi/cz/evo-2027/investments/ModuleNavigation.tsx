@@ -42,6 +42,7 @@ export function ModuleNavigation({
         <CzechNavigationBar
           items={sections.map(item => ({
             ...item,
+            iconSize: item.id === 'history' ? 32 : undefined,
             label: primaryInvest
               ? item.id === 'portfolio'
                 ? language === 'cs'
@@ -59,7 +60,6 @@ export function ModuleNavigation({
           value={value}
           language={language}
           dark={dark}
-          primaryId={primaryInvest ? 'catalog' : undefined}
           label="Investment navigation"
           onSelect={id => onChange(id as InvestmentSection)}
         />

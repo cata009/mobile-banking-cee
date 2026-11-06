@@ -70,9 +70,11 @@ const evaluations = [
 function OrderDocuments({
   currency,
   initialOpenSection = null,
+  hideSeparators = false,
 }: {
   currency: string;
   initialOpenSection?: BaselineInvestmentDocumentSectionId | null;
+  hideSeparators?: boolean;
 }) {
   const host = useContext(InvestmentDocumentHost)!;
   const positiveFill = investmentColor(host, '--uc-green-olive');
@@ -291,7 +293,9 @@ function OrderDocuments({
                 ) : null}
               </View>
             ) : null}
-            <View style={[s.separator, renderStyle2]} />
+            {!hideSeparators ? (
+              <View style={[s.separator, renderStyle2]} />
+            ) : null}
           </View>
         );
       })}
@@ -435,13 +439,16 @@ const s = StyleSheet.create({
 export function BaselineInvestmentDocuments({
   host,
   security,
+  hideSectionSeparators = false,
 }: {
   host: CurrentScreenProps;
   security: InvestmentCatalogSecurity;
+  hideSectionSeparators?: boolean;
 }) {
   return newBaselineInvestmentDocumentsPreview({
     host,
     currency: security.instrumentCurrency,
+    hideSectionSeparators,
   });
 }
 
@@ -449,14 +456,20 @@ export function newBaselineInvestmentDocumentsPreview({
   host,
   currency,
   initialOpenSection,
+  hideSectionSeparators = false,
 }: {
   host: CurrentScreenProps;
   currency: string;
   initialOpenSection?: BaselineInvestmentDocumentSectionId | null;
+  hideSectionSeparators?: boolean;
 }) {
   return (
     <InvestmentDocumentHost.Provider value={host}>
-      <OrderDocuments currency={currency} initialOpenSection={initialOpenSection} />
+      <OrderDocuments
+        currency={currency}
+        initialOpenSection={initialOpenSection}
+        hideSeparators={hideSectionSeparators}
+      />
     </InvestmentDocumentHost.Provider>
   );
 }
