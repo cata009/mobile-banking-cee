@@ -4,6 +4,7 @@ import { BottomSheet } from '@/app/components/BottomSheet'
 import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
+import TextLink from '@/app/components/TextLink'
 import ToggleButton from '@/app/components/ToggleButton'
 import InvestmentDetailField from '@/app/components/investments/InvestmentDetailField'
 import { NativeOrderDocumentsPreview } from '@/flows/shared/investments-bulk-approval/NativeOrderDocumentsPreview'
@@ -154,25 +155,21 @@ function BulkSelectionScreen({
             Total orders: <span className="font-bold">{selectableDrafts.length}</span>
           </p>
           {bulkMode ? (
-            <button
-              type="button"
-              onClick={onCancelBulk}
-              className="inline-flex h-[24px] items-center whitespace-nowrap text-[14px] font-bold leading-[normal] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-              aria-label="CANCEL"
-            >
+            <TextLink onClick={onCancelBulk} ariaLabel="CANCEL" className="-my-[10px]">
               CANCEL
-            </button>
+            </TextLink>
           ) : null}
           {!bulkMode && selectableDrafts.length > 1 ? (
-            <button
-              type="button"
+            <TextLink
               onClick={onEnterBulk}
-              className="inline-flex h-[24px] items-center gap-[5px] whitespace-nowrap text-[14px] font-bold leading-[normal] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)]"
-              aria-label="BULK SIGNING"
+              ariaLabel="BULK SIGNING"
+              className="-my-[10px]"
+              leadingIcon={
+                <img src="/assets/investments/sign-multiple.svg" width="16" height="16" alt="" aria-hidden="true" />
+              }
             >
-              <img src="/assets/investments/sign-multiple.svg" width="16" height="16" alt="" aria-hidden="true" />
               BULK SIGNING
-            </button>
+            </TextLink>
           ) : null}
         </div>
         {groups.map((group) => (

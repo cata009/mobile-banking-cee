@@ -108,7 +108,9 @@ describe("Investments bulk approval Flow Library prototype", () => {
     expect(screen.getByText("These investment order drafts were prepared by your advisor and are awaiting for your approval. Once approved, the orders will be processed.")).toBeInTheDocument();
     const bulkSigning = screen.getByRole("button", { name: "BULK SIGNING" });
     expect(bulkSigning).toBeInTheDocument();
-    expect(bulkSigning).toHaveClass("h-[24px]", "gap-[5px]", "text-[14px]");
+    // The Design System inline text link: 14 Bold, 5px gap before the glyph, 44px touch target.
+    expect(bulkSigning).toHaveAttribute("data-ds-label", "TextLink");
+    expect(bulkSigning).toHaveClass("gap-[5px]", "uc-type-n5-strong", "min-h-[44px]");
     expect(bulkSigning.querySelector("img")).toHaveAttribute("src", "/assets/investments/sign-multiple.svg");
     expect(screen.queryByTestId("bulk-selected-count")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Sign orders" })).not.toBeInTheDocument();
