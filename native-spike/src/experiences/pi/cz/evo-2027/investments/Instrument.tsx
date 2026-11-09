@@ -94,7 +94,12 @@ export function InvestmentInstrument({
           <View style={s.actions}>
             {canSell ? (
               <View style={s.action}>
-                <Button label="Sell" secondary onPress={onSell!} />
+                <Button
+                  label="Sell"
+                  secondary
+                  secondaryColor={czInvestmentTokens.text}
+                  onPress={onSell!}
+                />
               </View>
             ) : null}
             {canBuy ? (

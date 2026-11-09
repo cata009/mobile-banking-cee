@@ -20,9 +20,12 @@ import accidentIcon from '@/assets/pi/ro/genius-protect/genius-protect-coverage-
 import disabilityIcon from '@/assets/pi/ro/genius-protect/genius-protect-coverage-disability.svg';
 import surgeryIcon from '@/assets/pi/ro/genius-protect/genius-protect-coverage-surgery.svg';
 import websiteIcon from '@/assets/pi/ro/genius-protect/genius-protect-claim-website.svg';
+import documentsIcon from '@/assets/pi/ro/genius-protect/genius-protect-documents.svg';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
+import { BaselineAccountInfoField } from '../../../../../universal/BaselineAccountInfoField';
+import { BaselineDetailToolbar } from '../../../../../universal/BaselineDetailToolbar';
+import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigationRow';
 import { BaselinePageHeader } from '../../../../../universal/BaselinePageHeader';
-import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
 import { BaselineSectionDivider } from '../../../../../universal/BaselineSectionDivider';
 import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
@@ -30,7 +33,6 @@ import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../../universal/Typography';
 import { sourceColor } from '../../../../../universal/sourceColor';
 
-type PolicyTab = 'details' | 'documents';
 type CoverageId = (typeof GENIUS_PROTECT_COVERAGE)[number]['id'];
 
 const coverageRows: readonly {
@@ -80,45 +82,22 @@ const coverageRows: readonly {
   },
 ];
 
-const policyDocuments = [
-  {
-    title: 'Policy_certificate_34314',
-    date: '13',
-    month: 'MAR',
-    ro: 'Policy_certificate_34314',
-    description:
-      'Insurance certificate and policy terms for your active Genius Protect cover.',
-    roDescription:
-      'Certificatul de asigurare și condițiile poliței Genius Protect active.',
-  },
-  {
-    title: 'Policy_contract_34314',
-    date: '13',
-    month: 'MAR',
-    ro: 'Policy_contract_34314',
-    description: 'Signed Genius Protect insurance contract and policy terms.',
-    roDescription:
-      'Contractul de asigurare Genius Protect semnat și condițiile poliței.',
-  },
-];
-
 export default function GeniusProtectPolicyDetails(host: CurrentScreenProps) {
   const dark = host.tokens.background === '#121212';
   const ink = sourceColor('var(--uc-text)', dark);
   const muted = sourceColor('var(--uc-text-muted)', dark);
   const surface = sourceColor('var(--uc-surface)', dark);
+  const appBg = sourceColor('var(--uc-app-bg)', dark);
   const snapshot = useSyncExternalStore(
     subscribeGeniusProtect,
     getGeniusProtectSnapshot,
   );
-  const [tab, setTab] = useState<PolicyTab>('details');
+  const [policyInfoOpen, setPolicyInfoOpen] = useState(false);
+  const [infoProgress, setInfoProgress] = useState(0);
+  const [detailsProgress, setDetailsProgress] = useState(0);
   const [selectedCoverage, setSelectedCoverage] = useState<
     (typeof coverageRows)[number] | null
   >(null);
-  const [selectedDocument, setSelectedDocument] = useState<
-    (typeof policyDocuments)[number] | null
-  >(null);
-  const [documentSearch, setDocumentSearch] = useState('');
   const policy = snapshot.policy;
   const copy = (en: string, ro: string) => (host.language === 'ro' ? ro : en);
   const coverageAmounts = new Map(
@@ -127,412 +106,442 @@ export default function GeniusProtectPolicyDetails(host: CurrentScreenProps) {
   const monthlyPremium =
     (policy?.nextPremiumCents ?? GENIUS_PROTECT_MONTHLY_PREMIUM_CENTS) / 100;
 
-  return (
-    <View style={[styles.page, { backgroundColor: surface }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View
-          style={[
-            styles.headerBlock,
-            { backgroundColor: sourceColor('var(--uc-app-bg)', dark) },
-          ]}
+  /* ── Bottom sheets (shared across tabs) ── */
+  const coverageSheet = selectedCoverage ? (
+    <SourceBottomSheet
+      title={copy(selectedCoverage.title.en, selectedCoverage.title.ro)}
+      onClose={() => setSelectedCoverage(null)}
+      dark={dark}
+      stickyHeader
+      footer={
+        <View style={styles.sheetFooter}>
+          <PrimaryButton
+            label={copy(
+              'Contact Allianz-Țiriac',
+              'Contactează Allianz-Țiriac',
+            )}
+            onPress={() => setSelectedCoverage(null)}
+            dark={dark}
+          />
+        </View>
+      }
+    >
+      <View style={styles.sheetBody}>
+        <Text style={[styles.body, { color: ink }]}>
+          {copy(
+            selectedCoverage.description.en,
+            selectedCoverage.description.ro,
+          )}
+        </Text>
+        <Text style={[styles.amountInSheet, { color: ink }]}>
+          {`${coverageAmounts.get(selectedCoverage.id)?.toLocaleString(host.language === 'ro' ? 'ro-RO' : 'en-US')} ${copy('RON insured amount', 'RON sumă asigurată')}`}
+        </Text>
+      </View>
+    </SourceBottomSheet>
+  ) : null;
+
+  /* ── Missing policy ── */
+  if (!policy) {
+    return (
+      <View style={[styles.page, { backgroundColor: surface }]}>
+        <View style={{ backgroundColor: appBg }}>
+          <BaselineDetailToolbar
+            variant="account"
+            title={copy('Insurances', 'Asigurări')}
+            progress={1}
+            onBack={host.onBack}
+            safeAreaReserve={host.screenTopInset}
+            dark={dark}
+          />
+        </View>
+        <View style={styles.missingPolicy}>
+          <Text style={[styles.body, { color: ink }]}>
+            {copy(
+              'No active Genius Protect policy is available.',
+              'Nu există o poliță Genius Protect activă.',
+            )}
+          </Text>
+          <PrimaryButton
+            label={copy('Back to Home', 'Înapoi la Homepage')}
+            onPress={() => host.onNavigate({ screen: 'home' })}
+            dark={dark}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  if (policyInfoOpen) {
+    const monthlyPayment = new Intl.NumberFormat(
+      host.language === 'ro' ? 'ro-RO' : 'en-US',
+      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+    ).format(monthlyPremium);
+    const fields = [
+      [
+        copy('Insurance type', 'Tipul asigurării'),
+        copy('Life insurance', 'Asigurare de viață'),
+      ],
+      [
+        copy('Status', 'Status'),
+        copy(
+          policy.status === 'active' ? 'Active' : 'Inactive',
+          policy.status === 'active' ? 'Activă' : 'Inactivă',
+        ),
+      ],
+      [copy('Insurance name', 'Numele asigurării'), 'Genius Protect'],
+      [copy('Policy number', 'Numărul poliței'), policy.number],
+      [
+        copy('Offered by', 'Oferită de'),
+        copy('Allianz-Tiriac Asigurari', 'Allianz-Țiriac Asigurări'),
+      ],
+      [copy('Last payment date', 'Data ultimei plăți'), policy.lastPaymentDate],
+      [copy('Monthly payment', 'Plată lunară'), `${monthlyPayment} RON`],
+      [
+        copy('Payment account', 'Contul de plată'),
+        snapshot.draft?.accountId ?? '1234567890123456',
+      ],
+    ] as const;
+
+    return (
+      <View style={[styles.page, { backgroundColor: surface }]}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[0]}
+          scrollEventThrottle={16}
+          onScroll={event =>
+            setInfoProgress(
+              Math.min(1, Math.max(0, event.nativeEvent.contentOffset.y / 64)),
+            )
+          }
+          style={Platform.OS === 'web' ? styles.webScroll : undefined}
+          contentContainerStyle={styles.infoScrollContent}
         >
           <BaselinePageHeader
-            title=""
-            onBack={() =>
-              tab === 'documents' ? setTab('details') : host.onBack()
-            }
+            title={copy('Insurance details', 'Detalii asigurare')}
+            onBack={() => setPolicyInfoOpen(false)}
             showHelp={false}
             renderLargeTitle={false}
             includeSafeArea
             safeAreaReserve={host.screenTopInset}
+            collapsedTitleProgress={infoProgress}
             dark={dark}
           />
-          <Text
-            accessibilityRole="header"
-            style={[styles.pageTitle, { color: ink }]}
-          >
-            {tab === 'documents'
-              ? copy('Documents', 'Documente')
-              : copy('Insurances', 'Asigurări')}
-          </Text>
-          {policy && tab === 'details' ? (
-            <View
-              style={[
-                styles.policyCard,
-                {
-                  backgroundColor: surface,
-                  shadowColor: '#000000',
-                  boxShadow:
-                    Platform.OS === 'web'
-                      ? '0 12px 16px rgba(0,0,0,.18)'
-                      : undefined,
-                },
-              ]}
+          <View style={[styles.infoTitleFrame, { opacity: 1 - infoProgress }]}>
+            <Text
+              accessibilityRole="header"
+              style={[styles.infoTitle, { color: ink }]}
             >
-              <View style={styles.policyIdentity}>
-                <View style={styles.identityCopy}>
-                  <Text style={[styles.policyTitle, { color: ink }]}>
-                    Genius Protect
-                  </Text>
-                  <Text style={[styles.policyType, { color: ink }]}>
-                    {copy(
-                      'Life insurance policy',
-                      'Poliță de asigurare de viață',
-                    )}
-                  </Text>
-                  <Text style={[styles.policyNumber, { color: muted }]}>
-                    {policy.number}
-                  </Text>
-                </View>
-                <AssetGlyph asset={allianzLogo} width={87} height={16} />
-              </View>
-              <View style={[styles.cardDivider, { backgroundColor: muted }]} />
-              <View style={styles.paymentRow}>
-                <Text style={[styles.cardMeta, { color: muted }]}>
-                  {copy('Next premium', 'Următoarea primă')}
-                </Text>
-                <Text style={[styles.cardMetaStrong, { color: ink }]}>
-                  {`${monthlyPremium} ${copy('RON', 'RON')}`}
-                </Text>
-              </View>
-              <View style={styles.paymentRow}>
-                <Text style={[styles.cardMeta, { color: muted }]}>
-                  {copy('Last payment date', 'Data ultimei plăți')}
-                </Text>
-                <Text style={[styles.cardMeta, { color: muted }]}>
-                  {policy.lastPaymentDate}
-                </Text>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.missingPolicy}>
-              <Text style={[styles.body, { color: ink }]}>
-                {copy(
-                  'No active Genius Protect policy is available.',
-                  'Nu există o poliță Genius Protect activă.',
-                )}
-              </Text>
-              <PrimaryButton
-                label={copy('Back to Home', 'Înapoi la Homepage')}
-                onPress={() => host.onNavigate({ screen: 'home' })}
+              {copy('Insurance details', 'Detalii asigurare')}
+            </Text>
+          </View>
+          <View style={styles.infoFields}>
+            {fields.map(([title, subtitle]) => (
+              <BaselineAccountInfoField
+                key={title}
+                title={title}
+                subtitle={subtitle}
+                uppercaseTitle={false}
+                subtitleFontSize={18}
                 dark={dark}
               />
-            </View>
-          )}
-          {policy && tab === 'details' ? (
-            <View
-              accessibilityRole="tablist"
-              style={[styles.actionBar, { borderBottomColor: `${ink}26` }]}
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.page, { backgroundColor: surface }]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+        scrollEventThrottle={16}
+        onScroll={event =>
+          setDetailsProgress(
+            Math.min(1, Math.max(0, event.nativeEvent.contentOffset.y / 64)),
+          )
+        }
+        style={Platform.OS === 'web' ? styles.webScroll : undefined}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <BaselineDetailToolbar
+          variant="account"
+          title={copy('Insurances', 'Asigurări')}
+          progress={detailsProgress}
+          onBack={host.onBack}
+          safeAreaReserve={host.screenTopInset}
+          dark={dark}
+        />
+
+        <View style={{ backgroundColor: appBg }}>
+          <View
+            style={[styles.titleFrame, { opacity: 1 - detailsProgress * 0.9 }]}
+          >
+            <Text
+              accessibilityRole="header"
+              style={[styles.largeTitle, { color: ink }]}
             >
-              <Pressable
-                accessibilityRole="tab"
-                accessibilityLabel={copy('Details', 'Detalii')}
-                accessibilityState={{ selected: tab === 'details' }}
-                onPress={() => setTab('details')}
-                style={styles.actionItem}
-              >
-                <SourceCustomIcon name="info-circle" size={28} color={ink} />
-                <Text style={[styles.actionLabel, { color: ink }]}>
-                  {copy('Details', 'Detalii')}
+              {copy('Insurances', 'Asigurări')}
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.policyCard,
+              {
+                backgroundColor: surface,
+                shadowColor: '#000000',
+                boxShadow:
+                  Platform.OS === 'web'
+                    ? '0 12px 16px rgba(0,0,0,.18)'
+                    : undefined,
+              },
+            ]}
+          >
+            <View style={styles.policyIdentity}>
+              <View style={styles.identityCopy}>
+                <Text style={[styles.policyTitle, { color: ink }]}>
+                  Genius Protect
                 </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="tab"
-                accessibilityLabel={copy('Documents', 'Documente')}
-                accessibilityState={{ selected: false }}
-                onPress={() => setTab('documents')}
-                style={styles.actionItem}
-              >
-                <SourceCustomIcon
-                  name="investment-documents"
-                  size={28}
-                  color={ink}
-                />
-                <Text style={[styles.actionLabel, { color: ink }]}>
-                  {copy('Documents', 'Documente')}
+                <Text style={[styles.policyType, { color: ink }]}>
+                  {copy(
+                    'Life insurance policy',
+                    'Poliță de asigurare de viață',
+                  )}
                 </Text>
-              </Pressable>
+                <Text style={[styles.policyNumber, { color: muted }]}>
+                  {policy.number}
+                </Text>
+              </View>
+              <AssetGlyph asset={allianzLogo} width={87} height={16} />
             </View>
-          ) : null}
+            <View style={[styles.cardDivider, { backgroundColor: muted }]} />
+            <View style={styles.paymentRow}>
+              <Text style={[styles.cardMeta, { color: muted }]}>
+                {copy('Next premium', 'Următoarea primă')}
+              </Text>
+              <Text style={[styles.cardMetaStrong, { color: ink }]}>
+                {`${monthlyPremium} ${copy('RON', 'RON')}`}
+              </Text>
+            </View>
+            <View style={styles.paymentRow}>
+              <Text style={[styles.cardMeta, { color: muted }]}>
+                {copy('Last payment date', 'Data ultimei plăți')}
+              </Text>
+              <Text style={[styles.cardMeta, { color: muted }]}>
+                {policy.lastPaymentDate}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.actionBar}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={copy('Details', 'Detalii')}
+              onPress={() => setPolicyInfoOpen(true)}
+              style={styles.actionItem}
+            >
+              <View style={styles.actionIcon}>
+                <SourceCustomIcon name="info-circle" size={24} color={ink} />
+              </View>
+              <Text style={[styles.actionLabel, { color: ink }]}>
+                {copy('Details', 'Detalii')}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={copy('Documents', 'Documente')}
+              onPress={() => host.onNavigate({ screen: 'documents' })}
+              style={styles.actionItem}
+            >
+              <View style={styles.actionIcon}>
+                <AssetGlyph asset={documentsIcon} width={20} height={19} />
+              </View>
+              <Text style={[styles.actionLabel, { color: ink }]}>
+                {copy('Documents', 'Documente')}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
-        {policy && tab === 'details' ? (
-          <View style={styles.detailsContent}>
+        <View style={[styles.detailsContent, { backgroundColor: surface }]}>
+          <View style={styles.sectionDivider}>
             <BaselineSectionDivider
-              title={copy('WHAT’S INSURED', 'CE ESTE ASIGURAT')}
+              title={copy('WHAT\u2019S INSURED', 'CE ESTE ASIGURAT')}
               variant="section"
               dark={dark}
             />
-            <Text style={[styles.intro, { color: ink }]}>
-              {copy(
-                'Select a benefit to view full conditions or to start a claim process.',
-                'Selectează o acoperire pentru a vedea condițiile complete sau pentru a începe o notificare de daună.',
-              )}
-            </Text>
-            <View style={styles.coverageList}>
-              {coverageRows.map(row => (
-                <Pressable
-                  key={row.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={copy(row.title.en, row.title.ro)}
-                  onPress={() => setSelectedCoverage(row)}
-                  style={styles.coverageRow}
-                >
+          </View>
+          <Text style={[styles.intro, { color: ink }]}>
+            {copy(
+              'Select a benefit to view full conditions or to start a claim process.',
+              'Selectează o acoperire pentru a vedea condițiile complete sau pentru a începe o notificare de daună.',
+            )}
+          </Text>
+          <View style={styles.coverageList}>
+            {coverageRows.map(row => (
+              <BaselineNavigationRow
+                key={row.id}
+                title={copy(row.title.en, row.title.ro)}
+                titleStyle={[styles.coverageTitle, { color: ink }]}
+                descriptionStyle={[
+                  styles.coverageDescription,
+                  { color: muted },
+                ]}
+                description={copy(row.description.en, row.description.ro)}
+                linkLabel={`${coverageAmounts
+                  .get(row.id)
+                  ?.toLocaleString(
+                    host.language === 'ro' ? 'ro-RO' : 'en-US',
+                  )} ${copy('RON', 'RON')}`}
+                linkLabelStyle={[styles.coverageAmount, { color: ink }]}
+                ariaLabel={copy(row.title.en, row.title.ro)}
+                onPress={() => setSelectedCoverage(row)}
+                trailingAccessory="chevron"
+                chevronSize={32}
+                leadingVisual={
                   <View style={styles.coverageIcon}>
-                    <AssetGlyph asset={row.icon} size={32} />
+                    <AssetGlyph
+                      asset={row.icon}
+                      size={row.id === 'accidental-death' ? 20 : 32}
+                    />
                   </View>
-                  <View style={styles.coverageCopy}>
-                    <Text style={[styles.coverageTitle, { color: ink }]}>
-                      {copy(row.title.en, row.title.ro)}
-                    </Text>
-                    <Text
-                      style={[styles.coverageDescription, { color: muted }]}
-                    >
-                      {copy(row.description.en, row.description.ro)}
-                    </Text>
-                    <Text style={[styles.coverageAmount, { color: ink }]}>
-                      {`${coverageAmounts.get(row.id)?.toLocaleString(host.language === 'ro' ? 'ro-RO' : 'en-US')} ${copy('RON', 'RON')}`}
-                    </Text>
-                  </View>
-                  <SourceCustomIcon
-                    name="chevron-right"
-                    size={24}
-                    color={ink}
-                  />
-                </Pressable>
-              ))}
-            </View>
+                }
+                style={styles.coverageRow}
+                dark={dark}
+              />
+            ))}
+          </View>
+          <View style={styles.sectionDivider}>
             <BaselineSectionDivider
               title={copy('NOTIFY A CLAIM', 'NOTIFICĂ O DAUNĂ')}
               variant="section"
               dark={dark}
             />
-            <View style={styles.claimList}>
-              <ClaimContact
-                title={copy('ONLINE FORM', 'FORMULAR ONLINE')}
-                detail="NOTIFICARE.ALLIANZTIRIAC.RO"
-                icon={<AssetGlyph asset={websiteIcon} size={24} />}
-                href="https://notificare.allianztiriac.ro"
-                dark={dark}
-              />
-              <ClaimContact
-                title={copy(
-                  'SEND CLAIM VIA EMAIL',
-                  'TRIMITE NOTIFICAREA PRIN E-MAIL',
-                )}
-                detail="INFO@ALLIANZTIRIAC.RO"
-                icon={
+          </View>
+          <View style={styles.claimList}>
+            <ClaimContact
+              title={copy('ONLINE FORM', 'FORMULAR ONLINE')}
+              linkLabel="NOTIFICARE.ALLIANZTIRIAC.RO"
+              leadingVisual={
+                <View style={styles.claimIcon}>
+                  <AssetGlyph asset={websiteIcon} size={40} />
+                </View>
+              }
+              href="https://notificare.allianztiriac.ro"
+              dark={dark}
+            />
+            <ClaimContact
+              title={copy(
+                'SEND CLAIM VIA EMAIL',
+                'TRIMITE NOTIFICAREA PRIN E-MAIL',
+              )}
+              linkLabel="INFO@ALLIANZTIRIAC.RO"
+              leadingVisual={
+                <View style={styles.claimIcon}>
                   <SourceCustomIcon
                     name="contact-email"
                     size={24}
                     color={ink}
                   />
-                }
-                href="mailto:info@allianztiriac.ro"
-                dark={dark}
-              />
-              <ClaimContact
-                title={copy(
-                  'CALL ALLIANZ TIRIAC HELPLINE',
-                  'SUNĂ LA LINIA DE ASISTENȚĂ ALLIANZ-ȚIRIAC',
-                )}
-                detail={copy(
-                  'We are available from Monday to Friday between 08:00 - 20:00\n021 20 19 100',
-                  'Luni–vineri, între 08:00 și 20:00\n021 20 19 100',
-                )}
-                icon={
+                </View>
+              }
+              href="mailto:info@allianztiriac.ro"
+              dark={dark}
+            />
+            <ClaimContact
+              title={copy(
+                'CALL ALLIANZ TIRIAC HELPLINE',
+                'SUNĂ LA LINIA DE ASISTENȚĂ ALLIANZ-ȚIRIAC',
+              )}
+              description={copy(
+                'We are available from Monday to Friday between 08:00 - 20:00',
+                'Luni–vineri, între 08:00 și 20:00',
+              )}
+              linkLabel="021 20 19 100"
+              linkLabelStyle={styles.phoneLink}
+              leadingVisual={
+                <View style={styles.claimIcon}>
                   <SourceCustomIcon
                     name="contact-phone"
                     size={24}
                     color={ink}
                   />
-                }
-                href="tel:+40212019100"
-                dark={dark}
-              />
-            </View>
-          </View>
-        ) : null}
-
-        {policy && tab === 'documents' ? (
-          <View style={styles.documentsContent}>
-            <BaselineSearchBar
-              value={documentSearch}
-              placeholder={copy('Search', 'Caută')}
-              accessibilityLabel={copy('Search documents', 'Caută documente')}
-              fieldSurface="muted"
-              onValueChange={setDocumentSearch}
-              onClearClick={() => setDocumentSearch('')}
+                </View>
+              }
+              href="tel:+40212019100"
               dark={dark}
             />
-            <BaselineSectionDivider
-              title="2026"
-              variant="section"
-              dark={dark}
-            />
-            <View style={styles.documentList}>
-              {policyDocuments
-                .filter(document =>
-                  document.title
-                    .toLocaleLowerCase()
-                    .includes(documentSearch.trim().toLocaleLowerCase()),
-                )
-                .map(document => (
-                  <Pressable
-                    key={document.title}
-                    accessibilityRole="button"
-                    accessibilityLabel={copy(document.title, document.ro)}
-                    onPress={() => setSelectedDocument(document)}
-                    style={[
-                      styles.documentRow,
-                      { borderBottomColor: `${ink}26` },
-                    ]}
-                  >
-                    <View style={styles.documentDate}>
-                      <Text style={[styles.documentDay, { color: ink }]}>
-                        {document.date}
-                      </Text>
-                      <Text style={[styles.documentMonth, { color: muted }]}>
-                        {document.month}
-                      </Text>
-                    </View>
-                    <View style={styles.documentCopy}>
-                      <Text style={[styles.documentTitle, { color: ink }]}>
-                        {copy(document.title, document.ro)}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.documentBadge,
-                          { color: sourceColor('var(--uc-action)', dark) },
-                        ]}
-                      >
-                        NEW
-                      </Text>
-                    </View>
-                    <SourceCustomIcon
-                      name="chevron-right"
-                      size={24}
-                      color={ink}
-                    />
-                  </Pressable>
-                ))}
-            </View>
           </View>
-        ) : null}
+        </View>
       </ScrollView>
-
-      {selectedCoverage ? (
-        <SourceBottomSheet
-          title={copy(selectedCoverage.title.en, selectedCoverage.title.ro)}
-          onClose={() => setSelectedCoverage(null)}
-          dark={dark}
-          stickyHeader
-          footer={
-            <View style={styles.sheetFooter}>
-              <PrimaryButton
-                label={copy(
-                  'Contact Allianz-Țiriac',
-                  'Contactează Allianz-Țiriac',
-                )}
-                onPress={() => setSelectedCoverage(null)}
-                dark={dark}
-              />
-            </View>
-          }
-        >
-          <View style={styles.sheetBody}>
-            <Text style={[styles.body, { color: ink }]}>
-              {copy(
-                selectedCoverage.description.en,
-                selectedCoverage.description.ro,
-              )}
-            </Text>
-            <Text style={[styles.amountInSheet, { color: ink }]}>
-              {`${coverageAmounts.get(selectedCoverage.id)?.toLocaleString(host.language === 'ro' ? 'ro-RO' : 'en-US')} ${copy('RON insured amount', 'RON sumă asigurată')}`}
-            </Text>
-          </View>
-        </SourceBottomSheet>
-      ) : null}
-
-      {selectedDocument ? (
-        <SourceBottomSheet
-          title={copy(selectedDocument.title, selectedDocument.ro)}
-          onClose={() => setSelectedDocument(null)}
-          dark={dark}
-          stickyHeader
-          footer={
-            <View style={styles.sheetFooter}>
-              <PrimaryButton
-                label={copy('Close', 'Închide')}
-                onPress={() => setSelectedDocument(null)}
-                dark={dark}
-              />
-            </View>
-          }
-        >
-          <View style={styles.sheetBody}>
-            <Text style={[styles.body, { color: ink }]}>
-              {copy(
-                selectedDocument.description,
-                selectedDocument.roDescription,
-              )}
-            </Text>
-            <Text style={[styles.documentReference, { color: muted }]}>
-              {`${copy('Policy number', 'Număr poliță')}: ${policy?.number ?? ''}`}
-            </Text>
-          </View>
-        </SourceBottomSheet>
-      ) : null}
+      {coverageSheet}
     </View>
   );
 }
 
 function ClaimContact({
   title,
-  detail,
-  icon,
+  description,
+  linkLabel,
+  linkLabelStyle,
+  leadingVisual,
   href,
   dark,
 }: {
   title: string;
-  detail: string;
-  icon: React.ReactNode;
+  description?: string;
+  linkLabel: string;
+  linkLabelStyle?: React.ComponentProps<
+    typeof BaselineNavigationRow
+  >['linkLabelStyle'];
+  leadingVisual: React.ReactNode;
   href: string;
   dark: boolean;
 }) {
-  const ink = sourceColor('var(--uc-text)', dark);
-  const muted = sourceColor('var(--uc-text-muted)', dark);
   return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`${title} ${detail}`}
-      onPress={() => {
+    <BaselineNavigationRow
+      title={title}
+      description={description}
+      descriptionStyle={
+        description
+          ? [
+              styles.phoneDescription,
+              { color: sourceColor('var(--uc-text-muted)', dark) },
+            ]
+          : undefined
+      }
+      linkLabel={linkLabel}
+      linkLabelStyle={linkLabelStyle}
+      linkAccessibilityRole="link"
+      leadingVisual={leadingVisual}
+      onLinkPress={() => {
         void Linking.openURL(href).catch(() => undefined);
       }}
-      style={styles.claimRow}
-    >
-      <View style={styles.claimIcon}>{icon}</View>
-      <View style={styles.coverageCopy}>
-        <Text style={[styles.coverageTitle, { color: ink }]}>{title}</Text>
-        <Text style={[styles.claimDetail, { color: muted }]}>{detail}</Text>
-      </View>
-    </Pressable>
+      ariaLabel={`${title} ${description ?? ''} ${linkLabel}`.trim()}
+      dark={dark}
+      style={description ? styles.multilineClaimRow : undefined}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   page: { flex: 1, minHeight: 0 },
-  scrollContent: { paddingBottom: 32 },
-  headerBlock: { gap: 16, paddingBottom: 16 },
-  pageTitle: {
-    paddingHorizontal: 24,
-    fontFamily: 'UniCredit-bold',
-    fontSize: 28,
-    lineHeight: 34,
+  scrollContent: { paddingBottom: 0 },
+  infoScrollContent: { paddingBottom: 0 },
+  webScroll: { flex: 1, minHeight: 0, transform: 'none' },
+  titleFrame: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
+  largeTitle: { fontFamily: 'UniCredit-bold', fontSize: 28, flexShrink: 1 },
+  infoTitleFrame: { paddingHorizontal: 24, paddingVertical: 8 },
+  infoTitle: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 32 },
+  infoFields: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 },
   policyCard: {
     alignSelf: 'center',
     width: '83%',
@@ -565,13 +574,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
   },
-  missingPolicy: { paddingHorizontal: 24, gap: 16 },
+  missingPolicy: { paddingHorizontal: 24, paddingTop: 24, gap: 16 },
   actionBar: {
     flexDirection: 'row',
+    marginTop: 16,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   actionItem: {
     flex: 1,
@@ -585,14 +594,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 17,
   },
-  body: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 22 },
-  detailsContent: { backgroundColor: '#FFFFFF', gap: 16, paddingBottom: 24 },
-  documentsContent: {
-    backgroundColor: '#FFFFFF',
-    gap: 16,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+  phoneLink: { fontSize: 16 },
+  actionIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  body: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 22 },
+  sectionDivider: { paddingHorizontal: 24 },
+  detailsContent: { gap: 16, paddingBottom: 24, marginTop: 32 },
   intro: {
     paddingHorizontal: 24,
     fontFamily: 'UniCredit-regular',
@@ -601,18 +612,22 @@ const styles = StyleSheet.create({
   },
   coverageList: { gap: 0 },
   coverageRow: {
+    height: 'auto',
     minHeight: 112,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingLeft: 16,
-    paddingRight: 12,
     paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
   },
-  coverageIcon: { width: 32, alignItems: 'center' },
-  coverageCopy: { flex: 1, minWidth: 0, gap: 4 },
-  coverageTitle: { fontFamily: 'UniCredit-bold', fontSize: 16, lineHeight: 19 },
+  coverageIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coverageTitle: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 16,
+    lineHeight: 19,
+    textTransform: 'uppercase',
+  },
   coverageDescription: {
     fontFamily: 'UniCredit-regular',
     fontSize: 16,
@@ -622,46 +637,26 @@ const styles = StyleSheet.create({
     fontFamily: 'UniCredit-bold',
     fontSize: 20,
     lineHeight: 23,
+    marginTop: 0,
   },
-  claimList: { gap: 16, paddingHorizontal: 24 },
-  claimRow: {
-    minHeight: 72,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  claimIcon: { width: 32, alignItems: 'center' },
-  claimDetail: {
-    marginTop: 4,
+  phoneDescription: {
     fontFamily: 'UniCredit-regular',
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  documentList: { gap: 0 },
-  documentRow: {
-    minHeight: 80,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  documentDate: { width: 36, alignItems: 'center', gap: 2 },
-  documentDay: { fontFamily: 'UniCredit-bold', fontSize: 14, lineHeight: 16 },
-  documentMonth: { fontFamily: 'UniCredit-bold', fontSize: 12, lineHeight: 14 },
-  documentCopy: { flex: 1, minWidth: 0, gap: 6 },
-  documentTitle: {
-    fontFamily: 'UniCredit-bold',
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: 19,
   },
-  documentBadge: { fontFamily: 'UniCredit-bold', fontSize: 12, lineHeight: 14 },
+  claimList: { gap: 0 },
+  multilineClaimRow: {
+    height: 'auto',
+    minHeight: 142,
+    paddingVertical: 24,
+  },
+  claimIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sheetFooter: { paddingHorizontal: 24, paddingTop: 8 },
   sheetBody: { paddingHorizontal: 24, paddingVertical: 16, gap: 16 },
   amountInSheet: { fontFamily: 'UniCredit-bold', fontSize: 18, lineHeight: 22 },
-  documentReference: {
-    fontFamily: 'UniCredit-bold',
-    fontSize: 14,
-    lineHeight: 18,
-  },
 });

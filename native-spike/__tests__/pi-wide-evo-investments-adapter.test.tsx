@@ -50,7 +50,14 @@ async function mount(
 }
 
 test('Czech adapter opens the Future portfolio with its two-series chart', async () => {
-  const tree = await mount({ screen: 'investments' });
+  const tree = await mount({ screen: 'investments' }, { language: 'en' });
+  expect(
+    tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Investment profile' &&
+        typeof node.props.onPress === 'function',
+    ),
+  ).toHaveLength(0);
   expect(
     tree.root.findAll(node => node.props.testID === 'future-portfolio-chart'),
   ).not.toHaveLength(0);

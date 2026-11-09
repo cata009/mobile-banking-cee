@@ -243,6 +243,8 @@ export default function NativeCzechApp({
   }));
   const rememberedSourceSelection = useRef<RememberedSourceSelection>({});
   const [amountsHidden, hideAmounts] = useState(initialAmountsHidden);
+  const [hasSelectedInvestmentSecurity, setHasSelectedInvestmentSecurity] =
+    useState(false);
   const [suppressedPrimary, suppressPrimary] =
     useState<CzechNativeRoute | null>(null);
   const controlledRouteKey = control
@@ -479,7 +481,10 @@ export default function NativeCzechApp({
     investmentRequests: control?.investmentRequests,
     onInvestmentBuyRequestConsumed:
       control?.events.onInvestmentBuyRequestConsumed,
-    onInvestmentSecuritySelected: control?.events.onInvestmentSecuritySelected,
+    onInvestmentSecuritySelected: security => {
+      setHasSelectedInvestmentSecurity(security !== null);
+      control?.events.onInvestmentSecuritySelected?.(security);
+    },
     onInvestmentReturnToSimulator:
       control?.events.onInvestmentReturnToSimulator,
     paymentFlow: control?.paymentFlow,
@@ -685,6 +690,11 @@ export default function NativeCzechApp({
                 ].includes(route.screen)
                   ? screenTopInset
                   : 0;
+                const whiteInvestmentSurface =
+                  !displayDark &&
+                  (route.screen === 'investment-detail' ||
+                    (route.screen === 'investments' &&
+                      hasSelectedInvestmentSecurity));
                 return (
                   <View
                     key={routeIds.current.map.get(route)}
@@ -699,10 +709,9 @@ export default function NativeCzechApp({
                       { paddingTop },
                       (route.screen === 'investments' ||
                         route.screen === 'investment-detail') && {
-                        backgroundColor: sourceColor(
-                          'var(--uc-app-bg)',
-                          displayDark,
-                        ),
+                        backgroundColor: whiteInvestmentSurface
+                          ? sourceColor('var(--uc-static-white)', false)
+                          : sourceColor('var(--uc-app-bg)', displayDark),
                       },
                       verticalNavigation &&
                         !['prelogin', 'login'].includes(route.screen) && {

@@ -5,6 +5,7 @@ import {
   getProductsMenuForCountry,
   type ProductsCard,
 } from '@/app/config/productsMenuConfig';
+import { getDocumentsConfigForCountry } from '@/app/config/documentsConfig';
 import type {
   CurrentRoute,
   CurrentScreenProps,
@@ -13,6 +14,7 @@ import { CURRENT_HOME_ADAPTER } from '../src/experiences/pi/current/adapter';
 import ProductSheet from '../src/experiences/pi/current/baseline/offers/ProductSheet';
 import { AccountSelectionSheet } from '../src/experiences/pi/current/baseline/AccountSelectionSheet';
 import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { mobileFirstTokens } from '../src/universal/tokens';
 import {
   completeGeniusProtectRequest,
@@ -73,7 +75,11 @@ function press(tree: Renderer.ReactTestRenderer, label: string) {
       .findAll(node => typeof node.props.onPress === 'function')
       .map(
         node =>
-          `${node.props.accessibilityLabel ?? node.props.accessible ?? 'unlabeled'}${node.props.disabled ? ' (disabled)' : ''}`,
+          `${
+            node.props.accessibilityLabel ??
+            node.props.accessible ??
+            'unlabeled'
+          }${node.props.disabled ? ' (disabled)' : ''}`,
       );
     throw new Error(
       `Missing pressable control: ${label}. Available: ${available.join(', ')}`,
@@ -161,6 +167,26 @@ describe('Genius Protect', () => {
     }
   });
 
+  it('adds Genius Protect policy documents to the Romanian Documents source only', () => {
+    const roItems = getDocumentsConfigForCountry('RO').groups.flatMap(
+      group => group.items,
+    );
+    const czItems = getDocumentsConfigForCountry('CZ').groups.flatMap(
+      group => group.items,
+    );
+    const policyDocumentIds = [
+      'genius-protect-policy-certificate',
+      'genius-protect-policy-contract',
+    ];
+
+    expect(roItems.map(item => item.id)).toEqual(
+      expect.arrayContaining(policyDocumentIds),
+    );
+    expect(czItems.map(item => item.id)).not.toEqual(
+      expect.arrayContaining(policyDocumentIds),
+    );
+  });
+
   it('collects notices before personal data and disables Continue until every needs declaration is complete', () => {
     const tree = renderProductDetail({
       screen: 'product-detail',
@@ -201,9 +227,10 @@ describe('Genius Protect', () => {
     }
   });
 
-  it('opens the active Genius Protect policy details and documents from the product-detail route', () => {
+  it('opens policy details and routes Documents to the shared document list', () => {
     startGeniusProtectRequest();
     completeGeniusProtectRequest();
+    const onNavigate = jest.fn();
     const tree = renderProductDetail(
       {
         screen: 'product-detail',
@@ -213,7 +240,7 @@ describe('Genius Protect', () => {
           optionId: 'genius-protect-policy',
         },
       },
-      { language: 'en' },
+      { language: 'en', onNavigate },
     );
     try {
       let copy = JSON.stringify(tree.toJSON());
@@ -227,13 +254,24 @@ describe('Genius Protect', () => {
         'Financial protection for your family in case of death caused by illness.',
       );
       press(tree, 'Close');
-      press(tree, 'Documents');
+      press(tree, 'Details');
       copy = JSON.stringify(tree.toJSON());
-      expect(copy).toContain('Documents');
-      expect(copy).toContain('Policy_certificate_34314');
-      expect(copy).toContain('Policy_contract_34314');
+      expect(copy).toContain('Insurance details');
+      expect(copy).toContain('Insurance type');
+      expect(copy).toContain('Status');
+      expect(copy).toContain('Payment account');
+      expect(copy).toContain('1234567890123456');
       press(tree, 'Back');
       expect(JSON.stringify(tree.toJSON())).toContain('WHAT’S INSURED');
+
+      const coverageChevrons = tree.root
+        .findAllByType(SourceCustomIcon)
+        .filter(icon => icon.props.name === 'chevron-link');
+      expect(coverageChevrons).toHaveLength(4);
+      expect(coverageChevrons.every(icon => icon.props.size === 32)).toBe(true);
+
+      press(tree, 'Documents');
+      expect(onNavigate).toHaveBeenCalledWith({ screen: 'documents' });
     } finally {
       act(() => tree.unmount());
     }
