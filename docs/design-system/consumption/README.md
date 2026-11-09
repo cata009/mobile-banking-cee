@@ -38,36 +38,36 @@ adapter counts as aligned.
 
 ## Aligned so far
 
-| Component | Now |
-| --- | --- |
-| Profile `Button` | library `PrimaryButton` (Figma Button: 48 high, radius 4, #007A91, Bold 18) |
-| Profile `MailboxTabs` | adapter over `BaselineMailboxTabs` |
-| Banking `Toggle` | library `ToggleButton` (replaces the platform `Switch`) |
-| Appointment `FormCheckbox` | library `BaselineCheckbox` with `presentation="canonical"`, dark aware |
-| Appointment `AppointmentSheet` (also `SelectionSheet`, `CalendarSheet`, `AccountSelectionSheet`) | library `BaselineBottomSheet` |
-| `RoBaselineCategorySheet` (change category) | library `BaselineBottomSheet` with the new `fixedHeight` option (full-height panel, scrolling list, pinned action) |
-| `BankingSheet` (internal transfer, schedule) | adapter over `BaselineBottomSheet`; keeps the original 16 px inset until the banking forms are reviewed |
-| Offers `BaselineProductsTabs` (Banking / ShopSmart) | adapter over `BaselineMailboxTabs`: 18 px labels like every other tab strip (decision: tabs are 18 px everywhere; they were 20 px here) |
-| `FilterDivider` (investment history filters) and `DepositDivider` (Future Gain deposit) | library `BaselineSectionDivider` `medium-title`: 14 px title, text inset 24, rule across the width (decision: section titles with a rule are 14 px; they were 18 px) |
-| `BankingButton` | library `PrimaryButton` (same 48 / radius 4 / action-strong, 0.3 opacity and 18 px label when disabled) |
-| Romanian profile `ConsentToggle` | library `ToggleButton`, row keeps the press and the accessible name |
-| `SourceOfferCard` | adapter over `BaselineProductOfferCard` (which gained optional `testID` and `accessibilityLabel`) |
-| RS property insurance `SecondaryAction` (Flows) | `PrimaryButton variant="secondary"` |
-| RS property insurance `OpenDocumentButton` (Flows) | `LinkActionButton` (the Design System text button: uppercase 14 Bold, 16 px chevron, 4 px gap, 44 px target) |
-| `DatedRow` (profile) and `ServiceDatedRow` (baseline More), the same row written twice | new library component `BaselineDatedRow`; both are now adapters. Candidate DS entry "Dated list row" (not yet in Figma) |
-| Investments catalog `Logo` | new library component `BaselineBrandLogo`; `Logo` is an adapter. The web twin is `components/brand-logo/BrandLogo.tsx` |
+| Component                                                                                                                   | Now                                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Profile `Button`                                                                                                            | library `PrimaryButton` (Figma Button: 48 high, radius 4, #007A91, Bold 18)                                                                                                                                                                                                |
+| Profile `MailboxTabs`                                                                                                       | adapter over `BaselineMailboxTabs`                                                                                                                                                                                                                                         |
+| Banking `Toggle`                                                                                                            | library `ToggleButton` (replaces the platform `Switch`)                                                                                                                                                                                                                    |
+| Appointment `FormCheckbox`                                                                                                  | library `BaselineCheckbox` with `presentation="canonical"`, dark aware                                                                                                                                                                                                     |
+| Appointment `AppointmentSheet` (also `SelectionSheet`, `CalendarSheet`, `AccountSelectionSheet`)                            | library `BaselineBottomSheet`                                                                                                                                                                                                                                              |
+| `RoBaselineCategorySheet` (change category)                                                                                 | library `BaselineBottomSheet` with the new `fixedHeight` option (full-height panel, scrolling list, pinned action)                                                                                                                                                         |
+| `BankingSheet` (internal transfer, schedule)                                                                                | adapter over `BaselineBottomSheet`; keeps the original 16 px inset until the banking forms are reviewed                                                                                                                                                                    |
+| Offers `BaselineProductsTabs` (Banking / ShopSmart)                                                                         | adapter over `BaselineMailboxTabs`: 18 px labels like every other tab strip (decision: tabs are 18 px everywhere; they were 20 px here)                                                                                                                                    |
+| `FilterDivider` (investment history filters) and `DepositDivider` (Future Gain deposit)                                     | library `BaselineSectionDivider` `medium-title`: 14 px title, text inset 24, rule across the width (decision: section titles with a rule are 14 px; they were 18 px)                                                                                                       |
+| `BankingButton`                                                                                                             | library `PrimaryButton` (same 48 / radius 4 / action-strong, 0.3 opacity and 18 px label when disabled)                                                                                                                                                                    |
+| Romanian profile `ConsentToggle`                                                                                            | library `ToggleButton`, row keeps the press and the accessible name                                                                                                                                                                                                        |
+| `SourceOfferCard`                                                                                                           | adapter over `BaselineProductOfferCard` (which gained optional `testID` and `accessibilityLabel`)                                                                                                                                                                          |
+| RS property insurance `SecondaryAction` (Flows)                                                                             | `PrimaryButton variant="secondary"`                                                                                                                                                                                                                                        |
+| RS property insurance `OpenDocumentButton` (Flows)                                                                          | `LinkActionButton` (the Design System text button: uppercase 14 Bold, 16 px chevron, 4 px gap, 44 px target)                                                                                                                                                               |
+| `DatedRow` (profile) and `ServiceDatedRow` (baseline More), the same row written twice                                      | new library component `BaselineDatedRow`; both are now adapters. Candidate DS entry "Dated list row" (not yet in Figma)                                                                                                                                                    |
+| Investments catalog `Logo`                                                                                                  | new library component `BaselineBrandLogo`; `Logo` is an adapter. The web twin is `components/brand-logo/BrandLogo.tsx`                                                                                                                                                     |
+| Inline text actions in Flows (Genius My Car x2, investments bulk approval x2, RS property insurance "Edit")                 | new component `TextLink` (web `src/app/components/TextLink.tsx`, native `BaselineTextLink`), one contract `contracts/textLink.ts`: sentence case, 14 Bold, `--uc-action`, no chevron, 44 px target                                                                         |
+| Label and value rows: native `OfferRow`; Flows `DataRow` (Genius My Car), `SummaryRow`, `ReviewRow` (RS property insurance) | new component `KeyValueRow` (web `src/app/components/KeyValueRow.tsx`, native `BaselineKeyValueRow`), one contract `contracts/keyValueRow.ts`: inline (muted label, bold value, rule) or stacked (bold uppercase label over a muted value), compact 14 px or regular 16 px |
+| Web `PrimaryButton` default label size                                                                                      | now 18, like Figma and the native button                                                                                                                                                                                                                                   |
 
 ## Open gaps: proposals, not approved
 
 Proposals follow `AGENTS.md`: genuinely unmapped components go to a `De aprobat / <source>` page in the
 Design System Figma file and need individual approval before promotion. Nothing has been written to Figma.
 
-1. **Inline text link.** Sentence case, 14 px Bold, colour `--uc-action-strong`, no chevron, 44 px touch
-   target. Used as a plain text action inside flows. It is not the Figma "Text button / Primary" (uppercase,
-   trailing 16 px chevron; implemented as `BaselineNavigationLink`, web `NavigationLink`, `LinkActionButton`).
-   Seen at `src/flows/ro/genius-my-car/geniusMyCarPurchase.tsx` (4 places),
-   `src/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx` (2),
-   `src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx` (2).
+1. **Inline text link: built as `TextLink`.** It is not the Figma "Text button / Primary" (uppercase, trailing 16 px
+   chevron; implemented as `BaselineNavigationLink`, web `NavigationLink`, `LinkActionButton`). Still a proposal for
+   Figma ("Text link").
 2. **Product menu card with responsive width.** `SourceMenuCard` takes a `width` (full or half row);
    `BaselineProductMenuCard` is fixed size. Needs a decision: a width-fill variant, or fixed width everywhere.
 3. **Reviewed and kept on purpose.**
@@ -81,8 +81,8 @@ Design System Figma file and need individual approval before promotion. Nothing 
      not a copy of `BaselineToast`, which is the icon/dot message toast.
    - `PrimeEntryButton` is the Prime header control (pill with a glyph, overlay variant); there is no library
      counterpart.
-   - **Key-value rows** (`OfferRow`, the Romanian profile `DataRow`, Genius Protect `DataRow`): a recurring label and
-     value pattern with no Design System component. A proposal ("Key-value row") belongs in Figma first.
+   - **Key-value rows**: built as `KeyValueRow` (see above; still a proposal for Figma). Not yet moved onto it: the
+     Romanian profile `DataRow` and Genius Protect `DataRow` (the second is left alone while that flow is edited).
    - `AppointmentListRow` (date, meeting-type icon, three lines), `FilterRow` (muted title over a bold value, chevron
      or calendar glyph) and `CzRoboSecurityRow` (logo, quantity, prices, performance) are domain list items, not
      copies of `BaselineNavigationRow` or `BaselineDatedRow`.
@@ -95,8 +95,7 @@ Design System Figma file and need individual approval before promotion. Nothing 
    (`ActionButton`, radius 32). Deferred with Kids and Evo.
 5. **Tabs role.** Appointment `MeetingTabs` exposes `button`; `BaselineMailboxTabs` exposes `tab`. Moving it
    changes an accessibility role that a test in the Evo area asserts, so it waits for Evo.
-6. **Web `PrimaryButton` default label size.** The web wrapper defaults to 16, Figma and the native button to
-   18; only 18 of 142 call sites pass the size explicitly.
+6. **Web `PrimaryButton` default label size**: resolved, the web default is now 18.
 
 ## Not yet reviewed individually
 
@@ -105,16 +104,19 @@ and below, and each one either needs a Design System decision or is domain-speci
 no new ones appear.
 
 Native, also kept:
+
 - `DesignCarousel` (virtual card design picker with mouse-drag paging) and `BaselinePfmPeriodCarousel` (a paging rail
   for the Spending periods, web and native variants) are behaviour components; the library only has the dots
   (`BaselineCarouselIndicator`), not a paging rail. A library "paged rail" would be a new component.
 
 Flows (web, judged against `src/app/components`, which the web previews consume):
+
 - Presentation chrome, not product UI: `FraudPresentationDialog`, `PrimePresentationDialog`.
 - Flow-specific cards and carousels: `ChoiceCard`, `PackageCard`, `PackageCarousel`, `MyCarVehicleCard`,
   `AddVehicleCard`, `InfoPanel`.
-- Key-value and summary rows (`SummaryRow`, `ReviewRow`, `BenefitRow`, `CoveredWorkRow`, `ConsentRow`,
-  `VehiclePolicyRow`, `DataRow`): the same "Key-value row" gap as in the native app.
+- Summary rows `BenefitRow`, `CoveredWorkRow`, `ConsentRow`, `VehiclePolicyRow`: they carry an icon, a check or a
+  toggle next to the text, so they are not plain key-value rows. `SummaryRow`, `ReviewRow` and `DataRow` already use
+  `KeyValueRow`.
 - `PolicyStatusBadge` (status tag with tones) has no web Design System tag; `StepProgress` is a four-step stepper;
   `VehicleBrandLogo` renders car make logos in a white pill, not the brand registry; `BottomCta` and `Field` are
   layout wrappers.

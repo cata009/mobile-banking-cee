@@ -12,7 +12,6 @@
     "native-spike/src/experiences/pi/current/banking/Accounts.tsx#BalanceCard",
     "native-spike/src/experiences/pi/current/banking/CopyToast.tsx#BankingCopyToast",
     "native-spike/src/experiences/pi/current/baseline/Card.tsx#BaselineSensitiveCard",
-    "native-spike/src/experiences/pi/current/baseline/CreditLimitOfferFlow.tsx#OfferRow",
     "native-spike/src/experiences/pi/current/baseline/more/appointment/MeetingViews.tsx#AppointmentListRow",
     "native-spike/src/experiences/pi/current/baseline/more/appointment/MeetingViews.tsx#MeetingTabs",
     "native-spike/src/experiences/pi/current/baseline/offers/GeniusProtectFlow.tsx#CheckRow",
@@ -37,7 +36,6 @@
     "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#PolicyStatusBadge",
     "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#VehiclePolicyRow",
     "src/flows/ro/genius-my-car/geniusMyCarPurchase.tsx#StepProgress",
-    "src/flows/ro/genius-my-car/geniusMyCarUi.tsx#DataRow",
     "src/flows/ro/genius-my-car/geniusMyCarUi.tsx#InfoPanel",
     "src/flows/ro/genius-my-car/geniusMyCarUi.tsx#VehicleBrandLogo",
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#BenefitRow",
@@ -49,8 +47,6 @@
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#GroupHeader",
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#PackageCard",
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#PackageCarousel",
-    "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#ReviewRow",
-    "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#SummaryRow",
     "src/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx#FlowBulkSelectionCheckbox",
     "src/flows/shared/prime/presentation/PrimePresentationDialog.tsx#PrimePresentationDialog"
   ]
