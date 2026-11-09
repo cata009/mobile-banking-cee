@@ -2,7 +2,7 @@ import { futureGainEnabled } from '../future-gain/model';
 import { getFutureGainProductOffers } from '@/features/investments/future-gain/offers';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useDemoViewport } from '../../../../universal/DemoViewport';
+import { BaselineProductMenuGrid } from '../../../../universal/BaselineProductMenuCard';
 import {
   getProductsMenuForCountry,
   getProductCardSheetConfig,
@@ -61,7 +61,6 @@ export default function Products(host: CurrentScreenProps) {
   const [tab, setTab] = useState<ProductsMenuTab>('banking');
   const [selected, setSelected] = useState<ProductsCard | null>(null);
   const [query, setQuery] = useState('');
-  const useWidth = useDemoViewport().width;
   const width = 327;
   const offers = tab === 'banking'
     ? getFutureGainProductOffers({ product: 'PI', country: host.country, release: host.release }, config.offers)
@@ -102,11 +101,10 @@ export default function Products(host: CurrentScreenProps) {
             item.title,
           ),
   });
-  const card = (item: ProductsCard, fullWidth = false) => (
+  const card = (item: ProductsCard) => (
     <SourceMenuCard
       key={item.id}
       dark={host.tokens.background === '#121212'}
-      width={fullWidth ? useWidth - 48 : (useWidth - 60) / 2}
       card={localizeCard(item)}
       onPress={() => openCard(item)}
     />
@@ -250,9 +248,9 @@ export default function Products(host: CurrentScreenProps) {
                   )
                 : ''}
             </SectionTitle>
-            <View style={s.grid}>
+            <BaselineProductMenuGrid style={s.grid}>
               {config.products.map(item => card(item))}
-            </View>
+            </BaselineProductMenuGrid>
             {config.otherSolutions.length > 0 && (
               <>
                 <SectionTitle host={host}>
@@ -262,9 +260,9 @@ export default function Products(host: CurrentScreenProps) {
                     config.otherSolutionsTitle,
                   )}
                 </SectionTitle>
-                <View style={s.grid}>
-                  {config.otherSolutions.map(item => card(item, true))}
-                </View>
+                <BaselineProductMenuGrid columns={1} style={s.grid}>
+                  {config.otherSolutions.map(item => card(item))}
+                </BaselineProductMenuGrid>
               </>
             )}
           </>
@@ -490,9 +488,6 @@ const s = StyleSheet.create({
   searchRow:{height:32,minHeight:32},searchInput:{fontSize:14,lineHeight:15,height:32,padding:0},
   optionTitle:{fontSize:18,lineHeight:20,letterSpacing:.3},optionRow:{paddingLeft:24,paddingRight:16,paddingVertical:24,minHeight:80},
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
     paddingHorizontal: 24,
     paddingTop: 16,
   },

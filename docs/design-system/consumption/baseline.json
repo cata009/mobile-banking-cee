@@ -26,7 +26,6 @@
     "native-spike/src/experiences/pi/current/investments/baseline/flows/HistoryDetail.tsx#HistoryHomeIndicator",
     "native-spike/src/experiences/pi/current/investments/baseline/flows/HistoryFilters.tsx#FilterRow",
     "native-spike/src/experiences/pi/current/investments/baseline/overview/CzRoboOverview.tsx#CzRoboSecurityRow",
-    "native-spike/src/experiences/pi/current/products/SourceCards.tsx#SourceMenuCard",
     "native-spike/src/experiences/pi/current/products/SourceCards.tsx#SourceShopSmartCard",
     "native-spike/src/experiences/pi/current/profile/BottomSheet.tsx#BottomSheet",
     "src/flows/ba/card-fraud/FraudPresentationDialog.tsx#FraudPresentationDialog",
