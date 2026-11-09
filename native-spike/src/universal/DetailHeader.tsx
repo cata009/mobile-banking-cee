@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import type { Themed } from './types';
 
+import { sourceColor } from './sourceColor';
 /** Shared safe-area-relative navigation band; the host supplies the system inset. */
 export function DetailHeader({
   tokens,
@@ -97,6 +98,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#e2001a',
+    backgroundColor: sourceColor('var(--uc-brand)'),
   },
 });

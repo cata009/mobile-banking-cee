@@ -11,6 +11,7 @@ import {
 import { Text, TextInput } from './Typography';
 import type { Themed } from './types';
 
+import { sourceColor } from './sourceColor';
 export const FormField = forwardRef<
   React.ElementRef<typeof TextInput>,
   Themed & {
@@ -109,8 +110,8 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   inputWithAccessory: { flex: 1 },
   inputAccessory: { minHeight: 48, justifyContent: 'center' },
-  error: { color: '#e2001a', fontSize: 14, lineHeight: 20 },
-  errorInput: { borderColor: '#e2001a' },
+  error: { color: sourceColor('var(--uc-danger)'), fontSize: 14, lineHeight: 20 },
+  errorInput: { borderColor: sourceColor('var(--uc-danger)') },
   focusedInput: { borderBottomWidth: 2 },
   webInput: { outlineWidth: 0 },
 });

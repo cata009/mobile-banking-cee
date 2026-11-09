@@ -74,7 +74,7 @@ export function BaselineDialog({
   };
   const backdrop = {
     ...styles.shade,
-    backgroundColor: `rgba(0,0,0,${c.overlayOpacity})`,
+    backgroundColor: sourceColor(`rgb(var(--uc-shadow-rgb)/${c.overlayOpacity})`),
   };
   const content = {
     ...styles.content,
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: sourceColor('rgb(var(--uc-shadow-rgb)/0.4)'),
   },
   box: { overflow: 'hidden' },
   content: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 16 },

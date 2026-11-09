@@ -32,7 +32,9 @@ export function BaselineToast({
     paddingHorizontal: contract.googlePay ? 27 : undefined,
     paddingRight: contract.googlePay ? 27 : 8,
     gap: contract.googlePay ? undefined : contract.gap,
-    backgroundColor: contract.dark ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.06)',
+    backgroundColor: contract.dark
+      ? sourceColor('rgb(var(--uc-static-white-rgb)/.2)')
+      : sourceColor('rgb(var(--uc-shadow-rgb)/.06)'),
   };
   const slotStyle: ViewStyle = {
     width: contract.slotSize,

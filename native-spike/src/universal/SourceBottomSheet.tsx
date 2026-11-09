@@ -136,7 +136,7 @@ const s = StyleSheet.create({
     flexGrow: 0,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
-    boxShadow: '0 -8px 24px rgba(0,0,0,0.18)',
+    boxShadow: `0 -8px 24px ${sourceColor('rgb(var(--uc-shadow-rgb)/0.18)')}`,
   },
   content: { paddingTop: 24, paddingBottom: 24 },
   footer: {

@@ -2,6 +2,7 @@ import React, { memo, useId } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import Svg, { Defs, G, Mask, Rect } from 'react-native-svg';
 
+import { sourceColor } from './sourceColor';
 export interface SoftShadowProps {
   width: number;
   height: number;
@@ -108,7 +109,7 @@ export const SoftShadow = memo(function ShadowDecoration({
             width={width}
             height={height}
             rx={corner}
-            fill="#000"
+            fill={sourceColor('var(--uc-static-black)')}
           />
         </Mask>
       </Defs>

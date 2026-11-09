@@ -3,6 +3,7 @@ import Renderer, { act } from 'react-test-renderer';
 import { StyleSheet, TextInput } from 'react-native';
 import { FormField } from '../src/universal/FormField';
 import { mobileFirstTokens } from '../src/universal/tokens';
+import { sourceColor } from '../src/universal/sourceColor';
 
 test('shared fields focus with a teal underline and preserve caller focus handlers', () => {
   const onFocus = jest.fn(),
@@ -52,7 +53,8 @@ test('validation errors retain their underline color while focused', () => {
   act(() => input().props.onFocus({ nativeEvent: {} }));
   expect(StyleSheet.flatten(input().props.style)).toMatchObject({
     borderBottomWidth: 2,
-    borderColor: '#e2001a',
+    // The error color is the danger token, so it follows the single color source.
+    borderColor: sourceColor('var(--uc-danger)'),
   });
   act(() => tree.unmount());
 });

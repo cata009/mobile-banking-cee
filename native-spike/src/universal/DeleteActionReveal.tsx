@@ -64,7 +64,7 @@ export function DeleteActionReveal({
             onPress={onDelete}
             style={styles.deleteButton}
           >
-            <SourceCustomIcon name="trash-2" size={24} color="#ffffff" />
+            <SourceCustomIcon name="trash-2" size={24} color={sourceColor('var(--uc-static-white)')} />
             <Text style={styles.deleteLabel}>{deleteActionLabel}</Text>
           </Pressable>
         ) : null}
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   deleteLabel: {
     marginTop: 8,
-    color: '#ffffff',
+    color: sourceColor('var(--uc-static-white)'),
     fontFamily: 'UniCredit-bold',
     fontSize: 14,
     lineHeight: 15,

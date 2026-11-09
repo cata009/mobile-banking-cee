@@ -8,6 +8,7 @@ import type { CardVariant } from '@/app/components/contracts/cardArtwork';
 import { BaselineCardArtwork } from './BaselineCardArtwork';
 import { Text } from './Typography';
 
+import { sourceColor } from './sourceColor';
 /** Static DS composition; no carousel selection, masking or business logic is introduced. */
 export function BaselineCardComponent({
   cardHolderName = 'PETER JAGODIC',
@@ -49,7 +50,7 @@ export function BaselineCardComponent({
     height: geometry.slotHeight,
     borderRadius: geometry.slotRadius,
     overflow: 'hidden',
-    boxShadow: '0 11.265px 11.265px rgba(0,0,0,.2)',
+    boxShadow: `0 11.265px 11.265px ${sourceColor('rgb(var(--uc-shadow-rgb)/.2)')}`,
   };
   return (
     <View style={rootStyle}>
