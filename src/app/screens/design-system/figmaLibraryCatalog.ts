@@ -8374,7 +8374,8 @@ export function getFigmaFamilyForHash(
   if (!hash.startsWith('#figma/')) return undefined
   let id: string
   try {
-    id = decodeURIComponent(hash.slice(7))
+    // "#figma/<node>/<tab>" keeps the open documentation tab in the link.
+    id = decodeURIComponent(hash.slice(7).split('/')[0] ?? '')
   } catch {
     return undefined
   }
@@ -8383,6 +8384,11 @@ export function getFigmaFamilyForHash(
     if (family) return { page, family }
   }
   return undefined
+}
+/** The documentation tab named after the family id ("#figma/<node>/states"), if any. */
+export function getFigmaFamilyTabFromHash(hash: string): string | undefined {
+  if (!hash.startsWith('#figma/')) return undefined
+  return hash.slice(7).split('/')[1] || undefined
 }
 export function getFigmaFamilyExamples(familyId: string): readonly string[] {
   return !getFigmaFamilyScopeExclusion(familyId) &&

@@ -282,13 +282,13 @@ describe('Design System specimen selectors', () => {
     if (!colorsTab) throw new Error('Missing Colors inventory tab')
     fireEvent.click(colorsTab)
 
-    const neutral = getByRole('tab', { name: /^Neutral \/ Primary/ })
-    expect(neutral).toHaveAttribute('aria-selected', 'true')
+    const neutral = getByRole('button', { name: /^Neutral \/ Primary/ })
+    expect(neutral).toHaveAttribute('aria-current', 'page')
     expect(window.location.hash).toBe('#colors')
 
-    const pfm = getByRole('tab', { name: /^PFM Categories/ })
+    const pfm = getByRole('button', { name: /^PFM Categories/ })
     fireEvent.click(pfm)
-    expect(pfm).toHaveAttribute('aria-selected', 'true')
+    expect(pfm).toHaveAttribute('aria-current', 'page')
     expect(window.location.hash).toBe('#colors')
     expect(getByRole('heading', { name: 'PFM Taxes and Penalties' })).toBeInTheDocument()
   })
@@ -440,12 +440,12 @@ describe('Design System specimen selectors', () => {
   it('keeps the selected canonical category stable while the catalog scrolls', () => {
     const { container, getByRole } = renderInventory(true)
     const sections = getByRole('navigation', { name: 'Component sections' })
-    fireEvent.click(within(sections).getByRole('button', { name: /^Buttons$/ }))
+    fireEvent.click(within(sections).getByRole('button', { name: /^Buttons\b/ }))
     expect(window.location.hash).toBe('#figma-0-1817')
     expect(container.querySelectorAll('[data-figma-page]')).toHaveLength(1)
     fireEvent.scroll(container.firstElementChild!, { target: { scrollTop: 600 } })
     expect(window.location.hash).toBe('#figma-0-1817')
-    expect(within(sections).getByRole('button', { name: /^Buttons$/ })).toHaveAttribute('aria-current', 'page')
+    expect(within(sections).getByRole('button', { name: /^Buttons\b/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('keeps a tab default hash stable when no sections are available to observe', () => {

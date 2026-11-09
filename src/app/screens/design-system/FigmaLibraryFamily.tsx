@@ -8,34 +8,37 @@ import {
 import { getNativeDesignSystemPreview } from '@/features/demo-native/designSystemPreview'
 import type { ComponentId } from '@/app/state/demoTypes'
 import ImplementationCodeBrowser from './ImplementationCodeBrowser'
-import ComponentOverviewSections from './ComponentOverviewSections'
+import ComponentOverviewSections, { type ComponentDocStatus, type ComponentDocTab } from './ComponentOverviewSections'
 import { getComponentLivePreview } from './componentLivePreviews'
-import { InspectModeContext } from './inspect/MeasurementSurface'
-import { NativeDesignSystemPreview } from './NativeDesignSystemPreview'
-import {
-  CATALOG_COMPOSITION_SOURCES,
-  getCatalogCompositionSource,
-} from '@/app/components/contracts/catalogCompositions'
+import { NativeDesignSystemPreview, VariantPicker } from './NativeDesignSystemPreview'
+import { CATALOG_COMPOSITION_SOURCES } from '@/app/components/contracts/catalogCompositions'
 import { getFigmaLibraryReference } from './figmaLibraryReferences'
+import { FigmaStateGallery, resolveFigmaStates } from './FigmaStateGallery'
 import {
   getFigmaFamilyExamples,
+  getFigmaFamilyHref,
+  getFigmaFamilyTabFromHash,
   getFigmaImplementationGroup,
   getFigmaNodeUrl,
-  getFigmaPageSectionId,
-  getFigmaVariantScopeExclusion,
   getFigmaFamilyScopeExclusion,
+  getFigmaPageSectionId,
   type FigmaLibraryFamily,
   type FigmaLibraryPage,
 } from './figmaLibraryCatalog'
+
+const DOC_TABS: readonly ComponentDocTab[] = ['overview', 'states', 'specs', 'code']
 
 export function FigmaLivePreview({
   family,
   implementationId,
   theme = 'light',
+  variantId,
 }: {
   family: FigmaLibraryFamily
   implementationId?: string
   theme?: 'light' | 'dark'
+  /** Shows this implemented variant; the page then owns the variant picker. */
+  variantId?: string
 }) {
   const id = implementationId ?? getFigmaFamilyExamples(family.nodeId)[0]
   const native = id ? getNativeDesignSystemPreview(id) : undefined
@@ -47,7 +50,9 @@ export function FigmaLivePreview({
         variantId={
           native.controls === 'internal'
             ? family.variants.find((variant) => native.variants.includes(variant.nodeId))?.nodeId
-            : undefined
+            : variantId && native.variants.includes(variantId)
+              ? variantId
+              : undefined
         }
         initialVariantId={family.variants.find((variant) => native.variants.includes(variant.nodeId))?.nodeId}
       />
@@ -55,51 +60,27 @@ export function FigmaLivePreview({
   return id ? getComponentLivePreview(id, theme) : null
 }
 
+/** A design that is not a live component documents its source only; there is nothing to specify yet. */
 function sourcePackage(family: FigmaLibraryFamily): ComponentImplementationPackage {
-  const first = family.variants[0]
   return {
-    summary:
-      getFigmaFamilyScopeExclusion(family.nodeId) ||
-      family.description ||
-      getFigmaLibraryReference(family.nodeId)?.reason ||
-      family.name + ' requires source alignment before implementation.',
-    visualSpecifications: [
-      {
-        label: 'Source canvas',
-        value: first ? `${first.width} × ${first.height} px` : 'See Figma',
-        detail: 'Dimensions refer to the authored source. Inspector measures actual rendered elements.',
-      },
-    ],
+    summary: family.description,
+    visualSpecifications: [],
     states: [],
-    motionSpecifications: [
-      {
-        label: 'Interaction ownership',
-        value: 'Controlled values and callbacks',
-        detail: 'The consuming feature owns validation, availability, navigation and banking actions.',
-      },
-    ],
-    accessibilitySpecifications: family.name.toLowerCase().includes('counter')
-      ? [
-          'Include the count in the owning action’s accessible name; keep the visual counter out of the focus order.',
-          'Expose status in text and semantics, as well as color.',
-        ]
-      : family.name.toLowerCase().includes('field')
-        ? [
-            'Associate a persistent label with the field and expose its selected value, error and disabled state.',
-            'Support keyboard activation, selection, dismissal and focus return in the target host.',
-            'Verify focus, contrast, wrapping and reachable actions at 200% text size.',
-          ]
-        : [
-            'Use readable text and meaningful accessible names; keep decorative artwork out of the focus order.',
-            'Check keyboard, screen reader and visible focus in the consuming screen.',
-            'Verify contrast and content adaptation at 200% text size; test browser zoom separately.',
-          ],
-    assets: {
-      required: false,
-      summary:
-        'Shared primitives, typography and original glyph/artwork assets. Review imports in the executable source.',
-    },
+    motionSpecifications: [],
+    accessibilitySpecifications: [],
+    assets: { required: false, summary: '' },
   }
+}
+
+function unimplementedReason(family: FigmaLibraryFamily): string {
+  const exclusion = getFigmaFamilyScopeExclusion(family.nodeId)
+  if (exclusion) return exclusion
+  const reference = getFigmaLibraryReference(family.nodeId)
+  if (reference) return reference.reason
+  return (
+    CATALOG_COMPOSITION_SOURCES.find((source) => source.familyId === family.nodeId && source.status === 'blocked')
+      ?.reason ?? 'This design is not implemented yet.'
+  )
 }
 
 export default function FigmaLibraryFamilyView({
@@ -115,148 +96,123 @@ export default function FigmaLibraryFamilyView({
   const implementations = group?.implementations ?? []
   const sources = group?.sources ?? [family]
   const [selected, setSelected] = useState(implementations[0] ?? '')
-  const [inspect, setInspect] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const meta = COMPONENT_REGISTRY[selected as ComponentId]
   const native = getNativeDesignSystemPreview(selected)
-  const data = getComponentImplementationPackage(selected) ?? sourcePackage(family)
+  const data = (selected && getComponentImplementationPackage(selected)) || sourcePackage(family)
   const code = resolveComponentCodeSample(COMPONENT_CODE_SAMPLES[selected], undefined)
   const title = sources.length > 1 ? (meta?.label ?? group?.label ?? family.name) : family.name
-  const sourceStates = (
-    <>
-      {sources.map((source) => (
-        <div key={source.nodeId}>
-          <h3>{source.name}</h3>
-          <div className="ds-figma-variant-list" role="list" aria-label={source.name + ' source variants'}>
-            {source.variants.map((variant) => (
-              <div className="ds-figma-variant-row" role="listitem" key={variant.nodeId}>
-                <a href={getFigmaNodeUrl(variant.nodeId)} target="_blank" rel="noreferrer">
-                  {variant.name} ↗
-                  {getFigmaVariantScopeExclusion(variant.nodeId) ? (
-                    <span className="ds-source-note">
-                      {' '}
-                      · Excluded by scope: {getFigmaVariantScopeExclusion(variant.nodeId)}
-                    </span>
-                  ) : null}
-                  {!getFigmaVariantScopeExclusion(variant.nodeId) &&
-                  getCatalogCompositionSource(variant.nodeId)?.status === 'blocked' ? (
-                    <span className="ds-source-note">
-                      {' '}
-                      · Unavailable: {getCatalogCompositionSource(variant.nodeId)?.reason}
-                    </span>
-                  ) : null}
-                </a>
-                <span>
-                  {variant.width} × {variant.height} px
-                </span>
-                <code>{variant.nodeId}</code>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </>
-  )
-  return (
-    <article className="ds-figma-family" data-figma-family={family.nodeId}>
-      <a className="ds-text-link ds-back" href={'#' + getFigmaPageSectionId(page.nodeId)}>
-        ← {page.name}
-      </a>
-      <header className="ds-detail-header">
-        <div>
-          <p className="ds-eyebrow">{page.name}</p>
-          <h1>{title}</h1>
-          <p>
-            {sources.reduce((sum, source) => sum + source.variants.length, 0)} authored source variants ·{' '}
-            {sources.length} Figma {sources.length === 1 ? 'family' : 'families'}
-          </p>
-        </div>
-        <a className="ds-text-link" href={getFigmaNodeUrl(family.nodeId)} target="_blank" rel="noreferrer">
-          Open Figma ↗
-        </a>
-      </header>
-      {implementations.length ? (
-        <div className="ds-detail-toolbar">
-          {implementations.length > 1 ? (
-            <label className="ds-figma-select-label">
-              Composition
-              <select
-                aria-label="Component composition"
-                value={selected}
-                onChange={(event) => setSelected(event.target.value)}
-              >
-                {implementations.map((id) => (
-                  <option key={id} value={id}>
-                    {COMPONENT_REGISTRY[id as ComponentId]?.label ?? id}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <span className="ds-source-note">
-              {native ? 'React Native · implemented source' : 'Shared web component'}
-            </span>
-          )}
-          <button
-            type="button"
-            className="ds-inspector-button"
-            aria-pressed={inspect}
-            onClick={() => setInspect((value) => !value)}
-          >
-            {inspect ? 'Inspector ON' : 'Inspector OFF'}
-          </button>
-        </div>
-      ) : (
-        <p className="ds-source-note">
-          {exclusion ??
-            (reference
-              ? `${reference.kind} reference · ${reference.reason}`
-              : (CATALOG_COMPOSITION_SOURCES.find(
-                  (source) => source.familyId === family.nodeId && source.status === 'blocked',
-                )?.reason ??
-                'This source family is awaiting implementation or exact mapping. It is not a live component.'))}
-        </p>
-      )}
-      {inspect ? (
-        <p className="ds-inspect-help">Select an element to measure its rendered dimensions, typography and spacing.</p>
-      ) : null}
-      <InspectModeContext.Provider value={inspect}>
-        <ComponentOverviewSections
-          componentId={selected || family.nodeId}
-          data={data}
-          themeMode={theme}
-          onThemeModeChange={setTheme}
-          preview={
-            selected ? <FigmaLivePreview family={family} implementationId={selected} theme={theme} /> : undefined
+  const states = resolveFigmaStates(sources, selected || undefined, native?.variants ?? [])
+  const pickable = native && native.controls !== 'internal' && native.variants.length > 1 ? native.variants : []
+  const [variant, setVariant] = useState<string>()
+  const currentVariant =
+    variant && pickable.includes(variant)
+      ? variant
+      : (family.variants.find((entry) => pickable.includes(entry.nodeId))?.nodeId ?? pickable[0])
+  const hashTab = getFigmaFamilyTabFromHash(window.location.hash)
+  const initialTab = DOC_TABS.find((tab) => tab === hashTab) ?? 'overview'
+
+  const status: ComponentDocStatus[] = []
+  if (!implementations.length)
+    status.push(
+      exclusion
+        ? { label: 'Out of scope', tone: 'neutral' }
+        : reference
+          ? { label: `Design reference · ${reference.kind}`, tone: 'neutral' }
+          : { label: 'Not implemented', tone: 'attention' },
+    )
+  else {
+    status.push(
+      states.perState
+        ? {
+            label:
+              states.built === states.total
+                ? `All ${states.total} states live`
+                : `${states.built} of ${states.total} states live`,
+            tone: states.built === states.total ? 'positive' : 'neutral',
           }
-          sourcePath={native?.sourcePath ?? meta?.componentPath}
-          webSourcePath={meta?.componentPath}
-          documentationUrl={getFigmaNodeUrl(family.nodeId)}
-          usedByScreens={meta?.usedByScreens}
-          sourceStates={sourceStates}
-          allowThemeChange={native?.themeModes?.length !== 1}
-        />
-      </InspectModeContext.Provider>
-      <section className="ds-doc-section">
-        <p className="ds-eyebrow">07 / Developer handoff</p>
-        <h2>Implementation & code</h2>
-        {native || meta ? (
-          <ImplementationCodeBrowser
-            key={selected}
-            componentId={selected}
-            componentPath={native?.sourcePath ?? meta?.componentPath ?? ''}
-            code={code ?? undefined}
-          />
-        ) : (
-          <p className="ds-source-note">
-            {exclusion
-              ? 'This source is excluded by the requested scope. Its original Figma identity is preserved.'
-              : reference
-                ? 'Use the existing shared components and the platform or feature composition referenced by this design. This source reference does not introduce another implementation.'
-                : 'No executable source is mapped. Follow the exact approved design when adding this component.'}
-          </p>
-        )}
-      </section>
-    </article>
+        : { label: 'Live preview', tone: 'positive' },
+    )
+    status.push({ label: native ? 'React Native' : 'React' })
+  }
+
+  return (
+    <div className="ds-figma-family" data-figma-family={family.nodeId}>
+      <ComponentOverviewSections
+        key={selected}
+        componentId={selected || family.nodeId}
+        title={title}
+        breadcrumbs={[
+          { label: 'Components', href: '#figma-library' },
+          { label: page.name, href: '#' + getFigmaPageSectionId(page.nodeId) },
+        ]}
+        summary={data.summary}
+        status={status}
+        documentationUrl={getFigmaNodeUrl(family.nodeId)}
+        notice={implementations.length ? undefined : unimplementedReason(family)}
+        headerExtras={
+          implementations.length > 1 ? (
+            <div className="ds-composition-chips" role="group" aria-label="Implementation">
+              {implementations.map((id) => (
+                <button key={id} type="button" aria-pressed={selected === id} onClick={() => setSelected(id)}>
+                  {COMPONENT_REGISTRY[id as ComponentId]?.label ?? id}
+                </button>
+              ))}
+            </div>
+          ) : null
+        }
+        data={data}
+        themeMode={theme}
+        onThemeModeChange={setTheme}
+        preview={
+          selected ? (
+            <FigmaLivePreview family={family} implementationId={selected} theme={theme} variantId={currentVariant} />
+          ) : undefined
+        }
+        previewControls={
+          pickable.length && currentVariant ? (
+            <VariantPicker
+              componentId={selected}
+              id={`${selected.split('.').pop()}-variant-select`}
+              label=""
+              variants={pickable}
+              selected={currentVariant}
+              onSelect={setVariant}
+            />
+          ) : undefined
+        }
+        webSourcePath={native ? meta?.componentPath : undefined}
+        usedByScreens={meta?.usedByScreens}
+        sourceStates={
+          states.total ? (
+            <FigmaStateGallery
+              sources={sources}
+              componentId={selected || undefined}
+              liveVariantIds={native?.variants ?? []}
+              theme={theme}
+            />
+          ) : undefined
+        }
+        allowThemeChange={native?.themeModes?.length !== 1}
+        initialTab={initialTab}
+        onTabChange={(tab) =>
+          window.history.replaceState(
+            null,
+            '',
+            getFigmaFamilyHref(family.nodeId) + (tab === 'overview' ? '' : '/' + tab),
+          )
+        }
+        implementation={
+          native || meta ? (
+            <ImplementationCodeBrowser
+              key={selected}
+              componentId={selected}
+              componentPath={native?.sourcePath ?? meta?.componentPath ?? ''}
+              code={code ?? undefined}
+            />
+          ) : undefined
+        }
+      />
+    </div>
   )
 }

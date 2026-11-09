@@ -34,5 +34,5 @@ export function NativeComponentSource({ componentId, componentPath }: { componen
       <p role="status">{definition ? 'Native source could not be loaded.' : 'Component source could not be loaded.'}</p>
     )
   if (loaded?.path !== path) return <p role="status">Loading {definition ? 'React Native' : 'React'} source…</p>
-  return <CodeBlock code={loaded.code} language="tsx" fileName={path.split('/').pop() ?? 'Component.tsx'} />
+  return <CodeBlock code={loaded.code} language="tsx" fileName={path} />
 }

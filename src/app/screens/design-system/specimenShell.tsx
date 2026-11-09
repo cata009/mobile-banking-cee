@@ -21,18 +21,18 @@ export type ProductCardEvolutionVariant = "pi-default" | "pi-account-actions" | 
 
 export function Section({ id, title, description, children }: {
   id: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   children: React.ReactNode;
 }) {
   return (
     <section id={id} className="ds-section">
-      <div className="ds-section-heading">
-        <h2>{title}</h2>
-        <p>
-          {description}
-        </p>
-      </div>
+      {title || description ? (
+        <div className="ds-section-heading">
+          {title ? <h2>{title}</h2> : null}
+          {description ? <p>{description}</p> : null}
+        </div>
+      ) : null}
       {children}
     </section>
   );
@@ -71,19 +71,6 @@ export function InventorySearchField({
         </button>
       ) : null}
     </label>
-  );
-}
-
-export function InventoryStatGrid({ items }: { items: Array<[string, React.ReactNode]> }) {
-  return (
-    <div className="mb-5 grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(160px,1fr))]">
-      {items.map(([label, value]) => (
-        <div key={label} className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-4">
-          <p className="text-[12px] uppercase text-[var(--uc-text-muted)]">{label}</p>
-          <p className="mt-1 font-['UniCredit:Bold',sans-serif] text-[26px] leading-none text-[var(--uc-text)]">{value}</p>
-        </div>
-      ))}
-    </div>
   );
 }
 

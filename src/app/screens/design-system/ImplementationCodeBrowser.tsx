@@ -48,8 +48,8 @@ export default function ImplementationCodeBrowser({
                 ? 'React Native'
                 : 'React'
               : entry === 'swift'
-                ? 'Swift reference'
-                : 'Kotlin reference'}
+                ? 'Swift'
+                : 'Kotlin'}
           </button>
         ))}
       </div>
@@ -65,32 +65,25 @@ export default function ImplementationCodeBrowser({
           </select>
         </label>
       ) : null}
-      <div className="ds-code-provenance" role="status">
-        <strong>
-          {canonical ? 'Implemented source' : available ? 'Illustrative reference' : 'Mapping unavailable'}
-        </strong>
-        <p>
-          {canonical
-            ? `Executable ${nativeDefinition ? 'React Native' : 'React'} component source used by this preview. Imports and shared dependencies remain part of the repository.`
-            : segment === 'react'
-              ? available
-                ? 'Curated React example. Consult the repository component for its complete runtime dependencies and integration.'
-                : 'No React example or canonical mobile source is mapped for this component.'
-              : `No production ${platform} implementation is mapped. ${available ? 'This reference illustrates the component contract; validate it before using it in an application.' : 'A reference example has not been authored for this component.'}`}
+      {canonical ? null : (
+        <p className="ds-code-provenance" role="status">
+          {segment === 'react'
+            ? available
+              ? 'Illustrative React example. The repository component is the source of truth.'
+              : 'No React example is mapped for this component.'
+            : available
+              ? `Illustrative ${platform} reference. No production ${platform} implementation is mapped.`
+              : `No ${platform} reference has been written for this component.`}
         </p>
-        <code className="ds-code-path">
-          {canonical ? sourcePath : segment === 'react' ? componentPath : `Reference example · ${fileName}`}
-        </code>
-      </div>
+      )}
       {canonical ? (
         <NativeComponentSource componentId={componentId} componentPath={sourcePath} />
       ) : available && code ? (
         <CodeBlock code={code[segment]} language={segment === 'react' ? 'tsx' : segment} fileName={fileName} />
       ) : (
-        <div className="ds-empty">
-          <h3>Code sample unavailable</h3>
-          <p>Use the source path and documentation references to review the current implementation.</p>
-        </div>
+        <p className="ds-doc-text">
+          Source: <code>{componentPath}</code>
+        </p>
       )}
     </div>
   )
