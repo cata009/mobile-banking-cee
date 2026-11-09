@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type ReactNode } from 'react'
 import { Check, ChevronRight, LockKeyhole } from 'lucide-react'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import TextField from '@/app/components/TextField'
+import TextLink from '@/app/components/TextLink'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import type { GeniusMyCarScreenKind } from '@/app/screens/flow-library/flows/types'
 import { MY_CAR_DEMO_DATE } from '@/flows/ro/genius-my-car/vehicles'
@@ -211,13 +212,7 @@ function OwnerPreview({ adding = false }: { adding?: boolean }) {
           </dl>
         ) : null}
         {draft.sameDriver && !driverOpen ? (
-          <button
-            type="button"
-            onClick={() => setDriverOpen(true)}
-            className="min-h-[44px] uc-type-n5-strong text-[var(--uc-action-strong)]"
-          >
-            Adaugă încă un conducător
-          </button>
+          <TextLink onClick={() => setDriverOpen(true)}>Adaugă încă un conducător</TextLink>
         ) : null}
         {!draft.sameDriver || driverOpen ? (
           <div className="mt-[14px] grid gap-[18px]">
@@ -239,16 +234,14 @@ function OwnerPreview({ adding = false }: { adding?: boolean }) {
               onChange={(licenseYear) => updateDraft({ extraDriver: { ...draft.extraDriver, licenseYear } })}
             />
             {driverOpen && draft.sameDriver ? (
-              <button
-                type="button"
-                className="text-left uc-type-n5-strong text-[var(--uc-action-strong)]"
+              <TextLink
                 onClick={() => {
                   setDriverOpen(false)
                   updateDraft({ extraDriver: { name: '', cnp: '', licenseYear: '' } })
                 }}
               >
                 Elimină conducătorul adăugat
-              </button>
+              </TextLink>
             ) : null}
           </div>
         ) : null}

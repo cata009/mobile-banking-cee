@@ -5,12 +5,14 @@ import { useDragCarousel } from '@/hooks/useDragCarousel'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import NavigationRow from '@/app/components/NavigationRow'
 import PageHeader from '@/app/components/PageHeader'
+import KeyValueRow from '@/app/components/KeyValueRow'
 import LinkActionButton from '@/app/components/LinkActionButton'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import StandardSignScreen from '@/app/components/flow/StandardSignScreen'
 import StandardSuccessScreen from '@/app/components/flow/StandardSuccessScreen'
 import TextField from '@/app/components/TextField'
+import TextLink from '@/app/components/TextLink'
 import ToggleButton from '@/app/components/ToggleButton'
 import { AppIcon } from '@/app/components/icons'
 import { PreviewSafeTop } from '@/app/screens/flow-library/components/MiniPhone'
@@ -143,16 +145,7 @@ function SummaryRow({
   strong?: boolean
   borderless?: boolean
 }) {
-  return (
-    <div
-      className={`flex items-start justify-between gap-[16px] py-[10px] ${borderless ? '' : 'border-b border-[var(--uc-border)]'}`}
-    >
-      <p className="uc-type-n5 shrink-0 text-[var(--uc-text-muted)]">{label}</p>
-      <p className={`min-w-0 text-right ${strong ? 'uc-type-n4-strong' : 'uc-type-n5'} text-[var(--uc-text)]`}>
-        {value}
-      </p>
-    </div>
-  )
+  return <KeyValueRow label={label} value={value} size="compact" emphasis={strong} plainValue divider={!borderless} />
 }
 
 /**
@@ -161,12 +154,7 @@ function SummaryRow({
  * something before committing reads the same.
  */
 function ReviewRow({ label, value, nowrap = false }: { label: string; value: string; nowrap?: boolean }) {
-  return (
-    <div className="pt-[18px]">
-      <p className="uc-type-n5-strong uppercase text-[var(--uc-text)]">{label}</p>
-      <p className={`pt-[2px] uc-type-n4 text-[var(--uc-text-muted)] ${nowrap ? 'whitespace-nowrap' : ''}`}>{value}</p>
-    </div>
-  )
+  return <KeyValueRow label={label} value={value} layout="stacked" nowrap={nowrap} />
 }
 
 /** The premium block pinned above the primary action on the configuration step. */
@@ -1902,13 +1890,9 @@ function GroupHeader({ title, editAt }: { title: string; editAt?: RsPropertyInsu
       {/* Edit returns to the screen that owns the group. The total is derived, so
           it has nothing of its own to correct and carries no action. */}
       {editAt ? (
-        <button
-          type="button"
-          onClick={() => nav.go(editAt)}
-          className="absolute right-0 top-0 uc-type-n5-strong text-[var(--uc-action)]"
-        >
+        <TextLink onClick={() => nav.go(editAt)} className="absolute right-0 top-[-4px]">
           Edit
-        </button>
+        </TextLink>
       ) : null}
     </div>
   )

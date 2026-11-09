@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import type { CreditCard } from '@/data/products';
 import { getCreditLimitProposal } from '@/features/cards/credit-limit/model';
 import { getCountryConfig } from '@/app/registry/countryConfig';
+import { BaselineKeyValueRow } from '../../../../universal/BaselineKeyValueRow';
 import { BaselinePageHeader } from '../../../../universal/BaselinePageHeader';
 import { BaselineTextField } from '../../../../universal/BaselineTextField';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
@@ -271,20 +272,16 @@ function OfferRow({
   host: CurrentScreenProps;
   prominent: boolean;
 }) {
+  // The Design System key-value row; 24 px when prominent (the new limit).
   return (
-    <View style={styles.row}>
-      <Text style={[styles.rowLabel, { color: host.tokens.muted }]}>
-        {label}
-      </Text>
-      <Text
-        style={[
-          prominent ? styles.newLimit : styles.rowValue,
-          { color: host.tokens.text },
-        ]}
-      >
-        {value}
-      </Text>
-    </View>
+    <BaselineKeyValueRow
+      label={label}
+      value={value}
+      emphasis={prominent}
+      paddingVertical={0}
+      divider={false}
+      dark={host.tokens.text.toLowerCase() !== '#262626'}
+    />
   );
 }
 
@@ -301,15 +298,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   rows: { gap: 18, paddingTop: 20 },
-  row: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    gap: 16,
-    justifyContent: 'space-between',
-  },
-  rowLabel: { flex: 1, fontFamily: 'UniCredit-regular', fontSize: 16 },
-  rowValue: { fontFamily: 'UniCredit-bold', fontSize: 16, textAlign: 'right' },
-  newLimit: { fontFamily: 'UniCredit-bold', fontSize: 24, textAlign: 'right' },
   notice: { borderRadius: 8, gap: 8, marginTop: 32, padding: 16 },
   noticeTitle: { fontFamily: 'UniCredit-bold', fontSize: 16, lineHeight: 20 },
   terms: {

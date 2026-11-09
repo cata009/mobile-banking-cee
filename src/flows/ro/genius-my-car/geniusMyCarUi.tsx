@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import KeyValueRow from '@/app/components/KeyValueRow'
 import PageHeader from '@/app/components/PageHeader'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import { useCollapsingHeader } from '@/hooks/useCollapsingHeader'
@@ -65,10 +66,5 @@ export function InfoPanel({ children }: { children: ReactNode }) {
 }
 
 export function DataRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-start justify-between gap-[14px] border-b border-[var(--uc-border-muted)] py-[10px] last:border-0">
-      <dt className="uc-type-n5 text-[var(--uc-text-muted)]">{label}</dt>
-      <dd className="max-w-[60%] text-right uc-type-n5-strong text-[var(--uc-text)]">{value}</dd>
-    </div>
-  )
+  return <KeyValueRow label={label} value={value} size="compact" definition className="last:border-0" />
 }

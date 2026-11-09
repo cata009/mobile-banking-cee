@@ -13,7 +13,8 @@ export default function PrimaryButton({
   disabled = false,
   className = '',
   variant = 'action',
-  labelSize = '16',
+  // 18 px: the Figma Button and the native PrimaryButton. Pass '16' or '14' only where a screen needs a smaller label.
+  labelSize = '18',
 }: PrimaryButtonProps) {
   const web = primaryButtonWeb({ variant, labelSize, disabled }, className)
 
