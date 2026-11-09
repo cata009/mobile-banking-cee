@@ -44,7 +44,7 @@ export function BaselineCarouselIndicator({
     ? resolveAnalyticsIndicator({ periodKeys: analyticsKeys, activePeriodKey })
     : undefined;
   const inactive = state.inverse
-    ? 'rgba(255,255,255,0.55)'
+    ? sourceColor('rgb(var(--uc-static-white-rgb)/0.55)')
     : sourceColor('var(--uc-text-muted)', dark);
   const activeColor = sourceColor('var(--uc-action)', dark);
   const frameStyle = {

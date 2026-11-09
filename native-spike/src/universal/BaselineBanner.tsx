@@ -116,7 +116,7 @@ export function BaselineBanner({
     borderWidth: variant === 'ghost' || variant === 'info' ? 1 : 0,
     borderStyle: variant === 'ghost' ? 'dashed' : 'solid',
     borderColor: text,
-    boxShadow: user ? '0 4px 16px rgba(0,0,0,.08)' : undefined,
+    boxShadow: user ? `0 4px 16px ${sourceColor('rgb(var(--uc-shadow-rgb)/.08)')}` : undefined,
   };
   const titleStyle = {
     fontFamily: presentation?.titleFont ?? 'UniCredit-bold',

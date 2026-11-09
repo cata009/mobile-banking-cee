@@ -48,3 +48,12 @@ kept the old teal was an offer card that uses `--uc-banner-blue-2`, a separate b
 - `--uc-investment-reference-*` in `src/styles/investment-reference.css`: approved static snapshots, the same in
   both themes, pinned by `tests/components/investment-semantic-colors.test.tsx`.
 - `--prime-*` in the Prime presentation, and the Italy and Evo 2027 styles (out of scope until scheduled).
+
+## What is still typed directly (tracked by the ratchet)
+
+About 1,400 typed colors remain in 212 files. Roughly half are authored on purpose: theme and appearance
+previews and pickers (swatches), the Prime experience, tutorial and illustration art, charts, and the Flow Library
+and Tools chrome. About 680 in 167 files are ordinary interface colors that should become tokens, component by
+component. They do not follow the source today; the ratchet stops the number from growing. Shadows, static white
+and the brand red in the React Native library are already tokens (`--uc-shadow-rgb`, `--uc-static-white`,
+`--uc-brand`, `--uc-danger`).

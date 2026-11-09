@@ -63,7 +63,10 @@ export function BaselineShopsmartOfferCard({
     borderWidth: contract.borderWidth,
     borderColor: contract.borderColor,
     backgroundColor: sourceColor('var(--uc-surface)', dark),
-    boxShadow: variant === 'partner' ? '0 1px 2px rgba(0,0,0,.08)' : undefined,
+    boxShadow:
+      variant === 'partner'
+        ? `0 1px 2px ${sourceColor('rgb(var(--uc-shadow-rgb)/.08)')}`
+        : undefined,
   };
   const imageContainer: ViewStyle = {
     width: '100%',
@@ -74,7 +77,7 @@ export function BaselineShopsmartOfferCard({
   const overlayStyle: ViewStyle = {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(0,0,0,.2)',
+    backgroundColor: sourceColor('rgb(var(--uc-shadow-rgb)/.2)'),
   };
   const tagStyle: ViewStyle = {
     position: 'absolute',
@@ -110,7 +113,7 @@ export function BaselineShopsmartOfferCard({
       pillTone === 'white' ? 'var(--uc-surface)' : 'var(--uc-action-strong)',
       dark,
     ),
-    boxShadow: '0 0 4px rgba(0,0,0,.25)',
+    boxShadow: `0 0 4px ${sourceColor('rgb(var(--uc-shadow-rgb)/.25)')}`,
     paddingHorizontal: 0,
     paddingVertical: 0,
   };

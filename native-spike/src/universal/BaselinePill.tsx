@@ -75,7 +75,7 @@ export function BaselinePill({
     justifyContent: 'center',
     opacity: contract.opacity,
     backgroundColor: sourceColor(`var(${contract.backgroundToken})`, dark),
-    boxShadow: '0 2px 4px rgba(0,0,0,.2)',
+    boxShadow: `0 2px 4px ${sourceColor('rgb(var(--uc-shadow-rgb)/.2)')}`,
     ...(presentation === 'navigation'
       ? {
           width: undefined,

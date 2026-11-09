@@ -31,8 +31,10 @@ const EXCLUDE = [
   /\/data\//,
   /\/translations\//,
   /(Artwork|artwork|Flag|Logo|logo|CardArt|CardArtwork|canonicalIcons|catalogCompositions|Illustration|merchant|Merchant|brand|Brand|icons\/|\/images\/|colorTokens|colorRegistry|iconRegistry)/,
+  // The demo's own device chrome (bezel, island, status bar, wallet brand buttons) is not product UI.
+  /(MobileFrame|DynamicIsland|StatusBar|FramelessDeviceFrame|WalletButton|DuoSystemStrip)/,
 ]
-const literal = /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b|rgba?\(/g
+const literal = /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b|rgba?\((?!\s*var\()/g
 
 const walk = (dir, acc = []) => {
   if (!existsSync(dir)) return acc
