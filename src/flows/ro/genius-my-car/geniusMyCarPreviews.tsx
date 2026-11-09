@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import NavigationRow from '@/app/components/NavigationRow'
 import PrimaryButton from '@/app/components/PrimaryButton'
+import StatusTag from '@/app/components/StatusTag'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import { AppIcon } from '@/app/components/icons'
 import { DemoProvider } from '@/app/state/demoStore'
@@ -160,28 +161,8 @@ function PolicyStatusBadge({ state }: { state: PolicyState }) {
     pending: 'Neverificată',
   }[state]
   const tone =
-    state === 'valid'
-      ? 'bg-[color-mix(in_srgb,var(--uc-green-status)_12%,var(--uc-surface))] text-[var(--uc-green-status)]'
-      : state === 'expired'
-        ? 'bg-[color-mix(in_srgb,var(--uc-status-red)_10%,var(--uc-surface))] text-[var(--uc-status-red)]'
-        : state === 'expiring'
-          ? 'bg-[color-mix(in_srgb,var(--uc-orange-deep)_12%,var(--uc-surface))] text-[var(--uc-orange-deep)]'
-          : 'bg-[var(--uc-surface-muted)] text-[var(--uc-text-muted)]'
-  const dot =
-    state === 'valid'
-      ? 'bg-[var(--uc-green-status)]'
-      : state === 'expired'
-        ? 'bg-[var(--uc-status-red)]'
-        : state === 'expiring'
-          ? 'bg-[var(--uc-orange-deep)]'
-          : 'bg-[var(--uc-text-muted)]'
-
-  return (
-    <span className={`inline-flex items-center gap-[6px] rounded-full px-[8px] py-[3px] uc-type-n6-strong ${tone}`}>
-      <span aria-hidden="true" className={`size-[6px] rounded-full ${dot}`} />
-      {label}
-    </span>
-  )
+    state === 'valid' ? 'positive' : state === 'expired' ? 'negative' : state === 'expiring' ? 'warning' : 'neutral'
+  return <StatusTag tone={tone}>{label}</StatusTag>
 }
 
 function VehiclePolicyRow({ label, policy }: { label: string; policy: VehiclePolicy }) {

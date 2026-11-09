@@ -898,6 +898,7 @@ export const BASELINE_NATIVE_PILOT_PATHS = [
   'native-spike/src/universal/BaselineSectionDivider.tsx',
   'native-spike/src/universal/BaselineShopsmartOfferCard.tsx',
   'native-spike/src/universal/BaselineStackedProductShadow.tsx',
+  'native-spike/src/universal/BaselineStatusTag.tsx',
   'native-spike/src/universal/BaselineTextField.tsx',
   'native-spike/src/universal/BaselineTextLink.tsx',
   'native-spike/src/universal/BaselineTotalRow.tsx',

@@ -223,8 +223,8 @@ describe("Investments bulk approval Flow Library prototype", () => {
     enterBulkSigning();
     expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Selected: UniCredit Balanced Income Fund" })).toBeDisabled();
-    expect(screen.getAllByTestId("flow-bulk-selection-checkmark")).toHaveLength(10);
-    expect(screen.getAllByTestId("flow-bulk-selection-checkmark")[0]).toHaveAttribute("width", "14");
+    expect(screen.getAllByTestId("checkbox-mark")).toHaveLength(10);
+    expect(screen.getAllByTestId("checkbox-mark")[0]).toHaveAttribute("width", "14");
     expect(screen.queryByRole("button", { name: "REJECT" })).not.toBeInTheDocument();
 
     const lastAdvisoryRow = screen.getByText("CEE Government Bond Fund").closest("div.flex");
