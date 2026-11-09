@@ -61,6 +61,15 @@ for (const file of libraryFiles) {
   for (const m of text.matchAll(/export\s+(?:default\s+)?(?:function|const)\s+([A-Z][A-Za-z0-9]*)/g)) library.set(m[1], rel(file))
 }
 
+// 1b. Web components (src/app/components): the library that Flows and Tools consume. Both stacks
+// read the same contracts, so a web-area look-alike is judged against these names, not the RN ones.
+const webLibrary = new Set()
+for (const file of walk(path.join(root, 'src/app/components')).filter((f) => !/\/contracts\//.test(rel(f)))) {
+  webLibrary.add(path.basename(file).replace(/\.tsx$/, ''))
+  const text = readFileSync(file, 'utf8')
+  for (const m of text.matchAll(/export\s+(?:default\s+)?(?:function|const)\s+([A-Z][A-Za-z0-9]*)/g)) webLibrary.add(m[1])
+}
+
 // 2. Consumer areas.
 const areaOf = (file) => {
   const r = rel(file)
@@ -126,7 +135,8 @@ for (const file of consumers) {
     const body = next === -1 ? rest : rest.slice(0, next)
     // Only a library component of the SAME family counts as composition: wrapping an
     // icon does not make a hand-rolled sheet or row a legitimate wrapper.
-    const composes = [...library.keys()].filter((n) => familyOf(n) === family && new RegExp(`<${n}\\b`).test(body))
+    const libraryNames = area.startsWith('demo/') ? [...library.keys()] : [...webLibrary]
+    const composes = libraryNames.filter((n) => familyOf(n) === family && new RegExp(`<${n}\\b`).test(body))
     const rawPrimitives = ['Modal', 'Pressable', 'TouchableOpacity', 'TextInput', 'ScrollView'].filter((p) => new RegExp(`<${p}\\b`).test(body))
     details.push({
       name,

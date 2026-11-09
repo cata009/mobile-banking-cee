@@ -460,23 +460,15 @@ function PdfDocumentIcon({
 }
 
 function OpenDocumentButton({ title, onOpen }: { title: string; onOpen?: () => void }) {
+  // The Design System text button (uppercase 14 Bold, 16px chevron, 4px gap, 44px target). The negative
+  // margin keeps the label flush with the copy above, as before.
   return (
-    <button
-      type="button"
-      aria-label={`Open document ${title}`}
+    <LinkActionButton
+      label="OPEN DOCUMENT"
+      ariaLabel={`Open document ${title}`}
       onClick={onOpen ?? noop}
-      className="flex items-center gap-[5px] pt-[6px] uc-type-n5-strong uppercase leading-[20px] text-[var(--uc-action)]"
-    >
-      OPEN DOCUMENT
-      <svg aria-hidden="true" fill="none" height="14" viewBox="0 0 14 14" width="14" xmlns="http://www.w3.org/2000/svg">
-        <path
-          clipRule="evenodd"
-          d="M4.50778 1.75C3.74741 2.4512 3.74741 3.58914 4.50778 4.291L7.26114 7L4.50778 9.709C3.74741 10.4109 3.74741 11.5481 4.50778 12.25L9.84375 7L4.50778 1.75Z"
-          fill="currentColor"
-          fillRule="evenodd"
-        />
-      </svg>
-    </button>
+      className="-ml-[14px]"
+    />
   )
 }
 

@@ -31,7 +31,10 @@ entries is encouraged; after aligning components, refresh the file with
 interfaces: reported, not enforced.
 
 The classifier is name based, so it can be wrong. A false positive is resolved by composing the library
-component, not by editing the baseline.
+component, not by editing the baseline. In the native demo a look-alike is judged against the React Native
+library (`native-spike/src/universal`); in Flows it is judged against the web components in
+`src/app/components`, which the web previews consume. A local component that renders an already-aligned local
+adapter counts as aligned.
 
 ## Aligned so far
 
@@ -48,6 +51,7 @@ component, not by editing the baseline.
 | Romanian profile `ConsentToggle` | library `ToggleButton`, row keeps the press and the accessible name |
 | `SourceOfferCard` | adapter over `BaselineProductOfferCard` (which gained optional `testID` and `accessibilityLabel`) |
 | RS property insurance `SecondaryAction` (Flows) | `PrimaryButton variant="secondary"` |
+| RS property insurance `OpenDocumentButton` (Flows) | `LinkActionButton` (the Design System text button: uppercase 14 Bold, 16 px chevron, 4 px gap, 44 px target) |
 | `DatedRow` (profile) and `ServiceDatedRow` (baseline More), the same row written twice | new library component `BaselineDatedRow`; both are now adapters. Candidate DS entry "Dated list row" (not yet in Figma) |
 | Investments catalog `Logo` | new library component `BaselineBrandLogo`; `Logo` is an adapter. The web twin is `components/brand-logo/BrandLogo.tsx` |
 
@@ -98,8 +102,26 @@ Design System Figma file and need individual approval before promotion. Nothing 
 
 ## Not yet reviewed individually
 
-Only a few entries in `baseline.json` have not been compared with the library yet: `DesignCarousel`
-(virtual card), `BaselinePfmPeriodCarousel` and `FilterDivider`, plus the flow preview components under
-`src/flows` (`BottomCta`, `ChoiceCard`, `PackageCard`, the genius-my-car and property-insurance rows and chips),
-which are web compositions. Every other entry was reviewed and is explained above. The ratchet accepts them so
-that no new ones appear, not because they were judged correct. Align them and then refresh the baseline.
+Every entry in `baseline.json` has now been reviewed. The ones that remain are kept for a stated reason, listed above
+and below, and each one either needs a Design System decision or is domain-specific. The ratchet accepts them so that
+no new ones appear.
+
+Native, also kept:
+- `DesignCarousel` (virtual card design picker with mouse-drag paging) and `BaselinePfmPeriodCarousel` (a paging rail
+  for the Spending periods, web and native variants) are behaviour components; the library only has the dots
+  (`BaselineCarouselIndicator`), not a paging rail. A library "paged rail" would be a new component.
+- `FilterDivider` (investment history) and `DepositDivider` are the same 18 px title with a rule written twice with
+  slightly different rule geometry. They need an 18 px divider variant in Figma before they can be unified.
+
+Flows (web, judged against `src/app/components`, which the web previews consume):
+- Presentation chrome, not product UI: `FraudPresentationDialog`, `PrimePresentationDialog`.
+- Flow-specific cards and carousels: `ChoiceCard`, `PackageCard`, `PackageCarousel`, `MyCarVehicleCard`,
+  `AddVehicleCard`, `InfoPanel`.
+- Key-value and summary rows (`SummaryRow`, `ReviewRow`, `BenefitRow`, `CoveredWorkRow`, `ConsentRow`,
+  `VehiclePolicyRow`, `DataRow`): the same "Key-value row" gap as in the native app.
+- `PolicyStatusBadge` (status tag with tones) has no web Design System tag; `StepProgress` is a four-step stepper;
+  `VehicleBrandLogo` renders car make logos in a white pill, not the brand registry; `BottomCta` and `Field` are
+  layout wrappers.
+- `FlowBulkSelectionCheckbox`: there is no canonical web checkbox (the shadcn `ui/checkbox` is a generic 16 px
+  one), so a web counterpart of `BaselineCheckbox presentation="canonical"` is missing.
+- `GroupHeader` already composes the web `SectionHeadingDivider`; the name-based family rule cannot see that.
