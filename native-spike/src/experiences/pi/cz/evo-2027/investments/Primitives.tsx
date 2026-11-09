@@ -82,13 +82,14 @@ export function Button({
   disabled,
   secondary,
   secondaryColor,
-  canonical = false,
+  canonical = true,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   secondary?: boolean;
   secondaryColor?: string;
+  /** The Design System button (48 px, radius 4, 18 Bold). The legacy ActionButton adds padding and reaches 54 px. */
   canonical?: boolean;
 }) {
   if (canonical)
@@ -97,7 +98,13 @@ export function Button({
         label={label}
         onPress={onPress}
         disabled={disabled}
-        variant={secondary ? 'secondary' : 'action'}
+        // An outlined button in a custom colour (Sell): the surface variant plus a hairline in that colour.
+        variant={secondaryColor ? 'surface' : secondary ? 'secondary' : 'action'}
+        style={
+          secondaryColor
+            ? { borderWidth: 1, borderColor: secondaryColor }
+            : undefined
+        }
       />
     );
   return (
