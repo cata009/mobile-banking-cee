@@ -48,6 +48,8 @@ component, not by editing the baseline.
 | Romanian profile `ConsentToggle` | library `ToggleButton`, row keeps the press and the accessible name |
 | `SourceOfferCard` | adapter over `BaselineProductOfferCard` (which gained optional `testID` and `accessibilityLabel`) |
 | RS property insurance `SecondaryAction` (Flows) | `PrimaryButton variant="secondary"` |
+| `DatedRow` (profile) and `ServiceDatedRow` (baseline More), the same row written twice | new library component `BaselineDatedRow`; both are now adapters. Candidate DS entry "Dated list row" (not yet in Figma) |
+| Investments catalog `Logo` | new library component `BaselineBrandLogo`; `Logo` is an adapter. The web twin is `components/brand-logo/BrandLogo.tsx` |
 
 ## Open gaps: proposals, not approved
 
@@ -75,6 +77,18 @@ Design System Figma file and need individual approval before promotion. Nothing 
      Aligning it would change the size, so it needs a design decision (an 18 px variant or a 14 px title).
    - `PrimeEntryButton` is the Prime header control (pill with a glyph, overlay variant); there is no library
      counterpart.
+   - **Key-value rows** (`OfferRow`, the Romanian profile `DataRow`, Genius Protect `DataRow`): a recurring label and
+     value pattern with no Design System component. A proposal ("Key-value row") belongs in Figma first.
+   - `AppointmentListRow` (date, meeting-type icon, three lines), `FilterRow` (muted title over a bold value, chevron
+     or calendar glyph) and `CzRoboSecurityRow` (logo, quantity, prices, performance) are domain list items, not
+     copies of `BaselineNavigationRow` or `BaselineDatedRow`.
+   - `BaselineProductsTabs` uses 20 px labels with a muted inactive underline; `BaselineMailboxTabs` uses 18 px with
+     a neutral rule. Same family, different spec: a tab size variant needs a decision.
+   - Future Gain `Chips` use an accent fill when selected; `BaselinePill` selected is black. Different spec.
+   - `BaselineInvestmentField` adds multiline, a secondary value and a `product-detail` variant on top of what
+     `BaselineAccountInfoField` offers; extend the library field before replacing it.
+   - `BalanceCard` is an Evo 2027 card (out of scope), and `BaselineSensitiveCard` is a whole card-details screen
+     named like a card, so it is a false positive of the name-based classifier.
 4. **Selectable pill button with icon** (Kids `Button`) and the **pill-shaped action button** used by Evo 2027
    (`ActionButton`, radius 32). Deferred with Kids and Evo.
 5. **Tabs role.** Appointment `MeetingTabs` exposes `button`; `BaselineMailboxTabs` exposes `tab`. Moving it
@@ -84,9 +98,8 @@ Design System Figma file and need individual approval before promotion. Nothing 
 
 ## Not yet reviewed individually
 
-The remaining entries in `baseline.json` (rows such as `DatedRow`, `DocumentRow`, `ServiceDatedRow`,
-`AppointmentListRow`, `DataRow`, `FilterRow`, `CzRoboSecurityRow`, `OfferRow`; cards `BalanceCard` and
-`BaselineSensitiveCard`; `DesignCarousel`, `BaselineProductsTabs`, `BaselinePfmPeriodCarousel`; `Chips`;
-`FilterDivider`; `BaselineInvestmentField`; `Logo`) are screen-specific compositions that have not been compared
-with their library counterparts yet. They are accepted by the ratchet so that no new ones appear, not because they
-were judged correct. Align them family by family and then refresh the baseline.
+Only a few entries in `baseline.json` have not been compared with the library yet: `DesignCarousel`
+(virtual card), `BaselinePfmPeriodCarousel` and `FilterDivider`, plus the flow preview components under
+`src/flows` (`BottomCta`, `ChoiceCard`, `PackageCard`, the genius-my-car and property-insurance rows and chips),
+which are web compositions. Every other entry was reviewed and is explained above. The ratchet accepts them so
+that no new ones appear, not because they were judged correct. Align them and then refresh the baseline.
