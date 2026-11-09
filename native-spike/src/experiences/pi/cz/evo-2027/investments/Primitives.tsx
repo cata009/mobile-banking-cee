@@ -81,12 +81,14 @@ export function Button({
   onPress,
   disabled,
   secondary,
+  secondaryColor,
   canonical = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
   secondary?: boolean;
+  secondaryColor?: string;
   canonical?: boolean;
 }) {
   if (canonical)
@@ -105,8 +107,16 @@ export function Button({
       onPress={onPress}
       disabled={disabled}
       secondary={secondary}
-      containerStyle={ui.button}
-      labelStyle={ui.buttonLabel}
+      containerStyle={[
+        ui.button,
+        secondaryColor
+          ? { borderWidth: 1, borderColor: secondaryColor }
+          : undefined,
+      ]}
+      labelStyle={[
+        ui.buttonLabel,
+        secondaryColor ? { color: secondaryColor } : undefined,
+      ]}
     />
   );
 }

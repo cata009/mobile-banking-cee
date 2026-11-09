@@ -59,9 +59,37 @@ const SHARED_DOCUMENTS_CONFIG: DocumentsConfig = {
   ],
 };
 
+const ROMANIAN_DOCUMENTS_CONFIG: DocumentsConfig = {
+  ...SHARED_DOCUMENTS_CONFIG,
+  groups: SHARED_DOCUMENTS_CONFIG.groups.map((group) =>
+    group.year === '2026'
+      ? {
+          ...group,
+          items: [
+            ...group.items,
+            {
+              id: 'genius-protect-policy-certificate',
+              day: '13',
+              month: 'MAR',
+              title: 'Policy_certificate_34314',
+              description: '',
+            },
+            {
+              id: 'genius-protect-policy-contract',
+              day: '13',
+              month: 'MAR',
+              title: 'Policy_contract_34314',
+              description: '',
+            },
+          ],
+        }
+      : group,
+  ),
+}
+
 export const DOCUMENTS_CONFIG_BY_COUNTRY: Record<CountryId, DocumentsConfig> = {
   IT: { title: "Documents", groups: [] },
-  RO: SHARED_DOCUMENTS_CONFIG,
+  RO: ROMANIAN_DOCUMENTS_CONFIG,
   RS: SHARED_DOCUMENTS_CONFIG,
   HU: SHARED_DOCUMENTS_CONFIG,
   BA: SHARED_DOCUMENTS_CONFIG,

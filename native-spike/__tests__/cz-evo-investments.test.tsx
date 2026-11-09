@@ -1,7 +1,13 @@
 import { authorizeDemo } from '../test-support/cz-evo-investmentsHelpers';
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { StyleSheet, TextInput, View } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { Header } from '../src/universal/Header';
 import { CzInvestmentsScreen } from '../src/experiences/pi/cz/evo-2027/investments';
 import { CZECH_INVESTMENTS_ADAPTER } from '../src/experiences/pi/cz/evo-2027/investments/adapter';
@@ -53,6 +59,39 @@ describe('CZ Evo native investments', () => {
     )[0]!;
     expect(trigger.props.accessibilityLabel).toBe('Switch portfolio: CZ Robo');
     expect(JSON.stringify(tree.toJSON())).toContain('CZ Robo');
+    act(() => tree.unmount());
+  });
+
+  it('renders the instrument Sell action with a dark outline and label', () => {
+    const model = createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS);
+    const security = model.catalog.find(
+      item => item.title === 'CEE Government Bond Fund',
+    )!;
+    let tree!: Renderer.ReactTestRenderer;
+    act(() => {
+      tree = Renderer.create(
+        <CzInvestmentsScreen snapshot={model} onBack={jest.fn()} />,
+      );
+    });
+
+    press(tree, 'Invest');
+    press(tree, `${security.title}, ${security.productId}`);
+    const sell = tree.root.findAll(
+      node =>
+        node.props.accessibilityLabel === 'Sell' &&
+        typeof node.props.onPress === 'function',
+    )[0]!;
+    const sellStyle = sell.props.style as (
+      state: { pressed: boolean },
+    ) => StyleProp<ViewStyle>;
+    expect(StyleSheet.flatten(sellStyle({ pressed: false }))).toMatchObject({
+      borderWidth: 1,
+      borderColor: '#262626',
+    });
+    const label = sell.findAll(
+      node => node.props.children === 'Sell' && node.props.style,
+    )[0]!;
+    expect(StyleSheet.flatten(label.props.style)?.color).toBe('#262626');
     act(() => tree.unmount());
   });
 

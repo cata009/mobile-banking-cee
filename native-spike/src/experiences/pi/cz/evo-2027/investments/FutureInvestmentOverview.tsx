@@ -437,21 +437,6 @@ export function FutureInvestmentOverview({
                           : `${performance.percent > 0 ? '+' : ''}${new Intl.NumberFormat(host.language === 'cs' ? 'cs-CZ' : 'en-GB', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(performance.percent)}%`}
                     </Text>
                   </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={c.profile}
-                    onPress={profileEntry}
-                    style={[
-                      s.profileAction,
-                      { backgroundColor: investmentColor(host, '--uc-app-bg') },
-                    ]}
-                  >
-                    <SourceCustomIcon
-                      name="header-profile"
-                      size={22}
-                      color={host.tokens.text}
-                    />
-                  </Pressable>
                 </View>
                 {!!points.length && (
                   <View style={s.chart}>
@@ -723,16 +708,6 @@ const s = StyleSheet.create({
     paddingVertical: 4,
   },
   link: { minHeight: 40, justifyContent: 'center' },
-  profileAction: {
-    position: 'absolute',
-    right: 16,
-    top: 16,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   dock: { position: 'absolute', bottom: 8, left: 0, right: 0 },
   embedded: { flex: 1, paddingBottom: 84 },
 });

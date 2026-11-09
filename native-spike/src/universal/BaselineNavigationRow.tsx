@@ -22,13 +22,16 @@ export function BaselineNavigationRow({
   title,
   description,
   linkLabel,
+  linkLabelStyle,
   leadingIconName,
   leadingVisual,
   trailing,
   chevronIconName = 'chevron-link',
+  chevronSize,
   chevronStyle,
   onPress,
   onLinkPress,
+  linkAccessibilityRole = 'button',
   onToggle,
   ariaLabel,
   dark = false,
@@ -49,9 +52,11 @@ export function BaselineNavigationRow({
   leadingVisual?: React.ReactNode;
   trailing?: React.ReactNode;
   chevronIconName?: string;
+  chevronSize?: number;
   chevronStyle?: StyleProp<ViewStyle>;
   onPress?: () => void;
   onLinkPress?: () => void;
+  linkAccessibilityRole?: 'button' | 'link';
   onToggle?: (checked: boolean) => void;
   ariaLabel?: string;
   dark?: boolean;
@@ -61,6 +66,7 @@ export function BaselineNavigationRow({
   titleAccessory?: React.ReactNode;
   titleAccessoryStyle?: StyleProp<ViewStyle>;
   descriptionStyle?: StyleProp<TextStyle>;
+  linkLabelStyle?: StyleProp<TextStyle>;
 }) {
   const state = resolveNavigationRow({
     ...options,
@@ -73,6 +79,8 @@ export function BaselineNavigationRow({
     ? sourceIconDimensions(leadingIconName)
     : { width: 20, height: 20 };
   const trailingDimensions = sourceIconDimensions(chevronIconName);
+  const chevronWidth = chevronSize ?? trailingDimensions.width;
+  const chevronHeight = chevronSize ?? trailingDimensions.height;
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const rootStyle: StyleProp<ViewStyle> = [
     {
@@ -88,12 +96,15 @@ export function BaselineNavigationRow({
     },
     style,
   ];
-  const textStyle1 = {
-    fontFamily: 'UniCredit-bold',
-    fontSize: state.linkFontSize,
-    color: color(state.actionToken),
-    marginTop: 4,
-  } as const;
+  const textStyle1 = [
+    {
+      fontFamily: 'UniCredit-bold',
+      fontSize: state.linkFontSize,
+      color: color(state.actionToken),
+      marginTop: 4,
+    },
+    linkLabelStyle,
+  ] as const;
   const link = <Text style={textStyle1}>{linkLabel}</Text>;
   const viewStyle2 = {
     flex: 1,
@@ -151,7 +162,10 @@ export function BaselineNavigationRow({
       ) : null}
       {linkLabel ? (
         onLinkPress ? (
-          <Pressable accessibilityRole="button" onPress={onLinkPress}>
+          <Pressable
+            accessibilityRole={linkAccessibilityRole}
+            onPress={onLinkPress}
+          >
             {link}
           </Pressable>
         ) : (
@@ -203,13 +217,9 @@ export function BaselineNavigationRow({
         <View style={[viewStyle7, chevronStyle]}>
           <SourceCustomIcon
             name={chevronIconName}
-            size={
-              trailingDimensions.width === trailingDimensions.height
-                ? trailingDimensions.width
-                : undefined
-            }
-            width={trailingDimensions.width}
-            height={trailingDimensions.height}
+            size={chevronWidth === chevronHeight ? chevronWidth : undefined}
+            width={chevronWidth}
+            height={chevronHeight}
             color={color(state.textToken)}
           />
         </View>

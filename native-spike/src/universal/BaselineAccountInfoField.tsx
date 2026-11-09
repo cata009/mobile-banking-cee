@@ -7,11 +7,15 @@ export function BaselineAccountInfoField({
   title,
   subtitle,
   trailingIcon,
+  uppercaseTitle = true,
+  subtitleFontSize = 16,
   dark = false,
 }: {
   title: string;
   subtitle: string;
   trailingIcon?: React.ReactNode;
+  uppercaseTitle?: boolean;
+  subtitleFontSize?: number;
   dark?: boolean;
 }) {
   const state = resolveAccountInfoField({ hasTrailing: Boolean(trailingIcon) }),
@@ -28,9 +32,16 @@ export function BaselineAccountInfoField({
       fontSize: state.fontSize,
       color,
     },
-    strong = { ...text, fontFamily: 'UniCredit-bold' };
+    strong = {
+      ...text,
+      fontFamily: 'UniCredit-bold',
+      fontSize: subtitleFontSize,
+    };
   const viewStyle1 = { flex: 1, minWidth: 0, gap: state.textGap } as const;
-  const textStyle2 = [text, { textTransform: 'uppercase' }] as const;
+  const textStyle2 = [
+    text,
+    { textTransform: uppercaseTitle ? 'uppercase' : 'none' },
+  ] as const;
   const viewStyle3 = {
     width: state.trailingSlot,
     height: state.trailingSlot,

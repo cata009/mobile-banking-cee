@@ -11,6 +11,8 @@ import type {
   CzechNativeScreenProps,
   CzechNativeAdapter,
 } from '../src/experiences/pi/cz/evo-2027/contracts';
+import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
+import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 const homeMounted = jest.fn();
 const homeUnmounted = jest.fn();
 beforeEach(() => {
@@ -108,6 +110,50 @@ test('primary navigation clears the device bottom safe area', async () => {
       .findAllByType(View)
       .some(node => StyleSheet.flatten(node.props.style)?.bottom === 32),
   ).toBe(true);
+  await act(() => tree.unmount());
+});
+
+test('matches the investment top inset to the white instrument surface while a security is open', async () => {
+  const security = createCzInvestmentSnapshot(DEFAULT_CZECH_COUNTS).catalog.find(
+    item => item.title === 'CEE Government Bond Fund',
+  )!;
+  function InvestmentSurface(props: CzechNativeScreenProps) {
+    return (
+      <Pressable
+        accessibilityLabel="Open security"
+        onPress={() => props.onInvestmentSecuritySelected?.(security)}
+      />
+    );
+  }
+
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <NativeCzechApp
+        initialRoute={{ screen: 'investments' }}
+        initialMode="light"
+        screenTopInset={54}
+        adapters={[
+          { id: 'investment-surface-test', screens: { investments: InvestmentSurface } },
+        ]}
+      />,
+    );
+  });
+  const insetBackground = () => {
+    const inset = tree.root.findAllByType(View).find(node => {
+      const style = StyleSheet.flatten(node.props.style);
+      return style?.paddingTop === 54 && style?.backgroundColor;
+    })!;
+    return StyleSheet.flatten(inset.props.style)?.backgroundColor;
+  };
+  const portfolioBackground = insetBackground();
+  const openSecurity = tree.root.findAll(
+    node =>
+      node.props.accessibilityLabel === 'Open security' &&
+      typeof node.props.onPress === 'function',
+  )[0]!;
+  await act(() => openSecurity.props.onPress());
+  expect(insetBackground()).not.toBe(portfolioBackground);
   await act(() => tree.unmount());
 });
 test('a page-local hardware Back handler runs before the shell fallback', async () => {
