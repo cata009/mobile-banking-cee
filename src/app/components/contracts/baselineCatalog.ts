@@ -874,6 +874,7 @@ export const BASELINE_NATIVE_PILOT_PATHS = [
   'native-spike/src/universal/BaselineCardNavigationRow.tsx',
   'native-spike/src/universal/BaselineCarouselIndicator.tsx',
   'native-spike/src/universal/BaselineCheckbox.tsx',
+  'native-spike/src/universal/BaselineChoiceChip.tsx',
   'native-spike/src/universal/BaselineCodeField.tsx',
   'native-spike/src/universal/BaselineDatedRow.tsx',
   'native-spike/src/universal/BaselineDetailToolbar.tsx',
