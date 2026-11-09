@@ -79,11 +79,22 @@ export function CzechNavigationBar({
             onPress={() => onSelect(item.id)}
             style={vertical ? s.verticalItem : s.item}
           >
-            <SourceCustomIcon
-              name={item.icon}
-              size={item.iconSize ?? 22}
-              color={color}
-            />
+            <View
+              style={[
+                s.iconSlot,
+                // A larger glyph keeps the same 22 px of layout height, so labels stay on one line.
+                {
+                  height: item.iconSize ?? 22,
+                  marginVertical: (22 - (item.iconSize ?? 22)) / 2,
+                },
+              ]}
+            >
+              <SourceCustomIcon
+                name={item.icon}
+                size={item.iconSize ?? 22}
+                color={color}
+              />
+            </View>
             {!vertical && (
               <Text style={[s.label, { color }]}>{item.label}</Text>
             )}
@@ -197,6 +208,13 @@ const s = StyleSheet.create({
     gap: 2,
     borderRadius: 12,
     paddingHorizontal: 1,
+  },
+  // Every icon sits in the same 22 px slot, so a larger glyph never pushes its label below the others.
+  iconSlot: {
+    width: 32,
+    height: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     fontFamily: 'UniCredit-regular',

@@ -10,11 +10,17 @@ import { saveFutureProfile } from '@/features/investments/future-overview/sessio
 import type { BaselineInvestmentSnapshot } from '../../../current/investments/baseline/contracts';
 import type { CurrentScreenProps } from '../../../current/contracts';
 import { Select } from '../../../../../universal/Select';
-import { NavigationRow } from '../../../../../universal/NavigationRow';
+import { BaselineKeyValueRow } from '../../../../../universal/BaselineKeyValueRow';
+import { BaselineStatusTag } from '../../../../../universal/BaselineStatusTag';
 import { PrimaryButton } from '../../../../../universal/PrimaryButton';
 import { Text } from '../../../../../universal/Typography';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import { investmentDark } from '../../../current/investments/baseline/Frame';
+import {
+  FutureList,
+  FutureSectionTitle,
+  type FutureListItem,
+} from './FutureSection';
 import { shareDemoFile } from '../../../../../platform/nativeFiles';
 export type MorePage =
   'menu' | 'profile' | 'questionnaire' | 'report' | 'statements' | 'help';
@@ -53,22 +59,18 @@ export function FutureInvestmentMore({
     fontSize: 16,
     lineHeight: 22,
   };
-  const heading = {
-    ...text,
-    fontFamily: host.tokens.strongFont,
-    fontSize: 22,
-    lineHeight: 28,
-  };
-  const row = (title: string, next: MorePage, subtitle?: string) => (
-    <NavigationRow
-      key={next}
-      tokens={host.tokens}
-      title={title}
-      subtitle={subtitle}
-      payload={next}
-      onSelect={onPage}
-    />
-  );
+  const item = (
+    id: MorePage,
+    title: string,
+    icon: string,
+    description?: string,
+  ): FutureListItem => ({
+    id,
+    title,
+    description,
+    icon,
+    onPress: () => onPage(id),
+  });
   const panel =
     (title: string) =>
     ({
@@ -134,63 +136,67 @@ export function FutureInvestmentMore({
   };
   return (
     <View style={s.content}>
-      <Text accessibilityRole="header" style={heading}>
-        {page === 'menu'
-          ? c.more
-          : page === 'profile'
-            ? c.profile
-            : page === 'questionnaire'
-              ? c.questionnaire
-              : page === 'report'
-                ? c.report
-                : page === 'statements'
-                  ? c.statements
-                  : c.help}
-      </Text>
       {page === 'menu' && (
-        <>
-          {row(c.profile, 'profile', c.profileSummary)}
-          {row(c.report, 'report')}
-          {row(c.statements, 'statements')}
-          {row(c.help, 'help')}
-        </>
+        <FutureList
+          host={host}
+          items={[
+            item('profile', c.profile, 'header-profile', c.profileSummary),
+            item('report', c.report, 'investment-download-report'),
+            item('statements', c.statements, 'investment-documents'),
+            item('help', c.help, 'help-circle'),
+          ]}
+        />
       )}
       {page === 'profile' && (
         <>
-          <Text style={text}>{c.profileSummary}</Text>
-          <Text style={text}>
-            {c.risk}:{' '}
-            <Text style={{ fontFamily: host.tokens.strongFont }}>
-              {profile.risk === 1
-                ? c.low
-                : profile.risk === 2
-                  ? c.medium
-                  : c.high}
+          <View style={s.group}>
+            <View style={s.status}>
+              <BaselineStatusTag
+                label={profileIsValid(profile) ? c.valid : c.expired}
+                tone={profileIsValid(profile) ? 'positive' : 'warning'}
+                dark={investmentDark(host)}
+              />
+            </View>
+            <Text style={[text, { color: host.tokens.muted }]}>
+              {c.profileSummary}
             </Text>
-          </Text>
-          <Text style={text}>
-            {c.horizon}: {profile.horizon} {c.years}
-          </Text>
-          <Text style={text}>
-            {c.validity}:{' '}
-            {new Intl.DateTimeFormat(
-              host.language === 'cs' ? 'cs-CZ' : 'en-GB',
-            ).format(new Date(profile.validUntil))}
-          </Text>
-          <Text style={text}>
-            {profileIsValid(profile) ? c.valid : c.expired}
-          </Text>
+            <View>
+              <BaselineKeyValueRow
+                label={c.risk}
+                value={
+                  profile.risk === 1
+                    ? c.low
+                    : profile.risk === 2
+                      ? c.medium
+                      : c.high
+                }
+                dark={investmentDark(host)}
+              />
+              <BaselineKeyValueRow
+                label={c.horizon}
+                value={`${profile.horizon} ${c.years}`}
+                dark={investmentDark(host)}
+              />
+              <BaselineKeyValueRow
+                label={c.validity}
+                value={new Intl.DateTimeFormat(
+                  host.language === 'cs' ? 'cs-CZ' : 'en-GB',
+                ).format(new Date(profile.validUntil))}
+                dark={investmentDark(host)}
+              />
+            </View>
+          </View>
           <PrimaryButton
             label={c.update}
             dark={investmentDark(host)}
             onPress={() => onPage('questionnaire')}
           />
-          <Text accessibilityRole="header" style={heading}>
-            {c.target}
-          </Text>
-          <Text style={text}>{c.targetBody}</Text>
-          {row(c.report, 'report')}
-          {row(c.statements, 'statements')}
+          <View style={s.group}>
+            <FutureSectionTitle host={host} title={c.target} />
+            <Text style={[text, { color: host.tokens.muted }]}>
+              {c.targetBody}
+            </Text>
+          </View>
         </>
       )}
       {page === 'questionnaire' && (
@@ -314,4 +320,8 @@ export function FutureInvestmentMore({
     </View>
   );
 }
-const s = StyleSheet.create({ content: { padding: 16, gap: 18 } });
+const s = StyleSheet.create({
+  content: { padding: 16, gap: 24 },
+  group: { gap: 12 },
+  status: { alignItems: 'flex-start' },
+});
