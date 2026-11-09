@@ -8,6 +8,7 @@ import type {
 } from '@/app/config/productsMenuConfig';
 import { getProductBannerTone } from '@/app/config/productBannerVariants';
 import flowers from '@/assets/612ac7960c2d43bfdada538aae6f3cf27be44d99.png';
+import { BaselineProductMenuCard } from '../../../../universal/BaselineProductMenuCard';
 import { BaselineProductOfferCard } from '../../../../universal/BaselineProductOfferCard';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -72,30 +73,22 @@ function PositionedImage({
     />
   );
 }
+/**
+ * Adapter over the canonical Design System menu card. The card fills the width its parent gives it (see
+ * `BaselineProductMenuGrid`); only the product artwork stays here.
+ */
 export function SourceMenuCard({
   card,
-  width,
   onPress,
   dark = false,
 }: {
   card: ProductsCard;
-  width: number;
   onPress: () => void;
   dark?: boolean;
 }) {
   const color = sourceColor('var(--uc-text-inverse)', dark);
-  return (
-    <Pressable
-      testID={`source-menu-card-${card.id}`}
-      accessibilityRole="button"
-      accessibilityLabel={card.title.replace(/\n/g, ' ')}
-      onPress={onPress}
-      style={[
-        s.menu,
-        { width, backgroundColor: sourceColor(card.background, dark) },
-      ]}
-    >
-      <Text style={[s.menuTitle, { color }]}>{card.title}</Text>
+  const artwork = (
+    <>
       {card.imageSrc ? (
         <PositionedImage
           uri={card.imageSrc}
@@ -179,7 +172,17 @@ export function SourceMenuCard({
           <SourceCustomIcon name="arrow-right" size={20} color={color} />
         </View>
       )}
-    </Pressable>
+    </>
+  );
+  return (
+    <BaselineProductMenuCard
+      testID={`source-menu-card-${card.id}`}
+      card={{ id: card.id, title: card.title, background: card.background }}
+      artwork={artwork}
+      titleLineHeight={20}
+      dark={dark}
+      onPress={onPress}
+    />
   );
 }
 export function SourceOfferCard({
@@ -313,21 +316,6 @@ export function SourceShopSmartCard({
   );
 }
 const s = StyleSheet.create({
-  menu: {
-    height: 120,
-    padding: 16,
-    borderRadius: 8,
-    overflow: 'hidden',
-    position: 'relative',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  menuTitle: {
-    fontFamily: 'UniCredit-bold',
-    fontSize: 18,
-    lineHeight: 20,
-    zIndex: 1,
-  },
   art: { position: 'absolute' },
 });
 

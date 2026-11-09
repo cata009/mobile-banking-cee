@@ -68,8 +68,10 @@ Design System Figma file and need individual approval before promotion. Nothing 
 1. **Inline text link: built as `TextLink`.** It is not the Figma "Text button / Primary" (uppercase, trailing 16 px
    chevron; implemented as `BaselineNavigationLink`, web `NavigationLink`, `LinkActionButton`). Still a proposal for
    Figma ("Text link").
-2. **Product menu card with responsive width.** `SourceMenuCard` takes a `width` (full or half row);
-   `BaselineProductMenuCard` is fixed size. Needs a decision: a width-fill variant, or fixed width everywhere.
+2. **Product menu card with responsive width: resolved.** `BaselineProductMenuCard` fills the width its parent gives it
+   (no pixel width). `BaselineProductMenuGrid` lays cards out in columns from the width it measures (2 on a phone, up
+   to 4 on a wide screen or foldable, `columns={1}` for full-width cards). `SourceMenuCard` is an adapter and keeps only
+   the product artwork; `Products.tsx` no longer computes card widths from the screen size.
 3. **Reviewed and kept on purpose.**
    - Legacy `current/profile/BottomSheet.tsx`: its callers pass `panelStyle` and `headerStyle`, which the library sheet
      does not offer, and tests pin its `current-bottom-sheet` test id.
