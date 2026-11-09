@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import {
   Header,
-  ActionButton,
   NavigationRow,
 } from '../../../../universal/controls';
+import { PrimaryButton } from '../../../../universal/PrimaryButton';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { Text } from '../../../../universal/Typography';
 import { useProfileTokens } from './Host';
@@ -98,15 +98,15 @@ export function Button({
   secondary?: boolean;
 }) {
   const tokens = useCurrentTokens();
+  // Canonical Design System button (Figma Button: 48 high, 4 radius, 18 bold label).
   return (
-    <ActionButton
-      tokens={tokens}
+    <PrimaryButton
       label={label}
       onPress={onPress}
       disabled={disabled}
-      secondary={secondary}
-      labelStyle={s.buttonLabel}
-      containerStyle={s.button}
+      variant={secondary ? 'secondary' : 'action'}
+      labelSize="18"
+      dark={tokens.text.toLowerCase() !== '#262626'}
     />
   );
 }
@@ -457,8 +457,6 @@ export const s = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
     marginBottom: 16,
   },
-  button: { minHeight: 48, borderRadius: 4, paddingVertical: 10 },
-  buttonLabel: { fontSize: 18 },
   dialog: { gap: 20 },
   pad: { paddingHorizontal: 24, paddingTop: 20, gap: 16 },
   horizontal: { flexDirection: 'row', alignItems: 'center', gap: 12 },

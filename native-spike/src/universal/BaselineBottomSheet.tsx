@@ -24,6 +24,7 @@ export function BaselineBottomSheet({
   width = 375,
   height = 812,
   fillHeight = false,
+  fixedHeight = false,
   maxHeightOffsetPx = 54,
   animated = false,
   reducedMotion = false,
@@ -44,6 +45,8 @@ export function BaselineBottomSheet({
   width?: number;
   height?: number;
   fillHeight?: boolean;
+  /** Keeps the panel at full height without stretching the scroll content, for long scrolling lists. */
+  fixedHeight?: boolean;
   maxHeightOffsetPx?: number;
   animated?: boolean;
   reducedMotion?: boolean;
@@ -126,7 +129,8 @@ export function BaselineBottomSheet({
   const panel = {
     ...styles.panel,
     maxHeight: height - maxHeightOffsetPx,
-    height: fillHeight ? height - maxHeightOffsetPx : undefined,
+    height:
+      fillHeight || fixedHeight ? height - maxHeightOffsetPx : undefined,
     padding: inset,
     borderTopLeftRadius: c.radius,
     borderTopRightRadius: c.radius,

@@ -32,7 +32,12 @@ export function BaselineProductOfferCard({
   dark = false,
   presentation,
   artwork,
+  testID,
+  accessibilityLabel,
 }: {
+  /** Optional host hooks; the accessible name defaults to the visible content. */
+  testID?: string;
+  accessibilityLabel?: string;
   offer: ProductOfferCardData;
   tone: {
     backgroundColor: string;
@@ -120,7 +125,9 @@ export function BaselineProductOfferCard({
   };
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       onPress={() => onPress?.(offer)}
       style={rootStyle}
     >

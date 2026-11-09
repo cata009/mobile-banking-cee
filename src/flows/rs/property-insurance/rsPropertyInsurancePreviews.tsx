@@ -119,20 +119,15 @@ function BottomCta({ children }: { children: ReactNode }) {
 }
 
 /**
- * The alternative action under a primary one. Same width, same height and the
- * same label size as PrimaryButton, so the pair reads as one control group
- * wherever it appears — and it is a real button, not a paragraph that looks like
- * one.
+ * The alternative action under a primary one: the Design System secondary
+ * button (same width, height and label size as the primary), so the pair reads
+ * as one control group wherever it appears.
  */
 function SecondaryAction({ children, onClick }: { children: ReactNode; onClick?: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="mt-[10px] flex h-[48px] w-full items-center justify-center rounded px-0 py-3 uc-type-n4-strong text-[var(--uc-action)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-action)] focus-visible:ring-offset-2 active:scale-[0.98]"
-    >
-      <span className="block max-w-full truncate">{children}</span>
-    </button>
+    <PrimaryButton variant="secondary" labelSize="16" className="mt-[10px]" onClick={onClick}>
+      {children}
+    </PrimaryButton>
   )
 }
 

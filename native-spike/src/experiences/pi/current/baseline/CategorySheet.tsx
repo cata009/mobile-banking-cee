@@ -1,18 +1,12 @@
 import React, { useState, type CSSProperties } from 'react';
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { Platform, Pressable, View, type ViewStyle } from 'react-native';
 import {
   PFM_CATEGORY_GROUPS,
   type PfmCategoryGroupDefinition,
   type PfmCategorySelection,
 } from '@/data/pfmCategories';
 import type { CurrentScreenProps } from '../contracts';
+import { BaselineBottomSheet } from '../../../../universal/BaselineBottomSheet';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { Text } from '../../../../universal/Typography';
@@ -40,7 +34,7 @@ export function RoBaselineCategorySheet({
     [expanded, setExpanded] = useState<string[]>([]),
     [draft, setDraft] = useState(currentSelection);
   const normalized = query.trim().toLocaleLowerCase(),
-    { height } = useDemoViewport(),
+    { width, height } = useDemoViewport(),
     dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const sheet = sourceColor('var(--uc-sheet-bg)', dark);
   const groups = PFM_CATEGORY_GROUPS.flatMap<PfmCategoryGroupDefinition>(
@@ -87,51 +81,6 @@ export function RoBaselineCategorySheet({
     } as const;
     return <Text style={[labelStyle, sourceStyle0]}>{text}</Text>;
   };
-  const sourceStyle1 = {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: sourceColor('var(--uc-overlay)', dark),
-  } as const;
-  const sourceStyle2 = {
-    height: height - 54,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
-    boxShadow: `0 -8px 24px ${sourceColor(
-      'rgb(var(--uc-shadow-rgb)/0.18)',
-      dark,
-    )}`,
-    paddingTop: 0,
-    overflow: 'hidden',
-  } as const;
-  const sourceStyle3 = {
-    height: 16,
-    width: 64,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  } as const;
-  const sourceStyle4 = {
-    height: 4,
-    width: 32,
-    borderRadius: 999,
-    backgroundColor: host.tokens.border,
-  } as const;
-  const sourceStyle5 = {
-    fontFamily: 'UniCredit-bold',
-    fontSize: 28,
-    lineHeight: 31,
-    color: host.tokens.text,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  } as const;
-  const sourceStyle6 = {
-    flex: 1,
-  } as const;
-  const sourceStyle7 = {
-    paddingHorizontal: 20,
-  } as const;
   const sourceStyle8 = {
     minHeight: 64,
     flexDirection: 'row',
@@ -161,11 +110,14 @@ export function RoBaselineCategorySheet({
     textAlign: 'center',
     color: host.tokens.muted,
   } as const;
+  // The footer bleeds to the sheet edges; the sheet panel insets everything by 20.
   const sourceStyle21 = {
     borderTopWidth: 1,
     borderTopColor: host.tokens.border,
     paddingHorizontal: 24,
     paddingVertical: 16,
+    marginHorizontal: -20,
+    marginBottom: -20,
     backgroundColor: sheet,
   } as const;
   return (
@@ -175,31 +127,40 @@ export function RoBaselineCategorySheet({
       animationType="none"
       onRequestClose={onClose}
     >
-      <View style={sourceStyle1}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close category sheet"
-          onPress={onClose}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={sourceStyle2}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close category sheet"
-            onPress={onClose}
-            style={sourceStyle3}
-          >
-            <View style={sourceStyle4} />
-          </Pressable>
-          <Text style={sourceStyle5}>
-            {host.t('runtime.pfmCategoryChange.title', 'Change category')}
-          </Text>
-          <ScrollView
-            style={sourceStyle6}
-            contentContainerStyle={sourceStyle7}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
+      {/* Canonical Design System bottom sheet: backdrop, drag handle, title and the pinned action. */}
+      <BaselineBottomSheet
+        title={host.t('runtime.pfmCategoryChange.title', 'Change category')}
+        onClose={onClose}
+        width={width}
+        height={height}
+        fixedHeight
+        showDragHandle
+        showCloseButton={false}
+        closeLabel="Close category sheet"
+        padding={20}
+        dark={dark}
+        footer={
+          <View style={sourceStyle21}>
+            <PrimaryButton
+              label={host.t(
+                'runtime.pfmCategoryChange.confirm',
+                'CHANGE CATEGORY',
+              )}
+              disabled={same(draft, currentSelection)}
+              onPress={() => {
+                return onConfirm(draft);
+              }}
+              dark={dark}
+              style={
+                Platform.OS === 'web' && same(draft, currentSelection)
+                  ? disabledWebButtonStyle
+                  : undefined
+              }
+            />
+          </View>
+        }
+      >
+        <>
             {heading(
               host.t(
                 'runtime.pfmCategoryChange.recommendedCategories',
@@ -392,27 +353,8 @@ export function RoBaselineCategorySheet({
                 )}
               </Text>
             ) : null}
-          </ScrollView>
-          <View style={sourceStyle21}>
-            <PrimaryButton
-              label={host.t(
-                'runtime.pfmCategoryChange.confirm',
-                'CHANGE CATEGORY',
-              )}
-              disabled={same(draft, currentSelection)}
-              onPress={() => {
-                return onConfirm(draft);
-              }}
-              dark={dark}
-              style={
-                Platform.OS === 'web' && same(draft, currentSelection)
-                  ? disabledWebButtonStyle
-                  : undefined
-              }
-            />
-          </View>
-        </View>
-      </View>
+        </>
+      </BaselineBottomSheet>
     </ModalPortal>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { Text } from '../../../../universal/Typography';
+import { BaselineBottomSheet } from '../../../../universal/BaselineBottomSheet';
+import { PrimaryButton } from '../../../../universal/PrimaryButton';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../universal/DemoViewport';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -20,38 +20,16 @@ export function BankingButton({
   disabled?: boolean;
   size?: 16 | 18;
 }) {
+  // The Design System primary button: 48 high, radius 4, action-strong fill, 0.3 opacity and an
+  // 18px label when disabled, 0.98 press scale. Same behaviour, now from the one definition.
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      disabled={disabled}
-      accessibilityState={{ disabled }}
+    <PrimaryButton
+      label={label}
       onPress={onPress}
-      style={({ pressed }) => [
-        s.button,
-        {
-          backgroundColor: sourceColor(
-            'var(--uc-action-strong)',
-            host.mode === 'dark',
-          ),
-          opacity: disabled ? 0.3 : 1,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-        },
-      ]}
-    >
-      <Text
-        numberOfLines={1}
-        style={[
-          s.buttonText,
-          {
-            fontFamily: host.tokens.strongFont,
-          },
-          disabled ? s.disabledLabel : { fontSize: size },
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
+      disabled={disabled}
+      labelSize={size === 18 ? '18' : '16'}
+      dark={host.mode === 'dark'}
+    />
   );
 }
 export function SelectedMark({ host }: { host: CurrentScreenProps }) {
@@ -88,7 +66,7 @@ export function BankingSheet({
   offset?: number;
   fillHeight?: boolean;
 }) {
-  const { height } = useDemoViewport();
+  const { width, height } = useDemoViewport();
   return (
     <ModalPortal
       visible={visible}
@@ -96,107 +74,22 @@ export function BankingSheet({
       animationType="none"
       onRequestClose={onClose}
     >
-      <View
-        style={[
-          s.overlay,
-          {
-            backgroundColor: sourceColor(
-              'var(--uc-overlay)',
-              host.mode === 'dark',
-            ),
-          },
-        ]}
+      {/* Canonical Design System bottom sheet; this wrapper keeps the banking call sites unchanged. */}
+      <BaselineBottomSheet
+        title={title}
+        onClose={onClose}
+        footer={footer}
+        closeLabel={closeLabel}
+        width={width}
+        height={height}
+        maxHeightOffsetPx={offset}
+        fillHeight={fillHeight}
+        // Banking forms are laid out for the original 16px inset; keep it until they are reviewed.
+        padding={16}
+        dark={host.mode === 'dark'}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close sheet"
-          onPress={onClose}
-          style={StyleSheet.absoluteFill}
-        />
-        <View
-          accessibilityViewIsModal
-          style={[
-            s.sheet,
-            {
-              backgroundColor: sourceColor(
-                'var(--uc-sheet-bg)',
-                host.mode === 'dark',
-              ),
-              maxHeight: height - offset,
-            },
-            fillHeight ? { height: height - offset } : undefined,
-          ]}
-        >
-          <View style={s.sheetHeader}>
-            <Text
-              accessibilityRole="header"
-              style={[
-                s.sheetTitle,
-                { fontFamily: host.tokens.strongFont, color: host.tokens.text },
-              ]}
-            >
-              {title}
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={closeLabel}
-              onPress={onClose}
-              style={s.close}
-            >
-              <Text
-                style={[
-                  s.closeGlyph,
-                  { color: host.tokens.text },
-                ]}
-              >
-                ×
-              </Text>
-            </Pressable>
-          </View>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {children}
-          </ScrollView>
-          {footer}
-        </View>
-      </View>
+        {children}
+      </BaselineBottomSheet>
     </ModalPortal>
   );
 }
-const s = StyleSheet.create({
-  disabledLabel: { fontSize: 18 },
-  button: {
-    height: 48,
-    minWidth: 0,
-    width: '100%',
-    borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: { color: '#ffffff', lineHeight: 20 },
-  overlay: { flex: 1, justifyContent: 'flex-end' },
-  sheet: {
-    width: '100%',
-    padding: 16,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    boxShadow: '0 -8px 24px rgba(0,0,0,.18)',
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 16,
-    marginBottom: 24,
-  },
-  sheetTitle: { flex: 1, fontSize: 28, lineHeight: 31 },
-  closeGlyph: { fontSize: 28, lineHeight: 32 },
-  close: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
