@@ -18,6 +18,7 @@ import {
 } from '../src/experiences/pi/current/coapping/adapter';
 import { buildCzChatHelpContext } from '@/app/chat/cz/context';
 import { BaselineMailboxTabs } from '../src/universal/BaselineMailboxTabs';
+import { BaselineCheckbox } from '../src/universal/BaselineCheckbox';
 import { AppointmentSheet } from '../src/experiences/pi/current/baseline/more/appointment/Sheets';
 const trees: Renderer.ReactTestRenderer[] = [];
 function host(screen: CurrentScreen): CurrentScreenProps {
@@ -244,7 +245,13 @@ test('Source callback selection is a bottom sheet with original boxed check mark
   expect(pressable(tree, 'Close sheet')).toBeDefined();
   await press(tree, 'Product related info');
   expect(JSON.stringify(tree.toJSON())).not.toContain('☑');
-  expect(JSON.stringify(tree.toJSON())).toContain('10.7556 3.76108');
+  // The original boxed check mark is the Design System checkbox in its canonical
+  // presentation (same 22px box and the same check-mark asset path as the Source).
+  const checked = tree.root
+    .findAllByType(BaselineCheckbox)
+    .filter(node => node.props.checked === true);
+  expect(checked).toHaveLength(1);
+  expect(checked[0].props.presentation).toBe('canonical');
 });
 test('contextual Czech Help opens canonical help context without changing the bank route', async () => {
   const props = {

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Pressable,
   StyleSheet,
-  Switch,
   View,
   type StyleProp,
   type TextStyle,
@@ -12,6 +11,7 @@ import { Text } from '../../../../universal/Typography';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { SearchField } from '../../../../universal/SearchField';
 import { NavigationRow } from '../../../../universal/NavigationRow';
+import { ToggleButton } from '../../../../universal/ToggleButton';
 import { formatMoneyNumber } from '@/app/registry/countryConfig';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import type { CurrentScreenProps } from '../contracts';
@@ -405,13 +405,12 @@ export function Toggle({
           {label}
         </Label>
       </View>
-      <Switch
-        accessibilityLabel={label}
-        value={value}
-        onValueChange={onChange}
-        trackColor={{
-          true: host.tokens.accent,
-        }}
+      {/* Canonical Design System toggle instead of the platform Switch. */}
+      <ToggleButton
+        checked={value}
+        onToggle={onChange}
+        ariaLabel={label}
+        dark={host.tokens.text.toLowerCase() !== '#262626'}
       />
     </View>
   );

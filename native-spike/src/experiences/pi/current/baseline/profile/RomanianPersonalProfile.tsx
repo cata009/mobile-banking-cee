@@ -18,6 +18,7 @@ import { AssetGlyph } from '../../../../../universal/AssetGlyph';
 import { BaselineCodeField } from '../../../../../universal/BaselineCodeField';
 import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
+import { ToggleButton } from '../../../../../universal/ToggleButton';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { Button, Copy, Page, useCurrentTokens } from '../../profile/Primitives';
 import { SourceTextField } from '../../profile/SourceTextField';
@@ -103,21 +104,16 @@ function ConsentToggle({
           {body}
         </Copy>
       </View>
+      {/* Canonical Design System toggle; the row owns the press and the accessible name. */}
       <View
-        style={[
-          styles.toggleTrack,
-          {
-            borderColor: checked ? tokens.accent : tokens.muted,
-            backgroundColor: checked ? tokens.accent : 'transparent',
-          },
-        ]}
+        pointerEvents="none"
+        aria-hidden
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
       >
-        <View
-          style={[
-            styles.toggleThumb,
-            checked && styles.toggleThumbOn,
-            { backgroundColor: checked ? '#fff' : tokens.muted },
-          ]}
+        <ToggleButton
+          checked={checked}
+          dark={tokens.text.toLowerCase() !== '#262626'}
         />
       </View>
     </Pressable>
@@ -878,16 +874,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   consentCopy: { flex: 1, gap: 4 },
-  toggleTrack: {
-    width: 56,
-    height: 32,
-    borderWidth: 2,
-    borderRadius: 18,
-    padding: 3,
-    justifyContent: 'center',
-  },
-  toggleThumb: { width: 22, height: 22, borderRadius: 11 },
-  toggleThumbOn: { alignSelf: 'flex-end' },
   tabs: {
     flexDirection: 'row',
     borderBottomWidth: 1,

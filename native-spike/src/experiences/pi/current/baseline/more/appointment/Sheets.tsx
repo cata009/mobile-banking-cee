@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   APPOINTMENT_REASON_OPTIONS,
   APPOINTMENT_DETAIL_OPTIONS,
@@ -19,7 +12,10 @@ import {
 import { ModalPortal } from '../../../../../../universal/ModalPortal';
 import { useDemoViewport } from '../../../../../../universal/DemoViewport';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
-import { Copy, Button, Link, useColors } from './Ui';
+import { BaselineBottomSheet } from '../../../../../../universal/BaselineBottomSheet';
+import { BaselineCheckbox } from '../../../../../../universal/BaselineCheckbox';
+import { serviceDark } from '../ServicePrimitives';
+import { Copy, Button, Link, useAppointmentHost, useColors } from './Ui';
 
 type TextFn = (key: string, fallback: string) => string;
 export function AppointmentSheet({
@@ -27,16 +23,17 @@ export function AppointmentSheet({
   onClose,
   children,
   footer,
-  headerGap = 20,
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** Kept so call sites compile; the Design System sheet owns heading spacing. */
   headerGap?: number;
 }) {
-  const { height } = useDemoViewport(),
-    color = useColors();
+  // Canonical Design System bottom sheet; the host supplies the portal and the viewport.
+  const { width, height } = useDemoViewport();
+  const dark = serviceDark(useAppointmentHost());
   return (
     <ModalPortal
       visible
@@ -44,46 +41,16 @@ export function AppointmentSheet({
       animationType="none"
       onRequestClose={onClose}
     >
-      <View
-        style={[styles.overlay, { backgroundColor: color('--uc-overlay') }]}
+      <BaselineBottomSheet
+        title={title}
+        onClose={onClose}
+        footer={footer}
+        width={width}
+        height={height}
+        dark={dark}
       >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close sheet"
-          onPress={onClose}
-          style={StyleSheet.absoluteFill}
-        />
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          style={[
-            styles.panel,
-            { maxHeight: height - 54, backgroundColor: color('--uc-sheet-bg') },
-            Platform.OS === 'web' ? styles.webScroll : undefined,
-          ]}
-          contentContainerStyle={styles.panelContent}
-        >
-          <View style={[styles.header, { marginBottom: headerGap }]}>
-            <Copy strong size={28} style={styles.title}>
-              {title}
-            </Copy>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-              onPress={onClose}
-              style={styles.close}
-            >
-              <SourceCustomIcon
-                name="close-x"
-                size={32}
-                color={color('--uc-icon')}
-              />
-            </Pressable>
-          </View>
-          {children}
-          {footer}
-        </ScrollView>
-      </View>
+        {children}
+      </BaselineBottomSheet>
     </ModalPortal>
   );
 }
@@ -99,6 +66,7 @@ export function FormCheckbox({
   onPress: () => void;
 }) {
   const color = useColors();
+  const dark = serviceDark(useAppointmentHost());
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -107,19 +75,14 @@ export function FormCheckbox({
       onPress={onPress}
       style={styles.checkboxRow}
     >
-      <View style={styles.checkSlot}>
-        <View style={styles.checkBox}>
-          {checked ? (
-            <Svg width={14} height={14} viewBox="0 0 14 14" fill="none">
-              <Path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M10.7556 3.76108C11.6516 2.82964 13.1039 2.82964 14 3.76108L6.66702 11.375L1.3125 5.81907C2.20816 4.88804 3.66088 4.88804 4.55693 5.81907L6.66702 8.00209L10.7556 3.76108Z"
-                fill="#007A91"
-              />
-            </Svg>
-          ) : null}
-        </View>
+      {/* Canonical Design System checkbox (Figma Checkbox element: 32 slot, 22 box). The row owns the press and the accessible name. */}
+      <View
+        pointerEvents="none"
+        aria-hidden
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        <BaselineCheckbox checked={checked} presentation="canonical" dark={dark} />
       </View>
       <View style={styles.checkboxCopy}>
         <Copy strong size={14} style={styles.checkLabel}>
@@ -360,50 +323,11 @@ export function CalendarSheet({
   );
 }
 const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end' },
-  panel: {
-    width: '100%',
-    flexGrow: 0,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    boxShadow: '0 -8px 24px rgba(0,0,0,0.18)',
-  },
-  panelContent: { paddingTop: 16, paddingHorizontal: 24, paddingBottom: 20 },
-  webScroll: { transform: 'none' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  title: { flexShrink: 1 },
-  close: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingVertical: 12,
-  },
-  checkSlot: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#262626',
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   checkboxCopy: { flex: 1, minHeight: 32, justifyContent: 'center' },
   checkLabel: {},

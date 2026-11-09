@@ -8,6 +8,7 @@ import type {
 } from '@/app/config/productsMenuConfig';
 import { getProductBannerTone } from '@/app/config/productBannerVariants';
 import flowers from '@/assets/612ac7960c2d43bfdada538aae6f3cf27be44d99.png';
+import { BaselineProductOfferCard } from '../../../../universal/BaselineProductOfferCard';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
@@ -194,40 +195,20 @@ export function SourceOfferCard({
     offer.colorFamily ?? 'green',
     offer.lightVersion ?? false,
   );
-  const color = sourceColor(tone.textColor, dark);
+  // Adapter over the canonical Design System campaign card; call sites are unchanged.
   return (
-    <Pressable
+    <BaselineProductOfferCard
       testID={`source-offer-${offer.id}`}
-      accessibilityRole="button"
       accessibilityLabel={offer.title.replace(/\n/g, ' ')}
-      onPress={onPress}
-      style={[
-        s.offer,
-        { backgroundColor: sourceColor(tone.backgroundColor, dark) },
-      ]}
-    >
-      <Svg width={161} height={157} viewBox="0 0 161 157" style={s.chevrons}>
-        <Path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          fill={sourceColor(tone.chevronColor, dark)}
-          d="M41.828 -36L160.486 78L41.828 192C24.9191 176.767 24.9191 152.064 41.828 136.824L103.055 78L41.828 19.176C24.9191 3.9356 24.9191 -20.7596 41.828 -36ZM-65.9884 -36L52.6697 78L-65.9884 192C-82.8971 176.767 -82.8971 152.064 -65.9884 136.824L-4.76076 78L-65.9884 19.176C-82.8971 3.9356 -82.8971 -20.7596 -65.9884 -36Z"
-        />
-      </Svg>
-      <Image
-        source={source(tone.imageSrc)}
-        resizeMode="cover"
-        style={s.offerPhoto}
-      />
-      <View style={s.offerCopy}>
-        <Text numberOfLines={2} style={[s.offerTitle, { color }]}>
-          {offer.title}
-        </Text>
-        <Text numberOfLines={3} style={[s.offerDescription, { color }]}>
-          {offer.description}
-        </Text>
-      </View>
-    </Pressable>
+      offer={{
+        id: offer.id,
+        title: offer.title,
+        description: offer.description,
+      }}
+      tone={tone}
+      dark={dark}
+      onPress={() => onPress?.()}
+    />
   );
 }
 export function SourceShopSmartCard({
@@ -348,34 +329,6 @@ const s = StyleSheet.create({
     zIndex: 1,
   },
   art: { position: 'absolute' },
-  offer: {
-    width: 327,
-    height: 157,
-    borderRadius: 8,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  chevrons: { position: 'absolute', left: -14, top: 0 },
-  offerPhoto: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: 100,
-    height: 157,
-  },
-  offerCopy: {
-    height: 157,
-    paddingLeft: 20,
-    paddingRight: 116,
-    justifyContent: 'center',
-    gap: 8,
-  },
-  offerTitle: { fontFamily: 'UniCredit-bold', fontSize: 22, lineHeight: 24 },
-  offerDescription: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 18,
-    lineHeight: 20,
-  },
 });
 
 const exactSourceStyles = StyleSheet.create({
