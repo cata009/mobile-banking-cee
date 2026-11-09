@@ -176,17 +176,23 @@ export async function loadNativeDemoModuleForWebTest(): Promise<NativeDemoModule
   nativeWebRendererDiagnostics.loadCalls += 1
   try {
     installNativeWebTestBrowserApis()
-    const [css, sourceTheme] = await Promise.all([
+    const [css, sourceTheme, generatedColors] = await Promise.all([
       readFile(resolve(process.cwd(), 'native-spike/dist-host/current-host.css'), 'utf8'),
       readFile(resolve(process.cwd(), 'src/styles/theme.css'), 'utf8'),
+      // Every color token is generated from src/app/registry/colorTokens.ts into this file.
+      readFile(resolve(process.cwd(), 'src/styles/colors.generated.css'), 'utf8'),
     ])
     if (!document.head.querySelector('[data-native-web-renderer-css]')) {
       const style = document.createElement('style')
       style.dataset.nativeWebRendererCss = 'true'
       // Browser entry points load these rules through the Source stylesheet.
       // Keep that independent palette in jsdom without unsupported Tailwind directives.
-      const light = sourceTheme.match(/:root,\s*\[data-uc-theme="light"\]\s*\{([^}]+)\}/)?.[1]
-      const dark = sourceTheme.match(/\[data-uc-theme="dark"\]\s*\{([^}]+)\}/)?.[1]
+      const light = [sourceTheme, generatedColors]
+        .map((file) => file.match(/:root,\s*\[data-uc-theme="light"\]\s*\{([^}]+)\}/)?.[1])
+        .join('')
+      const dark = [sourceTheme, generatedColors]
+        .map((file) => file.match(/\[data-uc-theme="dark"\]\s*\{([^}]+)\}/)?.[1])
+        .join('')
       if (!light || !dark) throw new Error('Source light/dark theme rules are unavailable')
       style.textContent = `:root,[data-uc-theme="light"]{${light}}[data-uc-theme="dark"]{${dark}}\n${css}`
       document.head.append(style)

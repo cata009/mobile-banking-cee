@@ -1,5 +1,7 @@
 @import './fonts.css';
 @import './tailwind.css';
+/* Every color token is generated from src/app/registry/colorTokens.ts (npm run generate:colors). */
+@import './colors.generated.css';
 @import './theme.css';
 @import './investment-reference.css';
 @import './app2027-motion.css';
@@ -32,21 +34,21 @@
    recognisable portfolio rail. Width changes composition; height changes
    density. Type and touch targets remain stable. */
 [data-app-2027-home] {
-  --uc-app-bg: #12171a;
-  --uc-surface: rgb(30 37 41 / 0.82);
-  --uc-surface-muted: rgb(255 255 255 / 0.09);
-  --uc-surface-raised: rgb(39 47 52 / 0.9);
-  --uc-text: #f7f7f4;
-  --uc-text-muted: #bec2c2;
-  --uc-text-subtle: #9ca1a1;
-  --uc-border: rgb(255 255 255 / 0.18);
-  --uc-border-muted: rgb(255 255 255 / 0.11);
-  --uc-action: #65d9d2;
-  --uc-action-hover: #8cebe5;
-  --uc-action-soft: rgb(101 217 210 / 0.15);
-  --uc-action-soft-strong: rgb(101 217 210 / 0.22);
-  --uc-action-strong: #0F6E7C;
-  --uc-bottom-bar-bg: rgb(34 41 45 / 0.74);
+  --uc-app-bg: var(--uc-home-glass-app-bg);
+  --uc-surface: var(--uc-home-glass-surface);
+  --uc-surface-muted: var(--uc-home-glass-surface-muted);
+  --uc-surface-raised: var(--uc-home-glass-surface-raised);
+  --uc-text: var(--uc-home-glass-text);
+  --uc-text-muted: var(--uc-home-glass-text-muted);
+  --uc-text-subtle: var(--uc-home-glass-text-subtle);
+  --uc-border: var(--uc-home-glass-border);
+  --uc-border-muted: var(--uc-home-glass-border-muted);
+  --uc-action: var(--uc-home-glass-action);
+  --uc-action-hover: var(--uc-home-glass-action-hover);
+  --uc-action-soft: var(--uc-home-glass-action-soft);
+  --uc-action-soft-strong: var(--uc-home-glass-action-soft-strong);
+  --uc-action-strong: var(--uc-home-glass-action-strong);
+  --uc-bottom-bar-bg: var(--uc-home-glass-bottom-bar-bg);
   isolation: isolate;
 }
 
@@ -74,22 +76,22 @@
 }
 
 [data-uc-theme="dark"] [data-app-2027-home] {
-  --app2027-logo-color: #f7f7f4;
-  --uc-app-bg: #12171a;
-  --uc-surface: rgb(30 37 41 / 0.82);
-  --uc-surface-muted: rgb(255 255 255 / 0.09);
-  --uc-surface-raised: rgb(39 47 52 / 0.9);
-  --uc-text: #f7f7f4;
-  --uc-text-muted: #bec2c2;
-  --uc-text-subtle: #aeb3b3;
-  --uc-border: rgb(255 255 255 / 0.18);
-  --uc-border-muted: rgb(255 255 255 / 0.11);
-  --uc-action: #65d9d2;
-  --uc-action-hover: #8cebe5;
-  --uc-action-soft: rgb(101 217 210 / 0.15);
-  --uc-action-soft-strong: rgb(101 217 210 / 0.22);
-  --uc-action-strong: #0F6E7C;
-  --uc-bottom-bar-bg: rgb(34 41 45 / 0.74);
+  --app2027-logo-color: var(--uc-home-glass-text);
+  --uc-app-bg: var(--uc-home-glass-app-bg);
+  --uc-surface: var(--uc-home-glass-surface);
+  --uc-surface-muted: var(--uc-home-glass-surface-muted);
+  --uc-surface-raised: var(--uc-home-glass-surface-raised);
+  --uc-text: var(--uc-home-glass-text);
+  --uc-text-muted: var(--uc-home-glass-text-muted);
+  --uc-text-subtle: var(--uc-home-glass-dark-text-subtle);
+  --uc-border: var(--uc-home-glass-border);
+  --uc-border-muted: var(--uc-home-glass-border-muted);
+  --uc-action: var(--uc-home-glass-action);
+  --uc-action-hover: var(--uc-home-glass-action-hover);
+  --uc-action-soft: var(--uc-home-glass-action-soft);
+  --uc-action-soft-strong: var(--uc-home-glass-action-soft-strong);
+  --uc-action-strong: var(--uc-home-glass-action-strong);
+  --uc-bottom-bar-bg: var(--uc-home-glass-bottom-bar-bg);
 }
 
 [data-app-2027-home]::before,

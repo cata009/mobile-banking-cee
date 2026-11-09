@@ -213,6 +213,11 @@ export function ColorCard({
       <code className="mt-0.5 block truncate rounded bg-[var(--uc-app-bg)] px-1.5 py-0.5 text-[10px] text-[var(--uc-text-muted)]">
         {color.cssVariable}
       </code>
+      {color.aliasOf ? (
+        <p className="mt-1 truncate text-[10px] text-[var(--uc-text-muted)]" title={`Follows ${color.aliasOf}`}>
+          follows <code>{color.aliasOf}</code>
+        </p>
+      ) : null}
       <div className="mt-1.5 grid gap-1">
         <div className="flex items-center justify-between gap-1">
           <span className="text-[10px] uppercase tracking-[0.08em] text-[var(--uc-text-muted)]">L</span>
@@ -288,7 +293,7 @@ export function ColorInventory() {
       <Section
         id="colors"
         title="Color palettes"
-        description="Colors extracted from screenshots/Colors.svg, normalized into the canonical light-mode registry and proposed dark-mode mapping. The list is filtered by palette to keep the page compact and easy to scan."
+        description="Every color in the app, in one source (src/app/registry/colorTokens.ts). The web CSS and the React Native demo are generated from it, so changing a value or a role here changes both. Palettes come from screenshots/Colors.svg; Roles are what components actually use (for example the primary button fill)."
       >
         <div className="sticky top-0 z-20 -mx-6 mb-6 bg-[var(--uc-surface-muted)] px-6 py-3 xl:-mx-8 xl:px-8">
           <InventorySearchField

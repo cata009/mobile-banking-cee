@@ -188,6 +188,10 @@ describe('Design System specimen selectors', () => {
       'peach',
       'pfm',
       'utility',
+      'roles',
+      'banners',
+      'scoped',
+      'other',
     ])
   })
 

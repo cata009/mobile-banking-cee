@@ -1,3 +1,5 @@
+import { COLOR_TOKENS, resolveColorToken } from "./colorTokens";
+
 export type ColorPaletteId =
   | "neutral"
   | "action-teal"
@@ -7,7 +9,11 @@ export type ColorPaletteId =
   | "warning-orange"
   | "peach"
   | "pfm"
-  | "utility";
+  | "utility"
+  | "roles"
+  | "banners"
+  | "scoped"
+  | "other";
 
 export type AppColorAuditStatus = "mapped" | "asset-exception" | "pending-review";
 
@@ -26,8 +32,13 @@ export interface DesignSystemColor {
   sourceTokens: string[];
   usage: string;
   cssVariable: string;
+  /** For a role that points at another token: the token it follows (a change there changes this too). */
+  aliasOf?: string;
   darkNote?: string;
 }
+
+/** A palette entry as documented here; its hex values come from the color token source. */
+export type RawDesignSystemColor = Omit<DesignSystemColor, "lightHex" | "darkHex">;
 
 export interface AppColorAuditItem {
   sourceColor: string;
@@ -94,15 +105,34 @@ export const COLOR_PALETTES = [
     label: "Utility",
     description: "Special status and audit-only colors from the source SVG.",
   },
+  {
+    id: "roles",
+    label: "Roles",
+    description:
+      "What the UI means by a color (action, surface, text, border). Components use these roles, not the raw palette, so changing a role here changes every component that uses it.",
+  },
+  {
+    id: "banners",
+    label: "Banner tones",
+    description: "Editorial banner and offer backgrounds, three tones per family.",
+  },
+  {
+    id: "scoped",
+    label: "Screen-scoped",
+    description: "Values owned by one screen family (the App 2027 Home glass theme, the static investment reference snapshots).",
+  },
+  {
+    id: "other",
+    label: "Other tokens",
+    description: "Remaining color tokens: goal, robo scenario, summary and static colors.",
+  },
 ] as const satisfies readonly [DesignSystemPalette, ...DesignSystemPalette[]];
 
-export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
+const RAW_DESIGN_SYSTEM_COLORS: RawDesignSystemColor[] = [
   {
     id: "neutral-white",
     name: "White",
     paletteId: "neutral",
-    lightHex: "#FFFFFF",
-    darkHex: "#262626",
     sourceTokens: ["Primary / 100", "Primary / 600 Copy 2-5"],
     usage: "Light surfaces, cards, nav bars, and inverse text.",
     cssVariable: "--uc-neutral-white",
@@ -112,8 +142,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-100",
     name: "Neutral 100",
     paletteId: "neutral",
-    lightHex: "#F5F5F5",
-    darkHex: "#121212",
     sourceTokens: ["Primary / 200"],
     usage: "App background and subtle section background.",
     cssVariable: "--uc-neutral-100",
@@ -122,8 +150,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-200",
     name: "Neutral 200",
     paletteId: "neutral",
-    lightHex: "#E5E5E5",
-    darkHex: "#333333",
     sourceTokens: ["Primary / 300"],
     usage: "Secondary separators and muted cards.",
     cssVariable: "--uc-neutral-200",
@@ -132,8 +158,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-300",
     name: "Neutral 300",
     paletteId: "neutral",
-    lightHex: "#D8D8D8",
-    darkHex: "#555555",
     sourceTokens: ["Primary / 902"],
     usage: "Primary borders and divider lines.",
     cssVariable: "--uc-neutral-300",
@@ -142,8 +166,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-400",
     name: "Neutral 400",
     paletteId: "neutral",
-    lightHex: "#CCCCCC",
-    darkHex: "#666666",
     sourceTokens: ["Primary / 600"],
     usage: "Disabled borders and low-emphasis controls.",
     cssVariable: "--uc-neutral-400",
@@ -152,8 +174,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-500",
     name: "Neutral 500",
     paletteId: "neutral",
-    lightHex: "#B9B9B9",
-    darkHex: "#7A7A7A",
     sourceTokens: ["Primary / Main 22"],
     usage: "Secondary UI chrome and inactive indicators.",
     cssVariable: "--uc-neutral-500",
@@ -162,8 +182,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-600",
     name: "Neutral 600",
     paletteId: "neutral",
-    lightHex: "#999999",
-    darkHex: "#909090",
     sourceTokens: ["Primary / 600 Copy"],
     usage: "Muted labels and secondary text.",
     cssVariable: "--uc-neutral-600",
@@ -172,8 +190,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-650",
     name: "Neutral 650",
     paletteId: "neutral",
-    lightHex: "#909090",
-    darkHex: "#CCCCCC",
     sourceTokens: ["Primary / Main 26"],
     usage: "Status and chart helper labels.",
     cssVariable: "--uc-neutral-650",
@@ -182,8 +198,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-700",
     name: "Neutral 700",
     paletteId: "neutral",
-    lightHex: "#666666",
-    darkHex: "#CCCCCC",
     sourceTokens: ["Primary / 901"],
     usage: "Secondary labels and inactive navigation text.",
     cssVariable: "--uc-neutral-700",
@@ -192,8 +206,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-750",
     name: "Neutral 750",
     paletteId: "neutral",
-    lightHex: "#535453",
-    darkHex: "#D6D1D8",
     sourceTokens: ["Primary / Main Copy 3"],
     usage: "Deep muted product surfaces.",
     cssVariable: "--uc-neutral-750",
@@ -202,8 +214,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-800",
     name: "Neutral 800",
     paletteId: "neutral",
-    lightHex: "#454545",
-    darkHex: "#D0D0D0",
     sourceTokens: ["Primary / Main 20"],
     usage: "Dense dark UI surfaces.",
     cssVariable: "--uc-neutral-800",
@@ -212,8 +222,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-900",
     name: "Primary K1",
     paletteId: "neutral",
-    lightHex: "#262626",
-    darkHex: "#FFFFFF",
     sourceTokens: ["Primary / 900", "Primary / Main 21"],
     usage: "Primary text, icons, and strong dividers.",
     cssVariable: "--uc-primary-k1",
@@ -222,8 +230,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "neutral-black",
     name: "Black",
     paletteId: "neutral",
-    lightHex: "#262626",
-    darkHex: "#FFFFFF",
     sourceTokens: ["Primary / Main"],
     usage: "Device chrome and strong dark surfaces, normalized away from pure black.",
     cssVariable: "--uc-primary-main",
@@ -232,8 +238,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-900",
     name: "Teal Deep",
     paletteId: "action-teal",
-    lightHex: "#006375",
-    darkHex: "#CCCCCC",
     sourceTokens: ["Primary / Main 2", "Primary / 900 Copy 3", "Primary / Main 18"],
     usage: "Pressed action, deep selected state, and offer backgrounds.",
     cssVariable: "--uc-teal-900",
@@ -242,8 +246,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-700",
     name: "Teal Main",
     paletteId: "action-teal",
-    lightHex: "#007A91",
-    darkHex: "#FFFFFF",
     sourceTokens: ["Primary / Main 3", "Primary / 900 2", "Primary / 900 16", "Primary / Main 27"],
     usage: "Primary action, active navigation, banners, and chart inflow.",
     cssVariable: "--uc-teal-main",
@@ -252,8 +254,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-650",
     name: "Teal Blue",
     paletteId: "action-teal",
-    lightHex: "#05829A",
-    darkHex: "#4FC6DD",
     sourceTokens: ["Primary / Main 19"],
     usage: "Alternate selected teal for charts and status surfaces.",
     cssVariable: "--uc-teal-blue",
@@ -262,8 +262,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-600",
     name: "Teal Bright",
     paletteId: "action-teal",
-    lightHex: "#00A197",
-    darkHex: "#3ED6C8",
     sourceTokens: ["Primary / Main 4"],
     usage: "Bright action accent and dark-mode active state.",
     cssVariable: "--uc-teal-bright",
@@ -272,8 +270,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-300",
     name: "Teal Soft",
     paletteId: "action-teal",
-    lightHex: "#94B1BA",
-    darkHex: "#2E7C88",
     sourceTokens: ["Primary / 900 3"],
     usage: "Soft active surface and light selected background.",
     cssVariable: "--uc-teal-soft",
@@ -282,8 +278,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "teal-100",
     name: "Teal Pale",
     paletteId: "action-teal",
-    lightHex: "#CCECEA",
-    darkHex: "#315B66",
     sourceTokens: ["Primary / 800"],
     usage: "Low-emphasis success/info background.",
     cssVariable: "--uc-teal-pale",
@@ -292,8 +286,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-main",
     name: "UniCredit Red",
     paletteId: "brand-red",
-    lightHex: "#E2001A",
-    darkHex: "#E2001A",
     sourceTokens: ["Primary / Main 5", "Primary / 900 14"],
     usage: "Brand mark and primary brand accent.",
     cssVariable: "--uc-red-main",
@@ -302,8 +294,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-bright",
     name: "Red Bright",
     paletteId: "brand-red",
-    lightHex: "#E01E25",
-    darkHex: "#FF5A68",
     sourceTokens: ["Primary / 600 Copy 6"],
     usage: "Dark-mode brand accent and alert emphasis.",
     cssVariable: "--uc-red-bright",
@@ -312,8 +302,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-card",
     name: "Red Card",
     paletteId: "brand-red",
-    lightHex: "#B91823",
-    darkHex: "#F04A58",
     sourceTokens: ["Primary / 600 Copy 2", "Primary / 900 13"],
     usage: "Card product tile and strong warning.",
     cssVariable: "--uc-red-card",
@@ -322,8 +310,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-deep",
     name: "Red Deep",
     paletteId: "brand-red",
-    lightHex: "#9A000B",
-    darkHex: "#D94A5A",
     sourceTokens: ["Primary / 900 Copy", "Primary / Main 15"],
     usage: "Deep red surfaces and dark red accents.",
     cssVariable: "--uc-red-deep",
@@ -332,8 +318,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-brown",
     name: "Red Brown",
     paletteId: "brand-red",
-    lightHex: "#961414",
-    darkHex: "#D65C68",
     sourceTokens: ["Primary / 900 4"],
     usage: "Legacy deep warning and decorative emphasis.",
     cssVariable: "--uc-red-brown",
@@ -342,8 +326,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-blue-deep",
     name: "Product Blue Deep",
     paletteId: "product",
-    lightHex: "#244858",
-    darkHex: "#91D1DD",
     sourceTokens: ["Primary / Main 6"],
     usage: "Account product tile.",
     cssVariable: "--uc-product-blue-deep",
@@ -352,8 +334,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-slate",
     name: "Product Slate",
     paletteId: "product",
-    lightHex: "#5E6F73",
-    darkHex: "#AAB8BC",
     sourceTokens: ["Primary / 900 5"],
     usage: "Investments and neutral product tile.",
     cssVariable: "--uc-product-slate",
@@ -362,8 +342,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-blue",
     name: "Product Blue",
     paletteId: "product",
-    lightHex: "#3F6A8B",
-    darkHex: "#78B6E8",
     sourceTokens: ["Primary / Main 7"],
     usage: "Insurance product tile.",
     cssVariable: "--uc-product-blue",
@@ -372,8 +350,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-mauve",
     name: "Product Mauve",
     paletteId: "product",
-    lightHex: "#A26077",
-    darkHex: "#D38AA3",
     sourceTokens: ["Primary / Main 8"],
     usage: "Mortgage and loans product tile.",
     cssVariable: "--uc-product-mauve",
@@ -382,8 +358,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-pink",
     name: "Product Pink",
     paletteId: "product",
-    lightHex: "#DD1860",
-    darkHex: "#FF5F9A",
     sourceTokens: ["Primary / 900 6"],
     usage: "Pink accent in product/editorial visuals.",
     cssVariable: "--uc-product-pink",
@@ -392,8 +366,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-brown",
     name: "Product Brown",
     paletteId: "product",
-    lightHex: "#5E3D32",
-    darkHex: "#9A6246",
     sourceTokens: ["Primary / Main 9"],
     usage: "Warm product surface and illustration accent.",
     cssVariable: "--uc-product-brown",
@@ -402,8 +374,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "product-hedging",
     name: "Product Hedging",
     paletteId: "product",
-    lightHex: "#717863",
-    darkHex: "#717863",
     sourceTokens: ["Prestiti"],
     usage: "Market Hedging product menu tile.",
     cssVariable: "--uc-product-hedging",
@@ -412,8 +382,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-deep",
     name: "Green Deep",
     paletteId: "semantic-green",
-    lightHex: "#004C3D",
-    darkHex: "#004C3D",
     sourceTokens: ["Primary / Main Copy 2", "Primary / Main 16"],
     usage: "Deep green editorial and success surface.",
     cssVariable: "--uc-green-deep",
@@ -422,8 +390,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-main",
     name: "Green Main",
     paletteId: "semantic-green",
-    lightHex: "#007A6B",
-    darkHex: "#26C3A8",
     sourceTokens: ["Primary / 900 15"],
     usage: "Positive/action green accent.",
     cssVariable: "--uc-green-main",
@@ -432,8 +398,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-bright",
     name: "Green Bright",
     paletteId: "semantic-green",
-    lightHex: "#008574",
-    darkHex: "#008574",
     sourceTokens: ["Primary / Main 17"],
     usage: "Bright green selected/semantic accent.",
     cssVariable: "--uc-green-bright",
@@ -442,8 +406,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-success",
     name: "Green Success",
     paletteId: "semantic-green",
-    lightHex: "#2FA358",
-    darkHex: "#59D37F",
     sourceTokens: ["Primary / Main 10"],
     usage: "Success and positive status.",
     cssVariable: "--uc-green-success",
@@ -452,8 +414,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-status",
     name: "Green Status",
     paletteId: "semantic-green",
-    lightHex: "#359F42",
-    darkHex: "#359F42",
     sourceTokens: ["Primary / Main Copy 4"],
     usage: "Status green in audit and message states.",
     cssVariable: "--uc-green-status",
@@ -462,8 +422,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "green-olive",
     name: "Green Olive",
     paletteId: "semantic-green",
-    lightHex: "#3D7D43",
-    darkHex: "#26EDA9",
     sourceTokens: ["Primary / Main 23"],
     usage: "Olive product/status accent.",
     cssVariable: "--uc-green-olive",
@@ -472,8 +430,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "orange-main",
     name: "Orange Main",
     paletteId: "warning-orange",
-    lightHex: "#E67300",
-    darkHex: "#FF9D3B",
     sourceTokens: ["Primary / Main Copy"],
     usage: "Warning and orange emphasis.",
     cssVariable: "--uc-orange-main",
@@ -482,8 +438,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "orange-card",
     name: "Orange Card",
     paletteId: "warning-orange",
-    lightHex: "#E67301",
-    darkHex: "#FF9D3C",
     sourceTokens: ["Primary / Main 13"],
     usage: "Card/network adjacent orange.",
     cssVariable: "--uc-orange-card",
@@ -492,8 +446,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "orange-bright",
     name: "Orange Bright",
     paletteId: "warning-orange",
-    lightHex: "#F0871D",
-    darkHex: "#FFB15C",
     sourceTokens: ["Primary / 900 10"],
     usage: "Bright warning highlight.",
     cssVariable: "--uc-orange-bright",
@@ -502,8 +454,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "orange-status",
     name: "Orange Status",
     paletteId: "warning-orange",
-    lightHex: "#F26B08",
-    darkHex: "#FDA98B",
     sourceTokens: ["Primary / Main 24"],
     usage: "Status warning accent.",
     cssVariable: "--uc-orange-status",
@@ -512,8 +462,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "yellow-gold",
     name: "Gold",
     paletteId: "warning-orange",
-    lightHex: "#FBB800",
-    darkHex: "#FFD24D",
     sourceTokens: ["Primary / 900 7"],
     usage: "Gold and attention highlights.",
     cssVariable: "--uc-yellow-gold",
@@ -522,8 +470,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "yellow-muted",
     name: "Muted Gold",
     paletteId: "warning-orange",
-    lightHex: "#DFA805",
-    darkHex: "#F2C84B",
     sourceTokens: ["Primary / 900 8"],
     usage: "Muted gold highlight.",
     cssVariable: "--uc-yellow-muted",
@@ -532,8 +478,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "yellow-brown",
     name: "Brown Gold",
     paletteId: "warning-orange",
-    lightHex: "#D1960A",
-    darkHex: "#E8BF52",
     sourceTokens: ["Primary / Main 11"],
     usage: "Deep gold/brown surface.",
     cssVariable: "--uc-yellow-brown",
@@ -542,8 +486,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "yellow-main",
     name: "Yellow Main",
     paletteId: "warning-orange",
-    lightHex: "#EDBA00",
-    darkHex: "#FFD24D",
     sourceTokens: ["Primary / 900 9"],
     usage: "Yellow highlight.",
     cssVariable: "--uc-yellow-main",
@@ -552,8 +494,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "orange-deep",
     name: "Orange Deep",
     paletteId: "warning-orange",
-    lightHex: "#E3690E",
-    darkHex: "#FF9A47",
     sourceTokens: ["Primary / Main 12"],
     usage: "Deep orange accent.",
     cssVariable: "--uc-orange-deep",
@@ -562,8 +502,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "peach-100",
     name: "Peach 100",
     paletteId: "peach",
-    lightHex: "#FFDAC0",
-    darkHex: "#8F5E42",
     sourceTokens: ["Primary / 900 12"],
     usage: "Warm pale surface.",
     cssVariable: "--uc-peach-100",
@@ -572,8 +510,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "peach-200",
     name: "Peach 200",
     paletteId: "peach",
-    lightHex: "#FFCBB1",
-    darkHex: "#9A6246",
     sourceTokens: ["Primary / 900 11"],
     usage: "Warm supporting surface.",
     cssVariable: "--uc-peach-200",
@@ -582,8 +518,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "peach-300",
     name: "Peach 300",
     paletteId: "peach",
-    lightHex: "#FFBDA5",
-    darkHex: "#A86B4F",
     sourceTokens: ["Primary / Main 14"],
     usage: "Warm supporting accent.",
     cssVariable: "--uc-peach-300",
@@ -592,8 +526,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-taxes-penalties",
     name: "PFM Taxes and Penalties",
     paletteId: "pfm",
-    lightHex: "#7757A4",
-    darkHex: "#9574BF",
     sourceTokens: ["PFM / Taxes and penalties"],
     usage: "Personal finance category color for taxes and penalties transactions.",
     cssVariable: "--uc-pfm-taxes-penalties",
@@ -602,8 +534,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-groceries",
     name: "PFM Groceries",
     paletteId: "pfm",
-    lightHex: "#A33694",
-    darkHex: "#C355B1",
     sourceTokens: ["PFM / Groceries"],
     usage: "Personal finance category color for groceries.",
     cssVariable: "--uc-pfm-groceries",
@@ -612,8 +542,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-lifestyle",
     name: "PFM Lifestyle",
     paletteId: "pfm",
-    lightHex: "#388BCA",
-    darkHex: "#55A2DC",
     sourceTokens: ["PFM / Lifestyle"],
     usage: "Personal finance category color for lifestyle and personal care.",
     cssVariable: "--uc-pfm-lifestyle",
@@ -622,8 +550,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-investments",
     name: "PFM Investments",
     paletteId: "pfm",
-    lightHex: "#363338",
-    darkHex: "#88858A",
     sourceTokens: ["PFM / Investments"],
     usage: "Personal finance category color for investments.",
     cssVariable: "--uc-pfm-investments",
@@ -632,8 +558,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-internal",
     name: "PFM Internal",
     paletteId: "pfm",
-    lightHex: "#0D5870",
-    darkHex: "#5190A6",
     sourceTokens: ["PFM / Internal"],
     usage: "Personal finance category color for internal own-account movements.",
     cssVariable: "--uc-pfm-internal",
@@ -642,8 +566,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-income",
     name: "PFM Income",
     paletteId: "pfm",
-    lightHex: "#05829A",
-    darkHex: "#3499AD",
     sourceTokens: ["PFM / Income"],
     usage: "Personal finance category color for income; intentionally aligned with the shared teal-blue action family.",
     cssVariable: "--uc-pfm-income",
@@ -652,8 +574,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-utilities",
     name: "PFM Utilities",
     paletteId: "pfm",
-    lightHex: "#006375",
-    darkHex: "#4693A2",
     sourceTokens: ["PFM / Utilities"],
     usage: "Personal finance category color for utilities; intentionally aligned with Teal Deep.",
     cssVariable: "--uc-pfm-utilities",
@@ -662,8 +582,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-exclude-budget",
     name: "PFM Exclude from Budget",
     paletteId: "pfm",
-    lightHex: "#B91823",
-    darkHex: "#E04950",
     sourceTokens: ["PFM / Exclude from budget"],
     usage: "Personal finance category color for excluded spend.",
     cssVariable: "--uc-pfm-exclude-budget",
@@ -672,8 +590,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-shopping",
     name: "PFM Shopping",
     paletteId: "pfm",
-    lightHex: "#9A000B",
-    darkHex: "#DA5251",
     sourceTokens: ["PFM / Shopping"],
     usage: "Personal finance category color for shopping.",
     cssVariable: "--uc-pfm-shopping",
@@ -682,8 +598,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-insurance",
     name: "PFM Insurance",
     paletteId: "pfm",
-    lightHex: "#004C3D",
-    darkHex: "#569482",
     sourceTokens: ["PFM / Insurance"],
     usage: "Personal finance category color for insurance.",
     cssVariable: "--uc-pfm-insurance",
@@ -692,8 +606,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-home",
     name: "PFM Home",
     paletteId: "pfm",
-    lightHex: "#008574",
-    darkHex: "#309B88",
     sourceTokens: ["PFM / Home"],
     usage: "Personal finance category color for home.",
     cssVariable: "--uc-pfm-home",
@@ -702,8 +614,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-education",
     name: "PFM Education",
     paletteId: "pfm",
-    lightHex: "#5E3D32",
-    darkHex: "#A17C73",
     sourceTokens: ["PFM / Education"],
     usage: "Personal finance category color for education.",
     cssVariable: "--uc-pfm-education",
@@ -712,8 +622,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-transportation",
     name: "PFM Transportation",
     paletteId: "pfm",
-    lightHex: "#E67300",
-    darkHex: "#FD8C46",
     sourceTokens: ["PFM / Transportation"],
     usage: "Personal finance category color for transportation.",
     cssVariable: "--uc-pfm-transportation",
@@ -722,8 +630,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-leisure-time",
     name: "PFM Leisure Time",
     paletteId: "pfm",
-    lightHex: "#E01E25",
-    darkHex: "#F8434C",
     sourceTokens: ["PFM / Leisure time"],
     usage: "Personal finance category color for leisure time.",
     cssVariable: "--uc-pfm-leisure-time",
@@ -732,8 +638,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-healthcare",
     name: "PFM Healthcare",
     paletteId: "pfm",
-    lightHex: "#DD1860",
-    darkHex: "#F63E7B",
     sourceTokens: ["PFM / Healthcare"],
     usage: "Personal finance category color for healthcare.",
     cssVariable: "--uc-pfm-healthcare",
@@ -742,8 +646,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-children",
     name: "PFM Children",
     paletteId: "pfm",
-    lightHex: "#006375",
-    darkHex: "#4693A2",
     sourceTokens: ["PFM / Children"],
     usage: "Personal finance category color for children-related spend.",
     cssVariable: "--uc-pfm-children",
@@ -752,8 +654,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-wallet",
     name: "PFM Wallet",
     paletteId: "pfm",
-    lightHex: "#7E5B01",
-    darkHex: "#A28040",
     sourceTokens: ["PFM / Wallet"],
     usage: "Personal finance category color for wallet and cash-like activity.",
     cssVariable: "--uc-pfm-wallet",
@@ -762,8 +662,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-transfers",
     name: "PFM Transfers",
     paletteId: "pfm",
-    lightHex: "#359F42",
-    darkHex: "#4CB65D",
     sourceTokens: ["PFM / Transfers"],
     usage: "Personal finance category color for transfers.",
     cssVariable: "--uc-pfm-transfers",
@@ -772,8 +670,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-finance",
     name: "PFM Finance",
     paletteId: "pfm",
-    lightHex: "#535453",
-    darkHex: "#858685",
     sourceTokens: ["PFM / Finance"],
     usage: "Personal finance category color for finance-related activity.",
     cssVariable: "--uc-pfm-finance",
@@ -782,8 +678,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-uncategorized",
     name: "PFM Uncategorized",
     paletteId: "pfm",
-    lightHex: "#007A6B",
-    darkHex: "#389987",
     sourceTokens: ["PFM / Uncategorized"],
     usage: "Fallback personal finance category color for uncategorized items.",
     cssVariable: "--uc-pfm-uncategorized",
@@ -792,8 +686,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-atm",
     name: "PFM ATM",
     paletteId: "pfm",
-    lightHex: "#388BCA",
-    darkHex: "#55A2DC",
     sourceTokens: ["PFM / ATM"],
     usage: "Personal finance category color for ATM activity.",
     cssVariable: "--uc-pfm-atm",
@@ -802,8 +694,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "pfm-fx",
     name: "PFM FX",
     paletteId: "pfm",
-    lightHex: "#244858",
-    darkHex: "#688C9C",
     sourceTokens: ["PFM / FX"],
     usage: "Personal finance category color for foreign exchange activity.",
     cssVariable: "--uc-pfm-fx",
@@ -812,8 +702,6 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "red-status",
     name: "Status Red",
     paletteId: "utility",
-    lightHex: "#CF3524",
-    darkHex: "#FF7A8E",
     sourceTokens: ["Primary / Main 25"],
     usage: "Status red in audit and warning surfaces.",
     cssVariable: "--uc-status-red",
@@ -822,13 +710,88 @@ export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [
     id: "gold-brown",
     name: "Gold Brown",
     paletteId: "utility",
-    lightHex: "#7E5B01",
-    darkHex: "#D4B04D",
     sourceTokens: ["Primary / Main Copy 4 2"],
     usage: "Utility brown/gold accent from source SVG.",
     cssVariable: "--uc-gold-brown",
   },
 ];
+
+/** The hex values are not stored here: they are resolved from colorTokens.ts, the single color source. */
+const PALETTE_COLORS: DesignSystemColor[] = RAW_DESIGN_SYSTEM_COLORS.map((color) => ({
+  ...color,
+  lightHex: resolveColorToken(color.cssVariable, "light"),
+  darkHex: resolveColorToken(color.cssVariable, "dark"),
+}));
+
+const ROLE_USAGE: Record<string, string> = {
+  "--uc-app-bg": "App background behind surfaces.",
+  "--uc-surface": "Cards, sheets and list rows.",
+  "--uc-surface-muted": "Subtle fills and section backgrounds.",
+  "--uc-surface-raised": "Elevated surfaces.",
+  "--uc-text": "Primary text.",
+  "--uc-text-muted": "Secondary text and captions.",
+  "--uc-text-subtle": "Tertiary text and placeholders.",
+  "--uc-text-inverse": "Text on filled actions and dark surfaces.",
+  "--uc-action": "Interactive color: links, selected states and active navigation.",
+  "--uc-action-strong": "Fill of the primary button.",
+  "--uc-action-hover": "Hover and pressed state of actions.",
+  "--uc-action-soft": "Soft action background for chips and tags.",
+  "--uc-action-soft-strong": "Stronger soft action background.",
+  "--uc-brand": "Brand red.",
+  "--uc-danger": "Errors and destructive actions.",
+  "--uc-icon": "Default icon color.",
+  "--uc-icon-muted": "Secondary icons.",
+  "--uc-border": "Borders and divider lines.",
+  "--uc-border-muted": "Subtle separators.",
+  "--uc-bottom-bar-bg": "Bottom navigation bar background.",
+  "--uc-sheet-bg": "Bottom sheet background.",
+  "--uc-overlay": "Backdrop behind sheets and dialogs.",
+  "--uc-static-white": "White that does not change with the theme.",
+  "--uc-static-black": "Dark that does not change with the theme.",
+};
+
+const humanize = (name: string) =>
+  name
+    .replace(/^--uc-/, "")
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+/** A bare `r g b` triplet (used for alpha mixing) is shown as a real color so it has a swatch. */
+const displayValue = (value: string) => (/^\d+(\.\d+)?\s+\d+(\.\d+)?\s+\d+(\.\d+)?$/.test(value) ? `rgb(${value})` : value);
+
+const documented = new Set(RAW_DESIGN_SYSTEM_COLORS.map((color) => color.cssVariable));
+
+/** Every other color token (roles, banners, scoped, extras), so the page shows the whole source, not a subset. */
+const TOKEN_COLORS: DesignSystemColor[] = COLOR_TOKENS.filter(
+  (token) => token.group !== "web-alias" && !documented.has(token.name) && token.name.startsWith("--uc-"),
+).map((token) => {
+  const paletteId: ColorPaletteId =
+    token.group === "role" && ROLE_USAGE[token.name] !== undefined
+      ? "roles"
+      : token.name.startsWith("--uc-banner-")
+        ? "banners"
+        : token.group === "scope"
+          ? "scoped"
+          : token.group === "role"
+            ? "roles"
+            : "other";
+  const alias = token.light?.match(/^var\((--[A-Za-z0-9-]+)\)$/)?.[1];
+  return {
+    id: token.name.replace(/^--/, ""),
+    name: humanize(token.name),
+    paletteId,
+    lightHex: displayValue(resolveColorToken(token.name, "light")),
+    darkHex: displayValue(resolveColorToken(token.name, "dark")),
+    sourceTokens: [],
+    usage: ROLE_USAGE[token.name] ?? "",
+    cssVariable: token.name,
+    ...(alias ? { aliasOf: alias } : {}),
+  };
+});
+
+export const DESIGN_SYSTEM_COLORS: DesignSystemColor[] = [...PALETTE_COLORS, ...TOKEN_COLORS];
+
 
 export const APP_COLOR_AUDIT: AppColorAuditItem[] = [
   {
