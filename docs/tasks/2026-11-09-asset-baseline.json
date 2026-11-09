@@ -1,0 +1,31 @@
+{
+  "owner": "library-alignment 2026-11",
+  "baseCommit": "c73a79d6",
+  "reason": "Assets committed to main after the last baseline update by Genius Protect and RS Disposable cards work (commits 27bd389a and 4a3d6568). The strict inventory was not updated then.",
+  "originalCount": 1499,
+  "originalAggregate": "1fd2b0bdde335e5ad8beff2c4c2ad81071dd0856645f2b241a7cc38d0cf3f8a7",
+  "preservation": "Excluding the two additions and restoring the previous bytes of the one modified asset reproduces the previous Git-normalized path/blob SHA-256 aggregate. No other asset path or byte changed; audit code and assertions are unchanged.",
+  "addedCount": 2,
+  "added": [
+    {
+      "path": "src/assets/pi/ro/genius-protect/genius-protect-documents.svg",
+      "bytes": 343,
+      "sha256": "a2fd1cb05446f7025521cf431fff0c60b9c316ef2cdae5a807394209b6879533"
+    },
+    {
+      "path": "src/flows/rs/disposable-cards/assets/disposable-card-expiry-proposal.svg",
+      "bytes": 1089,
+      "sha256": "a456ff74dc1379c62d5d406d8798b33ed5f2604b2cf873b72b089f20802d3ad6"
+    }
+  ],
+  "modified": [
+    {
+      "path": "src/assets/pi/ro/genius-protect/genius-protect-coverage-accident.svg",
+      "bytes": 1740,
+      "sha256": "9f2bf6de260569c33904f66cf1ba4cdfb31b4806a24a76d58843fbdaba3c6d77",
+      "previousSha256": "7100e668ad9d87d29a3f5b890a2bd3e4051ec0593bf2c3cb2f70151d45084065"
+    }
+  ],
+  "newCount": 1501,
+  "newAggregate": "7443255c8bbe8ac6ed5b31ce8668a5754813739c03a012c887148a9f9ae5af57"
+}

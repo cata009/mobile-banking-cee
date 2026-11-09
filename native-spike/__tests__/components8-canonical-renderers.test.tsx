@@ -292,9 +292,14 @@ describe('page-8 families use the existing canonical RN renderers', () => {
       const props = host(country);
       const tree = mount(<More {...props} />);
       const cards = tree.root.findAllByType(BaselineMoreCard);
-      expect(cards.map(card => card.props.variant)).toEqual(
-        getMoreCardsForCountry(country),
-      );
+      // RO also shows Contract withdrawal ("my-requests") before Tutorials.
+      const expectedCards =
+        country === 'RO'
+          ? getMoreCardsForCountry(country).flatMap(variant =>
+              variant === 'tutorial' ? ['my-requests', variant] : [variant],
+            )
+          : getMoreCardsForCountry(country);
+      expect(cards.map(card => card.props.variant)).toEqual(expectedCards);
       const contacts = cards.find(card => card.props.variant === 'contacts');
       act(() => contacts!.props.onPress());
       expect(props.onNavigate).toHaveBeenCalledWith({ screen: 'contacts' });
