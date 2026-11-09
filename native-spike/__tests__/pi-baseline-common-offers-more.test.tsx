@@ -93,7 +93,10 @@ function mount(element: React.ReactElement) {
 }
 
 it.each([
-  ['RO', ['contacts', 'documents', 'settings', 'gdpr-consent', 'tutorial']],
+  [
+    'RO',
+    ['contacts', 'documents', 'settings', 'gdpr-consent', 'my-requests', 'tutorial'],
+  ],
   [
     'HU',
     [

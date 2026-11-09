@@ -15,6 +15,7 @@ import { BaselineTextField } from '../src/universal/BaselineTextField';
 import { DateField } from '../src/universal/DateField';
 import { ModalPortal } from '../src/universal/ModalPortal';
 import { SETTINGS_SECTIONS } from '@/app/config/settingsConfig';
+import { getDocumentsCountForCountry } from '@/app/config/documentsConfig';
 import More, {
   RoMoreCard,
 } from '../src/experiences/pi/current/baseline/more/More';
@@ -229,7 +230,7 @@ it('adds Contract withdrawal before Tutorials in RO and preserves the document b
     expect(
       tree.root.findByProps({ testID: 'ro-more-documents-badge' }).props
         .children,
-    ).toBe(8);
+    ).toBe(getDocumentsCountForCountry('RO'));
     expect(
       StyleSheet.flatten(
         tree.root.findByProps({ testID: 'ro-more-top-reserve' }).props.style,
