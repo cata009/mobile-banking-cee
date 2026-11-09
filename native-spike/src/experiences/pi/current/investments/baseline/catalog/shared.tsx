@@ -7,9 +7,8 @@ import {
   type TextStyle,
   type TextProps,
 } from 'react-native';
-import { SvgXml } from 'react-native-svg';
-import { getBrandLogo } from '@/app/config/brandLogos';
 import type { CurrentScreenProps } from '../../../contracts';
+import { BaselineBrandLogo } from '../../../../../../universal/BaselineBrandLogo';
 import { Text } from '../../../../../../universal/Typography';
 import { investmentColor } from '../Frame';
 
@@ -32,16 +31,7 @@ export function Logo({
   size?: number;
   label?: string;
 }) {
-  const logo = getBrandLogo(id);
-  return logo ? (
-    <View
-      accessibilityRole="image"
-      accessibilityLabel={label ?? logo.name}
-      style={[styles.layout1, { width: size, height: size }]}
-    >
-      <SvgXml xml={logo.svg} width={size} height={size} />
-    </View>
-  ) : null;
+  return <BaselineBrandLogo id={id} size={size} label={label} />;
 }
 export function Copy({
   host,
@@ -193,7 +183,6 @@ const styles = StyleSheet.create({
   radioRow: { minHeight: 48, paddingVertical: 8, borderBottomWidth: 0 },
   checkbox: { borderRadius: 2 },
   radio: { borderRadius: 10 },
-  layout1: { flexShrink: 0 },
   layout2: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   layout3: {
     width: 20,
