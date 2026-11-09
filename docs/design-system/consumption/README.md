@@ -47,6 +47,8 @@ adapter counts as aligned.
 | Appointment `AppointmentSheet` (also `SelectionSheet`, `CalendarSheet`, `AccountSelectionSheet`) | library `BaselineBottomSheet` |
 | `RoBaselineCategorySheet` (change category) | library `BaselineBottomSheet` with the new `fixedHeight` option (full-height panel, scrolling list, pinned action) |
 | `BankingSheet` (internal transfer, schedule) | adapter over `BaselineBottomSheet`; keeps the original 16 px inset until the banking forms are reviewed |
+| Offers `BaselineProductsTabs` (Banking / ShopSmart) | adapter over `BaselineMailboxTabs`: 18 px labels like every other tab strip (decision: tabs are 18 px everywhere; they were 20 px here) |
+| `FilterDivider` (investment history filters) and `DepositDivider` (Future Gain deposit) | library `BaselineSectionDivider` `medium-title`: 14 px title, text inset 24, rule across the width (decision: section titles with a rule are 14 px; they were 18 px) |
 | `BankingButton` | library `PrimaryButton` (same 48 / radius 4 / action-strong, 0.3 opacity and 18 px label when disabled) |
 | Romanian profile `ConsentToggle` | library `ToggleButton`, row keeps the press and the accessible name |
 | `SourceOfferCard` | adapter over `BaselineProductOfferCard` (which gained optional `testID` and `accessibilityLabel`) |
@@ -77,8 +79,6 @@ Design System Figma file and need individual approval before promotion. Nothing 
    - `HistoryHomeIndicator` is the phone home bar, and `FutureGainBanner` is already an adapter.
    - `BankingCopyToast` is the native renderer of the web `CopyToast` (a transient "copied" pill with its own hook),
      not a copy of `BaselineToast`, which is the icon/dot message toast.
-   - `DepositDivider` uses an 18 px title with a rule; the library section divider only has 14 px and 20 px variants.
-     Aligning it would change the size, so it needs a design decision (an 18 px variant or a 14 px title).
    - `PrimeEntryButton` is the Prime header control (pill with a glyph, overlay variant); there is no library
      counterpart.
    - **Key-value rows** (`OfferRow`, the Romanian profile `DataRow`, Genius Protect `DataRow`): a recurring label and
@@ -86,8 +86,6 @@ Design System Figma file and need individual approval before promotion. Nothing 
    - `AppointmentListRow` (date, meeting-type icon, three lines), `FilterRow` (muted title over a bold value, chevron
      or calendar glyph) and `CzRoboSecurityRow` (logo, quantity, prices, performance) are domain list items, not
      copies of `BaselineNavigationRow` or `BaselineDatedRow`.
-   - `BaselineProductsTabs` uses 20 px labels with a muted inactive underline; `BaselineMailboxTabs` uses 18 px with
-     a neutral rule. Same family, different spec: a tab size variant needs a decision.
    - Future Gain `Chips` use an accent fill when selected; `BaselinePill` selected is black. Different spec.
    - `BaselineInvestmentField` adds multiline, a secondary value and a `product-detail` variant on top of what
      `BaselineAccountInfoField` offers; extend the library field before replacing it.
@@ -110,8 +108,6 @@ Native, also kept:
 - `DesignCarousel` (virtual card design picker with mouse-drag paging) and `BaselinePfmPeriodCarousel` (a paging rail
   for the Spending periods, web and native variants) are behaviour components; the library only has the dots
   (`BaselineCarouselIndicator`), not a paging rail. A library "paged rail" would be a new component.
-- `FilterDivider` (investment history) and `DepositDivider` are the same 18 px title with a rule written twice with
-  slightly different rule geometry. They need an 18 px divider variant in Figma before they can be unified.
 
 Flows (web, judged against `src/app/components`, which the web previews consume):
 - Presentation chrome, not product UI: `FraudPresentationDialog`, `PrimePresentationDialog`.

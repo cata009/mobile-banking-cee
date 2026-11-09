@@ -11,6 +11,7 @@ import { getCountryConfig } from '@/app/registry/countryConfig';
 import { parseIsoDateOnly } from '@/app/utils/dateOnly';
 import type { Currency } from '@/data/products';
 import type { CurrentScreenProps } from '../../../contracts';
+import { BaselineSectionDivider } from '../../../../../../universal/BaselineSectionDivider';
 import { Text } from '../../../../../../universal/Typography';
 import { SourceCustomIcon } from '../../../../../../universal/SourceCustomIcon';
 import { investmentColor, investmentScrollStyle } from '../Frame';
@@ -236,16 +237,14 @@ function FilterDivider({
   host: CurrentScreenProps;
   title: string;
 }) {
-  const renderStyle9 = {
-    color: investmentColor(host, '--uc-text'),
-  } as const;
-  const renderStyle10 = {
-    backgroundColor: investmentColor(host, '--uc-border'),
-  } as const;
+  // The Design System section divider (medium title: 14 px, text inset 24, rule across the width).
   return (
     <View style={baselineStyles.inline15}>
-      <Text style={[baselineStyles.inline16, renderStyle9]}>{title}</Text>
-      <View style={[baselineStyles.inline17, renderStyle10]} />
+      <BaselineSectionDivider
+        title={title}
+        variant="medium-title"
+        dark={host.tokens.text.toLowerCase() !== '#262626'}
+      />
     </View>
   );
 }
@@ -940,24 +939,7 @@ const baselineStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   inline15: {
-    height: 32,
     marginBottom: 16,
-    paddingLeft: 24,
-    paddingRight: 16,
-    paddingTop: 6,
-    justifyContent: 'center',
-  },
-  inline16: {
-    fontFamily: 'UniCredit-bold',
-    fontSize: 18,
-    lineHeight: 22,
-  },
-  inline17: {
-    position: 'absolute',
-    bottom: 0,
-    left: 16,
-    width: 343,
-    height: 1,
   },
   inline18: {
     flex: 1,

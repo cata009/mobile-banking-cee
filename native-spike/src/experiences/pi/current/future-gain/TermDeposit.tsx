@@ -25,6 +25,7 @@ import {
 import type { CurrentScreenProps } from '../contracts';
 import { futureGainAvailableBalance } from './model';
 import { BaselineAmountField } from '../../../../universal/BaselineAmountField';
+import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDivider';
 import { BaselineDropdownField } from '../../../../universal/BaselineDropdownField';
 import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
@@ -140,13 +141,14 @@ function DepositDivider({
   host: CurrentScreenProps;
   title: string;
 }) {
+  // The Design System section divider (medium title: 14 px, text inset 24, rule across the width).
   return (
-    <View
-      style={[styles.sectionDivider, { borderBottomColor: host.tokens.border }]}
-    >
-      <Label host={host} strong size={18}>
-        {title}
-      </Label>
+    <View style={styles.sectionDivider}>
+      <BaselineSectionDivider
+        title={title}
+        variant="medium-title"
+        dark={host.tokens.text.toLowerCase() !== '#262626'}
+      />
     </View>
   );
 }
@@ -604,13 +606,8 @@ const styles = StyleSheet.create({
   },
   sectionDivider: {
     width: '100%',
-    height: 32,
     marginTop: 24,
     marginHorizontal: -24,
-    paddingTop: 6,
-    paddingLeft: 24,
-    paddingRight: 16,
-    borderBottomWidth: 1,
   },
   depositDescription: { marginTop: 24, lineHeight: 18 },
   opportunityHeading: {

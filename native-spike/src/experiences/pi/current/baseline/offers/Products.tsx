@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
   getProductsMenuForCountry,
   type ProductsCard,
@@ -17,7 +11,7 @@ import {
   BaselineHeaderActionButton,
   BaselineHeaderActionRail,
 } from '../../../../../universal/BaselineHeaderActions';
-import { Text } from '../../../../../universal/Typography';
+import { BaselineMailboxTabs } from '../../../../../universal/BaselineMailboxTabs';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { localized, localizeProductCard, RoOffersCatalog } from './Catalog';
 import ShopSmart from './ShopSmart';
@@ -116,40 +110,20 @@ export function BaselineProductsTabs({
   onChange: (tab: ProductsMenuTab) => void;
 }) {
   const duo = useDuoPreview();
+  // The canonical Design System tabs: 18 px labels, the same as every other two-item tab strip.
   return (
-    <View style={[s.tabs, duo ? { marginHorizontal: 24 } : undefined]}>
-      {[
-        { id: 'banking' as const, label: bankingLabel },
-        { id: 'shopsmart' as const, label: shopSmartLabel },
-      ].map(item => (
-        <Pressable
-          key={item.id}
-          accessibilityRole="tab"
-          accessibilityLabel={item.label}
-          accessibilityState={{ selected: item.id === activeTab }}
-          onPress={() => onChange(item.id)}
-          style={[
-            s.tab,
-            item.id === activeTab ? s.tabSelected : s.tabInactive,
-            {
-              borderBottomColor:
-                item.id === activeTab ? host.tokens.text : host.tokens.muted,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              s.tabLabel,
-              {
-                color:
-                  item.id === activeTab ? host.tokens.text : host.tokens.muted,
-              },
-            ]}
-          >
-            {item.label}
-          </Text>
-        </Pressable>
-      ))}
+    <View style={duo ? s.duoTabs : undefined}>
+      <BaselineMailboxTabs
+        ariaLabel="Offers tabs"
+        withTopMargin={false}
+        tabs={[
+          { id: 'banking', label: bankingLabel },
+          { id: 'shopsmart', label: shopSmartLabel },
+        ]}
+        activeTabId={activeTab}
+        onChange={id => onChange(id as ProductsMenuTab)}
+        dark={host.tokens.text.toLowerCase() !== '#262626'}
+      />
     </View>
   );
 }
@@ -262,11 +236,7 @@ export default function Products(host: CurrentScreenProps) {
 const s = StyleSheet.create({
   root: { flex: 1 },
   topReserve: { height: 54 },
-  tabs: { height: 48, flexDirection: 'row' },
-  tab: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  tabSelected: { borderBottomWidth: 3 },
-  tabInactive: { borderBottomWidth: 1 },
-  tabLabel: { fontFamily: 'UniCredit-bold', fontSize: 20, lineHeight: 24 },
+  duoTabs: { marginHorizontal: 24 },
   body: { flex: 1 },
   webScroll: { transform: 'none' },
   content: { paddingBottom: 92 },
