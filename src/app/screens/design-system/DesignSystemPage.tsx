@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { FigmaLogo } from './FigmaLogo'
 import { DESIGN_SYSTEM_FIGMA_URL } from './documentationLinks'
+import { getFigmaFamilyForHash } from './figmaLibraryCatalog'
 import {
   getDefaultSectionForInventoryTab,
   getInventoryTabForHash,
@@ -21,10 +23,13 @@ export default function DesignSystemPage() {
   const lastGalleryHash = useRef(parseComponentDetailHash(initialHash) ? '#figma-library' : initialHash)
   const [inventoryTab, setInventoryTab] = useState<InventoryTab>(() => getInventoryTabForHash(initialHash))
   const [detailComponentId, setDetailComponentId] = useState<string | null>(() => parseComponentDetailHash(initialHash))
+  // A component page has its own header and breadcrumb, so the library header steps aside.
+  const [familyDetail, setFamilyDetail] = useState(() => !!getFigmaFamilyForHash(initialHash))
   useEffect(() => {
     const sync = () => {
       const detail = parseComponentDetailHash(window.location.hash)
       setDetailComponentId(detail)
+      setFamilyDetail(!!getFigmaFamilyForHash(window.location.hash))
       if (!detail) {
         lastGalleryHash.current = window.location.hash
         setInventoryTab(getInventoryTabForHash(window.location.hash))
@@ -44,31 +49,40 @@ export default function DesignSystemPage() {
   }
   return (
     <PlatformPageShell ref={scrollContainer} className="ds-workspace w-full self-stretch">
-        {!detailComponentId ? (
+        {!detailComponentId && !familyDetail ? (
           <PlatformPageHeader
             title="Design system"
             description="Explore the shared components, their variants and the source behind every interface."
             action={
-              <a className="ds-text-link" href={DESIGN_SYSTEM_FIGMA_URL} target="_blank" rel="noreferrer">
-                Design documentation ↗
+              <a
+                className="ds-figma-page-link"
+                href={DESIGN_SYSTEM_FIGMA_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open the design system in Figma"
+                title="Open the design system in Figma"
+              >
+                <FigmaLogo />
               </a>
             }
           />
         ) : null}
-        <div className="ds-inventory-tabs" role="tablist" aria-label="Design system inventory tabs">
-          {inventoryTabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              role="tab"
-              aria-selected={inventoryTab === tab}
-              onClick={() => handleInventoryTabChange(tab)}
-              className="ds-inventory-tab"
-            >
-              {inventoryTabLabels[tab]}
-            </button>
-          ))}
-        </div>
+        {detailComponentId || familyDetail ? null : (
+          <div className="ds-inventory-tabs" role="tablist" aria-label="Design system inventory tabs">
+            {inventoryTabs.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={inventoryTab === tab}
+                onClick={() => handleInventoryTabChange(tab)}
+                className="ds-inventory-tab"
+              >
+                {inventoryTabLabels[tab]}
+              </button>
+            ))}
+          </div>
+        )}
         <main className="min-w-0 flex-1">
           {detailComponentId ? (
             <ComponentDetailScreen

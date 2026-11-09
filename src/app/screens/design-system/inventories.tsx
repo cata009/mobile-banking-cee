@@ -3,7 +3,7 @@
  *
  * Extracted verbatim from DesignSystemPage.tsx.
  */
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AppIcon, ICON_INVENTORY, type IconInventoryItem } from '@/app/components/icons'
 import PfmCategoryIcon from '@/app/components/pfm/PfmCategoryIcon'
 import { PFM_CATEGORIES, PFM_ICON_SOURCE, type PfmCategoryDefinition } from '@/data/pfmCategories'
@@ -15,7 +15,7 @@ import {
   type ColorPaletteId,
   type DesignSystemColor,
 } from '@/app/registry/colorRegistry'
-import { InventorySearchField, InventoryStatGrid, Section } from './specimenShell'
+import { InventorySearchField, Section } from './specimenShell'
 import { inventoryTabCounts, inventoryTabLabels, inventoryTabs, type InventoryTab } from './inventoryNav'
 
 export function InventoryTabs({
@@ -258,17 +258,30 @@ export function ColorAuditRow({ item }: { item: (typeof APP_COLOR_AUDIT)[number]
   )
 }
 
+/** One Colors view at a time: a palette, or the app color map (anchored as #color-audit). */
+const APP_MAP_VIEW = 'app-map' as const
+type ColorView = ColorPaletteId | typeof APP_MAP_VIEW
+const colorViewFromHash = (): ColorView =>
+  typeof window !== 'undefined' && window.location.hash === '#color-audit' ? APP_MAP_VIEW : COLOR_PALETTES[0].id
+
 export function ColorInventory() {
-  const [selectedPaletteMeta, setSelectedPaletteMeta] = useState<(typeof COLOR_PALETTES)[number]>(COLOR_PALETTES[0])
+  const [selectedView, setSelectedView] = useState<ColorView>(colorViewFromHash)
   const [copiedValue, setCopiedValue] = useState<string | null>(null)
   const [colorSearchQuery, setColorSearchQuery] = useState('')
-  const selectedPalette: ColorPaletteId = selectedPaletteMeta.id
+  const isAppMapView = selectedView === APP_MAP_VIEW
+  useEffect(() => {
+    const syncFromHash = () => {
+      if (window.location.hash === '#color-audit') setSelectedView(APP_MAP_VIEW)
+    }
+    window.addEventListener('hashchange', syncFromHash)
+    return () => window.removeEventListener('hashchange', syncFromHash)
+  }, [])
   const normalizedColorQuery = colorSearchQuery.trim().toLowerCase()
   const matchesColorQuery = (values: string[]) =>
     normalizedColorQuery.length === 0 || values.join(' ').toLowerCase().includes(normalizedColorQuery)
   const selectedColors = DESIGN_SYSTEM_COLORS.filter(
     (color) =>
-      color.paletteId === selectedPalette &&
+      color.paletteId === selectedView &&
       matchesColorQuery([
         color.id,
         color.name,
@@ -292,70 +305,63 @@ export function ColorInventory() {
     <>
       <Section
         id="colors"
-        title="Color palettes"
-        description="Every color in the app, in one source (src/app/registry/colorTokens.ts). The web CSS and the React Native demo are generated from it, so changing a value or a role here changes both. Palettes come from screenshots/Colors.svg; Roles are what components actually use (for example the primary button fill)."
       >
-        <div className="sticky top-0 z-20 -mx-6 mb-6 bg-[var(--uc-surface-muted)] px-6 py-3 xl:-mx-8 xl:px-8">
+        <div className="ds-inventory-search">
           <InventorySearchField
             value={colorSearchQuery}
             onChange={setColorSearchQuery}
             placeholder="Search colors"
             label="Search colors"
           />
+        </div>
 
-          <div className="flex flex-wrap gap-2 pt-3" role="tablist" aria-label="Color palettes">
+        <div className="ds-figma-layout">
+          <nav className="ds-figma-page-nav ds-side-nav" aria-label="Color views">
+            <p className="ds-eyebrow">Palettes</p>
             {COLOR_PALETTES.map((palette) => {
               const count = DESIGN_SYSTEM_COLORS.filter((color) => color.paletteId === palette.id).length
-              const isActive = selectedPalette === palette.id
               return (
                 <button
                   key={palette.id}
                   type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setSelectedPaletteMeta(palette)}
-                  className={`rounded-full border px-4 py-2 text-left text-[13px] transition-colors ${
-                    isActive
-                      ? 'border-[var(--uc-action)] bg-[var(--uc-action-strong)] text-[var(--uc-static-white)]'
-                      : 'border-[var(--uc-border)] bg-[var(--uc-app-bg)] text-[var(--uc-text-muted)] hover:border-[var(--uc-action)]'
-                  }`}
+                  aria-current={selectedView === palette.id ? 'page' : undefined}
+                  onClick={() => setSelectedView(palette.id)}
                 >
-                  <span className="font-['UniCredit:Bold',sans-serif]">{palette.label}</span>
-                  <span className="ml-2 opacity-75">{count}</span>
+                  {palette.label} <span>{count}</span>
                 </button>
               )
             })}
+            <button
+              type="button"
+              aria-current={isAppMapView ? 'page' : undefined}
+              onClick={() => setSelectedView(APP_MAP_VIEW)}
+            >
+              App color map <span>{APP_COLOR_AUDIT.length}</span>
+            </button>
+          </nav>
+          <div className="ds-figma-results" id="color-audit">
+            <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
+              {isAppMapView ? (
+                visibleAuditRows.length > 0 ? (
+                  visibleAuditRows.map((item) => (
+                    <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
+                  ))
+                ) : (
+                  <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
+                    No app color rows match this search.
+                  </div>
+                )
+              ) : selectedColors.length > 0 ? (
+                selectedColors.map((color) => (
+                  <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
+                ))
+              ) : (
+                <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
+                  No colors match this search.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
-          {selectedColors.length > 0 ? (
-            selectedColors.map((color) => (
-              <ColorCard key={color.id} color={color} copiedValue={copiedValue} onCopy={handleCopy} />
-            ))
-          ) : (
-            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
-              No colors match this search.
-            </div>
-          )}
-        </div>
-      </Section>
-
-      <Section
-        id="color-audit"
-        title="App color map"
-        description="App color usage mapped back to design-system tokens. Remaining exceptions are treated as decorative or brand-like assets, not reusable UI colors."
-      >
-        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
-          {visibleAuditRows.length > 0 ? (
-            visibleAuditRows.map((item) => (
-              <ColorAuditRow key={`${item.sourceColor}-${item.targetToken}`} item={item} />
-            ))
-          ) : (
-            <div className="rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-6 text-[14px] text-[var(--uc-text-muted)] sm:col-span-2">
-              No app color rows match this search.
-            </div>
-          )}
         </div>
       </Section>
     </>
@@ -385,22 +391,15 @@ export function TypographyInventory() {
   return (
     <Section
       id="typography"
-      title="Typography"
-      description="Canonical typography tokens derived from the supplied Figma taxonomy. Active PI surfaces should call these named tokens instead of hardcoding font sizes, so a future token change propagates globally."
     >
-      <InventoryStatGrid
-        items={[
-          ['Named tokens', TYPOGRAPHY_TOKENS.length],
-          ['Visible', visibleTypographyTokens.length],
-        ]}
-      />
-
-      <InventorySearchField
-        value={typographySearchQuery}
-        onChange={setTypographySearchQuery}
-        placeholder="Search typography"
-        label="Search typography"
-      />
+      <div className="ds-inventory-search">
+        <InventorySearchField
+          value={typographySearchQuery}
+          onChange={setTypographySearchQuery}
+          placeholder="Search typography"
+          label="Search typography"
+        />
+      </div>
 
       {visibleTypographyTokens.length > 0 ? (
         <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(170px,1fr))]">
@@ -798,32 +797,20 @@ export function IconInventory() {
   const [iconSearchQuery, setIconSearchQuery] = useState('')
   const visibleIcons = ICON_INVENTORY.filter((icon) => matchesIconSearch(icon, iconSearchQuery))
   const visiblePfmIcons = PFM_CATEGORIES.filter((category) => matchesPfmIconSearch(category, iconSearchQuery))
-  const customCount = ICON_INVENTORY.filter((icon) => icon.source === 'custom').length
-  const lucideCount = ICON_INVENTORY.filter((icon) => icon.source === 'lucide').length
   const hasVisibleResults = visibleIcons.length > 0 || visiblePfmIcons.length > 0
 
   return (
     <Section
       id="icons"
-      title="Icon registry"
-      description="Single source of truth for reusable product icons, plus the PFM category icon map used by spending surfaces."
     >
-      <InventoryStatGrid
-        items={[
-          ['App icons', ICON_INVENTORY.length],
-          ['PFM icons', PFM_CATEGORIES.length],
-          ['Visible', visibleIcons.length + visiblePfmIcons.length],
-          ['Custom SVG', customCount],
-          ['Lucide wrappers', lucideCount],
-        ]}
-      />
-
-      <InventorySearchField
-        value={iconSearchQuery}
-        onChange={setIconSearchQuery}
-        placeholder="Search icons"
-        label="Search icons"
-      />
+      <div className="ds-inventory-search">
+        <InventorySearchField
+          value={iconSearchQuery}
+          onChange={setIconSearchQuery}
+          placeholder="Search icons"
+          label="Search icons"
+        />
+      </div>
 
       {visibleIcons.length > 0 ? (
         <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] xl:grid-cols-4">

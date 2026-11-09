@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { FigmaLogo } from './FigmaLogo'
 import FigmaLibraryFamilyView, { FigmaLivePreview } from './FigmaLibraryFamily'
 import { InventorySearchField } from './specimenShell'
 import { COMPONENT_REGISTRY } from '@/app/registry/componentRegistry'
@@ -7,10 +8,7 @@ import { getNativeDesignSystemPreview } from '@/features/demo-native/designSyste
 import { getSectionForHash } from './inventoryNav'
 import { getFigmaLibraryReference } from './figmaLibraryReferences'
 import {
-  FIGMA_LIBRARY_CAPTURED_ON,
-  FIGMA_LIBRARY_FAMILY_COUNT,
   FIGMA_LIBRARY_PAGES,
-  FIGMA_LIBRARY_VARIANT_COUNT,
   FIGMA_IMPLEMENTATION_GROUPS,
   getFigmaFamilyExamples,
   getFigmaFamilyForHash,
@@ -29,7 +27,6 @@ function pageForHash(hash: string) {
 export default function FigmaLibraryInventory() {
   const [query, setQuery] = useState('')
   const [pageId, setPageId] = useState(() => pageForHash(window.location.hash))
-  const [coverage, setCoverage] = useState('all')
   const [familyHash, setFamilyHash] = useState(() => window.location.hash)
   const root = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -46,41 +43,32 @@ export default function FigmaLibraryInventory() {
       FIGMA_LIBRARY_PAGES.filter((page) => pageId === 'all' || page.nodeId === pageId)
         .map((page) => ({
           page,
-          implementations:
-            coverage === 'pending' || coverage === 'references'
-              ? []
-              : FIGMA_IMPLEMENTATION_GROUPS.filter(
-                  (group) =>
-                    group.page.nodeId === page.nodeId &&
-                    group.sources.some((family) => matchesFigmaFamily(page, family, query)),
-                ),
-          pending:
-            coverage === 'implemented' || coverage === 'references'
-              ? []
-              : page.families.filter(
-                  (family) =>
-                    !getFigmaFamilyExamples(family.nodeId).length &&
-                    !getFigmaLibraryReference(family.nodeId) &&
-                    matchesFigmaFamily(page, family, query),
-                ),
-          references:
-            coverage === 'implemented' || coverage === 'pending'
-              ? []
-              : page.families.filter(
-                  (family) =>
-                    !getFigmaFamilyExamples(family.nodeId).length &&
-                    getFigmaLibraryReference(family.nodeId) &&
-                    matchesFigmaFamily(page, family, query),
-                ),
+          implementations: FIGMA_IMPLEMENTATION_GROUPS.filter(
+            (group) =>
+              group.page.nodeId === page.nodeId &&
+              group.sources.some((family) => matchesFigmaFamily(page, family, query)),
+          ),
+          pending: page.families.filter(
+            (family) =>
+              !getFigmaFamilyExamples(family.nodeId).length &&
+              !getFigmaLibraryReference(family.nodeId) &&
+              matchesFigmaFamily(page, family, query),
+          ),
+          references: page.families.filter(
+            (family) =>
+              !getFigmaFamilyExamples(family.nodeId).length &&
+              getFigmaLibraryReference(family.nodeId) &&
+              matchesFigmaFamily(page, family, query),
+          ),
         }))
         .filter(
           (group) =>
             group.implementations.length ||
             group.pending.length ||
             group.references.length ||
-            (!group.page.families.length && !query.trim() && coverage === 'all'),
+            (!group.page.families.length && !query.trim()),
         ),
-    [pageId, query, coverage],
+    [pageId, query],
   )
   const count = groups.reduce((sum, group) => sum + group.implementations.length, 0)
   const pendingCount = groups.reduce((sum, group) => sum + group.pending.length, 0)
@@ -101,51 +89,17 @@ export default function FigmaLibraryInventory() {
     )
   return (
     <div ref={root} className="ds-figma-library" id="figma-library">
-      <div className="ds-figma-summary" aria-label="Design system coverage">
-        <div>
-          <strong>{FIGMA_IMPLEMENTATION_GROUPS.length}</strong>
-          <span>live component entries</span>
-        </div>
-        <div>
-          <strong>{FIGMA_LIBRARY_PAGES.length}</strong>
-          <span>Figma sections</span>
-        </div>
-        <div>
-          <strong>{FIGMA_LIBRARY_FAMILY_COUNT}</strong>
-          <span>source families reviewed in the index</span>
-        </div>
-        <div>
-          <strong>{FIGMA_LIBRARY_VARIANT_COUNT}</strong>
-          <span>authored Figma variants</span>
-        </div>
-      </div>
-      <p className="ds-figma-provenance">
-        Organized by the main Figma library · source inventory {FIGMA_LIBRARY_CAPTURED_ON}. Each live entry reuses its
-        shared implementation. Source families awaiting alignment are listed separately within their section.
-      </p>
-      <div className="ds-figma-controls">
+      <div className="ds-inventory-search">
         <InventorySearchField
           value={query}
           onChange={setQuery}
-          placeholder="Search components, variants or source IDs"
+          placeholder="Search components"
           label="Search components"
         />
-        <label className="ds-figma-select-label">
-          Show
-          <select
-            aria-label="Filter implementation coverage"
-            value={coverage}
-            onChange={(event) => setCoverage(event.target.value)}
-          >
-            <option value="all">Components and alignment list</option>
-            <option value="implemented">Live components</option>
-            <option value="pending">Awaiting alignment</option>
-            <option value="references">Design and platform references</option>
-          </select>
-        </label>
       </div>
       <div className="ds-figma-layout">
-        <nav className="ds-figma-page-nav" aria-label="Component sections">
+        <nav className="ds-figma-page-nav ds-side-nav" aria-label="Component sections">
+          <p className="ds-eyebrow">Sections</p>
           <button type="button" aria-current={pageId === 'all' ? 'page' : undefined} onClick={() => choosePage('all')}>
             All components <span>{FIGMA_IMPLEMENTATION_GROUPS.length}</span>
           </button>
@@ -156,7 +110,8 @@ export default function FigmaLibraryInventory() {
               aria-current={pageId === page.nodeId ? 'page' : undefined}
               onClick={() => choosePage(page.nodeId)}
             >
-              {page.name}
+              {page.name}{' '}
+              <span>{FIGMA_IMPLEMENTATION_GROUPS.filter((group) => group.page.nodeId === page.nodeId).length}</span>
             </button>
           ))}
         </nav>
@@ -173,9 +128,9 @@ export default function FigmaLibraryInventory() {
             </select>
           </label>
           <p role="status" className="ds-figma-result-count">
-            {count} live {count === 1 ? 'entry' : 'entries'} · {pendingCount} source{' '}
-            {pendingCount === 1 ? 'family' : 'families'} awaiting alignment · {referenceCount} design/platform
-            references
+            {count} {count === 1 ? 'component' : 'components'}
+            {pendingCount ? ` · ${pendingCount} not implemented` : ''}
+            {referenceCount ? ` · ${referenceCount} design references` : ''}
           </p>
           {!groups.length ? (
             <div className="ds-empty">
@@ -186,7 +141,6 @@ export default function FigmaLibraryInventory() {
                 type="button"
                 onClick={() => {
                   setQuery('')
-                  setCoverage('all')
                   choosePage('all')
                 }}
               >
@@ -202,14 +156,16 @@ export default function FigmaLibraryInventory() {
               data-figma-page={page.nodeId}
             >
               <header className="ds-figma-page-heading">
-                <div>
-                  <p className="ds-eyebrow">
-                    {String(FIGMA_LIBRARY_PAGES.indexOf(page) + 1).padStart(2, '0')} / Components
-                  </p>
-                  <h2>{page.name}</h2>
-                </div>
-                <a className="ds-text-link" href={getFigmaNodeUrl(page.nodeId)} target="_blank" rel="noreferrer">
-                  Figma page ↗
+                <h2>{page.name}</h2>
+                <a
+                  className="ds-figma-page-link"
+                  href={getFigmaNodeUrl(page.nodeId)}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${page.name} in Figma`}
+                  title={`Open ${page.name} in Figma`}
+                >
+                  <FigmaLogo />
                 </a>
               </header>
               {!page.families.length ? (
@@ -240,23 +196,20 @@ export default function FigmaLibraryInventory() {
                       data-ds-component={group.id}
                     >
                       <div className="ds-figma-card-body">
-                        <span className="ds-figma-mapping-status">Live component</span>
-                        <h3>
-                          <a href={getFigmaFamilyHref(group.family.nodeId)}>
+                        <a className="ds-figma-card-header" href={getFigmaFamilyHref(group.family.nodeId)}>
+                                                    <h3>
                             {group.sources.length > 1
                               ? (COMPONENT_REGISTRY[group.id as ComponentId]?.label ?? group.label)
                               : group.label}
-                          </a>
-                        </h3>
-                        <p>
-                          {getNativeDesignSystemPreview(group.id)?.variants.length
-                            ? `${getNativeDesignSystemPreview(group.id)!.variants.length} live selections · `
-                            : ''}
-                          {group.sources.reduce((sum, family) => sum + family.variants.length, 0)} source variants ·{' '}
-                          {group.sources.length} Figma {group.sources.length === 1 ? 'family' : 'families'}
-                        </p>
-                        <a className="ds-text-link" href={getFigmaFamilyHref(group.family.nodeId)}>
-                          Documentation & inspect →
+                          </h3>
+                          <p>
+                            {(() => {
+                              const live = getNativeDesignSystemPreview(group.id)?.variants.length ?? 0
+                              const authored = group.sources.reduce((sum, family) => sum + family.variants.length, 0)
+                              const count = live || authored
+                              return `${count} ${count === 1 ? 'state' : 'states'}`
+                            })()}
+                          </p>
                         </a>
                       </div>
                       <div className="ds-figma-card-preview">
@@ -267,7 +220,7 @@ export default function FigmaLibraryInventory() {
                 </div>
               ) : null}
               {references.length ? (
-                <details className="ds-figma-alignment" open={coverage === 'references' || Boolean(query.trim())}>
+                <details className="ds-figma-alignment" open={Boolean(query.trim())}>
                   <summary>{references.length} design and platform references</summary>
                   <p className="ds-source-note">
                     Foundations, complete compositions and OS/legacy references retain their original Figma identities.
@@ -284,7 +237,7 @@ export default function FigmaLibraryInventory() {
                 </details>
               ) : null}
               {pending.length ? (
-                <details className="ds-figma-alignment" open={coverage === 'pending' || Boolean(query.trim())}>
+                <details className="ds-figma-alignment" open={Boolean(query.trim())}>
                   <summary>
                     {pending.length} source {pending.length === 1 ? 'family' : 'families'} awaiting alignment
                   </summary>

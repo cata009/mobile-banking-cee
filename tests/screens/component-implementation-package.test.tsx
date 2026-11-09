@@ -20,49 +20,50 @@ function renderDetail() {
 }
 
 describe('portable component implementation package', () => {
-  it('makes accessibility and geometry available in the documentation view', () => {
+  it('documents geometry and accessibility on Specs and links the Figma source once', () => {
     renderDetail()
 
-    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Primary button', level: 1 })).toBeInTheDocument()
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Overview', 'States', 'Specs', 'Code'])
+    expect(screen.getByRole('link', { name: 'Open Primary button in Figma' })).toHaveAttribute(
+      'href',
+      'https://www.figma.com/design/FKbbStgBIP9bFAMl3DPKHF/?node-id=10072-22172',
+    )
+    expect(screen.getByRole('button', { name: 'Measure' })).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(screen.getByRole('button', { name: 'Measure' }))
+    expect(screen.getByRole('button', { name: 'Measure' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('tab', { name: 'Specs' }))
+    expect(screen.getByRole('heading', { name: 'Dimensions and layout' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Behaviour' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Accessibility' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Anatomy, dimensions & spacing' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Open Figma documentation/i })).toHaveAttribute('href', 'https://www.figma.com/design/FKbbStgBIP9bFAMl3DPKHF/?node-id=10072-22172')
-    expect(screen.getByRole('button', { name: 'Inspector OFF' })).toHaveAttribute('aria-pressed', 'false')
-    fireEvent.click(screen.getByRole('button', { name: 'Inspector OFF' }))
-    expect(screen.getByRole('button', { name: 'Inspector ON' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('separates canonical mobile source from illustrative platform references', () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Implementation package' }))
-    expect(screen.getByText('Implemented source')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Swift reference' }))
-    expect(screen.getByText('Illustrative reference')).toBeInTheDocument()
-    expect(screen.getByText(/No production Swift implementation is mapped/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Code' }))
+    expect(screen.queryByText(/Illustrative/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Swift' }))
+    expect(screen.getByText(/Illustrative Swift reference. No production Swift implementation is mapped/)).toBeInTheDocument()
   })
 
   it('shows the complete vendor-neutral package for Primary button', () => {
     renderDetail()
 
-    // View is the default tab; switch to the Implementation package to assert its content.
-    fireEvent.click(screen.getByRole('button', { name: 'Implementation package' }))
-    expect(screen.getByRole('heading', { name: 'Implementation code' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Visual specifications' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Motion' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Code' }))
     expect(screen.getByRole('button', { name: 'React Native' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Swift reference' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Kotlin reference' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Swift' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Kotlin' })).toBeInTheDocument()
 
     const renderedText = document.body.textContent ?? ''
     expect(renderedText).not.toMatch(/asseco|asee|adaptive elements/i)
   })
 
-  it('renders States, Accessibility and Assets under the View tab', () => {
+  it('lists the implemented states on the States tab', () => {
     renderDetail()
 
-    fireEvent.click(screen.getByRole('button', { name: 'view' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'States' }))
 
-    expect(screen.getByRole('heading', { name: 'States' })).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Primary button states' })).toBeInTheDocument()
   })
 
   it('keeps the existing Code mode for components without a package', () => {
@@ -73,19 +74,15 @@ describe('portable component implementation package', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /code/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Implementation package' })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Code' })).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Specs' })).not.toBeInTheDocument()
   })
 
-  it('renders the real PrimaryButton in the isolated View preview', async () => {
+  it('renders the real PrimaryButton in the isolated preview', async () => {
     renderDetail()
 
-    fireEvent.click(screen.getByRole('button', { name: 'view' }))
-
-    // The View tab now also renders the States section, so the PrimaryButton
-    // appears in both the live preview and the state previews.
     expect((await screen.findAllByRole('button', { name: 'Continue' })).length).toBeGreaterThan(0)
-    expect(screen.queryByText(/No isolated live preview/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No live preview/i)).not.toBeInTheDocument()
   })
 
   it('ships self-contained reference samples for the Primary button package', () => {

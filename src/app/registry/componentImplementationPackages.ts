@@ -1,4 +1,5 @@
 import { CATALOG_COMPONENT_PACKAGES } from './catalogComponentPackages';
+import { COMPONENT_SUMMARIES, COMPONENT_USAGE } from './componentDocumentation';
 
 export interface ImplementationSpecification {
   label: string;
@@ -22,13 +23,18 @@ export interface ComponentImplementationPackage {
     required: boolean;
     summary: string;
   };
+  /** When to choose this component, and when another one fits better. */
+  usage?: {
+    use: readonly string[];
+    avoid: readonly string[];
+  };
 }
 
 export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplementationPackage> = {
   ...CATALOG_COMPONENT_PACKAGES,
   "ui.primary-button": {
     summary:
-      "Portable reference implementation for a primary action. The package documents the rendered component, native reference ports, visual values, supported states, motion, and accessibility behavior.",
+      "The main call to action on a screen: one per view, full width, with secondary, double-action and sticky footer compositions.",
     visualSpecifications: [
       { label: "Reference width", value: "327 px", detail: "May expand to the width supplied by its container." },
       { label: "Height", value: "48 px" },
@@ -73,7 +79,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "shell.status-bar": {
     summary:
-      "Portable reference for the simulated iOS status bar overlay shown at the top of every phone-frame screen. Documents layout values, light/dark/theme foreground variants, and the Co-Apping active tone.",
+      "Simulated iOS status bar overlay shown at the top of every phone-frame screen. Documents layout values, light/dark/theme foreground variants, and the Co-Apping active tone.",
     visualSpecifications: [
       { label: "Position", value: "absolute, inset-x-0 top-0", detail: "z-index 50, pointer-events: none, layered above phone content." },
       { label: "Container padding", value: "24px sides, 14px top, 16px bottom" },
@@ -102,7 +108,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "shell.home-header": {
     summary:
-      "Portable reference for the Home screen top bar: Prime entry pill, amount-visibility/profile/messages action rail, and an optional large title.",
+      "Home screen top bar: Prime entry pill, amount-visibility/profile/messages action rail, and an optional large title.",
     visualSpecifications: [
       { label: "Actions row height", value: "56px", detail: "Only rendered when showActions is true." },
       { label: "Container padding", value: "24px sides, 24px bottom" },
@@ -131,7 +137,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "shell.more-header": {
     summary:
-      "Portable reference for the More screen top bar: page title plus a profile/messages/logout action rail, with a Bosnia-specific contact-phone/messages variant.",
+      "More screen top bar: page title plus a profile/messages/logout action rail, with a Bosnia-specific contact-phone/messages variant.",
     visualSpecifications: [
       { label: "Container padding", value: "24px sides, 24px bottom" },
       { label: "Row", value: "min-height 32px, 8px gap", detail: "Title flexes to fill remaining width; actions sit in a trailing rail." },
@@ -157,7 +163,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "shell.page-header": {
     summary:
-      "Portable reference for the shared page header used across detail/list screens: a sticky compact bar with back/help actions plus an expanded large title that collapses on scroll.",
+      "Shared page header used across detail/list screens: a sticky compact bar with back/help actions plus an expanded large title that collapses on scroll.",
     visualSpecifications: [
       { label: "Sticky bar height", value: "48px", detail: "grid-cols [40px title 40px], 8px horizontal / 8px top padding." },
       { label: "Back / help / action targets", value: "40x40px" },
@@ -190,7 +196,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "shell.bottom-navigation": {
     summary:
-      "Portable reference for the fixed bottom tab bar: five tabs with 32px icons, a 24x2 active indicator bar, and 14px labels.",
+      "Fixed bottom tab bar: five tabs with 32px icons, a 24x2 active indicator bar, and 14px labels.",
     visualSpecifications: [
       { label: "Container", value: "375 x 54px", detail: "24px side padding, 8px inter-tab gap." },
       { label: "Icon slot", value: "32x32px" },
@@ -219,7 +225,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.section-heading-divider": {
     summary:
-      "Portable reference for the shared section/divider family: 13 Meniga-mapped states covering small/medium/large titles, counters, action/date rows, and Light Restyle variants, behind one legacy runtime API.",
+      "Shared section/divider family: 13 Meniga-mapped states covering small/medium/large titles, counters, action/date rows, and Light Restyle variants, behind one legacy runtime API.",
     visualSpecifications: [
       { label: "Standard width", value: "375px" },
       { label: "Light Restyle width", value: "343px" },
@@ -249,7 +255,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.bar": {
     summary:
-      "Portable reference for the Bar progress/status primitive: six mapped statuses with a 24px left-inset teal fill, plus a static thin divider state.",
+      "Bar progress/status primitive: six mapped statuses with a 24px left-inset teal fill, plus a static thin divider state.",
     visualSpecifications: [
       { label: "Standard size", value: "375 x 8px", detail: "role=\"meter\" with aria-valuemin 0 / aria-valuemax 327 / aria-valuenow tracking the active width." },
       { label: "Thin size", value: "279 x 1px", detail: "role=\"presentation\"; a static 109px --uc-neutral-700 segment over a --uc-neutral-300 track." },
@@ -278,7 +284,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.language-selector-button": {
     summary:
-      "Portable reference for the compact top-bar language toggle: a right-aligned uppercase language code over a 1px underline, used on pre-login surfaces.",
+      "Compact top-bar language toggle: a right-aligned uppercase language code over a 1px underline, used on pre-login surfaces.",
     visualSpecifications: [
       { label: "Layout", value: "flex-col, items-end, 1px gap" },
       { label: "Label typography", value: "uc-type-n5-strong, --uc-static-white", detail: "Renders the language code in uppercase via text-transform." },
@@ -301,7 +307,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.navigation-link": {
     summary:
-      "Portable reference for the dark-surface text link with a trailing chevron accessory, used for pre-login find-out-more actions.",
+      "Dark-surface text link with a trailing chevron accessory, used for pre-login find-out-more actions.",
     visualSpecifications: [
       { label: "Layout", value: "flex, items-center, 1px gap" },
       { label: "Label typography", value: "uc-type-n5-strong, whitespace-nowrap, --uc-static-white" },
@@ -323,7 +329,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.prelogin-heading": {
     summary:
-      "Portable reference for the three-line white pre-login hero heading: 38px bold H1, 24px bold H2, and 18px regular H3.",
+      "Three-line white pre-login hero heading: 38px bold H1, 24px bold H2, and 18px regular H3.",
     visualSpecifications: [
       { label: "Layout", value: "flex-col, 16px gap", detail: "The H1/H2 group uses an inner 32px gap." },
       { label: "H1", value: "38px bold / 40px line-height / 0.335px tracking" },
@@ -347,7 +353,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.radio-button": {
     summary:
-      "Portable reference for the radio-style selection row: a 32px selected/unselected glyph plus a bold label, used for language selection.",
+      "Radio-style selection row: a 32px selected/unselected glyph plus a bold label, used for language selection.",
     visualSpecifications: [
       { label: "Row padding", value: "24px horizontal, 20px vertical" },
       { label: "Icon slot", value: "32x32px", detail: "radio-selected / radio-unselected AppIcon glyphs." },
@@ -372,7 +378,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.link-button": {
     summary:
-      "Portable reference for the reusable text action with a chevron-link accessory: a centered, content-hugging button using the current action color.",
+      "Reusable text action with a chevron-link accessory: a centered, content-hugging button using the current action color.",
     visualSpecifications: [
       { label: "Layout", value: "flex w-fit, centered, 0 gap", detail: "Label and chevron sit directly adjacent." },
       { label: "Label typography", value: "13px bold uppercase / 16px line-height" },
@@ -398,7 +404,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.button-registry": {
     summary:
-      "Portable reference for the shared shadcn/Radix Button primitive used for generic, non-branded call-to-action rows across default, secondary, outline, ghost, and destructive variants.",
+      "Shared shadcn/Radix Button primitive used for generic, non-branded call-to-action rows across default, secondary, outline, ghost, and destructive variants.",
     visualSpecifications: [
       { label: "Height", value: "36px (default size)", detail: "sm=32px, lg=40px, icon=36x36px are also available via the size prop." },
       { label: "Corner radius", value: "6px (rounded-md)" },
@@ -429,7 +435,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.generic-controls": {
     summary:
-      "Portable reference for the vendored shadcn/Radix generic UI kit (Button, Badge, Input, Checkbox, Toggle, Toggle group, Slider, Progress, Separator, Skeleton, Alert, Tabs), kept deliberately generic and separate from bespoke UniCredit components.",
+      "Vendored shadcn/Radix generic UI kit (Button, Badge, Input, Checkbox, Toggle, Toggle group, Slider, Progress, Separator, Skeleton, Alert, Tabs), kept deliberately generic and separate from bespoke UniCredit components.",
     visualSpecifications: [
       { label: "Family selector", value: "12 primitives", detail: "Button, Badge, Input, Checkbox, Toggle, Toggle group, Slider, Progress, Separator, Skeleton, Alert, Tabs." },
       { label: "Styling", value: "Tailwind + class-variance-authority", detail: "Each primitive is a thin Radix/vendored wrapper; no bespoke UniCredit tokens beyond color-scheme integration." },
@@ -457,7 +463,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "co-apping.floating-button": {
     summary:
-      "Portable reference for the floating action button shown while a Co-Apping session is active, with an optional one-time slide-in entrance.",
+      "Floating action button shown while a Co-Apping session is active, with an optional one-time slide-in entrance.",
     visualSpecifications: [
       { label: "Size", value: "44 x 113px", detail: "Absolute positioned at top:432px, right:0, z-index 100." },
       { label: "Shape", value: "Custom Figma-patch SVG background", detail: "Fill --uc-green-bright." },
@@ -482,7 +488,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.text-field": {
     summary:
-      "Portable reference for the shared text input primitive with a floating label, helper/error messaging, and an optional trailing icon (used for the Dropdown variant).",
+      "Shared text input primitive with a floating label, helper/error messaging, and an optional trailing icon (used for the Dropdown variant).",
     visualSpecifications: [
       { label: "Divider", value: "0.5px bottom border", detail: "Color follows the focus/error/disabled state." },
       { label: "Label", value: "uc-type-n5", detail: "Floats above the value once focused or filled." },
@@ -522,7 +528,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.amount-field": {
     summary:
-      "Portable reference for the amount input variant: reuses Text field's states plus a 24px-spaced currency column with an optional chevron selector.",
+      "Amount input variant: reuses Text field's states plus a 24px-spaced currency column with an optional chevron selector.",
     visualSpecifications: [
       { label: "Layout", value: "flex, 24px gap", detail: "The text field flexes to fill remaining width; the currency column is content-width." },
       { label: "Currency label", value: "uc-type-n5, 14px" },
@@ -550,7 +556,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.code-field": {
     summary:
-      "Portable reference for the one-time-code field: four 44x64 numeric slots with paste distribution, arrow-key navigation, and accessible error messaging.",
+      "One-time-code field: four 44x64 numeric slots with paste distribution, arrow-key navigation, and accessible error messaging.",
     visualSpecifications: [
       { label: "Wrapper", value: "327px max-width, centered slot row", detail: "role=\"group\" with an aria-label." },
       { label: "Slot", value: "44x64px", detail: "8px radius, 1px border, N1 30px bold digits." },
@@ -581,7 +587,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.date-filter": {
     summary:
-      "Portable reference for the Date filter chip row: five-item and four-item states with a teal selected chip.",
+      "Date filter chip row: five-item and four-item states with a teal selected chip.",
     visualSpecifications: [
       { label: "Wrapper", value: "238x24px Figma preset", detail: "The experience preset retains its contextual periods and touch targets." },
       { label: "Chip", value: "35x22px Figma preset", detail: "3.5px radius and 14px bold label." },
@@ -607,7 +613,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.pill-sorting": {
     summary:
-      "Portable reference for the Pill sorting rail: four sort chips with a black selected/bold-white-label state.",
+      "Pill sorting rail: four sort chips with a black selected/bold-white-label state.",
     visualSpecifications: [
       { label: "Row", value: "375x40px, centered, 8px gap" },
       { label: "Chip", value: "24px height, 14.5px radius", detail: "8px/4px padding, 14px label with 15px line-height." },
@@ -631,7 +637,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.toggle-button": {
     summary:
-      "Portable reference for the 60x30 switch control: an animated 22px knob sliding between an unchecked gray track and a checked teal-bordered track.",
+      "60x30 switch control: an animated 22px knob sliding between an unchecked gray track and a checked teal-bordered track.",
     visualSpecifications: [
       { label: "Track", value: "60x30px", detail: "2px border; unchecked = --uc-text-muted border, checked = --uc-action border with white fill." },
       { label: "Knob", value: "22x22px", detail: "4px inset from the track edge; teal fill when checked, gray circle when unchecked." },
@@ -658,7 +664,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.navigation-row": {
     summary:
-      "Portable reference for the 18-case Navigation row family: icon/no-icon/toggle/special layouts sharing one 64-or-80px row contract.",
+      "18-case Navigation row family: icon/no-icon/toggle/special layouts sharing one 64-or-80px row contract.",
     visualSpecifications: [
       { label: "Width", value: "375px" },
       { label: "Row height", value: "64px or 80px", detail: "Controlled by the rowHeight prop." },
@@ -695,7 +701,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.profile-avatar": {
     summary:
-      "Portable reference for the 40px avatar family: full/inset photo, optional notification dot, initials fallback, and a gradient AI glyph.",
+      "40px avatar family: full/inset photo, optional notification dot, initials fallback, and a gradient AI glyph.",
     visualSpecifications: [
       { label: "Base size", value: "40x40px", detail: "Fully controlled via the size prop; all inner ratios scale proportionally." },
       { label: "Photo full", value: "fills the circle", detail: "object-cover, no inset." },
@@ -724,7 +730,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.ghost-banner": {
     summary:
-      "Portable reference for the dashed-border Ghost Banner: a leading icon, bold title, and optional multiline description, extracted from the Figma Banner component.",
+      "Dashed-border Ghost Banner: a leading icon, bold title, and optional multiline description, extracted from the Figma Banner component.",
     visualSpecifications: [
       { label: "Size", value: "327px wide, 92px Figma height", detail: "8px corner radius, dashed 1px --uc-text border, 16px padding." },
       { label: "Icon", value: "32x32px", detail: "add-circle by default, teal (--uc-action)." },
@@ -750,7 +756,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.info-banner": {
     summary:
-      "Portable reference for the solid-border Info Banner: informational messaging with an optional inline teal text action, extracted from the Figma Banner component.",
+      "Solid-border Info Banner: informational messaging with an optional inline teal text action, extracted from the Figma Banner component.",
     visualSpecifications: [
       { label: "Size", value: "327px wide, 153px Figma height", detail: "8px corner radius, solid 1px --uc-text border, 16px padding." },
       { label: "Icon", value: "32x32px", detail: "info-circle by default, --uc-text." },
@@ -776,7 +782,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.user-event-card": {
     summary:
-      "Portable reference for the User Event Card: a teal avatar circle with a bold title, multiline description, and optional text-link plus overflow control.",
+      "User Event Card: a teal avatar circle with a bold title, multiline description, and optional text-link plus overflow control.",
     visualSpecifications: [
       { label: "Size", value: "343px wide", detail: "8px corner radius, 0 4px 16px rgba(0,0,0,0.08) shadow, 16px padding." },
       { label: "Avatar", value: "48x48px circle, teal (--uc-action)", detail: "White 24px glyph centered inside." },
@@ -804,7 +810,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.helper-card": {
     summary:
-      "Portable reference for the solid teal Helper Card: a white icon, bold white title, and regular white body with an optional text link and close control.",
+      "Solid teal Helper Card: a white icon, bold white title, and regular white body with an optional text link and close control.",
     visualSpecifications: [
       { label: "Size", value: "343px wide", detail: "4px corner radius, solid teal (--uc-action) background, 16px padding." },
       { label: "Icon", value: "32x32px", detail: "info-circle by default, white." },
@@ -832,7 +838,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.pending-action-card": {
     summary:
-      "Portable reference for the Pending Action Card: a teal-gradient promo card with a bold white title/body and an optional expiring-tag pill.",
+      "Pending Action Card: a teal-gradient promo card with a bold white title/body and an optional expiring-tag pill.",
     visualSpecifications: [
       { label: "Size", value: "327 x 157px", detail: "8px corner radius, 24px padding." },
       { label: "Background", value: "linear-gradient(90deg, #007A91 0%, #44909E 100%)" },
@@ -858,7 +864,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.card": {
     summary:
-      "Portable reference for the Mastercard card artwork family: a single SVG-rendered component covering six debit/credit/virtual palettes at three controlled sizes.",
+      "Mastercard card artwork family: a single SVG-rendered component covering six debit/credit/virtual palettes at three controlled sizes.",
     visualSpecifications: [
       { label: "Figma base size", value: "64 x 40px", detail: "medium=96x60, large=160x100; corner radius scales proportionally (4px at figma size)." },
       { label: "Rendering", value: "Single inline SVG per instance", detail: "viewBox 0 0 64 40, preserveAspectRatio=none so the artwork stretches cleanly to the chosen size." },
@@ -886,7 +892,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "investments.fund-banner": {
     summary:
-      "Portable reference for the Investments fund CTA banner: a generic discovery variant plus six Figma-backed collection variants sharing one component.",
+      "Investments fund CTA banner: a generic discovery variant plus six Figma-backed collection variants sharing one component.",
     visualSpecifications: [
       { label: "Discovery size", value: "calc(100% - 32px) x 157px", detail: "16px side margins, 24px top margin." },
       { label: "Collection size", value: "full width, 126px minimum", detail: "Hugs multiline title/subtitle content instead of clipping it; never flex-shrinks." },
@@ -914,7 +920,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "products.offer-card": {
     summary:
-      "Portable reference for the Products offer carousel card: a chevron-background banner with a fixed right image column and standard/compact title-density variants.",
+      "Products offer carousel card: a chevron-background banner with a fixed right image column and standard/compact title-density variants.",
     visualSpecifications: [
       { label: "Size", value: "327 x 157px", detail: "8px corner radius, config-driven background/text color per tone." },
       { label: "Chevron background", value: "decorative SVG", detail: "161x157px, positioned left of center, tone-colored." },
@@ -942,7 +948,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "products.product-card": {
     summary:
-      "Portable reference for the Products menu card: a 164-wide entry tile with a config-driven background, per-card illustration placement, and standard/compact heights.",
+      "Products menu card: a 164-wide entry tile with a config-driven background, per-card illustration placement, and standard/compact heights.",
     visualSpecifications: [
       { label: "Standard size", value: "164 x 120px", detail: "16px padding." },
       { label: "Compact size", value: "164 x 72px", detail: "12px padding." },
@@ -970,7 +976,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "products.shopsmart-offer-card": {
     summary:
-      "Portable reference for the Shopsmart offer card: a bordered image-top card with an optional Activate pill (Offers 1) or free-shipping tag (Offers 2).",
+      "Shopsmart offer card: a bordered image-top card with an optional Activate pill (Offers 1) or free-shipping tag (Offers 2).",
     visualSpecifications: [
       { label: "Size", value: "327px wide", detail: "8px radius, 1px #666666 border." },
       { label: "Image", value: "full width, 130px (runtime) or 143px (Design System) height", detail: "Optional 20% black overlay via imageOverlay." },
@@ -998,7 +1004,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "home.account-balance-card": {
     summary:
-      "Portable reference for the primary account balance card: title, masked IBAN with copy action, an available/current-balance pair, and an optional progress bar for loan/deposit products.",
+      "Primary account balance card: title, masked IBAN with copy action, an available/current-balance pair, and an optional progress bar for loan/deposit products.",
     visualSpecifications: [
       { label: "Size", value: "311 x 197px", detail: "6px corner radius, 16px padding, layered soft shadow." },
       { label: "Title", value: "uc-type-n2-strong, 20px, teal (--uc-action)" },
@@ -1028,7 +1034,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "accounts.action-bar": {
     summary:
-      "Portable reference for the reusable 1-4 item account action bar: icon-over-label buttons with configurable alignment and per-item visibility.",
+      "Reusable 1-4 item account action bar: icon-over-label buttons with configurable alignment and per-item visibility.",
     visualSpecifications: [
       { label: "Container padding", value: "16px horizontal, 8px vertical" },
       { label: "Alignment", value: "start / center / end / between", detail: "'between' stretches each item to flex:1; other alignments use a fixed 82px item width with an 8px gap." },
@@ -1056,7 +1062,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "accounts.carousel-indicator": {
     summary:
-      "Portable reference for the account/product carousel dot indicator: individual dots for up to 4 items, or a sliding 5-dot window with mini end-caps for more.",
+      "Account/product carousel dot indicator: individual dots for up to 4 items, or a sliding 5-dot window with mini end-caps for more.",
     visualSpecifications: [
       { label: "Row height", value: "32px", detail: "13.591px backdrop blur, 6px inter-dot gap." },
       { label: "Active dot", value: "30 x 6px, rounded-full, teal (--uc-action)" },
@@ -1082,7 +1088,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "accounts.details-info-field": {
     summary:
-      "Portable reference for the Account Details title/subtitle row, with an optional trailing-icon (e.g. copy) variant.",
+      "Account Details title/subtitle row, with an optional trailing-icon (e.g. copy) variant.",
     visualSpecifications: [
       { label: "Height", value: "80px", detail: "Grid layout (content column + 40px icon column) when a trailing icon is supplied, flex otherwise." },
       { label: "Title", value: "uc-type-n4, uppercase" },
@@ -1107,7 +1113,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "messages.mailbox-tabs": {
     summary:
-      "Portable reference for the shared mailbox tab switcher: a 48px tab bar with an optional leading 'new' dot, equal-width or horizontally scrollable/draggable layouts, and an active bottom indicator.",
+      "Shared mailbox tab switcher: a 48px tab bar with an optional leading 'new' dot, equal-width or horizontally scrollable/draggable layouts, and an active bottom indicator.",
     visualSpecifications: [
       { label: "Height", value: "48px", detail: "1px bottom border across the whole bar." },
       { label: "Layout", value: "equal (2-col grid) or scrollable (flex, drag-to-scroll)" },
@@ -1135,7 +1141,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "accounts.transaction-search": {
     summary:
-      "Portable reference for the Account transaction search bar: a compact search row that swaps its trailing icon between Filter and Clear, plus an active/remove-filters expanded state.",
+      "Account transaction search bar: a compact search row that swaps its trailing icon between Filter and Clear, plus an active/remove-filters expanded state.",
     visualSpecifications: [
       { label: "Default height", value: "32px", detail: "10px corner radius, no outer padding." },
       { label: "Active/remove-filters height", value: "63px", detail: "16px horizontal / 2px vertical outer padding; row itself grows to 36px." },
@@ -1162,7 +1168,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "accounts.transaction-row": {
     summary:
-      "Portable reference for the account transaction list row: date, PFM category icon, label, and a signed/colored amount, with an optional split category-tap interaction.",
+      "Account transaction list row: date, PFM category icon, label, and a signed/colored amount, with an optional split category-tap interaction.",
     visualSpecifications: [
       { label: "Size", value: "375 x 80px", detail: "16px/20px padding." },
       { label: "Date column", value: "18px bold day + 14px bold month, 2px gap", detail: "16px gap to the icon." },
@@ -1188,7 +1194,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "payments.hero-card": {
     summary:
-      "Portable reference for the Payments primary hero card: a 120px-tall CTA with a title/description block and a right-aligned illustration or screenshot-backed image.",
+      "Payments primary hero card: a 120px-tall CTA with a title/description block and a right-aligned illustration or screenshot-backed image.",
     visualSpecifications: [
       { label: "Size", value: "120px tall, full width", detail: "8px corner radius." },
       { label: "Content padding", value: "20px sides, 16px top" },
@@ -1218,7 +1224,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "contacts.navigation-card": {
     summary:
-      "Portable reference for the Contacts entry row: a thin wrapper over the shared NavigationRow that maps a fixed set of contact icons to their glyphs.",
+      "Contacts entry row: a thin wrapper over the shared NavigationRow that maps a fixed set of contact icons to their glyphs.",
     visualSpecifications: [
       { label: "Row", value: "Delegates entirely to NavigationRow", detail: "Same 375px width, 80px height, 16px title/description typography as ui.navigation-row." },
       { label: "Icon mapping", value: "9 contact icons", detail: "prime, location, time, phone, block, email, website, youtube, x — each mapped to its own contact-* AppIcon glyph." },
@@ -1243,7 +1249,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "products.product-card-list-total": {
     summary:
-      "Portable reference for the Products evolution family (ProductCard + ProductsList + TotalRow): PI and SME styles across Default, Accordion, and Open list states.",
+      "Products evolution family (ProductCard + ProductsList + TotalRow): PI and SME styles across Default, Accordion, and Open list states.",
     visualSpecifications: [
       { label: "Card width", value: "327px (Figma)", detail: "16px padding, 4px corner radius." },
       { label: "Icon slot", value: "32x32px" },
@@ -1272,7 +1278,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.toast-message": {
     summary:
-      "Portable reference for the Toast message family: a status-dot pill (Action required / Aware) and a compact hug-content Google Pay confirmation variant.",
+      "Toast message family: a status-dot pill (Action required / Aware) and a compact hug-content Google Pay confirmation variant.",
     visualSpecifications: [
       { label: "Default size", value: "327 x 32px", detail: "16px corner radius, 8px pr, 20px icon-to-text gap." },
       { label: "Google Pay size", value: "174 x 35px, hug content", detail: "Centered label, no status dot." },
@@ -1298,7 +1304,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.wallet-button": {
     summary:
-      "Portable reference for the 48px wallet/payment button family: Google Wallet, Apple Wallet, and Click to Pay, each in condensed and 327px-long sizes, with Google copy localized per market.",
+      "48px wallet/payment button family: Google Wallet, Apple Wallet, and Click to Pay, each in condensed and 327px-long sizes, with Google copy localized per market.",
     visualSpecifications: [
       { label: "Height", value: "48px" },
       { label: "Sizes", value: "condensed (content-width, Apple fixed at 163px) or long (327px)" },
@@ -1330,7 +1336,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "ui.pill": {
     summary:
-      "Portable reference for the Meniga-normalized Pill button: a fixed 120x36 rounded action across primary, secondary, counter, loading, and activated states.",
+      "Meniga-normalized Pill button: a fixed 120x36 rounded action across primary, secondary, counter, loading, and activated states.",
     visualSpecifications: [
       { label: "Size", value: "120 x 36px", detail: "18px corner radius, 8px horizontal padding." },
       { label: "Label", value: "uc-type-n5-strong, 14px / 15px, centered, truncated to one line" },
@@ -1362,7 +1368,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "dialogs.logout-confirmation": {
     summary:
-      "Portable reference for the iOS-style logout confirmation alert: a centered overlay dialog with a message and Cancel/OK actions.",
+      "IOS-style logout confirmation alert: a centered overlay dialog with a message and Cancel/OK actions.",
     visualSpecifications: [
       { label: "Dialog box", value: "max-width 270px, 14px corner radius", detail: "Layered shadow; centered via an absolute inset-0 flex overlay." },
       { label: "Overlay", value: "40% black scrim", detail: "Clicking it also dismisses the dialog (calls onClose)." },
@@ -1386,7 +1392,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "cards.card-component": {
     summary:
-      "Portable reference for the Card management section: card-holder name and masked number above a horizontally scrollable carousel of shared Card artwork slots.",
+      "Card management section: card-holder name and masked number above a horizontally scrollable carousel of shared Card artwork slots.",
     visualSpecifications: [
       { label: "Frame", value: "375px wide", detail: "12px vertical gap, clips content, --uc-surface-muted (#F5F5F5) background." },
       { label: "Text block", value: "24px left padding, 8px gap", detail: "14px bold card-holder name, 18px bold masked card number." },
@@ -1409,7 +1415,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "prelogin.other-panel": {
     summary:
-      "Portable reference for the pre-login 'Other' menu panel: a bottom-sheet with Smart Banking, Exchange rates, ATM/branches, and an optional Co-Apping entry row.",
+      "Pre-login 'Other' menu panel: a bottom-sheet with Smart Banking, Exchange rates, ATM/branches, and an optional Co-Apping entry row.",
     visualSpecifications: [
       { label: "Sheet", value: "Bottom-anchored, 12px top corners", detail: "51% opaque black backdrop with a 5.9px blur; 24px vertical padding, 8px row gap." },
       { label: "Drag handle", value: "40x5px, rounded, centered", detail: "16px tap target; clicking it also dismisses the sheet." },
@@ -1433,7 +1439,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
 
   "prelogin.other-panel-basic": {
     summary:
-      "Portable reference for the pre-login 'Other' menu panel variant used where Co-Apping is unavailable: the same bottom-sheet without the Co-Apping row.",
+      "Pre-login 'Other' menu panel variant used where Co-Apping is unavailable: the same bottom-sheet without the Co-Apping row.",
     visualSpecifications: [
       { label: "Sheet", value: "Bottom-anchored, 12px top corners", detail: "51% opaque black backdrop with a 5.9px blur; 24px vertical padding, 8px row gap." },
       { label: "Drag handle", value: "40x5px, rounded, centered" },
@@ -1455,6 +1461,10 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
   },
 };
 
-export function getComponentImplementationPackage(componentId: string) {
-  return COMPONENT_IMPLEMENTATION_PACKAGES[componentId];
+export function getComponentImplementationPackage(componentId: string): ComponentImplementationPackage | undefined {
+  const pkg = COMPONENT_IMPLEMENTATION_PACKAGES[componentId];
+  if (!pkg) return undefined;
+  const summary = COMPONENT_SUMMARIES[componentId];
+  const usage = COMPONENT_USAGE[componentId];
+  return summary || usage ? { ...pkg, summary: summary ?? pkg.summary, usage: usage ?? pkg.usage } : pkg;
 }

@@ -31,6 +31,7 @@
     "generate:colors": "node scripts/generate-colors.mjs",
     "audit:colors": "node scripts/generate-colors.mjs --check",
     "audit:color-literals": "node scripts/audit-color-literals.mjs --check",
+    "audit:component-docs": "vitest run tests/screens/design-system-component-docs.test.tsx",
     "agent:scope": "node scripts/check-agent-scope.mjs",
     "audit:all": "npm run audit:card-details && npm run audit:investments && npm run audit:figma-bridge && npm run audit:registry && npm run audit:platform && npm run audit:assets && npm run audit:modules && npm run audit:colors && npm run audit:color-literals && npm run audit:consumption && npm run audit:retired-pi",
     "verify": "npm run test:platform && npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run audit:all && npm run build",
