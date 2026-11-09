@@ -32,3 +32,26 @@ export function checkboxWeb(options: Parameters<typeof resolveCheckbox>[0] = {})
     iconClass: 'size-3.5',
   }
 }
+
+/**
+ * The canonical (selection list) checkbox: a 32 px touch slot holding a 22 px box with a 1 px text-colour border,
+ * the surface colour inside and a 14 px action-coloured thick tick. Used for row selection (bulk approval, lists).
+ * The generic 16 px control above stays for forms.
+ */
+export function resolveCanonicalCheckbox({
+  checked = false,
+  disabled = false,
+}: { checked?: CheckboxCheckedState; disabled?: boolean } = {}) {
+  const state = resolveCheckbox({ checked, disabled })
+  return {
+    ...state,
+    slot: 32,
+    box: 22,
+    boxRadius: 4,
+    boxBorderWidth: 1,
+    markSize: 14,
+    borderToken: '--uc-text',
+    fillToken: '--uc-surface',
+    markToken: '--uc-action',
+  } as const
+}

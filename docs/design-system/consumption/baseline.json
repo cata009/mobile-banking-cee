@@ -30,9 +30,6 @@
     "native-spike/src/experiences/pi/current/profile/BottomSheet.tsx#BottomSheet",
     "src/flows/ba/card-fraud/FraudPresentationDialog.tsx#FraudPresentationDialog",
     "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#AddVehicleCard",
-    "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#MyCarVehicleCard",
-    "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#PolicyStatusBadge",
-    "src/flows/ro/genius-my-car/geniusMyCarPreviews.tsx#VehiclePolicyRow",
     "src/flows/ro/genius-my-car/geniusMyCarPurchase.tsx#StepProgress",
     "src/flows/ro/genius-my-car/geniusMyCarUi.tsx#InfoPanel",
     "src/flows/ro/genius-my-car/geniusMyCarUi.tsx#VehicleBrandLogo",
@@ -45,7 +42,6 @@
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#GroupHeader",
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#PackageCard",
     "src/flows/rs/property-insurance/rsPropertyInsurancePreviews.tsx#PackageCarousel",
-    "src/flows/shared/investments-bulk-approval/investmentsBulkApprovalPreviews.tsx#FlowBulkSelectionCheckbox",
     "src/flows/shared/prime/presentation/PrimePresentationDialog.tsx#PrimePresentationDialog"
   ]
 }

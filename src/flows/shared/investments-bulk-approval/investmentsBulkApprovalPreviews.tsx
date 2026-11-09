@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import BrandLogo from '@/app/components/brand-logo/BrandLogo'
 import { BottomSheet } from '@/app/components/BottomSheet'
 import PageHeader from '@/app/components/PageHeader'
+import Checkbox from '@/app/components/Checkbox'
 import PrimaryButton from '@/app/components/PrimaryButton'
 import SectionHeadingDivider from '@/app/components/SectionHeadingDivider'
 import TextLink from '@/app/components/TextLink'
@@ -35,27 +36,6 @@ function PrototypeShell({ children }: { children: ReactNode }) {
   return <div className="flex h-full w-full flex-col bg-[var(--uc-surface)] text-[var(--uc-text)]">{children}</div>
 }
 
-function FlowBulkSelectionCheckmark() {
-  return (
-    <svg
-      data-testid="flow-bulk-selection-checkmark"
-      xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M10.3181 3.76108C11.2141 2.82964 12.6664 2.82964 13.5625 3.76108L6.22952 11.375L0.875 5.81907C1.77066 4.88804 3.22338 4.88804 4.11943 5.81907L6.22952 8.00209L10.3181 3.76108Z"
-        fill="var(--uc-action)"
-      />
-    </svg>
-  )
-}
-
 function BulkReviewSummaryIcon() {
   return (
     <svg
@@ -74,42 +54,6 @@ function BulkReviewSummaryIcon() {
         fill="var(--uc-text)"
       />
     </svg>
-  )
-}
-
-/** Figma 13573 selection checkbox: 24px target, 22px white inner surface, 1px K10 border and T2 thick tick. */
-function FlowBulkSelectionCheckbox({
-  checked,
-  disabled = false,
-  onToggle,
-  label,
-}: {
-  checked: boolean
-  disabled?: boolean
-  onToggle: () => void
-  label: string
-}) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      onClick={onToggle}
-      data-flow-bulk-checkbox="true"
-      className="relative grid size-[24px] shrink-0 place-items-center rounded-[4px] text-[var(--uc-action)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--uc-focus-ring)] disabled:cursor-not-allowed disabled:opacity-100"
-    >
-      <span
-        className="absolute inset-[1px] rounded-[4px] border border-[var(--uc-text)] bg-[var(--uc-surface)]"
-        aria-hidden="true"
-      />
-      {checked ? (
-        <span className="relative">
-          <FlowBulkSelectionCheckmark />
-        </span>
-      ) : null}
-    </button>
   )
 }
 
@@ -202,12 +146,7 @@ function BulkSelectionScreen({
 
               return bulkMode ? (
                 <div key={draft.id} className={rowClassName}>
-                  <FlowBulkSelectionCheckbox
-                    checked={selected}
-                    disabled
-                    onToggle={() => undefined}
-                    label={`Selected: ${draft.name}`}
-                  />
+                  <Checkbox checked={selected} readOnly label={`Selected: ${draft.name}`} />
                   {details}
                 </div>
               ) : (

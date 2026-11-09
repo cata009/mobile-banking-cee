@@ -4,6 +4,7 @@ import sourceMark from '@/assets/design-system/checkbox-mark.svg';
 import { AssetGlyph } from './AssetGlyph';
 import { SvgXml } from 'react-native-svg';
 import {
+  resolveCanonicalCheckbox,
   resolveCheckbox,
   type CheckboxCheckedState,
 } from '@/app/components/contracts/checkbox';
@@ -74,6 +75,7 @@ export function BaselineCheckbox({
     justifyContent: 'center' as const,
   };
   const canonical = presentation === 'canonical';
+  const canonicalSpec = resolveCanonicalCheckbox({ checked: state.checked, disabled });
   const activate = () => {
     if (disabled) return;
     if (checked === undefined) setInternal(state.nextChecked);
@@ -96,17 +98,19 @@ export function BaselineCheckbox({
   const mark = canonical ? (
     <View
       style={{
-        width: 22,
-        height: 22,
-        borderWidth: 1,
-        borderRadius: 4,
-        borderColor: dark ? '#ffffff' : '#262626',
-        backgroundColor: dark ? '#333333' : '#ffffff',
+        width: canonicalSpec.box,
+        height: canonicalSpec.box,
+        borderWidth: canonicalSpec.boxBorderWidth,
+        borderRadius: canonicalSpec.boxRadius,
+        borderColor: sourceColor(`var(${canonicalSpec.borderToken})`, dark),
+        backgroundColor: sourceColor(`var(${canonicalSpec.fillToken})`, dark),
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      {active ? <AssetGlyph asset={sourceMark} size={14} /> : null}
+      {active ? (
+        <AssetGlyph asset={sourceMark} size={canonicalSpec.markSize} />
+      ) : null}
     </View>
   ) : state.showIndicator && xml ? (
     <SvgXml xml={xml} width={state.iconSize} height={state.iconSize} />
@@ -124,8 +128,8 @@ export function BaselineCheckbox({
       style={
         canonical
           ? {
-              width: 32,
-              height: 32,
+              width: canonicalSpec.slot,
+              height: canonicalSpec.slot,
               opacity: state.opacity,
               alignItems: 'center',
               justifyContent: 'center',
