@@ -81,3 +81,12 @@ Design System Figma file and need individual approval before promotion. Nothing 
    changes an accessibility role that a test in the Evo area asserts, so it waits for Evo.
 6. **Web `PrimaryButton` default label size.** The web wrapper defaults to 16, Figma and the native button to
    18; only 18 of 142 call sites pass the size explicitly.
+
+## Not yet reviewed individually
+
+The remaining entries in `baseline.json` (rows such as `DatedRow`, `DocumentRow`, `ServiceDatedRow`,
+`AppointmentListRow`, `DataRow`, `FilterRow`, `CzRoboSecurityRow`, `OfferRow`; cards `BalanceCard` and
+`BaselineSensitiveCard`; `DesignCarousel`, `BaselineProductsTabs`, `BaselinePfmPeriodCarousel`; `Chips`;
+`FilterDivider`; `BaselineInvestmentField`; `Logo`) are screen-specific compositions that have not been compared
+with their library counterparts yet. They are accepted by the ratchet so that no new ones appear, not because they
+were judged correct. Align them family by family and then refresh the baseline.
