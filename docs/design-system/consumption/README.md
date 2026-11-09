@@ -86,7 +86,7 @@ Design System Figma file and need individual approval before promotion. Nothing 
    - `AppointmentListRow` (date, meeting-type icon, three lines), `FilterRow` (muted title over a bold value, chevron
      or calendar glyph) and `CzRoboSecurityRow` (logo, quantity, prices, performance) are domain list items, not
      copies of `BaselineNavigationRow` or `BaselineDatedRow`.
-   - Future Gain `Chips` use an accent fill when selected; `BaselinePill` selected is black. Different spec.
+   - Future Gain `Chips`: built as `BaselineChoiceChip` / `BaselineChoiceChips` (contract `contracts/choiceChip.ts`, action fill when chosen, 14 Bold, scrolling row). `Chips` is now an adapter. `BaselinePill` selected is black and `BaselineAmountSuggestionChip` is 13 px action-strong, so neither fits. Still a proposal for Figma ("Choice chip").
    - `BaselineInvestmentField` adds multiline, a secondary value and a `product-detail` variant on top of what
      `BaselineAccountInfoField` offers; extend the library field before replacing it.
    - `BalanceCard` is an Evo 2027 card (out of scope), and `BaselineSensitiveCard` is a whole card-details screen

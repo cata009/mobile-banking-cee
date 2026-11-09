@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '../../../../universal/Typography';
 import { ActionButton } from '../../../../universal/ActionButton';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { SourceBottomSheet } from '../../../../universal/SourceBottomSheet';
+import { BaselineChoiceChips } from '../../../../universal/BaselineChoiceChip';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { FormField } from '../../../../universal/FormField';
 import { AssetGlyph } from '../../../../universal/AssetGlyph';
@@ -214,53 +215,13 @@ export function Chips({
   onChange: (value: number) => void;
 }) {
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
-  const chipSurface = sourceColor('var(--uc-neutral-100, #F5F5F5)', dark);
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={s.chips}
-    >
-      {items.map(item => {
-        const selected = item.value === value;
-        return (
-          <Pressable
-            key={item.value}
-            accessibilityRole="button"
-            accessibilityLabel={item.label}
-            accessibilityState={{ selected }}
-            onPress={() => onChange(item.value)}
-            style={[
-              s.chip,
-              {
-                borderWidth: selected ? 1 : 0,
-                borderColor: selected
-                  ? host.tokens.accent
-                  : chipSurface,
-                backgroundColor: selected
-                  ? host.tokens.accent
-                  : chipSurface,
-              },
-            ]}
-          >
-            <Label
-              host={{
-                ...host,
-                tokens: {
-                  ...host.tokens,
-                  text: selected ? host.tokens.inverse : host.tokens.text,
-                },
-              }}
-              strong
-              size={14}
-              style={s.chipLabel}
-            >
-              {item.label}
-            </Label>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+    <BaselineChoiceChips
+      items={items}
+      value={value}
+      onChange={onChange}
+      dark={dark}
+    />
   );
 }
 export function Request({
@@ -465,13 +426,6 @@ export const s = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  chips: { gap: 16, paddingVertical: 23.5 },
-  chip: {
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipLabel: { lineHeight: 15 },
   request: { paddingTop: 32, alignItems: 'center', gap: 16 },
   panel: { borderRadius: 8, padding: 16, gap: 8 },
   row: {
