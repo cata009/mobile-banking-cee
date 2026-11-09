@@ -65,7 +65,10 @@ adapter counts as aligned.
 ## Open gaps: proposals, not approved
 
 Proposals follow `AGENTS.md`: genuinely unmapped components go to a `De aprobat / <source>` page in the
-Design System Figma file and need individual approval before promotion. Nothing has been written to Figma.
+Design System Figma file and need individual approval before promotion. On 2026-11-09 the proposals for
+`TextLink`, `KeyValueRow`, the choice chip, the status tag tones (an extension of "Status badge / Successful"),
+the dated list row and the responsive menu card were written to the page `De aprobat / Library alignment 2026-11`
+(file `FKbbStgBIP9bFAMl3DPKHF`). No approved page was changed and nothing was promoted.
 
 1. **Inline text link: built as `TextLink`.** It is not the Figma "Text button / Primary" (uppercase, trailing 16 px
    chevron; implemented as `BaselineNavigationLink`, web `NavigationLink`, `LinkActionButton`). Still a proposal for
