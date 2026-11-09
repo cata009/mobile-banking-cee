@@ -69,6 +69,12 @@ Design System Figma file and need individual approval before promotion. Nothing 
      that flow is being edited elsewhere in the working tree.
    - `BaselinePeriodIndicator` and `SourcePeriodIndicator` already read the shared `analyticsIndicator` contract.
    - `HistoryHomeIndicator` is the phone home bar, and `FutureGainBanner` is already an adapter.
+   - `BankingCopyToast` is the native renderer of the web `CopyToast` (a transient "copied" pill with its own hook),
+     not a copy of `BaselineToast`, which is the icon/dot message toast.
+   - `DepositDivider` uses an 18 px title with a rule; the library section divider only has 14 px and 20 px variants.
+     Aligning it would change the size, so it needs a design decision (an 18 px variant or a 14 px title).
+   - `PrimeEntryButton` is the Prime header control (pill with a glyph, overlay variant); there is no library
+     counterpart.
 4. **Selectable pill button with icon** (Kids `Button`) and the **pill-shaped action button** used by Evo 2027
    (`ActionButton`, radius 32). Deferred with Kids and Evo.
 5. **Tabs role.** Appointment `MeetingTabs` exposes `button`; `BaselineMailboxTabs` exposes `tab`. Moving it
