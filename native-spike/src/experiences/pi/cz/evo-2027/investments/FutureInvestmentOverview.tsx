@@ -56,6 +56,7 @@ import { Select } from '../../../../../universal/Select';
 import { Text } from '../../../../../universal/Typography';
 import { ModuleNavigation, type InvestmentSection } from './ModuleNavigation';
 import { FuturePortfolioChart } from './FuturePortfolioChart';
+import { FutureInvestmentExplore } from './FutureInvestmentExplore';
 import { FutureInvestmentMore, type MorePage } from './FutureInvestmentMore';
 import { FuturePortfolioSwitcher } from './FuturePortfolioSwitcher';
 import { Chips } from './Primitives';
@@ -204,6 +205,15 @@ export function FutureInvestmentOverview({
     history: c.activity,
     more: c.more,
   };
+  // A nested More page names itself in the header, so the page never repeats its title as a heading.
+  const moreTitles: Record<MorePage, string> = {
+    menu: c.more,
+    profile: c.profile,
+    questionnaire: c.questionnaire,
+    report: c.report,
+    statements: c.statements,
+    help: c.help,
+  };
   const showSectionHeader =
     section === 'catalog'
       ? catalogAtRoot
@@ -290,7 +300,7 @@ export function FutureInvestmentOverview({
     >
       {showSectionHeader && (
         <BaselinePageHeader
-          title={titles[section]}
+          title={section === 'more' ? moreTitles[morePage] : titles[section]}
           onBack={morePageIsNested ? goBack : host.onBack}
           backIconName={morePageIsNested ? 'back-heavy' : 'close-flow'}
           backLabel={morePageIsNested ? 'Back' : 'Close'}
@@ -555,52 +565,15 @@ export function FutureInvestmentOverview({
               </>
             )}
             {section === 'explore' && (
-              <View style={s.section}>
-                <Text accessibilityRole="header" style={heading}>
-                  {c.explore}
-                </Text>
-                {!!recommendations.length ? (
-                  <>
-                    <Text
-                      accessibilityRole="header"
-                      style={[heading, { fontSize: 20 }]}
-                    >
-                      {c.recommended}
-                    </Text>
-                    <Text style={text}>{c.recommendationReason}</Text>
-                    {recommendations.map(security => recommendation(security))}
-                  </>
-                ) : (
-                  <NavigationRow
-                    tokens={host.tokens}
-                    title={c.noRecommendations}
-                    payload={null}
-                    onSelect={profileEntry}
-                  />
-                )}
-                <Text accessibilityRole="header" style={heading}>
-                  {c.education}
-                </Text>
-                <NavigationRow
-                  tokens={host.tokens}
-                  title={c.learnRisk}
-                  payload="risk"
-                  onSelect={() => setEducation('risk')}
-                />
-                <NavigationRow
-                  tokens={host.tokens}
-                  title={c.learnRecurring}
-                  payload="regular"
-                  onSelect={() => setEducation('regular')}
-                />
-                <NavigationRow
-                  tokens={host.tokens}
-                  title={c.readyToInvest}
-                  subtitle={c.catalogue}
-                  payload="catalog"
-                  onSelect={() => onSectionChange('catalog')}
-                />
-              </View>
+              <FutureInvestmentExplore
+                host={host}
+                copy={c}
+                recommendations={recommendations}
+                onOpenSecurity={onOpenSecurity}
+                onOpenProfile={profileEntry}
+                onEducation={setEducation}
+                onOpenCatalog={() => onSectionChange('catalog')}
+              />
             )}
             {section === 'more' && (
               <FutureInvestmentMore
