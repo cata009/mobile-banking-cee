@@ -21,7 +21,8 @@ const card = (id: string) => (
 );
 const rowsOf = (tree: Renderer.ReactTestRenderer) =>
   tree.root.findAll(
-    n => n.type === 'View' && n.props.testID === 'product-menu-grid-row',
+    n =>
+      (n.type as unknown) === 'View' && n.props.testID === 'product-menu-grid-row',
   );
 const measure = (tree: Renderer.ReactTestRenderer, width: number) => {
   const root = tree.root.findAll(n => typeof n.props.onLayout === 'function')[0];
