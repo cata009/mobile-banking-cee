@@ -9,8 +9,10 @@ import { sourceColor } from './sourceColor';
 
 const tint = (hex: string, percent: number) => {
   if (!/^#[0-9a-f]{6}$/i.test(hex)) return hex;
-  const channel = (start: number) => parseInt(hex.slice(start, start + 2), 16);
-  return `rgba(${channel(1)},${channel(3)},${channel(5)},${percent / 100})`;
+  const alpha = Math.round((percent / 100) * 255)
+    .toString(16)
+    .padStart(2, '0');
+  return `${hex}${alpha}`;
 };
 
 /** The Design System status tag: tinted rounded label with an optional dot in the tone color. */

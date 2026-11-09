@@ -23,8 +23,8 @@ test('a tag takes its text color from the tone and tints the fill', () => {
     color: sourceColor('var(--uc-green-status)', false),
   });
   const root = tree.root.findByProps({ accessibilityLabel: 'Active' });
-  expect(StyleSheet.flatten(root.props.style).backgroundColor).toMatch(
-    /^rgba\(53,159,66,0\.12\)$/,
+  expect(StyleSheet.flatten(root.props.style).backgroundColor).toBe(
+    `${sourceColor('var(--uc-green-status)', false)}1f`,
   );
 });
 

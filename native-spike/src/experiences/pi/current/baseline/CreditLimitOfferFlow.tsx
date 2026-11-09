@@ -280,7 +280,10 @@ function OfferRow({
       emphasis={prominent}
       paddingVertical={0}
       divider={false}
-      dark={host.tokens.text.toLowerCase() !== '#262626'}
+      dark={
+        host.tokens.text.toLowerCase() !==
+        sourceColor('var(--uc-text)', false).toLowerCase()
+      }
     />
   );
 }

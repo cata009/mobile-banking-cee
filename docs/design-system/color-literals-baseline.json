@@ -1,6 +1,6 @@
 {
   "note": "Color literals accepted per file. A file may lose literals, never gain them. Regenerate with --write-baseline only after converting literals to tokens.",
-  "total": 1407,
+  "total": 1402,
   "files": {
     "native-spike/src/app/componentPreviewAdapter.tsx": 3,
     "native-spike/src/app/CzechPrimaryNavigation.tsx": 12,
@@ -83,7 +83,6 @@
     "native-spike/src/experiences/pi/current/context.ts": 2,
     "native-spike/src/experiences/pi/current/future-gain/PeerInsights.tsx": 8,
     "native-spike/src/experiences/pi/current/future-gain/PeerSimulator.tsx": 11,
-    "native-spike/src/experiences/pi/current/future-gain/Primitives.tsx": 1,
     "native-spike/src/experiences/pi/current/future-gain/SmartInvestment.tsx": 7,
     "native-spike/src/experiences/pi/current/future-gain/TermDeposit.tsx": 4,
     "native-spike/src/experiences/pi/current/Home.tsx": 10,
@@ -127,7 +126,7 @@
     "native-spike/src/universal/BaselineCanonicalIcon.tsx": 1,
     "native-spike/src/universal/BaselineCardComponent.tsx": 3,
     "native-spike/src/universal/BaselineCatalogCompositions.tsx": 38,
-    "native-spike/src/universal/BaselineCheckbox.tsx": 5,
+    "native-spike/src/universal/BaselineCheckbox.tsx": 1,
     "native-spike/src/universal/BaselineDialog.tsx": 1,
     "native-spike/src/universal/BaselineFeedbackProgress.tsx": 10,
     "native-spike/src/universal/BaselineInvestmentProductRow.tsx": 2,
