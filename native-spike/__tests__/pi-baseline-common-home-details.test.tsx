@@ -122,7 +122,7 @@ const cases = [
   {
     country: 'BA',
     currency: 'BAM',
-    symbol: 'KM',
+    symbol: 'BAM',
     first: 20229.58,
     available: 41602.98,
     owed: 233710.57,
@@ -131,7 +131,7 @@ const cases = [
   {
     country: 'BA_BL',
     currency: 'BAM',
-    symbol: 'KM',
+    symbol: 'BAM',
     first: 20229.58,
     available: 41602.98,
     owed: 233710.57,
