@@ -1,4 +1,5 @@
 import { useId, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { PreviewControlSlotContext } from './previewControlSlot'
 import ThemeModeSegment from '@/app/components/ThemeModeSegment'
 import type { ComponentImplementationPackage as ImplementationPackageData } from '@/app/registry/componentImplementationPackages'
 import { SCREEN_REGISTRY } from '@/app/registry/screenRegistry'
@@ -89,6 +90,7 @@ export default function ComponentOverviewSections({
 }) {
   const baseId = useId()
   const [inspect, setInspect] = useState(false)
+  const [controlSlot, setControlSlot] = useState<HTMLDivElement | null>(null)
   const specs = data.visualSpecifications.filter((row) => !GENERIC_ROWS.has(row.label))
   const behaviour = data.motionSpecifications.filter((row) => !GENERIC_ROWS.has(row.label))
   const showAssets = data.assets.required && !!data.assets.summary
@@ -207,13 +209,15 @@ export default function ComponentOverviewSections({
           >
             {tab === 'overview' ? (
               <>
-                {preview ? (
-                  <section className="ds-doc-stage" aria-label="Live preview">
-                    <div className="ds-doc-stage-toolbar">
-                      <div className="ds-doc-stage-variants">{previewControls}</div>
-                      {allowThemeChange ? (
-                        <ThemeModeSegment value={themeMode} onChange={onThemeModeChange} ariaLabel="Preview theme" />
-                      ) : null}
+                <section className="ds-doc-stage" aria-label="Live preview">
+                  <div className="ds-doc-stage-toolbar">
+                    <div className="ds-doc-stage-variants" ref={setControlSlot}>
+                      {preview ? previewControls : <span className="ds-variant-count">No live preview</span>}
+                    </div>
+                    {preview && allowThemeChange ? (
+                      <ThemeModeSegment value={themeMode} onChange={onThemeModeChange} ariaLabel="Preview theme" />
+                    ) : null}
+                    {preview ? (
                       <button
                         type="button"
                         className="ds-measure-button"
@@ -223,46 +227,28 @@ export default function ComponentOverviewSections({
                       >
                         Measure
                       </button>
-                    </div>
-                    {inspect ? (
-                      <p className="ds-inspect-help">Select an element to see its size, typography and spacing.</p>
                     ) : null}
+                  </div>
+                  {inspect ? (
+                    <p className="ds-inspect-help">Select an element to see its size, typography and spacing.</p>
+                  ) : null}
+                  {preview ? (
                     <MeasurementSurface>
                       <div className={`ds-document-preview${themeMode === 'dark' ? ' ds-document-preview-dark' : ''}`}>
-                        {preview}
+                        <PreviewControlSlotContext.Provider value={controlSlot}>{preview}</PreviewControlSlotContext.Provider>
                       </div>
                     </MeasurementSurface>
-                  </section>
-                ) : (
-                  <div className="ds-doc-empty">
-                    <p>No live preview. This design is documented in Figma.</p>
-                    {documentationUrl ? (
-                      <a className="ds-text-link" href={documentationUrl} target="_blank" rel="noreferrer">
-                        Open in Figma ↗
-                      </a>
-                    ) : null}
-                  </div>
-                )}
-                {data.usage ? (
-                  <div className="ds-usage">
-                    <section>
-                      <h2>Use when</h2>
-                      <ul>
-                        {data.usage.use.map((line) => (
-                          <li key={line}>{line}</li>
-                        ))}
-                      </ul>
-                    </section>
-                    <section>
-                      <h2>Don't use when</h2>
-                      <ul>
-                        {data.usage.avoid.map((line) => (
-                          <li key={line}>{line}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  </div>
-                ) : null}
+                  ) : (
+                    <div className="ds-doc-empty">
+                      <p>This design is documented in Figma. No isolated live preview is wired yet.</p>
+                      {documentationUrl ? (
+                        <a className="ds-text-link" href={documentationUrl} target="_blank" rel="noreferrer">
+                          Open in Figma ↗
+                        </a>
+                      ) : null}
+                    </div>
+                  )}
+                </section>
                 {screens.length ? (
                   <section className="ds-doc-block">
                     <h2>Used in</h2>

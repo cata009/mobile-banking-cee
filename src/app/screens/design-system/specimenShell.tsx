@@ -4,8 +4,10 @@
  *
  * Extracted verbatim from DesignSystemPage.tsx.
  */
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { createPortal } from "react-dom";
 import ThemeModeSegment from "@/app/components/ThemeModeSegment";
+import { PreviewControlSlotContext } from "./previewControlSlot";
 import { AppIcon } from "@/app/components/icons";
 import { getNativeDesignSystemPreview } from '@/features/demo-native/designSystemPreview';
 import { NativeDesignSystemPreview } from './NativeDesignSystemPreview';
@@ -150,7 +152,8 @@ export function VariantSelector<Value extends string>({
   onChange: (value: Value) => void;
   extras?: React.ReactNode;
 }) {
-  return (
+  const slot = useContext(PreviewControlSlotContext);
+  const control = (
     <div className="flex flex-wrap items-center gap-3">
       <select
         id={id}
@@ -171,4 +174,6 @@ export function VariantSelector<Value extends string>({
       {extras}
     </div>
   );
+  // Inside a documented preview the control lives in the stage toolbar; elsewhere it renders in place.
+  return slot ? createPortal(control, slot) : control;
 }
