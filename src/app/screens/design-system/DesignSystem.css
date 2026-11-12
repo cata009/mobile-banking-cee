@@ -318,6 +318,12 @@
   justify-content: center;
   width: 100%;
 }
+/* A live state is sized to its content and centred in its card, so narrow controls such as a switch sit in the middle. */
+.ds-state-lazy > [data-native-ds-component] {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
 .ds-state-grid-live {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -1379,8 +1385,19 @@
   background: var(--uc-surface);
 }
 .ds-doc-stage-variants {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   flex: 1;
+  gap: 8px;
   min-width: 0;
+}
+/* A component without a variant selector still shows the slot, so every stage reads the same. */
+.ds-doc-stage-variants:empty::after {
+  content: 'Default state';
+  color: var(--ds-muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 .ds-doc-stage .ds-variant-picker {
   margin: 0;
@@ -1433,8 +1450,10 @@
   color: var(--uc-action-strong);
 }
 .ds-doc-stage .ds-document-preview {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 300px;
   margin: 0;
   padding: 48px 32px;
@@ -1442,14 +1461,25 @@
   border-radius: 0;
   background: transparent;
 }
+/* Every preview root is centred as one box in the canvas, whatever its inner layout. */
 .ds-doc-stage .ds-document-preview > * {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
 }
 .ds-doc-stage [data-native-ds-component] {
   align-items: center;
 }
 .ds-document-preview-dark {
   background-color: var(--uc-static-black) !important;
+}
+.ds-doc-stage .ds-doc-empty {
+  justify-items: center;
+  align-content: center;
+  min-height: 300px;
+  padding: 48px 32px;
+  border: 0;
+  border-radius: 0;
+  text-align: center;
 }
 .ds-doc-empty {
   display: grid;

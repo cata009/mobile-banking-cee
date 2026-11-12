@@ -30,6 +30,7 @@ import PanelWithoutCoAppingTranslations from "@/app/components/PanelWithoutCoApp
 import CardComponent from "@/app/components/cards/CardComponent";
 import { noop } from "./inspect/MeasurementSurface";
 import { ShadcnSpecimens } from "./shadcnSpecimens";
+import { VariantSelector } from "./specimenShell";
 import {
   BarVariantSpecimen,
   BottomNavigationVariantSpecimen,
@@ -96,7 +97,7 @@ function LogoutConfirmDialogPreview() {
 function BubblePreview() {
   const [variant, setVariant] = useState('default');
   return <div className="flex flex-col gap-4">
-    <label className="ds-figma-select-label">Variant<select aria-label="Bubble variant" value={variant} onChange={event => setVariant(event.target.value)}><option value="default">Default / Selected</option><option value="payments">Payments</option></select></label>
+    <VariantSelector id="bubble-variant-select" label="Bubble variant" value={variant} onChange={setVariant} options={[{ id: 'default', label: 'Default / Selected' }, { id: 'payments', label: 'Payments' }]} />
     <PaymentOtherShortcut presentation="bubble" treatment="baseline" iconVisual={<img src={variant === 'default' ? bubbleTemplate : bubbleRecurrent} width={32} height={32} alt="" />} item={{ id: variant === 'default' ? 'templates' : 'standing-order', icon: variant === 'default' ? 'templates' : 'standing', label: variant === 'default' ? 'CLOTHING\nAND SHOES' : 'STANDING\nORDER' }} />
   </div>;
 }
