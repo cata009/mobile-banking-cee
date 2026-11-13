@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import {
   resolveRadioButton,
   type RadioButtonOptions,
@@ -15,6 +22,8 @@ export function RadioButton({
   onPress,
   dark = false,
   paddingHorizontal,
+  style,
+  labelStyle,
   ...options
 }: RadioButtonOptions & {
   label: string;
@@ -23,6 +32,8 @@ export function RadioButton({
   dark?: boolean;
   /** Override the row inset when its parent surface already supplies one. */
   paddingHorizontal?: number;
+  style?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
 }) {
   const contract = resolveRadioButton(options);
   const [hovered, setHovered] = useState(false);
@@ -54,7 +65,7 @@ export function RadioButton({
       onPress={onPress}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
-      style={[styles.row, rowStateStyle]}
+      style={[styles.row, rowStateStyle, style]}
     >
       <View
         style={markStyle}
@@ -80,12 +91,18 @@ export function RadioButton({
                   : undefined,
               color: sourceColor(`var(${contract.labelToken})`, dark),
             },
+            labelStyle,
           ]}
         >
           {label}
         </Text>
         {description ? (
-          <Text style={[styles.description, { color: sourceColor('var(--uc-text-muted)', dark) }]}>
+          <Text
+            style={[
+              styles.description,
+              { color: sourceColor('var(--uc-text-muted)', dark) },
+            ]}
+          >
             {description}
           </Text>
         ) : null}
@@ -99,5 +116,9 @@ const styles = StyleSheet.create({
   mark: { flexShrink: 0, alignItems: 'center', justifyContent: 'center' },
   copy: { flex: 1, minWidth: 0, gap: 4 },
   label: { fontFamily: 'UniCredit-bold', flexShrink: 1 },
-  description: { fontFamily: 'UniCredit-regular', fontSize: 15, lineHeight: 20 },
+  description: {
+    fontFamily: 'UniCredit-regular',
+    fontSize: 15,
+    lineHeight: 20,
+  },
 });

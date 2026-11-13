@@ -1,8 +1,8 @@
 {
   "baselineCommit": "e348815 + generated goals illustration 2026-10-08 + generated partner shelf photography 2026-10-09 + Future Gain peer-insights SVGs 2026-10-12 + PI Italy Mobile First 2026-10-12 + main 770ea65 native and reference captures 2026-10-13 + original Figma design-system SVGs 2026-10-19 + CZ Robo goal outcome illustrations 2026-10-19 + original Figma DS vectors and approved photographs 2026-10-20",
   "baselineNote": "Preserves the approved asset inventory and generated goals-summary flag illustration; replaces only the Shopsmart and Partner offers shelf photos with GPT Image 2.1 images and a higher-contrast text scrim; adds 11 local Figma SVGs and 2 credit card art exports for the RS Future Gain peer-insights screens. Adds 864 scoped PI Italy Mobile First assets from Figma and supplied SVGs; preserves all 275 original assets and the operator's recorded pending photography edits. Exact path/blob inventory: docs/tasks/pi-italy-mobile-first-asset-baseline.json. Adds the exact Figma success and failure illustrations for the Native CZ Robo creation flow.",
-  "assetCount": 1501,
-  "pathBlobSha256Aggregate": "7443255c8bbe8ac6ed5b31ce8668a5754813739c03a012c887148a9f9ae5af57",
+  "assetCount": 1554,
+  "pathBlobSha256Aggregate": "7a6f522405aac9af61bd6ee0ed0f3dd9c4b1ebac106c04ece83128f94922d795",
   "roVirtualCardIntegration": "Adds two user-requested generated Ferrari card backgrounds. The previous 1479 asset paths and hashes retain aggregate 132f40b242fc59295ab0d7014951f9ad3cd17abcae2d0007e6f61e5f060c7c19; provenance and individual hashes are in src/assets/ro/virtual-card/PROVENANCE.md. No prior asset was removed or converted.",
   "roVirtualCardThemes": "Adds seven generated Ferrari, Hobbies and Nature backgrounds requested for expanded categories. The previous 1481 asset paths and hashes retain aggregate 09311b053c29febb878dc1ebed6fa6970508454eb0b08431223018d6a48cf66a; provenance and individual hashes are in src/assets/ro/virtual-card/PROVENANCE.md. No prior asset was removed or converted.",
   "roPersonalProfile": "Adds the exact face-recognition vector from RO - DBN - Flows node 10306:62188. The combined inventory also includes the pre-existing pending RO contract-withdrawal intro image. No prior asset was removed or converted.",
@@ -80,5 +80,6 @@
       "sha256": "02012af4245d044c8c69b054190a254c7371d02f6a7aab4a2157131f73971aaf"
     }
   ],
-  "assetBaselineRepair20261109": "Records two assets added (genius-protect-documents.svg, disposable-card-expiry-proposal.svg) and one modified (genius-protect-coverage-accident.svg) after c73a79d6, all already committed. Exact proof: docs/tasks/2026-11-09-asset-baseline.json."
+  "assetBaselineRepair20261109": "Records two assets added (genius-protect-documents.svg, disposable-card-expiry-proposal.svg) and one modified (genius-protect-coverage-accident.svg) after c73a79d6, all already committed. Exact proof: docs/tasks/2026-11-09-asset-baseline.json.",
+  "roOnboardingAndCashLoanIntegration": "Adds 37 original Figma SVG/photo source assets for PI Romania Baseline onboarding and Cash Loan, including user-approved provider photographs and geographic background. Separately records 16 assets already committed on main (Apple Wallet/Click to Pay and share preview). Excluding these 53 additions exactly reproduces all prior 1501 path/blob pairs. No old asset, assertion or approved retirement changed. Exact preservation and separate provenance: docs/tasks/2026-11-13-ro-onboarding-asset-proof.json."
 }

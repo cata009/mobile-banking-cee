@@ -29,6 +29,7 @@ export function BaselinePageHeader({
   largeTitleAlign = 'left',
   largeTitleColor,
   largeTitleGutter,
+  largeTitleNumberOfLines,
   leadingVisual,
   subtitle,
   headerSubtitle,
@@ -56,6 +57,8 @@ export function BaselinePageHeader({
   largeTitleColor?: string;
   /** Explicit composition inset; the mapped Figma L2 inner-page case uses 24. */
   largeTitleGutter?: number;
+  /** A source screen can retain its complete heading instead of the default two-line limit. */
+  largeTitleNumberOfLines?: number;
   leadingVisual?: React.ReactNode;
   subtitle?: React.ReactNode;
   headerSubtitle?: React.ReactNode;
@@ -155,7 +158,7 @@ export function BaselinePageHeader({
   const largeTitle = (
     <Text
       accessibilityRole="header"
-      numberOfLines={contract.largeTitleLines}
+      numberOfLines={largeTitleNumberOfLines ?? contract.largeTitleLines}
       style={titleStyle}
     >
       {title}

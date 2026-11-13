@@ -47,6 +47,7 @@ export function BaselinePreloginAccordion({
   products,
   productOrder: externalOrder,
   onProductClick,
+  onFindOutMore,
   variant = 'static',
   welcomeText,
   findOutMoreText = 'FIND OUT MORE',
@@ -56,6 +57,7 @@ export function BaselinePreloginAccordion({
   products: PreloginProduct[];
   productOrder?: number[];
   onProductClick?: (index: number) => void;
+  onFindOutMore?: (productId: string) => void;
   variant?: 'static' | 'animated';
   welcomeText?: string;
   findOutMoreText?: string;
@@ -218,6 +220,7 @@ export function BaselinePreloginAccordion({
               style={actionStyle}
               onHoverIn={() => setActionHovered(true)}
               onHoverOut={() => setActionHovered(false)}
+              onPress={() => onFindOutMore?.(expanded.product.id)}
             >
               <Text style={actionTextStyle}>
                 {findOutMoreText.toUpperCase()}

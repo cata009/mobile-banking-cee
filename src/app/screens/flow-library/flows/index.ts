@@ -1,4 +1,6 @@
+import { RO_CASH_LOAN_FLOW } from '@/flows/ro/cash-loan'
 import { ETHOCA_FLOW } from '@/flows/shared/ethoca'
+import { RO_ONBOARDING_FLOW } from '@/flows/ro/onboarding'
 import { PRIME_FLOW } from '@/flows/shared/prime'
 import { BA_CARD_FRAUD_FLOW } from '@/flows/ba/card-fraud'
 import { GENIUS_MY_CAR_FLOW } from '@/flows/ro/genius-my-car'
@@ -16,6 +18,8 @@ export const FLOW_DEFINITIONS: Record<FlowPreviewId, FlowDefinition> = {
   'rs-property-insurance': RS_PROPERTY_INSURANCE_FLOW,
   'rs-disposable-cards': RS_DISPOSABLE_CARDS_FLOW,
   'investments-bulk-approval': INVESTMENTS_BULK_APPROVAL_FLOW,
+  'ro-onboarding': RO_ONBOARDING_FLOW,
+  'ro-cash-loan': RO_CASH_LOAN_FLOW,
 }
 
 /** Display order. Adding a flow = add a data module + one entry here. */
@@ -27,6 +31,8 @@ export const FLOW_ORDER: readonly FlowPreviewId[] = [
   'rs-disposable-cards',
   'ro-genius-my-car',
   'mobile-pi-ethoca',
+  'ro-onboarding',
+  'ro-cash-loan',
 ]
 
 export function getFlowDefinition(id: FlowPreviewId): FlowDefinition {

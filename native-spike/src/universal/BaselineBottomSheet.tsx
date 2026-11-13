@@ -36,6 +36,7 @@ export function BaselineBottomSheet({
   padding,
   contentBleed = false,
   hostedInModal = false,
+  showBackdrop = true,
 }: {
   title?: string;
   children: ReactNode;
@@ -60,6 +61,8 @@ export function BaselineBottomSheet({
   contentBleed?: boolean;
   /** On web an enclosing ModalPortal already exposes the dialog; avoids nested dialogs. */
   hostedInModal?: boolean;
+  /** A sheet over an interactive map leaves its background operable. */
+  showBackdrop?: boolean;
 }) {
   const c = resolveBottomSheet({
     fillHeight,
@@ -132,8 +135,7 @@ export function BaselineBottomSheet({
   const panel = {
     ...styles.panel,
     maxHeight: height - maxHeightOffsetPx,
-    height:
-      fillHeight || fixedHeight ? height - maxHeightOffsetPx : undefined,
+    height: fillHeight || fixedHeight ? height - maxHeightOffsetPx : undefined,
     padding: inset,
     borderTopLeftRadius: c.radius,
     borderTopRightRadius: c.radius,
@@ -183,15 +185,17 @@ export function BaselineBottomSheet({
     backgroundColor: sourceColor('var(--uc-border)', dark),
   };
   return (
-    <View style={host}>
-      <Animated.View style={[styles.shade, { opacity: backdropProgress }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Close sheet"
-          onPress={requestClose}
-          style={shade}
-        />
-      </Animated.View>
+    <View style={host} pointerEvents={showBackdrop ? 'auto' : 'box-none'}>
+      {showBackdrop && (
+        <Animated.View style={[styles.shade, { opacity: backdropProgress }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close sheet"
+            onPress={requestClose}
+            style={shade}
+          />
+        </Animated.View>
+      )}
       <Animated.View
         role={Platform.OS === 'web' && hostedInModal ? undefined : 'dialog'}
         aria-modal={Platform.OS === 'web' && hostedInModal ? undefined : true}

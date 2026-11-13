@@ -1,3 +1,4 @@
+import { RO_CASH_LOAN_SCREEN_SOURCE } from "@/flows/ro/cash-loan/sources";
 /**
  * The screens as built, as text.
  *
@@ -8,6 +9,7 @@
  */
 
 import type { FlowPreviewId } from "../flows/types";
+import { RO_ONBOARDING_SCREEN_SOURCE } from "@/flows/ro/onboarding/sources";
 import fraudJourneySource from "@/flows/ba/card-fraud/FraudJourney.tsx?raw";
 import fraudBaselineSource from "@/flows/ba/card-fraud/FraudBaselineScreen.tsx?raw";
 import fraudNotificationSource from "@/flows/ba/card-fraud/FraudNotification.tsx?raw";
@@ -166,4 +168,6 @@ export const FLOW_SCREEN_SOURCES: Partial<Record<FlowPreviewId, FlowScreenSource
       { file: "native-spike/src/app/componentPreviewAdapter.tsx", source: nativeComponentPreviewAdapterSource },
     ],
   },
+  "ro-onboarding": RO_ONBOARDING_SCREEN_SOURCE,
+  "ro-cash-loan": RO_CASH_LOAN_SCREEN_SOURCE,
 };

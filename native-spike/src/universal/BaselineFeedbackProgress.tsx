@@ -188,6 +188,8 @@ export function BaselineFeedbackSlider({
   valueLabel,
   minLabel = 'Label min',
   maxLabel = 'Label max',
+  showTrack = true,
+  compact = false,
   dark = false,
 }: {
   label?: string;
@@ -199,6 +201,8 @@ export function BaselineFeedbackSlider({
   valueLabel?: string;
   minLabel?: string;
   maxLabel?: string;
+  showTrack?: boolean;
+  compact?: boolean;
   dark?: boolean;
 }) {
   const color = sourceColor('var(--uc-text)', dark);
@@ -210,7 +214,7 @@ export function BaselineFeedbackSlider({
     <View style={s.slider}>
       <Text style={[s.label14, { color }]}>{label.toUpperCase()}</Text>
       <View style={s.sliderBody}>
-        <View style={s.counter}>
+        <View style={[s.counter, compact && { width: 202, minHeight: 40 }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Decrease value"
@@ -220,7 +224,7 @@ export function BaselineFeedbackSlider({
             onPress={() => {
               if (value > min) shift(-step);
             }}
-            style={s.counterAction}
+            style={[s.counterAction, compact && { minHeight: 40 }]}
           >
             <AssetGlyph
               asset={decrementIcon}
@@ -232,13 +236,14 @@ export function BaselineFeedbackSlider({
           <View
             style={[
               s.counterValue,
+              compact && { width: 142, minHeight: 40 },
               {
                 backgroundColor: sourceColor('var(--uc-surface)', dark),
                 borderColor: sourceColor('var(--uc-text-muted)', dark),
               },
             ]}
           >
-            <Text style={[s.value24, { color }]}>
+            <Text style={[s.value24, { color }, compact && { fontSize: 20 }]}>
               {valueLabel ?? String(value)}
             </Text>
           </View>
@@ -251,7 +256,7 @@ export function BaselineFeedbackSlider({
             onPress={() => {
               if (value < max) shift(step);
             }}
-            style={s.counterAction}
+            style={[s.counterAction, compact && { minHeight: 40 }]}
           >
             <AssetGlyph
               asset={incrementIcon}
@@ -261,23 +266,25 @@ export function BaselineFeedbackSlider({
             />
           </Pressable>
         </View>
-        <View style={s.sliderBottom}>
-          <View style={s.rangeSlot}>
-            <View style={s.rangePosition}>
-              <SourceRangeSlider
-                presentation="feedback"
-                label={label}
-                value={value}
-                min={min}
-                max={max}
-                step={step}
-                onChange={onChange}
-                color={sourceColor('var(--uc-action-strong)', dark)}
-              />
+        {showTrack && (
+          <View style={s.sliderBottom}>
+            <View style={s.rangeSlot}>
+              <View style={s.rangePosition}>
+                <SourceRangeSlider
+                  presentation="feedback"
+                  label={label}
+                  value={value}
+                  min={min}
+                  max={max}
+                  step={step}
+                  onChange={onChange}
+                  color={sourceColor('var(--uc-action-strong)', dark)}
+                />
+              </View>
             </View>
+            <Legend minLabel={minLabel} maxLabel={maxLabel} dark={dark} />
           </View>
-          <Legend minLabel={minLabel} maxLabel={maxLabel} dark={dark} />
-        </View>
+        )}
       </View>
     </View>
   );
@@ -310,13 +317,13 @@ export function BaselineFeedbackInfo({
         variant === 'image'
           ? s.infoImage
           : variant === 'icon'
-          ? s.infoIcon
-          : s.infoText,
+            ? s.infoIcon
+            : s.infoText,
         { backgroundColor: sourceColor('var(--uc-surface)', dark) },
       ]}
     >
       {variant === 'image'
-        ? image ?? (
+        ? (image ?? (
             <View
               testID="feedback-info-placeholder"
               style={s.placeholder}
@@ -330,7 +337,7 @@ export function BaselineFeedbackInfo({
                 height={24.106}
               />
             </View>
-          )
+          ))
         : null}
       {variant === 'icon' ? (
         <>
@@ -384,14 +391,14 @@ export function BaselineNpsStars({
               key === 'ArrowRight' || key === 'ArrowDown'
                 ? (rating % 5) + 1
                 : key === 'ArrowLeft' || key === 'ArrowUp'
-                ? ((rating + 3) % 5) + 1
-                : key === 'Home'
-                ? 1
-                : key === 'End'
-                ? 5
-                : key === ' ' || key === 'Spacebar'
-                ? rating
-                : undefined;
+                  ? ((rating + 3) % 5) + 1
+                  : key === 'Home'
+                    ? 1
+                    : key === 'End'
+                      ? 5
+                      : key === ' ' || key === 'Spacebar'
+                        ? rating
+                        : undefined;
             if (next !== undefined) {
               event.preventDefault();
               if (
@@ -461,12 +468,14 @@ export function BaselineNpsStars({
           </Pressable>
         ))}
       </View>
-      <Text
-        accessibilityLiveRegion="polite"
-        style={[s.body14, { color: sourceColor('var(--uc-text)', dark) }]}
-      >
-        {description ?? (selected ? 'Value description' : 'Select value')}
-      </Text>
+      {description !== '' && (
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[s.body14, { color: sourceColor('var(--uc-text)', dark) }]}
+        >
+          {description ?? (selected ? 'Value description' : 'Select value')}
+        </Text>
+      )}
     </View>
   );
 }

@@ -15,6 +15,7 @@ export function BaselineCodeField({
   onChange,
   length = 4,
   disabled = false,
+  readOnly = false,
   visualState,
   errorText,
   errorText2,
@@ -25,6 +26,8 @@ export function BaselineCodeField({
   onChange?: (value: string) => void;
   length?: number;
   disabled?: boolean;
+  /** Verified codes retain their source appearance without accepting further edits. */
+  readOnly?: boolean;
   visualState?: CodeFieldVisualState;
   errorText?: string;
   errorText2?: string;
@@ -44,6 +47,7 @@ export function BaselineCodeField({
   const id = useId();
   const helperId = state.isError ? `${id}-message` : undefined;
   const apply = (update: ReturnType<typeof updateCodeSlot>) => {
+    if (readOnly) return;
     if (update.value !== undefined) onChange?.(update.value);
     if (update.focusIndex !== undefined)
       refs.current[update.focusIndex]?.focus();
@@ -102,12 +106,12 @@ export function BaselineCodeField({
             aria-disabled={state.isDisabled}
             aria-invalid={state.isError}
             aria-describedby={helperId}
-            editable={!state.isDisabled}
+            editable={!state.isDisabled && !readOnly}
             value={slot}
             inputMode="numeric"
             autoComplete={index === 0 ? 'one-time-code' : 'off'}
             onFocus={() => {
-              if (!state.isDisabled) setFocusedIndex(index);
+              if (!state.isDisabled && !readOnly) setFocusedIndex(index);
             }}
             onBlur={() => setFocusedIndex(null)}
             onChangeText={next =>
@@ -122,7 +126,7 @@ export function BaselineCodeField({
               )
             }
             onKeyPress={event => {
-              if (state.isDisabled) return;
+              if (state.isDisabled || readOnly) return;
               const key = event.nativeEvent.key;
               if (key === 'Backspace') {
                 event.preventDefault();

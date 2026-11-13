@@ -28,7 +28,18 @@ it('finds extracted screen source in dependency modules and keeps every archive 
 })
 
 it('keeps the real registered source complete and every declared Bulk screen discoverable', () => {
-  expect(Object.keys(FLOW_SCREEN_SOURCES)).toEqual(['ba-card-fraud', 'pi-prime', 'investments-bulk-approval'])
+  expect(Object.keys(FLOW_SCREEN_SOURCES)).toEqual([
+    'ba-card-fraud',
+    'pi-prime',
+    'investments-bulk-approval',
+    'ro-onboarding',
+    'ro-cash-loan',
+  ])
+  for (const id of ['ro-onboarding', 'ro-cash-loan'] as const) {
+    const registered = FLOW_SCREEN_SOURCES[id]!
+    expect(registered.source).toContain('function RomanianOnboarding')
+    expect(registered.dependencies?.some((entry) => entry.file.endsWith('/session.ts'))).toBe(true)
+  }
   const source = FLOW_SCREEN_SOURCES['investments-bulk-approval']!
   for (const name of Object.values(INVESTMENTS_BULK_APPROVAL_FLOW.implementation!.screenSource!.screens)) {
     expect(findFunctionSource(source, name!)?.slice.code, name).toContain('function ' + name)

@@ -16,6 +16,9 @@ function wrap(render: Renderer): PreviewModule {
 }
 // Import only the selected family; metadata/index imports never mount previews.
 const loaders = {
+  cashLoan: () => import('@/flows/ro/cash-loan/preview').then((m) => wrap((screen) => m.renderCashLoanPreview(screen))),
+  onboarding: () =>
+    import('@/flows/ro/onboarding/preview').then((m) => wrap((screen) => m.renderOnboardingPreview(screen))),
   ethoca: () =>
     import('@/flows/shared/ethoca/preview').then((m) =>
       wrap((screen) => m.renderEthocaPreview(screen as Parameters<typeof m.renderEthocaPreview>[0])),
@@ -63,20 +66,24 @@ export function flowPreviewStatusBarVariant(kind: FlowScreenKind): 'light' | 'da
   return isPrimeReferenceScreen(kind) ? getPrimePhoneAppearance(kind).statusBarVariant : 'light'
 }
 export function renderFlowPreview(kind: FlowScreenKind, context: PreviewContext = {}): ReactNode {
-  const family = isPrimeReferenceScreen(kind)
-    ? 'prime'
-    : kind.startsWith('fraud-')
-      ? 'fraud'
-      : kind.startsWith('ethoca-')
-        ? 'ethoca'
-        : kind.startsWith('genius-my-car-')
-          ? 'genius'
-          : kind.startsWith('rs-pi-')
-            ? 'insurance'
-            : kind.startsWith('rs-disposable-')
-              ? 'disposable'
-              : kind.startsWith('investments-bulk-')
-                ? 'investments'
-                : null
+  const family = kind.startsWith('ro-cash-loan-')
+    ? 'cashLoan'
+    : kind.startsWith('ro-onboarding-')
+      ? 'onboarding'
+      : isPrimeReferenceScreen(kind)
+        ? 'prime'
+        : kind.startsWith('fraud-')
+          ? 'fraud'
+          : kind.startsWith('ethoca-')
+            ? 'ethoca'
+            : kind.startsWith('genius-my-car-')
+              ? 'genius'
+              : kind.startsWith('rs-pi-')
+                ? 'insurance'
+                : kind.startsWith('rs-disposable-')
+                  ? 'disposable'
+                  : kind.startsWith('investments-bulk-')
+                    ? 'investments'
+                    : null
   return family ? <DeferredPreview load={loaders[family]} screen={kind} context={context} /> : null
 }
