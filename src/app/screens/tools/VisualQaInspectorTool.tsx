@@ -34,13 +34,31 @@ function SearchableSelect({ label, displayLabel = label, value, options, placeho
   const id = useId()
   const selected = options.find((option) => option.value === value)?.label ?? ''
   const [query, setQuery] = useState(selected)
+  const [open, setOpen] = useState(false)
+  const [searching, setSearching] = useState(false)
+  const [active, setActive] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => { setQuery(selected) }, [selected])
-  return <label className="block min-w-0 text-[12px] font-bold">{displayLabel}<input aria-label={label} className={`${inputClass} mt-[4px]`} list={id} value={query} placeholder={placeholder} onChange={(event) => {
-    const next = event.target.value
-    setQuery(next)
-    const match = options.find((option) => option.label === next)
-    if (match) onChange(match.value)
-  }} onBlur={() => setQuery(selected)} /><datalist id={id}>{options.map((option) => <option key={option.value} value={option.label} />)}</datalist></label>
+  const filtered = searching ? options.filter((option) => option.label.toLocaleLowerCase().includes(query.toLocaleLowerCase())) : options
+  const choose = (option: { value: string; label: string }) => {
+    setQuery(option.label); setOpen(false); setSearching(false); setActive(0); onChange(option.value)
+  }
+  return <div className="relative min-w-0 text-[12px] font-bold" onBlur={(event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) { setOpen(false); setSearching(false); setQuery(selected) }
+  }}>
+    <label htmlFor={id}>{displayLabel}</label>
+    <div className="relative mt-[4px]">
+      <input id={id} ref={inputRef} role="combobox" aria-label={label} aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-list`} aria-activedescendant={open && filtered[active] ? `${id}-option-${active}` : undefined} className={`${inputClass} pr-[36px]`} value={query} placeholder={placeholder} onFocus={(event) => { setOpen(true); setSearching(false); event.currentTarget.select() }} onClick={() => { if (!open) { setSearching(false); setOpen(true) } }} onChange={(event) => { setQuery(event.target.value); setSearching(true); setOpen(true); setActive(0) }} onKeyDown={(event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); setOpen(true); setActive((current) => Math.max(0, Math.min(filtered.length - 1, current + (event.key === 'ArrowDown' ? 1 : -1)))) }
+        if (event.key === 'Enter' && open && filtered[active]) { event.preventDefault(); choose(filtered[active]) }
+        if (event.key === 'Escape') { setOpen(false); setSearching(false); setQuery(selected) }
+      }} />
+      <button type="button" aria-label={`Show ${displayLabel} options`} aria-expanded={open} tabIndex={-1} className="absolute inset-y-0 right-0 grid w-[36px] place-items-center text-[var(--uc-text)]" onMouseDown={(event) => event.preventDefault()} onClick={() => { if (open) { setOpen(false); setQuery(selected); setSearching(false) } else { setSearching(false); setOpen(true); inputRef.current?.focus() } }}><AppIcon name="chevron-down" size={16} /></button>
+    </div>
+    {open && <div id={`${id}-list`} role="listbox" aria-label={`${displayLabel} options`} className="absolute left-0 right-0 top-full z-50 mt-[4px] max-h-[220px] overflow-y-auto rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[4px] shadow-lg">
+      {filtered.length ? filtered.map((option, index) => <button type="button" tabIndex={-1} key={option.value} id={`${id}-option-${index}`} role="option" aria-selected={option.value === value} onMouseDown={(event) => event.preventDefault()} onMouseMove={() => setActive(index)} onClick={() => choose(option)} className={`block w-full cursor-pointer rounded-[5px] px-[9px] py-[8px] text-left text-[13px] font-normal ${index === active ? 'bg-[var(--uc-surface-muted)]' : ''}`}>{option.label}</button>) : <p className="px-[9px] py-[8px] font-normal text-[var(--uc-text-muted)]">No results</p>}
+    </div>}
+  </div>
 }
 const secondaryButtonClass = 'inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[20px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] py-[8px] text-[13px] font-bold text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)] disabled:cursor-not-allowed disabled:opacity-40'
 
@@ -117,7 +135,7 @@ export function VisualQaInspectorTool() {
   const [frameScale, setFrameScale] = useState(0.72)
   const [device, setDevice] = useState<'iphone' | 'android'>('iphone')
   const [deviceHeight, setDeviceHeight] = useState(812)
-  const [barHeight, setBarHeight] = useState(44)
+  const [barHeight, setBarHeight] = useState(32)
   const [reference, setReference] = useState('')
   const [actual, setActual] = useState('')
   const [actualName, setActualName] = useState('')
@@ -300,7 +318,7 @@ export function VisualQaInspectorTool() {
             </div>
           </details>
           <div className="mt-[16px] flex flex-wrap items-end gap-[14px]">
-            <div className="min-w-[170px]"><SearchableSelect label="Phone type" value={device} options={[{ value: 'iphone', label: 'iPhone · simulated' }, { value: 'android', label: 'Android · generic' }]} onChange={(value) => { const next = value as 'iphone' | 'android'; setDevice(next); setBarHeight(next === 'iphone' ? 44 : 40); setReference(''); setComparing(false) }} /></div>
+            <div className="min-w-[170px]"><SearchableSelect label="Phone type" value={device} options={[{ value: 'iphone', label: 'iPhone · simulated' }, { value: 'android', label: 'Android · generic' }]} onChange={(value) => { const next = value as 'iphone' | 'android'; setDevice(next); setBarHeight(32); setReference(''); setComparing(false) }} /></div>
             <label className="text-[12px] font-bold">System bar height <span className="font-normal">{barHeight}px</span><input aria-label="System bar height" className="mt-[4px] block w-[160px]" type="range" min="32" max="80" value={barHeight} onChange={(event) => { setBarHeight(Number(event.target.value)); setReference(''); setComparing(false) }} /></label>
             <p className="max-w-[430px] text-[12px] text-[var(--uc-text-muted)]">The system bar is simulated. The screenshot sets the screen proportions.</p>
           </div>
@@ -318,7 +336,7 @@ export function VisualQaInspectorTool() {
             <div className="mb-[10px] flex h-[66px] items-center justify-between gap-[8px]"><div><h3 className="font-bold">Demo reference</h3><p className="text-[12px] text-[var(--uc-text-muted)]">Navigate to the screen you want to check</p></div></div>
             <div ref={frameContainerRef} className="overflow-clip rounded-[25px] border-[4px] border-[var(--uc-static-black)] bg-[var(--uc-static-black)]" style={{ width: 278, height: deviceHeight * frameScale + 8, maxWidth: '100%' }}>
               <div className="origin-top-left" style={{ width: WIDTH, height: deviceHeight, transform: `scale(${frameScale})` }}>
-                <div ref={statusBarRef} className="relative overflow-hidden bg-[var(--uc-app-bg)]" style={{ width: WIDTH, height: barHeight }} aria-label={`Simulated ${device} system bar`}><StatusBar variant="light" edgeAligned={device === 'android'} /></div>
+                <div ref={statusBarRef} className="relative overflow-hidden bg-[var(--uc-app-bg)]" style={{ width: WIDTH, height: barHeight }} aria-label={`Simulated ${device} system bar`}><StatusBar variant="light" platform={device === 'android' ? 'android' : 'ios'} compact /></div>
                 <iframe key={frameVersion} ref={frameRef} title="Interactive demo reference" src={frameUrl} scrolling="no" className="block border-0" style={{ width: WIDTH, height: deviceHeight - barHeight }} onLoad={(event) => { const doc = event.currentTarget.contentDocument; if (!doc) return; const style = doc.createElement('style'); style.textContent = 'html,body{overflow:clip!important;scrollbar-width:none!important} [data-phone-screen="true"]{height:100dvh!important} *{scrollbar-width:none!important} *::-webkit-scrollbar{display:none!important}'; doc.head.appendChild(style) }} />
               </div>
             </div>

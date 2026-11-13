@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import svgPaths from '@/imports/svg-2hn0mpby87'
+import { BatteryFull, Signal, Wifi } from 'lucide-react'
 
 export type PhoneChromeVariant = 'light' | 'dark' | 'theme'
 
@@ -7,6 +8,8 @@ interface StatusBarProps {
   variant?: PhoneChromeVariant // light = text negru, dark = text alb, theme = controlled by phone theme CSS vars
   isCoAppingActive?: boolean
   edgeAligned?: boolean
+  platform?: 'ios' | 'android'
+  compact?: boolean
 }
 
 function getStatusBarForeground(variant: PhoneChromeVariant) {
@@ -102,11 +105,17 @@ function Levels({ variant, edgeAligned }: { variant: PhoneChromeVariant; edgeAli
   )
 }
 
-export default function StatusBar({ variant = 'dark', edgeAligned = false }: StatusBarProps) {
+export default function StatusBar({ variant = 'dark', edgeAligned = false, platform = 'ios', compact = false }: StatusBarProps) {
+  if (platform === 'android') {
+    return <div data-name="Status bar - Android" className="absolute inset-x-0 top-0 z-50 flex h-[32px] items-center justify-between px-[16px] pointer-events-none" style={{ color: getStatusBarForeground(variant) }}>
+      <Time variant={variant} edgeAligned />
+      <div aria-hidden="true" className="flex items-center gap-[5px]"><Signal size={15} fill="currentColor" /><Wifi size={15} /><BatteryFull size={17} /></div>
+    </div>
+  }
   return (
     <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none">
       <div
-        className={`content-stretch flex items-center ${edgeAligned ? 'justify-between' : 'gap-[154px] justify-center'} pb-[16px] pt-[14px] px-[24px] relative w-full`}
+        className={`content-stretch flex items-center ${edgeAligned ? 'justify-between' : 'gap-[154px] justify-center'} ${compact ? 'h-[32px]' : 'pb-[16px] pt-[14px]'} px-[24px] relative w-full`}
         data-name="Status bar - iPhone"
       >
         <Time variant={variant} edgeAligned={edgeAligned} />

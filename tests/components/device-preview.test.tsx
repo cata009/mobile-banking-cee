@@ -28,6 +28,18 @@ function selectDevice(label: string) {
 }
 
 describe('adaptive device preview', () => {
+  it('offers a generic Android phone with Android system chrome while keeping iPhone as default', () => {
+    renderPreview()
+    expect(screen.getByRole('button', { name: 'Preview device: iPhone 16' })).toBeInTheDocument()
+    selectDevice('Android phone')
+    expect(screen.getByTestId('device-preview-screen')).toHaveAttribute('data-device-profile', 'android-phone')
+    expect(document.querySelector('[data-name="Status bar - Android"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-android-camera]')).toBeInTheDocument()
+    expect(new URLSearchParams(window.location.search).get('previewDevice')).toBe('android-phone')
+    selectDevice('iPhone 16')
+    expect(document.querySelector('[data-name="Status bar - iPhone"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-android-camera]')).not.toBeInTheDocument()
+  })
   it('provides a centered baseline-width fallback only on the open Duo preview', () => {
     window.history.replaceState(null, '', '/?previewDevice=iphone-duo-open')
     const { container } = renderPreview()
