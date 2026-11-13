@@ -10,6 +10,6 @@ export const SCREEN_HEIGHT_FALLBACK = 812;
 
 export const CANVAS_SCALE = 1;
 
-export const BOTTOM_NAVIGATION_SELECTOR = "[data-phone-bottom-navigation='true']";
+export const BOTTOM_NAVIGATION_SELECTOR = "[data-phone-bottom-navigation='true'], [data-testid='phone-bottom-navigation']";
 
 export const DEVICE_SHELL_BACKGROUND_HEXES = new Set(["#000000", "#1F1F1F", "#262626"]);

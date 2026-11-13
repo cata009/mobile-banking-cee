@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/app/App'
 import { DemoTopBar } from '@/app/components/demo/DemoTopBar'
+import { expandShareUrl } from '@/app/utils/shareUrl'
 import { NavigationProvider } from '@/app/contexts/NavigationContext'
 import { COUNTRIES } from '@/app/registry/demoConfig'
 import { DemoProvider } from '@/app/state/demoStore'
@@ -19,6 +20,8 @@ vi.mock('@/app/components/demo/nativeDemoLoader', async () => {
   const { loadNativeDemoModuleForWebTest } = await import('../helpers/nativeWebRenderer')
   return { loadNativeDemoModule: loadNativeDemoModuleForWebTest }
 })
+
+vi.mock('qrcode.react', () => ({ QRCodeSVG: ({ value }: { value: string }) => <svg role="img" aria-label="Scan to open this demo on your phone" data-value={value} /> }))
 
 const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
 let originalMatchMedia: typeof window.matchMedia
@@ -214,7 +217,7 @@ describe('DemoTopBar app and country selector', () => {
 })
 
 describe('DemoTopBar web sharing', () => {
-  it('shares the desktop state and token-protected fullscreen link without QR or APK controls', async () => {
+  it('shares the desktop state and a token-protected QR code', async () => {
     window.history.replaceState({}, '', '/?product=PI&country=IT&scenario=active&ds=mobile-first&screen=homepage&theme=dark')
     const desktopUrl = window.location.href
     const copy = vi.fn().mockResolvedValue(undefined)
@@ -223,33 +226,31 @@ describe('DemoTopBar web sharing', () => {
     renderTopBar('IT')
     fireEvent.click(screen.getByRole('button', { name: 'Share' }))
     const popover = screen.getByText('Share this state').parentElement!
-    expect(within(popover).queryAllByText(/Scan to open|localhost the QR/)).toHaveLength(0)
-    expect(popover.querySelector('svg[width="144"]')).toBeNull()
     expect(within(popover).queryByRole('link', { name: 'Download Android demo APK' })).not.toBeInTheDocument()
     expect(popover.querySelector('a[download], a[href$=".apk"]')).toBeNull()
-    const fullscreen = screen.getByRole('link', { name: 'Open fullscreen demo' })
-    await waitFor(() => expect(new URL(fullscreen.getAttribute('href')!).searchParams.get('access_token')).toBe('authorized-test-token'))
-    const url = new URL(fullscreen.getAttribute('href')!)
+    expect(screen.queryByRole('link', { name: 'Open fullscreen demo' })).not.toBeInTheDocument()
+    const qr = await screen.findByRole('img', { name: 'Scan to open this demo on your phone' })
+    const url = new URL(expandShareUrl(qr.getAttribute('data-value')!))
+    expect(url.searchParams.get('access_token')).toBe('authorized-test-token')
     expect(url.searchParams.get('frame')).toBe('0')
     expect(url.searchParams.get('country')).toBe('IT')
     expect(url.searchParams.get('screen')).toBe('homepage')
     expect(url.searchParams.get('theme')).toBe('dark')
-    expect(fullscreen).toHaveAttribute('rel', 'noopener noreferrer')
     fireEvent.click(screen.getByRole('button', { name: 'Copy desktop link' }))
-    await waitFor(() => expect(copy).toHaveBeenCalledWith(desktopUrl))
+    await waitFor(() => expect(copy).toHaveBeenCalledOnce())
+    expect(expandShareUrl(String(copy.mock.calls[0]?.[0]))).toBe(desktopUrl)
     expect(screen.getByRole('button', { name: 'Link copied' })).toBeInTheDocument()
   })
 
-  it.each(['denied', 'empty', 'failure'] as const)('does not authorize fullscreen sharing when token request is %s', async (result) => {
+  it.each(['denied', 'empty', 'failure'] as const)('does not display a QR code when token request is %s', async (result) => {
     vi.stubEnv('VITE_LOCAL_SHARE_ACCESS_TOKEN', '')
     vi.stubGlobal('fetch', vi.fn(() => result === 'failure'
       ? Promise.reject(new Error('offline'))
       : Promise.resolve({ ok: result !== 'denied', json: async () => ({ token: '' }) })))
     renderTopBar()
     fireEvent.click(screen.getByRole('button', { name: 'Share' }))
-    const fullscreen = await screen.findByRole('link', { name: 'Open fullscreen demo' })
-    await act(async () => { await Promise.resolve() })
-    expect(new URL(fullscreen.getAttribute('href')!).searchParams.has('access_token')).toBe(false)
+    expect(await screen.findByText('QR code unavailable. Please try again.')).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Scan to open this demo on your phone' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copy desktop link' })).toBeInTheDocument()
   })
 
@@ -264,10 +265,10 @@ describe('DemoTopBar web sharing', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Share' }))
     window.history.replaceState({}, '', '/?screen=products&country=CZ')
     fireEvent.click(screen.getByRole('button', { name: 'Share' }))
-    const fullscreen = screen.getByRole('link', { name: 'Open fullscreen demo' })
-    await waitFor(() => expect(new URL(fullscreen.getAttribute('href')!).searchParams.get('access_token')).toBe('current-state-token'))
+    const qr = await screen.findByRole('img', { name: 'Scan to open this demo on your phone' })
+    expect(new URL(qr.getAttribute('data-value')!).searchParams.get('access_token')).toBe('current-state-token')
     await act(async () => { resolveEarlier({ ok: true, json: async () => ({ token: 'earlier-state-token' }) }); await earlier })
-    const url = new URL(fullscreen.getAttribute('href')!)
+    const url = new URL(expandShareUrl(qr.getAttribute('data-value')!))
     expect(url.searchParams.get('screen')).toBe('products')
     expect(url.searchParams.get('access_token')).toBe('current-state-token')
   })

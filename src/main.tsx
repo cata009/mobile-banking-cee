@@ -4,6 +4,10 @@ import { PlatformProvider } from '@/features/flow-collaboration/PlatformContext'
 import { PersonalAccessBoundary } from '@/features/flow-collaboration/PersonalAccessBoundary';
 import '@/styles/index.css';
 import { installRuntimeErrorHandlers, renderBootError } from '@/app/platform/runtimeErrors';
+import { expandShareUrl } from '@/app/utils/shareUrl';
+
+const expandedUrl = expandShareUrl(window.location.href);
+if (expandedUrl !== window.location.href) window.history.replaceState(window.history.state, '', expandedUrl);
 
 const rootElement = document.getElementById('root');
 
