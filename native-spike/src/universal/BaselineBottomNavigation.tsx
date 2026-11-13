@@ -67,7 +67,7 @@ export function BaselineBottomNavigation({
   };
   const iconLabelStyle = { alignItems: 'center' as const, gap: 0 };
   return (
-    <View style={barStyle}>
+    <View testID="phone-bottom-navigation" style={barStyle}>
       {resolveBottomNavigation({ items, myBanker }).map(item => {
         const selected = activeTab === item.id;
         const activeColor = sourceColor(`var(${geometry.activeToken})`, dark);

@@ -1,5 +1,6 @@
 
 import { CANVAS_SCALE, SCREEN_HEIGHT_FALLBACK, SCREEN_WIDTH_FALLBACK } from "./phoneScreenshot/constants";
+import { embedReferenceFonts } from "./phoneScreenshot/fonts";
 import { blobToDataUrl, inlineComputedStyles, canvasToBlob, copyFormState, createTimestamp, downloadBlob, expandScrollableContent, findPrimaryScrollableElement, getDirectElementText, getImageMimeType, getLayerName, inferFigmaLayerType, isRectOutsideFrame, loadImage, pickSerializableStyles, prepareRootClone, preserveVisibleHorizontalScrollOffsets, preserveVisibleScrollOffsets, round, toHorizontalScrollablePair, toScrollablePair, waitForLayoutFrame } from "./phoneScreenshot/domCapture";
 import { createFixedRootLayout, getFigmaReadyRootBackground, toFigmaReadyLayer } from "./phoneScreenshot/figmaLayers";
 import { validateGeneratedFigmaPayload } from "./phoneScreenshot/figmaValidation";
@@ -19,6 +20,7 @@ export async function createPhoneScreenshotBlob({
   mode,
 }: CreatePhoneScreenshotBlobOptions) {
   const capture = await createPhoneCaptureClone(screenElement, mode);
+  await embedReferenceFonts(capture.clone);
   const blob = await renderElementToPng(capture.clone, capture.width, capture.height);
 
   return {

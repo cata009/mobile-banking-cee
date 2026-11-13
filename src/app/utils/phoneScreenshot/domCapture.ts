@@ -296,6 +296,8 @@ export function anchorBottomNavigationAtCaptureEnd(
   if (!(cloneWrapper instanceof HTMLElement)) return;
 
   const wrapperHeight =
+    bottomNavigationWrapper.offsetHeight ||
+    bottomNavigationWrapper.clientHeight ||
     bottomNavigationWrapper.getBoundingClientRect().height ||
     bottomNavigation.getBoundingClientRect().height ||
     54;

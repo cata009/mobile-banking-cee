@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPhoneScreenshotBlob } from '@/app/utils/phoneScreenshot'
 import StatusBar from '@/app/components/StatusBar'
 import { AppIcon } from '@/app/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/app/components/ui/dropdown-menu'
 import { alignedScreenshotRect, heightForScreenshot } from './visualQaComparison'
-import { embedReferenceFonts, mountReferenceSnapshot } from './visualQaCapture'
+import { mountReferenceSnapshot } from './visualQaCapture'
 import { buildVisualQaHtml, buildVisualQaWord, type VisualQaReport } from './visualQaReport'
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from '@/app/registry/demoConfig'
 import { getAvailableLanguages, getLanguageDisplayName, type AppLanguage } from '@/app/registry/languageByCountry'
@@ -25,6 +25,22 @@ import type { BankingScenarioId, ProductCountKey, ProductCounts } from '@/app/st
 const WIDTH = 375
 const buttonClass = 'inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[20px] bg-[var(--uc-action-strong)] px-[16px] py-[9px] text-[13px] font-bold text-[var(--uc-static-white)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)] disabled:cursor-not-allowed disabled:opacity-40'
 const inputClass = 'w-full rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[8px] text-[13px] text-[var(--uc-text)]'
+
+function SearchableSelect({ label, displayLabel = label, value, options, placeholder, onChange }: {
+  label: string; value: string; options: Array<{ value: string; label: string }>;
+  displayLabel?: string; placeholder?: string; onChange: (value: string) => void
+}) {
+  const id = useId()
+  const selected = options.find((option) => option.value === value)?.label ?? ''
+  const [query, setQuery] = useState(selected)
+  useEffect(() => { setQuery(selected) }, [selected])
+  return <label className="block min-w-0 text-[12px] font-bold">{displayLabel}<input aria-label={label} className={`${inputClass} mt-[4px]`} list={id} value={query} placeholder={placeholder} onChange={(event) => {
+    const next = event.target.value
+    setQuery(next)
+    const match = options.find((option) => option.label === next)
+    if (match) onChange(match.value)
+  }} onBlur={() => setQuery(selected)} /><datalist id={id}>{options.map((option) => <option key={option.value} value={option.label} />)}</datalist></label>
+}
 const secondaryButtonClass = 'inline-flex min-h-[40px] items-center justify-center gap-[8px] rounded-[20px] border border-[var(--uc-border)] bg-[var(--uc-surface)] px-[14px] py-[8px] text-[13px] font-bold text-[var(--uc-text)] transition-colors hover:border-[var(--uc-action)] hover:text-[var(--uc-action)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)] disabled:cursor-not-allowed disabled:opacity-40'
 
 const productCountControls: Array<{ key: ProductCountKey; label: string }> = [
@@ -110,6 +126,8 @@ export function VisualQaInspectorTool() {
   const [offsetY, setOffsetY] = useState(0)
   const [frameVersion, setFrameVersion] = useState(0)
   const [note, setNote] = useState('')
+  const [expectedBehavior, setExpectedBehavior] = useState('')
+  const [actualBehavior, setActualBehavior] = useState('')
   const [error, setError] = useState('')
   const [capturing, setCapturing] = useState(false)
   const [referenceContext, setReferenceContext] = useState('')
@@ -176,7 +194,6 @@ export function VisualQaInspectorTool() {
       const snapshot = mountReferenceSnapshot(screen)
       let blob: Blob
       try {
-        await embedReferenceFonts(snapshot.element)
         ;({ blob } = await createPhoneScreenshotBlob({ screenElement: snapshot.element, mode: 'visible' }))
       } finally { snapshot.dispose() }
       const barCapture = await createPhoneScreenshotBlob({ screenElement: statusBarRef.current, mode: 'visible' })
@@ -258,7 +275,7 @@ export function VisualQaInspectorTool() {
         drawMarkers()
         alignedActualPng = encoded()
       }
-      const report: VisualQaReport = { context: referenceContext, screenshotName: actualName, observations: markers.map((marker, index) => `${index + 1}. ${marker.note || 'Observation'}`), notes: note, referencePng, actualPng, alignedActualPng }
+      const report: VisualQaReport = { context: referenceContext, screenshotName: actualName, observations: markers.map((marker, index) => `${index + 1}. ${marker.note || 'Observation'}`), notes: '', description: note, expectedBehavior, actualBehavior, referencePng, actualPng, alignedActualPng }
       const blob = format === 'word' ? buildVisualQaWord(report) : new Blob([buildVisualQaHtml(report, format === 'pdf')], { type: 'text/html;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       if (printWindow) { printWindow.location.href = url; window.setTimeout(() => URL.revokeObjectURL(url), 120_000) }
@@ -271,7 +288,7 @@ export function VisualQaInspectorTool() {
 
   function resetComparison() {
     setReference(''); setActual(''); setActualName(''); setReferenceContext('')
-    setMarkers([]); setNote(''); setError(''); setMarking(false)
+    setMarkers([]); setNote(''); setExpectedBehavior(''); setActualBehavior(''); setError(''); setMarking(false)
     setScale(100); setOffsetX(0); setOffsetY(0); setSplit(50)
     setComparing(false); setDeviceHeight(812)
     setFrameVersion((version) => version + 1)
@@ -288,23 +305,23 @@ export function VisualQaInspectorTool() {
         <div>
           <div className="mb-[10px] flex flex-wrap items-start justify-between gap-[8px]"><div><h2 className="text-[14px] font-bold">Comparison setup</h2><p className="mt-[2px] text-[12px] text-[var(--uc-text-muted)]">Choose the phone and demo context. You can still navigate inside the phone.</p></div><span className="text-[12px] text-[var(--uc-text-muted)]">Images stay in your browser</span></div>
           <div className="grid gap-[10px] sm:grid-cols-2 lg:grid-cols-4">
-            <label className="text-[12px] font-bold">Country<select aria-label="Reference country" className={`${inputClass} mt-[4px]`} value={referenceCountry} onChange={(event) => { const country = event.target.value as CountryId; const language = getAvailableLanguages(country).includes(referenceLanguage) ? referenceLanguage : 'en'; const release = availableReleases(country, product).includes(referenceRelease) ? referenceRelease : 'release-current'; setReferenceCountry(country); setReferenceLanguage(language); setReferenceRelease(release); updateReference({ country, lang: language, release, ds: country === 'IT' && product === 'PI' ? 'mobile-first' : designSystem === 'mobile-first' ? 'current' : designSystem }) }}>{COUNTRIES.map((country) => <option key={country} value={country}>{COUNTRY_META[country].nameEN}</option>)}</select></label>
-            <label className="text-[12px] font-bold">Language<select aria-label="Reference language" className={`${inputClass} mt-[4px]`} value={referenceLanguage} onChange={(event) => { const language = event.target.value as AppLanguage; setReferenceLanguage(language); updateReference({ lang: language }) }}>{getAvailableLanguages(referenceCountry).map((language) => <option key={language} value={language}>{getLanguageDisplayName(language)}</option>)}</select></label>
-            <label className="text-[12px] font-bold">App version<select aria-label="Reference version" className={`${inputClass} mt-[4px]`} value={referenceRelease} onChange={(event) => { const release = event.target.value as ReleaseId; setReferenceRelease(release); updateReference({ release }) }}>{[...new Set([referenceRelease, ...availableReleases(referenceCountry, product)])].map((release) => <option key={release} value={release}>{release === 'release-current' ? 'Baseline App' : RELEASES[release].label}</option>)}</select></label>
-            <label className="text-[12px] font-bold">Go to screen<select aria-label="Go to screen" className={`${inputClass} mt-[4px]`} value="" onChange={(event) => { if (event.target.value) updateReference({ screen: event.target.value }, true) }}><option value="">Choose a screen…</option>{screenShortcuts.map(({ screen, label }) => <option key={screen} value={screen}>{label}</option>)}</select></label>
+            <SearchableSelect displayLabel="Country" label="Reference country" value={referenceCountry} options={COUNTRIES.map((country) => ({ value: country, label: COUNTRY_META[country].nameEN }))} onChange={(value) => { const country = value as CountryId; const language = getAvailableLanguages(country).includes(referenceLanguage) ? referenceLanguage : 'en'; const release = availableReleases(country, product).includes(referenceRelease) ? referenceRelease : 'release-current'; setReferenceCountry(country); setReferenceLanguage(language); setReferenceRelease(release); updateReference({ country, lang: language, release, ds: country === 'IT' && product === 'PI' ? 'mobile-first' : designSystem === 'mobile-first' ? 'current' : designSystem }) }} />
+            <SearchableSelect displayLabel="Language" label="Reference language" value={referenceLanguage} options={getAvailableLanguages(referenceCountry).map((language) => ({ value: language, label: getLanguageDisplayName(language) }))} onChange={(value) => { const language = value as AppLanguage; setReferenceLanguage(language); updateReference({ lang: language }) }} />
+            <SearchableSelect displayLabel="App version" label="Reference version" value={referenceRelease} options={[...new Set([referenceRelease, ...availableReleases(referenceCountry, product)])].map((release) => ({ value: release, label: release === 'release-current' ? 'Baseline App' : RELEASES[release].label }))} onChange={(value) => { const release = value as ReleaseId; setReferenceRelease(release); updateReference({ release }) }} />
+            <SearchableSelect label="Go to screen" value="" placeholder="Choose a screen…" options={screenShortcuts.map(({ screen, label }) => ({ value: screen, label }))} onChange={(screen) => updateReference({ screen }, true)} />
           </div>
           <p className="mt-[10px] text-[12px] text-[var(--uc-text-muted)]">Some screens need a selected account or card: open those in the phone. Changing the reference keeps your screenshot and notes.</p>
           <details className="mt-[16px] rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)]">
             <summary className="cursor-pointer px-[14px] py-[12px] text-[13px] font-bold text-[var(--uc-text)]"><span>Customer &amp; products</span><span className="ml-[8px] font-normal text-[var(--uc-text-muted)]">{BANKING_SCENARIOS[referenceBank].label}</span></summary>
             <div className="grid gap-[14px] border-t border-[var(--uc-border)] p-[14px]">
-              <label className="block max-w-[360px] text-[12px] font-bold">Customer scenario<select aria-label="Customer scenario" className={`${inputClass} mt-[4px]`} value={referenceBank} onChange={(event) => { const bank = event.target.value as BankingScenarioId; const counts = product === 'PI' && isPIProductScenarioId(bank) ? resolveProductDataAuthority(bank, {}).baselineCounts : referenceCounts; setReferenceBank(bank); setReferenceCounts(counts); updateReference({ bank, ...countParams(counts), screen: 'homepage' }, true) }}>{Object.values(BANKING_SCENARIOS).filter((scenario) => scenario.products.includes(product) && scenario.countries.includes(referenceCountry)).map((scenario) => <option key={scenario.id} value={scenario.id}>{scenario.label}</option>)}</select></label>
+              <div className="max-w-[360px]"><SearchableSelect label="Customer scenario" value={referenceBank} options={Object.values(BANKING_SCENARIOS).filter((scenario) => scenario.products.includes(product) && scenario.countries.includes(referenceCountry)).map((scenario) => ({ value: scenario.id, label: scenario.label }))} onChange={(value) => { const bank = value as BankingScenarioId; const counts = product === 'PI' && isPIProductScenarioId(bank) ? resolveProductDataAuthority(bank, {}).baselineCounts : referenceCounts; setReferenceBank(bank); setReferenceCounts(counts); updateReference({ bank, ...countParams(counts), screen: 'homepage' }, true) }} /></div>
               <p className="text-[12px] text-[var(--uc-text-muted)]">{BANKING_SCENARIOS[referenceBank].description} Selecting a scenario sets its starting products; adjust the counts below.</p>
-              {product === 'PI' ? <div className="grid grid-cols-2 gap-[10px] sm:grid-cols-3 lg:grid-cols-5">{productCountControls.map(({ key, label }) => <label key={key} className="text-[12px] font-bold">{label}<input aria-label={`${label} in reference`} type="number" min={0} max={9} className={`${inputClass} mt-[4px]`} value={referenceCounts[key]} onChange={(event) => { const value = Number(event.target.value); const counts = { ...referenceCounts, [key]: Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0 }; setReferenceCounts(counts); updateReference(countParams(counts)) }} /></label>)}</div> : <p className="text-[12px] text-[var(--uc-text-muted)]">Product count editing is available for the personal banking demo.</p>}
+              {product === 'PI' ? <div className="grid grid-cols-3 gap-[10px] sm:grid-cols-5 xl:grid-cols-9">{productCountControls.map(({ key, label }) => <label key={key} className="text-[12px] font-bold">{label}<input aria-label={`${label} in reference`} type="number" min={0} max={9} className={`${inputClass} mt-[4px]`} value={referenceCounts[key]} onChange={(event) => { const value = Number(event.target.value); const counts = { ...referenceCounts, [key]: Number.isFinite(value) ? Math.max(0, Math.min(9, Math.trunc(value))) : 0 }; setReferenceCounts(counts); updateReference(countParams(counts)) }} /></label>)}</div> : <p className="text-[12px] text-[var(--uc-text-muted)]">Product count editing is available for the personal banking demo.</p>}
               <details className="text-[12px] text-[var(--uc-text-muted)]"><summary className="cursor-pointer font-bold text-[var(--uc-text)]">Rights from scenario · {restrictedActions.length} restricted actions</summary><p className="mt-[6px]">Rights and limits come from the selected scenario and available products; they are not individually editable. Some demo screens may not enforce every restriction.</p>{restrictedActions.length > 0 && <ul className="mt-[6px] list-disc space-y-[3px] pl-[18px]">{restrictedActions.map(({ action, label, reason }) => <li key={action}>{label}: {reason}</li>)}</ul>}</details>
             </div>
           </details>
           <div className="mt-[16px] flex flex-wrap items-end gap-[14px]">
-            <label className="text-[12px] font-bold">Phone type<select aria-label="Phone type" className={`${inputClass} mt-[4px] min-w-[170px]`} value={device} onChange={(event) => { const next = event.target.value as 'iphone' | 'android'; setDevice(next); setBarHeight(next === 'iphone' ? 44 : 40); setReference(''); setComparing(false) }}><option value="iphone">iPhone · simulated</option><option value="android">Android · generic</option></select></label>
+            <div className="min-w-[170px]"><SearchableSelect label="Phone type" value={device} options={[{ value: 'iphone', label: 'iPhone · simulated' }, { value: 'android', label: 'Android · generic' }]} onChange={(value) => { const next = value as 'iphone' | 'android'; setDevice(next); setBarHeight(next === 'iphone' ? 44 : 40); setReference(''); setComparing(false) }} /></div>
             <label className="text-[12px] font-bold">System bar height <span className="font-normal">{barHeight}px</span><input aria-label="System bar height" className="mt-[4px] block w-[160px]" type="range" min="32" max="80" value={barHeight} onChange={(event) => { setBarHeight(Number(event.target.value)); setReference(''); setComparing(false) }} /></label>
             <p className="max-w-[430px] text-[12px] text-[var(--uc-text-muted)]">The system bar is simulated. The screenshot sets the screen proportions.</p>
           </div>
@@ -375,7 +392,9 @@ export function VisualQaInspectorTool() {
             <button type="button" aria-pressed={marking} className={`${marking ? buttonClass : secondaryButtonClass} justify-self-start`} onClick={() => setMarking(!marking)}>{marking ? 'Click the image to place a marker' : '+ Mark an observation'}</button>
             {markers.length > 0 && <p className="text-[12px] text-[var(--uc-text-muted)]">Existing observations are kept. If you changed the demo screen, check their positions.</p>}
             {markers.map((marker, index) => <div key={marker.id} className="flex items-center gap-[8px]"><span className="font-bold">{index + 1}.</span><input className={inputClass} aria-label={`Observation ${index + 1}`} value={marker.note} placeholder="What is different?" onChange={(event) => setMarkers((items) => items.map((item) => item.id === marker.id ? { ...item, note: event.target.value } : item))} /><button type="button" className="text-[13px] underline" onClick={() => setMarkers((items) => items.filter((item) => item.id !== marker.id))}>Remove</button></div>)}
-            <label className="text-[13px] font-bold">Additional notes<textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} className={`${inputClass} mt-[6px]`} placeholder="Expected vs. observed…" /></label>
+            <label className="text-[13px] font-bold">Description<textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} className={`${inputClass} mt-[6px]`} placeholder="Describe the issue and its context…" /></label>
+            <label className="text-[13px] font-bold">Expected behavior<textarea value={expectedBehavior} onChange={(event) => setExpectedBehavior(event.target.value)} rows={3} className={`${inputClass} mt-[6px]`} placeholder="What should happen?" /></label>
+            <label className="text-[13px] font-bold">Actual behavior<textarea value={actualBehavior} onChange={(event) => setActualBehavior(event.target.value)} rows={3} className={`${inputClass} mt-[6px]`} placeholder="What happens instead?" /></label>
           </div>
         </div>}
       </section>

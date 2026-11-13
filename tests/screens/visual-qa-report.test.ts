@@ -8,6 +8,9 @@ const report = {
   screenshotName: 'credit-card.png',
   observations: ['1. Installments plan appears in the app only'],
   notes: 'Review against approved design.',
+  description: 'The card title is misplaced.',
+  expectedBehavior: 'The title is aligned with the card.',
+  actualBehavior: 'The title overlaps the card.',
   referencePng: png,
   actualPng: png,
 }
@@ -31,15 +34,19 @@ describe('visual QA reports', () => {
     const files = unzipSync(new Uint8Array(await blob.arrayBuffer()))
     const xml = new TextDecoder().decode(files['word/document.xml'])
     expect(xml).toContain('Installments plan appears in the app only')
+    expect(xml).toContain('The title is aligned with the card.')
+    expect(xml).toContain('The title overlaps the card.')
     expect(Object.keys(files).filter((name) => name.startsWith('word/media/'))).toHaveLength(2)
     expect(xml).not.toContain('Pixel differences')
   })
 
   it('escapes notes in HTML and includes the evidence images', () => {
-    const html = buildVisualQaHtml({ ...report, notes: '<script>not markup</script>' })
+    const html = buildVisualQaHtml({ ...report, description: '<script>not markup</script>' })
     expect(html).toContain('&lt;script&gt;not markup&lt;/script&gt;')
     expect(html.match(/data:image\/png;base64,/g)).toHaveLength(2)
     expect(html).not.toContain('Pixel differences')
     expect(html).toContain('Installments plan appears in the app only')
+    expect(html).toContain('The title is aligned with the card.')
+    expect(html).toContain('The title overlaps the card.')
   })
 })

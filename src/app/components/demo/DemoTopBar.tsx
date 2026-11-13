@@ -23,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/app/components/ui/dropdown-menu";
 import { withFramelessParam, withShareAccessTokenParam } from "@/app/utils/deepLink";
+import { compactShareUrl } from "@/app/utils/shareUrl";
+import { QRCodeSVG } from "qrcode.react";
 import { DemoFeatureSidePanel } from "./DemoFeatureSidePanel";
 import { PhoneScreenshotMenuItems } from "./PhoneScreenshotControl";
 import { DevicePreviewSelector } from "./DevicePreview";
@@ -112,6 +114,8 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
   const [shareCopied, setShareCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareUrls, setShareUrls] = useState({ framed: "", device: "" });
+  const [shareQrStatus, setShareQrStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const shareRequestRef = useRef(0);
   const shareResetTimeoutRef = useRef<number | null>(null);
   const shareRef = useRef<HTMLDivElement>(null);
 
@@ -257,27 +261,34 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
 
   const toggleShare = async () => {
     if (isShareOpen) {
+      shareRequestRef.current += 1;
       setIsShareOpen(false);
       return;
     }
-    const framed = window.location.href;
+    const requestId = ++shareRequestRef.current;
+    const framed = compactShareUrl(window.location.href);
     const device = withFramelessParam(framed);
-    setShareUrls({ framed, device });
+    setShareUrls({ framed, device: "" });
+    setShareQrStatus("loading");
     setShareCopied(false);
     setIsShareOpen(true);
 
     try {
       const shareAccessToken = (await requestShareAccessToken()) ?? getLocalShareAccessToken();
-      if (!shareAccessToken) return;
+      if (requestId !== shareRequestRef.current) return;
+      if (!shareAccessToken) { setShareQrStatus("unavailable"); return; }
       setShareUrls((current) =>
         current.framed === framed ? { ...current, device: withShareAccessTokenParam(device, shareAccessToken) } : current
       );
+      setShareQrStatus("ready");
     } catch {
+      if (requestId !== shareRequestRef.current) return;
       const localShareAccessToken = getLocalShareAccessToken();
-      if (!localShareAccessToken) return;
+      if (!localShareAccessToken) { setShareQrStatus("unavailable"); return; }
       setShareUrls((current) =>
         current.framed === framed ? { ...current, device: withShareAccessTokenParam(device, localShareAccessToken) } : current
       );
+      setShareQrStatus("ready");
     }
   };
 
@@ -582,14 +593,16 @@ export function DemoTopBar({ onOpenFocusMode }: DemoTopBarProps) {
                       </span>
                       {shareCopied ? "Link copied" : "Copy desktop link"}
                     </button>
-                    <a
-                      href={shareUrls.device || withFramelessParam(window.location.href)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 flex h-[36px] w-full items-center justify-center rounded-lg font-['UniCredit:Bold',sans-serif] text-[13px] text-[var(--uc-action)] hover:bg-[var(--uc-surface-muted)]"
-                    >
-                      Open fullscreen demo
-                    </a>
+                    <div className="mt-4 flex flex-col items-center gap-2 text-center">
+                      {shareQrStatus === "ready" && shareUrls.device ? (
+                        <QRCodeSVG value={shareUrls.device} size={144} marginSize={2} role="img" aria-label="Scan to open this demo on your phone" />
+                      ) : (
+                        <p role="status" className="text-[12px] text-[var(--uc-text-muted)]">
+                          {shareQrStatus === "loading" ? "Preparing QR code…" : "QR code unavailable. Please try again."}
+                        </p>
+                      )}
+                      {shareQrStatus === "ready" && <p className="text-[12px] text-[var(--uc-text-muted)]">Scan to open on your phone</p>}
+                    </div>
                   </div>
                 )}
               </div>

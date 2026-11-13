@@ -7,7 +7,27 @@ import {
   type FigmaReadyLayer,
   type PhoneFigmaJsonPayload,
 } from '../../src/app/utils/phoneScreenshot'
-import { preserveVisibleHorizontalScrollOffsets, toHorizontalScrollablePair } from '../../src/app/utils/phoneScreenshot/domCapture'
+import { anchorBottomNavigationAtCaptureEnd, preserveVisibleHorizontalScrollOffsets, toHorizontalScrollablePair } from '../../src/app/utils/phoneScreenshot/domCapture'
+
+vi.mock('@/app/utils/phoneScreenshot/fonts', () => ({ embedReferenceFonts: vi.fn(async () => undefined) }))
+
+it('uses the unscaled bottom navigation height in a full capture', () => {
+  const screen = document.createElement('div')
+  const wrapper = document.createElement('div')
+  const nav = document.createElement('div')
+  nav.dataset.testid = 'phone-bottom-navigation'
+  wrapper.style.position = 'absolute'
+  wrapper.style.bottom = '0px'
+  Object.defineProperty(wrapper, 'offsetHeight', { value: 56 })
+  wrapper.getBoundingClientRect = () => toRect([0, 0, 250, 38])
+  wrapper.append(nav)
+  screen.append(wrapper)
+  const clone = screen.cloneNode(true) as HTMLElement
+  const cloneWrapper = clone.firstElementChild as HTMLElement
+  anchorBottomNavigationAtCaptureEnd(new Map([[wrapper, cloneWrapper]]), screen, clone, 400)
+  expect(cloneWrapper.style.top).toBe('344px')
+  expect(cloneWrapper.style.height).toBe('56px')
+})
 
 type RectTuple = [x: number, y: number, width: number, height: number]
 
