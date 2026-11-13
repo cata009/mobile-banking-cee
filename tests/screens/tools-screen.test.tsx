@@ -78,7 +78,7 @@ describe("ToolsScreen", () => {
   it("renders the overview with all tool cards", () => {
     const { container } = renderTools();
     expect(screen.getByRole("heading", { name: "Tools", level: 1 })).toBeInTheDocument();
-    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(6);
+    expect(container.querySelectorAll("[data-tool-card]")).toHaveLength(7);
     expect(container.querySelector('[data-tool-card="marketing-email"]')).not.toBeNull();
     expect(container.querySelector('[data-tool-card="localization-coverage"]')).toBeNull();
     expect(container.querySelector('[data-tool-card="localization-signoff"]')).toBeNull();

@@ -28,6 +28,7 @@ import { Text } from '../../../../universal/Typography';
 import { sourceColor } from '../../../../universal/sourceColor';
 import { AccountDetailsShareSheet } from './AccountDetailsShareSheet';
 import { getAccountNameOverride } from '@/features/accounts-payments/accountNameOverrides';
+import { accountConvention } from '@/features/accounts-payments/roAccountConvention';
 
 /** Source account information: identity stays visible; only financial values are private. */
 export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
@@ -255,7 +256,7 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                   {
                     key: 'offer',
                     fallback: 'Offer',
-                    value: copy(
+                    value: accountConvention(host.country, product.type) ?? copy(
                       host,
                       'runtime.accounts.detailsInfo.offerValue',
                       'Account under favorable conditions',
@@ -263,8 +264,10 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                   },
                 ]),
           ];
-  const visibleFields = expanded ? fields : fields.slice(0, 3),
-    canExpand = fields.length > 3,
+  const showAllDetails = Boolean(deposit || product?.type === 'mortgage');
+  const visibleFields =
+      showAllDetails || expanded ? fields : fields.slice(0, 3),
+    canExpand = !showAllDetails && fields.length > 3,
     expansionLabel = copy(
       host,
       expanded ? 'runtime.actions.showLess' : 'runtime.actions.showMore',
@@ -280,6 +283,9 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
   const accountOwner = 'IACOB MIHAI-CATALIN';
   const bic = host.country === 'RO' ? 'BACXROBU' : undefined;
   const surface = sourceColor('var(--uc-surface)', dark);
+  const canShareAccountDetails = Boolean(
+    product && !deposit && product.type !== 'mortgage',
+  );
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
       <ScrollView
@@ -303,9 +309,11 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
           safeAreaReserve={host.screenTopInset}
           collapsedTitleProgress={progress}
           dark={dark}
-          onRightActionPress={() => setShareOpen(true)}
+          onRightActionPress={
+            canShareAccountDetails ? () => setShareOpen(true) : undefined
+          }
           rightActionIcon={
-            product ? (
+            canShareAccountDetails ? (
               <SourceCustomIcon
                 name="share-filled"
                 size={20}
@@ -412,7 +420,7 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
           </>
         ) : null}
       </ScrollView>
-      {product && shareOpen ? (
+      {product && canShareAccountDetails && shareOpen ? (
         <AccountDetailsShareSheet
           host={host}
           accountTitle={accountTitle.value}

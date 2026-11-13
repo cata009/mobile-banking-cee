@@ -31,6 +31,7 @@ export function BaselineMailboxTabs({
   labelTextStyle,
   dragScroll = false,
   scrollStyle,
+  accessibilityLabels,
 }: {
   tabs: readonly MessagesMailboxTab[];
   activeTabId: string;
@@ -44,6 +45,7 @@ export function BaselineMailboxTabs({
   labelTextStyle?: StyleProp<TextStyle>;
   dragScroll?: boolean;
   scrollStyle?: StyleProp<ViewStyle>;
+  accessibilityLabels?: Readonly<Record<string, string>>;
 }) {
   const state = resolveMailboxTabs({
     layout,
@@ -172,7 +174,7 @@ export function BaselineMailboxTabs({
           setLayoutVersion(value => value + 1);
         }}
         accessibilityRole="tab"
-        accessibilityLabel={tab.label}
+        accessibilityLabel={accessibilityLabels?.[tab.id] ?? tab.label}
         accessibilityState={{ selected }}
         aria-selected={selected}
         onPress={() => {

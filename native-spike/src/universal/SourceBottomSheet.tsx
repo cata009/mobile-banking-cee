@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -42,9 +42,10 @@ export function SourceBottomSheet({
   fixedHeight?: boolean;
 }) {
   const { height } = useDemoViewport();
+  const [footerHeight, setFooterHeight] = useState(140);
   const maxSheetHeight = Math.max(
     0,
-    height - maxHeightOffsetPx - (footer ? 140 : 0),
+    height - maxHeightOffsetPx - (footer ? footerHeight : 0),
   );
   return (
     <ModalPortal
@@ -113,12 +114,13 @@ export function SourceBottomSheet({
         </ScrollView>
         {footer && (
           <View
+            onLayout={event => setFooterHeight(event.nativeEvent.layout.height)}
             style={[
               s.footer,
+              showFooterDivider && s.footerDivider,
               {
                 backgroundColor: sourceColor('var(--uc-sheet-bg)', dark),
                 borderTopColor: sourceColor('var(--uc-border-muted)', dark),
-                borderTopWidth: showFooterDivider ? 1 : 0,
               },
             ]}
           >
@@ -144,6 +146,7 @@ const s = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 24,
   },
+  footerDivider: { borderTopWidth: 1 },
   stickyContent: { paddingTop: 0 },
   stickyHeader: { paddingTop: 24, paddingBottom: 24, marginBottom: 0 },
   header: {

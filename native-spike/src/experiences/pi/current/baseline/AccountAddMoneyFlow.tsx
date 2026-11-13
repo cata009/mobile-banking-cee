@@ -34,6 +34,7 @@ import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { Text } from '../../../../universal/Typography';
 import { ToggleButton } from '../../../../universal/ToggleButton';
 import { sourceColor } from '../../../../universal/sourceColor';
+import { Fact } from '../banking/Primitives';
 import { AccountSelectionSheet } from './AccountSelectionSheet';
 
 type AddMoneyStep = 'form' | 'review' | 'card' | 'success';
@@ -97,7 +98,9 @@ export function AccountAddMoneyFlow({
       copy(
         host,
         `runtime.accounts.productTitles.${accountTypeTitleKey(selectedAccount)}`,
-        selectedAccount.type.replace(/_/g, ' ').toUpperCase(),
+        selectedAccount.type === 'saving_account'
+          ? 'Savings account'
+          : 'Current account',
       ))
     : '';
   const parsedAmount = isValidAddMoneyAmount(amount)
@@ -128,14 +131,7 @@ export function AccountAddMoneyFlow({
   const updateCard = (change: Partial<AddMoneyCardDetails>) =>
     setCard(current => ({ ...current, ...change }));
   const titleText = (label: string, value: string) => (
-    <View style={styles.reviewField}>
-      <Text style={[styles.reviewLabel, { color: host.tokens.text }]}>
-        {label}
-      </Text>
-      <Text style={[styles.reviewValue, { color: host.tokens.muted }]}>
-        {value}
-      </Text>
-    </View>
+    <Fact host={host} label={label} value={value} />
   );
   const pageTitle =
     step === 'form'
@@ -376,15 +372,15 @@ export function AccountAddMoneyFlow({
               title="CHECK YOUR DATA AND CONFIRM"
               dark={dark}
             />
-            {titleText('BENEFICIARY ACCOUNT NAME', accountName.toUpperCase())}
-            {titleText('BENEFICIARY ACCOUNT NUMBER', beneficiaryAccountNumber)}
-            {titleText('AMOUNT', amountDisplay)}
+            {titleText('Beneficiary account name', accountName)}
+            {titleText('Beneficiary account number', beneficiaryAccountNumber)}
+            {titleText('Amount', amountDisplay)}
             {transactionInfo.trim()
-              ? titleText('TRANSACTION INFO', transactionInfo.trim())
+              ? titleText('Transaction info', transactionInfo.trim())
               : null}
-            {titleText('RECURRENT PAYMENT', recurring ? 'Yes' : 'No')}
+            {titleText('Recurrent payment', recurring ? 'Yes' : 'No')}
             {recurring
-              ? titleText('MONTHLY RECURRENCE DAY', recurrenceDay)
+              ? titleText('Monthly recurrence day', recurrenceDay)
               : null}
             <BaselineNavigationRow
               title="I AGREE WITH TERMS AND CONDITIONS"
@@ -589,13 +585,6 @@ const styles = StyleSheet.create({
   rowInset: { paddingLeft: 0, paddingRight: 0 },
   footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
   reviewContent: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 },
-  reviewField: { paddingTop: 24, paddingBottom: 10, gap: 2 },
-  reviewLabel: { fontFamily: 'UniCredit-bold', fontSize: 14, lineHeight: 18 },
-  reviewValue: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 16,
-    lineHeight: 21,
-  },
   termsHint: {
     textAlign: 'center',
     fontSize: 14,

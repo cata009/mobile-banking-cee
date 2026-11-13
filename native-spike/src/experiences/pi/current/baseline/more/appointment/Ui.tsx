@@ -120,7 +120,11 @@ export function Copy({
     color: color ?? host.tokens.text,
   };
   return (
-    <Text accessibilityRole={accessibilityRole} numberOfLines={numberOfLines} style={[copyStyle, style]}>
+    <Text
+      accessibilityRole={accessibilityRole}
+      numberOfLines={numberOfLines}
+      style={[copyStyle, style]}
+    >
       {children}
     </Text>
   );
@@ -159,7 +163,10 @@ export function Link({
   size?: number;
   style?: StyleProp<ViewStyle>;
   expanded?: boolean;
-} & ({ onPress: () => void; href?: string } | { href: string; onPress?: () => void })) {
+} & (
+  | { onPress: () => void; href?: string }
+  | { href: string; onPress?: () => void }
+)) {
   const color = useColors();
   return (
     <Pressable
@@ -167,7 +174,14 @@ export function Link({
       {...(Platform.OS === 'web' && href ? { href } : {})}
       accessibilityLabel={label}
       accessibilityState={expanded === undefined ? undefined : { expanded }}
-      onPress={onPress ?? (href && Platform.OS !== 'web' ? () => { void Linking.openURL(href).catch(() => undefined); } : undefined)}
+      onPress={
+        onPress ??
+        (href && Platform.OS !== 'web'
+          ? () => {
+              void Linking.openURL(href).catch(() => undefined);
+            }
+          : undefined)
+      }
       style={style}
     >
       <Copy strong size={size} color={color('--uc-action')}>
@@ -211,11 +225,14 @@ export function AppointmentPage({
         stickyHeaderIndices={[0]}
         scrollEventThrottle={16}
         onScroll={event => {
-          const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-          const availableScroll = contentSize && layoutMeasurement
-            ? contentSize.height - layoutMeasurement.height
-            : 48;
-          const distance = availableScroll > 0 ? Math.min(48, availableScroll) : 48;
+          const { contentOffset, contentSize, layoutMeasurement } =
+            event.nativeEvent;
+          const availableScroll =
+            contentSize && layoutMeasurement
+              ? contentSize.height - layoutMeasurement.height
+              : 48;
+          const distance =
+            availableScroll > 0 ? Math.min(48, availableScroll) : 48;
           setProgress(Math.min(1, Math.max(0, contentOffset.y / distance)));
         }}
         style={Platform.OS === 'web' ? s.webScroll : undefined}
@@ -237,7 +254,10 @@ export function AppointmentPage({
           />
         </View>
         {showLargeTitle ? (
-          <View style={[s.largeTitle, { opacity: 1 - progress }]} aria-hidden={progress >= 1}>
+          <View
+            style={[s.largeTitle, { opacity: 1 - progress }]}
+            aria-hidden={progress >= 1}
+          >
             <Copy strong size={28} numberOfLines={2} accessibilityRole="header">
               {title}
             </Copy>
@@ -314,8 +334,8 @@ export function FieldValue({
           ]}
         >
           <SourceCustomIcon
-            name="insurance-calendar"
-            size={32}
+            name="calendar-days"
+            size={24}
             color={host.tokens.text}
           />
         </View>

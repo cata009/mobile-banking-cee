@@ -120,7 +120,9 @@ export function AccountStatementFlow({
     const message = selectedStatements
       .map(
         statement =>
-          `Statement number ${statement.statementNumber} · ${statementDateLabel(statement.date)}`,
+          `Statement number ${statement.statementNumber} · ${statementDateLabel(
+            statement.date,
+          )}`,
       )
       .join('\n');
     setNotice('');
@@ -397,8 +399,8 @@ export function AccountStatementFlow({
                 displayFormat="long-month"
                 calendarIcon={
                   <SourceCustomIcon
-                    name="insurance-calendar"
-                    size={32}
+                    name="calendar-days"
+                    size={24}
                     color={host.tokens.text}
                   />
                 }
@@ -416,8 +418,8 @@ export function AccountStatementFlow({
                 displayFormat="long-month"
                 calendarIcon={
                   <SourceCustomIcon
-                    name="insurance-calendar"
-                    size={32}
+                    name="calendar-days"
+                    size={24}
                     color={host.tokens.text}
                   />
                 }
@@ -470,8 +472,8 @@ export function AccountStatementFlow({
                 displayFormat="long-month"
                 calendarIcon={
                   <SourceCustomIcon
-                    name="insurance-calendar"
-                    size={32}
+                    name="calendar-days"
+                    size={24}
                     color={host.tokens.text}
                   />
                 }
@@ -489,8 +491,8 @@ export function AccountStatementFlow({
                 displayFormat="long-month"
                 calendarIcon={
                   <SourceCustomIcon
-                    name="insurance-calendar"
-                    size={32}
+                    name="calendar-days"
+                    size={24}
                     color={host.tokens.text}
                   />
                 }

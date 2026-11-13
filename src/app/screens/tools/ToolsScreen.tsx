@@ -15,10 +15,12 @@ import { TranslationTesterTool } from "./TranslationTesterTool";
 import { TranslationReviewTool } from "./TranslationReviewTool";
 import { CountryDivergenceTool } from "./CountryDivergenceTool";
 import { PreloginPictureTesterTool } from "./PreloginPictureTesterTool";
+import { VisualQaInspectorTool } from "./VisualQaInspectorTool";
 
 const MarketingEmailBuilderTool = lazy(() => import('./MarketingEmailBuilderTool'));
 
 type ToolId =
+  | "visual-qa"
   | "marketing-email"
   | "prelogin-picture"
   | "side-by-side"
@@ -36,9 +38,16 @@ interface ToolMeta {
 
 const TOOLS: readonly ToolMeta[] = [
   {
+    id: "visual-qa",
+    label: "Visual QA Inspector",
+    icon: "eye",
+    description: "Compare an interactive demo screen with an app screenshot, highlight visual differences and prepare a report.",
+    audience: "QA · Design · Development",
+  },
+  {
     id: "marketing-email",
     label: "Marketing email builder",
-    icon: "book-open",
+    icon: "send",
     description: "Compose reusable email blocks, preview responsive light/dark HTML, validate content and download an editable campaign package.",
     audience: "Marketing · Design · Local market teams · QA",
   },
@@ -53,7 +62,7 @@ const TOOLS: readonly ToolMeta[] = [
   {
     id: "side-by-side",
     label: "Country comparison",
-    icon: "grid-2x2",
+    icon: "repeat",
     description:
       "Render the same screen for 2–3 countries as live app frames in parallel and compare the CEE differences directly.",
     audience: "Business · Management · BA",
@@ -61,7 +70,7 @@ const TOOLS: readonly ToolMeta[] = [
   {
     id: "country-divergence",
     label: "Country divergence explorer",
-    icon: "sliders-horizontal",
+    icon: "chart-bars",
     description:
       "A matrix of every dimension that differs across the 8 countries — currency, locale, capabilities and feature scope — against the majority or a reference country.",
     audience: "BA · Product owners",
@@ -126,11 +135,11 @@ export default function ToolsScreen() {
                 type="button"
                 onClick={() => setActiveToolId(tool.id)}
                 data-tool-card={tool.id}
-                className="group rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] text-left shadow-sm transition-colors hover:border-[var(--uc-action)]"
+                className="group flex h-full flex-col items-stretch rounded-[8px] border border-[var(--uc-border)] bg-[var(--uc-surface)] p-[20px] text-left shadow-sm transition-colors hover:border-[var(--uc-action)]"
               >
                   <div className="flex items-start justify-between gap-[12px]">
-                    <span className="grid size-[40px] shrink-0 place-items-center rounded-[8px] bg-[var(--uc-surface-muted)] text-[var(--uc-text)] transition-colors group-hover:text-[var(--uc-action)]">
-                      <AppIcon name={tool.icon} size={20} color="currentColor" />
+                    <span className="grid size-[44px] shrink-0 place-items-center rounded-[10px] border border-[color-mix(in_srgb,var(--uc-action)_14%,var(--uc-surface))] bg-[color-mix(in_srgb,var(--uc-action)_8%,var(--uc-surface))] text-[var(--uc-action)] transition-colors group-hover:bg-[color-mix(in_srgb,var(--uc-action)_14%,var(--uc-surface))]">
+                      <AppIcon name={tool.icon} size={22} color="currentColor" />
                     </span>
                     <span className="mt-[10px] text-[var(--uc-text-muted)] transition-colors group-hover:text-[var(--uc-action)]">
                       <AppIcon name="arrow-right" size={18} color="currentColor" />
@@ -138,7 +147,7 @@ export default function ToolsScreen() {
                   </div>
                   <h2 className="mt-[14px] text-[16px] font-bold leading-[21px] text-[var(--uc-text)]">{tool.label}</h2>
                   <p className="mt-[6px] text-[13px] leading-[18px] text-[var(--uc-text-muted)]">{tool.description}</p>
-                  <p className="mt-[12px] text-[11px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
+                  <p className="mt-auto pt-[12px] text-[11px] font-bold uppercase tracking-[0.04em] text-[var(--uc-text-muted)]">
                     {tool.audience}
                   </p>
                 </button>
@@ -147,7 +156,9 @@ export default function ToolsScreen() {
         ) : (
           <div>
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
-              {activeToolId === "marketing-email" ? (
+              {activeToolId === "visual-qa" ? (
+                <VisualQaInspectorTool />
+              ) : activeToolId === "marketing-email" ? (
                 <Suspense fallback={<p role="status">Se încarcă editorul de emailuri…</p>}><MarketingEmailBuilderTool /></Suspense>
               ) : activeToolId === "prelogin-picture" ? (
                 <PreloginPictureTesterTool />

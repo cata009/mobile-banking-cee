@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BaselineNavigationRow } from '../../../../universal/BaselineNavigationRow';
 import { AssetGlyph } from '../../../../universal/AssetGlyph';
@@ -13,6 +13,14 @@ import CardLimitsSheet from './CardLimitsSheet';
 import CardPushNotifications from './CardPushNotifications';
 import { isCardLimitsAvailable } from '@/features/cards/card-limits/model';
 import { isRoBaselinePinAvailable } from '@/features/cards/pin/model';
+import WalletButton from '@/app/components/ui/WalletButton';
+import { CardWalletEnrollmentFlow } from './RoCardServices';
+import {
+  cardServiceSnapshot,
+  isRomanianDemoWalletEnrolled,
+  subscribeCardServices,
+  type CardWalletProvider,
+} from '../banking/cardServicesStore';
 
 const programs = [
   ['apple-pay', 'card-options-apple-pay', 'APPLE PAY', 'Active'],
@@ -85,7 +93,13 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
   const [pinOpen, setPinOpen] = useState(false);
   const [limitsOpen, setLimitsOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [walletProvider, setWalletProvider] = useState<CardWalletProvider | null>(null);
   const [demoPins, setDemoPins] = useState<Record<string, string>>({});
+  useSyncExternalStore(
+    subscribeCardServices,
+    cardServiceSnapshot,
+    cardServiceSnapshot,
+  );
   const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
   const cards = bankingProducts(host).cards,
     card =
@@ -103,9 +117,33 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
         ]}
       />
     );
-  if (host.route.params?.cardLimitsPage === 'true' || host.route.params?.cardSecurityPage === 'true')
-    return <CardLimitsSheet country={host.country} cardId={card.id} available={card.type === 'credit_card' ? card.availableCredit : Math.abs(card.balance)} dark={dark} onClose={host.onBack} />;
-  if (notificationsOpen) return <CardPushNotifications host={host} cardId={card.id} onClose={() => setNotificationsOpen(false)} />;
+  if (walletProvider)
+    return <CardWalletEnrollmentFlow host={host} card={card} provider={walletProvider} onClose={() => setWalletProvider(null)} />;
+  if (
+    host.route.params?.cardLimitsPage === 'true' ||
+    host.route.params?.cardSecurityPage === 'true'
+  )
+    return (
+      <CardLimitsSheet
+        country={host.country}
+        cardId={card.id}
+        available={
+          card.type === 'credit_card'
+            ? card.availableCredit
+            : Math.abs(card.balance)
+        }
+        dark={dark}
+        onClose={host.onBack}
+      />
+    );
+  if (notificationsOpen)
+    return (
+      <CardPushNotifications
+        host={host}
+        cardId={card.id}
+        onClose={() => setNotificationsOpen(false)}
+      />
+    );
   const virtual =
     host.country === 'RO' &&
     host.release === 'release-current' &&
@@ -144,7 +182,8 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
               ? () => setPinOpen(true)
               : id === 'reissue-card' && securityRoutes?.replacement
                 ? () => host.onNavigate(securityRoutes.replacement!)
-                : id === 'card-limits' && isCardLimitsAvailable('PI', host.country)
+                : id === 'card-limits' &&
+                    isCardLimitsAvailable('PI', host.country)
                   ? () => setLimitsOpen(true)
                   : id === 'push-notifications' && host.country !== 'IT'
                     ? () => setNotificationsOpen(true)
@@ -153,6 +192,27 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
         />
       </View>
     ));
+  const roActive = host.country === 'RO' && host.release === 'release-current' && host.scenario === 'active';
+  const walletRows = (['apple-pay', 'click-to-pay'] as const).map(provider => {
+    const enrolled = isRomanianDemoWalletEnrolled(card.id, provider, cards);
+    const apple = provider === 'apple-pay';
+    return (
+      <View key={provider} testID={`ro-card-option-${provider}`}>
+        <BaselineNavigationRow
+          title={apple ? 'APPLE PAY' : 'CLICK TO PAY'}
+          description={enrolled ? 'Enrolled' : apple ? 'Add to Apple Wallet' : 'Add to Mastercard Wallet'}
+          leadingIconName={enrolled ? 'card-options-apple-pay' : undefined}
+          trailingAccessory={enrolled ? 'chevron' : 'none'}
+          trailing={enrolled ? undefined : <WalletButton kind={apple ? 'apple-wallet' : 'click-to-pay'} size="condensed" onClick={() => setWalletProvider(provider)} />}
+          rowHeight={80}
+          style={enrolled ? undefined : styles.walletRow}
+          titleStyle={enrolled ? undefined : styles.walletTitle}
+          descriptionStyle={enrolled ? undefined : styles.walletDescription}
+          dark={dark}
+        />
+      </View>
+    );
+  });
   return (
     <View style={styles.root}>
       <View
@@ -163,7 +223,8 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
       >
         <RoBaselineCardPage host={host} title="Card options" showHelp={false}>
           <View style={styles.content}>
-            {rows(programs)}
+            {roActive ? walletRows : null}
+            {rows(roActive ? programs.slice(1) : programs)}
             <View accessibilityLabel="General settings" style={styles.settings}>
               <View style={styles.divider}>
                 <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
@@ -185,18 +246,35 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
                   <BaselineNavigationRow
                     title="DISPOSABLE CARDS"
                     description="View or create disposable cards"
-                    leadingVisual={host.route.params.disposableCardsIcon ? (
-                      <View testID="disposable-card-icon" aria-hidden={true} style={styles.proposalIcon}>
-                        <AssetGlyph asset={host.route.params.disposableCardsIcon} width={20} height={19} tintColor={sourceColor('var(--uc-text)', dark)} />
-                      </View>
-                    ) : undefined}
+                    leadingVisual={
+                      host.route.params.disposableCardsIcon ? (
+                        <View
+                          testID="disposable-card-icon"
+                          aria-hidden={true}
+                          style={styles.proposalIcon}
+                        >
+                          <AssetGlyph
+                            asset={host.route.params.disposableCardsIcon}
+                            width={20}
+                            height={19}
+                            tintColor={sourceColor('var(--uc-text)', dark)}
+                          />
+                        </View>
+                      ) : undefined
+                    }
                     trailingAccessory="chevron"
                     rowHeight={80}
                     dark={dark}
-                    onPress={() => host.onNavigate({
-                      screen: 'card',
-                      params: { productId: card.id, cardId: card.id, openDisposableCards: 'true' },
-                    })}
+                    onPress={() =>
+                      host.onNavigate({
+                        screen: 'card',
+                        params: {
+                          productId: card.id,
+                          cardId: card.id,
+                          openDisposableCards: 'true',
+                        },
+                      })
+                    }
                   />
                 ) : null}
                 {rows([
@@ -210,7 +288,19 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
           </View>
         </RoBaselineCardPage>
       </View>
-      {limitsOpen && <CardLimitsSheet country={host.country} cardId={card.id} available={card.type === 'credit_card' ? card.availableCredit : Math.abs(card.balance)} dark={dark} onClose={() => setLimitsOpen(false)} />}
+      {limitsOpen && (
+        <CardLimitsSheet
+          country={host.country}
+          cardId={card.id}
+          available={
+            card.type === 'credit_card'
+              ? card.availableCredit
+              : Math.abs(card.balance)
+          }
+          dark={dark}
+          onClose={() => setLimitsOpen(false)}
+        />
+      )}
       {pinOpen ? (
         <CardPinFlow
           host={host}
@@ -228,8 +318,16 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  proposalIcon: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  proposalIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   content: { paddingBottom: 40 },
+  walletRow: { paddingLeft: 24, paddingRight: 12 },
+  walletTitle: { fontSize: 14, letterSpacing: 1 },
+  walletDescription: { fontSize: 14 },
   settings: { marginTop: 16 },
   divider: { paddingHorizontal: 24 },
   rows: { paddingTop: 16 },

@@ -3,6 +3,7 @@ import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { resolveDuoContent } from '@/features/demo-native/duoPreview';
 import type { CurrentScreenProps } from '../../contracts';
 import { bankingProducts } from '../../banking/model';
+import { Fact } from '../../banking/Primitives';
 import {
   canContinueContractWithdrawal,
   CONTRACT_WITHDRAWAL_BANK_PRODUCTS,
@@ -440,8 +441,8 @@ export default function ContractWithdrawalFlow({
             locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
             calendarIcon={
               <SourceCustomIcon
-                name="insurance-calendar"
-                size={32}
+                name="calendar-days"
+                size={24}
                 color={sourceColor('var(--uc-text)', dark)}
               />
             }
@@ -608,12 +609,12 @@ export default function ContractWithdrawalFlow({
         <ReviewField
           title={copy('runtime.contractWithdrawal.clientName', 'Client name')}
           value={CONTRACT_WITHDRAWAL_DEMO_CONTACT.name}
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy('runtime.contractWithdrawal.customerId', 'Customer ID')}
           value={CONTRACT_WITHDRAWAL_DEMO_CONTACT.customerId}
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy(
@@ -631,7 +632,7 @@ export default function ContractWithdrawalFlow({
                   'UniCredit Bank',
                 )
           }
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy(
@@ -639,7 +640,7 @@ export default function ContractWithdrawalFlow({
             'Product type category',
           )}
           value={productLabel(state.product ?? 'package', copy)}
-          dark={dark}
+          host={host}
         />
         {state.product !== 'package' ? (
           <ReviewField
@@ -654,7 +655,7 @@ export default function ContractWithdrawalFlow({
               state.productIdentifier,
               copy,
             )}
-            dark={dark}
+            host={host}
           />
         ) : null}
         <ReviewField
@@ -663,7 +664,7 @@ export default function ContractWithdrawalFlow({
             'Product was opened/requested on',
           )}
           value={displayIsoDate(state.requestedDate, '.')}
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy(
@@ -671,7 +672,7 @@ export default function ContractWithdrawalFlow({
             'Product was requested in the channel',
           )}
           value={channelLabel(state.requestChannel, copy)}
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy(
@@ -679,12 +680,12 @@ export default function ContractWithdrawalFlow({
             'Contract / application reference number',
           )}
           value={state.contractReference.trim() || '—'}
-          dark={dark}
+          host={host}
         />
         <ReviewField
           title={copy('runtime.contractWithdrawal.email', 'Your email address')}
           value={state.email}
-          dark={dark}
+          host={host}
         />
         <View style={styles.declaration}>
           <BaselineNavigationRow
@@ -984,17 +985,13 @@ function channelLabel(
 function ReviewField({
   title,
   value,
-  dark,
+  host,
 }: {
   title: string;
   value: string;
-  dark: boolean;
+  host: CurrentScreenProps;
 }) {
-  return (
-    <View style={styles.reviewField}>
-      <BaselineAccountInfoField title={title} subtitle={value} dark={dark} />
-    </View>
-  );
+  return <Fact host={host} label={title} value={value} />;
 }
 
 function FullScreenPage({
@@ -1302,11 +1299,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   cardNotice: { paddingHorizontal: 24, paddingVertical: 8 },
-  reviewField: {
-    paddingHorizontal: 24,
-    minHeight: 72,
-    justifyContent: 'center',
-  },
   declaration: { paddingTop: 16, paddingHorizontal: 24 },
   pageFooter: {
     paddingHorizontal: 24,

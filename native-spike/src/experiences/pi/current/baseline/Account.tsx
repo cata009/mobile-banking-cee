@@ -40,6 +40,7 @@ import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
 import { AccountAddMoneyFlow } from './AccountAddMoneyFlow';
 import { AccountMcashFlow } from './AccountMcashFlow';
+import { MortgageReimbursementFlow } from './MortgageReimbursementFlow';
 
 const geometry = {
   width: 311,
@@ -259,6 +260,7 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
   const [progress, setProgress] = useState(0);
   const [addMoneyOpen, setAddMoneyOpen] = useState(false);
   const [mcashOpen, setMcashOpen] = useState(false);
+  const [reimbursementOpen, setReimbursementOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const measuredScrollY = useRef(0);
   const [query, setQuery] = useState('');
@@ -297,7 +299,12 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
         if (product)
           host.onNavigate({
             screen: 'account-options',
-            params: { productId: requestedId ?? defaultId ?? product.id },
+            params: {
+              productId:
+                host.country === 'RO'
+                  ? product.id
+                  : (requestedId ?? defaultId ?? product.id),
+            },
           });
       },
       hidden:
@@ -326,7 +333,12 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
     },
     {
       id: 'mcash',
-      iconName: 'mcash',
+      iconName:
+        product?.type === 'term_deposit'
+          ? 'trash-2'
+          : product?.type === 'mortgage'
+            ? 'payment-card-repayment'
+            : 'mcash',
       label:
         host.country === 'RO' && product?.type === 'current_account'
           ? 'mCash'
@@ -350,7 +362,10 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
       onPress:
         host.country === 'RO' && product?.type === 'current_account'
           ? () => setMcashOpen(true)
-          : undefined,
+          : host.country === 'RO' && product?.type === 'mortgage'
+            ? () => setReimbursementOpen(true)
+            : undefined,
+      hidden: host.country === 'RO' && product?.type === 'loan',
     },
   ];
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -493,6 +508,15 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
         accounts={data.currentAccounts}
         initialAccountId={product.id}
         onClose={() => setMcashOpen(false)}
+      />
+    );
+  }
+  if (reimbursementOpen && product?.type === 'mortgage') {
+    return (
+      <MortgageReimbursementFlow
+        host={host}
+        mortgage={product}
+        onClose={() => setReimbursementOpen(false)}
       />
     );
   }

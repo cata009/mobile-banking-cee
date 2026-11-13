@@ -622,6 +622,14 @@ export function getAllRecurrentPayments(country: CountryId): RecurrentPayment[] 
   ]
 }
 
+/** Return only locally created recurrent payments, without country seed records. */
+export function getCreatedRecurrentPayments(
+  country: CountryId,
+  kind: RecurrentPaymentKind,
+): RecurrentPayment[] {
+  return getStoredRecurrentPaymentChanges(country).created.filter((payment) => payment.kind === kind)
+}
+
 export function createRecurrentPayment(country: CountryId, payment: RecurrentPayment) {
   const changes = getStoredRecurrentPaymentChanges(country)
   changes.created = [...changes.created.filter((item) => item.id !== payment.id), payment]

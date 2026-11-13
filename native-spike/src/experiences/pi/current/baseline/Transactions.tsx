@@ -53,6 +53,7 @@ export function RoBaselineTransactions({
   filters: controlledFilters,
   onFiltersChange,
   stickyTop = host.screenTopInset + 48,
+  searchTopPadding = 24,
   renderSections,
 }: {
   host: CurrentScreenProps;
@@ -68,6 +69,7 @@ export function RoBaselineTransactions({
   filters?: AccountTransactionFilterState;
   onFiltersChange?: (filters: AccountTransactionFilterState) => void;
   stickyTop?: number;
+  searchTopPadding?: number;
   renderSections?: (sections: RoBaselineTransactionSections) => ReactNode;
 }) {
   const [localFilters, setLocalFilters] =
@@ -117,11 +119,11 @@ export function RoBaselineTransactions({
   const filtered = filterEvoTransactions({
     transactions: scoped,
     search: query,
-    filters: kind === 'account' ? filters : EMPTY_ACCOUNT_TRANSACTION_FILTERS,
+    filters,
     accountNumber: product.accountNumber,
     currency,
   });
-  const active = kind === 'account' && hasAccountTransactionFilters(filters);
+  const active = hasAccountTransactionFilters(filters);
   const hasSearch = Boolean(query.trim());
   const groups = groupAccountTransactionsByMonth(
     filtered.filter(t => {
@@ -167,7 +169,7 @@ export function RoBaselineTransactions({
   };
   const sourceStyle0 = {
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: searchTopPadding,
     backgroundColor: surface,
     zIndex: 20,
     ...(Platform.OS === 'web' && !renderSections
@@ -188,13 +190,7 @@ export function RoBaselineTransactions({
         onFocus={onActivateSearch}
         dark={dark}
         filtersActive={active}
-        onFilterClick={
-          kind === 'account'
-            ? () => {
-                return setFiltersOpen(true);
-              }
-            : undefined
-        }
+        onFilterClick={() => setFiltersOpen(true)}
         onRemoveFilters={() => {
           setFilters({
             ...EMPTY_ACCOUNT_TRANSACTION_FILTERS,

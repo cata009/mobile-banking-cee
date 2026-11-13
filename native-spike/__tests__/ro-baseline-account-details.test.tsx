@@ -169,7 +169,7 @@ test('selected Romanian account owns details, options and carousel transitions',
   await act(() => tree.unmount());
 });
 
-test('options uses the account route owner after a local carousel selection', async () => {
+test('options uses the selected current account after a local carousel selection', async () => {
   const props = host({
     route: { screen: 'account', params: { productId: 'acc-1' } },
   });
@@ -180,13 +180,13 @@ test('options uses the account route owner after a local carousel selection', as
   await act(() => press(tree, 'Options').props.onPress());
   expect(props.onNavigate).toHaveBeenLastCalledWith({
     screen: 'account-options',
-    params: { productId: 'acc-1' },
+    params: { productId: 'acc-2' },
   });
   await act(() => tree.unmount());
 });
 
 test.each(['Details', 'Options'])(
-  'actual controller restores the original account route after %s and Back',
+  'actual controller retains the selected account after %s and Back',
   async action => {
     let tree!: Renderer.ReactTestRenderer;
     await act(() => {
@@ -213,15 +213,42 @@ test.each(['Details', 'Options'])(
       ).toBe('RO44BACX1234567890123402');
     await act(() => press(tree, 'Back').props.onPress());
     expect(activeBalance(tree).props.account.accountNumber).toBe(
-      'RO43BACX1234567890123401',
+      'RO44BACX1234567890123402',
     );
-    expect(
-      tree.root.findAll(node => node.props.testID === 'ro-pending-transactions')
-        .length,
-    ).toBeGreaterThan(0);
     await act(() => tree.unmount());
   },
 );
+
+test('last carousel product remains selected after Details and Back', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  const products = bankingProducts(host()).accounts,
+    selected = products.at(-1)!;
+  await act(() => {
+    tree = Renderer.create(
+      <NativeCurrentApp
+        country="RO"
+        release="release-current"
+        scenario="active"
+        productCounts={counts}
+        initialLanguage="en"
+        initialMode="light"
+        initialRoute={{ screen: 'account', params: { productId: 'acc-1' } }}
+        adapters={[CURRENT_BANKING_ADAPTER]}
+      />,
+    );
+  });
+  await act(() =>
+    tree.root
+      .findByType(BaselineCarouselIndicator)
+      .props.onSelect(products.length - 1),
+  );
+  await act(() => press(tree, 'Details').props.onPress());
+  await act(() => press(tree, 'Back').props.onPress());
+  expect(activeBalance(tree).props.account.accountNumber).toBe(
+    selected.accountNumber,
+  );
+  await act(() => tree.unmount());
+});
 
 test('current account uses source Romanian balance and 92 percent secondary balance', async () => {
   const { tree } = await render();
@@ -276,12 +303,61 @@ test('deposit suppresses ledger and copy, while loan retains repayment figures a
   expect(activeBalance(tree).props.currentBalance).toBe('291,19');
   expect(activeBalance(tree).props.progress).toBeCloseTo(0.4);
   const actions = tree.root.findByType(BaselineAccountActionBar).props.items;
+  expect(actions).toHaveLength(4);
+  expect(actions[0].id).toBe('details');
   expect(
     actions.find((item: { id: string }) => item.id === 'mcash').label,
   ).toBe('Reimbursement');
   expect(
+    actions.find((item: { id: string }) => item.id === 'mcash').hidden,
+  ).toBe(true);
+  expect(
     actions.find((item: { id: string }) => item.id === 'mcash').onPress,
   ).toBeUndefined();
+  await act(() => tree.unmount());
+});
+
+test('hides Romanian loan reimbursement without moving the Details action slot', async () => {
+  const props = host(),
+    products = bankingProducts(props).accounts,
+    loan = products.find(product => product.type === 'loan')!;
+  props.route = { screen: 'account', params: { productId: loan.id } };
+  const { tree } = await render(props);
+  const actions = tree.root.findByType(BaselineAccountActionBar).props.items;
+  expect(actions.map((action: { id: string }) => action.id)).toEqual([
+    'details',
+    'options',
+    'add-money',
+    'mcash',
+  ]);
+  expect(actions[3]).toMatchObject({
+    label: 'Reimbursement',
+    hidden: true,
+    onPress: undefined,
+  });
+  await act(() => tree.unmount());
+});
+
+test('Romanian mortgage reimbursement opens the intro and selectable request form', async () => {
+  const props = host(),
+    mortgage = bankingProducts(props).accounts.find(
+      product => product.type === 'mortgage',
+    )!;
+  props.route = { screen: 'account', params: { productId: mortgage.id } };
+  const { tree } = await render(props);
+  const reimbursement = press(tree, 'Reimbursement');
+  expect(reimbursement).toBeDefined();
+  await act(() => reimbursement.props.onPress());
+  expect(tree.root.findByType(BaselineBottomSheet).props.title).toBe(
+    'Early reimbursement',
+  );
+  await act(() => press(tree, 'OK').props.onPress());
+  expect(
+    tree.root.findByProps({ testID: 'ro-mortgage-reimbursement-form' }),
+  ).toBeDefined();
+  expect(press(tree, 'TOTAL')).toBeDefined();
+  expect(press(tree, 'PARTIAL')).toBeDefined();
+  expect(press(tree, 'Confirm').props.accessibilityState.disabled).toBe(true);
   await act(() => tree.unmount());
 });
 
@@ -456,7 +532,13 @@ test('account filter dropdowns open full-height option sheets over the filters',
     await act(() => press(tree, field).props.onPress());
     const sheet = tree.root.findAllByType(BaselineBottomSheet).at(-1)!;
     expect(sheet.props.title).toBe(
-      `Choose ${field === 'Select status' ? 'status' : field === 'Transaction type' ? 'transaction type' : 'category'}`,
+      `Choose ${
+        field === 'Select status'
+          ? 'status'
+          : field === 'Transaction type'
+          ? 'transaction type'
+          : 'category'
+      }`,
     );
     expect(sheet.props.fillHeight).toBe(true);
     const labels = sheet
@@ -468,6 +550,7 @@ test('account filter dropdowns open full-height option sheets over the filters',
     const radio = sheet
       .findAllByType(RadioButton)
       .find(candidate => candidate.props.label === selectedOption)!;
+    expect(radio.props.paddingHorizontal).toBe(0);
     await act(() => radio.props.onPress());
     await act(() => press(tree, 'OK').props.onPress());
     expect(tree.root.findAllByType(BaselineBottomSheet)).toHaveLength(0);
@@ -657,10 +740,11 @@ test.each([
     await act(() => {
       tree = Renderer.create(<RoBaselineAccountInfo {...props} />);
     });
+    const allVisible = type === 'term_deposit' || type === 'mortgage';
     expect(tree.root.findAllByType(BaselineAccountInfoField)).toHaveLength(
-      Math.min(count, 3),
+      allVisible ? count : Math.min(count, 3),
     );
-    if (count > 3) {
+    if (count > 3 && !allVisible) {
       expect(press(tree, 'Show more')).toBeDefined();
       await act(() => press(tree, 'Show more').props.onPress());
     } else {
@@ -674,6 +758,8 @@ test.each([
     expect(tree.root.findAllByType(BaselineCardNavigationRow)).toHaveLength(0);
     if (type === 'loan' || type === 'mortgage')
       expect(press(tree, 'Copy IBAN')).toBeDefined();
+    if (type === 'term_deposit' || type === 'mortgage')
+      expect(press(tree, 'Share account details')).toBeUndefined();
     await act(() => tree.unmount());
   },
 );
@@ -1063,7 +1149,9 @@ test('push notification flow updates account and card limits and preserves toggl
   expect(
     tree.root
       .findAllByType(Text)
-      .some(node => node.props.children === 'Accounts transaction notifications'),
+      .some(
+        node => node.props.children === 'Accounts transaction notifications',
+      ),
   ).toBe(true);
   expect(
     switchControl('REJECTED ACCOUNTS TRANSACTION NOTIFICATIONS').props
@@ -1193,7 +1281,9 @@ test('account statement flow selects and shares statements and completes an on-d
   expect(
     tree.root
       .findAllByType(SourceCustomIcon)
-      .some(icon => icon.props.name === 'prime-check' && icon.props.size === 64),
+      .some(
+        icon => icon.props.name === 'prime-check' && icon.props.size === 64,
+      ),
   ).toBe(true);
   await act(() => press(tree, 'Ok, got it').props.onPress());
   expect(JSON.stringify(tree.toJSON())).toContain('NOV 2025 - NOV 2026');

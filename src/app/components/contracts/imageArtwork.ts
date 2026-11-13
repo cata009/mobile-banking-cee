@@ -567,6 +567,18 @@ export const CARD_ARTWORK_IMAGES = {
 
 export type PaymentImageVariant = keyof typeof PAYMENT_IMAGE_ARTWORK
 export type CardArtVariant = keyof typeof CARD_ARTWORK_IMAGES
+
+/** Approved full-art mapping used by PI baseline debit and credit card carousels. */
+export function resolveBaselineCardArtVariant(
+  cardType: 'credit_card' | 'debit_card',
+  debitCardIndex = 0,
+): CardArtVariant {
+  if (cardType === 'credit_card') return 'Credit red arrow gold'
+  return debitCardIndex <= 0
+    ? 'Debit white arrow gold'
+    : 'Debit white arrow red'
+}
+
 export type ResolvedImageArtwork = ImageArtworkSource & { width: number; height: number; scale: number }
 
 function resolveSource(source: ImageArtworkSource, width: number): ResolvedImageArtwork {

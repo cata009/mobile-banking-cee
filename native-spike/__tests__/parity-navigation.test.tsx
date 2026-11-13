@@ -72,7 +72,7 @@ function SelectedAccount(props: CurrentScreenProps) {
     />
   );
 }
-test('Source RO info uses the carousel selection while Back restores the original account route', async () => {
+test('Source RO info and Back retain the carousel-selected account route', async () => {
   let tree!: Renderer.ReactTestRenderer;
   await act(async () => {
     tree = Renderer.create(
@@ -108,6 +108,6 @@ test('Source RO info uses the carousel selection while Back restores the origina
   await press('Back');
   expect(
     tree.root.findByType(SelectedAccount).props.route.params.productId,
-  ).toBe('acc-1');
+  ).toBe('acc-2');
   await act(async () => tree.unmount());
 });

@@ -22,6 +22,7 @@ import surgeryIcon from '@/assets/pi/ro/genius-protect/genius-protect-coverage-s
 import websiteIcon from '@/assets/pi/ro/genius-protect/genius-protect-claim-website.svg';
 import documentsIcon from '@/assets/pi/ro/genius-protect/genius-protect-documents.svg';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
+import { BaselineAccountActionBar } from '../../../../../universal/BaselineAccountActionBar';
 import { BaselineAccountInfoField } from '../../../../../universal/BaselineAccountInfoField';
 import { BaselineDetailToolbar } from '../../../../../universal/BaselineDetailToolbar';
 import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigationRow';
@@ -116,10 +117,7 @@ export default function GeniusProtectPolicyDetails(host: CurrentScreenProps) {
       footer={
         <View style={styles.sheetFooter}>
           <PrimaryButton
-            label={copy(
-              'Contact Allianz-Țiriac',
-              'Contactează Allianz-Țiriac',
-            )}
+            label={copy('Contact Allianz-Țiriac', 'Contactează Allianz-Țiriac')}
             onPress={() => setSelectedCoverage(null)}
             dark={dark}
           />
@@ -134,7 +132,11 @@ export default function GeniusProtectPolicyDetails(host: CurrentScreenProps) {
           )}
         </Text>
         <Text style={[styles.amountInSheet, { color: ink }]}>
-          {`${coverageAmounts.get(selectedCoverage.id)?.toLocaleString(host.language === 'ro' ? 'ro-RO' : 'en-US')} ${copy('RON insured amount', 'RON sumă asigurată')}`}
+          {`${coverageAmounts
+            .get(selectedCoverage.id)
+            ?.toLocaleString(
+              host.language === 'ro' ? 'ro-RO' : 'en-US',
+            )} ${copy('RON insured amount', 'RON sumă asigurată')}`}
         </Text>
       </View>
     </SourceBottomSheet>
@@ -335,34 +337,29 @@ export default function GeniusProtectPolicyDetails(host: CurrentScreenProps) {
             </View>
           </View>
 
-          <View style={styles.actionBar}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={copy('Details', 'Detalii')}
-              onPress={() => setPolicyInfoOpen(true)}
-              style={styles.actionItem}
-            >
-              <View style={styles.actionIcon}>
-                <SourceCustomIcon name="info-circle" size={24} color={ink} />
-              </View>
-              <Text style={[styles.actionLabel, { color: ink }]}>
-                {copy('Details', 'Detalii')}
-              </Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={copy('Documents', 'Documente')}
-              onPress={() => host.onNavigate({ screen: 'documents' })}
-              style={styles.actionItem}
-            >
-              <View style={styles.actionIcon}>
-                <AssetGlyph asset={documentsIcon} width={20} height={19} />
-              </View>
-              <Text style={[styles.actionLabel, { color: ink }]}>
-                {copy('Documents', 'Documente')}
-              </Text>
-            </Pressable>
-          </View>
+          <BaselineAccountActionBar
+            items={[
+              {
+                id: 'details',
+                label: copy('Details', 'Detalii'),
+                iconName: 'info-circle',
+                onPress: () => setPolicyInfoOpen(true),
+              },
+              {
+                id: 'documents',
+                label: copy('Documents', 'Documente'),
+                icon: (
+                  <AssetGlyph asset={documentsIcon} width={20} height={19} />
+                ),
+                onPress: () => host.onNavigate({ screen: 'documents' }),
+              },
+              { id: 'reserved-3', label: '', hidden: true },
+              { id: 'reserved-4', label: '', hidden: true },
+            ]}
+            dark={dark}
+            presentation={{ paddingVertical: 8 }}
+            style={{ marginTop: 16, paddingBottom: 16 }}
+          />
         </View>
 
         <View style={[styles.detailsContent, { backgroundColor: surface }]}>
@@ -575,32 +572,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   missingPolicy: { paddingHorizontal: 24, paddingTop: 24, gap: 16 },
-  actionBar: {
-    flexDirection: 'row',
-    marginTop: 16,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  actionItem: {
-    flex: 1,
-    minHeight: 54,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  actionLabel: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 14,
-    lineHeight: 17,
-  },
   phoneLink: { fontSize: 16 },
-  actionIcon: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   body: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 22 },
   sectionDivider: { paddingHorizontal: 24 },
   detailsContent: { gap: 16, paddingBottom: 24, marginTop: 32 },

@@ -164,16 +164,22 @@ it('shows the photographed Romanian payment menus and keeps existing navigation'
       'Currency exchange',
       'Bills & Direct Debit',
     ]);
-    act(() => button(tree, 'Recurrent Payments').props.onPress());
+    const currencyExchangeHero = tree.root
+      .findAllByType(BaselinePaymentHero)
+      .find(n => n.props.item.id === 'between-accounts')!;
+    act(() => currencyExchangeHero.props.onSelect());
+    expect(
+      tree.root.findByProps({ testID: 'ro-payment-form-currency-exchange' }),
+    ).toBeTruthy();
+    expect(JSON.stringify(tree.toJSON())).not.toContain(
+      'Currency exchange between your accounts',
+    );
+    act(() => button(tree, 'Back').props.onPress());
     act(() => button(tree, 'Foreign Payments').props.onPress());
     expect(
-      tree.root.findAll(n => n.props.accessibilityLabel === 'Profile')[0].props
-        .onPress,
-    ).toBeUndefined();
-    expect(
-      tree.root.findAll(n => n.props.accessibilityLabel === 'Help')[0].props
-        .onPress,
-    ).toBeUndefined();
+      tree.root.findByProps({ testID: 'ro-payment-form-foreign-payment' }),
+    ).toBeTruthy();
+    act(() => button(tree, 'Back').props.onPress());
     expect(h.onNavigate).not.toHaveBeenCalled();
     for (const [index, labels] of [
       [
@@ -249,7 +255,9 @@ it('opens the existing templates and beneficiaries view from the Romanian sheet'
     expect(
       button(
         tree,
-        `Use template ${getPaymentTemplates('RO')[0].title} for ${getPaymentTemplates('RO')[0].beneficiaryName}`,
+        `Use template ${getPaymentTemplates('RO')[0].title} for ${
+          getPaymentTemplates('RO')[0].beneficiaryName
+        }`,
       ),
     ).toBeDefined();
   } finally {

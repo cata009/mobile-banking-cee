@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Text } from './Typography';
 import { FormField } from './FormField';
-import { Select } from './Select';
 import { ModalPortal } from './ModalPortal';
+import { SourceCustomIcon } from './SourceCustomIcon';
 import type { Themed } from './types';
 
 export function validIsoDate(value: string) {
@@ -64,6 +64,7 @@ export interface CalendarProps {
   locale?: string;
   title?: string;
   compact?: boolean;
+  closeIconSize?: number;
   previousIcon?: React.ReactNode;
   nextIcon?: React.ReactNode;
   onMonthChange?: (firstDayISO: string) => void;
@@ -78,6 +79,7 @@ export function CalendarPanel({
   locale = 'it-IT',
   title = 'Seleziona data',
   compact = false,
+  closeIconSize = 20,
   previousIcon,
   nextIcon,
   onMonthChange,
@@ -99,12 +101,6 @@ export function CalendarPanel({
       max && validIsoDate(max)
         ? Number(max.slice(0, 4))
         : new Date().getFullYear() + 25;
-  const months = Array.from({ length: 12 }, (_, index) => ({
-    value: String(index),
-    label: new Intl.DateTimeFormat(locale, { month: 'long' }).format(
-      new Date(2025, index, 1),
-    ),
-  }));
   const offset = (new Date(year, month, 1).getDay() + 6) % 7,
     days = new Date(year, month + 1, 0).getDate();
   const move = (amount: number) => {
@@ -140,67 +136,66 @@ export function CalendarPanel({
             </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Chiudi calendario"
+              accessibilityLabel="Close calendar"
               onPress={onClose}
               style={s.close}
             >
-              <Text style={[s.symbol, { color: tokens.text }]}>×</Text>
+              <SourceCustomIcon name="close-x" size={closeIconSize} color={tokens.text} />
             </Pressable>
           </View>
-          <View style={s.selectors}>
+          <View style={s.calendarHeading}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Mese precedente"
+              accessibilityLabel="Previous month"
               onPress={() => move(-1)}
-              style={s.arrow}
+              style={s.calendarArrow}
             >
-              <Text style={[s.symbol, { color: tokens.text }]}>‹</Text>
+              <SourceCustomIcon
+                name="chevron-left"
+                size={20}
+                color={tokens.text}
+              />
             </Pressable>
-            <View style={s.month}>
-              <Select
-                tokens={tokens}
-                label="Mese"
-                value={String(month)}
-                items={months}
-                onChange={selection => setMonth(Number(selection))}
-              />
-            </View>
-            <View style={s.year}>
-              <Select
-                tokens={tokens}
-                label="Anno"
-                value={String(year)}
-                items={Array.from(
-                  { length: lastYear - firstYear + 1 },
-                  (_, index) => ({
-                    value: String(firstYear + index),
-                    label: String(firstYear + index),
-                  }),
-                )}
-                onChange={selection => setYear(Number(selection))}
-              />
-            </View>
+            <Text
+              style={[
+                s.monthCaption,
+                { fontFamily: tokens.strongFont, color: tokens.text },
+              ]}
+            >
+              {new Intl.DateTimeFormat(locale, {
+                month: 'short',
+                year: 'numeric',
+              }).format(new Date(year, month, 1))}
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Mese successivo"
+              accessibilityLabel="Next month"
               onPress={() => move(1)}
-              style={s.arrow}
+              style={s.calendarArrow}
             >
-              <Text style={[s.symbol, { color: tokens.text }]}>›</Text>
+              <SourceCustomIcon
+                name="chevron-right"
+                size={20}
+                color={tokens.text}
+              />
             </Pressable>
           </View>
         </>
       )}
       {compact && (
-        <View style={s.compactHeading}>
+        <View style={s.calendarHeading}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Mese precedente"
+            accessibilityLabel="Previous month"
             onPress={() => move(-1)}
-            style={s.compactArrow}
+            style={s.calendarArrow}
           >
             {previousIcon ?? (
-              <Text style={[s.symbol, { color: tokens.text }]}>‹</Text>
+              <SourceCustomIcon
+                name="chevron-left"
+                size={20}
+                color={tokens.text}
+              />
             )}
           </Pressable>
           <Text
@@ -216,12 +211,16 @@ export function CalendarPanel({
           </Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Mese successivo"
+            accessibilityLabel="Next month"
             onPress={() => move(1)}
-            style={s.compactArrow}
+            style={s.calendarArrow}
           >
             {nextIcon ?? (
-              <Text style={[s.symbol, { color: tokens.text }]}>›</Text>
+              <SourceCustomIcon
+                name="chevron-right"
+                size={20}
+                color={tokens.text}
+              />
             )}
           </Pressable>
         </View>
@@ -247,14 +246,10 @@ export function CalendarPanel({
                 { fontFamily: tokens.font, color: tokens.muted },
               ]}
             >
-              {compact
-                ? new Intl.DateTimeFormat(locale, { weekday: 'short' })
-                    .format(new Date(2025, 0, 6 + index))
-                    .slice(0, 1)
-                    .toUpperCase()
-                : new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
-                    new Date(2025, 0, 6 + index),
-                  )}
+              {new Intl.DateTimeFormat(locale, { weekday: 'short' })
+                .format(new Date(2025, 0, 6 + index))
+                .slice(0, 1)
+                .toUpperCase()}
             </Text>
           </View>
         ))}
@@ -262,10 +257,11 @@ export function CalendarPanel({
           { length: Math.ceil((offset + days) / 7) * 7 },
           (_, index) => {
             const day = index - offset + 1;
-            if (day < 1 || day > days)
+            if (day < 1 || day > days) {
+              const adjacentDate = new Date(year, month, day);
               return (
                 <View
-                  key={index}
+                  key={`adjacent-${index}`}
                   style={[
                     s.cell,
                     compact && s.compactCell,
@@ -273,8 +269,24 @@ export function CalendarPanel({
                       width: Math.max(0, (gridWidth - 12) / 7),
                     },
                   ]}
-                />
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                >
+                  <View style={[s.day, s.disabled]}>
+                    <Text
+                      style={[
+                        s.dayText,
+                        { fontFamily: tokens.font, color: tokens.muted },
+                      ]}
+                    >
+                      {new Intl.DateTimeFormat(locale, {
+                        day: '2-digit',
+                      }).format(adjacentDate)}
+                    </Text>
+                  </View>
+                </View>
               );
+            }
             const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(
                 day,
               ).padStart(2, '0')}`,
@@ -342,6 +354,7 @@ export function DateField({
   labelStyle,
   inputProps,
   calendarButtonStyle,
+  openCalendarOnFieldPress = false,
 }: Themed & {
   label: string;
   value: string;
@@ -357,6 +370,8 @@ export function DateField({
   containerStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   calendarButtonStyle?: StyleProp<ViewStyle>;
+  /** Use the whole displayed date field as a calendar trigger instead of text input. */
+  openCalendarOnFieldPress?: boolean;
   inputProps?: Omit<
     TextInputProps,
     'value' | 'onChangeText' | 'secureTextEntry'
@@ -384,29 +399,60 @@ export function DateField({
     <View>
       <View style={s.field}>
         <View style={s.grow}>
-          <FormField
-            tokens={tokens}
-            label={label}
-            value={raw}
-            onChange={text => {
-              setRaw(text);
-              const iso = parseDisplayDate(text);
-              emitted.current = iso;
-              onChange(iso);
-            }}
-            error={error}
-            containerStyle={containerStyle}
-            labelStyle={labelStyle}
-            inputProps={{
-              placeholder: 'gg/mm/aaaa',
-              keyboardType: 'numbers-and-punctuation',
-              maxLength: displayFormat === 'long-month' ? 32 : 10,
-              autoCorrect: false,
-              autoCapitalize: 'none',
-              ...inputProps,
-              secureTextEntry: hidden,
-            }}
-          />
+          {openCalendarOnFieldPress ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Open calendar for ${label}`}
+              onPress={() => setOpen(true)}
+              style={s.fieldActivator}
+            >
+              <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <FormField
+                tokens={tokens}
+                label={label}
+                value={raw}
+                onChange={() => undefined}
+                error={error}
+                containerStyle={containerStyle}
+                labelStyle={labelStyle}
+                inputProps={{
+                  placeholder: 'gg/mm/aaaa',
+                  keyboardType: 'numbers-and-punctuation',
+                  maxLength: displayFormat === 'long-month' ? 32 : 10,
+                  autoCorrect: false,
+                  autoCapitalize: 'none',
+                  ...inputProps,
+                  editable: false,
+                  secureTextEntry: hidden,
+                }}
+              />
+              </View>
+            </Pressable>
+          ) : (
+            <FormField
+              tokens={tokens}
+              label={label}
+              value={raw}
+              onChange={text => {
+                setRaw(text);
+                const iso = parseDisplayDate(text);
+                emitted.current = iso;
+                onChange(iso);
+              }}
+              error={error}
+              containerStyle={containerStyle}
+              labelStyle={labelStyle}
+              inputProps={{
+                placeholder: 'gg/mm/aaaa',
+                keyboardType: 'numbers-and-punctuation',
+                maxLength: displayFormat === 'long-month' ? 32 : 10,
+                autoCorrect: false,
+                autoCapitalize: 'none',
+                ...inputProps,
+                secureTextEntry: hidden,
+              }}
+            />
+          )}
         </View>
         {!hidden && (
           <Pressable
@@ -416,7 +462,11 @@ export function DateField({
             style={[s.calendarButton, calendarButtonStyle]}
           >
             {calendarIcon ?? (
-              <Text style={[s.symbol, { color: tokens.text }]}>▦</Text>
+              <SourceCustomIcon
+                name="calendar-days"
+                size={24}
+                color={tokens.text}
+              />
             )}
           </Pressable>
         )}
@@ -436,6 +486,7 @@ export function DateField({
           />
           <CalendarPanel
             tokens={tokens}
+            closeIconSize={openCalendarOnFieldPress ? 32 : 20}
             title={label}
             value={value}
             min={min}
@@ -451,12 +502,12 @@ export function DateField({
 }
 const s = StyleSheet.create({
   compactPanel: { padding: 0 },
-  compactHeading: {
+  calendarHeading: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  compactArrow: {
+  calendarArrow: {
     width: 40,
     height: 40,
     alignItems: 'center',
@@ -478,21 +529,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  symbol: { fontSize: 28 },
-  selectors: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  arrow: {
-    width: 24,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  month: { flex: 1 },
-  year: { width: 100 },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: {
     width: '14.285714%',
@@ -513,6 +549,7 @@ const s = StyleSheet.create({
   disabled: { opacity: 0.3 },
   field: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   grow: { flex: 1 },
+  fieldActivator: { flex: 1 },
   calendarButton: {
     width: 44,
     height: 44,

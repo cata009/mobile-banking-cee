@@ -127,8 +127,8 @@ export function BaselineDatePeriodFilterSheet({
                         displayFormat="long-month"
                         calendarIcon={
                           <SourceCustomIcon
-                            name="insurance-calendar"
-                            size={32}
+                            name="calendar-days"
+                            size={24}
                             color={host.tokens.text}
                           />
                         }
@@ -146,8 +146,8 @@ export function BaselineDatePeriodFilterSheet({
                         displayFormat="long-month"
                         calendarIcon={
                           <SourceCustomIcon
-                            name="insurance-calendar"
-                            size={32}
+                            name="calendar-days"
+                            size={24}
                             color={host.tokens.text}
                           />
                         }

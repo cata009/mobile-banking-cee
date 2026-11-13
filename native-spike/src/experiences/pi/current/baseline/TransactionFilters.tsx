@@ -67,8 +67,7 @@ export function RoBaselineTransactionFilters({
     (validIsoDate(draft.dateFrom ?? '') &&
       validIsoDate(draft.dateTo ?? '') &&
       draft.dateFrom! <= draft.dateTo!);
-  const canApply =
-    hasAccountTransactionFilters(draft) && customDateRangeValid;
+  const canApply = hasAccountTransactionFilters(draft) && customDateRangeValid;
   const openSelection = (field: 'status' | 'transactionType' | 'category') => {
     setSelectionDraft(draft[field]);
     setSelectionSheet(field);
@@ -399,8 +398,8 @@ export function RoBaselineTransactionFilters({
                         displayFormat="long-month"
                         calendarIcon={
                           <SourceCustomIcon
-                            name="insurance-calendar"
-                            size={32}
+                            name="calendar-days"
+                            size={24}
                             color={host.tokens.text}
                           />
                         }
@@ -418,8 +417,8 @@ export function RoBaselineTransactionFilters({
                         displayFormat="long-month"
                         calendarIcon={
                           <SourceCustomIcon
-                            name="insurance-calendar"
-                            size={32}
+                            name="calendar-days"
+                            size={24}
                             color={host.tokens.text}
                           />
                         }
@@ -528,21 +527,22 @@ export function RoBaselineTransactionFilters({
               {(selectionSheet === 'status'
                 ? ['All transactions', 'Booked', 'Pending']
                 : selectionSheet === 'transactionType'
-                  ? ['All transactions', 'Incoming', 'Outgoing']
-                  : [
-                      'All categories',
-                      ...new Set(
-                        [draft.category, ...categories].filter(
-                          category => category && category !== 'All categories',
-                        ),
+                ? ['All transactions', 'Incoming', 'Outgoing']
+                : [
+                    'All categories',
+                    ...new Set(
+                      [draft.category, ...categories].filter(
+                        category => category && category !== 'All categories',
                       ),
-                    ]
+                    ),
+                  ]
               ).map(option => (
                 <RadioButton
                   key={option}
                   label={option}
                   selected={selectionDraft === option}
                   variant="standard"
+                  paddingHorizontal={0}
                   onPress={() => setSelectionDraft(option)}
                   dark={dark}
                 />

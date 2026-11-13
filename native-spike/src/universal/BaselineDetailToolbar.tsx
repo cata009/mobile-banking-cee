@@ -15,6 +15,7 @@ export function BaselineDetailToolbar({
   progress,
   onBack,
   onHelpPress,
+  showHelp,
   safeAreaReserve,
   dark = false,
 }: {
@@ -23,6 +24,7 @@ export function BaselineDetailToolbar({
   progress: number;
   onBack: () => void;
   onHelpPress?: () => void;
+  showHelp?: boolean;
   safeAreaReserve?: number;
   dark?: boolean;
 }) {
@@ -30,6 +32,7 @@ export function BaselineDetailToolbar({
     variant,
     progress,
     hasHelpCallback: Boolean(onHelpPress),
+    showHelp,
   });
   const color = sourceColor(`var(${contract.textToken})`, dark);
   const rootStyle: ViewStyle = {

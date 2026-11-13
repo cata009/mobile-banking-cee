@@ -35,6 +35,7 @@ export function BaselineBottomSheet({
   closeLabel = 'Close',
   padding,
   contentBleed = false,
+  hostedInModal = false,
 }: {
   title?: string;
   children: ReactNode;
@@ -57,6 +58,8 @@ export function BaselineBottomSheet({
   closeLabel?: string;
   padding?: number;
   contentBleed?: boolean;
+  /** On web an enclosing ModalPortal already exposes the dialog; avoids nested dialogs. */
+  hostedInModal?: boolean;
 }) {
   const c = resolveBottomSheet({
     fillHeight,
@@ -190,8 +193,8 @@ export function BaselineBottomSheet({
         />
       </Animated.View>
       <Animated.View
-        role="dialog"
-        aria-modal
+        role={Platform.OS === 'web' && hostedInModal ? undefined : 'dialog'}
+        aria-modal={Platform.OS === 'web' && hostedInModal ? undefined : true}
         accessibilityViewIsModal
         style={[
           panel,

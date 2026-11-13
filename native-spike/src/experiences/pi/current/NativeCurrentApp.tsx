@@ -359,15 +359,27 @@ export default function NativeCurrentApp({
           JSON.stringify(route.params)
       )
         return old;
-      // Source's common baseline carousel does not replace the parent route.
-      // Details carry the selected product; Back restores the original entry.
-      const previous = isPiClassicCompositionContext({
+      const context = {
         country,
         release,
         scenario: effectiveScenario,
-      })
-        ? old[old.length - 1]
-        : carrySourceProductSelection(old[old.length - 1], route);
+      };
+      const parent = old[old.length - 1];
+      const classic = isPiClassicCompositionContext(context);
+      // The Romanian baseline's carousel selection is the current account
+      // context; Details/Options must carry it into the parent route so Back
+      // returns to the same product. Other classic countries retain their
+      // established route-owner behavior.
+      const carriesRomanianAccount =
+        classic &&
+        country === 'RO' &&
+        parent.screen === 'account' &&
+        (route.screen === 'account-info' || route.screen === 'account-options');
+      const previous = classic
+        ? carriesRomanianAccount
+          ? carrySourceProductSelection(parent, route)
+          : parent
+        : carrySourceProductSelection(parent, route);
       return [...old.slice(0, -1), previous, route];
     });
   };
