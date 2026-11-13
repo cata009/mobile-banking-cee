@@ -8,7 +8,7 @@ import {
 } from '@/app/components/ui/dropdown-menu'
 
 export type DevicePreviewProfileId =
-  'iphone-16' | 'galaxy-fold8-closed' | 'galaxy-fold8-open' | 'apple-foldable-closed' | 'apple-foldable-open'
+  'iphone-16' | 'android-phone' | 'galaxy-fold8-closed' | 'galaxy-fold8-open' | 'apple-foldable-closed' | 'apple-foldable-open'
 export type DevicePreviewOrientation = 'portrait' | 'landscape'
 
 export interface DevicePreviewProfile {
@@ -18,9 +18,9 @@ export interface DevicePreviewProfile {
   width: number
   height: number
   kind: 'phone' | 'foldable-cover' | 'foldable-main'
-  screenChrome: 'dynamic-island' | 'none'
+  screenChrome: 'dynamic-island' | 'camera-hole' | 'none'
   supportsRotation: boolean
-  status: 'official-reference' | 'report-reference'
+  status: 'official-reference' | 'report-reference' | 'generic-reference'
 }
 
 export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
@@ -34,6 +34,17 @@ export const DEVICE_PREVIEW_PROFILES: readonly DevicePreviewProfile[] = [
     screenChrome: 'dynamic-island',
     supportsRotation: false,
     status: 'official-reference',
+  },
+  {
+    id: 'android-phone',
+    label: 'Android phone',
+    shortLabel: 'Android',
+    width: 393,
+    height: 852,
+    kind: 'phone',
+    screenChrome: 'camera-hole',
+    supportsRotation: false,
+    status: 'generic-reference',
   },
   {
     id: 'galaxy-fold8-closed',
@@ -238,7 +249,7 @@ export function DevicePreviewSelector() {
                     {item.label}
                   </span>
                   <span className="mt-0.5 block text-[11px] leading-[14px] text-[var(--uc-text-muted)]">
-                    {item.status === 'report-reference' ? 'ASEE report reference' : 'Device reference'}
+                    {item.status === 'report-reference' ? 'ASEE report reference' : item.status === 'generic-reference' ? 'Generic Android preview' : 'Device reference'}
                   </span>
                 </span>
                 {isSelected ? <AppIcon name="check" size={16} color="var(--uc-action)" aria-hidden="true" /> : null}

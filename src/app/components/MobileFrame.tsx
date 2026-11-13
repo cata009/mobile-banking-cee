@@ -212,9 +212,10 @@ export default function MobileFrame({
                 {duo && duoGeometry?.rightInset ? (
                   <DuoSystemStrip variant={statusBarVariant} cover={profile.kind === 'foldable-cover'} />
                 ) : (
-                  <StatusBar variant={statusBarVariant} edgeAligned={duoPortrait} />
+                  <StatusBar variant={statusBarVariant} edgeAligned={duoPortrait} platform={profile.id === 'android-phone' ? 'android' : 'ios'} />
                 )}
                 {profile.screenChrome === 'dynamic-island' ? <DynamicIsland variant={statusBarVariant} /> : null}
+                {profile.screenChrome === 'camera-hole' ? <div aria-hidden="true" data-android-camera className="pointer-events-none absolute left-1/2 top-[11px] z-[51] size-[8px] -translate-x-1/2 rounded-full bg-[var(--uc-static-black)]" /> : null}
 
                 {overlay && <div className="pointer-events-none absolute inset-0 z-[43]">{overlay}</div>}
 
