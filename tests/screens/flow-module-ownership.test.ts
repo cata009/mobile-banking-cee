@@ -5,13 +5,23 @@ vi.mock('react', () => {
   throw new Error('Metadata imported React')
 })
 const entries = import.meta.glob('/src/flows/**/index.ts', { eager: true })
-const paths = ['ro/genius-my-car', 'shared/ethoca', 'rs/property-insurance', 'rs/disposable-cards', 'ba/card-fraud']
+const paths = [
+  'ro/genius-my-car',
+  'shared/ethoca',
+  'rs/property-insurance',
+  'rs/disposable-cards',
+  'ba/card-fraud',
+  'ro/onboarding',
+  'ro/cash-loan',
+]
 const ids = [
   'ro-genius-my-car',
   'mobile-pi-ethoca',
   'rs-property-insurance',
   'rs-disposable-cards',
   'ba-card-fraud',
+  'ro-onboarding',
+  'ro-cash-loan',
 ] as const
 it('owns all canonical definitions as identity reexports without UI runtime imports', () => {
   paths.forEach((path, index) => {
@@ -27,6 +37,8 @@ it('owns all canonical definitions as identity reexports without UI runtime impo
     'rs-disposable-cards',
     'ro-genius-my-car',
     'mobile-pi-ethoca',
+    'ro-onboarding',
+    'ro-cash-loan',
   ])
 })
 

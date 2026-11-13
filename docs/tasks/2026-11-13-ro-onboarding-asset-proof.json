@@ -1,0 +1,291 @@
+{
+  "owner": "Codex / RO onboarding and Cash Loan integration",
+  "baseCommit": "d5889198ada291354c85b3d2fd6d536b5cb5d035",
+  "previousStrictBaseline": {
+    "count": 1501,
+    "aggregate": "7443255c8bbe8ac6ed5b31ce8668a5754813739c03a012c887148a9f9ae5af57",
+    "preserved": true
+  },
+  "baseCommitInventory": {
+    "count": 1517,
+    "aggregate": "60569d138ea0ee021024244d0a69170ff0da9da6077841961dd5b4fc4ef52757"
+  },
+  "preexistingCount": 16,
+  "preexistingAdded": [
+    {
+      "path": "public/share-preview.png",
+      "bytes": 1812694,
+      "sha256": "c8c324f5de24e64786beb98590703ef7d96e820237e437e82aa5d5ec2e17f73a"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/group-6.svg",
+      "bytes": 1315,
+      "sha256": "d604369a41c131226d062852a9c4c57eaa1a58a0f3927f80e33d3efd2a644c4a"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/group-7.svg",
+      "bytes": 1315,
+      "sha256": "039a7f9e5f7b2d72025cbe765c00cf892d3f0b65d175ec17bd2a350a76920d37"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/group-8.svg",
+      "bytes": 1314,
+      "sha256": "64c526d573424432966e750a44d671cd4d19b777907e39db5931266c06c1527b"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/group-9.svg",
+      "bytes": 1027,
+      "sha256": "2f4c61ed7c30b1bae8f998831465dc8d7481296a52e790f1617088acf3cb9a48"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/rectangle-2.png",
+      "bytes": 812,
+      "sha256": "8abb41eb93cae74a25c575b729500cba84899304f878680f7f784d579b795be9"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/rectangle-3.png",
+      "bytes": 788,
+      "sha256": "64f1c0913d0c9899cd2a3eda03578dcbd309806739c08d616a1f4b3b37c00092"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/rectangle-4.png",
+      "bytes": 867,
+      "sha256": "ac606b436d8458bccb13694b046fcb8ee53f975a44a6304d5bc9cfa70bf68c86"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/rectangle-5.png",
+      "bytes": 1337,
+      "sha256": "7f5365b5133f41055b7979886390935ac93451cf57384bb126322ddac041b039"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/vector-2.svg",
+      "bytes": 264,
+      "sha256": "c5035055dc48e451e94f9c7394ef51c9a833f49da53ce3376b73bb0e892d97fa"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/vector-3.svg",
+      "bytes": 264,
+      "sha256": "9d1e5c30dd42e7949614f288bb432a474271538997a0422816d0c18fbabe8e5d"
+    },
+    {
+      "path": "src/assets/design-system/icons/apple-wallet/vector-4.svg",
+      "bytes": 1389,
+      "sha256": "3a6279a4720c602ceaa7205cd64ac0d14c68c5c85ac648726496cd7c54b6459a"
+    },
+    {
+      "path": "src/assets/design-system/icons/click-to-pay/brand-divider.svg",
+      "bytes": 456,
+      "sha256": "b9f0ba780e02e3a13fb68669e16ad8e2e9b9bc5e81df3c288371a404c2928296"
+    },
+    {
+      "path": "src/assets/design-system/icons/click-to-pay/click-to-pay-symbol.svg",
+      "bytes": 1524,
+      "sha256": "aca7b6fede2c59e4608066dbb57f4dd13320bfb1eae1c778d6dd9fe5f4aab33c"
+    },
+    {
+      "path": "src/assets/design-system/icons/click-to-pay/click-to-pay-white.svg",
+      "bytes": 2242,
+      "sha256": "cc5c53f38665b0cdb4ae7779334db0c457e51032d80c6a40bab5294863614915"
+    },
+    {
+      "path": "src/assets/design-system/icons/click-to-pay/mastercard-symbol.svg",
+      "bytes": 1001,
+      "sha256": "b27fa4de01fc9ee215b59f4d6bcaffdc2f80e43d302ee569a4bd9b5a92de5e18"
+    }
+  ],
+  "taskAddedCount": 37,
+  "taskAdded": [
+    {
+      "path": "src/assets/pi/ro/cash-loan/document.svg",
+      "bytes": 454,
+      "sha256": "ec0b1f257681cf2455d9cb1c8bfebb2dbdf56b56609043dde5509bc6f0ce6f85"
+    },
+    {
+      "path": "src/assets/pi/ro/cash-loan/introduction.png",
+      "bytes": 1699064,
+      "sha256": "12a6b55c7b302d3c0d18f0d1e5fafc02a004b3ef3f6f3fd6c6662499bde12b6c"
+    },
+    {
+      "path": "src/assets/pi/ro/cash-loan/upload.svg",
+      "bytes": 959,
+      "sha256": "b535b20a53731a31bc2f6ac60d6b284ebc15299dedfee57000b43f92fd97f811"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/branch-map-source.png",
+      "bytes": 995894,
+      "sha256": "5f12625ce33fda65075fe2b901c31e8d4fb090bb6add2a582db298c163988645"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/branch-pin.svg",
+      "bytes": 4154,
+      "sha256": "aa662e277fcfa8715a417f4720f23a0fcdc910eae01ee8e3d33e03c2b6307052"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/branch-required.svg",
+      "bytes": 1351,
+      "sha256": "9d4c7ad155fec400fb9bb78c5db2ffb1ae6b99afb7fade0621ebdfeec38b35f0"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/card-benefit.svg",
+      "bytes": 482,
+      "sha256": "b00e6498123c1adbaf8e00f34ee1c9e73fd213608e3468e5e5220246ae915680"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/contact-verified.svg",
+      "bytes": 545,
+      "sha256": "3e4d478914ebba563622f1028e86f64cdf550b17a7485b77a9ff094460ac9ad0"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/email.svg",
+      "bytes": 2328,
+      "sha256": "96095b5c43a0aa1b5b3f226870a30d35f9f55733d57dae970dd756b04968f018"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/evaluation-pending.svg",
+      "bytes": 1952,
+      "sha256": "5e829f6db6a7ff9bc58f321ce7d055fecd2a43cc35d5032627e56129a0a8b652"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/identification-success.svg",
+      "bytes": 755,
+      "sha256": "3c7a111a222e4ddbb05dd7c9c04e1bbdb4834e0f3e3f0ed757f762a696c60ee3"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/identity-card.svg",
+      "bytes": 1263,
+      "sha256": "a69899f66b0368771ffe248a1bd57dc870fbb99967a5ac65f3d8b4a25c75dda8"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/individual.svg",
+      "bytes": 533,
+      "sha256": "28e5247ccfce4705301b00bcaeb4cfeb232cb3581b617e09baacc6689672a337"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/introduction.png",
+      "bytes": 570187,
+      "sha256": "472ac806b850f6335d7723d0ed343c4e73dd3d67b97a1315fd65a34363f9b7db"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/link-expired.svg",
+      "bytes": 1188,
+      "sha256": "1de209c56e49761613114f96ad5261b0a6219e2f4a90a4cbe262399da3997b2a"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/mobile-activation.svg",
+      "bytes": 1626,
+      "sha256": "aba1c7a6cd5d243dbfacd0ab8cbaf0ed0d101da179b01e5dbe4fe9f0762ef25d"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/new-customer.svg",
+      "bytes": 1271,
+      "sha256": "89f2089b9e896547ba5126b21333619cfe03b7443e42b9dde160cde382f62c6e"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/offer-cards.svg",
+      "bytes": 1071,
+      "sha256": "191a2ec9eefc25f7c8b2016d0f7fe0d308d03ffdc0b4d752c5a490e941faaa03"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/offer-mobile.svg",
+      "bytes": 1195,
+      "sha256": "99162a2b4cadfb5019a7272f60fd8d5a1064895861340ffc5f69853eefe9f0cf"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/phone.svg",
+      "bytes": 1399,
+      "sha256": "602e487762cf286f0bc4f7916d8171331cdcf59876dfb6cd9ab8ed69f6846045"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/prime.svg",
+      "bytes": 542,
+      "sha256": "959d5a609ddf81c5be59ceab7a8841927971a7181363b9522475eb83627dfe25"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/process-ceased.svg",
+      "bytes": 1351,
+      "sha256": "9d4c7ad155fec400fb9bb78c5db2ffb1ae6b99afb7fade0621ebdfeec38b35f0"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/product-catalog.svg",
+      "bytes": 579,
+      "sha256": "0b43214d20247a7d050e5aeb7d2d00b0d7131c1848cbf07e54f165a1f7507d4e"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/quick-menu.svg",
+      "bytes": 869,
+      "sha256": "4b652966944ee5c165c2e517dada6d27919bcf8b6125c3da721b6df235b3e3e5"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/romanian-prefix.svg",
+      "bytes": 234,
+      "sha256": "0de34f9a3caae001942ad150ac8ae9b63186e4bde662c8329e5a16f234303757"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-camera.svg",
+      "bytes": 906,
+      "sha256": "2df094d5b2fb72f7582e60ff1d38aac82e1d11eb9da8015b2b18903be9e11f9d"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-check.svg",
+      "bytes": 567,
+      "sha256": "719a6d227aad9c4fc4693590fc2f7a2219e6d01a8cdc74153348a6b96d769011"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-cross.svg",
+      "bytes": 598,
+      "sha256": "b373d3e7dd046e692cf0ae88d6f48892e8326c9a0754e0420be68a63a1210c6f"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-desk.png",
+      "bytes": 420261,
+      "sha256": "dea04ebbc00e6712f81c61ad68f15c86babc6c088484a0c060e9216478d98fbd"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-example-id.png",
+      "bytes": 5246535,
+      "sha256": "82fd940a470056cf61e3fd5fb4f5a49427458d36634895256a4ee5d28b71ec42"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-instructions.svg",
+      "bytes": 1324,
+      "sha256": "3e07eb189d7ffc7a40eac9e263ad4aa78535e497c48a2ce0cb0ab419537dcd3d"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-person.svg",
+      "bytes": 505,
+      "sha256": "977ca09c30df22b844404a41c489d75d18c35ea543428fe149f77b0f39d491e0"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-phone-outline.svg",
+      "bytes": 1322,
+      "sha256": "7a1c63e98999ccc0303de00583369534267a71796def1fabc6d276419a48e1b8"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/scan-review-id.png",
+      "bytes": 5246535,
+      "sha256": "82fd940a470056cf61e3fd5fb4f5a49427458d36634895256a4ee5d28b71ec42"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/selfie-center-source.png",
+      "bytes": 399030,
+      "sha256": "d4dd89ffa1f6668a8b49ee568dc45162ef5364edb34c959056f0e01b212dd6ee"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/selfie-smile-source.png",
+      "bytes": 278089,
+      "sha256": "35bb3a427915ec11f243bb240b0b2640d5caceaac15ffd7991f23f2c39fe4661"
+    },
+    {
+      "path": "src/assets/pi/ro/onboarding/verification-failed.svg",
+      "bytes": 842,
+      "sha256": "90e5be6dc51b628a748dce7c212ecf3b91765601fe0433696cf77d950b2d5a6d"
+    }
+  ],
+  "combinedCount": 1554,
+  "combinedAggregate": "7a6f522405aac9af61bd6ee0ed0f3dd9c4b1ebac106c04ece83128f94922d795",
+  "preservation": "Removing the 16 additions already committed on main after b5f19c8d and exactly the 37 source additions of this task reproduces the prior strict 1501-asset aggregate. No existing asset bytes or paths were changed, removed or converted. Audit implementation, strict count/hash assertions and approved retirements are unchanged.",
+  "provenance": [
+    "src/assets/pi/ro/onboarding/README.md",
+    "src/assets/pi/ro/cash-loan/README.md"
+  ]
+}

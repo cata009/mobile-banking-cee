@@ -28,6 +28,8 @@ import type { FraudScreen } from '@/features/cards/fraud/model'
 
 /** Stable ids for the flows shipped in the library. */
 export type FlowPreviewId =
+  | 'ro-onboarding'
+  | 'ro-cash-loan'
   | 'ba-card-fraud'
   | 'ro-genius-my-car'
   | 'mobile-pi-ethoca'
@@ -141,6 +143,8 @@ export type InvestmentsBulkApprovalScreenKind =
   | 'investments-bulk-failure'
 
 export type FlowScreenKind =
+  | `ro-onboarding-${import('@/features/ro-onboarding/model').OnboardingStep}`
+  | `ro-cash-loan-${import('@/features/ro-onboarding/model').OnboardingStep}`
   | FraudScreen
   | PrimeReferenceScreen
   | EthocaScreenKind

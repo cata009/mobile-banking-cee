@@ -1,0 +1,9 @@
+{
+  "background": "#808080",
+  "positioning": "#ff9500",
+  "smile": "#ff2d55",
+  "captureGuide": "#ff0033",
+  "alertSurface": "#efefef",
+  "alertDivider": "#d1d1d1",
+  "alertAction": "#007aff"
+}

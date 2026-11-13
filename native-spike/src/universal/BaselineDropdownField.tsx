@@ -22,6 +22,7 @@ export function BaselineDropdownField({
   expanded: externalExpanded,
   fillWidth = false,
   paddingLeft = 24,
+  presentation = 'standard',
   dark = false,
 }: {
   label: string;
@@ -38,6 +39,8 @@ export function BaselineDropdownField({
   expanded?: boolean;
   fillWidth?: boolean;
   paddingLeft?: number;
+  /** Source compact form; default catalog geometry is preserved. */
+  presentation?: 'standard' | 'compact';
   dark?: boolean;
 }) {
   const disabled =
@@ -69,15 +72,16 @@ export function BaselineDropdownField({
         <View
           style={{
             width: fillWidth ? '100%' : 375,
-            minHeight: 96,
-            paddingTop: 8,
-            paddingBottom: 5,
+            minHeight: presentation === 'compact' ? 56 : 96,
+            paddingTop: presentation === 'compact' ? 4 : 8,
+            paddingBottom: presentation === 'compact' ? 0 : 5,
             paddingLeft,
-            paddingRight: 56,
+            paddingRight: presentation === 'compact' ? 24 : 56,
           }}
         >
           <BaselineTextField
             label={label}
+            forceFloatLabel={presentation === 'compact'}
             value={selected}
             multipleValues={multipleValues ? [...selectedLabels] : undefined}
             multipleCount={multipleValues?.length}

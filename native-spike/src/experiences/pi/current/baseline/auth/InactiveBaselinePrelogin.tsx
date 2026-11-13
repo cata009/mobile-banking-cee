@@ -25,10 +25,29 @@ import { sourceColor } from '../../../../../universal/sourceColor';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
 import { useDuoPreview } from '../../../../../universal/DuoPreview';
 import { resolveDuoContent } from '@/features/demo-native/duoPreview';
+import {
+  canOpenOnboarding,
+  type OnboardingStep,
+} from '@/features/ro-onboarding/model';
+import { RomanianOnboarding } from './RomanianOnboarding';
+import { hasOnboardingDraft } from '@/features/ro-onboarding/session';
+import { cashLoanSession } from '@/features/ro-cash-loan/session';
 
 /** Source inactive prelogin composition; activation remains an inert prototype CTA. */
 export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
   const [other, setOther] = useState(false);
+  const eligible = canOpenOnboarding(host.country, host.release);
+  const [journey, setJourney] = useState<'onboarding' | 'cash-loan'>(
+    host.route.params?.onboardingJourney === 'cash-loan'
+      ? 'cash-loan'
+      : 'onboarding',
+  );
+  const [onboarding, setOnboarding] = useState(
+    eligible && host.route.params?.onboarding === 'true',
+  );
+  const [onboardingStep, setOnboardingStep] = useState(
+    host.route.params?.onboardingStep as OnboardingStep | undefined,
+  );
   const viewport = useDemoViewport();
   const duo = useDuoPreview();
   const duoFrame = duo ? resolveDuoContent(duo) : undefined;
@@ -51,14 +70,25 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
     return () => visibility?.(true);
   }, [visibility]);
   useEffect(() => {
+    if (onboarding) return;
     registerBack?.(() => {
       if (!other) return false;
       setOther(false);
       return true;
     });
     return () => registerBack?.(null);
-  }, [registerBack, other]);
+  }, [registerBack, other, onboarding]);
 
+  if (onboarding && eligible)
+    return (
+      <RomanianOnboarding
+        onBackHandlerChange={registerBack}
+        journey={journey}
+        initialStep={onboardingStep}
+        topInset={host.screenTopInset}
+        onClose={() => setOnboarding(false)}
+      />
+    );
   return (
     <View testID="pi-inactive-prelogin" style={s.root}>
       <RasterImage
@@ -100,7 +130,10 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
                 top: 0,
                 bottom: 0,
                 left: duoFrame ? -duoFrame.left : 0,
-                right: duoFrame && duo ? -(duo.width - duoFrame.left - duoFrame.width) : 0,
+                right:
+                  duoFrame && duo
+                    ? -(duo.width - duoFrame.left - duoFrame.width)
+                    : 0,
                 pointerEvents: 'none',
                 background:
                   'linear-gradient(180deg, color-mix(in srgb, #262626 0%, transparent) 0%, #262626 5.95%)',
@@ -111,7 +144,12 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
               width={duo ? duo.width : '100%'}
               height="100%"
               pointerEvents="none"
-              style={[StyleSheet.absoluteFill, duoFrame ? { left: -duoFrame.left, right: undefined } : undefined]}
+              style={[
+                StyleSheet.absoluteFill,
+                duoFrame
+                  ? { left: -duoFrame.left, right: undefined }
+                  : undefined,
+              ]}
             >
               <Defs>
                 <LinearGradient
@@ -138,6 +176,32 @@ export function InactiveBaselinePrelogin(host: CurrentScreenProps) {
               welcomeText={host.t('preLogin.welcome')}
               products={products}
               findOutMoreText={host.t('products.findOutMore')}
+              onFindOutMore={
+                eligible
+                  ? productId => {
+                      if (productId === 'account' || productId === 'accounts') {
+                        setJourney('onboarding');
+                        setOnboardingStep(
+                          hasOnboardingDraft(Date.now())
+                            ? 'resume-password'
+                            : 'introduction',
+                        );
+                        setOnboarding(true);
+                      } else if (
+                        productId === 'loans' ||
+                        productId === 'cash-loan'
+                      ) {
+                        setJourney('cash-loan');
+                        setOnboardingStep(
+                          cashLoanSession.hasOnboardingDraft(Date.now())
+                            ? 'loan-active-request'
+                            : 'loan-introduction',
+                        );
+                        setOnboarding(true);
+                      }
+                    }
+                  : undefined
+              }
               dark={dark}
             />
           ) : (

@@ -40,6 +40,8 @@ export function BaselineNavigationRow({
   titleAccessory,
   titleAccessoryStyle,
   descriptionStyle,
+  descriptionLines = 2,
+  titleLines,
   ...options
 }: Omit<
   NavigationRowOptions,
@@ -66,6 +68,9 @@ export function BaselineNavigationRow({
   titleAccessory?: React.ReactNode;
   titleAccessoryStyle?: StyleProp<ViewStyle>;
   descriptionStyle?: StyleProp<TextStyle>;
+  /** Long source explanations may wrap; null preserves the complete paragraph. */
+  descriptionLines?: number | null;
+  titleLines?: number | null;
   linkLabelStyle?: StyleProp<TextStyle>;
 }) {
   const state = resolveNavigationRow({
@@ -152,11 +157,16 @@ export function BaselineNavigationRow({
   } as const;
   const copy = (
     <View style={viewStyle4}>
-      <Text numberOfLines={state.titleMaxLines} style={textStyle5}>
+      <Text
+        numberOfLines={
+          titleLines === null ? undefined : (titleLines ?? state.titleMaxLines)
+        }
+        style={textStyle5}
+      >
         {title}
       </Text>
       {description ? (
-        <Text numberOfLines={2} style={textStyle6}>
+        <Text numberOfLines={descriptionLines ?? undefined} style={textStyle6}>
           {description}
         </Text>
       ) : null}

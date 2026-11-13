@@ -6,6 +6,7 @@ import {
   View,
   type TextStyle,
   type ViewStyle,
+  type StyleProp,
 } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import {
@@ -31,12 +32,16 @@ export function BaselineSectionDivider({
   onCheckedChange,
   disabled = false,
   ruleOnly = false,
+  headingStyle,
+  lineStyle,
   ...options
 }: SectionDividerOptions &
   SectionDividerInteractions & {
     title: string;
     dark?: boolean;
     ruleOnly?: boolean;
+    headingStyle?: StyleProp<TextStyle>;
+    lineStyle?: StyleProp<ViewStyle>;
   }) {
   const state = resolveSectionDivider(options);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
@@ -46,12 +51,15 @@ export function BaselineSectionDivider({
         accessible={false}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        style={{
-          width: options.width ?? 375,
-          maxWidth: '100%',
-          height: 1,
-          backgroundColor: '#909090',
-        }}
+        style={[
+          {
+            width: options.width ?? 375,
+            maxWidth: '100%',
+            height: 1,
+            backgroundColor: '#909090',
+          },
+          lineStyle,
+        ]}
       />
     );
   const titleStyle: TextStyle = {
@@ -95,7 +103,7 @@ export function BaselineSectionDivider({
             accessibilityRole="header"
             aria-level={2}
             numberOfLines={2}
-            style={[titleStyle, styles.sectionTitle]}
+            style={[titleStyle, styles.sectionTitle, headingStyle]}
           >
             {title}
           </Text>
@@ -112,7 +120,7 @@ export function BaselineSectionDivider({
           accessible={false}
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
-          style={sectionRuleStyle}
+          style={[sectionRuleStyle, lineStyle]}
         />
       </View>
     );
