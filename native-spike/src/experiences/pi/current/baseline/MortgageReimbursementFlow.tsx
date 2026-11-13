@@ -55,7 +55,7 @@ export function MortgageReimbursementFlow({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [learnMore, setLearnMore] = useState(false);
   const viewport = useDemoViewport();
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const details = getLoanDetails(mortgage);
   const currency = mortgage.currency;
   const source = accounts.find(account => account.id === debitAccountId);
@@ -194,7 +194,7 @@ export function MortgageReimbursementFlow({
                   style={styles.choice}
                 >
                   <View style={[styles.choiceCircle, { backgroundColor: sourceColor(selected ? 'var(--uc-action)' : 'var(--uc-neutral-100)', dark) }]}>
-                    <SourceCustomIcon name="prime-check" size={22} color={selected ? '#FFFFFF' : host.tokens.text} />
+                    <SourceCustomIcon name="prime-check" size={22} color={selected ? sourceColor('var(--uc-static-white)') : host.tokens.text} />
                   </View>
                   <Text style={[styles.choiceLabel, { color: textColor }]}>
                     {label}
@@ -234,7 +234,7 @@ export function MortgageReimbursementFlow({
                       style={styles.choice}
                     >
                       <View style={[styles.choiceCircle, { backgroundColor: sourceColor(selected ? 'var(--uc-action)' : 'var(--uc-neutral-100)', dark) }]}>
-                        <SourceCustomIcon name="prime-check" size={22} color={selected ? '#FFFFFF' : host.tokens.text} />
+                        <SourceCustomIcon name="prime-check" size={22} color={selected ? sourceColor('var(--uc-static-white)') : host.tokens.text} />
                       </View>
                       <Text style={[styles.choiceLabel, { color: textColor }]}>
                         {label}

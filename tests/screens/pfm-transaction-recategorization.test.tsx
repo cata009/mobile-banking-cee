@@ -273,7 +273,8 @@ describe('PFM transaction recategorization entry points', () => {
       { wrapper: Providers },
     )
 
-    expect(await screen.findByText('Pending')).toBeInTheDocument()
+    expect(await screen.findByText('RESERVED AMOUNT')).toBeInTheDocument()
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
     expect(screen.queryByTestId('transaction-pfm-summary')).not.toBeInTheDocument()
     expect(screen.queryByText('Spending Insight')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Change category/i })).not.toBeInTheDocument()

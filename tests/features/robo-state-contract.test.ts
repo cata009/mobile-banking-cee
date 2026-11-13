@@ -4,15 +4,16 @@ import { getPortfoliosForStrategy } from '@/features/investments/robo/model'
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures'
 
 describe('Robo canonical state', () => {
-  it('requires data confirmation between the intro and risk-profile stages', () => {
-    const intro = createRoboState()
-    expect(roboReducer(intro, { type: 'navigate', to: 'profile' })).toBe(intro)
-    const data = roboReducer(intro, { type: 'navigate', to: 'contact' })
-    expect(getRoboFlowView(data).step).toBe('contact')
-    const profile = roboReducer(data, { type: 'navigate', to: 'profile' })
+  it('requires contact confirmation before the introduction and risk-profile stages', () => {
+    const contact = createRoboState()
+    expect(getRoboFlowView(contact).step).toBe('contact')
+    expect(roboReducer(contact, { type: 'navigate', to: 'profile' })).toBe(contact)
+    const intro = roboReducer(contact, { type: 'navigate', to: 'intro' })
+    expect(getRoboFlowView(intro).step).toBe('intro')
+    const profile = roboReducer(intro, { type: 'navigate', to: 'profile' })
     expect(getRoboFlowView(profile).step).toBe('profile')
-    expect(roboReducer(profile, { type: 'navigate', to: 'intro' })).toBe(profile)
-    expect(getRoboFlowView(roboReducer(profile, { type: 'navigate', to: 'contact' })).step).toBe('contact')
+    expect(getRoboFlowView(roboReducer(profile, { type: 'navigate', to: 'intro' })).step).toBe('intro')
+    expect(roboReducer(profile, { type: 'navigate', to: 'contact' })).toBe(profile)
   })
 
   it('attaches management navigation to an existing goal and rejects stale creation commands', () => {
@@ -44,7 +45,7 @@ describe('Robo canonical state', () => {
     expect(roboReducer(initial, { type: 'navigate', to: 'goal-detail' })).toBe(initial)
     const portfolio = getPortfoliosForStrategy('sustainable-balanced')[0]!
     let state = createRoboState()
-    for (const to of ['contact', 'profile', 'goal-type', 'goal-name', 'target'] as const)
+    for (const to of ['intro', 'profile', 'goal-type', 'goal-name', 'target'] as const)
       state = roboReducer(state, { type: 'navigate', to })
     state = roboReducer(state, { type: 'open-portfolio', from: 'target' })
     state = roboReducer(state, { type: 'portfolio-selected', portfolio })
@@ -70,7 +71,7 @@ describe('Robo canonical state', () => {
   it('keeps portfolio back origin, consent and the selected horizon through review back navigation', () => {
     const portfolio = getPortfoliosForStrategy('balanced-core')[0]!
     let state = createRoboState()
-    for (const to of ['contact', 'profile', 'goal-type', 'goal-name', 'target'] as const)
+    for (const to of ['intro', 'profile', 'goal-type', 'goal-name', 'target'] as const)
       state = roboReducer(state, { type: 'navigate', to })
     state = roboReducer(state, { type: 'select-horizon', years: 10 })
     state = roboReducer(state, { type: 'set-manual-horizon', value: '12' })

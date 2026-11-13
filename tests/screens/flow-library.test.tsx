@@ -628,7 +628,8 @@ describe('flow-library screen', () => {
     expect(focusedPreview().getAllByText('Pending').length).toBeGreaterThan(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Pending transaction detail' }))
-    await waitFor(() => expect(focusedPreview().getByText('Pending')).toBeInTheDocument())
+    await waitFor(() => expect(focusedPreview().getByText('RESERVED AMOUNT')).toBeInTheDocument())
+    expect(focusedPreview().queryByText('Pending')).not.toBeInTheDocument()
     expect(focusedPreview().queryByText('Spending Insight')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Logo unavailable fallback' }))

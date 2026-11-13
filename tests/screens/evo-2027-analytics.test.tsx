@@ -124,12 +124,12 @@ async function selectCustomRange(fromMonth: string, toMonth: string) {
   fireEvent.click(screen.getByRole('button', { name: spendingCopy.presetCustom }))
   await screen.findByRole('button', { name: spendingCopy.from })
   fireEvent.click(screen.getByRole('button', { name: spendingCopy.from }))
-  await screen.findByRole('button', { name: fromMonth })
-  fireEvent.click(screen.getByRole('button', { name: fromMonth }))
+  const fromPicker = within(await screen.findByRole('dialog', { name: spendingCopy.from }))
+  fireEvent.click(await fromPicker.findByRole('button', { name: fromMonth }))
   await screen.findByRole('button', { name: spendingCopy.to })
   fireEvent.click(screen.getByRole('button', { name: spendingCopy.to }))
-  await screen.findByRole('button', { name: toMonth })
-  fireEvent.click(screen.getByRole('button', { name: toMonth }))
+  const toPicker = within(await screen.findByRole('dialog', { name: spendingCopy.to }))
+  fireEvent.click(await toPicker.findByRole('button', { name: toMonth }))
   await screen.findByRole('button', { name: spendingCopy.apply })
   fireEvent.click(screen.getByRole('button', { name: spendingCopy.apply }))
   await waitFor(() => {
@@ -206,7 +206,7 @@ describe('Evo 2027 analytics overview', () => {
     )
     expect(screen.getByTestId('cz-pfm-expense')).toHaveTextContent(formatEvo2027Number(sourceSummary.spendingTotal))
     fireEvent.click(scopeTrigger)
-    fireEvent.click(await screen.findByRole('radio', { name: account.name }))
+    fireEvent.click(await screen.findByRole('radio', { name: `${account.name}, ${account.accountNumber}` }))
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Choose accounts' })).toHaveTextContent(account.name),
@@ -368,8 +368,16 @@ async function openExpenses(month = 'April 2026', accounts?: number) {
   }
 
   async function selectSplitMode(label: string) {
-    fireEvent.click(screen.getByRole('tab', { name: label }))
-    await waitFor(() => expect(screen.getByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true'))
+    if (label === 'Bars') {
+      fireEvent.click(screen.getByRole('tab', { name: label }))
+      await waitFor(() => expect(screen.getByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true'))
+      return
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Split by' }))
+    const options = await screen.findByRole('button', { name: label })
+    expect(options).toHaveAttribute('aria-selected')
+    fireEvent.click(options)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Split by' })).toHaveTextContent(label))
   }
 
   it('shows the donut and a category breakdown instead of a raw transaction list', async () => {
@@ -558,8 +566,14 @@ async function openExpenses(month = 'April 2026', accounts?: number) {
   it('offers the currency split only when the scope actually mixes currencies', async () => {
     await openExpenses('April 2026', 1)
 
-    const available = () => screen.getAllByRole('tab').map((tab) => tab.getAttribute('aria-label'))
-    expect(available()).not.toContain('Currencies')
+    const available = async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Split by' }))
+      await screen.findByRole('button', { name: 'Categories' })
+      const names = ['Categories', 'Merchants', 'Currencies'].filter(name => screen.queryByRole('button', { name }))
+      fireEvent.click(screen.getByRole('button', { name: 'Close split options' }))
+      return names
+    }
+    expect(await available()).toEqual(['Categories', 'Merchants'])
     await selectSplitMode('Categories')
 
     cleanup()
@@ -574,7 +588,7 @@ async function openExpenses(month = 'April 2026', accounts?: number) {
 
     await openExpenses('April 2026', 2)
 
-    expect(available()).toContain('Currencies')
+    expect(await available()).toEqual(['Categories', 'Merchants', 'Currencies'])
     await selectSplitMode('Currencies')
     expect(breakdownRows().length).toBeGreaterThan(0)
   })

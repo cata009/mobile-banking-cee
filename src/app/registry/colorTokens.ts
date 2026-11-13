@@ -22,6 +22,15 @@ export interface ColorToken {
 }
 
 export const COLOR_TOKENS: readonly ColorToken[] = [
+  // Existing approved wallet/provider and payment presentation; fixed source colors, no change to global roles.
+  { name: '--uc-source-wallet-apple-text', light: '#1D1D1F', group: 'scope' },
+  { name: '--uc-source-wallet-apple-muted', light: '#86868B', group: 'scope' },
+  { name: '--uc-source-wallet-apple-border', light: '#D1D1D6', group: 'scope' },
+  { name: '--uc-source-wallet-device-border', light: '#D3D3D3', group: 'scope' },
+  { name: '--uc-source-wallet-field-border', light: '#8C8C8C', group: 'scope' },
+  { name: '--uc-source-wallet-value-muted', light: '#737373', group: 'scope' },
+  { name: '--uc-source-payment-record-border', light: '#B8B8B8', group: 'scope' },
+  { name: '--uc-source-payment-provider-border', light: '#D0D0D0', group: 'scope' },
   { name: '--uc-neutral-white', light: '#FFFFFF', dark: '#262626', group: 'palette' },
   { name: '--uc-static-white', light: '#FFFFFF', dark: '#FFFFFF', group: 'role' },
   { name: '--uc-static-black', light: '#262626', dark: '#262626', group: 'role' },

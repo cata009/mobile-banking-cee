@@ -6,6 +6,7 @@ import { COMPONENT_REGISTRY } from '@/app/registry/componentRegistry'
 import { SCREEN_REGISTRY } from '@/app/registry/screenRegistry'
 import { AppIcon, ICON_INVENTORY, ICON_REGISTRY } from '@/app/components/icons/AppIcon'
 import baseline from './fixtures/declarative-baseline.json'
+import inventoryDelta from './fixtures/icon-inventory-delta.json'
 import figmaAdditions from './fixtures/figma-catalog-components.json'
 import { FIGMA_COMPONENTS } from '@/app/registry/domains/foundation/figmaComponents'
 const hash = (value: string) => createHash('sha256').update(value).digest('hex')
@@ -40,7 +41,20 @@ describe('approved declarative output', () => {
         return [name, hash(renderToStaticMarkup(createElement(AppIcon, { name })))]
       }),
     )
-    expect(output).toEqual(baseline.icons)
-    expect(hash(JSON.stringify(ICON_INVENTORY))).toBe(baseline.inventory)
+    // The approved installment icon was registered after the extraction baseline.
+    expect(output['card-installment-plan']).toBe('381df5f719a3d0c40f9b106c330ee0a48f2aaaad010660df6bc9765dd8cf97fd')
+    const preserved = Object.fromEntries(Object.entries(output).filter(([name]) => name !== 'card-installment-plan'))
+    expect(preserved).toEqual(baseline.icons)
+    expect(ICON_INVENTORY.filter((icon) => icon.name === 'card-installment-plan')).toHaveLength(1)
+    const inventory = JSON.parse(
+      JSON.stringify(ICON_INVENTORY.filter((icon) => icon.name !== 'card-installment-plan')),
+    ) as typeof ICON_INVENTORY
+    expect(inventoryDelta.changes).toHaveLength(1)
+    for (const change of inventoryDelta.changes) {
+      const index = inventory.findIndex((icon) => icon.name === change.name)
+      expect(inventory[index]).toEqual(change.after)
+      inventory[index] = change.before as (typeof ICON_INVENTORY)[number]
+    }
+    expect(hash(JSON.stringify(inventory))).toBe(baseline.inventory)
   })
 })

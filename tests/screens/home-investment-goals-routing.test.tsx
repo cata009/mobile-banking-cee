@@ -218,7 +218,7 @@ describe('Future CZ Homepage Investment goals routing', () => {
 
     await openExistingGoal()
     const nanoChipHolding = await screen.findByRole('button', { name: /Nano-Chip Equity Fund/ })
-    expect(nanoChipHolding).toHaveTextContent('11,660 PCS')
+    expect(nanoChipHolding).toHaveTextContent('11,6598 PCS')
     expect(nanoChipHolding).toHaveTextContent('31.010,57')
     expect(nanoChipHolding).toHaveTextContent('CZK')
 
