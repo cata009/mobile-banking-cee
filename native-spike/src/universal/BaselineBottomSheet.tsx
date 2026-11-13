@@ -229,7 +229,7 @@ export function BaselineBottomSheet({
         <View style={headingStyle}>
           {closeButtonPosition === 'left' ? closeControl : null}
           <View style={styles.titleColumn}>
-            <Text style={titleStyle}>{title}</Text>
+            <Text accessibilityRole="header" style={titleStyle}>{title}</Text>
             {typeof subtitle === 'string' || typeof subtitle === 'number' ? (
               <Text style={supportingStyle}>{subtitle}</Text>
             ) : (

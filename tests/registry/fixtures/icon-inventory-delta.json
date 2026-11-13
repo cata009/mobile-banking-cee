@@ -1,0 +1,37 @@
+{
+  "sourceCommit": "2e18d0a88d2c24a4970179204dd6b4048f3902d4",
+  "changes": [
+    {
+      "name": "insurance-calendar",
+      "before": {
+        "name": "insurance-calendar",
+        "label": "Insurance calendar",
+        "category": "System",
+        "source": "custom",
+        "defaultSize": "32x32",
+        "previewWidth": 32,
+        "previewHeight": 32,
+        "viewBox": "0 0 32 32",
+        "usage": [
+          "RsPropertyInsurancePreviews insurance start date"
+        ],
+        "notes": "Exact 32px calendar glyph supplied for the RS property-insurance start-date field."
+      },
+      "after": {
+        "name": "insurance-calendar",
+        "label": "Insurance calendar",
+        "category": "System",
+        "source": "custom",
+        "defaultSize": "32x32",
+        "previewWidth": 32,
+        "previewHeight": 32,
+        "viewBox": "0 0 32 32",
+        "usage": [
+          "RS property-insurance preview",
+          "Native date fields across PI baseline and Evo screens"
+        ],
+        "notes": "Exact 19x20 calendar glyph supplied for shared native date fields."
+      }
+    }
+  ]
+}

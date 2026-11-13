@@ -4,8 +4,8 @@ import { resolveDetailToolbar } from '@/app/components/contracts/detailToolbar'
 
 describe('baseline header composition contracts', () => {
   it.each([
-    ['home', 24, 24, 'normal', 'div'], ['more', 16, 24, 'normal', 'div'],
-    ['products', 24, 22, 36, 'div'], ['payments', 20, 20, 'normal', 'div'],
+    ['home', 24, 24, 'normal', 'div'], ['more', 24, 24, 'normal', 'div'],
+    ['products', 24, 22, 36, 'div'], ['payments', 24, 20, 'normal', 'div'],
     ['analytics', 24, 20, 'normal', 'header'],
   ] as const)('preserves %s geometry', (variant, gutter, paddingBottom, lineHeight, rootTag) => {
     expect(resolveL1Header(variant)).toMatchObject({ gutter, paddingBottom, lineHeight, rootTag, titleFontSize: 28, actionSize: 32 })

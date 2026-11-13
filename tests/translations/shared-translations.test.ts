@@ -75,7 +75,7 @@ describe('shared runtime translations', () => {
     const english = getTranslations('RO', 'en')!.runtime.analytics
     const romanian = getTranslations('RO', 'ro')!.runtime.analytics
 
-    expect(english.addTransaction).toBe('Add Transaction')
+    expect(english.addTransaction).toBe('Add transaction')
     expect(romanian.addTransaction).toBe('Adaugă tranzacție')
     expect(romanian.showMoreCategories).toBe('Arată mai multe categorii')
     expect(romanian.noIncome).toBe('Fără venituri')

@@ -606,18 +606,18 @@ export default function ContractWithdrawalFlow({
           variant="section"
           dark={dark}
         />
-        <ReviewField
-          title={copy('runtime.contractWithdrawal.clientName', 'Client name')}
+        <Fact
+          label={copy('runtime.contractWithdrawal.clientName', 'Client name')}
           value={CONTRACT_WITHDRAWAL_DEMO_CONTACT.name}
           host={host}
         />
-        <ReviewField
-          title={copy('runtime.contractWithdrawal.customerId', 'Customer ID')}
+        <Fact
+          label={copy('runtime.contractWithdrawal.customerId', 'Customer ID')}
           value={CONTRACT_WITHDRAWAL_DEMO_CONTACT.customerId}
           host={host}
         />
-        <ReviewField
-          title={copy(
+        <Fact
+          label={copy(
             'runtime.contractWithdrawal.productSource',
             'Product requested from',
           )}
@@ -634,8 +634,8 @@ export default function ContractWithdrawalFlow({
           }
           host={host}
         />
-        <ReviewField
-          title={copy(
+        <Fact
+          label={copy(
             'runtime.contractWithdrawal.productCategory',
             'Product type category',
           )}
@@ -643,8 +643,8 @@ export default function ContractWithdrawalFlow({
           host={host}
         />
         {state.product !== 'package' ? (
-          <ReviewField
-            title={copy(
+          <Fact
+            label={copy(
               'runtime.contractWithdrawal.productIdentifier',
               'Product identifier',
             )}
@@ -658,32 +658,32 @@ export default function ContractWithdrawalFlow({
             host={host}
           />
         ) : null}
-        <ReviewField
-          title={copy(
+        <Fact
+          label={copy(
             'runtime.contractWithdrawal.requestedDate',
             'Product was opened/requested on',
           )}
           value={displayIsoDate(state.requestedDate, '.')}
           host={host}
         />
-        <ReviewField
-          title={copy(
+        <Fact
+          label={copy(
             'runtime.contractWithdrawal.requestChannel',
             'Product was requested in the channel',
           )}
           value={channelLabel(state.requestChannel, copy)}
           host={host}
         />
-        <ReviewField
-          title={copy(
+        <Fact
+          label={copy(
             'runtime.contractWithdrawal.contractReference',
             'Contract / application reference number',
           )}
           value={state.contractReference.trim() || '—'}
           host={host}
         />
-        <ReviewField
-          title={copy('runtime.contractWithdrawal.email', 'Your email address')}
+        <Fact
+          label={copy('runtime.contractWithdrawal.email', 'Your email address')}
           value={state.email}
           host={host}
         />
@@ -980,18 +980,6 @@ function channelLabel(
   if (channel === 'branch')
     return copy('runtime.contractWithdrawal.channels.branch', 'Branch');
   return '—';
-}
-
-function ReviewField({
-  title,
-  value,
-  host,
-}: {
-  title: string;
-  value: string;
-  host: CurrentScreenProps;
-}) {
-  return <Fact host={host} label={title} value={value} />;
 }
 
 function FullScreenPage({

@@ -1,3 +1,4 @@
+import { resolveColorToken } from '@/app/registry/colorTokens'
 import { alignedScreenshotRect } from './visualQaComparison'
 
 type Marker = { x: number; y: number }
@@ -11,8 +12,8 @@ export function drawVisualQaEvidence(canvas: HTMLCanvasElement, reference: HTMLI
   const drawMarkers = () => markers.forEach((marker, index) => {
     const x = marker.x / 100 * canvas.width
     const y = marker.y / 100 * canvas.height
-    context.beginPath(); context.arc(x, y, 18, 0, Math.PI * 2); context.fillStyle = '#007e91'; context.fill(); context.lineWidth = 3; context.strokeStyle = '#ffffff'; context.stroke()
-    context.fillStyle = '#ffffff'; context.font = 'bold 20px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(String(index + 1), x, y)
+    context.beginPath(); context.arc(x, y, 18, 0, Math.PI * 2); context.fillStyle = resolveColorToken('--uc-action', 'light'); context.fill(); context.lineWidth = 3; context.strokeStyle = resolveColorToken('--uc-static-white', 'light'); context.stroke()
+    context.fillStyle = resolveColorToken('--uc-static-white', 'light'); context.font = 'bold 20px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(String(index + 1), x, y)
   })
   draw(reference)
   const referencePng = encoded()

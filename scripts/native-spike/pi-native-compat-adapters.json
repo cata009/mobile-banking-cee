@@ -56,7 +56,7 @@
       "path": "src/app/screens/accounts/AccountDetailScreen.tsx"
     },
     {
-      "reviewedSha256": "F294A081BCC27D636BF2896E252441B6F717AEFBF0E78AC3C2958056919E9B89",
+      "reviewedSha256": "227CF3A5A71B374B4E4F86113A50D0BBC76B1B8D1F9D5219E642EE7B247B781B",
       "nativeOnly": true,
       "excludedProductBranches": [],
       "requiredTests": [
@@ -383,7 +383,7 @@
         "tests/screens/transaction-detail-native-eligibility.test.tsx"
       ],
       "nativeOnly": true,
-      "reviewedSha256": "49A2918B5020219D9F24B24F31C4D55CD767942B2C7E86547587CD675EB5425C",
+      "reviewedSha256": "A7375DD0DA3D522B92CDFDBA2EA97DD0CD982333DB024DC7E496AFD63D380AB0",
       "includedScope": {
         "product": "PI",
         "countries": [

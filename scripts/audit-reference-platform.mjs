@@ -102,13 +102,13 @@ effectiveFields.forEach((field) => assertIncludes(effectiveContext, field, "effe
   "Product count overrides",
   "Reset to scenario",
   "Rights",
-  "Release Features",
   "Unplanned Features",
 ].forEach((panelSection) => {
   assertIncludes(sidePanel, panelSection, "control panel section");
 });
 
 [
+  "Release Features",
   "CURRENT CONTEXT",
   "Release preview",
   "Project Pack",
@@ -127,6 +127,8 @@ effectiveFields.forEach((field) => assertIncludes(effectiveContext, field, "effe
   "ProductCounts",
   "productCounts",
   "setProductCount",
+  "resolveProductDataAuthority",
+  "baselineCounts",
 ].forEach((productCountSymbol) => {
   assertIncludes(demoTypes + sidePanel, productCountSymbol, "editable product-count control contract");
 });

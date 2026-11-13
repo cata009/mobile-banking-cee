@@ -69,7 +69,7 @@ export function RoBaselineDirectDebitList({
   onBack: () => void;
   onCreate: () => void;
 }) {
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   return (
     <View
@@ -135,7 +135,7 @@ export function RoBaselineBillProviderPicker({
   onSelect: (provider: RoBaselineBillProvider) => void;
 }) {
   const [search, setSearch] = useState('');
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const providers = getRoBaselineBillProviders().filter(provider =>
     `${provider.name} ${provider.category}`
@@ -247,7 +247,7 @@ export function RoBaselinePaymentFormFlow({
   const [choicePicker, setChoicePicker] = useState<
     'address' | 'currency' | 'frequency' | null
   >(null);
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const calendarIcon = () => (
     <SourceCustomIcon
@@ -1054,7 +1054,7 @@ function ChoiceSheet({
           value,
           label: value.toUpperCase(),
         }));
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const { width, height } = useDemoViewport();
   const title =
@@ -1185,7 +1185,7 @@ const styles = StyleSheet.create({
   subtitle: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 22 },
   record: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#B8B8B8',
+    borderBottomColor: sourceColor('var(--uc-source-payment-record-border)'),
     paddingVertical: 18,
     gap: 6,
   },
@@ -1195,7 +1195,7 @@ const styles = StyleSheet.create({
     minHeight: 64,
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#D0D0D0',
+    borderBottomColor: sourceColor('var(--uc-source-payment-provider-border)'),
   },
   providerName: { fontFamily: 'UniCredit-bold', fontSize: 16, lineHeight: 22 },
   providerIntro: { gap: 4, marginBottom: 4 },
@@ -1239,7 +1239,7 @@ const styles = StyleSheet.create({
   },
   termsLink: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#8C8C8C',
+    borderBottomColor: sourceColor('var(--uc-source-wallet-field-border)'),
     paddingVertical: 12,
   },
   termsText: {

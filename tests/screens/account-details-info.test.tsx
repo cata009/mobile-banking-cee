@@ -120,7 +120,7 @@ describe('Native account information in the Web host', () => {
     const { container } = renderDetails('term-1')
     await waitForNativeScreen(container)
 
-    await expandAccountDetails()
+    expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument()
     expectFieldOrder(container, [
       'Maturity amount',
       'Interest amount before tax',
@@ -152,7 +152,8 @@ describe('Native account information in the Web host', () => {
       const { container } = renderDetails(productId)
       await waitForNativeScreen(container)
 
-      await expandAccountDetails()
+      if (productId === 'loan-1') await expandAccountDetails()
+      else expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument()
       expectFieldOrder(container, [
         'Next installment',
         'Next installment date',

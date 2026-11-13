@@ -14,8 +14,8 @@ describe('Romanian Personal Profile', () => {
 
   it('starts with the profile details shown by the RO Personal Profile flow', () => {
     expect(getRomanianProfileSnapshot()).toMatchObject({
-      firstName: 'Mihai Catalin',
-      lastName: 'Iacob',
+      firstName: 'Ion',
+      lastName: 'Popescu',
       documentType: 'Identity card',
       documentNumber: 'RX 123456',
       citizenship: 'Romanian',

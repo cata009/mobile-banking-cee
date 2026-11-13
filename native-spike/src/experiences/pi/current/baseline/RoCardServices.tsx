@@ -86,7 +86,7 @@ export function CardWalletEnrollmentFlow({
     subscribeRomanianProfile,
     getRomanianProfileSnapshot,
   );
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const title =
     provider === 'apple-pay'
       ? step === 'success'
@@ -117,7 +117,7 @@ export function CardWalletEnrollmentFlow({
 
   if (step === 'success')
     return (
-      <View style={[styles.screen, { backgroundColor: '#FFFFFF' }]}>
+      <View style={[styles.screen, { backgroundColor: sourceColor('var(--uc-static-white)') }]}>
         <BaselinePageHeader
           title={title}
           onBack={finish}
@@ -125,7 +125,7 @@ export function CardWalletEnrollmentFlow({
           includeSafeArea
           safeAreaReserve={host.screenTopInset}
           dark={false}
-          largeTitleColor="#262626"
+          largeTitleColor={sourceColor('var(--uc-static-black)')}
         />
         <View
           style={styles.walletSuccess}
@@ -133,10 +133,10 @@ export function CardWalletEnrollmentFlow({
         >
           <AssetGlyph asset={successIllustration} width={343} height={160} />
           <ClickToPayBrand compact />
-          <Text style={[styles.walletSuccessText, { color: '#262626' }]}>
+          <Text style={[styles.walletSuccessText, { color: sourceColor('var(--uc-static-black)') }]}>
             Your Card has been successfully added to Click to Pay Profile.
           </Text>
-          <Text style={[styles.walletSuccessBody, { color: '#262626' }]}>
+          <Text style={[styles.walletSuccessBody, { color: sourceColor('var(--uc-static-black)') }]}>
             All set now for the fun part.
           </Text>
         </View>
@@ -161,7 +161,7 @@ export function CardWalletEnrollmentFlow({
             onPress={onClose}
             style={styles.applePayClose}
           >
-            <SourceCustomIcon name="close-x" size={32} color="#1D1D1F" />
+            <SourceCustomIcon name="close-x" size={32} color={sourceColor('var(--uc-source-wallet-apple-text)')} />
           </Pressable>
         </View>
         <View style={styles.applePayCopy}>
@@ -188,7 +188,7 @@ export function CardWalletEnrollmentFlow({
 
   if (step === 'intro')
     return (
-      <View style={[styles.screen, { backgroundColor: '#FFFFFF' }]}>
+      <View style={[styles.screen, { backgroundColor: sourceColor('var(--uc-static-white)') }]}>
         <BaselinePageHeader
           title={title}
           onBack={onClose}
@@ -197,7 +197,7 @@ export function CardWalletEnrollmentFlow({
           includeSafeArea
           safeAreaReserve={host.screenTopInset}
           dark={false}
-          largeTitleColor="#262626"
+          largeTitleColor={sourceColor('var(--uc-static-black)')}
         />
         <ScrollView
           style={styles.walletIntroScroll}
@@ -207,19 +207,19 @@ export function CardWalletEnrollmentFlow({
           <ClickToPayBrand />
           <Text
             accessibilityRole="header"
-            style={[styles.walletIntroTitle, { color: '#262626' }]}
+            style={[styles.walletIntroTitle, { color: sourceColor('var(--uc-static-black)') }]}
           >
             Activate Click to Pay
           </Text>
-          <Text style={[styles.walletIntroCopy, { color: '#262626' }]}>
+          <Text style={[styles.walletIntroCopy, { color: sourceColor('var(--uc-static-black)') }]}>
             Change the way you pay online with intelligent, password-free
             checkout.
           </Text>
-          <Text style={[styles.walletIntroCopy, { color: '#262626' }]}>
+          <Text style={[styles.walletIntroCopy, { color: sourceColor('var(--uc-static-black)') }]}>
             Store your payment information in one place and speed through
             checkout where you see Click to Pay icon.
           </Text>
-          <Text style={[styles.walletIntroCopy, { color: '#262626' }]}>
+          <Text style={[styles.walletIntroCopy, { color: sourceColor('var(--uc-static-black)') }]}>
             With Mastercard Click to pay, you can make secure, reliable, and
             fast online payments, without needing your physical card.
           </Text>
@@ -234,7 +234,7 @@ export function CardWalletEnrollmentFlow({
     );
 
   return (
-    <View style={[styles.screen, { backgroundColor: '#FFFFFF' }]}>
+    <View style={[styles.screen, { backgroundColor: sourceColor('var(--uc-static-white)') }]}>
       <BaselinePageHeader
         title={title}
         onBack={() => setStep('intro')}
@@ -242,18 +242,18 @@ export function CardWalletEnrollmentFlow({
         includeSafeArea
         safeAreaReserve={host.screenTopInset}
         dark={false}
-        largeTitleColor="#262626"
+        largeTitleColor={sourceColor('var(--uc-static-black)')}
       />
       <ScrollView
         contentContainerStyle={styles.walletBody}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={[styles.walletSecurityIntro, { color: '#262626' }]}>
+        <Text style={[styles.walletSecurityIntro, { color: sourceColor('var(--uc-static-black)') }]}>
           For your security, Mastercard may send text messages to this number to
           verify you and help keep your account safe.
         </Text>
         <View style={styles.walletSectionHeading}>
-          <Text style={[styles.walletSectionTitle, { color: '#262626' }]}>
+          <Text style={[styles.walletSectionTitle, { color: sourceColor('var(--uc-static-black)') }]}>
             CARD SELECTION
           </Text>
         </View>
@@ -268,51 +268,51 @@ export function CardWalletEnrollmentFlow({
             ariaLabel={card.name}
           />
           <View style={styles.selectedCardCopy}>
-            <Text style={[styles.selectedCardName, { color: '#262626' }]}>
+            <Text style={[styles.selectedCardName, { color: sourceColor('var(--uc-static-black)') }]}>
               Mastercard Standard{' '}
               {card.type === 'credit_card' ? 'Credit' : 'Debit'}
             </Text>
-            <Text style={[styles.walletIntroCopy, { color: '#262626' }]}>
+            <Text style={[styles.walletIntroCopy, { color: sourceColor('var(--uc-static-black)') }]}>
               {formatMaskedCardNumber(card.cardNumber)}
             </Text>
           </View>
         </View>
         <View style={styles.walletSectionHeading}>
-          <Text style={[styles.walletSectionTitle, { color: '#262626' }]}>
+          <Text style={[styles.walletSectionTitle, { color: sourceColor('var(--uc-static-black)') }]}>
             CONTACT INFORMATION
           </Text>
         </View>
         <View style={styles.walletContactField}>
-          <Text style={[styles.walletFieldLabel, { color: '#262626' }]}>
+          <Text style={[styles.walletFieldLabel, { color: sourceColor('var(--uc-static-black)') }]}>
             E-MAIL
           </Text>
-          <Text style={[styles.walletFieldValue, { color: '#737373' }]}>
+          <Text style={[styles.walletFieldValue, { color: sourceColor('var(--uc-source-wallet-value-muted)') }]}>
             {profile.email}
           </Text>
         </View>
         <View style={styles.walletContactField}>
-          <Text style={[styles.walletFieldLabel, { color: '#262626' }]}>
+          <Text style={[styles.walletFieldLabel, { color: sourceColor('var(--uc-static-black)') }]}>
             PHONE NUMBER
           </Text>
-          <Text style={[styles.walletFieldValue, { color: '#737373' }]}>
+          <Text style={[styles.walletFieldValue, { color: sourceColor('var(--uc-source-wallet-value-muted)') }]}>
             {formatRomanianPhone(profile.phone)}
           </Text>
         </View>
-        <Text style={[styles.walletLegalCopy, { color: '#262626' }]}>
+        <Text style={[styles.walletLegalCopy, { color: sourceColor('var(--uc-static-black)') }]}>
           For your security, Mastercard may send text messages to this number to
           verify you and help keep your account safe.
         </Text>
-        <Text style={[styles.walletLegalCopy, { color: '#262626' }]}>
+        <Text style={[styles.walletLegalCopy, { color: sourceColor('var(--uc-static-black)') }]}>
           By continuing, you acknowledge that you have read, understand, and
           agree to Mastercard&apos;s{' '}
           <Text style={styles.walletLegalLink}>Terms</Text>.
         </Text>
-        <Text style={[styles.walletLegalCopy, { color: '#262626' }]}>
+        <Text style={[styles.walletLegalCopy, { color: sourceColor('var(--uc-static-black)') }]}>
           Your personal data will be collected, stored and processed in
           accordance with the principles and guidelines outlined in the{' '}
           <Text style={styles.walletLegalLink}>Privacy Notice</Text>.
         </Text>
-        <Text style={[styles.walletLegalCopy, { color: '#262626' }]}>
+        <Text style={[styles.walletLegalCopy, { color: sourceColor('var(--uc-static-black)') }]}>
           For safety and convenience, UniCredit Bank will share your card
           details with Click to Pay. By continuing, you allow UniCredit Bank to
           share card information with Mastercard Inc. International as described
@@ -327,7 +327,7 @@ export function CardWalletEnrollmentFlow({
           onPress={onClose}
           style={styles.cancelButton}
         >
-          <Text style={[styles.link, { color: '#007A91' }]}>Cancel</Text>
+          <Text style={[styles.link, { color: sourceColor('var(--uc-teal-main)') }]}>Cancel</Text>
         </Pressable>
       </View>
     </View>
@@ -394,7 +394,7 @@ export function CardInstallmentsFlow({
   const [planId, setPlanId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const viewport = useDemoViewport();
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const surface = sourceColor('var(--uc-surface)', dark);
   const ink = sourceColor('var(--uc-text)', dark);
   const muted = sourceColor('var(--uc-text-muted)', dark);
@@ -860,7 +860,7 @@ export function CardRepaymentFlow({
   const [amount, setAmount] = useState(minimum.toFixed(2));
   const [date, setDate] = useState(localToday());
   const [instantPayment, setInstantPayment] = useState(true);
-  const dark = host.tokens.background === '#121212';
+  const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const surface = sourceColor('var(--uc-surface)', dark);
   const ink = sourceColor('var(--uc-text)', dark);
   const muted = sourceColor('var(--uc-text-muted)', dark);
@@ -1233,7 +1233,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: sourceColor('var(--uc-static-white)'),
   },
   applePayTop: { paddingHorizontal: 16 },
   applePayClose: {
@@ -1241,7 +1241,7 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E5E5',
+    borderColor: sourceColor('var(--uc-neutral-200)'),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1251,14 +1251,14 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   applePayTitle: {
-    color: '#1D1D1F',
+    color: sourceColor('var(--uc-source-wallet-apple-text)'),
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Arial',
     fontSize: 20,
     fontWeight: '700',
     lineHeight: 26,
   },
   applePayLead: {
-    color: '#86868B',
+    color: sourceColor('var(--uc-source-wallet-apple-muted)'),
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Arial',
     fontSize: 20,
     lineHeight: 25,
@@ -1266,17 +1266,17 @@ const styles = StyleSheet.create({
   },
   applePayDevices: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D1D6',
+    borderColor: sourceColor('var(--uc-source-wallet-apple-border)'),
     paddingHorizontal: 16,
   },
   applePayDevice: {
     minHeight: 51,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D1D1D6',
+    borderColor: sourceColor('var(--uc-source-wallet-apple-border)'),
     justifyContent: 'center',
   },
   applePayDeviceLabel: {
-    color: '#1D1D1F',
+    color: sourceColor('var(--uc-source-wallet-apple-text)'),
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Arial',
     fontSize: 16,
     fontWeight: '700',
@@ -1285,7 +1285,7 @@ const styles = StyleSheet.create({
   deviceRow: {
     minHeight: 64,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: '#D3D3D3',
+    borderColor: sourceColor('var(--uc-source-wallet-device-border)'),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1371,7 +1371,7 @@ const styles = StyleSheet.create({
   },
   walletSectionHeading: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8C8C8C',
+    borderColor: sourceColor('var(--uc-source-wallet-field-border)'),
     paddingBottom: 8,
     paddingTop: 4,
   },
@@ -1396,19 +1396,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
   },
-  walletLegalLink: { color: '#007A91' },
+  walletLegalLink: { color: sourceColor('var(--uc-teal-main)') },
   walletFooter: {
     gap: 12,
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: sourceColor('var(--uc-static-white)'),
   },
   cancelButton: { alignItems: 'center', paddingVertical: 8 },
   link: { fontFamily: 'UniCredit-bold', fontSize: 15, lineHeight: 20 },
   sectionHeading: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8C8C8C',
+    borderColor: sourceColor('var(--uc-source-wallet-field-border)'),
     paddingBottom: 8,
     paddingTop: 12,
   },
@@ -1452,7 +1452,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8C8C8C',
+    borderColor: sourceColor('var(--uc-source-wallet-field-border)'),
     paddingVertical: 8,
   },
   amountRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 16 },

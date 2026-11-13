@@ -1160,6 +1160,15 @@ export const APP_ICON_METADATA: readonly AppIconMetadata[] = [
     usage: ['CardOptionsScreen', 'DesignSystemPage Icons inventory'],
   },
   {
+    name: 'card-installment-plan',
+    label: 'Card installment plan',
+    category: 'Actions',
+    source: 'custom',
+    width: 20,
+    height: 20,
+    usage: ['RomanianCardInstallments'],
+  },
+  {
     name: 'file-pdf',
     label: 'PDF file',
     category: 'Actions',

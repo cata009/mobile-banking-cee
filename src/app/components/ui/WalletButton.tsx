@@ -84,7 +84,9 @@ function AppleWalletMark() {
 
 function ClickToPayMark() {
   return (
-    <img alt="" className="block shrink-0" src={clickToPayWhite} aria-hidden="true" />
+    <span className="block h-[24px] w-[38.4px] shrink-0" aria-hidden="true">
+      <img alt="" className="block size-full" src={clickToPayWhite} />
+    </span>
   );
 }
 

@@ -1,0 +1,64 @@
+{
+  "sourceCommit": "e348815ff8db113a06350483610c934b0c731da7",
+  "changedBy": "4a3d6568a8424c3a0d53ff8571b1fcbfc8fa33e4",
+  "changes": [
+    {
+      "path": [
+        "overview",
+        "businessAnalysis",
+        "proposedSolution",
+        "2",
+        "items",
+        "0"
+      ],
+      "before": "Merchant header. Show the clean merchant name and a circular 64x64 merchant visual when a usable logo is available; pending details retain their existing PFM-free treatment.",
+      "after": "Merchant header. Show the clean merchant name and a circular 64x64 merchant visual when a usable logo is available; pending details use a white RESERVED AMOUNT badge with a gray label and border, no category icon, and no PFM summaries or controls."
+    },
+    {
+      "path": [
+        "overview",
+        "businessRules",
+        "4"
+      ],
+      "before": "Pending card transactions use the identical merchant-logo/fallback selection. The existing orange dot and `Pending` label remain directly below the amount and are not replaced by enrichment status.",
+      "after": "Pending card rows use the identical merchant-logo/fallback selection and retain their orange dot and `Pending` label. In transaction details, the pending state is shown with a white `RESERVED AMOUNT` badge, a gray label and border, and no category icon."
+    },
+    {
+      "path": [
+        "overview",
+        "notes",
+        "2",
+        "body"
+      ],
+      "before": "The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details stay PFM-free.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with the localized MCC description as the final row directly after Posting date when available; the numeric code is not displayed. Card used remains visible below the detail rows.",
+      "after": "The enriched card detail uses a 64x64 circular merchant mark in the header and the clean merchant name as the transaction title. PFM information remains on completed card details because categorisation continues to power Spending Insight and customer recategorisation; pending details show a white `RESERVED AMOUNT` badge with gray label and border and no category icon instead of PFM summaries or controls.\n\nFor a verified in-store purchase, the first Transaction details item is a static map/address card. It is omitted for online purchases or missing/unsafe location data and does not open an external map. Standard transaction fields follow, with the localized MCC description as the final row directly after Posting date when available; the numeric code is not displayed. Card used remains visible below the detail rows."
+    },
+    {
+      "path": [
+        "screenSpecs",
+        "ethoca-detail-pending-merchant-logo",
+        "fields",
+        "0",
+        "validation"
+      ],
+      "before": "Orange dot and localized Pending label remain in the header.",
+      "after": "A white RESERVED AMOUNT pill with matching gray label and border and no category icon appears in the header; no orange dot or Pending label is shown there."
+    },
+    {
+      "path": [
+        "screenSpecs",
+        "ethoca-detail-pending-merchant-logo",
+        "acceptance"
+      ],
+      "before": [
+        "eMAG is shown as the clean merchant name.",
+        "The pending detail contains no PFM summary or category controls."
+      ],
+      "after": [
+        "eMAG is shown as the clean merchant name.",
+        "The pending reservation is labelled RESERVED AMOUNT in a white pill with a gray label and border and no category icon.",
+        "The pending detail contains no PFM summary or category controls."
+      ]
+    }
+  ]
+}
