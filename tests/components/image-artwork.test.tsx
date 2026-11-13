@@ -7,6 +7,7 @@ import { resolve } from 'node:path'
 import {
   PAYMENT_IMAGE_ARTWORK,
   CARD_ARTWORK_IMAGES,
+  resolveBaselineCardArtVariant,
   resolvePaymentImage,
   resolveCardArt,
 } from '@/app/components/contracts/imageArtwork'
@@ -38,6 +39,24 @@ it('keeps full card art and the 64×40 thumbnail contract separate', () => {
   expect(partner.svgWidth).toBe(219)
   expect(partner.svgHeight).toBe(155)
   expect(resolvePaymentImage({ variant: 'MakePayment', width: 274 }).height).toBe(240)
+})
+
+it('uses the approved Figma artwork for PI baseline credit and debit card positions', () => {
+  expect(
+    resolveCardArt({
+      variant: resolveBaselineCardArtVariant('credit_card'),
+    }).nodeId,
+  ).toBe('1272:9526')
+  expect(
+    resolveCardArt({
+      variant: resolveBaselineCardArtVariant('debit_card', 0),
+    }).nodeId,
+  ).toBe('1272:9371')
+  expect(
+    resolveCardArt({
+      variant: resolveBaselineCardArtVariant('debit_card', 1),
+    }).nodeId,
+  ).toBe('1272:10297')
 })
 
 it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('rejects invalid artwork width %s', (width) => {

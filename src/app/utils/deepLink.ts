@@ -77,7 +77,7 @@ const PARAM = {
   shareAccessToken: 'access_token',
 } as const
 
-const PRODUCT_COUNT_PARAM: Record<ProductCountKey, string> = {
+export const PRODUCT_COUNT_PARAM: Record<ProductCountKey, string> = {
   accounts: 'count_accounts',
   debitCards: 'count_debit_cards',
   creditCards: 'count_credit_cards',

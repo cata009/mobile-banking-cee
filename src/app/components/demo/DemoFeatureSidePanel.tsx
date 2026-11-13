@@ -8,6 +8,7 @@ import { useDemo, useProductData } from "@/app/state/demoStore";
 import { isFeatureActive } from "@/app/state/featureResolver";
 import { FEATURE_META } from "@/app/registry/demoConfig";
 import { BANKING_SCENARIOS } from "@/app/platform/banking/bankingScenarioRegistry";
+import { isPIProductScenarioId, resolveProductDataAuthority } from "@/app/platform/banking/productDataAuthority";
 import { resolveEffectiveAppContext } from "@/app/platform/effectiveAppContext";
 import type {
   BankingScenarioId,
@@ -95,7 +96,6 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
   const effectiveContext = resolveEffectiveAppContext(demoState);
 
   const allFeatureIds = Object.keys(FEATURE_META) as FeatureId[];
-  const releaseFeatures = allFeatureIds.filter((id) => FEATURE_META[id].kind === "release");
   const unplannedFeatures = allFeatureIds.filter((id) => FEATURE_META[id].kind === "unplanned");
   const visibleBankingScenarioIds = (Object.keys(BANKING_SCENARIOS) as BankingScenarioId[]).filter(
     (scenarioId) => scenarioId !== "sme-owner-preview" && scenarioId !== "kids-child-preview"
@@ -154,7 +154,14 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
                 label: BANKING_SCENARIOS[scenarioId].label,
                 note: BANKING_SCENARIOS[scenarioId].readiness,
               }))}
-              onChange={(value) => setBankingScenario(value as BankingScenarioId)}
+              onChange={(value) => {
+                const selected = value as BankingScenarioId;
+                setBankingScenario(selected);
+                if (demoState.product === "PI" && isPIProductScenarioId(selected)) {
+                  const counts = resolveProductDataAuthority(selected, {}).baselineCounts;
+                  (Object.keys(counts) as ProductCountKey[]).forEach((key) => setProductCount(key, counts[key]));
+                }
+              }}
             />
           </section>
 
@@ -179,6 +186,7 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
             <h4 className="text-xs font-semibold text-[var(--uc-text-muted)] uppercase tracking-wide mb-3">
               Rights
             </h4>
+            <p className="mb-3 text-xs text-[var(--uc-text-muted)]">Derived from the selected scenario, products and limits. Rights cannot be edited individually here. Some demo screens may not enforce every restriction.</p>
             <ContextRow label="Enabled actions" value={effectiveContext.enabledActions.length.toString()} />
             <ContextRow label="Disabled actions" value={effectiveContext.disabledActions.length.toString()} />
             <MiniList
@@ -189,14 +197,6 @@ export function DemoFeatureSidePanel({ isOpen, onClose }: DemoFeatureSidePanelPr
               empty="No disabled actions"
             />
           </section>
-
-          <FeatureGroup
-            title="Release Features"
-            featureIds={releaseFeatures}
-            demoState={demoState}
-            readOnly
-            onChange={() => undefined}
-          />
 
           <FeatureGroup
             title="Unplanned Features"

@@ -40,6 +40,7 @@ import {
   productTransactions,
 } from '../../../banking/model';
 import { resolveAnalyticsTransaction } from '../../../banking/analyticsTransaction';
+import { Fact } from '../../../banking/Primitives';
 import { BaselinePageHeader } from '../../../../../../universal/BaselinePageHeader';
 import { BaselineSectionDivider } from '../../../../../../universal/BaselineSectionDivider';
 import {
@@ -616,25 +617,13 @@ export default function RoBaselinePaymentCreateScreen(
             <>
               {section('paymentOrder', 'PAYMENT ORDER')}
               <View style={styles.review}>
-                {reviewRows.map(([label, value], index) => (
-                  <View style={styles.detail} key={index}>
-                    <Text
-                      style={[
-                        styles.detailLabel,
-                        { color: color('--uc-text-muted') },
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.detailValue,
-                        { color: color('--uc-text') },
-                      ]}
-                    >
-                      {value}
-                    </Text>
-                  </View>
+                {reviewRows.map(([label, value]) => (
+                  <Fact
+                    key={label}
+                    host={host}
+                    label={label!}
+                    value={value}
+                  />
                 ))}
               </View>
               <View style={styles.save}>
@@ -758,13 +747,6 @@ const styles = StyleSheet.create({
   },
   footer: { paddingHorizontal: 24, paddingBottom: 42 },
   review: { paddingTop: 22 },
-  detail: { paddingVertical: 17 },
-  detailLabel: { fontFamily: 'UniCredit-regular', fontSize: 14 },
-  detailValue: {
-    fontFamily: 'UniCredit-bold',
-    fontSize: 16,
-    marginTop: 3,
-  },
   save: {
     paddingVertical: 16,
     flexDirection: 'row',

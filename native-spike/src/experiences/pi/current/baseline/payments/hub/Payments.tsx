@@ -13,6 +13,7 @@ import {
 } from '@/app/config/paymentsMenuConfig';
 import type { CurrentScreenProps } from '../../../contracts';
 import { disabledBankingActions } from '../../../banking/model';
+import { requiredPaymentShortcutAction } from '@/features/accounts-payments/paymentShortcutPolicy';
 import { BaselineL1Header } from '../../../../../../universal/BaselineL1Header';
 import {
   BaselineHeaderActionButton,
@@ -31,6 +32,20 @@ import { RO_SHEETS } from './roSheetOptions';
 import { RoPayIcon } from './RoPayIcon';
 import { RoPaymentOptionIcon } from './RoPaymentOptionIcon';
 import { RoBillIcon } from './RoBillIcon';
+import {
+  createRecurrentPayment,
+  getCreatedRecurrentPayments,
+} from '@/data/paymentsHub';
+import type { RecurrentPayment } from '@/data/paymentsHub';
+import type {
+  RoBaselineBillProvider,
+  RoBaselinePaymentKind,
+} from '@/features/accounts-payments/currentPaymentPolicy';
+import {
+  RoBaselineBillProviderPicker,
+  RoBaselineDirectDebitList,
+  RoBaselinePaymentFormFlow,
+} from '../forms/RoBaselinePaymentFlow';
 
 const otherIcons = {
   qr: 'payment-create-qr',
@@ -51,6 +66,11 @@ const actionIcons = {
 export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   const [view, setView] = useState(host.route.params?.view ?? 'overview');
   const [hero, setHero] = useState<PaymentHeroId | null>(null);
+  const [activePayment, setActivePayment] =
+    useState<RoBaselinePaymentKind | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<
+    RoBaselineBillProvider | undefined
+  >();
   const visibility = host.onPrimaryNavigationChange;
   useEffect(() => {
     visibility?.(view === 'overview');
@@ -58,21 +78,25 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   }, [view, visibility]);
   const registerBack = host.onBackHandlerChange;
   useEffect(() => {
-    // The exchange child owns its chooser and registers its own back handler.
-    if (view === 'exchange-rates') return;
+    // Full-screen child flows own nested chooser/step back handling.
+    if (view === 'exchange-rates' || view === 'payment-form') return;
     registerBack?.(() => {
       if (hero) {
         setHero(null);
         return true;
       }
       if (view !== 'overview') {
-        setView('overview');
+        if (view === 'payment-form' && activePayment === 'direct-debit')
+          setView('direct-debit-providers');
+        else if (view === 'direct-debit-providers')
+          setView('direct-debit-list');
+        else setView('overview');
         return true;
       }
       return false;
     });
     return () => registerBack?.(null);
-  }, [registerBack, view, hero]);
+  }, [registerBack, view, hero, activePayment]);
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const color = (token: string) => sourceColor(`var(${token})`, dark);
   const menu = getPaymentsMenuForCountry(host.country);
@@ -98,6 +122,48 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
   if (view === 'exchange-rates')
     return (
       <RoBaselineExchangeRates host={host} onBack={() => setView('overview')} />
+    );
+  if (view === 'direct-debit-list')
+    return (
+      <RoBaselineDirectDebitList
+        host={host}
+        records={getCreatedRecurrentPayments('RO', 'direct-debit')}
+        onBack={() => setView('overview')}
+        onCreate={() => setView('direct-debit-providers')}
+      />
+    );
+  if (view === 'direct-debit-providers')
+    return (
+      <RoBaselineBillProviderPicker
+        host={host}
+        onBack={() => setView('direct-debit-list')}
+        onSelect={provider => {
+          setSelectedProvider(provider);
+          setActivePayment('direct-debit');
+          setView('payment-form');
+        }}
+      />
+    );
+  if (view === 'payment-form' && activePayment)
+    return (
+      <RoBaselinePaymentFormFlow
+        host={host}
+        kind={activePayment}
+        provider={selectedProvider}
+        onBack={() =>
+          setView(
+            activePayment === 'direct-debit'
+              ? 'direct-debit-providers'
+              : 'overview',
+          )
+        }
+        onComplete={(payment: RecurrentPayment | null) => {
+          if (payment) createRecurrentPayment('RO', payment);
+          setSelectedProvider(undefined);
+          setActivePayment(null);
+          setView('overview');
+        }}
+      />
     );
   const sheet = hero
     ? getHeroSheetForRelease(menu, host.country, hero, { baseline: true })
@@ -170,10 +236,10 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
               item.id === 'between-accounts'
                 ? 'payments.exchange.create'
                 : item.id === 'manage-ebills'
-                  ? 'payments.ebills.manage'
-                  : item.id === 'recurrent-payments'
-                    ? 'payments.templates.manage'
-                    : 'payments.domestic.create';
+                ? 'payments.ebills.manage'
+                : item.id === 'recurrent-payments'
+                ? 'payments.templates.manage'
+                : 'payments.domestic.create';
             return (
               <View
                 key={item.id}
@@ -185,7 +251,17 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                   imageVariant={item.imageVariant}
                   dark={dark}
                   disabled={disabled.has(action)}
-                  onSelect={() => setHero(item.id)}
+                  onSelect={() => {
+                    if (
+                      host.country === 'RO' &&
+                      item.id === 'between-accounts'
+                    ) {
+                      setActivePayment('currency-exchange');
+                      setView('payment-form');
+                      return;
+                    }
+                    setHero(item.id);
+                  }}
                 />
               </View>
             );
@@ -213,6 +289,8 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
             contentContainerStyle={s.shortcuts}
           >
             {menu.otherItems.map(item => {
+              const requiredAction = requiredPaymentShortcutAction(item.id);
+              const isDisabled = requiredAction !== null && disabled.has(requiredAction);
               const label =
                 item.translationKey === null
                   ? item.label
@@ -227,10 +305,24 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                   key={item.id}
                   accessibilityRole="button"
                   accessibilityLabel={label.replace(/\n/g, ' ')}
-                  style={s.shortcut}
+                  accessibilityState={{ disabled: isDisabled }}
+                  disabled={isDisabled}
+                  style={[s.shortcut, isDisabled && { opacity: 0.45 }]}
                   onPress={() => {
+                    if (isDisabled) return;
                     if (item.id === 'templates') setView('templates');
                     if (item.id === 'exchange-rates') setView('exchange-rates');
+                    if (
+                      host.country === 'RO' &&
+                      item.id === 'foreign-payments'
+                    ) {
+                      setActivePayment('foreign-payment');
+                      setView('payment-form');
+                    }
+                    if (host.country === 'RO' && item.id === 'standing-order') {
+                      setActivePayment('standing-order');
+                      setView('payment-form');
+                    }
                   }}
                 >
                   <View
@@ -299,6 +391,34 @@ export function RoBaselinePaymentsScreen(host: CurrentScreenProps) {
                     if (roSheet && action.id === 'templates-beneficiaries') {
                       setHero(null);
                       setView('templates');
+                    }
+                    if (
+                      host.country === 'RO' &&
+                      action.id === 'foreign-payment'
+                    ) {
+                      setHero(null);
+                      setActivePayment('foreign-payment');
+                      setView('payment-form');
+                    }
+                    if (
+                      host.country === 'RO' &&
+                      action.id === 'treasury-payment'
+                    ) {
+                      setHero(null);
+                      setActivePayment('treasury-payment');
+                      setView('payment-form');
+                    }
+                    if (
+                      host.country === 'RO' &&
+                      action.id === 'own-account-transfer'
+                    ) {
+                      setHero(null);
+                      setActivePayment('own-account-transfer');
+                      setView('payment-form');
+                    }
+                    if (host.country === 'RO' && action.id === 'direct-debit') {
+                      setHero(null);
+                      setView('direct-debit-list');
                     }
                   }}
                 >

@@ -30,4 +30,19 @@ describe('radio preservation contract', () => {
       hoverOpacity: 1,
     })
   })
+  it('defines the installment option sheet rows with radio sizing and selected action color', () => {
+    expect(resolveRadioButton({ selected: true, variant: 'option-sheet' })).toMatchObject({
+      height: 80,
+      slotSize: 32,
+      iconSize: 20,
+      gap: 16,
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+      fontSize: 14,
+      lineHeight: 18,
+      labelToken: '--uc-action',
+      selectedIcon: 'radio-selected',
+      hoverOpacity: 1,
+    })
+  })
 })

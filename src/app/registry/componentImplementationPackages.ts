@@ -1311,7 +1311,7 @@ export const COMPONENT_IMPLEMENTATION_PACKAGES: Record<string, ComponentImplemen
       { label: "Corner radius", value: "24px (Google Wallet, or Click to Pay in HU) / 8px (otherwise)" },
       { label: "Google mark", value: "31x31px 4-band color glyph" },
       { label: "Apple mark", value: "36.9 x 27.6px inline SVG wallet-card glyph" },
-      { label: "Click to Pay mark", value: "40x24px chevron glyph" },
+      { label: "Click to Pay mark", value: "38.4x24px chevron glyph" },
       { label: "Background", value: "--uc-static-black, white text", detail: "Google Wallet variant also has a 1px #747775 border." },
     ],
     states: [

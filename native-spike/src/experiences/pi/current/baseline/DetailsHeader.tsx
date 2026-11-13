@@ -12,11 +12,13 @@ export function RoBaselineDetailsHeader({
   title,
   progress,
   kind,
+  showHelp,
 }: {
   host: CurrentScreenProps;
   title: string;
   progress: number;
   kind: 'account' | 'card';
+  showHelp?: boolean;
 }) {
   const defaultHelp = assistantAvailable(host)
     ? () => {
@@ -34,8 +36,8 @@ export function RoBaselineDetailsHeader({
         );
       }
     : kind === 'account'
-    ? inertHelp
-    : undefined;
+      ? inertHelp
+      : undefined;
   return (
     <BaselineDetailToolbar
       variant={kind}
@@ -43,6 +45,7 @@ export function RoBaselineDetailsHeader({
       progress={progress}
       onBack={host.onBack}
       onHelpPress={host.onHelpRequest ?? defaultHelp}
+      showHelp={showHelp}
       safeAreaReserve={host.screenTopInset}
       dark={host.tokens.background === '#121212'}
     />

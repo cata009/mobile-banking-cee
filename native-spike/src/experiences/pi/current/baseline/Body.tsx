@@ -13,6 +13,7 @@ import { getProductIcon } from '@/app/components/products/productGlyph';
 import { maskAmountParts } from '@/app/utils/amountPrivacy';
 import { isInvestmentsPortfolioAvailable } from '@/app/utils/investmentsAvailability';
 import { isAccountDetailProduct, type Product } from '@/data/products';
+import { accountConvention } from '@/features/accounts-payments/roAccountConvention';
 import { createCurrentProducts } from '../context';
 import type { CurrentScreenProps } from '../contracts';
 import { BaselineAccordion } from '../../../../universal/BaselineAccordion';
@@ -384,6 +385,7 @@ export function BaselineHomeBody({
                         }
                         title={product.name}
                         accountNumber={model.getProductDisplayNumber(product)}
+                        thirdLine={accountConvention(host.country, product.type)}
                         amount={amount.integer}
                         decimals={amount.decimals}
                         currency={amount.currency}

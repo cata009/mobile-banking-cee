@@ -1,5 +1,17 @@
-import { useId, type ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/app/components/ui/utils";
+import appleWalletGroup6 from "@/assets/design-system/icons/apple-wallet/group-6.svg";
+import appleWalletGroup7 from "@/assets/design-system/icons/apple-wallet/group-7.svg";
+import appleWalletGroup8 from "@/assets/design-system/icons/apple-wallet/group-8.svg";
+import appleWalletGroup9 from "@/assets/design-system/icons/apple-wallet/group-9.svg";
+import appleWalletRectangle2 from "@/assets/design-system/icons/apple-wallet/rectangle-2.png";
+import appleWalletRectangle3 from "@/assets/design-system/icons/apple-wallet/rectangle-3.png";
+import appleWalletRectangle4 from "@/assets/design-system/icons/apple-wallet/rectangle-4.png";
+import appleWalletRectangle5 from "@/assets/design-system/icons/apple-wallet/rectangle-5.png";
+import appleWalletVector2 from "@/assets/design-system/icons/apple-wallet/vector-2.svg";
+import appleWalletVector3 from "@/assets/design-system/icons/apple-wallet/vector-3.svg";
+import appleWalletVector4 from "@/assets/design-system/icons/apple-wallet/vector-4.svg";
+import clickToPayWhite from "@/assets/design-system/icons/click-to-pay/click-to-pay-white.svg";
 
 export const WALLET_BUTTON_SOURCE = {
   schema: "codex-figma-component-spec/v1",
@@ -41,45 +53,38 @@ function GoogleWalletMark() {
 }
 
 function AppleWalletMark() {
-  const clipId = useId();
-
   return (
-    <span className="relative h-[27.558px] w-[36.876px] shrink-0" aria-hidden="true">
-      <svg className="block size-full" viewBox="0 0 36.876 27.558" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <clipPath id={clipId}>
-            <rect x="0.25" y="0.25" width="36.376" height="27.058" rx="5.05" />
-          </clipPath>
-        </defs>
-        <g clipPath={`url(#${clipId})`}>
-          <rect x="0.25" y="0.25" width="36.376" height="27.058" rx="5.05" fill="#FFFFFF" />
-          <rect x="2.34" y="1.35" width="32.18" height="14.36" rx="3.55" fill="#F8F8F8" />
-          <rect x="2.34" y="1.35" width="32.18" height="4.1" rx="2.05" fill="#5AC8FA" />
-          <rect x="1.28" y="4.2" width="34.28" height="14.36" rx="3.55" fill="#F8F8F8" />
-          <rect x="1.28" y="4.2" width="34.28" height="4.1" rx="2.05" fill="#34C759" />
-          <rect x="2.34" y="7.08" width="32.18" height="14.36" rx="3.55" fill="#F8F8F8" />
-          <rect x="2.34" y="7.08" width="32.18" height="4.1" rx="2.05" fill="#FFCC00" />
-          <rect x="1.28" y="9.94" width="34.28" height="14.36" rx="3.55" fill="#F8F8F8" />
-          <rect x="1.28" y="9.94" width="34.28" height="4.1" rx="2.05" fill="#FF3B30" />
-          <rect x="0.25" y="10.8" width="36.376" height="16.508" rx="4.75" fill="#F2F2F7" />
-          <path d="M4.2 15.2H32.7" stroke="#D9D9DE" strokeWidth="1.25" strokeLinecap="round" />
-          <path d="M4.2 18.7H25.4" stroke="#D9D9DE" strokeWidth="1.25" strokeLinecap="round" />
-          <path d="M4.2 22.2H30.2" stroke="#D9D9DE" strokeWidth="1.25" strokeLinecap="round" />
-        </g>
-        <rect x="0.25" y="0.25" width="36.376" height="27.058" rx="5.05" stroke="#D7D7DC" strokeWidth="0.5" />
-      </svg>
+    <span className="flex h-[28.558px] w-[37px] shrink-0 flex-col items-start pt-px" aria-hidden="true">
+      <span className="relative block h-[27.558px] w-[36.876px]">
+        <img alt="" className="absolute" style={{ left: 2.497, top: 1.264, width: 32.0405, height: 22.3097 }} src={appleWalletVector2} />
+        <img alt="" className="absolute" style={{ left: 2.865, top: 1.62, width: 31.3292, height: 13.2914 }} src={appleWalletVector3} />
+        <span className="pointer-events-none absolute inset-[9.12%_2.19%_30.67%_3.5%] overflow-hidden">
+          <img alt="" className="absolute left-0 top-0 size-full max-w-none" src={appleWalletRectangle2} />
+        </span>
+        <img alt="" className="absolute" style={{ left: 2.865, top: 4.466, width: 31.3292, height: 13.2927 }} src={appleWalletGroup6} />
+        <span className="pointer-events-none absolute inset-[19.54%_2.19%_20.25%_3.5%] overflow-hidden">
+          <img alt="" className="absolute left-0 top-0 size-full max-w-none" src={appleWalletRectangle3} />
+        </span>
+        <img alt="" className="absolute" style={{ left: 2.865, top: 7.31, width: 31.3292, height: 13.2927 }} src={appleWalletGroup7} />
+        <span className="pointer-events-none absolute inset-[29.96%_2.19%_9.83%_3.5%] overflow-hidden">
+          <img alt="" className="absolute left-0 top-0 size-full max-w-none" src={appleWalletRectangle4} />
+        </span>
+        <img alt="" className="absolute" style={{ left: 2.865, top: 10.16, width: 31.3292, height: 13.2927 }} src={appleWalletGroup8} />
+        <img alt="" className="absolute" style={{ left: 0.966, top: -0.278, width: 35.1264, height: 14.718 }} src={appleWalletVector4} />
+        <span className="absolute inset-[39.22%_-0.53%_1.01%_0.53%] rounded-bl-[4.61px] rounded-br-[4.61px]">
+          <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-bl-[4.61px] rounded-br-[4.61px]">
+            <img alt="" className="absolute left-[-2.22%] top-0 h-[102.69%] w-[104.7%] max-w-none" src={appleWalletRectangle5} />
+          </span>
+        </span>
+        <img alt="" className="absolute" style={{ left: 0.97, top: 13.012, width: 35.1264, height: 13.2901 }} src={appleWalletGroup9} />
+      </span>
     </span>
   );
 }
 
 function ClickToPayMark() {
   return (
-    <span className="relative h-[24px] w-[40px] shrink-0 text-[var(--uc-static-white)]" aria-hidden="true">
-      <svg viewBox="0 0 40 24" className="size-full" fill="none">
-        <path d="M2 5.2C2 3.4 3.4 2 5.2 2h9.5l8 10-8 10H5.2C3.4 22 2 20.6 2 18.8V5.2Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
-        <path d="M18 2h5.8l8 10-8 10H18l8-10-8-10Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
-      </svg>
-    </span>
+    <img alt="" className="block shrink-0" src={clickToPayWhite} aria-hidden="true" />
   );
 }
 

@@ -8,6 +8,8 @@ import {
   validIsoDate,
 } from '../src/universal/DateField';
 import { mobileFirstTokens as tokens } from '../src/universal/tokens';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
+import { ModalPortal } from '../src/universal/ModalPortal';
 test('ISO/display dates preserve leap-day rules and reject partial input', () => {
   expect(parseDisplayDate('29/02/2024')).toBe('2024-02-29');
   expect(parseDisplayDate('29/02/2025')).toBe('');
@@ -57,6 +59,31 @@ test('compact calendars keep seven columns, Italian initials and selected month 
     tree.root
       .findAllByType(Text)
       .some(node => node.props.children === 'febbraio 2025'),
+  ).toBe(true);
+});
+test('standard calendar uses the shared chevrons and centered month caption', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <CalendarPanel
+        tokens={tokens}
+        value="2025-11-12"
+        locale="en-GB"
+        onSelect={() => {}}
+        onClose={() => {}}
+      />,
+    );
+  });
+  expect(
+    tree.root.findAllByType(SourceCustomIcon).map(icon => icon.props.name),
+  ).toEqual(expect.arrayContaining(['chevron-left', 'chevron-right']));
+  expect(
+    tree.root
+      .findAllByType(Text)
+      .some(node => node.props.children === 'Nov 2025'),
+  ).toBe(true);
+  expect(
+    tree.root.findAllByType(Text).some(node => node.props.children === '27'),
   ).toBe(true);
 });
 test('native date typing keeps partial text while canonical incomplete values stay empty', async () => {
@@ -116,6 +143,31 @@ test('date fields can display a localized long month for cash transaction entry'
   });
   expect(tree.root.findByType(TextInput).props.value).toBe('03-November-2026');
   expect(tree.root.findByType(TextInput).props.editable).toBe(false);
+});
+
+test('calendar-only date fields open from the value without focusing a text input', async () => {
+  let tree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    tree = Renderer.create(
+      <DateField
+        tokens={tokens}
+        label="Payment processing date"
+        value="2026-11-13"
+        locale="en-GB"
+        displayFormat="long-month"
+        openCalendarOnFieldPress
+        onChange={() => {}}
+      />,
+    );
+  });
+  expect(tree.root.findByType(TextInput).props.value).toBe('13-November-2026');
+  expect(tree.root.findByType(TextInput).props.editable).toBe(false);
+  expect(tree.root.findByType(ModalPortal).props.visible).toBe(false);
+  const activate = tree.root.findByProps({
+    accessibilityLabel: 'Open calendar for Payment processing date',
+  });
+  await act(() => activate.props.onPress());
+  expect(tree.root.findByType(ModalPortal).props.visible).toBe(true);
 });
 
 test('hidden dates are masked and do not expose a date-selection panel', async () => {

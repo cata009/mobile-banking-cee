@@ -1,6 +1,13 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
-import { PanResponder, Platform, ScrollView, StyleSheet } from 'react-native';
+import {
+  PanResponder,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { bankingProducts } from '../src/experiences/pi/current/banking/model';
 import {
   currentTokens,
@@ -20,10 +27,38 @@ import CardInfo from '../src/experiences/pi/current/baseline/CardInfo';
 import CardOptions from '../src/experiences/pi/current/baseline/CardOptions';
 import { Circle, Path } from 'react-native-svg';
 import { FaceIdOverlay as MotionFaceId } from '../src/experiences/pi/current/baseline/FaceIdOverlay';
+import { getEligibleRomanianInstallmentTransactions } from '@/features/cards/roCardServices';
+import { productTransactions } from '../src/experiences/pi/current/banking/model';
+import {
+  getCardInstallmentPlans,
+  isCardWalletEnrolled,
+  isRomanianDemoWalletEnrolled,
+  enrollCardWallet,
+} from '../src/experiences/pi/current/banking/cardServicesStore';
+import { BaselinePageHeader } from '../src/universal/BaselinePageHeader';
+import { ModalPortal } from '../src/universal/ModalPortal';
+import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
+import { BaselineAccountActionBar } from '../src/universal/BaselineAccountActionBar';
+import { CardWalletEnrollmentFlow } from '../src/experiences/pi/current/baseline/RoCardServices';
 
 jest.mock('../src/platform/nativeFiles', () => ({
   copyDemoText: jest.fn(async () => {}),
 }));
+jest.mock('@/app/components/ui/WalletButton', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: ({ kind, ...props }: { kind: string; [key: string]: unknown }) =>
+      React.createElement('button', {
+        ...props,
+        'data-wallet-button': kind,
+        'aria-label':
+          kind === 'apple-wallet'
+            ? 'Add to Apple Wallet'
+            : 'Add to Click to Pay',
+      }),
+  };
+});
 
 const counts = {
   accounts: 2,
@@ -83,6 +118,10 @@ test('Romanian baseline card screen uses canonical credit availability and selec
   props.route = { screen: 'card', params: { productId: card.id } };
   const tree = await render(props),
     json = JSON.stringify(tree.toJSON());
+  expect(tree.root.findByType(RoBaselineDetailsHeader).props.showHelp).toBe(
+    false,
+  );
+  expect(button(tree, 'Help')).toBeUndefined();
   expect(json).toContain(
     formatEvo2027Number(card.type === 'credit_card' ? card.availableCredit : 0),
   );
@@ -291,6 +330,7 @@ test.each(['credit_card', 'debit_card'] as const)(
     const rows = tree.root.findAllByType(BaselineNavigationRow);
     expect(rows.map(n => n.props.title)).toEqual([
       'APPLE PAY',
+      'CLICK TO PAY',
       'MASTERCARD PRICELESS',
       'CARD REGISTRATIONS',
       'VIEW PIN',
@@ -312,6 +352,9 @@ test.each(['credit_card', 'debit_card'] as const)(
           n.props.trailingAccessory === 'chevron',
       ),
     ).toBe(true);
+    expect(
+      rows.find(node => node.props.title === 'APPLE PAY')?.props.description,
+    ).toBe('Enrolled');
     expect(button(tree, 'Help')).toBeUndefined();
     await act(() => tree.unmount());
   },
@@ -539,5 +582,359 @@ test('keeps the requested card selected while its programmatic scroll is in prog
     screen: 'card-options',
     params: { productId: cards[0]!.id },
   });
+  await act(() => tree.unmount());
+});
+
+test('Romanian credit-card repayment opens its own repayment form', async () => {
+  const props = host(),
+    card = bankingProducts(props).cards.find(
+      item => item.type === 'credit_card',
+    )!;
+  props.route = { screen: 'card', params: { productId: card.id } };
+  const tree = await render(props);
+
+  await act(() => button(tree, 'Repayment').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Card Repayment');
+  expect(JSON.stringify(tree.toJSON())).toContain('MINIMUM AMOUNT TO REPAY');
+  const flow = tree.root.findByProps({ testID: 'ro-card-repayment-flow' });
+  expect(StyleSheet.flatten(flow.props.style).backgroundColor).toBe('#FFFFFF');
+  const scroll = tree.root.findByProps({ testID: 'ro-card-repayment-scroll' });
+  expect(scroll.props.showsVerticalScrollIndicator).toBe(false);
+  const header = () => tree.root.findByType(BaselinePageHeader);
+  expect(header().props.renderLargeTitle).toBe(false);
+  expect(header().props.collapsedTitleProgress).toBe(0);
+  expect(
+    tree.root
+      .findAllByType(SourceCustomIcon)
+      .some(
+        icon =>
+          icon.props.name === 'payment-card-repayment' &&
+          icon.props.size === 24,
+      ),
+  ).toBe(true);
+  await act(() =>
+    scroll.props.onScroll({ nativeEvent: { contentOffset: { y: 48 } } }),
+  );
+  expect(header().props.collapsedTitleProgress).toBe(1);
+  const dateActivator = tree.root.findByProps({
+    accessibilityLabel: 'Open calendar for PAYMENT PROCESSING DATE',
+  });
+  await act(() => dateActivator.props.onPress());
+  expect(tree.root.findByType(ModalPortal).props.visible).toBe(true);
+  await act(() => tree.root.findByType(ModalPortal).props.onRequestClose());
+  await act(() => button(tree, 'Next').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Review data');
+  expect(header().props.collapsedTitleProgress).toBe(0);
+  const payerLabel = tree.root
+    .findAllByType(Text)
+    .find(node => node.props.children === 'PAYER ACCOUNT NUMBER');
+  expect(payerLabel).toBeDefined();
+  expect(JSON.stringify(payerLabel!.props.style)).toContain(
+    'UniCredit-regular',
+  );
+  expect(
+    StyleSheet.flatten(payerLabel!.parent!.props.style).borderBottomWidth ?? 0,
+  ).toBe(0);
+  expect(props.onNavigate).not.toHaveBeenCalledWith({ screen: 'payments' });
+  await act(() => tree.unmount());
+});
+
+test('installments are offered only on Romanian credit cards and use booked card transactions', async () => {
+  const props = host(),
+    credit = bankingProducts(props).cards.find(
+      item => item.type === 'credit_card',
+    )!,
+    transactions = productTransactions(props, credit),
+    eligible = getEligibleRomanianInstallmentTransactions(transactions);
+  props.route = { screen: 'card', params: { productId: credit.id } };
+  const tree = await render(props);
+  const planned = getCardInstallmentPlans(credit.id);
+  const available = eligible.filter(
+    transaction => !planned.some(plan => plan.transactionId === transaction.id),
+  );
+  const row = tree.root
+    .findAllByType(BaselineNavigationRow)
+    .find(node => node.props.title === 'Installments plan');
+  expect(row?.props.description).toBe(
+    `Available transactions to split: ${available.length}`,
+  );
+  await act(() => row!.props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Available to split into installments',
+  );
+  expect(JSON.stringify(tree.toJSON())).toContain('Active installments');
+  expect(planned.length).toBeGreaterThan(0);
+  const twentyFourPlan = planned.find(plan => plan.numberOfInstallments === 24);
+  expect(twentyFourPlan).toBeDefined();
+  const twentyFourPlanRow = tree.root.findByProps({
+    accessibilityLabel: `Installment details for ${
+      twentyFourPlan!.merchantName
+    }`,
+  });
+  expect(
+    twentyFourPlanRow
+      .findAllByType(Text)
+      .some(
+        node =>
+          Array.isArray(node.props.children) &&
+          node.props.children.join('') === 'Current installment 7/24',
+      ),
+  ).toBe(true);
+  await act(() => twentyFourPlanRow.props.onPress());
+  const merchantValue = tree.root
+    .findAllByType(Text)
+    .find(node => node.props.children === twentyFourPlan!.merchantName);
+  expect(merchantValue).toBeDefined();
+  expect(JSON.stringify(merchantValue!.props.style)).toContain(
+    'UniCredit-bold',
+  );
+  const merchantLabel = tree.root
+    .findAllByType(Text)
+    .find(node => node.props.children === 'MERCHANT NAME');
+  expect(JSON.stringify(merchantLabel!.props.style)).toContain(
+    'UniCredit-regular',
+  );
+  await act(() => button(tree, 'Back').props.onPress());
+  if (available[0]) {
+    expect(JSON.stringify(tree.toJSON())).toContain(available[0].label);
+    const availableRow = tree.root.findByProps({
+      accessibilityLabel: `Create installments for ${available[0].label}`,
+    });
+    await act(() => availableRow.props.onPress());
+    const countSelector = tree.root.findByProps({
+      accessibilityLabel: 'Choose number of installments',
+    });
+    await act(() =>
+      countSelector.props.onPress({ stopPropagation: jest.fn() }),
+    );
+    expect(JSON.stringify(tree.toJSON())).toContain(
+      'Number of installments to split',
+    );
+    const options = () =>
+      tree.root.findAll(
+        node =>
+          node.props.accessibilityRole === 'radio' &&
+          typeof node.props.onPress === 'function',
+      );
+    expect(options().map(option => option.props.accessibilityLabel)).toEqual([
+      expect.stringMatching(/^12 INSTALLMENTS\./),
+      expect.stringMatching(/^24 INSTALLMENTS\./),
+      expect.stringMatching(/^36 INSTALLMENTS\./),
+    ]);
+    const radioStyles = options().map(option =>
+      StyleSheet.flatten(option.props.style),
+    );
+    expect(radioStyles.map(style => style.paddingHorizontal)).toEqual([
+      0, 0, 0,
+    ]);
+    expect(
+      radioStyles.every(style => style.borderBottomWidth === undefined),
+    ).toBe(true);
+    expect(options()[0]!.props.accessibilityState).toEqual({ checked: true });
+    await act(() => options()[1]!.props.onPress());
+    expect(options()[1]!.props.accessibilityState).toEqual({ checked: true });
+    expect(JSON.stringify(tree.toJSON())).toContain('Total monthly payment');
+    await act(() => button(tree, 'Select').props.onPress());
+    expect(JSON.stringify(tree.toJSON())).toContain('24 installments');
+    expect(JSON.stringify(tree.toJSON())).not.toContain(
+      'Number of installments to split',
+    );
+  }
+  await act(() => tree.unmount());
+
+  const debitProps = host(),
+    debit = bankingProducts(debitProps).cards.find(
+      item => item.type === 'debit_card',
+    )!;
+  debitProps.route = { screen: 'card', params: { productId: debit.id } };
+  const debitTree = await render(debitProps);
+  expect(
+    debitTree.root
+      .findAllByType(BaselineNavigationRow)
+      .some(node => node.props.title === 'Installments plan'),
+  ).toBe(false);
+  await act(() => debitTree.unmount());
+});
+
+test('Romanian euro debit card actions stay left aligned when mCash is unavailable', async () => {
+  const props = host(),
+    card = [...bankingProducts(props).cards]
+      .reverse()
+      .find(item => item.type === 'debit_card' && item.currency === 'EUR')!;
+  props.route = { screen: 'card', params: { productId: card.id } };
+  const tree = await render(props),
+    actionBar = tree.root.findByType(BaselineAccountActionBar),
+    actionBarShell = actionBar.findAllByType(View)[0]!;
+
+  expect(actionBar.props.items.map((item: { id: string }) => item.id)).toEqual([
+    'card-details',
+    'options',
+    'block-card',
+  ]);
+  expect(actionBar.props.align).toBe('start');
+  expect(StyleSheet.flatten(actionBarShell.props.style).justifyContent).toBe(
+    'flex-start',
+  );
+  await act(() => tree.unmount());
+});
+
+test('wallet options reflect the demo card enrollment and offer both compact setup actions', async () => {
+  const props = host();
+  const cards = bankingProducts(props).cards;
+  const unregistered = [...cards].reverse().find(item => item.type === 'debit_card' && item.currency === 'EUR')!;
+  for (const card of cards) {
+    const cardProps = host({ route: { screen: 'card-options', params: { productId: card.id } } });
+    let tree!: Renderer.ReactTestRenderer;
+    await act(() => { tree = Renderer.create(<CardOptions {...cardProps} />); });
+    const rows = tree.root.findAllByType(BaselineNavigationRow);
+    const apple = rows.find(row => row.props.title === 'APPLE PAY')!;
+    const click = rows.find(row => row.props.title === 'CLICK TO PAY')!;
+    expect(apple).toBeDefined();
+    expect(click).toBeDefined();
+    if (card.id === unregistered.id) {
+      expect(apple.props.description).toBe('Add to Apple Wallet');
+      expect(click.props.description).toBe('Add to Mastercard Wallet');
+      const buttons = tree.root.findAll(node => typeof node.props.onClick === 'function' && node.props['data-wallet-button']);
+      expect(buttons.map(node => node.props['data-wallet-button'])).toEqual(['apple-wallet', 'click-to-pay']);
+      expect(buttons.every(node => node.props.size === 'condensed')).toBe(true);
+      await act(() => buttons[0].props.onClick());
+      expect(JSON.stringify(tree.toJSON())).toContain('Add Card to Apple Pay');
+      await act(() => tree.root.findByType(CardWalletEnrollmentFlow).props.onClose());
+      const clickButton = tree.root.findAll(node => node.props['data-wallet-button'] === 'click-to-pay' && typeof node.props.onClick === 'function')[0];
+      await act(() => clickButton.props.onClick());
+      expect(tree.root.findByType(CardWalletEnrollmentFlow).props.provider).toBe('click-to-pay');
+    } else {
+      expect(apple.props.description).toBe('Enrolled');
+      expect(click.props.description).toBe('Enrolled');
+      expect(tree.root.findAll(node => node.props['data-wallet-button'])).toHaveLength(0);
+    }
+    await act(() => tree.unmount());
+  }
+});
+
+test('wallet enrollment flows update Apple Pay and Click to Pay status on the selected RO card', async () => {
+  const props = host(),
+    cards = bankingProducts(props).cards,
+    card = [...cards]
+      .reverse()
+      .find(item => item.type === 'debit_card' && item.currency === 'EUR')!;
+  props.route = { screen: 'card', params: { productId: card.id } };
+  const tree = await render(props);
+
+  let apple = tree.root.findAll(
+    node =>
+      node.props['data-wallet-button'] === 'apple-wallet' &&
+      typeof node.props.onClick === 'function',
+  )[0]!;
+  await act(() => apple.props.onClick());
+  await act(() =>
+    tree.root
+      .findByProps({ accessibilityLabel: 'Add card to iPhone (2)' })
+      .props.onPress(),
+  );
+  await act(() => button(tree, 'OK').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).not.toContain('Apple Pay active');
+  const intermediateProps = host({ route: { screen: 'card-options', params: { productId: card.id } } });
+  let intermediate!: Renderer.ReactTestRenderer;
+  await act(() => { intermediate = Renderer.create(<CardOptions {...intermediateProps} />); });
+  const intermediateRows = intermediate.root.findAllByType(BaselineNavigationRow);
+  expect(intermediateRows.find(row => row.props.title === 'APPLE PAY')?.props.description).toBe('Enrolled');
+  expect(intermediateRows.find(row => row.props.title === 'CLICK TO PAY')?.props.description).toBe('Add to Mastercard Wallet');
+  expect(intermediate.root.findAll(node => node.props['data-wallet-button'] === 'apple-wallet')).toHaveLength(0);
+  expect(intermediate.root.findAll(node => node.props['data-wallet-button'] === 'click-to-pay')).toHaveLength(1);
+  await act(() => intermediate.unmount());
+
+  const clickToPay = tree.root.findAll(
+    node =>
+      node.props['data-wallet-button'] === 'click-to-pay' &&
+      typeof node.props.onClick === 'function',
+  )[0]!;
+  await act(() => clickToPay.props.onClick());
+  expect(tree.root.findByType(BaselinePageHeader).props.renderLargeTitle).toBe(
+    false,
+  );
+  await act(() => button(tree, 'Enroll in Click to Pay now').props.onPress());
+  expect(tree.root.findByType(BaselinePageHeader).props.renderLargeTitle).toBe(
+    undefined,
+  );
+  const securityIntro = tree.root
+    .findAllByType(Text)
+    .find(node =>
+      String(node.props.children).startsWith(
+        'For your security, Mastercard may send text messages',
+      ),
+    );
+  expect(StyleSheet.flatten(securityIntro!.props.style).textAlign).toBe(
+    'center',
+  );
+  await act(() => button(tree, 'Continue').props.onPress());
+  await act(() => button(tree, 'Done').props.onPress());
+  expect(isCardWalletEnrolled(card.id, 'apple-pay')).toBe(true);
+  expect(isCardWalletEnrolled(card.id, 'click-to-pay')).toBe(true);
+  expect(
+    tree.root.findAll(
+      node => node.props['data-wallet-button'] === 'click-to-pay',
+    ),
+  ).toHaveLength(0);
+  expect(JSON.stringify(tree.toJSON())).not.toContain('Click to Pay active');
+  await act(() => tree.unmount());
+
+  for (const otherCard of cards.filter(item => item.id !== card.id)) {
+    const otherProps = host({
+      route: { screen: 'card', params: { productId: otherCard.id } },
+    });
+    const otherTree = await render(otherProps);
+    expect(
+      otherTree.root.findAll(
+        node =>
+          node.props['data-wallet-button'] === 'apple-wallet' ||
+          node.props['data-wallet-button'] === 'click-to-pay',
+      ),
+    ).toHaveLength(0);
+    expect(JSON.stringify(otherTree.toJSON())).not.toContain(
+      'Apple Pay active',
+    );
+    expect(JSON.stringify(otherTree.toJSON())).not.toContain(
+      'Click to Pay active',
+    );
+    await act(() => otherTree.unmount());
+  }
+
+  const optionsProps = host({
+    route: { screen: 'card-options', params: { productId: card.id } },
+  });
+  let optionsTree!: Renderer.ReactTestRenderer;
+  await act(() => {
+    optionsTree = Renderer.create(
+      React.createElement(CardOptions!, optionsProps),
+    );
+  });
+  expect(
+    optionsTree.root
+      .findAllByType(BaselineNavigationRow)
+      .find(node => node.props.title === 'APPLE PAY')?.props.description,
+  ).toBe('Enrolled');
+  expect(optionsTree.root.findAllByType(BaselineNavigationRow).find(node => node.props.title === 'CLICK TO PAY')?.props.description).toBe('Enrolled');
+  await act(() => optionsTree.unmount());
+});
+
+test('recording one service preserves the seeded enrollment of the other', () => {
+  const cards = bankingProducts(host()).cards;
+  const credit = cards.find(card => card.type === 'credit_card')!;
+  enrollCardWallet(credit.id, 'apple-pay');
+  expect(isRomanianDemoWalletEnrolled(credit.id, 'click-to-pay', cards)).toBe(true);
+});
+
+test('the final Romanian card carousel item opens the virtual-card issue flow', async () => {
+  const tree = await render();
+  const placeholder = tree.root.findByProps({
+    testID: 'ro-card-create-virtual',
+  });
+  await act(() => placeholder.props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Select your preferred card');
+  await act(() => button(tree, 'Select Clean Green').props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain(
+    'Select the account you want to attach to the card',
+  );
   await act(() => tree.unmount());
 });

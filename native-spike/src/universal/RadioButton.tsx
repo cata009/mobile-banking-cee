@@ -11,12 +11,14 @@ import { SourceCustomIcon } from './SourceCustomIcon';
 /** Isolated controlled-row pilot, using the original Source icon artwork. */
 export function RadioButton({
   label,
+  description,
   onPress,
   dark = false,
   paddingHorizontal,
   ...options
 }: RadioButtonOptions & {
   label: string;
+  description?: string;
   onPress: () => void;
   dark?: boolean;
   /** Override the row inset when its parent surface already supplies one. */
@@ -46,7 +48,7 @@ export function RadioButton({
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityLabel={label}
+      accessibilityLabel={description ? `${label}. ${description}` : label}
       accessibilityState={{ checked: contract.selected }}
       aria-checked={contract.selected}
       onPress={onPress}
@@ -66,21 +68,28 @@ export function RadioButton({
           variables={iconVariables}
         />
       </View>
-      <Text
-        style={[
-          styles.label,
-          {
-            fontSize: contract.fontSize,
-            lineHeight:
-              typeof contract.lineHeight === 'number'
-                ? contract.lineHeight
-                : undefined,
-            color: sourceColor(`var(${contract.labelToken})`, dark),
-          },
-        ]}
-      >
-        {label}
-      </Text>
+      <View style={styles.copy}>
+        <Text
+          style={[
+            styles.label,
+            {
+              fontSize: contract.fontSize,
+              lineHeight:
+                typeof contract.lineHeight === 'number'
+                  ? contract.lineHeight
+                  : undefined,
+              color: sourceColor(`var(${contract.labelToken})`, dark),
+            },
+          ]}
+        >
+          {label}
+        </Text>
+        {description ? (
+          <Text style={[styles.description, { color: sourceColor('var(--uc-text-muted)', dark) }]}>
+            {description}
+          </Text>
+        ) : null}
+      </View>
     </Pressable>
   );
 }
@@ -88,5 +97,7 @@ export function RadioButton({
 const styles = StyleSheet.create({
   row: { width: '100%', flexDirection: 'row', alignItems: 'center' },
   mark: { flexShrink: 0, alignItems: 'center', justifyContent: 'center' },
+  copy: { flex: 1, minWidth: 0, gap: 4 },
   label: { fontFamily: 'UniCredit-bold', flexShrink: 1 },
+  description: { fontFamily: 'UniCredit-regular', fontSize: 15, lineHeight: 20 },
 });

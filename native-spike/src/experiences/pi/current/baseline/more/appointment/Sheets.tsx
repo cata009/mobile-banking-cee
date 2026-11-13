@@ -42,6 +42,7 @@ export function AppointmentSheet({
       onRequestClose={onClose}
     >
       <BaselineBottomSheet
+        hostedInModal
         title={title}
         onClose={onClose}
         footer={footer}

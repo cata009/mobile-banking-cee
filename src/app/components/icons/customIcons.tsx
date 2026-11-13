@@ -151,6 +151,7 @@ const CUSTOM_ICON_ORDER = [
   'card-options-change-name',
   'card-options-delivery-address',
   'card-options-reissue',
+  'card-installment-plan',
   'file-pdf',
   'file-word',
   'robo-goal-wealth',

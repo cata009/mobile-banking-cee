@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import {
   Platform,
   Pressable,
@@ -12,11 +18,15 @@ import { formatMaskedCardNumber } from '@/app/utils/cardNumber';
 import { maskFormattedAmount } from '@/app/utils/amountPrivacy';
 import { creditLimitOpportunityNudge } from '@/features/cards/credit-limit/opportunityNudge';
 import type { AccountTransaction } from '@/data/accountDetails';
-import type { CardVariant } from '@/app/components/contracts/cardArtwork';
-import { BaselineCardArtwork } from '../../../../universal/BaselineCardArtwork';
+import {
+  resolveBaselineCardArtVariant,
+  type CardArtVariant,
+} from '@/app/components/contracts/imageArtwork';
+import { BaselineCardArt } from '../../../../universal/BaselineCardArt';
 import { VirtualCardArt } from './virtual-card/VirtualCardArt';
 import { BaselineCarouselIndicator } from '../../../../universal/BaselineCarouselIndicator';
 import { BaselineAccountActionBar } from '../../../../universal/BaselineAccountActionBar';
+import { BaselineNavigationRow } from '../../../../universal/BaselineNavigationRow';
 import { BaselinePageHeader } from '../../../../universal/BaselinePageHeader';
 import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { SoftShadow } from '../../../../universal/SoftShadow';
@@ -33,12 +43,32 @@ import {
 } from '../banking/model';
 import { FaceIdOverlay } from './FaceIdOverlay';
 import { CardBlockScreen, BlockedCardOverlay } from './CardBlockScreen';
-import { blockedCardsSnapshot, subscribeBlockedCards, isCardBlocked, changeCardBlocked } from '../banking/blockedCardStore';
+import {
+  blockedCardsSnapshot,
+  subscribeBlockedCards,
+  isCardBlocked,
+  changeCardBlocked,
+} from '../banking/blockedCardStore';
 import { CreditLimitOfferFlow } from './CreditLimitOfferFlow';
 import { BankingCopyToast, useBankingCopy } from '../banking/CopyToast';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
 import { AccountMcashFlow } from './AccountMcashFlow';
+import VirtualCardFlow from './virtual-card/VirtualCardFlow';
+import {
+  CardInstallmentsFlow,
+  CardRepaymentFlow,
+  CardWalletEnrollmentFlow,
+} from './RoCardServices';
+import WalletButton from '@/app/components/ui/WalletButton';
+import {
+  cardServiceSnapshot,
+  ensureDemoRomanianCardInstallmentPlans,
+  isRomanianDemoWalletEnrolled,
+  subscribeCardServices,
+  type CardWalletProvider,
+} from '../banking/cardServicesStore';
+import { getEligibleRomanianInstallmentTransactions } from '@/features/cards/roCardServices';
 import { assistantAvailable } from '../coapping/model';
 import { openCurrentForYou } from '../coapping/contextHelp';
 import { DuoColumns, DuoPane } from '../../../../universal/DuoPreview';
@@ -57,11 +87,17 @@ const CARD_GEOMETRY = {
 const webCardCompositor: ViewStyle & { willChange: 'transform' } = {
   willChange: 'transform',
 };
-function artworkVariant(card: BankingCard): CardVariant {
-  if (card.type === 'credit_card') return 'mc-credit-partner-standard';
-  return card.id.endsWith('-2') || card.id === 'card-3'
-    ? 'mc-debit-standard'
-    : 'mc-debit-gold';
+function artworkVariant(
+  card: BankingCard,
+  cards: readonly BankingCard[],
+): CardArtVariant {
+  const debitCardIndex =
+    card.type === 'debit_card'
+      ? cards
+          .filter(candidate => candidate.type === 'debit_card')
+          .findIndex(candidate => candidate.id === card.id)
+      : 0;
+  return resolveBaselineCardArtVariant(card.type, debitCardIndex);
 }
 
 /** Source live selection and pointer drag; the Czech carousel leaf remains untouched. */
@@ -71,6 +107,9 @@ function CardCarousel({
   selectionRequest,
   onSelect,
   onRequestSelect,
+  onCreateVirtualCard,
+  onActiveIndexChange,
+  placeholderColors,
   renderItem,
 }: {
   items: readonly BankingCard[];
@@ -78,6 +117,14 @@ function CardCarousel({
   selectionRequest: number;
   onSelect: (card: BankingCard) => void;
   onRequestSelect: (card: BankingCard) => void;
+  onCreateVirtualCard?: () => void;
+  onActiveIndexChange: (index: number) => void;
+  placeholderColors: {
+    surface: string;
+    border: string;
+    ink: string;
+    action: string;
+  };
   renderItem: (card: BankingCard) => React.ReactNode;
 }) {
   const rail = useRef<React.ComponentRef<typeof ScrollView>>(null),
@@ -86,8 +133,13 @@ function CardCarousel({
   const programmaticTarget = useRef<number | null>(null);
   const [viewport, setViewport] = useState(375),
     offsets = useMemo(
-      () => carouselOffsets(items.length, viewport, CARD_GEOMETRY),
-      [items.length, viewport],
+      () =>
+        carouselOffsets(
+          items.length + (onCreateVirtualCard ? 1 : 0),
+          viewport,
+          CARD_GEOMETRY,
+        ),
+      [items.length, Boolean(onCreateVirtualCard), viewport],
     );
   const selectedIndex = useRef(items.findIndex(card => card.id === selectedId));
   selectedIndex.current = items.findIndex(card => card.id === selectedId);
@@ -95,6 +147,7 @@ function CardCarousel({
     rail,
     offsets,
     onSelect: index => {
+      onActiveIndexChange(index);
       const card = items[index];
       if (card) {
         programmaticTarget.current = null;
@@ -114,6 +167,7 @@ function CardCarousel({
     );
   const select = (index: number, animated = true) => {
     const card = items[index];
+    onActiveIndexChange(index);
     if (card) {
       const offset = offsets[index] ?? 0;
       programmaticTarget.current =
@@ -163,7 +217,9 @@ function CardCarousel({
               return;
             programmaticTarget.current = null;
           }
-          const card = items[nearest(scrollLeft.current)];
+          const index = nearest(scrollLeft.current);
+          const card = items[index];
+          onActiveIndexChange(index);
           if (card && card.id !== selectedId) onSelect(card);
         }}
         onMomentumScrollEnd={() => {
@@ -173,6 +229,8 @@ function CardCarousel({
           )
             return;
           programmaticTarget.current = null;
+          if (scrollLeft.current > (offsets[offsets.length - 1] ?? 0) + 2)
+            return;
           select(nearest(scrollLeft.current));
         }}
       >
@@ -195,6 +253,39 @@ function CardCarousel({
             {renderItem(card)}
           </Pressable>
         ))}
+        {onCreateVirtualCard ? (
+          <Pressable
+            testID="ro-card-create-virtual"
+            accessibilityRole="button"
+            accessibilityLabel="Open a new virtual card"
+            onPress={() => {
+              onActiveIndexChange(items.length);
+              onCreateVirtualCard();
+            }}
+            style={[
+              styles.art,
+              styles.virtualPlaceholder,
+              {
+                backgroundColor: placeholderColors.surface,
+                borderColor: placeholderColors.border,
+              },
+            ]}
+          >
+            <SourceCustomIcon
+              name="add-circle"
+              size={30}
+              color={placeholderColors.action}
+            />
+            <Text
+              style={[
+                styles.virtualPlaceholderLabel,
+                { color: placeholderColors.ink },
+              ]}
+            >
+              Open a virtual card
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </View>
   );
@@ -212,6 +303,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
       data.cards[0]?.id ??
       '';
   const [selected, setSelected] = useState(initial),
+    [carouselIndex, setCarouselIndex] = useState(() =>
+      Math.max(
+        0,
+        data.cards.findIndex(item => item.id === initial),
+      ),
+    ),
     [selectionRequest, setSelectionRequest] = useState(0),
     [authCard, setAuthCard] = useState<string | null>(null),
     [sensitiveCard, setSensitiveCard] = useState<string | null>(null),
@@ -219,12 +316,28 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
       string | null
     >(null),
     [mcashOpen, setMcashOpen] = useState(false),
+    [cardServiceFlow, setCardServiceFlow] = useState<
+      'repayment' | 'installments' | null
+    >(null),
+    [walletProvider, setWalletProvider] = useState<CardWalletProvider | null>(
+      null,
+    ),
+    [virtualCardOpen, setVirtualCardOpen] = useState(false),
     [blockOpen, setBlockOpen] = useState(false),
     [query, setQuery] = useState(''),
     [scrollOffset, setScrollOffset] = useState(0),
     [progress, setProgress] = useState(0),
     [isOpportunityDismissed, setOpportunityDismissed] = useState(false);
-  const blockedCards = useSyncExternalStore(subscribeBlockedCards, blockedCardsSnapshot, blockedCardsSnapshot);
+  const blockedCards = useSyncExternalStore(
+    subscribeBlockedCards,
+    blockedCardsSnapshot,
+    blockedCardsSnapshot,
+  );
+  const cardServices = useSyncExternalStore(
+    subscribeCardServices,
+    cardServiceSnapshot,
+    cardServiceSnapshot,
+  );
   const page = useRef<React.ComponentRef<typeof ScrollView>>(null),
     searchY = useRef(0),
     active = useRef(host.isActive),
@@ -238,6 +351,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
   );
   useEffect(() => {
     setSelected(initial);
+    setCarouselIndex(
+      Math.max(
+        0,
+        data.cards.findIndex(item => item.id === initial),
+      ),
+    );
     setSelectionRequest(value => value + 1);
     setAuthCard(null);
     setSensitiveCard(null);
@@ -257,6 +376,30 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
   }, [host.isActive]);
   const card = data.cards.find(item => item.id === selected) ?? data.cards[0];
   const cardId = card?.id;
+  useEffect(() => {
+    if (
+      host.country !== 'RO' ||
+      host.release !== 'release-current' ||
+      host.scenario !== 'active' ||
+      !host.isActive ||
+      card?.type !== 'credit_card'
+    )
+      return;
+
+    ensureDemoRomanianCardInstallmentPlans(
+      card.id,
+      productTransactions(host, card),
+      host.language,
+    );
+  }, [
+    card?.id,
+    card?.type,
+    host.country,
+    host.isActive,
+    host.language,
+    host.release,
+    host.scenario,
+  ]);
   const explicitOpportunity = host.bankingPresentation?.aiOpportunityNudge;
   const aiOpportunityNudge =
     explicitOpportunity !== undefined
@@ -329,16 +472,68 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
           title="Cards"
           progress={1}
           kind="card"
+          showHelp={false}
         />
       </View>
     );
+  if (virtualCardOpen)
+    return (
+      <VirtualCardFlow
+        host={host}
+        mode="issue"
+        onCancel={() => setVirtualCardOpen(false)}
+        onDone={id => {
+          setVirtualCardOpen(false);
+          setSelected(id);
+          setSelectionRequest(value => value + 1);
+        }}
+      />
+    );
+  if (walletProvider)
+    return (
+      <CardWalletEnrollmentFlow
+        host={host}
+        card={card}
+        provider={walletProvider}
+        onClose={() => setWalletProvider(null)}
+      />
+    );
+  if (cardServiceFlow === 'repayment' && card.type === 'credit_card')
+    return (
+      <CardRepaymentFlow
+        host={host}
+        card={card}
+        onClose={() => setCardServiceFlow(null)}
+      />
+    );
+  if (cardServiceFlow === 'installments' && card.type === 'credit_card')
+    return (
+      <CardInstallmentsFlow
+        host={host}
+        card={card}
+        onClose={() => setCardServiceFlow(null)}
+      />
+    );
   const cardIsBlocked = (id: string) =>
-    host.bankingPresentation?.productId === id && host.bankingPresentation.cardStatus
+    host.bankingPresentation?.productId === id &&
+    host.bankingPresentation.cardStatus
       ? host.bankingPresentation.cardStatus !== 'active'
       : isCardBlocked(blockedCards, host.country, id);
   const blocked = cardIsBlocked(card.id);
-  if (blockOpen) return <CardBlockScreen host={host} blocked={blocked} onBack={() => setBlockOpen(false)} onConfirm={() => { changeCardBlocked(host.country, card.id, !blocked); setBlockOpen(false); }} />;
+  if (blockOpen)
+    return (
+      <CardBlockScreen
+        host={host}
+        blocked={blocked}
+        onBack={() => setBlockOpen(false)}
+        onConfirm={() => {
+          changeCardBlocked(host.country, card.id, !blocked);
+          setBlockOpen(false);
+        }}
+      />
+    );
   const select = (item: BankingCard) => {
+    setCarouselIndex(data.cards.findIndex(cardItem => cardItem.id === item.id));
     setAuthCard(null);
     setSensitiveCard(null);
     setSelected(item.id);
@@ -400,6 +595,30 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     setAuthCard(card.id);
   };
   const securityRoutes = host.bankingPresentation?.cardSecurityRoutes;
+  const cardSpecificAction =
+    card.type === 'credit_card' && host.country === 'RO'
+      ? {
+          id: 'repayment',
+          iconName: 'payment-card-repayment',
+          label: 'Repayment',
+          onPress: () => setCardServiceFlow('repayment'),
+        }
+      : card.type === 'debit_card' &&
+          host.country === 'RO' &&
+          card.currency === 'RON'
+        ? {
+            id: 'mcash',
+            iconName: 'mcash',
+            label: copy(host, 'runtime.accounts.actions.mCash', 'mCash'),
+            onPress: () => setMcashOpen(true),
+          }
+        : card.type === 'debit_card' && host.country === 'RO'
+          ? undefined
+          : {
+              id: 'view-pin',
+              iconName: 'view-pin',
+              label: copy(host, 'runtime.cards.actions.viewPin', 'View PIN'),
+            };
   const actions = [
     {
       id: 'card-details',
@@ -424,28 +643,17 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     {
       id: 'block-card',
       iconName: 'block-card',
-      label: blocked ? 'Unblock card' : copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
-      onPress: blocked && host.bankingPresentation?.cardStatus ? undefined : securityRoutes ? () => host.onNavigate(securityRoutes.block) : () => setBlockOpen(true),
+      label: blocked
+        ? 'Unblock card'
+        : copy(host, 'runtime.cards.actions.blockCard', 'Block Card'),
+      onPress:
+        blocked && host.bankingPresentation?.cardStatus
+          ? undefined
+          : securityRoutes
+            ? () => host.onNavigate(securityRoutes.block)
+            : () => setBlockOpen(true),
     },
-    card.type === 'credit_card' && host.country === 'RO'
-      ? {
-          id: 'repayment',
-          iconName: 'payment-card-repayment',
-          label: 'Repayment',
-          onPress: () => host.onNavigate({ screen: 'payments' }),
-        }
-      : card.type === 'debit_card' && host.country === 'RO'
-        ? {
-            id: 'mcash',
-            iconName: 'mcash',
-            label: copy(host, 'runtime.accounts.actions.mCash', 'mCash'),
-            onPress: () => setMcashOpen(true),
-          }
-        : {
-            id: 'view-pin',
-            iconName: 'view-pin',
-            label: copy(host, 'runtime.cards.actions.viewPin', 'View PIN'),
-          },
+    ...(cardSpecificAction ? [cardSpecificAction] : []),
   ];
   const free = maskFormattedAmount(
     formatEvo2027Number(
@@ -455,18 +663,43 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     ),
     host.amountsHidden,
   );
+  const cardTransactions = productTransactions(host, card);
+  const activeInstallments = cardServices.installmentPlans.filter(
+    plan => plan.cardId === card.id,
+  );
+  const plannedTransactionIds = new Set(
+    activeInstallments.map(plan => plan.transactionId),
+  );
+  const availableInstallments =
+    card.type === 'credit_card' && host.country === 'RO'
+      ? getEligibleRomanianInstallmentTransactions(cardTransactions).filter(
+          transaction => !plannedTransactionIds.has(transaction.id),
+        )
+      : [];
+  const roActiveExperience =
+    host.country === 'RO' &&
+    host.release === 'release-current' &&
+    host.scenario === 'active';
+  const walletActionsAvailable =
+    roActiveExperience && !blocked;
+  const appleEnrolled = isRomanianDemoWalletEnrolled(card.id, 'apple-pay', data.cards);
+  const clickEnrolled = isRomanianDemoWalletEnrolled(card.id, 'click-to-pay', data.cards);
+  const virtualCardAvailable = roActiveExperience;
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
       <RoBaselineTransactions
         host={host}
         kind="card"
         product={card}
-        transactions={productTransactions(host, card)}
+        transactions={cardTransactions}
         query={query}
         onQueryChange={setQuery}
         showPending={showPending}
         onTransaction={onTransaction}
         onActivateSearch={activateSearch}
+        searchTopPadding={
+          card.type === 'credit_card' && host.country === 'RO' ? 8 : 24
+        }
         renderSections={({ search, body, overlays, stickyTop }) => (
           <>
             <ScrollView
@@ -489,6 +722,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                 title="Cards"
                 progress={progress}
                 kind="card"
+                showHelp={false}
               />
               <View style={{ backgroundColor: host.tokens.background }}>
                 <View style={[styles.title, { opacity: 1 - progress * 0.9 }]}>
@@ -520,6 +754,18 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                         selectionRequest={selectionRequest}
                         onSelect={select}
                         onRequestSelect={requestSelect}
+                        onActiveIndexChange={setCarouselIndex}
+                        placeholderColors={{
+                          surface: host.tokens.surface,
+                          border: host.tokens.border,
+                          ink: host.tokens.text,
+                          action: host.tokens.accent,
+                        }}
+                        onCreateVirtualCard={
+                          virtualCardAvailable
+                            ? () => setVirtualCardOpen(true)
+                            : undefined
+                        }
                         renderItem={item => (
                           <View style={styles.art}>
                             <SoftShadow
@@ -550,15 +796,14 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                                   ariaLabel="Virtual card"
                                 />
                               ) : (
-                                <BaselineCardArtwork
-                                  variant={artworkVariant(item)}
-                                  size="large"
+                                <BaselineCardArt
+                                  variant={artworkVariant(item, data.cards)}
+                                  width={219}
                                   ariaLabel={
                                     item.type === 'debit_card'
                                       ? 'Debit card'
                                       : 'Credit card'
                                   }
-                                  style={styles.artClip}
                                 />
                               )}
                               {cardIsBlocked(item.id) && <BlockedCardOverlay />}
@@ -597,9 +842,7 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                           style={[styles.amount, { color: host.tokens.text }]}
                         >
                           {free}{' '}
-                          <Text style={styles.currency}>
-                            {card.currency}
-                          </Text>
+                          <Text style={styles.currency}>{card.currency}</Text>
                         </Text>
                       </View>
                       <Pressable
@@ -628,19 +871,48 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                           ).toUpperCase()}
                         </Text>
                       </Pressable>
+                      {walletActionsAvailable &&
+                      (!appleEnrolled || !clickEnrolled) ? (
+                        <View style={styles.walletActions}>
+                          {!appleEnrolled ? (
+                            <WalletButton
+                              kind="apple-wallet"
+                              size="long"
+                              onClick={() => setWalletProvider('apple-pay')}
+                            />
+                          ) : null}
+                          {!clickEnrolled ? (
+                            <WalletButton
+                              kind="click-to-pay"
+                              size="long"
+                              onClick={() => setWalletProvider('click-to-pay')}
+                            />
+                          ) : null}
+                        </View>
+                      ) : null}
                       <BaselineCarouselIndicator
-                        count={data.cards.length}
-                        activeIndex={data.cards.indexOf(card)}
+                        count={
+                          data.cards.length +
+                          (host.country === 'RO' &&
+                          host.release === 'release-current' &&
+                          host.scenario === 'active'
+                            ? 1
+                            : 0)
+                        }
+                        activeIndex={carouselIndex}
                         onSelect={index => {
+                          setCarouselIndex(index);
                           const item = data.cards[index];
                           if (item) requestSelect(item);
+                          else if (virtualCardAvailable)
+                            setVirtualCardOpen(true);
                         }}
                         dark={dark}
                       />
                     </View>
                     <BaselineAccountActionBar
                       items={actions}
-                      align="between"
+                      align="start"
                       iconTreatment="bare"
                       dark={dark}
                       style={{ backgroundColor: host.tokens.background }}
@@ -648,6 +920,19 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
                   </DuoPane>
                 </DuoColumns>
               </View>
+              {card.type === 'credit_card' && host.country === 'RO' ? (
+                <View style={{ backgroundColor: host.tokens.background }}>
+                  <BaselineNavigationRow
+                    title="Installments plan"
+                    description={`Available transactions to split: ${availableInstallments.length}`}
+                    leadingIconName="payment-card-repayment"
+                    trailingAccessory="chevron"
+                    rowHeight={80}
+                    dark={dark}
+                    onPress={() => setCardServiceFlow('installments')}
+                  />
+                </View>
+              ) : null}
               <View
                 testID="ro-card-sticky-search"
                 style={[
@@ -899,6 +1184,21 @@ const styles = StyleSheet.create({
   },
   searchLayer: { zIndex: 20 },
   art: { width: 219, height: 138 },
+  virtualPlaceholder: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: 16,
+  },
+  virtualPlaceholderLabel: {
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
   artClip: { width: 219, height: 138, borderRadius: 5.67, overflow: 'hidden' },
   webShadow: { boxShadow: '0 11.265px 11.265px rgba(0,0,0,0.2)' },
   balanceArea: {
@@ -907,6 +1207,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 4,
+  },
+  walletActions: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: 8,
   },
   balance: { alignSelf: 'stretch', gap: 2 },
   balanceLabel: {

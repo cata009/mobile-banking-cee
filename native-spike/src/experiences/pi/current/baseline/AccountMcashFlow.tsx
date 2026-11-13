@@ -25,10 +25,10 @@ import type { Product } from '@/data/products';
 import type { CurrentScreenProps } from '../contracts';
 import { copy } from '../banking/model';
 import { BaselineBottomSheet } from '../../../../universal/BaselineBottomSheet';
+import { BaselineAmountField } from '../../../../universal/BaselineAmountField';
 import { BaselineDropdownField } from '../../../../universal/BaselineDropdownField';
 import { BaselineNavigationRow } from '../../../../universal/BaselineNavigationRow';
 import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDivider';
-import { BaselineTextField } from '../../../../universal/BaselineTextField';
 import { McashQrCode } from './McashQrCode';
 import { ModalPortal } from '../../../../universal/ModalPortal';
 import { PrimaryButton } from '../../../../universal/PrimaryButton';
@@ -179,7 +179,7 @@ export function AccountMcashFlow({
           onClose={onClose}
           width={viewport.width}
           height={viewport.height}
-          fillHeight
+          fixedHeight
           showDragHandle
           dark={dark}
           footer={
@@ -238,31 +238,17 @@ export function AccountMcashFlow({
           <View style={styles.section}>
             <BaselineSectionDivider title="SPECIFIC AMOUNT" dark={dark} />
             <View style={styles.amountRow}>
-              <View style={styles.amountInput}>
-                <BaselineTextField
-                  label="AMOUNT TO WITHDRAW"
-                  ariaLabel="Amount to withdraw"
-                  value={amount}
-                  onChange={setAmount}
-                  inputMode="decimal"
-                  dark={dark}
-                />
-                <Text style={[styles.helper, { color: host.tokens.muted }]}>
-                  Please enter only multiple of 10
-                </Text>
-              </View>
-              <View style={styles.currency}>
-                <Text
-                  style={[styles.currencyLabel, { color: host.tokens.muted }]}
-                >
-                  CURRENCY
-                </Text>
-                <Text
-                  style={[styles.currencyValue, { color: host.tokens.text }]}
-                >
-                  {currency}
-                </Text>
-              </View>
+              <BaselineAmountField
+                label="AMOUNT TO WITHDRAW"
+                ariaLabel="Amount to withdraw"
+                value={amount}
+                onChange={setAmount}
+                inputMode="decimal"
+                helperText="Please enter only multiple of 10"
+                currency={currency}
+                hideCurrencySelector
+                dark={dark}
+              />
             </View>
           </View>
           <View style={styles.section}>
@@ -276,6 +262,7 @@ export function AccountMcashFlow({
               }))}
               onChange={setAccountNumber}
               fillWidth
+              paddingLeft={0}
               dark={dark}
             />
             {account ? (
@@ -337,7 +324,7 @@ export function AccountMcashFlow({
             onClose={() => setCode(null)}
             width={viewport.width}
             height={viewport.height}
-            fillHeight
+            fixedHeight
             dark={dark}
           >
             <View style={styles.codeContent}>
@@ -538,7 +525,7 @@ export function AccountMcashFlow({
 }
 
 const styles = StyleSheet.create({
-  footer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
+  footer: { paddingHorizontal: 8, paddingTop: 8, paddingBottom: 16 },
   presets: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -555,27 +542,8 @@ const styles = StyleSheet.create({
   },
   presetLabel: { fontFamily: 'UniCredit-bold', fontSize: 12, lineHeight: 16 },
   section: { marginTop: 18 },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 20,
-    paddingTop: 16,
-  },
-  amountInput: { flex: 1, minWidth: 0 },
-  currency: { width: 56, paddingBottom: 7 },
-  currencyLabel: { fontFamily: 'UniCredit-regular', fontSize: 14 },
-  currencyValue: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 18,
-    marginTop: 2,
-  },
-  helper: {
-    fontFamily: 'UniCredit-regular',
-    fontSize: 14,
-    lineHeight: 20,
-    paddingTop: 8,
-  },
-  accountBalance: { paddingHorizontal: 8, marginTop: -4 },
+  amountRow: { paddingTop: 16 },
+  accountBalance: { marginTop: -4 },
   accountName: {
     fontFamily: 'UniCredit-regular',
     fontSize: 14,
@@ -645,7 +613,7 @@ const styles = StyleSheet.create({
   },
   countdown: { fontFamily: 'UniCredit-bold', fontSize: 18, lineHeight: 24 },
   atmSection: { alignSelf: 'stretch', marginTop: 24 },
-  atmDetails: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 8 },
+  atmDetails: { paddingTop: 18, paddingBottom: 8 },
   atmCity: { fontFamily: 'UniCredit-regular', fontSize: 16, lineHeight: 20 },
   atmCountry: { fontFamily: 'UniCredit-regular', fontSize: 14, lineHeight: 18 },
   atmDistance: {
@@ -660,8 +628,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: 18,
   },
-  rowInset: { paddingLeft: 12, paddingRight: 12 },
-  contactRule: { height: 1, marginHorizontal: 20 },
+  rowInset: { paddingLeft: 0, paddingRight: 0 },
+  contactRule: { height: 1 },
   confirmOverlay: {
     flex: 1,
     alignItems: 'center',

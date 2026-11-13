@@ -16,6 +16,7 @@ import contactsIllustration from '@/assets/design-system/compositions/variant-15
 import identityScanIllustration from '@/assets/pi/ro/personal-profile/identity-scan.svg';
 import { AssetGlyph } from '../../../../../universal/AssetGlyph';
 import { BaselineCodeField } from '../../../../../universal/BaselineCodeField';
+import { BaselineMailboxTabs } from '../../../../../universal/BaselineMailboxTabs';
 import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { ToggleButton } from '../../../../../universal/ToggleButton';
@@ -127,7 +128,7 @@ function addressLabel(address: RomanianProfileAddress) {
 function accordionChevron(open: boolean, color: string) {
   return (
     <View style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }}>
-      <SourceCustomIcon name="chevron-down-wide" size={24} color={color} />
+      <SourceCustomIcon name="chevron-down-wide" size={16} color={color} />
     </View>
   );
 }
@@ -332,8 +333,8 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
                   screen === 'contact-intro'
                     ? 'contact-edit'
                     : screen === 'address-intro'
-                      ? 'address-edit'
-                      : 'identity-scan',
+                    ? 'address-edit'
+                    : 'identity-scan',
                 );
               },
               !consented,
@@ -506,20 +507,18 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
                   : contactsIllustration
               }
               size={100}
-              tintColor={
-                screen === 'identity-intro' ? undefined : tokens.text
-              }
+              tintColor={screen === 'identity-intro' ? undefined : tokens.text}
             />
           </View>
           <Copy strong size={28} lineHeight={32} textAlign="center">
             {screen === 'contact-intro'
               ? copy('Update contact details', 'Actualizează datele de contact')
               : screen === 'address-intro'
-                ? copy('Update addresses', 'Modifică adresele')
-                : copy(
-                    'Scan your identity document',
-                    'Scanează actul de identitate',
-                  )}
+              ? copy('Update addresses', 'Modifică adresele')
+              : copy(
+                  'Scan your identity document',
+                  'Scanează actul de identitate',
+                )}
           </Copy>
           <Copy size={18} lineHeight={24} textAlign="center">
             {screen === 'contact-intro'
@@ -528,42 +527,39 @@ export function RomanianPersonalProfile(host: CurrentScreenProps) {
                   'Utilizarea numărului de telefon sau a adresei de e-mail necesită validarea cu un cod trimis la noul contact.',
                 )
               : screen === 'address-intro'
-                ? copy(
-                    'Change your residence or correspondence address and verify the request with a PIN or biometric data.',
-                    'Modifică adresa de reședință sau de corespondență și validează solicitarea cu un cod PIN sau date biometrice.',
-                  )
-                : copy(
-                    'Take a photo of your identity document. The Bank will review it and update your details.',
-                    'Fotografiază documentul de identitate. Banca îl va analiza și va actualiza datele.',
-                  )}
+              ? copy(
+                  'Change your residence or correspondence address and verify the request with a PIN or biometric data.',
+                  'Modifică adresa de reședință sau de corespondență și validează solicitarea cu un cod PIN sau date biometrice.',
+                )
+              : copy(
+                  'Take a photo of your identity document. The Bank will review it and update your details.',
+                  'Fotografiază documentul de identitate. Banca îl va analiza și va actualiza datele.',
+                )}
           </Copy>
         </View>
       ) : screen === 'contact-edit' ? (
         <View style={styles.content}>
-          <View style={styles.tabs}>
-            {(['phone', 'email'] as const).map(kind => (
-              <Pressable
-                key={kind}
-                accessibilityRole="tab"
-                accessibilityLabel={
-                  kind === 'phone' ? 'Phone number' : 'Email address'
-                }
-                accessibilityState={{ selected: contactKind === kind }}
-                onPress={() => changeContact(kind)}
-                style={[styles.tab, contactKind === kind && styles.activeTab]}
-              >
-                <Copy
-                  strong
-                  size={14}
-                  color={contactKind === kind ? tokens.accent : tokens.muted}
-                >
-                  {kind === 'phone'
-                    ? copy('PHONE NUMBER', 'NUMĂR DE TELEFON')
-                    : copy('EMAIL', 'E-MAIL')}
-                </Copy>
-              </Pressable>
-            ))}
-          </View>
+          <BaselineMailboxTabs
+            ariaLabel={copy(
+              'Contact update method',
+              'Metoda de actualizare a contactului',
+            )}
+            withTopMargin={false}
+            tabs={[
+              {
+                id: 'phone',
+                label: copy('PHONE NUMBER', 'NUMĂR DE TELEFON'),
+              },
+              { id: 'email', label: copy('EMAIL', 'E-MAIL') },
+            ]}
+            activeTabId={contactKind}
+            accessibilityLabels={{
+              phone: copy('Phone number', 'Număr de telefon'),
+              email: copy('Email address', 'Adresă de e-mail'),
+            }}
+            onChange={id => changeContact(id as ContactKind)}
+            dark={dark}
+          />
           {contactKind === 'phone' ? (
             <SourceTextField
               label={copy('Phone number', 'Număr de telefon')}

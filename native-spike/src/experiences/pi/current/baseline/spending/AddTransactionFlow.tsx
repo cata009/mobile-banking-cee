@@ -170,8 +170,8 @@ export default function AddTransactionFlow({
                   locale={host.language === 'ro' ? 'ro-RO' : 'en-GB'}
                   calendarIcon={
                     <SourceCustomIcon
-                      name="insurance-calendar"
-                      size={32}
+                      name="calendar-days"
+                      size={24}
                       color={sourceColor('var(--uc-text)', dark)}
                     />
                   }

@@ -141,25 +141,25 @@ export function initialPaymentDraft(props: CzechNativeScreenProps) {
   let draft = movement
     ? createRedoDomesticPaymentDraft(movement, 'CZ', payer)
     : template
-      ? createTemplateDomesticPaymentDraft(
-          {
-            ...template,
-            beneficiaryName: getEvo2027TemplateBeneficiaryName(template, 'CZ'),
-          },
-          'CZ',
-          payer,
-        )
-      : person
-        ? {
-            ...empty,
-            beneficiaryName: person.name,
-            recipientKind: person.recipientKind,
-            prefix: person.paymentAccountPrefix ?? '',
-            accountNumber: person.paymentAccountNumber,
-            bankCode: person.paymentBankCode,
-            currency: person.currency,
-          }
-        : empty;
+    ? createTemplateDomesticPaymentDraft(
+        {
+          ...template,
+          beneficiaryName: getEvo2027TemplateBeneficiaryName(template, 'CZ'),
+        },
+        'CZ',
+        payer,
+      )
+    : person
+    ? {
+        ...empty,
+        beneficiaryName: person.name,
+        recipientKind: person.recipientKind,
+        prefix: person.paymentAccountPrefix ?? '',
+        accountNumber: person.paymentAccountNumber,
+        bankCode: person.paymentBankCode,
+        currency: person.currency,
+      }
+    : empty;
   const chosen =
     products.find(
       p =>
@@ -198,7 +198,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
   const controlledFlow =
     (props.paymentFlow as ControlledPaymentFlow | null | undefined) ?? null;
   const [initial] = useState(() =>
-    controlled ? (controlledFlow?.draft ?? null) : initialPaymentDraft(props),
+    controlled ? controlledFlow?.draft ?? null : initialPaymentDraft(props),
   );
   const [draft, setDraft] = useState(
     initial ?? createEmptyDomesticPaymentDraft('CZ'),
@@ -215,8 +215,8 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
     controlledFlow
       ? internalStepForFlow(controlledFlow)
       : props.route.params?.beneficiaryId || initial?.amount
-        ? 'amount'
-        : 'recipient',
+      ? 'amount'
+      : 'recipient',
   );
   const [pin, setPin] = useState(''),
     [busy, setBusy] = useState(false),
@@ -308,7 +308,10 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       ...patch,
     }));
   const emitControlledFlow = (nextFlow: NativePaymentFlow | null) => {
-    if (controlled) props.onPaymentFlowChange?.(nextFlow);
+    if (controlled) {
+      previousControlledFlowKey.current = controlledFlowKey(nextFlow);
+      props.onPaymentFlowChange?.(nextFlow);
+    }
   };
   const commitDraft = (nextDraft: DomesticPaymentDraft) => {
     setDraft(nextDraft);
@@ -409,11 +412,7 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       <Page
         title="New Payment"
         onBack={props.onBack}
-        style={
-          bounded
-            ? { width: '100%', maxWidth: 640, alignSelf: 'center' }
-            : undefined
-        }
+        style={bounded ? extractedStyles.boundedPage : undefined}
       >
         <View style={s.alert}>
           <Copy>Payment target not found</Copy>
@@ -424,12 +423,12 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
     step === 'recipient'
       ? 'Add beneficiary'
       : step === 'amount'
-        ? draft.beneficiaryName || 'Amount'
-        : step === 'review'
-          ? 'Review transfer'
-          : step === 'sign'
-            ? 'Sign'
-            : 'Successful payment';
+      ? draft.beneficiaryName || 'Amount'
+      : step === 'review'
+      ? 'Review transfer'
+      : step === 'sign'
+      ? 'Sign'
+      : 'Successful payment';
   const field = (
     label: string,
     key: keyof DomesticPaymentDraft,
@@ -456,9 +455,9 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       }}
     />
   );
-  const paymentSelectTrigger =
-    (fieldLabel: string) =>
-    ({
+  const renderPaymentSelectTrigger = (
+    fieldLabel: string,
+    {
       open,
       expanded,
       label,
@@ -466,53 +465,54 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       open: () => void;
       expanded: boolean;
       label: string;
-    }) => (
-      <View style={extractedStyles.selectField}>
-        <Copy size={16}>
-          {fieldLabel === 'Recipient country'
-            ? 'Country / region of recipient’s account'
-            : fieldLabel === 'Payment currency'
-              ? 'Currency'
-              : fieldLabel}
-        </Copy>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={fieldLabel}
-          accessibilityValue={{ text: label }}
-          accessibilityState={{ expanded }}
-          onPress={open}
-          style={extractedStyles.selectTrigger}
-        >
-          {fieldLabel === 'Recipient country' ||
-          fieldLabel === 'Payment currency' ? (
-            <View style={extractedStyles.selectFlag}>
-              <CountryFlag
-                size={24}
-                {...(fieldLabel === 'Payment currency'
-                  ? { currency: draft.currency }
-                  : { country: draft.recipientCountry ?? 'CZ' })}
-              />
-            </View>
-          ) : null}
-          <View style={extractedStyles.selectValue}>
-            <Copy size={17}>
-              {fieldLabel === 'Payment currency' ? draft.currency : label}
-            </Copy>
+    },
+  ) => (
+    <View style={extractedStyles.selectField}>
+      <Copy size={16}>
+        {fieldLabel === 'Recipient country'
+          ? 'Country / region of recipient’s account'
+          : fieldLabel === 'Payment currency'
+          ? 'Currency'
+          : fieldLabel}
+      </Copy>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={fieldLabel}
+        accessibilityValue={{ text: label }}
+        accessibilityState={{ expanded }}
+        onPress={open}
+        style={extractedStyles.selectTrigger}
+      >
+        {fieldLabel === 'Recipient country' ||
+        fieldLabel === 'Payment currency' ? (
+          <View style={extractedStyles.selectFlag}>
+            <CountryFlag
+              size={24}
+              {...(fieldLabel === 'Payment currency'
+                ? { currency: draft.currency }
+                : { country: draft.recipientCountry ?? 'CZ' })}
+            />
           </View>
-          <SourceCustomIcon name="chevron-down" size={20} color={tokens.text} />
-        </Pressable>
-      </View>
-    );
-  const paymentSelectPanel =
-    (
-      title: string,
-      search?: {
-        label: string;
-        value: string;
-        setValue: (value: string) => void;
-      },
-    ) =>
-    ({
+        ) : null}
+        <View style={extractedStyles.selectValue}>
+          <Copy size={17}>
+            {fieldLabel === 'Payment currency' ? draft.currency : label}
+          </Copy>
+        </View>
+        <SourceCustomIcon name="chevron-down" size={20} color={tokens.text} />
+      </Pressable>
+    </View>
+  );
+  const renderPaymentSelectPanel = (
+    panelTitle: string,
+    search:
+      | {
+          label: string;
+          value: string;
+          setValue: (value: string) => void;
+        }
+      | undefined,
+    {
       visible,
       onClose,
       children,
@@ -520,34 +520,35 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
       visible: boolean;
       onClose: () => void;
       children: React.ReactNode;
-    }) =>
-      visible ? (
-        <SourceBottomSheet
-          title={title}
-          fixedHeight={!!search}
-          onClose={() => {
-            search?.setValue('');
-            onClose();
-          }}
-        >
-          {search && (
-            <SearchField
-              tokens={tokens}
-              label={search.label}
-              placeholder={search.label}
-              value={search.value}
-              onChange={search.setValue}
-              onSubmit={() => {}}
-              onClear={() => search.setValue('')}
-              icon={
-                <SourceCustomIcon name="search" size={20} color={tokens.text} />
-              }
-              containerStyle={extractedStyles.pickerSearch}
-            />
-          )}
-          {children}
-        </SourceBottomSheet>
-      ) : null;
+    },
+  ) =>
+    visible ? (
+      <SourceBottomSheet
+        title={panelTitle}
+        fixedHeight={!!search}
+        onClose={() => {
+          search?.setValue('');
+          onClose();
+        }}
+      >
+        {search && (
+          <SearchField
+            tokens={tokens}
+            label={search.label}
+            placeholder={search.label}
+            value={search.value}
+            onChange={search.setValue}
+            onSubmit={() => {}}
+            onClear={() => search.setValue('')}
+            icon={
+              <SourceCustomIcon name="search" size={20} color={tokens.text} />
+            }
+            containerStyle={extractedStyles.pickerSearch}
+          />
+        )}
+        {children}
+      </SourceBottomSheet>
+    ) : null;
   const foreign =
     readiness.route === 'foreign-us' || readiness.route === 'foreign-cn';
   const canSign = readiness.canContinueToSign;
@@ -566,8 +567,8 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
               { width: '100%', maxWidth: 640, alignSelf: 'center' },
             ]
           : step === 'recipient'
-            ? { backgroundColor: tokens.surface }
-            : undefined
+          ? { backgroundColor: tokens.surface }
+          : undefined
       }
       headerBackground={step === 'recipient' ? tokens.surface : undefined}
       titleStyle={
@@ -651,15 +652,20 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
             <Select
               tokens={tokens}
               label="Recipient country"
-              renderTrigger={paymentSelectTrigger('Recipient country')}
-              renderPanel={paymentSelectPanel(
-                'Country / region of recipient’s account',
-                {
-                  label: 'Search countries',
-                  value: countrySearch,
-                  setValue: setCountrySearch,
-                },
-              )}
+              renderTrigger={triggerProps =>
+                renderPaymentSelectTrigger('Recipient country', triggerProps)
+              }
+              renderPanel={panelProps =>
+                renderPaymentSelectPanel(
+                  'Country / region of recipient’s account',
+                  {
+                    label: 'Search countries',
+                    value: countrySearch,
+                    setValue: setCountrySearch,
+                  },
+                  panelProps,
+                )
+              }
               searchText={countrySearch}
               value={draft.recipientCountry ?? 'CZ'}
               items={RECIPIENT_COUNTRIES.map(c => ({
@@ -699,12 +705,20 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
             <Select
               tokens={tokens}
               label="Payment currency"
-              renderTrigger={paymentSelectTrigger('Payment currency')}
-              renderPanel={paymentSelectPanel('Currency', {
-                label: 'Search currencies',
-                value: currencySearch,
-                setValue: setCurrencySearch,
-              })}
+              renderTrigger={triggerProps =>
+                renderPaymentSelectTrigger('Payment currency', triggerProps)
+              }
+              renderPanel={panelProps =>
+                renderPaymentSelectPanel(
+                  'Currency',
+                  {
+                    label: 'Search currencies',
+                    value: currencySearch,
+                    setValue: setCurrencySearch,
+                  },
+                  panelProps,
+                )
+              }
               searchText={currencySearch}
               value={draft.currency}
               items={PAYMENT_CURRENCIES.filter(c =>
@@ -780,7 +794,13 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
                     </Pressable>
                   </View>
                 )}
-                renderPanel={paymentSelectPanel('Account details type')}
+                renderPanel={panelProps =>
+                  renderPaymentSelectPanel(
+                    'Account details type',
+                    undefined,
+                    panelProps,
+                  )
+                }
                 value={draft.recipientAccountMode ?? 'local'}
                 items={[
                   {
@@ -827,8 +847,19 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
                   <Select
                     tokens={tokens}
                     label="US bank details"
-                    renderTrigger={paymentSelectTrigger('US bank details')}
-                    renderPanel={paymentSelectPanel('US bank details')}
+                    renderTrigger={triggerProps =>
+                      renderPaymentSelectTrigger(
+                        'US bank details',
+                        triggerProps,
+                      )
+                    }
+                    renderPanel={panelProps =>
+                      renderPaymentSelectPanel(
+                        'US bank details',
+                        undefined,
+                        panelProps,
+                      )
+                    }
                     value={draft.usBankDetailsMode ?? 'ach'}
                     items={US_BANK_DETAILS_OPTIONS}
                     onChange={usBankDetailsMode =>
@@ -865,8 +896,19 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
                     <Select
                       tokens={tokens}
                       label="Payment purpose"
-                      renderTrigger={paymentSelectTrigger('Payment purpose')}
-                      renderPanel={paymentSelectPanel('Payment purpose')}
+                      renderTrigger={triggerProps =>
+                        renderPaymentSelectTrigger(
+                          'Payment purpose',
+                          triggerProps,
+                        )
+                      }
+                      renderPanel={panelProps =>
+                        renderPaymentSelectPanel(
+                          'Payment purpose',
+                          undefined,
+                          panelProps,
+                        )
+                      }
                       value={draft.paymentPurpose ?? ''}
                       items={CHINA_PAYMENT_PURPOSES.filter(p =>
                         p.kinds.some(
@@ -1191,7 +1233,9 @@ function PaymentFlowContent(props: CzechPaymentScreenProps) {
                   )}
                   min={toIsoDateOnly(new Date())}
                   locale="en-GB"
-                  calendarIcon={<SourceCustomIcon name="insurance-calendar" size={32} />}
+                  calendarIcon={
+                    <SourceCustomIcon name="insurance-calendar" size={32} />
+                  }
                   onChange={dueDate =>
                     update({
                       dueDate,
@@ -1251,6 +1295,7 @@ export default function PaymentFlow(props: CzechPaymentScreenProps) {
 }
 
 const extractedStyles = StyleSheet.create({
+  boundedPage: { width: '100%', maxWidth: 640, alignSelf: 'center' },
   recipientTitle: { marginBottom: 23, fontSize: 30, lineHeight: 35 },
   pickerSearch: {
     marginHorizontal: 24,
