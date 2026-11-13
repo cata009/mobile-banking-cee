@@ -3,7 +3,8 @@ import { createPhoneScreenshotBlob } from '@/app/utils/phoneScreenshot'
 import StatusBar from '@/app/components/StatusBar'
 import { AppIcon } from '@/app/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/app/components/ui/dropdown-menu'
-import { alignedScreenshotRect, heightForScreenshot } from './visualQaComparison'
+import { heightForScreenshot } from './visualQaComparison'
+import { drawVisualQaEvidence } from './visualQaEvidence'
 import { mountReferenceSnapshot } from './visualQaCapture'
 import { buildVisualQaHtml, buildVisualQaWord, type VisualQaReport } from './visualQaReport'
 import { COUNTRIES, COUNTRY_META, FEATURE_META } from '@/app/registry/demoConfig'
@@ -252,29 +253,7 @@ export function VisualQaInspectorTool() {
       const canvas = document.createElement('canvas')
       canvas.width = WIDTH * 2
       canvas.height = deviceHeight * 2
-      const context = canvas.getContext('2d')
-      if (!context) throw new Error('The report could not be prepared.')
-      const draw = (image: HTMLImageElement) => { context.clearRect(0, 0, canvas.width, canvas.height); context.drawImage(image, 0, 0, canvas.width, canvas.height) }
-      const encoded = () => canvas.toDataURL('image/png').split(',')[1] ?? ''
-      draw(refImage)
-      const drawMarkers = () => markers.forEach((marker, index) => {
-        const x = marker.x / 100 * canvas.width
-        const y = marker.y / 100 * canvas.height
-        context.beginPath(); context.arc(x, y, 18, 0, Math.PI * 2); context.fillStyle = '#007e91'; context.fill(); context.lineWidth = 3; context.strokeStyle = '#ffffff'; context.stroke()
-        context.fillStyle = '#ffffff'; context.font = 'bold 20px sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(String(index + 1), x, y)
-      })
-      drawMarkers()
-      const referencePng = encoded()
-      draw(actualImage)
-      const actualPng = encoded()
-      let alignedActualPng: string | undefined
-      if (scale !== 100 || offsetX !== 0 || offsetY !== 0) {
-        const rect = alignedScreenshotRect(canvas.width, canvas.height, scale, offsetX, offsetY)
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.drawImage(actualImage, rect.x, rect.y, rect.width, rect.height)
-        drawMarkers()
-        alignedActualPng = encoded()
-      }
+      const { referencePng, actualPng, alignedActualPng } = drawVisualQaEvidence(canvas, refImage, actualImage, markers, scale, offsetX, offsetY)
       const report: VisualQaReport = { context: referenceContext, screenshotName: actualName, observations: markers.map((marker, index) => `${index + 1}. ${marker.note || 'Observation'}`), notes: '', description: note, expectedBehavior, actualBehavior, referencePng, actualPng, alignedActualPng }
       const blob = format === 'word' ? buildVisualQaWord(report) : new Blob([buildVisualQaHtml(report, format === 'pdf')], { type: 'text/html;charset=utf-8' })
       const url = URL.createObjectURL(blob)
