@@ -15,11 +15,14 @@ export function AccountNameFlow({
   currentName,
   onClose,
   onSave,
+  maxLength = MAX_ACCOUNT_NAME_LENGTH,
 }: {
   host: CurrentScreenProps;
   currentName: string;
   onClose: () => void;
   onSave: (name: string) => void;
+  /** Country limit; defaults to the shared 20-character limit. */
+  maxLength?: number;
 }) {
   const [name, setName] = useState(currentName);
   const viewport = useDemoViewport();
@@ -27,9 +30,7 @@ export function AccountNameFlow({
   const normalizedName = name.trim();
   const unchanged = normalizedName === currentName;
   const disabled =
-    !normalizedName ||
-    normalizedName.length > MAX_ACCOUNT_NAME_LENGTH ||
-    unchanged;
+    !normalizedName || normalizedName.length > maxLength || unchanged;
 
   return (
     <ModalPortal
@@ -67,18 +68,18 @@ export function AccountNameFlow({
           ariaLabel="Account name"
           value={name}
           onChange={setName}
-          maxLength={MAX_ACCOUNT_NAME_LENGTH}
+          maxLength={maxLength}
           dark={dark}
         />
         <View style={styles.counterRow}>
           <Text style={[styles.helper, { color: host.tokens.muted }]}>
-            Up to {MAX_ACCOUNT_NAME_LENGTH} characters
+            Up to {maxLength} characters
           </Text>
           <Text
             testID="ro-account-name-character-count"
             style={[styles.counter, { color: host.tokens.muted }]}
           >
-            {name.length} / {MAX_ACCOUNT_NAME_LENGTH}
+            {name.length} / {maxLength}
           </Text>
         </View>
       </BaselineBottomSheet>

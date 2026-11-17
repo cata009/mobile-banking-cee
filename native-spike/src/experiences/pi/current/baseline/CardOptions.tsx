@@ -6,7 +6,17 @@ import { BaselineSectionDivider } from '../../../../universal/BaselineSectionDiv
 import { sourceColor } from '../../../../universal/sourceColor';
 import type { CurrentScreenProps } from '../contracts';
 import { bankingProducts } from '../banking/model';
+import {
+  linkedAccountsSnapshot,
+  setLinkedAccountOverride,
+  subscribeLinkedAccounts,
+} from '@/features/products/cardLinkedAccounts';
+import {
+  getCardCapabilities,
+  getLinkedAccountIds,
+} from '@/features/products/productFacts';
 import { RoBaselineCardPage } from './CardInfo';
+import { CardSpendFromAccountSheet } from './CardSpendFromAccountSheet';
 import VirtualCardFlow from './virtual-card/VirtualCardFlow';
 import CardPinFlow from './pin/CardPinFlow';
 import CardLimitsSheet from './CardLimitsSheet';
@@ -87,13 +97,28 @@ const debitSettings = [
   ],
 ] as const;
 
+const cardAccounts = (host: CurrentScreenProps) =>
+  bankingProducts(host).currentAccounts.map(account => ({
+    id: account.id,
+    name: account.name,
+    currency: account.currency,
+    accountNumber: account.accountNumber,
+  }));
+
 /** Card options reuse the shared Card Limits sheet. */
 export default function RoBaselineCardOptions(host: CurrentScreenProps) {
   const [changingPicture, setChangingPicture] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [limitsOpen, setLimitsOpen] = useState(false);
+  const [spendOpen, setSpendOpen] = useState(false);
+  useSyncExternalStore(
+    subscribeLinkedAccounts,
+    linkedAccountsSnapshot,
+    linkedAccountsSnapshot,
+  );
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [walletProvider, setWalletProvider] = useState<CardWalletProvider | null>(null);
+  const [walletProvider, setWalletProvider] =
+    useState<CardWalletProvider | null>(null);
   const [demoPins, setDemoPins] = useState<Record<string, string>>({});
   useSyncExternalStore(
     subscribeCardServices,
@@ -118,7 +143,14 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
       />
     );
   if (walletProvider)
-    return <CardWalletEnrollmentFlow host={host} card={card} provider={walletProvider} onClose={() => setWalletProvider(null)} />;
+    return (
+      <CardWalletEnrollmentFlow
+        host={host}
+        card={card}
+        provider={walletProvider}
+        onClose={() => setWalletProvider(null)}
+      />
+    );
   if (
     host.route.params?.cardLimitsPage === 'true' ||
     host.route.params?.cardSecurityPage === 'true'
@@ -181,18 +213,35 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
             isRoBaselinePinAvailable(host.country, host.release, host.scenario)
               ? () => setPinOpen(true)
               : id === 'reissue-card' && securityRoutes?.replacement
-                ? () => host.onNavigate(securityRoutes.replacement!)
-                : id === 'card-limits' &&
-                    isCardLimitsAvailable('PI', host.country)
-                  ? () => setLimitsOpen(true)
-                  : id === 'push-notifications' && host.country !== 'IT'
-                    ? () => setNotificationsOpen(true)
-                    : undefined
+              ? () => host.onNavigate(securityRoutes.replacement!)
+              : id === 'card-limits' &&
+                isCardLimitsAvailable('PI', host.country)
+              ? () => setLimitsOpen(true)
+              : id === 'push-notifications' && host.country !== 'IT'
+              ? () => setNotificationsOpen(true)
+              : undefined
           }
         />
       </View>
     ));
-  const roActive = host.country === 'RO' && host.release === 'release-current' && host.scenario === 'active';
+  const roActive =
+    host.country === 'RO' &&
+    host.release === 'release-current' &&
+    host.scenario === 'active';
+  // Digital wallets are enrolled from the app in RO and HU.
+  const walletAvailable =
+    (host.country === 'RO' || host.country === 'HU') &&
+    host.release === 'release-current' &&
+    host.scenario === 'active';
+  const allAccounts = cardAccounts(host);
+  const linkedIds =
+    card.type === 'debit_card'
+      ? getLinkedAccountIds(
+          card,
+          allAccounts.map(account => account.id),
+          host.country,
+        )
+      : [];
   const walletRows = (['apple-pay', 'click-to-pay'] as const).map(provider => {
     const enrolled = isRomanianDemoWalletEnrolled(card.id, provider, cards);
     const apple = provider === 'apple-pay';
@@ -200,10 +249,24 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
       <View key={provider} testID={`ro-card-option-${provider}`}>
         <BaselineNavigationRow
           title={apple ? 'APPLE PAY' : 'CLICK TO PAY'}
-          description={enrolled ? 'Enrolled' : apple ? 'Add to Apple Wallet' : 'Add to Mastercard Wallet'}
+          description={
+            enrolled
+              ? 'Enrolled'
+              : apple
+              ? 'Add to Apple Wallet'
+              : 'Add to Mastercard Wallet'
+          }
           leadingIconName={enrolled ? 'card-options-apple-pay' : undefined}
           trailingAccessory={enrolled ? 'chevron' : 'none'}
-          trailing={enrolled ? undefined : <WalletButton kind={apple ? 'apple-wallet' : 'click-to-pay'} size="condensed" onClick={() => setWalletProvider(provider)} />}
+          trailing={
+            enrolled ? undefined : (
+              <WalletButton
+                kind={apple ? 'apple-wallet' : 'click-to-pay'}
+                size="condensed"
+                onClick={() => setWalletProvider(provider)}
+              />
+            )
+          }
           rowHeight={80}
           style={enrolled ? undefined : styles.walletRow}
           titleStyle={enrolled ? undefined : styles.walletTitle}
@@ -223,8 +286,8 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
       >
         <RoBaselineCardPage host={host} title="Card options" showHelp={false}>
           <View style={styles.content}>
-            {roActive ? walletRows : null}
-            {rows(roActive ? programs.slice(1) : programs)}
+            {walletAvailable ? walletRows : null}
+            {rows(walletAvailable ? programs.slice(1) : programs)}
             <View accessibilityLabel="General settings" style={styles.settings}>
               <View style={styles.divider}>
                 <BaselineSectionDivider title="GENERAL SETTINGS" dark={dark} />
@@ -239,6 +302,18 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
                     rowHeight={80}
                     dark={dark}
                     onPress={() => setChangingPicture(true)}
+                  />
+                ) : null}
+                {getCardCapabilities(host.country).spendFromAccount &&
+                card.type === 'debit_card' ? (
+                  <BaselineNavigationRow
+                    title="SPEND FROM ACCOUNT"
+                    description="Manage the accounts linked to your card"
+                    leadingIconName="card-options-limits"
+                    trailingAccessory="chevron"
+                    rowHeight={80}
+                    dark={dark}
+                    onPress={() => setSpendOpen(true)}
                   />
                 ) : null}
                 {rows(commonSettings.slice(0, 1))}
@@ -288,6 +363,15 @@ export default function RoBaselineCardOptions(host: CurrentScreenProps) {
           </View>
         </RoBaselineCardPage>
       </View>
+      {spendOpen ? (
+        <CardSpendFromAccountSheet
+          host={host}
+          accounts={allAccounts}
+          linkedIds={linkedIds}
+          onSave={ids => setLinkedAccountOverride(card.id, ids)}
+          onClose={() => setSpendOpen(false)}
+        />
+      ) : null}
       {limitsOpen && (
         <CardLimitsSheet
           country={host.country}

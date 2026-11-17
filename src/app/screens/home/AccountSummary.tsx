@@ -49,8 +49,7 @@ export default function AccountSummary({
     formatProductAmount, 
     getProductDisplayNumber, 
     calculateTotal, 
-    calculateTotalAvailable, 
-    calculateTotalOwed 
+    calculateHomeTotals
   } = useProducts();
   
   const { t } = useLanguage();
@@ -62,10 +61,11 @@ export default function AccountSummary({
     release === "release-future-cz-robo";
 
   // Calculate totals for the main card
-  const totalAvailable = calculateTotalAvailable();
-  const totalOwed = calculateTotalOwed();
-  const displayedTotalAvailable = maskAmountParts(totalAvailable, amountsHidden);
-  const displayedTotalOwed = maskAmountParts(totalOwed, amountsHidden);
+  const homeTotals = calculateHomeTotals();
+  const displayedTotalAvailable = maskAmountParts(homeTotals.primary.amount, amountsHidden);
+  const displayedTotalOwed = homeTotals.secondary
+    ? maskAmountParts(homeTotals.secondary.amount, amountsHidden)
+    : undefined;
   
   // Get currency symbol for display (uses country config)
   const currencyCode = getCurrencySymbol(country);
@@ -82,7 +82,7 @@ export default function AccountSummary({
             {/* Total Available */}
             <div className="flex flex-col gap-[4px]">
               <p className="uc-type-n5-strong text-[var(--uc-text)]">
-                {t(showRedesign ? 'home.totalBalance' : 'home.totalAvailable')}
+                {showRedesign ? t('home.totalBalance') : t(homeTotals.primary.labelKey, homeTotals.primary.fallback)}
               </p>
               <div className="flex items-baseline gap-[2px]">
                 <span className="uc-type-n1 text-[var(--uc-text)] leading-[1]">
@@ -94,21 +94,27 @@ export default function AccountSummary({
               </div>
             </div>
 
-            {/* Separator Line */}
-            <div className="w-[205px] h-[0.25px] bg-[var(--uc-text)]" />
+            {homeTotals.secondary && displayedTotalOwed && (
+              <>
+                {/* Separator Line */}
+                <div className="w-[205px] h-[0.25px] bg-[var(--uc-text)]" />
 
-            {/* Total Owed */}
-            <div className="flex flex-col gap-[4px]">
-              <p className="uc-type-n5-strong text-[var(--uc-text)]">Total Owed</p>
-              <div className="flex items-baseline">
-                <span className="uc-type-n2-strong text-[var(--uc-text)] leading-[1]">
-                  {displayedTotalOwed.integer}
-                </span>
-                <span className="uc-type-n5-strong text-[var(--uc-text)] leading-[1]">
-                  {displayedTotalOwed.decimals} {currencyCode}
-                </span>
-              </div>
-            </div>
+                {/* Second indicator (Total Owed, Total Balance, ...) */}
+                <div className="flex flex-col gap-[4px]">
+                  <p className="uc-type-n5-strong text-[var(--uc-text)]">
+                    {t(homeTotals.secondary.labelKey, homeTotals.secondary.fallback)}
+                  </p>
+                  <div className="flex items-baseline">
+                    <span className="uc-type-n2-strong text-[var(--uc-text)] leading-[1]">
+                      {displayedTotalOwed.integer}
+                    </span>
+                    <span className="uc-type-n5-strong text-[var(--uc-text)] leading-[1]">
+                      {displayedTotalOwed.decimals} {currencyCode}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Cards Redesign Extra Info */}
             {showRedesign && (

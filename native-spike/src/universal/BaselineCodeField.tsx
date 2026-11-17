@@ -59,12 +59,16 @@ export function BaselineCodeField({
   };
   const railStyle = {
     flexDirection: 'row' as const,
+    width: '100%' as const,
+    maxWidth: length * state.slotSize.width + (length - 1) * state.gap,
     gap: state.gap,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   };
   const slotStyle = {
     ...state.slotSize,
+    flexShrink: 1,
+    minWidth: 0,
     borderWidth: 1,
     borderRadius: state.radius,
     borderColor: sourceColor(`var(${state.borderToken})`, dark),
@@ -79,6 +83,7 @@ export function BaselineCodeField({
   };
   const helperStyle = {
     width: state.helperWidth,
+    maxWidth: '100%' as const,
     gap: state.helperGap,
     marginTop: state.helperTop,
   };

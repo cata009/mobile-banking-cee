@@ -41,7 +41,7 @@ function host(overrides: Partial<CurrentScreenProps> = {}): CurrentScreenProps {
     route: { screen: 'home' },
     tokens: currentTokens(),
     t: (key, fallback) =>
-      key === 'home.totalAvailable' ? 'Total Available' : (fallback ?? key),
+      key === 'home.totalAvailable' ? 'Total Available' : fallback ?? key,
     amountsHidden: false,
     screenTopInset: 0,
     isActive: true,
@@ -85,8 +85,9 @@ describe('scoped RO current Native Home body', () => {
       });
     }
     const json = JSON.stringify(tree.toJSON());
-    expect(json).toContain(model.calculateTotalAvailable().integer);
-    expect(json).toContain(model.calculateTotalOwed().integer);
+    const totals = model.calculateHomeTotals();
+    expect(json).toContain(totals.primary.amount.integer);
+    expect(json).toContain(totals.secondary!.amount.integer);
     act(() => {
       tree.update(
         <BaselineHomeBody host={{ ...context, amountsHidden: true }} />,
@@ -103,7 +104,7 @@ describe('scoped RO current Native Home body', () => {
       });
     }
     expect(JSON.stringify(tree.toJSON())).not.toContain(
-      model.calculateTotalAvailable().integer,
+      totals.primary.amount.integer,
     );
     act(() => tree.unmount());
   });
@@ -247,14 +248,14 @@ describe('scoped RO current Native Home body', () => {
         product.type === 'investment_account'
           ? { screen: 'investments' }
           : product.type === 'debit_card' || product.type === 'credit_card'
-            ? {
-                screen: 'card',
-                params: { productId: product.id, cardId: product.id },
-              }
-            : {
-                screen: 'account',
-                params: { productId: product.id, accountId: product.id },
-              };
+          ? {
+              screen: 'card',
+              params: { productId: product.id, cardId: product.id },
+            }
+          : {
+              screen: 'account',
+              params: { productId: product.id, accountId: product.id },
+            };
       expect(context.onNavigate).toHaveBeenLastCalledWith(expected);
     }
     act(() => tree.unmount());
@@ -263,14 +264,19 @@ describe('scoped RO current Native Home body', () => {
     const tree = renderBody(
       host({
         language: 'ro',
-        t: key =>
-          key === 'home.totalAvailable' ? 'Total disponibil' : 'Tradus',
+        t: (key, fallback) =>
+          key === 'home.totalAvailable'
+            ? 'Total disponibil'
+            : fallback ?? 'Tradus',
       }),
     );
     const json = JSON.stringify(tree.toJSON());
     expect(json).toContain('Total disponibil');
     expect(json).toContain('Total Owed');
-    const image = tree.root.findByType(Image);
+    // The commercial card of the carousel carries its own artwork.
+    const image = tree.root
+      .findAllByType(Image)
+      .find(item => item.props.accessibilityLabel === 'Lighthouse')!;
     expect(image.props.accessibilityLabel).toBe('Lighthouse');
     expect(image.props.style).toMatchObject({
       width: 96,

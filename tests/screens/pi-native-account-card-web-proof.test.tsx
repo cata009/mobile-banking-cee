@@ -67,9 +67,11 @@ describe('PI Native account and card screens in the Web host', () => {
     const page = container.querySelector<HTMLElement>('[data-testid="ro-account-info-page"]')
     expect(page).toBeInTheDocument()
     expect(page).toHaveTextContent('Account Details')
-    expect(page).toHaveTextContent('RO44BACX1234567890123402')
+    // The IBAN is displayed in groups of four.
+    expect(page).toHaveTextContent('RO44 BACX 1234 5678 9012 3402')
     expect(page).toHaveTextContent('3.902,84 EUR')
-    expect(page).toHaveTextContent('3.590,61 EUR')
+    // Current balance is the ledger balance: available funds less the demo overdraft plus blocked amounts.
+    expect(page).toHaveTextContent('129,52 EUR')
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy account number' }))
     expect(await screen.findByRole('status')).toHaveTextContent('Account number successfully copied')

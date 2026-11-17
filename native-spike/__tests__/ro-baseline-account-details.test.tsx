@@ -210,7 +210,7 @@ test.each(['Details', 'Options'])(
     if (action === 'Details')
       expect(
         tree.root.findAllByType(BaselineAccountInfoField)[0]!.props.subtitle,
-      ).toBe('RO44BACX1234567890123402');
+      ).toBe('RO44 BACX 1234 5678 9012 3402');
     await act(() => press(tree, 'Back').props.onPress());
     expect(activeBalance(tree).props.account.accountNumber).toBe(
       'RO44BACX1234567890123402',
@@ -250,12 +250,13 @@ test('last carousel product remains selected after Details and Back', async () =
   await act(() => tree.unmount());
 });
 
-test('current account uses source Romanian balance and 92 percent secondary balance', async () => {
+test('current account shows the Romanian available balance and its ledger balance', async () => {
   const { tree } = await render();
   const card = activeBalance(tree).props;
   expect(card.availableInteger).toBe('20.614');
   expect(card.availableDecimals).toBe(',83');
-  expect(card.currentBalance).toBe('18.965,64');
+  // Ledger balance: available funds less the demo overdraft plus blocked amounts.
+  expect(card.currentBalance).toBe('850,54');
   expect(card.currency).toBe('RON');
   expect(tree.root.findAllByType(BaselineAccountBalanceCard)).toHaveLength(6);
   await act(() => tree.unmount());
@@ -612,7 +613,7 @@ test('account information carries source current-account figures and its connect
   await act(() => press(tree, 'Show more').props.onPress());
   const fields = tree.root.findAllByType(BaselineAccountInfoField);
   expect(fields).toHaveLength(7);
-  expect(fields[0]!.props.subtitle).toBe('RO44BACX1234567890123402');
+  expect(fields[0]!.props.subtitle).toBe('RO44 BACX 1234 5678 9012 3402');
   expect(
     fields.find(field => field.props.title === 'Available funds')!.props
       .subtitle,
@@ -758,8 +759,9 @@ test.each([
     expect(tree.root.findAllByType(BaselineCardNavigationRow)).toHaveLength(0);
     if (type === 'loan' || type === 'mortgage')
       expect(press(tree, 'Copy IBAN')).toBeDefined();
+    // Romania shares deposit and loan details as well (all-country specification).
     if (type === 'term_deposit' || type === 'mortgage')
-      expect(press(tree, 'Share account details')).toBeUndefined();
+      expect(press(tree, 'Share account details')).toBeDefined();
     await act(() => tree.unmount());
   },
 );
@@ -775,7 +777,8 @@ test('account options keeps canonical menu and product offers inert with host-ow
       typeof node.type === 'string' &&
       node.props.testID?.startsWith('ro-account-option-'),
   );
-  expect(menu).toHaveLength(5);
+  // Paycode is retired from the account menu.
+  expect(menu).toHaveLength(4);
   expect(press(tree, 'PUSH NOTIFICATIONS')).toBeDefined();
   expect(press(tree, 'ACCOUNT STATEMENT')).toBeDefined();
   expect(press(tree, 'CHANGE ACCOUNT NAME')).toBeDefined();
@@ -1028,13 +1031,13 @@ test('Romanian mCash creates, shares and invalidates a cash withdrawal code', as
   await act(() => tree.unmount());
 });
 
-test('mCash replaces Internal transfer only on Romanian current accounts', async () => {
+test('mCash replaces Internal transfer only on Romanian current accounts; elsewhere Internal transfer opens Payments', async () => {
   const props = host({ country: 'HU', route: { screen: 'account' } });
   const { tree } = await render(props);
   expect(press(tree, 'mCash')).toBeUndefined();
   expect(press(tree, 'Internal transfer')).toBeDefined();
   await act(() => press(tree, 'Internal transfer').props.onPress());
-  expect(props.onNavigate).not.toHaveBeenCalled();
+  expect(props.onNavigate).toHaveBeenCalledWith({ screen: 'payments' });
   await act(() => tree.unmount());
 });
 

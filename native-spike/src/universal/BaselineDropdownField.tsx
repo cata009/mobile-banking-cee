@@ -23,6 +23,7 @@ export function BaselineDropdownField({
   fillWidth = false,
   paddingLeft = 24,
   presentation = 'standard',
+  alignChevronWithField = false,
   dark = false,
 }: {
   label: string;
@@ -41,6 +42,8 @@ export function BaselineDropdownField({
   paddingLeft?: number;
   /** Source compact form; default catalog geometry is preserved. */
   presentation?: 'standard' | 'compact';
+  /** Align the action with the field edge, as in baseline payment forms. */
+  alignChevronWithField?: boolean;
   dark?: boolean;
 }) {
   const disabled =
@@ -88,6 +91,21 @@ export function BaselineDropdownField({
             onChange={() => {}}
             helperText={helperText}
             errorText={errorText}
+            trailingIconName={
+              alignChevronWithField ? 'chevron-down-wide' : undefined
+            }
+            trailingIconPlacement={
+              alignChevronWithField ? 'floating' : undefined
+            }
+            trailingIconAction={
+              alignChevronWithField
+                ? {
+                    ariaLabel: 'Open ' + label,
+                    onClick: onOpen ?? open,
+                    expanded: externalExpanded ?? expanded,
+                  }
+                : undefined
+            }
             visualState={
               disabled || errorText || visualState?.startsWith('error')
                 ? visualState
@@ -105,43 +123,45 @@ export function BaselineDropdownField({
               },
             }}
           />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={'Open ' + label}
-            accessibilityState={{
-              disabled,
-              expanded: externalExpanded ?? expanded,
-            }}
-            disabled={disabled}
-            onPress={onOpen ?? open}
-            style={{
-              position: 'absolute',
-              right: 12,
-              top: 14,
-              width: 44,
-              height: 44,
-              alignItems: 'flex-end',
-              justifyContent: 'center',
-            }}
-          >
-            <View
+          {!alignChevronWithField && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={'Open ' + label}
+              accessibilityState={{
+                disabled,
+                expanded: externalExpanded ?? expanded,
+              }}
+              disabled={disabled}
+              onPress={onOpen ?? open}
               style={{
-                width: 32,
-                height: 32,
-                alignItems: 'center',
+                position: 'absolute',
+                right: 12,
+                top: 14,
+                width: 44,
+                height: 44,
+                alignItems: 'flex-end',
                 justifyContent: 'center',
               }}
             >
-              <SourceCustomIcon
-                name="chevron-down-wide"
-                size={20}
-                color={sourceColor(
-                  disabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
-                  dark,
-                )}
-              />
-            </View>
-          </Pressable>
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <SourceCustomIcon
+                  name="chevron-down-wide"
+                  size={20}
+                  color={sourceColor(
+                    disabled ? 'var(--uc-text-subtle)' : 'var(--uc-text)',
+                    dark,
+                  )}
+                />
+              </View>
+            </Pressable>
+          )}
         </View>
       )}
     />

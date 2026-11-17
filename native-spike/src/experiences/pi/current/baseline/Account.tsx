@@ -38,6 +38,8 @@ import { carouselOffsets } from '../../cz/evo-2027/accounts/Carousel';
 import { useMouseCarousel } from '../../cz/evo-2027/mouseCarousel';
 import { RoBaselineDetailsHeader } from './DetailsHeader';
 import { RoBaselineTransactions } from './Transactions';
+import { getAccountFacts } from '@/features/products/productFacts';
+import { SourceCustomIcon } from '../../../../universal/SourceCustomIcon';
 import { AccountAddMoneyFlow } from './AccountAddMoneyFlow';
 import { AccountMcashFlow } from './AccountMcashFlow';
 import { MortgageReimbursementFlow } from './MortgageReimbursementFlow';
@@ -186,6 +188,7 @@ function balanceProps(
   product: Product,
   currentAccountNumber: string,
   hidden: boolean,
+  country: CurrentScreenProps['country'],
 ) {
   const deposit =
     product.type === 'term_deposit'
@@ -220,7 +223,7 @@ function balanceProps(
       formatEvo2027Number(
         deposit?.maturityAmount ??
           loan?.nextInstallment ??
-          product.balance * 0.92,
+          getAccountFacts(product, country).ledgerBalance,
       ),
       hidden,
     ),
@@ -278,6 +281,10 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
       data.accounts[Math.max(0, Math.min(data.accounts.length - 1, index))]?.id,
     );
   };
+  const blocked = Boolean(
+    product &&
+    host.bankingPresentation?.blockedAccountIds?.includes(product.id),
+  );
   const actions: BaselineAccountAction[] = [
     {
       id: 'details',
@@ -324,6 +331,7 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
             )
           : copy(host, 'runtime.accounts.actions.addMoney', 'Add money'),
       hidden:
+        blocked ||
         product?.type === 'saving_account' ||
         product?.type === 'loan' ||
         product?.type === 'mortgage',
@@ -364,8 +372,20 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
           ? () => setMcashOpen(true)
           : host.country === 'RO' && product?.type === 'mortgage'
             ? () => setReimbursementOpen(true)
-            : undefined,
-      hidden: host.country === 'RO' && product?.type === 'loan',
+            : host.country !== 'RO' &&
+                (product?.type === 'current_account' ||
+                  product?.type === 'saving_account')
+              ? () => host.onNavigate({ screen: 'payments' })
+              : undefined,
+      // Payments and transfers are disabled on a blocked account; outside RO the
+      // deposit and loan tiles have no journey yet and stay hidden.
+      hidden:
+        blocked ||
+        (host.country === 'RO' && product?.type === 'loan') ||
+        (host.country !== 'RO' &&
+          (product?.type === 'term_deposit' ||
+            product?.type === 'loan' ||
+            product?.type === 'mortgage')),
     },
   ];
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -416,6 +436,14 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
                   {title}
                 </Text>
               </View>
+              {blocked ? (
+                <Text
+                  accessibilityRole="text"
+                  style={[styles.blockedLabel, { color: host.tokens.accent }]}
+                >
+                  BLOCKED
+                </Text>
+              ) : null}
               <AccountCarousel
                 products={data.accounts}
                 activeIndex={activeIndex}
@@ -427,6 +455,7 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
                       account,
                       data.currentAccounts[0]?.accountNumber ?? '',
                       host.amountsHidden,
+                      host.country,
                     )}
                     active={index === activeIndex}
                     dark={dark}
@@ -568,6 +597,13 @@ export default function RoBaselineAccount(host: CurrentScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  blockedLabel: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    letterSpacing: 1,
+  },
   root: { flex: 1 },
   scroll: { flex: 1, minHeight: 0 },
   content: { flexGrow: 1, paddingBottom: 32 },

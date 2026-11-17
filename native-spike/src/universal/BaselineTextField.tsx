@@ -36,7 +36,11 @@ export interface BaselineTextFieldProps extends TextFieldOptions {
   trailingIconSize?: number;
   /** Calendar fields use a 24px icon with an 8px gap; other fields retain 32px + 12px. */
   trailingIconLayout?: 'standard' | 'compact';
-  trailingIconAction?: { ariaLabel: string; onClick: () => void };
+  trailingIconAction?: {
+    ariaLabel: string;
+    onClick: () => void;
+    expanded?: boolean;
+  };
   dark?: boolean;
   /** Amount placeholders sit on the baseline; default empty labels are centered. */
   emptyValueAlignment?: 'center' | 'end';
@@ -179,7 +183,7 @@ export function BaselineTextField(props: BaselineTextFieldProps) {
         color={color(
           state.isDisabled
             ? state.iconColor
-            : props.trailingIconColor ?? state.iconColor,
+            : (props.trailingIconColor ?? state.iconColor),
         )}
       />
     ) : null);
@@ -189,7 +193,10 @@ export function BaselineTextField(props: BaselineTextFieldProps) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={props.trailingIconAction.ariaLabel}
-        accessibilityState={{ disabled: state.isDisabled }}
+        accessibilityState={{
+          disabled: state.isDisabled,
+          expanded: props.trailingIconAction.expanded,
+        }}
         disabled={state.isDisabled}
         style={iconActionStyle}
         onPress={event => {

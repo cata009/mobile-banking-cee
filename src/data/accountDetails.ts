@@ -1008,11 +1008,6 @@ export const ACCOUNT_OPTION_ITEMS: AccountOptionItem[] = [
     description: "Download or send the account statement by e-mail",
   },
   {
-    id: "create-paycode",
-    title: "CREATE PAYCODE",
-    description: "Create pay code info",
-  },
-  {
     id: "change-account-name",
     title: "CHANGE ACCOUNT NAME",
     description: "You can choose any name you want for your accounts",

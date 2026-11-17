@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { calculateCashLoanOffer } from '@/features/ro-cash-loan/calculator';
 import { BaselineFeedbackSlider } from '../../../../../universal/BaselineFeedbackProgress';
 import { BaselineCheckbox } from '../../../../../universal/BaselineCheckbox';
 import { BaselineTag } from '../../../../../universal/BaselineTag';
@@ -18,11 +19,28 @@ import {
   type CashLoanPageProps,
 } from './CashLoanCommon';
 const number = (value: string) => Number(value || 0).toLocaleString('ro-RO');
-const statistics = [
-  ['DOBÂNDA FIXĂ', '5.99%'],
-  ['DAE', '10.11%'],
-  ['TOTAL DE RAMBURSAT', '50.500,31 LEI'],
-];
+const money = (value: number) =>
+  `${value.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} LEI`;
+function offerFor(p: CashLoanPageProps) {
+  return calculateCashLoanOffer({
+    amount: Number(p.values.loanAmount || 40000),
+    months: Number(p.values.loanMonths || 60),
+    insured: !!p.checks.insurance,
+    declining: p.values.repayment === 'Rată descrescătoare',
+    recommendedInsurance: p.values.recommendedInsurance === 'true',
+    refinancedCredits:
+      p.values.loanType === 'refinance'
+        ? Number(!!p.checks.refinance1) + Number(!!p.checks.refinance2)
+        : 0,
+  });
+}
+function offerStatistics(offer: ReturnType<typeof offerFor>) {
+  return [
+    ['DOBÂNDA FIXĂ', `${offer.interestRate.toFixed(2)}%`],
+    ['DAE', `${offer.apr.toFixed(2)}%`],
+    ['TOTAL DE RAMBURSAT', money(offer.totalPayable)],
+  ];
+}
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <View style={s.group}>
@@ -296,11 +314,16 @@ function RefinanceCredit({
 }
 export function CashLoanOffer(p: CashLoanPageProps) {
   const refinance = p.values.loanType === 'refinance';
+  const offer = offerFor(p);
   return (
     <View style={s.content}>
       <LoanCopy>
         După evaluarea datelor tale, îți prezentăm oferta de creditare, pe care
         te rugăm să o analizezi atent.
+      </LoanCopy>
+      <LoanCopy small>
+        Simulare demonstrativă: valorile sunt estimative și includ comisionul de
+        analiză și, dacă este selectată, asigurarea.
       </LoanCopy>
       {(refinance || p.values.refinanceEligible === 'true') && (
         <View style={s.row}>
@@ -345,34 +368,30 @@ export function CashLoanOffer(p: CashLoanPageProps) {
                 ? 'credit'
                 : 'credite'}{' '}
               pentru un total de{' '}
-              {(
-                (p.checks.refinance1 ? 17500 : 0) +
-                (p.checks.refinance2 ? 17500 : 0)
-              ).toLocaleString('ro-RO')}{' '}
-              Lei
+              {offer.refinancedAmount.toLocaleString('ro-RO')} Lei
             </LoanCopy>
           </View>
           <LoanInsurance {...p} />
           <Repayment {...p} />
           <AmountPeriod {...p} />
           {[
-            ['VALOARE TOTALA CREDIT SOLICITAT', '150.500,31 LEI'],
+            ['VALOARE TOTALA CREDIT SOLICITAT', money(offer.principal)],
             [
               'DIN CARE SUMA SUPLIMENTARA PENTRU NEVOI PERSONALE',
-              '50.500,31 LEI',
+              money(Number(p.values.loanAmount || 40000)),
             ],
-            ['SUMA REFINANTATA', '100.000,00 LEI'],
+            ['SUMA REFINANTATA', money(offer.refinancedAmount)],
             [
               'RATA LUNARĂ CREDIT NOU (INCLUDE CREDITE REFINANTATE)',
-              '855,30 LEI',
+              money(offer.monthlyPayment),
             ],
             [
               'TOTAL RATE PE CARE LE PLATESTI ACUM DIN CREDITE SELECTATE',
-              '1.233,30 LEI',
+              money(offer.currentPayments),
             ],
-            ['DOBÂNDA FIXĂ', '5.99%'],
-            ['DAE', '7.99%'],
-            ['VALOARE TOTALA PLATIBILA', '190.500,31 LEI'],
+            ['DOBÂNDA FIXĂ', `${offer.interestRate.toFixed(2)}%`],
+            ['DAE', `${offer.apr.toFixed(2)}%`],
+            ['VALOARE TOTALA PLATIBILA', money(offer.totalPayable)],
           ].map(([label, value]) => (
             <Fact key={label} label={label} value={value} />
           ))}
@@ -384,12 +403,16 @@ export function CashLoanOffer(p: CashLoanPageProps) {
             <Text style={s.title}>40.000,00 LEI</Text>
           </View>
           <View style={s.mutedBox}>
-            <Text style={s.label}>RATA LUNARA CREDIT</Text>
-            <Text style={s.title}>1.437,36 LEI</Text>
+            <Text style={s.label}>
+              {p.values.repayment === 'Rată descrescătoare'
+                ? 'PRIMA RATĂ LUNARĂ'
+                : 'RATA LUNARA CREDIT'}
+            </Text>
+            <Text style={s.title}>{money(offer.monthlyPayment)}</Text>
           </View>
           <AmountPeriod {...p} />
           <LoanInsurance {...p} />
-          {statistics.map(([label, value]) => (
+          {offerStatistics(offer).map(([label, value]) => (
             <Fact key={label} label={label} value={value} />
           ))}
           <Repayment {...p} />
@@ -425,6 +448,7 @@ export function CashLoanRefinancing(p: CashLoanPageProps) {
   );
 }
 export function CashLoanSummary(p: CashLoanPageProps) {
+  const offer = offerFor(p);
   return (
     <View style={s.content}>
       <LoanCopy>
@@ -433,22 +457,31 @@ export function CashLoanSummary(p: CashLoanPageProps) {
         le-ai deschis, citit, înțeles și acceptat.
       </LoanCopy>
       <OnboardingSectionDivider title="OFERTA DE CREDIT" />
+      <LoanCopy small>
+        Simulare demonstrativă: valorile sunt estimative și includ comisionul de
+        analiză și, dacă este selectată, asigurarea.
+      </LoanCopy>
       {[
-        ['SUMA SOLICITATĂ', `${number(p.values.loanAmount)} LEI`],
-        ['RATĂ LUNARĂ', '838,34 LEI'],
+        ['SUMA SOLICITATĂ', money(offer.principal)],
+        [
+          p.values.repayment === 'Rată descrescătoare'
+            ? 'PRIMA RATĂ LUNARĂ'
+            : 'RATĂ LUNARĂ',
+          money(offer.monthlyPayment),
+        ],
         ['PERIOADĂ', `${p.values.loanMonths} LUNI`],
-        ...statistics,
+        ...offerStatistics(offer),
         ['ASIGURARE DE CREDIT INCLUSĂ', p.checks.insurance ? 'DA' : 'NU'],
         ...(p.checks.insurance
-          ? [['COST TOTAL ASIGURARE', '1.314,00 LEI']]
+          ? [['COST TOTAL ASIGURARE', money(offer.insuranceTotal)]]
           : []),
       ].map(([label, value]) => (
         <Fact key={label} label={label} value={value} />
       ))}
       {p.checks.insurance && (
         <LoanCopy small>
-          Prima de asigurare lunară de 30,66 LEI este inclusă și plătită
-          împreună cu rata creditului.
+          Prima de asigurare lunară estimată de {money(offer.monthlyInsurance)}{' '}
+          este inclusă și plătită împreună cu rata creditului.
         </LoanCopy>
       )}
       <Fact

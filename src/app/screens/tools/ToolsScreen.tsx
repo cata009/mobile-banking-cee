@@ -6,7 +6,7 @@
  * country comparison, component translation tester and translation review.
  */
 
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 import { AppIcon, type IconName } from "@/app/components/icons";
 import { PlatformPageShell } from "@/app/components/platform/PlatformPage";
 import { ToolErrorBoundary } from "./toolsUi";
@@ -17,11 +17,8 @@ import { CountryDivergenceTool } from "./CountryDivergenceTool";
 import { PreloginPictureTesterTool } from "./PreloginPictureTesterTool";
 import { VisualQaInspectorTool } from "./VisualQaInspectorTool";
 
-const MarketingEmailBuilderTool = lazy(() => import('./MarketingEmailBuilderTool'));
-
 type ToolId =
   | "visual-qa"
-  | "marketing-email"
   | "prelogin-picture"
   | "side-by-side"
   | "country-divergence"
@@ -43,13 +40,6 @@ const TOOLS: readonly ToolMeta[] = [
     icon: "eye",
     description: "Compare an interactive demo screen with an app screenshot, highlight visual differences and prepare a report.",
     audience: "QA · Design · Development",
-  },
-  {
-    id: "marketing-email",
-    label: "Marketing email builder",
-    icon: "send",
-    description: "Compose reusable email blocks, preview responsive light/dark HTML, validate content and download an editable campaign package.",
-    audience: "Marketing · Design · Local market teams · QA",
   },
   {
     id: "prelogin-picture",
@@ -158,8 +148,6 @@ export default function ToolsScreen() {
             <ToolErrorBoundary key={activeToolId} toolLabel={activeTool?.label ?? "Tool"}>
               {activeToolId === "visual-qa" ? (
                 <VisualQaInspectorTool />
-              ) : activeToolId === "marketing-email" ? (
-                <Suspense fallback={<p role="status">Se încarcă editorul de emailuri…</p>}><MarketingEmailBuilderTool /></Suspense>
               ) : activeToolId === "prelogin-picture" ? (
                 <PreloginPictureTesterTool />
               ) : activeToolId === "side-by-side" ? (

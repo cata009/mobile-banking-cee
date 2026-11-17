@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { searchOnboardingBranches } from '@/features/ro-onboarding/branches';
 import { OnboardingSheet } from './OnboardingSheet';
-import { BaselineTextField } from '../../../../../universal/BaselineTextField';
+import { BaselineSearchBar } from '../../../../../universal/BaselineSearchBar';
 import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigationRow';
 import { OnboardingSectionDivider as BaselineSectionDivider } from './OnboardingSectionDivider';
 import { PrimaryButton } from '../../../../../universal/PrimaryButton';
@@ -94,15 +94,17 @@ export function OnboardingBranches({
         </View>
       ) : (
         <>
-          <BaselineTextField
-            label="Caută"
+          <BaselineSearchBar
+            placeholder="Caută"
+            accessibilityLabel="Caută"
             value={search}
-            onChange={value => {
+            onValueChange={value => {
               setSearch(value);
               setExpanded(true);
             }}
             onFocus={() => setExpanded(true)}
-            trailingIconName="search"
+            showTrailingAction={false}
+            showRemoveFiltersAction={false}
           />
           {expanded &&
             searchOnboardingBranches(search).map(item => (

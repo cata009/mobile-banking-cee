@@ -1,3 +1,4 @@
+import { getCreditCardFacts } from '@/features/products/productFacts';
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
 import {
@@ -295,6 +296,8 @@ test('card information uses Source fields and selected canonical credit figures 
   expect(fields).toEqual([
     ['Card product', `${card.cardType} Credit card`],
     ['Card status', 'Active'],
+    ['Card holder', card.cardHolderName ?? 'PETER JAGODIĆ'],
+    ['Expiration date', card.expiryDate],
     ['Card reference', `•••• ${card.cardNumber.slice(-4)}`],
     [
       'Available to spend',
@@ -310,6 +313,20 @@ test('card information uses Source fields and selected canonical credit figures 
         'RO',
       )} ${card.currency}`,
     ],
+    ...(() => {
+      const due = getCreditCardFacts(
+        card as Extract<typeof card, { type: 'credit_card' }>,
+      );
+      const money = (value: number) =>
+        `${formatMoneyNumber(value, 'RO')} ${card.currency}`;
+      return [
+        ['Due amount', money(due.statementDue)],
+        ['Minimum amount due', money(due.minimumDue)],
+        ['Due date', due.dueDate],
+        ['Total amount due', money(due.totalDue)],
+        ['Interest rate', due.interestRate],
+      ];
+    })(),
   ]);
   await act(() => button(tree, 'Back').props.onPress());
   expect(props.onBack).toHaveBeenCalledTimes(1);

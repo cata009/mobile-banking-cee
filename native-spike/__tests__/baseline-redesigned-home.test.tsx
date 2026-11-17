@@ -133,12 +133,16 @@ describe.each(contexts)(
         ),
       );
       expect(content).toContain(
-        `${model.calculateTotalAvailable().decimals} ${getCurrencySymbol(
+        `${model.calculateHomeTotals().primary.amount.decimals} ${getCurrencySymbol(
           value.country,
         )}`,
       );
-      expect(content).toContain(model.calculateTotalAvailable().integer);
-      expect(content).toContain(model.calculateTotalOwed().integer);
+      expect(content).toContain(
+        model.calculateHomeTotals().primary.amount.integer,
+      );
+      expect(content).toContain(
+        model.calculateHomeTotals().secondary!.amount.integer,
+      );
     });
 
     it('preserves card, account, and investment navigation and inert meal cards', () => {

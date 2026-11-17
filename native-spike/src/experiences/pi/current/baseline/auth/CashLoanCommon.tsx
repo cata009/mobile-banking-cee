@@ -150,6 +150,7 @@ export function LoanSelect({
     <>
       <View style={{ marginHorizontal: -24 }}>
         <BaselineDropdownField
+          alignChevronWithField
           presentation="compact"
           label={label}
           value={values[name] || ''}

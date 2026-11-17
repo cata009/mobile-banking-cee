@@ -680,8 +680,12 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
     host.country === 'RO' &&
     host.release === 'release-current' &&
     host.scenario === 'active';
+  // Digital wallets are enrolled from the app in RO and HU.
   const walletActionsAvailable =
-    roActiveExperience && !blocked;
+    (host.country === 'RO' || host.country === 'HU') &&
+    host.release === 'release-current' &&
+    host.scenario === 'active' &&
+    !blocked;
   const appleEnrolled = isRomanianDemoWalletEnrolled(card.id, 'apple-pay', data.cards);
   const clickEnrolled = isRomanianDemoWalletEnrolled(card.id, 'click-to-pay', data.cards);
   const virtualCardAvailable = roActiveExperience;
@@ -1069,6 +1073,9 @@ export default function RoBaselineCard(host: CurrentScreenProps) {
   );
 }
 
+/** Clear PAN and CVV auto-hide after this long. */
+export const SENSITIVE_CARD_VISIBLE_MS = 60_000;
+
 export function BaselineSensitiveCard({
   host,
   card,
@@ -1081,6 +1088,12 @@ export function BaselineSensitiveCard({
   const [progress, setProgress] = useState(0),
     { copy: copyCard, toast } = useBankingCopy(),
     dark = host.tokens.background === '#121212';
+  // Clear card data is shown for a limited time only.
+  const { onBack } = host;
+  useEffect(() => {
+    const timer = setTimeout(onBack, SENSITIVE_CARD_VISIBLE_MS);
+    return () => clearTimeout(timer);
+  }, [onBack]);
   const rows = [
     ['Card number', card.cardNumber],
     ['Card CVV2/CVC2', card.securityCode ?? '990'],

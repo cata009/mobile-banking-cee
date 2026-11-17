@@ -64,6 +64,7 @@ describe('Future CZ Homepage account quick-action routing', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Account info' }))
 
     expect(await screen.findAllByRole('heading', { name: 'Account Details' })).not.toHaveLength(0)
-    expect(screen.getByText('CZ43BACX1234567890123401')).toBeInTheDocument()
+    // Czech accounts show the local number and the IBAN in groups of four.
+    expect(screen.getByText('CZ43 BACX 1234 5678 9012 3401')).toBeInTheDocument()
   })
 })

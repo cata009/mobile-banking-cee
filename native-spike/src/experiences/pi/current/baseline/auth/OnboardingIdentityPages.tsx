@@ -328,6 +328,7 @@ export function OnboardingAddressSummary({
   const select = (key: string, label: string) => (
     <View key={key} style={{ marginHorizontal: -24 }}>
       <BaselineDropdownField
+        alignChevronWithField
         label={label}
         value={values[key] || ''}
         options={[{ value: values[key] || '', label: values[key] || '' }]}
@@ -423,6 +424,7 @@ export function OnboardingAddressSummary({
             />
             <View style={{ marginHorizontal: -24 }}>
               <BaselineDropdownField
+                alignChevronWithField
                 label="ADRESA ESTE SIMILARĂ CU"
                 value={values.correspondence || ''}
                 options={[

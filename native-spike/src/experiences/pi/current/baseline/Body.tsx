@@ -29,6 +29,14 @@ import {
 import { sourceColor } from '../../../../universal/sourceColor';
 import { sourceLinearGradient } from '../../../../universal/sourceLinearGradient';
 import { Text } from '../../../../universal/Typography';
+import {
+  needsCurrentAccountFallback,
+  sortPendingActions,
+} from '@/features/products/homeSurfaces';
+import { getProductsMenuForCountry } from '@/app/config/productsMenuConfig';
+import { getProductBannerTone } from '@/app/config/productBannerVariants';
+import { BaselineProductOfferCard } from '../../../../universal/BaselineProductOfferCard';
+import { localized } from './offers/Catalog';
 import { FutureGainBanner } from '../future-gain/FutureGainBanner';
 import { futureGainEnabled } from '../future-gain/model';
 import {
@@ -62,6 +70,35 @@ export function BaselineHomeBody({
   redesigned?: boolean;
 }) {
   const securityNotice = host.bankingPresentation?.homeSecurityNotice;
+  const pendingActions = useMemo(
+    () =>
+      sortPendingActions(host.bankingPresentation?.homePendingActions ?? []),
+    [host.bankingPresentation?.homePendingActions],
+  );
+  const [summaryHeight, setSummaryHeight] = useState<number | undefined>();
+  // The second page is the first commercial card of the Offers shelf (as in the RO baseline).
+  const commercialOffer = useMemo(() => {
+    const first = getProductsMenuForCountry(host.country).offers[0];
+    if (!first) return null;
+    return {
+      ...first,
+      title: localized(
+        { t: host.t },
+        `runtime.productsMenu.offers.${first.id}.title`,
+        first.title,
+      ),
+      description: localized(
+        { t: host.t },
+        `runtime.productsMenu.offers.${first.id}.description`,
+        first.description,
+      ),
+    };
+  }, [host.country, host.t]);
+  const railCount =
+    1 +
+    (securityNotice ? 1 : 0) +
+    (pendingActions.length ? 1 : 0) +
+    (commercialOffer ? 1 : 0);
   const geniusProtect = useSyncExternalStore(
     subscribeGeniusProtect,
     getGeniusProtectSnapshot,
@@ -71,7 +108,7 @@ export function BaselineHomeBody({
   const [summaryIndex, setSummaryIndex] = useState(0);
   const summaryStep = summaryWidth + 12;
   useEffect(() => {
-    if (Platform.OS !== 'web' || !securityNotice) return;
+    if (Platform.OS !== 'web' || railCount < 2) return;
     const node = summaryRail.current?.getScrollableNode() as
       HTMLElement | undefined;
     if (!node?.addEventListener) return;
@@ -88,7 +125,7 @@ export function BaselineHomeBody({
       suppressUntil = Date.now() + 100;
       const index = Math.max(
         0,
-        Math.min(1, Math.round(node.scrollLeft / summaryStep)),
+        Math.min(railCount - 1, Math.round(node.scrollLeft / summaryStep)),
       );
       setSummaryIndex(index);
       summaryRail.current?.scrollTo({
@@ -139,7 +176,7 @@ export function BaselineHomeBody({
       document.removeEventListener('mousemove', move);
       document.removeEventListener('mouseup', finish);
     };
-  }, [securityNotice, summaryStep]);
+  }, [railCount, summaryStep]);
   const model = useMemo(
     () =>
       createCurrentProducts({
@@ -160,11 +197,17 @@ export function BaselineHomeBody({
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true);
   const textColor = sourceColor('var(--uc-text)', dark);
   const currency = getCurrencySymbol(host.country);
+  const homeTotals = model.calculateHomeTotals();
   const available = maskAmountParts(
-    model.calculateTotalAvailable(),
+    homeTotals.primary.amount,
     host.amountsHidden,
   );
-  const owed = maskAmountParts(model.calculateTotalOwed(), host.amountsHidden);
+  const owed = homeTotals.secondary
+    ? maskAmountParts(homeTotals.secondary.amount, host.amountsHidden)
+    : undefined;
+  const primaryLabel = redesigned
+    ? host.t('home.totalBalance')
+    : host.t(homeTotals.primary.labelKey, homeTotals.primary.fallback);
   const productAction = (product: Product): (() => void) | undefined => {
     if (
       product.type === 'investment_account' &&
@@ -213,12 +256,20 @@ export function BaselineHomeBody({
   const dividerStyle = [styles.divider, { backgroundColor: textColor }];
 
   const summary = (
-    <View style={[summaryStyle, securityNotice ? { height: 157 } : undefined]}>
+    <View
+      onLayout={event =>
+        setSummaryHeight(Math.round(event.nativeEvent.layout.height))
+      }
+      style={[
+        summaryStyle,
+        securityNotice ? { height: 157 } : undefined,
+        // A single indicator (BIH) keeps the two-indicator card height so the lighthouse is not clipped.
+        !securityNotice && !owed ? { minHeight: 157 } : undefined,
+      ]}
+    >
       <View style={styles.summaryCopy}>
         <View style={styles.balanceBlock}>
-          <Text style={labelStyle}>
-            {host.t(redesigned ? 'home.totalBalance' : 'home.totalAvailable')}
-          </Text>
+          <Text style={labelStyle}>{primaryLabel}</Text>
           <View style={styles.availableRow}>
             <Text style={availableIntegerStyle}>{available.integer}</Text>
             <Text style={availableDecimalsStyle}>
@@ -226,16 +277,25 @@ export function BaselineHomeBody({
             </Text>
           </View>
         </View>
-        <View style={dividerStyle} />
-        <View style={styles.balanceBlock}>
-          <Text style={labelStyle}>Total Owed</Text>
-          <View style={styles.owedRow}>
-            <Text style={owedIntegerStyle}>{owed.integer}</Text>
-            <Text style={owedDecimalsStyle}>
-              {owed.decimals} {currency}
-            </Text>
-          </View>
-        </View>
+        {owed && homeTotals.secondary ? (
+          <>
+            <View style={dividerStyle} />
+            <View style={styles.balanceBlock}>
+              <Text style={labelStyle}>
+                {host.t(
+                  homeTotals.secondary.labelKey,
+                  homeTotals.secondary.fallback,
+                )}
+              </Text>
+              <View style={styles.owedRow}>
+                <Text style={owedIntegerStyle}>{owed.integer}</Text>
+                <Text style={owedDecimalsStyle}>
+                  {owed.decimals} {currency}
+                </Text>
+              </View>
+            </View>
+          </>
+        ) : null}
         {redesigned ? (
           <View
             style={[styles.redesignInfo, { borderTopColor: `${textColor}33` }]}
@@ -258,25 +318,102 @@ export function BaselineHomeBody({
       </View>
     </View>
   );
+  const fallbackHeader = needsCurrentAccountFallback(model.products);
+  const pages: { key: string; label: string; node: React.ReactNode }[] = [];
+  if (securityNotice)
+    pages.push({
+      key: 'security',
+      label: 'Show security alert',
+      node: (
+        <BaselineBanner
+          variant="pending"
+          title={securityNotice.title}
+          description={securityNotice.description}
+          tagLabel={securityNotice.tagLabel}
+          presentation={{ width: '100%' }}
+          onPress={() =>
+            host.onNavigate({
+              screen: 'transactions',
+              params: { fraudAction: 'review-alerts' },
+            })
+          }
+          dark={dark}
+        />
+      ),
+    });
+  if (pendingActions.length)
+    pages.push({
+      key: 'pending-actions',
+      label: 'Show pending actions',
+      node: (
+        <BaselineBanner
+          variant="pending"
+          title={pendingActions[0]!.title}
+          description={pendingActions[0]!.description}
+          tagLabel={`${pendingActions.length} pending`}
+          presentation={{ width: '100%' }}
+          onPress={() => host.onNavigate({ screen: 'transactions' })}
+          dark={dark}
+        />
+      ),
+    });
+  pages.push({
+    key: 'totals',
+    label: 'Show total available',
+    node: fallbackHeader ? (
+      <BaselineBanner
+        variant="helper"
+        title="Open a current account"
+        description="Get a current account to unlock payments and your full Home."
+        actionLabel="Open a current account"
+        onActionPress={() => host.onNavigate({ screen: 'products' })}
+        presentation={{ width: '100%' }}
+        dark={dark}
+      />
+    ) : (
+      summary
+    ),
+  });
+  if (commercialOffer)
+    pages.push({
+      key: 'offer',
+      label: 'Show offer',
+      node: (
+        <BaselineProductOfferCard
+          offer={commercialOffer}
+          tone={getProductBannerTone(
+            commercialOffer.colorFamily ?? 'green',
+            commercialOffer.lightVersion ?? false,
+          )}
+          dark={dark}
+          presentation={{ width: summaryWidth, height: summaryHeight }}
+          onPress={() => host.onNavigate({ screen: 'products' })}
+        />
+      ),
+    });
   return (
     <>
       <>
         <View
           style={[
             styles.summaryGutter,
-            securityNotice ? { paddingHorizontal: 0 } : undefined,
+            railCount > 1 ? { paddingHorizontal: 0 } : undefined,
           ]}
           onLayout={event =>
             setSummaryWidth(Math.max(1, event.nativeEvent.layout.width - 48))
           }
         >
-          {securityNotice ? (
+          {railCount > 1 ? (
             <>
               <ScrollView
                 ref={summaryRail}
-                testID="home-security-carousel"
+                testID={
+                  securityNotice
+                    ? 'home-security-carousel'
+                    : 'home-header-carousel'
+                }
                 horizontal
-                snapToOffsets={[0, summaryStep]}
+                snapToOffsets={pages.map((_, index) => index * summaryStep)}
                 snapToEnd={false}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
@@ -287,7 +424,7 @@ export function BaselineHomeBody({
                     Math.max(
                       0,
                       Math.min(
-                        1,
+                        railCount - 1,
                         Math.round(
                           event.nativeEvent.contentOffset.x / summaryStep,
                         ),
@@ -297,28 +434,16 @@ export function BaselineHomeBody({
                 }
                 style={{ width: summaryWidth + 48 }}
               >
-                <View style={{ width: summaryWidth }}>
-                  <BaselineBanner
-                    variant="pending"
-                    title={securityNotice.title}
-                    description={securityNotice.description}
-                    tagLabel={securityNotice.tagLabel}
-                    presentation={{ width: '100%' }}
-                    onPress={() =>
-                      host.onNavigate({
-                        screen: 'transactions',
-                        params: { fraudAction: 'review-alerts' },
-                      })
-                    }
-                    dark={dark}
-                  />
-                </View>
-                <View style={{ width: summaryWidth }}>{summary}</View>
+                {pages.map(page => (
+                  <View key={page.key} style={{ width: summaryWidth }}>
+                    {page.node}
+                  </View>
+                ))}
               </ScrollView>
               <BaselineCarouselIndicator
-                count={2}
+                count={pages.length}
                 activeIndex={summaryIndex}
-                itemLabels={['Show security alert', 'Show total available']}
+                itemLabels={pages.map(page => page.label)}
                 onSelect={index => {
                   setSummaryIndex(index);
                   summaryRail.current?.scrollTo({
@@ -331,7 +456,7 @@ export function BaselineHomeBody({
               />
             </>
           ) : (
-            summary
+            pages[0]?.node
           )}
         </View>
       </>
@@ -346,7 +471,7 @@ export function BaselineHomeBody({
             <View
               style={[
                 styles.category,
-                securityNotice && categoryIndex === 0
+                railCount > 1 && categoryIndex === 0
                   ? { paddingTop: 12 }
                   : undefined,
               ]}
@@ -385,7 +510,10 @@ export function BaselineHomeBody({
                         }
                         title={product.name}
                         accountNumber={model.getProductDisplayNumber(product)}
-                        thirdLine={accountConvention(host.country, product.type)}
+                        thirdLine={accountConvention(
+                          host.country,
+                          product.type,
+                        )}
                         amount={amount.integer}
                         decimals={amount.decimals}
                         currency={amount.currency}
