@@ -29,6 +29,17 @@ import { sourceColor } from '../../../../universal/sourceColor';
 import { AccountDetailsShareSheet } from './AccountDetailsShareSheet';
 import { getAccountNameOverride } from '@/features/accounts-payments/accountNameOverrides';
 import { accountConvention } from '@/features/accounts-payments/roAccountConvention';
+import {
+  DEMO_ACCOUNT_OWNER,
+  canShareAccountDetails,
+  formatIbanGroups,
+  getAccountCapabilities,
+  getAccountFacts,
+  getAccountIdentifiers,
+  getLinkedAccountIds,
+  getLoanFacts,
+  type InterestTier,
+} from '@/features/products/productFacts';
 
 /** Source account information: identity stays visible; only financial values are private. */
 export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
@@ -65,6 +76,28 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
     product?.type === 'loan' || product?.type === 'mortgage'
       ? getLoanDetails(product)
       : null;
+  const capabilities = getAccountCapabilities(host.country);
+  const blocked = Boolean(
+    product &&
+    host.bankingPresentation?.blockedAccountIds?.includes(product.id),
+  );
+  const facts =
+    product && !deposit && !loan
+      ? getAccountFacts(product, host.country, { blocked })
+      : null;
+  const identifiers = product
+    ? getAccountIdentifiers(host.country, product.accountNumber)
+    : [];
+  const tiersText = (tiers: readonly InterestTier[]) =>
+    tiers
+      .map((tier, index) =>
+        tiers.length === 1
+          ? tier.rate
+          : tier.upTo !== undefined
+            ? `Up to ${amount(tier.upTo)}: ${tier.rate}`
+            : `Above ${amount(tiers[index - 1]?.upTo ?? 0)}: ${tier.rate}`,
+      )
+      .join('\n');
   const productTitleKey =
     product?.type === 'saving_account'
       ? 'savingAccount'
@@ -91,8 +124,10 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
     fallback: string;
     value: string;
     copyLabel?: string;
+    /** Clipboard value when it differs from the displayed one (IBAN without spaces). */
+    copyValue?: string;
   };
-  const fields: Field[] = !product
+  const allFields: Field[] = !product
     ? []
     : deposit
       ? [
@@ -217,31 +252,62 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
               fallback: 'Final payment',
               value: loan.finalPayment,
             },
+            ...(() => {
+              const extra = getLoanFacts(
+                product,
+                host.country,
+                formatIbanGroups(currentAccountNumber),
+              );
+              return [
+                {
+                  key: 'loan.contractNumber',
+                  fallback: 'Contract number',
+                  value: extra.contractNumber,
+                },
+                {
+                  key: 'loan.repaymentAccount',
+                  fallback: 'Repayment account number',
+                  value: extra.repaymentAccount,
+                },
+                {
+                  key: 'loan.referenceRate',
+                  fallback: 'Margin + reference index',
+                  value: `${extra.margin} + ${extra.referenceIndex}`,
+                },
+              ];
+            })(),
           ]
         : [
+            ...identifiers.map(identifier => {
+              // The audited RO page labels the IBAN "Account number".
+              const roLabel =
+                host.country === 'RO' && identifier.key === 'iban';
+              return {
+                key: roLabel ? 'accountNumber' : identifier.key,
+                fallback: roLabel ? 'Account number' : identifier.label,
+                value: identifier.value,
+                copyLabel:
+                  identifier.key === 'iban' && !roLabel
+                    ? 'IBAN'
+                    : 'Account number',
+                copyValue: identifier.copyValue,
+              };
+            }),
             {
-              key: 'accountNumber',
-              fallback: 'Account number',
-              value: product.accountNumber,
-              copyLabel: 'Account number',
+              key: 'accountOwner',
+              fallback: 'Account owner',
+              value: DEMO_ACCOUNT_OWNER,
             },
-            ...(product.type === 'saving_account'
-              ? [accountTitle]
-              : [
-                  {
-                    key: 'availableFunds',
-                    fallback: 'Available funds',
-                    value: amount(product.balance),
-                  },
-                ]),
+            ...(product.type === 'saving_account' ? [accountTitle] : []),
+            {
+              key: 'availableFunds',
+              fallback: 'Available funds',
+              value: amount(facts!.availableFunds),
+            },
             {
               key: 'currentBalance',
               fallback: 'Current balance',
-              value: amount(
-                product.type === 'saving_account'
-                  ? product.balance
-                  : product.balance * 0.92,
-              ),
+              value: amount(facts!.ledgerBalance),
             },
             ...(product.type === 'saving_account'
               ? []
@@ -249,21 +315,102 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                   {
                     key: 'blockedReservedAmount',
                     fallback: 'Blocked/reserved amount',
-                    value: amount(0),
+                    value: amount(facts!.blockedAmount),
                   },
-                  { key: 'overdraft', fallback: 'Overdraft', value: amount(0) },
-                  accountTitle,
                   {
-                    key: 'offer',
-                    fallback: 'Offer',
-                    value: accountConvention(host.country, product.type) ?? copy(
-                      host,
-                      'runtime.accounts.detailsInfo.offerValue',
-                      'Account under favorable conditions',
-                    ),
+                    key: 'overdraft',
+                    fallback: 'Overdraft',
+                    value: amount(facts!.overdraftLimit),
                   },
+                  {
+                    key: 'outstandingTransactions',
+                    fallback: 'Outstanding domestic and foreign transactions',
+                    value: amount(facts!.outstandingAmount),
+                  },
+                  {
+                    key: 'creditEvidenceIncrease',
+                    fallback: 'Credit evidence increase availability',
+                    value: amount(facts!.creditEvidenceIncrease),
+                  },
+                  accountTitle,
+                  ...(accountConvention(host.country, product.type)
+                    ? [
+                        {
+                          key: 'offer',
+                          fallback: 'Offer',
+                          value: accountConvention(host.country, product.type)!,
+                        },
+                      ]
+                    : []),
+                  {
+                    key: 'feeChargeDay',
+                    fallback: 'Charge day',
+                    value: facts!.fees.chargeDay,
+                  },
+                  {
+                    key: 'feeFrequency',
+                    fallback: 'Charge frequency',
+                    value: facts!.fees.frequency,
+                  },
+                  {
+                    key: 'feeNextChargeDate',
+                    fallback: 'Next charge date',
+                    value: facts!.fees.nextChargeDate,
+                  },
+                  ...(facts!.fees.transferAccount
+                    ? [
+                        {
+                          key: 'feeTransferAccount',
+                          fallback: 'Charges transfer account',
+                          value: facts!.fees.transferAccount,
+                        },
+                      ]
+                    : []),
                 ]),
+            {
+              key: 'creditInterest',
+              fallback: 'Credit interest',
+              value: tiersText(facts!.interest.credit),
+            },
+            ...(facts!.interest.debit
+              ? [
+                  {
+                    key: 'debitInterest',
+                    fallback: 'Debit interest',
+                    value: tiersText(facts!.interest.debit),
+                  },
+                ]
+              : []),
           ];
+  /**
+   * Owner, outstanding transactions, fees, interest and the extended loan block come from the
+   * all-country specification; the audited RO source page keeps its original field set.
+   */
+  const specificationOnly = new Set([
+    'accountOwner',
+    'outstandingTransactions',
+    'creditEvidenceIncrease',
+    'feeChargeDay',
+    'feeFrequency',
+    'feeNextChargeDate',
+    'feeTransferAccount',
+    'creditInterest',
+    'debitInterest',
+    'loan.contractNumber',
+    'loan.repaymentAccount',
+    'loan.referenceRate',
+  ]);
+  const fields =
+    host.country === 'RO'
+      ? allFields.filter(
+          field =>
+            !specificationOnly.has(field.key) &&
+            !(
+              product?.type === 'saving_account' &&
+              field.key === 'availableFunds'
+            ),
+        )
+      : allFields;
   const showAllDetails = Boolean(deposit || product?.type === 'mortgage');
   const visibleFields =
       showAllDetails || expanded ? fields : fields.slice(0, 3),
@@ -273,19 +420,26 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
       expanded ? 'runtime.actions.showLess' : 'runtime.actions.showMore',
       expanded ? 'Show less' : 'Show more',
     );
-  const connectedCard =
+  const connectedCards =
     product?.type === 'current_account'
-      ? data.cards.find(
+      ? data.cards.filter(
           card =>
-            card.type === 'debit_card' && card.linkedAccountId === product.id,
+            card.type === 'debit_card' &&
+            getLinkedAccountIds(
+              card,
+              data.currentAccounts.map(account => account.id),
+              host.country,
+            ).includes(product.id),
         )
-      : null;
-  const accountOwner = 'IACOB MIHAI-CATALIN';
+      : [];
+  const accountOwner = DEMO_ACCOUNT_OWNER;
   const bic = host.country === 'RO' ? 'BACXROBU' : undefined;
   const surface = sourceColor('var(--uc-surface)', dark);
-  const canShareAccountDetails = Boolean(
-    product && !deposit && product.type !== 'mortgage',
+  const canShare = Boolean(
+    product && canShareAccountDetails(host.country, product.type),
   );
+  const accountNumberIdentifier = identifiers.find(item => item.key !== 'iban');
+  const ibanIdentifier = identifiers.find(item => item.key === 'iban');
   return (
     <View style={[styles.root, { backgroundColor: surface }]}>
       <ScrollView
@@ -309,11 +463,9 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
           safeAreaReserve={host.screenTopInset}
           collapsedTitleProgress={progress}
           dark={dark}
-          onRightActionPress={
-            canShareAccountDetails ? () => setShareOpen(true) : undefined
-          }
+          onRightActionPress={canShare ? () => setShareOpen(true) : undefined}
           rightActionIcon={
-            canShareAccountDetails ? (
+            canShare ? (
               <SourceCustomIcon
                 name="share-filled"
                 size={20}
@@ -337,6 +489,14 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                 {title}
               </Text>
             </View>
+            {facts?.status === 'BLOCKED' ? (
+              <Text
+                accessibilityRole="text"
+                style={[styles.blocked, { color: host.tokens.accent }]}
+              >
+                BLOCKED
+              </Text>
+            ) : null}
             <View style={styles.fields}>
               {visibleFields.map(field => (
                 <BaselineAccountInfoField
@@ -358,7 +518,10 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                             : 'Copy account number'
                         }
                         onPress={() => {
-                          copyAccount(field.value, field.copyLabel!);
+                          copyAccount(
+                            field.copyValue ?? field.value,
+                            field.copyLabel!,
+                          );
                         }}
                         style={styles.copy}
                       >
@@ -400,32 +563,63 @@ export default function RoBaselineAccountInfo(host: CurrentScreenProps) {
                     )}
                     dark={dark}
                   />
-                  <BaselineCardNavigationRow
-                    card={connectedCard}
-                    label={copy(
-                      host,
-                      'runtime.accounts.detailsInfo.mastercardStandardDebit',
-                      'Mastercard Standard Debit',
-                    )}
-                    maskedNumber={
-                      connectedCard
-                        ? formatMaskedCardNumber(connectedCard.cardNumber)
-                        : undefined
-                    }
-                    dark={dark}
-                  />
+                  {connectedCards.length === 0 ? (
+                    <BaselineCardNavigationRow
+                      card={null}
+                      label={copy(
+                        host,
+                        'runtime.accounts.detailsInfo.mastercardStandardDebit',
+                        'Mastercard Standard Debit',
+                      )}
+                      dark={dark}
+                    />
+                  ) : connectedCards.length >
+                    capabilities.connectedCardsListLimit ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="View all cards"
+                      onPress={() => host.onNavigate({ screen: 'cards' })}
+                      style={styles.viewAll}
+                    >
+                      <Text
+                        style={[
+                          styles.expansionActionLabel,
+                          { color: host.tokens.accent },
+                        ]}
+                      >
+                        View all cards
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    connectedCards.map(connectedCard => (
+                      <BaselineCardNavigationRow
+                        key={connectedCard.id}
+                        card={connectedCard}
+                        label={copy(
+                          host,
+                          'runtime.accounts.detailsInfo.mastercardStandardDebit',
+                          'Mastercard Standard Debit',
+                        )}
+                        maskedNumber={formatMaskedCardNumber(
+                          connectedCard.cardNumber,
+                        )}
+                        dark={dark}
+                      />
+                    ))
+                  )}
                 </>
               ) : null}
             </View>
           </>
         ) : null}
       </ScrollView>
-      {product && canShareAccountDetails && shareOpen ? (
+      {product && canShare && shareOpen ? (
         <AccountDetailsShareSheet
           host={host}
           accountTitle={accountTitle.value}
           accountOwner={accountOwner}
-          iban={product.accountNumber}
+          iban={ibanIdentifier?.copyValue ?? ''}
+          accountNumber={accountNumberIdentifier?.copyValue}
           bic={bic}
           onClose={() => setShareOpen(false)}
         />
@@ -445,6 +639,14 @@ const styles = StyleSheet.create({
   },
   title: { fontFamily: 'UniCredit-bold', fontSize: 28, lineHeight: 31 },
   fields: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 40 },
+  blocked: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    fontFamily: 'UniCredit-bold',
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+  viewAll: { alignSelf: 'center', paddingVertical: 18 },
   copy: {
     width: 40,
     height: 40,

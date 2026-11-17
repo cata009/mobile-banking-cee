@@ -4,10 +4,13 @@ import { formatCzLocalAccountNumber } from '@/data/czechDomesticAccount'
 import { RO_DEMO_CUSTOMER } from '@/data/customerProfile'
 import type { CountryId, ProductCounts, ReleaseId } from '@/app/state/demoTypes'
 import { applyProductCounts } from './counts'
+import { orderCardsForCountry } from './homePolicy'
 import { applyCzApp2027CurrentAccounts, applyCzApp2027TermDeposits, applyCzApp2027DebitCards } from './czEvoFixtures'
 
-function formatProductIban(country: string, productId: string, baseNumber: string): string {
+function formatProductIban(country: string, productId: string, baseNumber: string, productType?: string): string {
   const prefix = country === 'BA_BL' ? 'BA' : country
+  // Slovenia classifies every SI56 account as a current account.
+  if (country === 'SI' && productType === 'current_account') return `SI56BACX${baseNumber}`
   let hash = 0
   for (let i = 0; i < productId.length; i++) {
     hash += productId.charCodeAt(i)
@@ -54,7 +57,10 @@ export function deriveProductCategories({
   // Get base categories and convert all products to local currency
   return countedCategories.map((category) => ({
     ...category,
-    products: category.products.map((product) => {
+    products: (category.key === 'cards'
+      ? orderCardsForCountry(category.products, country, release)
+      : category.products
+    ).map((product) => {
       const isCard = product.type === 'debit_card' || product.type === 'credit_card' || product.type === 'meal_card'
       const preserveCzApp2027Account = isCzApp2027 && product.type === 'current_account'
       const preserveCzApp2027ForeignDebitCard =
@@ -65,7 +71,7 @@ export function deriveProductCategories({
           ? product.accountNumber
           : isCzApp2027
             ? formatCzLocalAccountNumber(product.accountNumber)
-            : formatProductIban(country, product.id, product.accountNumber)
+            : formatProductIban(country, product.id, product.accountNumber, product.type)
 
       if (preserveCzApp2027Account) {
         return {

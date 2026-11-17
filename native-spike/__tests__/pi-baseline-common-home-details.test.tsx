@@ -189,10 +189,10 @@ function text(tree: Renderer.ReactTestRenderer): string {
     typeof node === 'string'
       ? node
       : Array.isArray(node)
-        ? node.map(collect).join('')
-        : node
-          ? (node.children ?? []).map(collect).join('')
-          : '';
+      ? node.map(collect).join('')
+      : node
+      ? (node.children ?? []).map(collect).join('')
+      : '';
   return collect(tree.toJSON());
 }
 const press = (tree: Renderer.ReactTestRenderer, label: string) =>
@@ -218,13 +218,31 @@ test('native Home labels retain the actual branded bold face without web fallbac
   const tree = mount(<BaselineHomeBody host={props} />);
   const label = tree.root
     .findAllByType(Text)
-    .find(node => node.props.children === props.t('home.totalAvailable'))!;
+    .find(
+      node =>
+        node.props.children ===
+        props.t('home.availableBalance', 'Available Balance'),
+    )!;
   expect(StyleSheet.flatten(label.props.style)).toMatchObject({
     fontFamily: 'UniCredit-bold',
     fontSize: 14,
   });
   expect(StyleSheet.flatten(label.props.style).fontWeight).toBeUndefined();
   expect(StyleSheet.flatten(label.props.style).fontSynthesis).toBeUndefined();
+});
+
+test('Home indicators follow each country: BIH account balance, RS available/current, CZ available/balance', () => {
+  const bih = text(mount(<BaselineHomeBody host={host('BA')} />));
+  // Available and accounting balance are equal in the demo, so only one indicator shows.
+  expect(bih).toContain('Account Balance');
+  expect(bih).not.toContain('Available Balance');
+  expect(bih).not.toContain('Total Owed');
+  const rs = text(mount(<BaselineHomeBody host={host('RS')} />));
+  expect(rs).toContain('Available Balance');
+  expect(rs).toContain('Total Current Balance');
+  const cz = text(mount(<BaselineHomeBody host={host('CZ')} />));
+  expect(cz).toContain('Total available');
+  expect(cz).toContain('Total balance');
 });
 
 describe.each(cases)(
@@ -247,7 +265,7 @@ describe.each(cases)(
       );
       expect(getCurrencySymbol(country)).toBe(symbol);
       expect(text(tree)).toContain(
-        `${model.calculateTotalAvailable().decimals} ${symbol}`,
+        `${model.calculateHomeTotals().primary.amount.decimals} ${symbol}`,
       );
       const cards = tree.root.findAllByType(BaselineProductCard);
       expect(cards).toHaveLength(11);
@@ -315,7 +333,11 @@ describe.each(cases)(
         tree.root
           .findAllByType(BaselineHeaderActionButton)
           .map(button => button.props.label),
-      ).toEqual(['Profile', 'Messages']);
+      ).toEqual(
+        ['SI', 'BA', 'BA_BL'].includes(country)
+          ? ['Contact us', 'Messages']
+          : ['Profile', 'Messages'],
+      );
       act(() => press(tree, 'Prime').props.onPress());
       expect(props.onNavigate).toHaveBeenLastCalledWith({ screen: 'prime' });
       act(() => press(tree, 'Messages').props.onPress());

@@ -12,6 +12,12 @@ import {
   ACCOUNT_OPTION_ITEMS,
   ACCOUNT_PRODUCT_OPTIONS,
 } from '@/data/accountDetails';
+import {
+  DEMO_ACCOUNT_OWNER,
+  canShareAccountDetails,
+  getAccountCapabilities,
+  getAccountIdentifiers,
+} from '@/features/products/productFacts';
 import type { CurrentScreenProps } from '../contracts';
 import { bankingProducts, copy } from '../banking/model';
 import { optionArt } from '../banking/assets';
@@ -69,7 +75,24 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
       `runtime.accounts.productTitles.${productTitleKey}`,
       account?.type.replace(/_/g, ' ').toUpperCase() ?? '',
     );
-  const accountOwner = 'IACOB MIHAI-CATALIN';
+  const accountOwner = DEMO_ACCOUNT_OWNER;
+  const capabilities = getAccountCapabilities(host.country);
+  const identifiers = account
+    ? getAccountIdentifiers(host.country, account.accountNumber)
+    : [];
+  const ibanIdentifier = identifiers.find(item => item.key === 'iban');
+  const localIdentifier = identifiers.find(item => item.key !== 'iban');
+  /** Paycode is retired; nickname and sharing follow the country policy. */
+  const optionItems = [
+    ...ACCOUNT_OPTION_ITEMS.filter(
+      item =>
+        item.id !== 'create-paycode' &&
+        (item.id !== 'change-account-name' || capabilities.nickname.enabled) &&
+        (item.id !== 'share-account-info' ||
+          !account ||
+          canShareAccountDetails(host.country, account.type)),
+    ),
+  ];
   const bic = host.country === 'RO' ? 'BACXROBU' : undefined;
   const title = copy(host, 'runtime.accountOptions.title', 'Account options');
   const dark = host.tokens.background === sourceColor('var(--uc-app-bg)', true),
@@ -92,7 +115,8 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
         host={host}
         accountTitle={accountTitle}
         accountOwner={accountOwner}
-        iban={account?.accountNumber ?? ''}
+        iban={ibanIdentifier?.copyValue ?? ''}
+        accountNumber={localIdentifier?.copyValue}
         bic={bic}
         onClose={() => setAccountInfoShareOpen(false)}
       />
@@ -103,9 +127,17 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
       <AccountNameFlow
         host={host}
         currentName={accountTitle}
+        maxLength={capabilities.nickname.maxLength}
         onClose={() => setAccountNameOpen(false)}
         onSave={name => {
-          if (saveAccountNameOverride(account.id, name)) host.onChanged();
+          if (
+            saveAccountNameOverride(
+              account.id,
+              name,
+              capabilities.nickname.maxLength,
+            )
+          )
+            host.onChanged();
         }}
       />
     );
@@ -152,7 +184,7 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
         </View>
         <View style={styles.content}>
           <View style={styles.menu}>
-            {ACCOUNT_OPTION_ITEMS.map(item => (
+            {optionItems.map(item => (
               <Pressable
                 key={item.id}
                 testID={`ro-account-option-${item.id}`}
@@ -184,7 +216,10 @@ export default function RoBaselineAccountOptions(host: CurrentScreenProps) {
                           ? 'statement'
                           : item.id === 'change-account-name'
                             ? 'change-name'
-                            : item.id
+                            : item.id === 'standing-orders' ||
+                                item.id === 'direct-debit'
+                              ? 'statement'
+                              : item.id
                     }`}
                     size={20}
                     color={host.tokens.text}

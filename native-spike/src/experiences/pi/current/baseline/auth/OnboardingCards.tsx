@@ -406,6 +406,7 @@ export function OnboardingCards({
           )}
           <View style={s.dropdown}>
             <BaselineDropdownField
+              alignChevronWithField
               label="Card atasat la contul de"
               value={values[accountKey] || ''}
               options={options}
@@ -539,6 +540,7 @@ export function OnboardingCards({
             ))}
             <View style={s.dropdown}>
               <BaselineDropdownField
+                alignChevronWithField
                 label="Card atasat la contul de"
                 value={replacementAccount}
                 options={options}
@@ -612,6 +614,7 @@ export function OnboardingCardConfiguration({
           />
           <View style={s.dropdown}>
             <BaselineDropdownField
+              alignChevronWithField
               label="Selecteaza adresa"
               value={values.deliveryAddress || ''}
               options={DELIVERY_ADDRESSES.map(address => ({

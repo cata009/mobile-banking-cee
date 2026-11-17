@@ -158,6 +158,7 @@ export function CashLoanOtherIncome(p: CashLoanPageProps) {
             title={row.type}
             description={row.amount}
             trailingAccessory="chevron"
+            style={{ paddingLeft: 0, paddingRight: 0 }}
             onPress={() => {
               p.onChange('incomeType', row.type);
               p.onChange('monthlyIncome', row.amount);

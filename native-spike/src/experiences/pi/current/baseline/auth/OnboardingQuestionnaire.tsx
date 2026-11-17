@@ -66,6 +66,7 @@ export function OnboardingQuestionnaire({
   const select = (key: SheetKey, label: string) => (
     <View style={s.dropdown}>
       <BaselineDropdownField
+        alignChevronWithField
         label={label}
         value={values[key] || ''}
         options={SHEETS[key].options.map((value, index) => ({

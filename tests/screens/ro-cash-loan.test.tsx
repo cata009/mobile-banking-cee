@@ -65,6 +65,32 @@ async function clearNativeLoanDraft() {
   await click('Reîncepe fluxul')
   reset.unmount()
 }
+it('updates the preliminary offer when the amount, period and insurance change', async () => {
+  mount('loan-preliminary')
+  const label = await screen.findByText('RATA LUNARA CREDIT')
+  const installment = label.parentElement!
+  const initial = installment.textContent
+  const decreases = screen.getAllByRole('button', { name: 'Decrease value' })
+  await nativePress(decreases[0]!)
+  await waitFor(() => expect(screen.getByText('39.500 LEI')).toBeInTheDocument())
+  expect(installment.textContent).not.toBe(initial)
+  const afterAmount = installment.textContent
+  await nativePress(decreases[1]!)
+  await waitFor(() => expect(installment.textContent).not.toBe(afterAmount))
+  const afterPeriod = installment.textContent
+  await nativePress(screen.getByRole('radio', { name: /NU DORESC ASIGURARE PENTRU CREDIT/ }))
+  await waitFor(() => expect(installment.textContent).not.toBe(afterPeriod))
+})
+it('aligns financial dropdown chevrons with the field and opens their choices', async () => {
+  mount('loan-financial')
+  const trigger = await screen.findByRole('button', { name: 'Open Statut Profesional' })
+  expect(trigger.parentElement).toHaveStyle({ position: 'absolute', right: '0px' })
+  expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await nativePress(trigger)
+  expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  expect(screen.getByRole('checkbox', { name: 'ANGAJAT' })).toBeInTheDocument()
+})
 it('rejects a draft that expires between phone verification and the recovery OTP', async () => {
   await clearNativeLoanDraft()
   const expiresAt = Date.now() + 60000
@@ -241,7 +267,7 @@ it('completes the connected credit journey through the shared identification and
   await click()
   await click()
   const branches = await screen.findByRole('dialog')
-  fireEvent.focus(within(branches).getByRole('textbox', { name: 'Caută' }))
+  fireEvent.focus(within(branches).getByRole('searchbox', { name: 'Caută' }))
   fireEvent.click(await within(branches).findByRole('button', { name: /BRANCH ATM NAME 1/ }))
   await click('Alege Sucursala')
   await screen.findByRole('heading', { name: 'Contractul tău' }, { timeout: 5000 })
@@ -358,6 +384,13 @@ it('adds another income without losing the previously declared income entries', 
   await click()
   expect(await screen.findByRole('button', { name: 'Pensie militara' })).toHaveTextContent('2500')
   expect(screen.getByRole('button', { name: 'Diurnă' })).toHaveTextContent('2.000')
+})
+it('aligns income summary rows with the section rather than adding horizontal padding', async () => {
+  mount('loan-income-summary')
+  const row = await screen.findByRole('button', { name: 'Diurnă' })
+  expect(row).toHaveStyle({ paddingLeft: '0px', paddingRight: '0px' })
+  await nativePress(row)
+  expect(await screen.findByRole('button', { name: 'Open Alte tipuri de venit' })).toBeInTheDocument()
 })
 it('uses the source recommended-insurance panel and removes it when insurance is declined', async () => {
   mount('loan-insurance-recommended')

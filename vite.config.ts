@@ -18,7 +18,6 @@ function figmaAssetResolver(): Plugin {
 }
 
 export default defineConfig({
-  worker: { format: 'es' },
   server: {
     port: Number(process.env.PORT) || 5173,
     proxy: {

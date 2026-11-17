@@ -142,7 +142,8 @@ describe('PRIME reference in Flows', () => {
     )
     await asyncNativeReady(rendered.container)
     expect(screen.getByRole('heading', { name: 'Your Homepage' })).toBeInTheDocument()
-    expect(screen.getByText('Total Owed')).toBeInTheDocument()
+    // Czech Baseline pairs available funds with the ledger balance.
+    expect(screen.getByText('Total balance')).toBeInTheDocument()
     fireEvent.click(await screen.findByRole('button', { name: 'Prime' }))
     await waitFor(() => expect(go).toHaveBeenCalledWith('prime-advisor'))
   })

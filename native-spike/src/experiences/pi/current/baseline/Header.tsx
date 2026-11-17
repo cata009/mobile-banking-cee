@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { PrimeDiamondMark } from '@/app/components/prime/PrimeDiamondMark';
+import {
+  DEMO_UNREAD_MESSAGES,
+  homeHeaderUsesContact,
+} from '@/features/products/homeSurfaces';
 import type { CurrentScreenProps } from '../contracts';
 import { BaselineL1Header } from '../../../../universal/BaselineL1Header';
 import {
@@ -58,15 +62,25 @@ export function BaselineHomeHeader({
             </Pressable>
           )}
           <BaselineHeaderActionRail>
-            <BaselineHeaderActionButton
-              icon="profile"
-              label="Profile"
-              onPress={host.onProfile}
-              dark={dark}
-            />
+            {homeHeaderUsesContact(host.country) ? (
+              <BaselineHeaderActionButton
+                icon="contact-phone"
+                label="Contact us"
+                onPress={() => host.onNavigate({ screen: 'contacts' })}
+                dark={dark}
+              />
+            ) : (
+              <BaselineHeaderActionButton
+                icon="profile"
+                label="Profile"
+                onPress={host.onProfile}
+                dark={dark}
+              />
+            )}
             <BaselineHeaderActionButton
               icon="messages"
               label="Messages"
+              badgeCount={DEMO_UNREAD_MESSAGES}
               onPress={() => host.onNavigate({ screen: 'messages' })}
               dark={dark}
             />

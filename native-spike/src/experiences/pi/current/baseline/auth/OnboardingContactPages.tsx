@@ -11,7 +11,7 @@ import { BaselineNavigationRow } from '../../../../../universal/BaselineNavigati
 import { BaselineNavigationLink } from '../../../../../universal/BaselineNavigationLink';
 import { ToggleButton } from '../../../../../universal/ToggleButton';
 import { Text } from '../../../../../universal/Typography';
-import prefixFlag from '@/assets/pi/ro/onboarding/romanian-prefix.svg';
+import { CountryFlag } from '../../../../../universal/CountryFlag';
 import verifiedIcon from '@/assets/pi/ro/onboarding/contact-verified.svg';
 import { sourceColor } from '../../../../../universal/sourceColor';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
@@ -129,7 +129,7 @@ export function OnboardingContactInput({
         <View style={s.prefix}>
           <Text style={s.helper}>Prefix</Text>
           <View style={s.flagRow}>
-            <AssetGlyph asset={prefixFlag} width={24} height={16} />
+            <CountryFlag country="RO" size={24} />
             <Text style={s.body}>+40 România</Text>
           </View>
         </View>

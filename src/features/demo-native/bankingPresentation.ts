@@ -26,6 +26,10 @@ export interface NativeCardSecurityPresentation {
 export interface NativeBankingPresentation {
   /** Optional security entry composed into the existing Home summary carousel. */
   homeSecurityNotice?: { title: string; description: string; tagLabel?: string }
+  /** Accounts with status BLOCKED: payments and transfers are disabled, details and nickname stay available. */
+  blockedAccountIds?: readonly string[]
+  /** Unresolved actions for the Home header carousel (3DS, PSD2 refusals, signatures). */
+  homePendingActions?: readonly import('@/features/products/homeSurfaces').PendingAction[]
   /** Optional executable routes for security actions; absence preserves inert source actions. */
   cardSecurityRoutes?: { block: NativeDemoRoute; replacement?: NativeDemoRoute }
   /** Flow-owned controls for the Native Card security preview. */

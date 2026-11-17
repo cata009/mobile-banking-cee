@@ -37,6 +37,41 @@ async function nativePress(button: HTMLElement) {
   fireEvent.click(button)
 }
 
+it('uses the shared branch search and filters and clears the results', async () => {
+  mount('RO', 'branch-list')
+  const dialog = await screen.findByRole('dialog')
+  const search = within(dialog).getByRole('searchbox', { name: 'Caută' })
+  fireEvent.change(search, { target: { value: '2' } })
+  expect(await within(dialog).findByRole('button', { name: /BRANCH ATM NAME 2/ })).toBeInTheDocument()
+  expect(within(dialog).queryByRole('button', { name: /BRANCH ATM NAME 1/ })).not.toBeInTheDocument()
+  await nativePress(within(dialog).getByRole('button', { name: 'Clear search results' }))
+  await waitFor(() => expect(search).toHaveValue(''))
+  expect(within(dialog).getByRole('button', { name: /BRANCH ATM NAME 1/ })).toBeInTheDocument()
+})
+
+it('aligns questionnaire dropdown chevrons with the field and opens their choices', async () => {
+  mount('RO', 'additional')
+  const trigger = await screen.findByRole('button', { name: 'Open 3. Care este sursa fondurilor tale' })
+  expect(trigger.parentElement).toHaveStyle({ position: 'absolute', right: '0px' })
+  expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await nativePress(trigger)
+  expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  expect(screen.getByRole('checkbox', { name: 'SALARIU' })).toBeInTheDocument()
+})
+
+it('renders the Romanian flag and a code rail that can shrink to its container', async () => {
+  const phone = mount('RO', 'phone')
+  const prefix = (await screen.findByText('+40 România')).parentElement!
+  expect(prefix.querySelector('svg')).toBeInTheDocument()
+  expect(prefix.querySelectorAll('svg path, svg rect').length).toBeGreaterThan(1)
+  phone.unmount()
+  mount('RO', 'email-code')
+  const digit = await screen.findByRole('textbox', { name: 'Cod de verificare digit 1 of 6' })
+  expect(digit).toHaveStyle({ flexShrink: '1', minWidth: '0px' })
+  expect(digit.parentElement).toHaveStyle({ width: '100%' })
+})
+
 it('uses the source photograph and keeps recommendation off the introduction form', async () => {
   const { container } = mount()
   await screen.findByRole('button', { name: 'AM COD DE RECOMANDARE' })
@@ -230,7 +265,7 @@ it('completes the connected CR journey through contact verification, identity, q
   await click('Continuă')
   await click('Continuă')
   const branchDialog = await screen.findByRole('dialog')
-  fireEvent.focus(within(branchDialog).getByRole('textbox', { name: 'Caută' }))
+  fireEvent.focus(within(branchDialog).getByRole('searchbox', { name: 'Caută' }))
   fireEvent.click(await within(branchDialog).findByRole('button', { name: /BRANCH ATM NAME 1/ }))
   fireEvent.click(await screen.findByRole('button', { name: 'Alege Sucursala' }))
   await screen.findByText('MARKETING PENTRU PRODUSELE UNICREDIT')

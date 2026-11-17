@@ -122,7 +122,8 @@ describe('Bosnia complete fraud flow', () => {
     await asyncNativeReady(document.body)
     expect(screen.queryByText('Suspicious activity')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Show security alert' })).toBeNull()
-    expect(screen.getByText('Total available')).toBeTruthy()
+    // Bosnia shows the primary account balance as its first indicator.
+    expect(screen.getByText('Account Balance')).toBeTruthy()
   })
   it('restarts the prototype with all three activities unreviewed and the card active', () => {
     const view = render(<FraudJourney initialScreen="fraud-claim-sent" controlledScreen="fraud-claim-sent" />)
