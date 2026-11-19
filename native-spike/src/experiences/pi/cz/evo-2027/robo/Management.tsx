@@ -19,6 +19,12 @@ import {
 } from '@/features/investments/robo/demoClock';
 import { canReviewRoboTopUp } from '@/features/investments/robo/flowSelectors';
 import {
+  buildRoboTopUpProjection,
+  getRoboTopUpBalanceCheck,
+  validateRoboTopUpAmount,
+  type RoboTopUpProjection,
+} from '@/features/investments/robo/topUpProjection';
+import {
   getFundingFieldVisibility,
   formatCzkInteger,
 } from '@/features/investments/robo/model';
@@ -60,7 +66,12 @@ import type { CurrentAccount } from '@/data/products';
 import type { CurrentScreenProps } from '../../../current/contracts';
 import fundingRadioSelected from '@/assets/investments/robo/funding-radio-selected.svg';
 import fundingRadioUnselected from '@/assets/investments/robo/funding-radio-unselected.svg';
-import fundingChevronDown from '@/assets/investments/robo/funding-chevron-down.svg';
+import balanceWarning from '@/../public/assets/investments/reject-warning.svg';
+import {
+  CashAccountField,
+  CashAccountIntroduction,
+  CashAccountSheet,
+} from './CashAccount';
 import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import { FormField } from '../../../../../universal/FormField';
 import { BaselineTextField } from '../../../../../universal/BaselineTextField';
@@ -105,6 +116,7 @@ import { useCurrentInvestmentHost } from '../investments/hostAdapter';
 import { DEFAULT_CZECH_COUNTS } from '../contracts';
 import { PlanFields } from './CreationScreens';
 import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
+import { TopUpProjection } from './TopUpProjection';
 
 function FundingAmount({
   label,
@@ -185,6 +197,11 @@ export function Management({
   release?: CurrentScreenProps['release'];
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
 }) {
+  const isCzRobo = release === 'release-future-cz-robo';
+  const fundingAccounts =
+    isCzRobo && mode === 'add-money'
+      ? currentAccounts.filter(account => account.currency === 'CZK')
+      : currentAccounts;
   const seed = {
     mode,
     name: goal.name,
@@ -201,6 +218,9 @@ export function Management({
     createRoboManagementState,
   );
   const [topUpTermsAccepted, setTopUpTermsAccepted] = useState(false);
+  const [projectionOpen, setProjectionOpen] = useState(false);
+  const [balanceErrorOpen, setBalanceErrorOpen] = useState(false);
+  const lastForecast = useRef<RoboTopUpProjection | null>(null);
   const [planState, dispatchPlan] = useReducer(roboReducer, goal, initial =>
     createRoboState(initial, clock),
   );
@@ -210,8 +230,12 @@ export function Management({
       Number(goal.targetInteger.replace(/\D/g, '')) ||
     (plan.horizonYears || Number(plan.manualHorizon)) !==
       (goal.horizonYears ?? 0);
-  const [accountId, setAccountId] = useState(currentAccounts[0]?.id ?? '');
-  const [draftAccountId, setDraftAccountId] = useState(accountId);
+  const [accountId, setAccountId] = useState(
+    () =>
+      fundingAccounts.find(account => account.id === goal.cashAccountId)?.id ??
+      fundingAccounts[0]?.id ??
+      '',
+  );
   const { width, height } = useDemoViewport();
   const closeCashAccounts = useCallback(
     () => dispatch({ type: 'account-sheet-toggled', open: false }),
@@ -223,10 +247,8 @@ export function Management({
   );
   const openStartDate = () =>
     dispatch({ type: 'date-picker-toggled', open: true });
-  const openCashAccounts = () => {
-    setDraftAccountId(accountId);
+  const openCashAccounts = () =>
     dispatch({ type: 'account-sheet-toggled', open: true });
-  };
   const [modelHolding, setModelHolding] =
     useState<InvestmentBasketFundHolding | null>(null);
   const [modelOpen, setModelOpen] = useState(false);
@@ -240,7 +262,7 @@ export function Management({
       )
     : undefined;
   const selectedAccount =
-    currentAccounts.find(account => account.id === accountId) ?? null;
+    fundingAccounts.find(account => account.id === accountId) ?? null;
   const historyBackHandler = useRef<(() => boolean) | null>(null);
   const registerHistoryBackHandler = useCallback(
     (handler: (() => boolean) | null) => {
@@ -268,7 +290,6 @@ export function Management({
     },
     release,
   );
-  const isCzRobo = release === 'release-future-cz-robo';
   const currentSeed = useRef(seed);
   currentSeed.current = seed;
   useEffect(() => {
@@ -277,8 +298,15 @@ export function Management({
       seed: currentSeed.current,
     });
     if (mode === 'add-money') setTopUpTermsAccepted(false);
+    setProjectionOpen(false);
+    setBalanceErrorOpen(false);
+    lastForecast.current = null;
   }, [mode]);
   useInvestmentBack(() => {
+    if (balanceErrorOpen) {
+      setBalanceErrorOpen(false);
+      return true;
+    }
     if (state.recurringDatePickerOpen) {
       closeStartDate();
       return true;
@@ -304,6 +332,10 @@ export function Management({
         onMode('menu');
         return true;
       }
+      if (projectionOpen) {
+        setProjectionOpen(false);
+        return true;
+      }
     }
     if (mode === 'withdraw' && state.withdrawal.kind === 'selling')
       return false;
@@ -315,14 +347,47 @@ export function Management({
     monthly = fields.monthlyContribution
       ? Number(state.topUp.monthlyAmount)
       : 0;
-  const canReview = canReviewRoboTopUp(
-    state.topUp.method,
+  const draft = {
+    method: state.topUp.method,
     initial,
     monthly,
-    state.topUp.date,
-    !!selectedAccount,
-    clock,
-  );
+    date: state.topUp.date,
+  };
+  const canPreview =
+    (!fields.initialAmount || validateRoboTopUpAmount(initial, 'initial')) &&
+    (!fields.monthlyContribution ||
+      validateRoboTopUpAmount(monthly, 'monthly')) &&
+    canReviewRoboTopUp(draft.method, initial, monthly, draft.date, true, clock);
+  const orderAccount = selectedAccount;
+  const canReview =
+    (!isCzRobo || canPreview) &&
+    canReviewRoboTopUp(
+      state.topUp.method,
+      initial,
+      monthly,
+      state.topUp.date,
+      !!orderAccount,
+      clock,
+    );
+  const balanceCheck = getRoboTopUpBalanceCheck(draft, orderAccount, clock);
+  const forecast =
+    projectionOpen && canPreview
+      ? buildRoboTopUpProjection(goal, portfolio, draft, clock)
+      : null;
+  useEffect(() => {
+    if (forecast) lastForecast.current = forecast;
+  }, [forecast]);
+  const displayedForecast = forecast ?? lastForecast.current;
+  const checkBalance = () => {
+    if (!isCzRobo || balanceCheck.kind === 'ready') return true;
+    setBalanceErrorOpen(true);
+    return false;
+  };
+  const openReview = () => {
+    if (!canReview || !checkBalance()) return;
+    setTopUpTermsAccepted(false);
+    dispatch({ type: 'top-up-reviewed', valid: true });
+  };
   const iso = (date: Date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
       2,
@@ -530,8 +595,7 @@ export function Management({
         <Notice text="Withdraw all holdings and wait for the sale orders to complete before closing the goal." />
       </Page>
     );
-  if (mode === 'withdraw' && state.withdrawal.kind === 'selling')
-  {
+  if (mode === 'withdraw' && state.withdrawal.kind === 'selling') {
     const onSaleComplete = (execution: BaselineSellExecution) => {
       const updated = applyRoboSale(
         goal,
@@ -621,7 +685,7 @@ export function Management({
         contentTop={4}
       >
         {products.length ? (
-          products.map(product => (
+          products.map(product =>
             isCzRobo && product.security ? (
               <CzRoboSecurityRow
                 key={product.id}
@@ -662,8 +726,8 @@ export function Management({
                     : undefined
                 }
               />
-            )
-          ))
+            ),
+          )
         ) : (
           <View testID="cz-withdraw-empty">
             <Copy>No investments to withdraw.</Copy>
@@ -686,6 +750,11 @@ export function Management({
         onBack={() => dispatch({ type: 'top-up-back', to: 'review' })}
         onExit={onExit}
         onSigned={() => {
+          if (!checkBalance()) {
+            dispatch({ type: 'top-up-back', to: 'review' });
+            dispatch({ type: 'top-up-back', to: 'amount' });
+            return;
+          }
           if (!canReview || !selectedAccount) return;
           onGoalUpdated(
             applyRoboTopUp(
@@ -727,11 +796,7 @@ export function Management({
         testID="cz-top-up-success"
       />
     );
-  if (
-    isCzRobo &&
-    mode === 'add-money' &&
-    state.topUp.kind === 'review'
-  )
+  if (isCzRobo && mode === 'add-money' && state.topUp.kind === 'review')
     return (
       <BaselineInvestmentFrame
         host={historyHost}
@@ -746,14 +811,14 @@ export function Management({
             host={historyHost}
             label={fields.initialAmount ? 'Buy' : 'Set up monthly investment'}
             disabled={!canReview || !topUpTermsAccepted}
-            onPress={() => dispatch({ type: 'top-up-sign-requested' })}
+            onPress={() => {
+              if (checkBalance()) dispatch({ type: 'top-up-sign-requested' });
+              else dispatch({ type: 'top-up-back', to: 'amount' });
+            }}
           />
         }
       >
-        <BaselineInvestmentSection
-          host={historyHost}
-          title="ORDER SUMMARY"
-        />
+        <BaselineInvestmentSection host={historyHost} title="ORDER SUMMARY" />
         <BaselineInvestmentField
           host={historyHost}
           label="Product"
@@ -783,12 +848,7 @@ export function Management({
             <BaselineInvestmentField
               host={historyHost}
               label="Estimated amount"
-              value={formatInvestmentMoney(
-                initial,
-                'CZ',
-                'CZK',
-                amountsHidden,
-              )}
+              value={formatInvestmentMoney(initial, 'CZ', 'CZK', amountsHidden)}
             />
           </>
         ) : null}
@@ -804,12 +864,7 @@ export function Management({
             <BaselineInvestmentField
               host={historyHost}
               label="Monthly contribution"
-              value={formatInvestmentMoney(
-                monthly,
-                'CZ',
-                'CZK',
-                amountsHidden,
-              )}
+              value={formatInvestmentMoney(monthly, 'CZ', 'CZK', amountsHidden)}
             />
             <BaselineInvestmentField
               host={historyHost}
@@ -824,11 +879,7 @@ export function Management({
           label="Cash account"
           value={selectedAccount?.name ?? 'Not available'}
         />
-        <OrderDocuments
-          currency="CZK"
-          hideSectionSeparators
-          bleed={false}
-        />
+        <OrderDocuments currency="CZK" hideSectionSeparators bleed={false} />
         <InvestmentTerms
           host={historyHost}
           value={topUpTermsAccepted}
@@ -903,221 +954,340 @@ export function Management({
         <Notice text="The goal value will update after the order is executed." />
       </Page>
     );
+  const projectionAccount = (
+    <CashAccountField
+      account={orderAccount}
+      amountsHidden={amountsHidden}
+      disabled={!fundingAccounts.length}
+      expanded={state.cashAccountSheetOpen}
+      onOpen={openCashAccounts}
+    />
+  );
   return (
     <>
-      <Page
-        {...page}
-        kind={mode}
-        title={
-          mode === 'monthly'
-            ? 'Manage monthly investment'
-            : state.topUp.method === 'one-off'
-              ? 'Add money to your goal'
-              : 'Choose how to invest'
-        }
-        description={
-          mode === 'monthly'
-            ? 'Change the amount or next date. Stopping monthly investments will not close your goal or sell existing holdings.'
-            : 'Choose one option. You can invest once, monthly, or combine both.'
-        }
-        descriptionStyle={
-          mode === 'add-money' ? fundingStyles.description : undefined
-        }
-        contentTop={mode === 'add-money' ? 32 : 16}
-        footer={
-          <Button
-            canonical={mode === 'add-money'}
-            label={mode === 'monthly' ? 'Review changes' : 'Review investment'}
-            disabled={mode === 'add-money' && !canReview}
-            onPress={() => {
-              if (mode === 'add-money')
-                dispatch({ type: 'top-up-reviewed', valid: canReview });
-              else onBack();
-            }}
-          />
-        }
-      >
-        <View style={mode === 'add-money' ? fundingStyles.form : undefined}>
-          {mode === 'add-money' ? (
-            <View
-              role="radiogroup"
-              accessibilityLabel="Contribution plan"
-              style={fundingStyles.contributionOptions}
-            >
-              {ROBO_FUNDING_OPTIONS.map(option => (
-                <Choice
-                  key={option.id}
-                  variant="radio"
-                  radioSize={32}
-                  radioIcon={
-                    <AssetGlyph
-                      asset={
-                        state.topUp.method === option.id
-                          ? fundingRadioSelected
-                          : fundingRadioUnselected
-                      }
-                      size={32}
-                    />
-                  }
-                  title={option.title}
-                  description={option.description}
-                  label={`${option.title}. ${option.description}`}
-                  selected={state.topUp.method === option.id}
-                  style={fundingStyles.contributionOption}
-                  titleStyle={fundingStyles.contributionTitle}
-                  descriptionStyle={fundingStyles.contributionDescription}
-                  onPress={() =>
-                    dispatch({ type: 'method-changed', method: option.id })
-                  }
-                />
-              ))}
-            </View>
-          ) : null}
-          <View style={mode === 'add-money' ? fundingStyles.fields : undefined}>
-            {fields.initialAmount && mode === 'add-money' ? (
-              <FundingAmount
-                label="Amount to invest now"
-                value={state.topUp.amount}
-                onChange={value =>
-                  dispatch({
-                    type: 'amount-changed',
-                    value,
-                  })
+      {mode === 'add-money' && projectionOpen && displayedForecast ? (
+        <TopUpProjection
+          name={goal.name}
+          forecast={displayedForecast}
+          amountsHidden={amountsHidden}
+          initial={
+            fields.initialAmount
+              ? {
+                  value: state.topUp.amount,
+                  onChange: value =>
+                    dispatch({ type: 'amount-changed', value }),
                 }
-                suggestions={['25000', '35000', '50000']}
+              : undefined
+          }
+          monthly={
+            fields.monthlyContribution
+              ? {
+                  value: state.topUp.monthlyAmount,
+                  onChange: value =>
+                    dispatch({ type: 'monthly-amount-changed', value }),
+                }
+              : undefined
+          }
+          date={draft.date}
+          account={projectionAccount}
+          canReview={canReview}
+          onReview={openReview}
+          onBack={() => setProjectionOpen(false)}
+        />
+      ) : (
+        <Page
+          {...page}
+          kind={mode}
+          title={
+            mode === 'monthly'
+              ? 'Manage monthly investment'
+              : state.topUp.method === 'one-off'
+                ? 'Add money to your goal'
+                : 'Choose how to invest'
+          }
+          description={
+            mode === 'monthly'
+              ? 'Change the amount or next date. Stopping monthly investments will not close your goal or sell existing holdings.'
+              : 'Choose one option. You can invest once, monthly, or combine both.'
+          }
+          descriptionStyle={
+            mode === 'add-money' ? fundingStyles.description : undefined
+          }
+          contentTop={mode === 'add-money' ? 32 : 16}
+          footer={
+            <View style={fundingStyles.actionStack}>
+              {mode === 'add-money' && isCzRobo ? (
+                <Button
+                  label="Preview impact"
+                  secondary
+                  disabled={!canPreview}
+                  onPress={() => setProjectionOpen(true)}
+                />
+              ) : null}
+              <Button
+                canonical={mode === 'add-money'}
+                label={
+                  mode === 'monthly' ? 'Review changes' : 'Review investment'
+                }
+                disabled={mode === 'add-money' && !canReview}
+                onPress={() => {
+                  if (mode === 'add-money') openReview();
+                  else onBack();
+                }}
               />
+            </View>
+          }
+        >
+          <View style={mode === 'add-money' ? fundingStyles.form : undefined}>
+            {mode === 'add-money' ? (
+              <View
+                role="radiogroup"
+                accessibilityLabel="Contribution plan"
+                style={fundingStyles.contributionOptions}
+              >
+                {ROBO_FUNDING_OPTIONS.map(option => (
+                  <Choice
+                    key={option.id}
+                    variant="radio"
+                    radioSize={32}
+                    radioIcon={
+                      <AssetGlyph
+                        asset={
+                          state.topUp.method === option.id
+                            ? fundingRadioSelected
+                            : fundingRadioUnselected
+                        }
+                        size={32}
+                      />
+                    }
+                    title={option.title}
+                    description={option.description}
+                    label={`${option.title}. ${option.description}`}
+                    selected={state.topUp.method === option.id}
+                    style={fundingStyles.contributionOption}
+                    titleStyle={fundingStyles.contributionTitle}
+                    descriptionStyle={fundingStyles.contributionDescription}
+                    onPress={() =>
+                      dispatch({ type: 'method-changed', method: option.id })
+                    }
+                  />
+                ))}
+              </View>
             ) : null}
-            {fields.monthlyContribution || mode === 'monthly' ? (
-              <>
-                {mode === 'add-money' ? (
-                  <FundingAmount
-                    label="Monthly contribution"
-                    value={state.topUp.monthlyAmount}
-                    onChange={value =>
-                      dispatch({ type: 'monthly-amount-changed', value })
-                    }
-                    suggestions={['500', '1000', '2000']}
-                  />
-                ) : (
-                  <FormField
-                    tokens={czInvestmentTokens}
-                    label="Monthly contribution"
-                    value={state.topUp.monthlyAmount}
-                    onChange={value =>
-                      dispatch({
-                        type: 'monthly-amount-changed',
-                        value: value.replace(/\D/g, ''),
-                      })
-                    }
-                    inputProps={{ keyboardType: 'number-pad' }}
-                  />
-                )}
-                {mode === 'monthly' ? (
-                  <DateField
-                    tokens={czInvestmentTokens}
-                    label="Monthly contribution starts"
-                    value={fundingDate ? iso(fundingDate) : state.topUp.date}
-                    calendarIcon={
-                      <SourceCustomIcon name="insurance-calendar" size={32} />
-                    }
-                    onChange={value =>
-                      dispatch({ type: 'date-changed', value: fromIso(value) })
-                    }
-                    min={minimumDate}
-                    locale="en-GB"
-                    error={
-                      !isRoboFundingDateAllowed(state.topUp.date, clock)
-                        ? 'Choose today or a later date.'
-                        : undefined
-                    }
-                  />
-                ) : state.topUp.method === 'regular' ? (
-                  <View style={fundingStyles.dateField}>
-                    <BaselineTextField
-                      label="Start date"
-                      ariaLabel="Select start date"
-                      value={displayIsoDate(
-                        fundingDate ? iso(fundingDate) : state.topUp.date,
-                      )}
-                      onChange={() => undefined}
-                      readOnly
-                      trailingIconName="prime-book-appointment"
-                      trailingIconSize={24}
-                      trailingIconLayout="compact"
-                      trailingIconAction={{
-                        ariaLabel: 'Select start date',
-                        onClick: openStartDate,
-                      }}
-                      onActivate={openStartDate}
-                      selectionControl={{
-                        expanded: state.recurringDatePickerOpen,
-                        onPress: openStartDate,
-                      }}
-                      errorText={
+            <View
+              style={mode === 'add-money' ? fundingStyles.fields : undefined}
+            >
+              {fields.initialAmount && mode === 'add-money' ? (
+                <FundingAmount
+                  label="Amount to invest now"
+                  value={state.topUp.amount}
+                  onChange={value =>
+                    dispatch({
+                      type: 'amount-changed',
+                      value,
+                    })
+                  }
+                  suggestions={['25000', '35000', '50000']}
+                />
+              ) : null}
+              {fields.monthlyContribution || mode === 'monthly' ? (
+                <>
+                  {mode === 'add-money' ? (
+                    <FundingAmount
+                      label="Monthly contribution"
+                      value={state.topUp.monthlyAmount}
+                      onChange={value =>
+                        dispatch({ type: 'monthly-amount-changed', value })
+                      }
+                      suggestions={['500', '1000', '2000']}
+                    />
+                  ) : (
+                    <FormField
+                      tokens={czInvestmentTokens}
+                      label="Monthly contribution"
+                      value={state.topUp.monthlyAmount}
+                      onChange={value =>
+                        dispatch({
+                          type: 'monthly-amount-changed',
+                          value: value.replace(/\D/g, ''),
+                        })
+                      }
+                      inputProps={{ keyboardType: 'number-pad' }}
+                    />
+                  )}
+                  {mode === 'monthly' ? (
+                    <DateField
+                      tokens={czInvestmentTokens}
+                      label="Monthly contribution starts"
+                      value={fundingDate ? iso(fundingDate) : state.topUp.date}
+                      calendarIcon={
+                        <SourceCustomIcon name="insurance-calendar" size={32} />
+                      }
+                      onChange={value =>
+                        dispatch({
+                          type: 'date-changed',
+                          value: fromIso(value),
+                        })
+                      }
+                      min={minimumDate}
+                      locale="en-GB"
+                      error={
                         !isRoboFundingDateAllowed(state.topUp.date, clock)
                           ? 'Choose today or a later date.'
                           : undefined
                       }
                     />
+                  ) : state.topUp.method === 'regular' ? (
+                    <View style={fundingStyles.dateField}>
+                      <BaselineTextField
+                        label="Start date"
+                        ariaLabel="Select start date"
+                        value={displayIsoDate(
+                          fundingDate ? iso(fundingDate) : state.topUp.date,
+                        )}
+                        onChange={() => undefined}
+                        readOnly
+                        trailingIconName="prime-book-appointment"
+                        trailingIconSize={24}
+                        trailingIconLayout="compact"
+                        trailingIconAction={{
+                          ariaLabel: 'Select start date',
+                          onClick: openStartDate,
+                        }}
+                        onActivate={openStartDate}
+                        selectionControl={{
+                          expanded: state.recurringDatePickerOpen,
+                          onPress: openStartDate,
+                        }}
+                        errorText={
+                          !isRoboFundingDateAllowed(state.topUp.date, clock)
+                            ? 'Choose today or a later date.'
+                            : undefined
+                        }
+                      />
+                    </View>
+                  ) : null}
+                </>
+              ) : null}
+              <View>
+                {mode === 'add-money' ? <CashAccountIntroduction /> : null}
+                {isCzRobo &&
+                mode === 'add-money' &&
+                !selectedAccount &&
+                fundingAccounts.length
+                  ? projectionAccount
+                  : null}
+                {selectedAccount ? (
+                  <View
+                    style={
+                      mode === 'add-money'
+                        ? fundingStyles.accountField
+                        : undefined
+                    }
+                  >
+                    <CashAccountField
+                      account={selectedAccount}
+                      amountsHidden={amountsHidden}
+                      announceAccountName
+                      expanded={state.cashAccountSheetOpen}
+                      onOpen={openCashAccounts}
+                    />
                   </View>
                 ) : null}
-              </>
-            ) : null}
-            <View>
-              {mode === 'add-money' ? (
-                <View style={fundingStyles.accountIntroduction}>
-                  <Copy strong style={fundingStyles.accountHeading}>
-                    Choose the account to use
-                  </Copy>
-                  <Copy style={fundingStyles.accountExplanation}>
-                    We’ll use this account for your first and future
-                    investments.
-                  </Copy>
-                </View>
-              ) : null}
-              {selectedAccount ? (
-                <View
-                  style={
-                    mode === 'add-money'
-                      ? fundingStyles.accountField
-                      : undefined
-                  }
-                >
-                  <BaselineTextField
-                    label="Cash Account"
-                    ariaLabel={`Cash account, ${selectedAccount.name}`}
-                    value={displayRoboAccountNumber(
-                      selectedAccount.accountNumber,
-                      'CZ',
-                    )}
-                    onChange={() => undefined}
-                    readOnly
-                    trailingIcon={
-                      <AssetGlyph asset={fundingChevronDown} size={32} />
-                    }
-                    trailingIconSize={32}
-                    helperText={selectedAccount.name}
-                    helperText2={`Available balance ${formatInvestmentMoney(
-                      selectedAccount.balance,
-                      'CZ',
-                      selectedAccount.currency,
-                      amountsHidden,
-                    )}`}
-                    onActivate={openCashAccounts}
-                    selectionControl={{
-                      expanded: state.cashAccountSheetOpen,
-                      onPress: openCashAccounts,
-                    }}
-                  />
-                </View>
-              ) : null}
-              {!currentAccounts.length ? (
-                <Notice error text="No cash account is available." />
-              ) : null}
+                {!fundingAccounts.length ? (
+                  <Notice error text="No cash account is available." />
+                ) : null}
+              </View>
             </View>
           </View>
-        </View>
-      </Page>
+        </Page>
+      )}
+      {balanceErrorOpen ? (
+        <ModalPortal
+          visible
+          transparent
+          animationType="none"
+          onRequestClose={() => setBalanceErrorOpen(false)}
+        >
+          <BaselineBottomSheet
+            title={
+              balanceCheck.kind === 'insufficient'
+                ? 'Insufficient funds'
+                : 'Cash account unavailable'
+            }
+            onClose={() => setBalanceErrorOpen(false)}
+            width={width}
+            height={height}
+            hostedInModal
+            padding={24}
+            showCloseButton={false}
+            footer={
+              <View style={fundingStyles.balanceAction}>
+                <Button
+                  label="Edit amount or cash account"
+                  onPress={() => setBalanceErrorOpen(false)}
+                />
+              </View>
+            }
+          >
+            <View
+              style={fundingStyles.balanceArtwork}
+              importantForAccessibility="no-hide-descendants"
+              aria-hidden
+            >
+              <AssetGlyph asset={balanceWarning} size={80} />
+            </View>
+            {balanceCheck.kind === 'insufficient' && orderAccount ? (
+              <View style={fundingStyles.balanceBody}>
+                <Copy>
+                  Enter a lower amount or choose another cash account to
+                  continue.
+                </Copy>
+                <View style={fundingStyles.balanceDetails}>
+                  {[
+                    [
+                      'Cash account',
+                      displayRoboAccountNumber(
+                        orderAccount.accountNumber,
+                        'CZ',
+                      ),
+                    ],
+                    [
+                      'Amount to invest now',
+                      formatInvestmentMoney(
+                        balanceCheck.amountDue,
+                        'CZ',
+                        'CZK',
+                        amountsHidden,
+                      ),
+                    ],
+                    [
+                      'Available balance',
+                      formatInvestmentMoney(
+                        orderAccount.balance,
+                        'CZ',
+                        'CZK',
+                        amountsHidden,
+                      ),
+                    ],
+                  ].map(([label, value]) => (
+                    <View key={label} style={fundingStyles.balanceRow}>
+                      <Copy style={fundingStyles.balanceLabel}>{label}</Copy>
+                      <Copy strong style={fundingStyles.balanceValue}>
+                        {value}
+                      </Copy>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : (
+              <Copy>
+                Choose an eligible cash account with an available balance.
+              </Copy>
+            )}
+          </BaselineBottomSheet>
+        </ModalPortal>
+      ) : null}
       {state.recurringDatePickerOpen ? (
         <ModalPortal
           visible
@@ -1164,76 +1334,13 @@ export function Management({
         </ModalPortal>
       ) : null}
       {state.cashAccountSheetOpen ? (
-        <ModalPortal
-          visible
-          transparent
-          animationType="none"
-          onRequestClose={closeCashAccounts}
-        >
-          <BaselineBottomSheet
-            title="Select cash account"
-            closeLabel="Close cash accounts"
-            onClose={closeCashAccounts}
-            width={width}
-            height={height}
-            footer={
-              <View style={fundingStyles.sheetFooter}>
-                <Button
-                  canonical
-                  label="Select"
-                  disabled={
-                    !currentAccounts.some(
-                      account => account.id === draftAccountId,
-                    )
-                  }
-                  onPress={() => {
-                    if (
-                      !currentAccounts.some(
-                        account => account.id === draftAccountId,
-                      )
-                    )
-                      return;
-                    setAccountId(draftAccountId);
-                    closeCashAccounts();
-                  }}
-                />
-              </View>
-            }
-          >
-            <View
-              role="radiogroup"
-              accessibilityLabel="Select cash account"
-              style={fundingStyles.accountOptions}
-            >
-              {currentAccounts.map(account => {
-                const detail = displayRoboAccountNumber(
-                  account.accountNumber,
-                  'CZ',
-                );
-                const balance = formatInvestmentMoney(
-                  account.balance,
-                  'CZ',
-                  account.currency,
-                  amountsHidden,
-                );
-                return (
-                  <View key={account.id} style={fundingStyles.accountOption}>
-                    <Choice
-                      variant="radio"
-                      title={account.name}
-                      description={`${detail}\n${balance}`}
-                      label={`${account.name}, ${detail}, ${balance}`}
-                      selected={draftAccountId === account.id}
-                      onPress={() => setDraftAccountId(account.id)}
-                      titleStyle={fundingStyles.accountTitle}
-                      descriptionStyle={fundingStyles.accountDescription}
-                    />
-                  </View>
-                );
-              })}
-            </View>
-          </BaselineBottomSheet>
-        </ModalPortal>
+        <CashAccountSheet
+          accounts={fundingAccounts}
+          selectedId={accountId}
+          amountsHidden={amountsHidden}
+          onClose={closeCashAccounts}
+          onSelect={setAccountId}
+        />
       ) : null}
     </>
   );
@@ -1262,6 +1369,7 @@ const managementStyles = StyleSheet.create({
 });
 
 const fundingStyles = StyleSheet.create({
+  actionStack: { gap: 12 },
   description: { fontSize: 18, lineHeight: 24 },
   form: { gap: 32 },
   contributionOptions: { gap: 16 },
@@ -1281,9 +1389,6 @@ const fundingStyles = StyleSheet.create({
   suggestionLabel: { fontSize: 14, lineHeight: 16 },
   selectedSuggestionLabel: { color: czInvestmentTokens.inverse },
   dateField: { minHeight: 80 },
-  accountIntroduction: { gap: 16 },
-  accountHeading: { fontSize: 18, lineHeight: 21 },
-  accountExplanation: { fontSize: 16, lineHeight: 18 },
   accountField: {
     minHeight: 96,
     marginTop: 8,
@@ -1291,9 +1396,11 @@ const fundingStyles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 5,
   },
-  sheetFooter: { paddingTop: 8 },
-  accountOptions: { gap: 8 },
-  accountOption: { minHeight: 80, paddingHorizontal: 8, paddingVertical: 12 },
-  accountTitle: { fontSize: 18, lineHeight: 21 },
-  accountDescription: { color: czInvestmentTokens.muted },
+  balanceArtwork: { alignItems: 'center', marginBottom: 24 },
+  balanceBody: { gap: 16 },
+  balanceDetails: { gap: 8 },
+  balanceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
+  balanceLabel: { flex: 1, fontSize: 16, lineHeight: 20 },
+  balanceValue: { flex: 1, textAlign: 'right', fontSize: 16, lineHeight: 20 },
+  balanceAction: { marginTop: 24 },
 });

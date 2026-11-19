@@ -121,6 +121,14 @@ export function CzRoboFlow({
 }: CzRoboFlowProps) {
   const [clock] = useState(() => demoClock ?? getCurrentRoboDemoClock());
   const [basketDetailsOpen, setBasketDetailsOpen] = useState(false);
+  const [cashAccountId, setCashAccountId] = useState('');
+  const cashAccounts =
+    release === 'release-future-cz-robo'
+      ? currentAccounts.filter(account => account.currency === 'CZK')
+      : undefined;
+  const cashAccount = cashAccountId
+    ? cashAccounts?.find(account => account.id === cashAccountId)
+    : cashAccounts?.[0];
   const [state, dispatch] = useReducer(roboReducer, initialGoal, goal =>
     initialEvents.reduce(roboReducer, createRoboState(goal, clock)),
   );
@@ -267,6 +275,7 @@ export function CzRoboFlow({
                 returnTone: 'neutral',
                 targetInteger: formatCzkInteger(view.targetAmount || '0'),
                 targetDecimals: ',00 CZK',
+                ...(cashAccount ? { cashAccountId: cashAccount.id } : {}),
                 horizonYears: view.horizonYears || Number(view.manualHorizon),
                 startDate: start,
                 endDate: getRoboGoalEndDateFromStart(
@@ -461,6 +470,10 @@ export function CzRoboFlow({
         basketDetailsOpen={basketDetailsOpen}
         onBasketDetailsOpen={() => setBasketDetailsOpen(true)}
         onBasketDetailsClose={() => setBasketDetailsOpen(false)}
+        cashAccounts={cashAccounts}
+        cashAccount={cashAccount}
+        amountsHidden={amountsHidden}
+        onCashAccountSelected={setCashAccountId}
       />
     </RoboSurface>
   );
