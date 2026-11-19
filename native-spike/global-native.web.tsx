@@ -16,6 +16,9 @@ import { readSourceNativeRoute } from './src/app/sourceRouteInputs';
 import './web.css';
 import './global-native.css';
 
+const nativeRuntime = globalThis as typeof globalThis & { global?: typeof globalThis };
+nativeRuntime.global ??= globalThis;
+
 const query = new URLSearchParams(location.search);
 const sourceState = readSourceDemoInputs(query);
 function axis<T extends string>(

@@ -37,6 +37,13 @@ import { useMouseCarousel } from '../mouseCarousel';
 import { InvestmentContract } from './InvestmentContract';
 import { BasketDetails, BasketSectionHeading } from './BasketDetails';
 import {
+  CashAccountField,
+  CashAccountIntroduction,
+  CashAccountSheet,
+} from './CashAccount';
+import type { CurrentAccount } from '@/data/products';
+import { displayRoboAccountNumber } from '@/features/investments/robo/presentationData';
+import {
   Button as InvestmentButton,
   Choice,
   Chips,
@@ -232,6 +239,10 @@ export function CreationScreens({
   basketDetailsOpen,
   onBasketDetailsOpen,
   onBasketDetailsClose,
+  cashAccounts,
+  cashAccount,
+  amountsHidden = false,
+  onCashAccountSelected,
 }: {
   view: RoboAdvisorFlowState;
   dispatch: React.Dispatch<RoboEvent>;
@@ -245,9 +256,14 @@ export function CreationScreens({
   basketDetailsOpen: boolean;
   onBasketDetailsOpen: () => void;
   onBasketDetailsClose: () => void;
+  cashAccounts?: readonly CurrentAccount[];
+  cashAccount?: CurrentAccount;
+  amountsHidden?: boolean;
+  onCashAccountSelected?: (id: string) => void;
 }) {
   const duoClose = useEvoDuoCloseAction(onExit, view.step === 'intro');
   const [termsOpen, setTermsOpen] = useState(false);
+  const [cashAccountSheetOpen, setCashAccountSheetOpen] = useState(false);
   const [profileUpdateInfoOpen, setProfileUpdateInfoOpen] = useState(false);
   const [contactInfoOpen, setContactInfoOpen] = useState<
     'phone' | 'email' | null
@@ -375,7 +391,7 @@ export function CreationScreens({
             onPress={onExit}
             style={[
               styles.introClose,
-                { top: Math.max(24, screenTopInset + 18) },
+              { top: Math.max(24, screenTopInset + 18) },
             ]}
           >
             <InvestmentGlyph name="close-flow" color="#262626" size={24} />
@@ -469,7 +485,9 @@ export function CreationScreens({
         </View>
         {contactInfoOpen ? (
           <SourceBottomSheet
-            title={contactInfoOpen === 'phone' ? 'Phone number' : 'Email Address'}
+            title={
+              contactInfoOpen === 'phone' ? 'Phone number' : 'Email Address'
+            }
             onClose={() => setContactInfoOpen(null)}
           >
             <Copy style={styles.contactInfoCopy}>
@@ -712,6 +730,7 @@ export function CreationScreens({
             label="Continue"
             disabled={
               !Number(view.targetAmount) ||
+              (cashAccounts !== undefined && !cashAccount) ||
               !(view.horizonYears > 0 || isValidRoboHorizon(view.manualHorizon))
             }
             onPress={() => {
@@ -726,6 +745,31 @@ export function CreationScreens({
         }
       >
         <PlanFields view={view} dispatch={dispatch} />
+        {cashAccounts ? (
+          <View style={styles.goalCashAccount}>
+            <CashAccountIntroduction />
+            <CashAccountField
+              account={cashAccount}
+              amountsHidden={amountsHidden}
+              announceAccountName
+              expanded={cashAccountSheetOpen}
+              disabled={!cashAccounts.length}
+              onOpen={() => setCashAccountSheetOpen(true)}
+            />
+            {!cashAccounts.length ? (
+              <Notice error text="No cash account is available." />
+            ) : null}
+            {cashAccountSheetOpen && onCashAccountSelected ? (
+              <CashAccountSheet
+                accounts={cashAccounts}
+                selectedId={cashAccount?.id ?? ''}
+                amountsHidden={amountsHidden}
+                onClose={() => setCashAccountSheetOpen(false)}
+                onSelect={onCashAccountSelected}
+              />
+            ) : null}
+          </View>
+        ) : null}
       </Page>
     );
   if (view.step === 'strategy') {
@@ -1003,6 +1047,15 @@ export function CreationScreens({
                       value={row.value}
                     />
                   ))}
+                {cashAccount ? (
+                  <ReviewField
+                    label="Cash account"
+                    value={displayRoboAccountNumber(
+                      cashAccount.accountNumber,
+                      'CZ',
+                    )}
+                  />
+                ) : null}
               </View>
               <View style={styles.termsSection}>
                 <View
@@ -1051,6 +1104,7 @@ export function CreationScreens({
   return null;
 }
 const styles = StyleSheet.create({
+  goalCashAccount: { marginTop: 24, gap: 16 },
   selectedCard: { borderWidth: 2 },
   unselectedCard: { borderWidth: 1 },
   introHero: { position: 'relative' },

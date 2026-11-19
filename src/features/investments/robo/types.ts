@@ -92,6 +92,8 @@ export interface RoboExistingGoal {
   /** Executed product-level activity for this goal. */
   transactions?: readonly InvestmentHistoryTransaction[]
   orders?: readonly InvestmentHistoryOrder[]
+  /** Preferred funding account selected when creating the goal. */
+  cashAccountId?: string
   /** Future monthly contribution plan; it does not count as an executed holding. */
   recurringContribution?: {
     amount: number
