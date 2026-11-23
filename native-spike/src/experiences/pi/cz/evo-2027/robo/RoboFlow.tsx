@@ -27,6 +27,7 @@ import {
 import { DEFAULT_ROBO_CASH_ACCOUNT } from '@/features/investments/robo/presentationData';
 import { createRoboTradeEventId } from '@/features/investments/robo/operationContext';
 import { hydrateRoboGoal } from '@/features/investments/robo/goalHydration';
+import { canStartRoboTopUpProjection } from '@/features/investments/robo/topUpProjection';
 import type {
   RoboExistingGoal,
   RoboInvestorProfileStatus,
@@ -122,6 +123,7 @@ export function CzRoboFlow({
   const [clock] = useState(() => demoClock ?? getCurrentRoboDemoClock());
   const [basketDetailsOpen, setBasketDetailsOpen] = useState(false);
   const [cashAccountId, setCashAccountId] = useState('');
+  const [firstAddMoneyVisit, setFirstAddMoneyVisit] = useState(false);
   const cashAccounts =
     release === 'release-future-cz-robo'
       ? currentAccounts.filter(account => account.currency === 'CZK')
@@ -141,6 +143,16 @@ export function CzRoboFlow({
   const publish = (next: RoboExistingGoal) => {
     dispatch({ type: 'goal-updated', goal: next });
     onGoalUpdated?.(next);
+  };
+  const openManagement = (
+    mode: Extract<RoboEvent, { type: 'management-opened' }>['mode'],
+  ) => {
+    if (mode === 'add-money' && goal && release === 'release-future-cz-robo') {
+      const eligible = canStartRoboTopUpProjection(goal);
+      setFirstAddMoneyVisit(eligible);
+      if (eligible) publish({ ...goal, addMoneyVisited: true });
+    }
+    dispatch({ type: 'management-opened', mode });
   };
   useEffect(() => {
     if (initialGoal)
@@ -353,7 +365,7 @@ export function CzRoboFlow({
                 label="Add money"
                 onPress={() => {
                   dispatch({ type: 'navigate', to: 'goal-detail' });
-                  dispatch({ type: 'management-opened', mode: 'add-money' });
+                  openManagement('add-money');
                 }}
               />
               <Button
@@ -398,7 +410,7 @@ export function CzRoboFlow({
           goal={goal}
           portfolio={state.portfolio}
           mode={state.management}
-          onMode={mode => dispatch({ type: 'management-opened', mode })}
+          onMode={openManagement}
           onBack={back}
           onExit={onExit}
           onGoalUpdated={publish}
@@ -409,6 +421,7 @@ export function CzRoboFlow({
           amountsHidden={amountsHidden}
           screenTopInset={screenTopInset}
           release={release}
+          projectionEligible={firstAddMoneyVisit}
           onOpenSecurity={onOpenSecurity}
         />
       );
@@ -426,7 +439,7 @@ export function CzRoboFlow({
           onBack={onBack}
           portfolioSwitcher={portfolioSwitcher}
           onExit={onExit}
-          onAction={mode => dispatch({ type: 'management-opened', mode })}
+          onAction={openManagement}
           securityCatalog={securityCatalog}
           clock={clock}
           amountsHidden={amountsHidden}

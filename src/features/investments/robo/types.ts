@@ -94,6 +94,8 @@ export interface RoboExistingGoal {
   orders?: readonly InvestmentHistoryOrder[]
   /** Preferred funding account selected when creating the goal. */
   cashAccountId?: string
+  /** Set when the first Add Money visit starts, even if no order is submitted. */
+  addMoneyVisited?: boolean
   /** Future monthly contribution plan; it does not count as an executed holding. */
   recurringContribution?: {
     amount: number

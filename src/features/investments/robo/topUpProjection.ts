@@ -1,8 +1,7 @@
 import { getRoboReferenceDate, parseRoboFundingDate, type RoboDemoClock } from './demoClock'
 import { getRoboGoalCurrentValue } from './goalModel'
 import { getFundingFieldVisibility } from './model'
-import { PROJECTION_RATES } from './projectionSelectors'
-import type { RoboExistingGoal, RoboFundingMethod, RoboPortfolio } from './types'
+import type { RoboExistingGoal, RoboFundingMethod } from './types'
 
 export const ROBO_TOP_UP_RANGES = {
   initial: { min: 5_000, max: 10_000_000, step: 500 },
@@ -14,6 +13,16 @@ export type RoboTopUpProjectionDraft = {
   initial: number
   monthly: number
   date: string
+}
+
+export function canStartRoboTopUpProjection(goal: RoboExistingGoal) {
+  return (
+    !goal.addMoneyVisited &&
+    !goal.recurringContribution &&
+    !goal.transactions?.length &&
+    !goal.orders?.length &&
+    getRoboGoalCurrentValue(goal) === 0
+  )
 }
 
 export function validateRoboTopUpAmount(value: number, kind: keyof typeof ROBO_TOP_UP_RANGES) {
@@ -39,13 +48,27 @@ export function getRoboTopUpBalanceCheck(
   return { kind: amountDue > account.balance ? 'insufficient' : 'ready', amountDue } as const
 }
 
-const averageMonthMs = (365.2425 / 12) * 24 * 60 * 60 * 1000
+const maximumChartYears = 10
+// Portfolio scenarios used in the Figma demo. Production projections are supplied by CTS.
+const positiveGrowth = (1 + 0.085) ** (1 / 12)
+const neutralGrowth = (1 + 0.0555) ** (1 / 12)
+const negativeGrowth = (1 - 0.02) ** (1 / 12)
 
 function dateAfterMonths(origin: Date, months: number) {
   const result = new Date(origin.getFullYear(), origin.getMonth() + months, 1)
   const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate()
   result.setDate(Math.min(origin.getDate(), lastDay))
   return result
+}
+
+const civilDate = (date: Date) => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+
+function monthsSince(origin: Date, date: Date) {
+  const calendarMonths = (date.getFullYear() - origin.getFullYear()) * 12 + date.getMonth() - origin.getMonth()
+  const months = calendarMonths - Number(dateAfterMonths(origin, calendarMonths) > date)
+  const start = civilDate(dateAfterMonths(origin, months))
+  const end = civilDate(dateAfterMonths(origin, months + 1))
+  return months + (civilDate(date) - start) / (end - start)
 }
 
 function paymentsBetween(today: Date, end: Date, start: Date | undefined, amount: number) {
@@ -60,7 +83,6 @@ function paymentsBetween(today: Date, end: Date, start: Date | undefined, amount
 
 export function buildRoboTopUpProjection(
   goal: RoboExistingGoal,
-  portfolio: RoboPortfolio,
   draft: RoboTopUpProjectionDraft,
   clock: RoboDemoClock,
 ) {
@@ -72,37 +94,54 @@ export function buildRoboTopUpProjection(
         Math.max(today.getTime(), new Date(goalEnd.getFullYear(), goalEnd.getMonth(), goalEnd.getDate()).getTime()),
       )
     : dateAfterMonths(today, fallbackHorizon * 12)
-  const completeYearCount = end.getFullYear() - today.getFullYear()
-  const years = Math.min(30, completeYearCount + Number(dateAfterMonths(today, completeYearCount * 12) < end))
+  const goalMonths = monthsSince(today, end)
+  const goalYears = Math.ceil(goalMonths / 12)
+  const years = Math.min(maximumChartYears, goalYears)
+  const lastMonth = Math.min(goalMonths, maximumChartYears * 12)
+  const chartEnd = dateAfterMonths(today, maximumChartYears * 12)
+  const scheduleEnd = end < chartEnd ? end : chartEnd
   const opening = getRoboGoalCurrentValue(goal)
   const target = Number(goal.targetInteger.replace(/\D/g, '')) + Number(goal.targetDecimals.replace(/\D/g, '')) / 100
-  const monthlyRate = PROJECTION_RATES[portfolio.strategyId][1] / 1200
   const fields = getFundingFieldVisibility(draft.method)
   const currentMonthly = goal.recurringContribution?.amount ?? 0
   const currentStart = parseRoboFundingDate(goal.recurringContribution?.startDate ?? '')
-  const proposedMonthly = fields.monthlyContribution ? draft.monthly : currentMonthly
-  const proposedStart = fields.monthlyContribution ? parseRoboFundingDate(draft.date) : currentStart
+  const proposedStart = fields.monthlyContribution ? parseRoboFundingDate(draft.date) : undefined
   const oneOff = fields.initialAmount ? draft.initial : 0
 
-  function scenario(asOf: Date, upfront: number, monthly: number, start: Date | undefined) {
-    const growth = (from: Date) => (1 + monthlyRate) ** ((asOf.getTime() - from.getTime()) / averageMonthMs)
-    const paid = paymentsBetween(today, asOf, start, monthly)
-    const contributions = upfront + paid.length * monthly
-    const value = Math.round(
-      (opening + upfront) * growth(today) + paid.reduce((sum, date) => sum + monthly * growth(date), 0),
-    )
-    return { value, contributions, gain: Math.round(value - opening - contributions) }
+  const schedule = (start: Date | undefined, amount: number) =>
+    paymentsBetween(today, scheduleEnd, start, amount).map((date) => ({ month: monthsSince(today, date), amount }))
+  const currentPayments = schedule(currentStart, currentMonthly)
+  const proposedPayments = proposedStart
+    ? [
+        ...currentPayments.filter((payment) => payment.month < monthsSince(today, proposedStart)),
+        ...schedule(proposedStart, draft.monthly),
+      ]
+    : currentPayments
+
+  function atMonth(month: number) {
+    const paid = proposedPayments.filter((payment) => payment.month <= month)
+    const startingCapital = opening + oneOff
+    const capital = Math.round(startingCapital + paid.reduce((sum, payment) => sum + payment.amount, 0))
+    const projectedValue = (growth: number) =>
+      Math.round(
+        startingCapital * growth ** month +
+          paid.reduce((sum, payment) => sum + payment.amount * growth ** (month - payment.month), 0),
+      )
+    return {
+      month,
+      capital,
+      positive: projectedValue(positiveGrowth),
+      neutral: projectedValue(neutralGrowth),
+      negative: projectedValue(negativeGrowth),
+    }
   }
 
   const periods = Array.from({ length: years + 1 }, (_, year) => {
-    const date = year === years ? end : dateAfterMonths(today, year * 12)
-    return {
-      year,
-      current: scenario(date, 0, currentMonthly, currentStart),
-      proposed: scenario(date, oneOff, proposedMonthly, proposedStart),
-    }
+    const month = Math.min(year * 12, lastMonth)
+    return { year, ...atMonth(month) }
   })
-  return { opening, target, years, periods, targetDelta: periods[years]!.proposed.value - target }
+  const months = Array.from({ length: Math.ceil(lastMonth) + 1 }, (_, month) => Math.min(month, lastMonth))
+  return { opening, target, goalYears, years, periods, curve: months.map(atMonth) }
 }
 
 export type RoboTopUpProjection = ReturnType<typeof buildRoboTopUpProjection>

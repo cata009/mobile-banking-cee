@@ -11,7 +11,7 @@ import { Page } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 import { Signing } from '../src/experiences/pi/cz/evo-2027/investments/Signing';
 import { BaselineInvestmentField } from '../src/experiences/pi/current/investments/baseline/Frame';
 import { InvestmentTerms } from '../src/experiences/pi/current/investments/baseline/flows/BuyOrder';
-import { BaselineAmountField } from '../src/universal/BaselineAmountField';
+import { TextInput } from '../src/universal/Typography';
 import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
 import { DemoViewport } from '../src/universal/DemoViewport';
 import { BaselineStandardSuccess } from '../src/universal/BaselineStandardSuccess';
@@ -34,6 +34,12 @@ const accounts: CurrentAccount[] = [
     currency: 'CZK',
   },
 ];
+const unfundedGoal = {
+  ...INITIAL_CZ_ROBO_GOALS[0]!,
+  positions: [],
+  transactions: [],
+  orders: [],
+};
 
 function render(
   overrides: Partial<React.ComponentProps<typeof Management>> = {},
@@ -43,10 +49,11 @@ function render(
     tree = Renderer.create(
       <DemoViewport>
         <Management
-          goal={INITIAL_CZ_ROBO_GOALS[0]!}
+          goal={unfundedGoal}
           portfolio={ROBO_PORTFOLIOS[0]!}
           mode="add-money"
           release="release-future-cz-robo"
+          projectionEligible
           onMode={jest.fn()}
           onBack={jest.fn()}
           onExit={jest.fn()}
@@ -82,15 +89,9 @@ test('changes the account after insufficient funds while preserving the amount t
     expect(tree.root.findByType(Page).props.title).toBe(
       'Investment projection',
     );
-    press(tree, 'All years');
-    const year = tree.root.findAll(
-      n =>
-        /^Year 1, current plan/.test(n.props.accessibilityLabel ?? '') &&
-        typeof n.props.onPress === 'function',
-    )[0]!;
-    act(() => year.props.onPress());
-    const editable = tree.root.findByType(BaselineAmountField);
-    act(() => editable.props.onChange('75000'));
+    press(tree, 'Year 1');
+    const editable = tree.root.findByType(TextInput);
+    act(() => editable.props.onChangeText('75.000'));
     press(tree, 'Review investment');
     expect(tree.root.findByType(Page).props.title).toBe(
       'Investment projection',
@@ -106,7 +107,7 @@ test('changes the account after insufficient funds while preserving the amount t
     press(tree, 'Cash account');
     press(tree, 'Cash B, 890123402/2700, 100.000,00 CZK');
     press(tree, 'Select');
-    expect(tree.root.findByType(BaselineAmountField).props.value).toBe('75000');
+    expect(tree.root.findByType(TextInput).props.value).toBe('75.000');
     press(tree, 'Review investment');
     const fields = tree.root.findAllByType(BaselineInvestmentField);
     expect(
@@ -122,6 +123,77 @@ test('changes the account after insufficient funds while preserving the amount t
       'Add money request submitted',
     );
     expect(onGoalUpdated).toHaveBeenCalledTimes(1);
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+test('updates the selected projection and restores it after the Excel-aligned help screen', () => {
+  const tree = render({
+    goal: {
+      ...INITIAL_CZ_ROBO_GOALS[0]!,
+      positions: [],
+      recurringContribution: undefined,
+    },
+  });
+  const hasText = (value: string) =>
+    tree.root.findAll(n => n.children.includes(value)).length > 0;
+  try {
+    press(tree, 'Preview impact');
+    press(tree, 'Today');
+    expect(hasText('Total contributions')).toBe(true);
+    expect(hasText('Portfolio value')).toBe(true);
+    expect(['Positive', 'Neutral', 'Negative'].every(hasText)).toBe(true);
+    const amount = () => tree.root.findByType(TextInput);
+    act(() => amount().props.onChangeText('75.000'));
+    expect(hasText('75.000 CZK')).toBe(true);
+    expect(hasText('Current plan')).toBe(false);
+    press(tree, 'Help');
+    expect(tree.root.findByType(Page).props.title).toBe(
+      'About this projection',
+    );
+    expect(hasText('Total contributions')).toBe(true);
+    act(() => tree.root.findByType(Page).props.onBack());
+    expect(tree.root.findByType(Page).props.title).toBe(
+      'Investment projection',
+    );
+    expect(hasText('75.000 CZK')).toBe(true);
+    expect(amount().props.value).toBe('75.000');
+  } finally {
+    act(() => tree.unmount());
+  }
+});
+
+test('remembers the first Add Money visit after exiting before investment', () => {
+  const updated = jest.fn();
+  let tree!: Renderer.ReactTestRenderer;
+  act(() => {
+    tree = Renderer.create(
+      <DemoViewport>
+        <CzRoboFlow
+          release="release-future-cz-robo"
+          initialGoal={unfundedGoal}
+          currentAccounts={accounts}
+          onBack={jest.fn()}
+          onExit={jest.fn()}
+          onGoalUpdated={updated}
+        />
+      </DemoViewport>,
+    );
+  });
+  try {
+    const preview = () =>
+      tree.root.findAll(n => n.props.accessibilityLabel === 'Preview impact');
+    press(tree, 'Add money');
+    expect(preview().length).toBeGreaterThan(0);
+    expect(updated).toHaveBeenLastCalledWith(
+      expect.objectContaining({ addMoneyVisited: true }),
+    );
+    press(tree, 'Back');
+    press(tree, 'Add money');
+    expect(preview()).toHaveLength(0);
+    press(tree, 'Review investment');
+    expect(tree.root.findByType(InvestmentTerms)).toBeDefined();
   } finally {
     act(() => tree.unmount());
   }
@@ -215,13 +287,16 @@ test.each([
     try {
       press(tree, choice);
       press(tree, 'Preview impact');
-      const fields = tree.root.findAllByType(BaselineAmountField);
-      expect(fields.map(node => node.props.label)).toEqual(
+      const fields = tree.root.findAllByType(TextInput);
+      expect(fields.map(node => node.props.accessibilityLabel)).toEqual(
         combined
           ? ['Add today', 'New monthly contribution']
           : ['New monthly contribution'],
       );
-      act(() => fields.at(-1)!.props.onChange('1500'));
+      act(() => fields.at(-1)!.props.onChangeText('1.500'));
+      expect(tree.root.findAllByType(TextInput).at(-1)!.props.value).toBe(
+        '1.500',
+      );
       press(tree, 'Review investment');
       const review = Object.fromEntries(
         tree.root

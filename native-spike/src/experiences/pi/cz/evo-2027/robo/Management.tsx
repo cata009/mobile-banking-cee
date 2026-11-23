@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -180,6 +181,7 @@ export function Management({
   amountsHidden,
   screenTopInset = 0,
   release = 'release-future-evo-2027',
+  projectionEligible = false,
 }: {
   goal: RoboExistingGoal;
   portfolio: RoboPortfolio;
@@ -195,6 +197,7 @@ export function Management({
   amountsHidden: boolean;
   screenTopInset?: number;
   release?: CurrentScreenProps['release'];
+  projectionEligible?: boolean;
   onOpenSecurity?: (security: InvestmentCatalogSecurity) => void;
 }) {
   const isCzRobo = release === 'release-future-cz-robo';
@@ -219,6 +222,7 @@ export function Management({
   );
   const [topUpTermsAccepted, setTopUpTermsAccepted] = useState(false);
   const [projectionOpen, setProjectionOpen] = useState(false);
+  const [projectionHelpOpen, setProjectionHelpOpen] = useState(false);
   const [balanceErrorOpen, setBalanceErrorOpen] = useState(false);
   const lastForecast = useRef<RoboTopUpProjection | null>(null);
   const [planState, dispatchPlan] = useReducer(roboReducer, goal, initial =>
@@ -299,6 +303,7 @@ export function Management({
     });
     if (mode === 'add-money') setTopUpTermsAccepted(false);
     setProjectionOpen(false);
+    setProjectionHelpOpen(false);
     setBalanceErrorOpen(false);
     lastForecast.current = null;
   }, [mode]);
@@ -333,6 +338,10 @@ export function Management({
         return true;
       }
       if (projectionOpen) {
+        if (projectionHelpOpen) {
+          setProjectionHelpOpen(false);
+          return true;
+        }
         setProjectionOpen(false);
         return true;
       }
@@ -347,12 +356,15 @@ export function Management({
     monthly = fields.monthlyContribution
       ? Number(state.topUp.monthlyAmount)
       : 0;
-  const draft = {
-    method: state.topUp.method,
-    initial,
-    monthly,
-    date: state.topUp.date,
-  };
+  const draft = useMemo(
+    () => ({
+      method: state.topUp.method,
+      initial,
+      monthly,
+      date: state.topUp.date,
+    }),
+    [state.topUp.method, initial, monthly, state.topUp.date],
+  );
   const canPreview =
     (!fields.initialAmount || validateRoboTopUpAmount(initial, 'initial')) &&
     (!fields.monthlyContribution ||
@@ -370,10 +382,13 @@ export function Management({
       clock,
     );
   const balanceCheck = getRoboTopUpBalanceCheck(draft, orderAccount, clock);
-  const forecast =
-    projectionOpen && canPreview
-      ? buildRoboTopUpProjection(goal, portfolio, draft, clock)
-      : null;
+  const forecast = useMemo(
+    () =>
+      projectionOpen && canPreview
+        ? buildRoboTopUpProjection(goal, draft, clock)
+        : null,
+    [projectionOpen, canPreview, goal, draft, clock],
+  );
   useEffect(() => {
     if (forecast) lastForecast.current = forecast;
   }, [forecast]);
@@ -967,7 +982,6 @@ export function Management({
     <>
       {mode === 'add-money' && projectionOpen && displayedForecast ? (
         <TopUpProjection
-          name={goal.name}
           forecast={displayedForecast}
           amountsHidden={amountsHidden}
           initial={
@@ -991,6 +1005,9 @@ export function Management({
           date={draft.date}
           account={projectionAccount}
           canReview={canReview}
+          helpOpen={projectionHelpOpen}
+          onOpenHelp={() => setProjectionHelpOpen(true)}
+          onCloseHelp={() => setProjectionHelpOpen(false)}
           onReview={openReview}
           onBack={() => setProjectionOpen(false)}
         />
@@ -1016,7 +1033,7 @@ export function Management({
           contentTop={mode === 'add-money' ? 32 : 16}
           footer={
             <View style={fundingStyles.actionStack}>
-              {mode === 'add-money' && isCzRobo ? (
+              {mode === 'add-money' && isCzRobo && projectionEligible ? (
                 <Button
                   label="Preview impact"
                   secondary
