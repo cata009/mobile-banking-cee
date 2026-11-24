@@ -42,7 +42,7 @@ afterEach(() => {
 })
 
 describe('Disposable Cards flow', () => {
-  it('registers the RS-only Disposable Cards flow in the library', () => {
+  it('registers a single Disposable Cards flow for Serbia and Bosnia and Herzegovina', () => {
     const definitions = FLOW_DEFINITIONS as unknown as Record<string, FlowDefinition>
     const previews = FLOW_PREVIEWS as unknown as Record<
       string,
@@ -57,7 +57,8 @@ describe('Disposable Cards flow', () => {
       id: flowId,
       title: 'Disposable Cards',
       domain: 'Cards',
-      countryScope: ['RS'],
+      countryScope: ['RS', 'BA'],
+      previewCountrySelection: true,
       screenSpecs: {
         [screenKind]: expect.objectContaining({
           title: 'Cards',
@@ -93,7 +94,7 @@ describe('Disposable Cards flow', () => {
         {
           label: 'Create disposable card',
           result:
-            'Starts Face ID, then creates a disposable card and opens its details when fewer than three are active.',
+            'Starts Face ID, then creates a disposable card and opens its details when the market has a free slot.',
         },
       ],
     })
@@ -120,7 +121,62 @@ describe('Disposable Cards flow', () => {
         },
       ]),
     )
-    expect(previews[flowId]).toMatchObject({ title: 'Disposable Cards', countryScope: ['RS'], domain: 'Cards' })
+    expect(previews[flowId]).toMatchObject({ title: 'Disposable Cards', countryScope: ['RS', 'BA'], domain: 'Cards' })
+  })
+
+  it('switches the Journey and interactive prototype to BA data and starts a fresh session on return to Serbia', async () => {
+    const view = render(
+      <DemoProvider initialState={{ country: 'CZ', product: 'PI', release: 'release-current' }}>
+        <LanguageProvider initialLanguage="en">
+          <FlowLibraryScreen initialFlowId={flowId} />
+        </LanguageProvider>
+      </DemoProvider>,
+    )
+    const selector = within(screen.getByRole('group', { name: 'Preview country' }))
+    const serbia = selector.getByRole('button', { name: 'Serbia' })
+    const bosnia = selector.getByRole('button', { name: 'Bosnia and Herzegovina' })
+    expect(serbia).toHaveAttribute('aria-pressed', 'true')
+    expect(bosnia.querySelector('[data-country-flag="BA"]')).toBeInTheDocument()
+    fireEvent.click(bosnia)
+    expect(bosnia).toHaveAttribute('aria-pressed', 'true')
+    const journey = within(screen.getByTestId('journey-current-screen-container'))
+    expect((await journey.findAllByText('BAM')).length).toBeGreaterThan(0)
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Prototype' }))
+    await asyncNativeReady(view.container)
+    const phone = () => within(screen.getByTestId('flow-prototype-inspect-phone'))
+    fireEvent.click(phone().getByRole('button', { name: 'Show Card Details' }))
+    const sheet = await phone().findByRole('dialog', { name: 'Choose a card' })
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Create disposable card' }))
+    expect(await phone().findByRole('status', { name: 'Face ID verification' })).toBeInTheDocument()
+    expect(await phone().findByText('5392 1076 4411 0015', {}, { timeout: 5_000 })).toBeInTheDocument()
+    fireEvent.click(phone().getByRole('button', { name: 'Back' }))
+    await asyncNativeReady(view.container)
+    fireEvent.click(phone().getByRole('button', { name: 'Show Card Details' }))
+    const full = within(await phone().findByRole('dialog', { name: 'Choose a card' }))
+    expect(full.getByText('Maximum of 1 active disposable card')).toBeInTheDocument()
+    expect(full.queryByRole('button', { name: 'Create disposable card' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: 'Successful payment on last viewed disposable card' }))
+    expect(await phone().findByRole('button', { name: /Disposable card payment.*BAM/i })).toBeInTheDocument()
+
+    fireEvent.click(serbia)
+    expect((await phone().findAllByText('RSD')).length).toBeGreaterThan(0)
+    expect(phone().queryByText('Disposable card payment')).not.toBeInTheDocument()
+  })
+
+  it('unlocks BA generation only after the active card is closed and confirmed on the standard success screen', async () => {
+    render(<>{renderFlowPreview('rs-disposable-cards-list', { country: 'BA', parameters: { journeyState: 'list' } })}</>)
+    const generate = () => screen.getByRole('button', { name: 'Generate new card' })
+    expect(await screen.findByText('You already have an active disposable card.')).toBeInTheDocument()
+    expect(generate()).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Card actions ending 0015' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete disposable card ending 0015' }))
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Confirm closure' }))
+    expect(screen.getByRole('heading', { name: 'Disposable card closed' }).closest('[data-standard-success-screen]')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Generate new card' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
+    expect(screen.getByText('No disposable cards yet')).toBeInTheDocument()
+    expect(generate()).toBeEnabled()
   })
 
   it('renders the Journey snapshots with the state described by each step', async () => {
@@ -197,7 +253,7 @@ describe('Disposable Cards flow', () => {
   it('links each management Journey step to its own matching screen specification', () => {
     const flow = (FLOW_DEFINITIONS as unknown as Record<string, FlowDefinition>)[flowId]!
     const journey = flow.scenarios.find((scenario) => scenario.id === 'manage-disposable-cards')!
-    for (const title of ['Card options', 'Disposable cards', 'About disposable cards', 'Confirm early closure']) {
+    for (const title of ['Card options', 'Disposable cards', 'About disposable cards', 'Confirm early closure', 'Disposable card closed']) {
       const step = journey.steps.find((item) => item.title === title)!
       expect(flow.screenSpecs[step.screen]?.title).toBe(title)
     }
@@ -519,6 +575,8 @@ describe('Disposable Cards flow', () => {
     expect(await screen.findByText('5392 1076 4411 0015', {}, { timeout: 5_000 })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Close disposable card' }))
     fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Confirm closure' }))
+    expect(screen.getByRole('heading', { name: 'Disposable card closed' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     expect(screen.getByText('No disposable cards yet')).toBeInTheDocument()
     expect(screen.getByText('Create a card for one payment.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
@@ -684,6 +742,7 @@ describe('Disposable Cards flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close disposable card' }))
     const confirm = screen.getByRole('dialog')
     fireEvent.click(within(confirm).getByRole('button', { name: 'Confirm closure' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     expect(screen.getAllByRole('button', { name: /View disposable card ending/ })).toHaveLength(2)
     expect(screen.queryByText(/\d of 3 active cards/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Generate new card' })).toBeEnabled()
@@ -762,6 +821,8 @@ describe('Disposable Cards flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete disposable card ending 0015' }))
     confirm = screen.getByRole('dialog', { name: 'Close disposable card?' })
     fireEvent.click(within(confirm).getByRole('button', { name: 'Confirm closure' }))
+    expect(screen.getByRole('heading', { name: 'Disposable card closed' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     expect(screen.queryByRole('button', { name: 'View disposable card ending 0015' })).not.toBeInTheDocument()
     expect(screen.getByText('No disposable cards yet')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Generate new card' })).toBeEnabled()

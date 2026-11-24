@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { COMPONENT_REGISTRY } from '@/app/registry/componentRegistry'
+import type { CountryId } from '@/app/state/demoTypes'
 import MiniPhone from './MiniPhone'
 import ScreenInspector from './ScreenInspector'
 import { renderFlowPreview } from './flowPreviews'
@@ -54,12 +55,12 @@ const REGISTRY_BY_PATH = new Map(Object.values(COMPONENT_REGISTRY).map((meta) =>
 
 export default function FlowImplementationPanel({
   flow,
-  countryName,
+  previewCountry,
   onOpenRule,
   onOpenScreenContract,
 }: {
   flow: FlowDefinition
-  countryName: string
+  previewCountry?: CountryId
   onOpenRule: (ruleId: string) => void
   onOpenScreenContract: (screen: FlowScreenKind) => void
 }) {
@@ -102,7 +103,7 @@ export default function FlowImplementationPanel({
       <ScreensAsBuilt
         flow={flow}
         screens={screens}
-        countryName={countryName}
+        previewCountry={previewCountry}
         screenSource={screenSource}
         onOpenRule={onOpenRule}
         onOpenScreenContract={onOpenScreenContract}
@@ -342,14 +343,14 @@ export default function FlowImplementationPanel({
 function ScreensAsBuilt({
   flow,
   screens,
-  countryName,
+  previewCountry,
   screenSource,
   onOpenRule,
   onOpenScreenContract,
 }: {
   flow: FlowDefinition
   screens: readonly FlowScreenKind[]
-  countryName: string
+  previewCountry?: CountryId
   screenSource: FlowScreenSource | undefined
   onOpenRule: (ruleId: string) => void
   onOpenScreenContract: (screen: FlowScreenKind) => void
@@ -420,7 +421,7 @@ function ScreensAsBuilt({
               <div className="justify-self-center xl:justify-self-start">
                 <ScreenInspector scale={INSPECT_SCALE} enabled={inspecting}>
                   <MiniPhone scale={INSPECT_SCALE} scrollable device>
-                    {renderFlowPreview(screen, { countryName })}
+                    {renderFlowPreview(screen, { country: previewCountry })}
                   </MiniPhone>
                 </ScreenInspector>
               </div>

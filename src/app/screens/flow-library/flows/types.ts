@@ -100,6 +100,7 @@ export type RsDisposableCardsScreenKind =
   | 'rs-disposable-cards-list'
   | 'rs-disposable-cards-help'
   | 'rs-disposable-cards-close-confirmation'
+  | 'rs-disposable-cards-close-success'
 
 /** Romania-only Genius My Car entry, vehicle registration and RCA/CASCO purchase previews. */
 export type GeniusMyCarScreenKind =
@@ -419,6 +420,8 @@ export interface FlowDefinition {
   /** Product domain used for grouping/filtering (e.g. "Savings", "Cards"). */
   domain: string
   countryScope: readonly CountryId[]
+  /** Enables market switching when the preview renders each market with its own data. */
+  previewCountrySelection?: boolean
   status: FlowStatus
   figmaFile: string
   figmaNodeId: string

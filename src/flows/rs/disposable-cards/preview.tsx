@@ -16,10 +16,12 @@ import {
 } from '@/app/components/messages/DeleteActionReveal'
 import { resolveCardNavigationRow } from '@/app/components/contracts/cardNavigationRow'
 import PrimaryButton from '@/app/components/PrimaryButton'
+import StandardSuccessScreen from '@/app/components/flow/StandardSuccessScreen'
 import {
   activeDisposableCards,
   closeDisposableCard,
   createDisposableCard,
+  disposableCardLimit,
   recordDisposableCardPayment,
   type DisposableCard,
 } from './model'
@@ -29,9 +31,11 @@ import CardSensitiveDetailsScreen from '@/app/screens/cards/CardSensitiveDetails
 import { useFlowNav } from '@/app/screens/flow-library/components/prototypeNav'
 import type { RsDisposableCardsScreenKind } from '@/app/screens/flow-library/flows/types'
 import { DemoProvider } from '@/app/state/demoStore'
+import type { CountryId } from '@/app/state/demoTypes'
 import { useProducts } from '@/hooks/useProducts'
 import type { CreditCard, DebitCard, Product } from '@/data/products'
 import type { AccountTransaction } from '@/data/accountDetails'
+import { DISPOSABLE_CARD_COUNTRIES } from './definition'
 
 const CARDS_SCREEN: RsDisposableCardsScreenKind = 'rs-disposable-cards-screen'
 const DETAILS_SHEET: RsDisposableCardsScreenKind = 'rs-disposable-cards-details-sheet'
@@ -39,6 +43,7 @@ const FACE_ID_NORMAL: RsDisposableCardsScreenKind = 'rs-disposable-cards-face-id
 const FACE_ID_DISPOSABLE: RsDisposableCardsScreenKind = 'rs-disposable-cards-face-id-disposable'
 const NORMAL_DETAILS: RsDisposableCardsScreenKind = 'rs-disposable-cards-normal-details'
 const DISPOSABLE_DETAILS: RsDisposableCardsScreenKind = 'rs-disposable-cards-disposable-details'
+const CLOSE_SUCCESS: RsDisposableCardsScreenKind = 'rs-disposable-cards-close-success'
 const JOURNEY_STATES: Partial<Record<RsDisposableCardsScreenKind, string>> = {
   'rs-disposable-cards-card-options': 'card-options',
   'rs-disposable-cards-list': 'list',
@@ -100,6 +105,7 @@ function DisposableCardIcon({ testId, muted = false }: { testId: string; muted?:
 function CardDetailsChoiceSheet({
   card,
   disposableCards,
+  activeLimit,
   initialPage,
   onClose,
   onView,
@@ -107,6 +113,7 @@ function CardDetailsChoiceSheet({
 }: {
   card: CardProduct
   disposableCards: DisposableCard[]
+  activeLimit: number
   initialPage: number
   onClose: () => void
   onView: (id: string | null, page: number) => void
@@ -119,7 +126,8 @@ function CardDetailsChoiceSheet({
   const programmaticTimer = useRef<number | null>(null)
   const programmaticScroll = useRef(false)
   const activeCards = activeDisposableCards(disposableCards, new Date())
-  const choices = ['standard', ...activeCards.map((item) => item.id), ...(activeCards.length < 3 ? ['create'] : [])]
+  const atLimit = activeCards.length >= activeLimit
+  const choices = ['standard', ...activeCards.map((item) => item.id), ...(!atLimit ? ['create'] : [])]
   const pages = Array.from({ length: Math.ceil(choices.length / 2) }, (_, index) =>
     choices.slice(index * 2, index * 2 + 2),
   )
@@ -293,9 +301,11 @@ function CardDetailsChoiceSheet({
           ))}
         </div>
       ) : null}
-      {activeCards.length >= 3 ? (
+      {atLimit ? (
         <p className="uc-type-n5 mb-[8px] text-center text-[var(--uc-text-muted)]">
-          Maximum of 3 active disposable cards
+          {activeLimit === 1
+            ? 'Maximum of 1 active disposable card'
+            : `Maximum of ${activeLimit} active disposable cards`}
         </p>
       ) : null}
     </BottomSheet>
@@ -304,6 +314,7 @@ function CardDetailsChoiceSheet({
 
 function DisposableCardsScreen({
   cards,
+  activeLimit,
   initialSelectedId,
   initialSheet,
   onBack,
@@ -313,6 +324,7 @@ function DisposableCardsScreen({
   onCardVerified,
 }: {
   cards: DisposableCard[]
+  activeLimit: number
   initialSelectedId?: string | null
   initialSheet?: 'help' | 'close' | null
   onBack: () => void
@@ -351,6 +363,9 @@ function DisposableCardsScreen({
     return () => window.clearInterval(timer)
   }, [])
   const active = activeDisposableCards(cards, now)
+  const atLimit = active.length >= activeLimit
+  const limitDescription =
+    activeLimit === 1 ? 'You can have one active card at a time.' : `You can have up to ${activeLimit} active cards.`
   const selected = active.find((card) => card.id === selectedId)
   const closingCard = active.find((card) => card.id === pendingCloseId)
   const date = (value: string) =>
@@ -418,9 +433,7 @@ function DisposableCardsScreen({
           </div>
         ) : (
           <div className="flex flex-col gap-[16px] px-[24px] pt-[24px] pb-[24px]">
-            <p className="uc-type-n5">
-              Each card can be used once and expires after 30 days. You can have up to 3 active cards.
-            </p>
+            <p className="uc-type-n5">Each card can be used once and expires after 30 days. {limitDescription}</p>
             {active.length === 0 ? (
               <div className="flex flex-col items-center gap-[8px] px-[16px] py-[24px] text-center">
                 <span
@@ -507,10 +520,14 @@ function DisposableCardsScreen({
           </PrimaryButton>
         ) : (
           <>
-            {active.length >= 3 ? (
-              <p className="uc-type-n5 text-center">You have reached the maximum of 3 active cards.</p>
+            {atLimit ? (
+              <p className="uc-type-n5 text-center">
+                {activeLimit === 1
+                  ? 'You already have an active disposable card.'
+                  : `You have reached the maximum of ${activeLimit} active cards.`}
+              </p>
             ) : null}
-            <PrimaryButton disabled={active.length >= 3} onClick={onGenerate}>
+            <PrimaryButton disabled={atLimit} onClick={onGenerate}>
               Generate new card
             </PrimaryButton>
           </>
@@ -554,7 +571,7 @@ function DisposableCardsScreen({
               <div className="min-w-0">
                 <h2 className="uc-type-n4-strong">Valid for up to 30 days</h2>
                 <p className="uc-type-n5 mt-[4px]">
-                  An unused card expires after 30 days. You can have up to 3 active cards and close any of them early.
+                  An unused card expires after 30 days. {limitDescription} You can close a card early.
                 </p>
               </div>
             </div>
@@ -584,16 +601,7 @@ function DisposableCardsScreen({
           }}
           footer={
             <div className="flex flex-col gap-[8px] pt-[24px]">
-              <PrimaryButton
-                onClick={() => {
-                  onCloseCard(closingCard.id)
-                  setSelectedId(null)
-                  setPendingCloseId(null)
-                  setSheet(null)
-                }}
-              >
-                Confirm closure
-              </PrimaryButton>
+              <PrimaryButton onClick={() => onCloseCard(closingCard.id)}>Confirm closure</PrimaryButton>
               <PrimaryButton
                 variant="secondary"
                 onClick={() => {
@@ -629,14 +637,17 @@ function DisposableCardsScreen({
   )
 }
 
-function SerbiaCardsPrototype({
+function DisposableCardsPrototype({
+  country,
   screen,
   parameters,
 }: {
+  country: CountryId
   screen: RsDisposableCardsScreenKind
   parameters?: Readonly<Record<string, string>>
 }) {
   const nav = useFlowNav()
+  const activeLimit = disposableCardLimit(country)
   const { categories } = useProducts()
   // Journey steps render independently; only their explicit fixtures receive sample session data.
   const requestedState = parameters?.journeyState
@@ -662,11 +673,12 @@ function SerbiaCardsPrototype({
     const parent = categories.flatMap((category) => category.products).find(isCardProduct)
     if (!parent) return null
     const now = new Date()
-    const card = createDisposableCard([], now, {
-      id: parent.id,
-      type: parent.type,
-      holder: parent.cardHolderName ?? 'PETER JAGODIĆ',
-    })
+    const card = createDisposableCard(
+      [],
+      now,
+      { id: parent.id, type: parent.type, holder: parent.cardHolderName ?? 'PETER JAGODIĆ' },
+      country,
+    )
     return card ? { card, parent, now } : null
   })
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
@@ -776,12 +788,34 @@ function SerbiaCardsPrototype({
     } else setLocalScreen(id ? FACE_ID_DISPOSABLE : FACE_ID_NORMAL)
   }
   const requestGeneration = (page?: number) => {
-    if (!selectedCard || activeDisposableCards(disposableCards, new Date()).length >= 3) return
+    if (!selectedCard || activeDisposableCards(disposableCards, new Date()).length >= activeLimit) return
     if (page !== undefined) setCarouselPage(page)
     setPendingGeneration({
       parent: { id: selectedCard.id, type: selectedCard.type, holder: selectedCard.cardHolderName ?? 'PETER JAGODIĆ' },
       origin: displayScreen === DETAILS_SHEET ? 'carousel' : 'list',
     })
+  }
+  const confirmClosure = (id: string) => {
+    setDisposableCards((current) => closeDisposableCard(current, id))
+    setVerifiedDisposableId(null)
+    setDetailOrigin('list')
+    setLastViewedDisposableId((current) => (current === id ? null : current))
+    if (nav.active) nav.go(CLOSE_SUCCESS)
+    else setLocalScreen(CLOSE_SUCCESS)
+  }
+
+  if (displayScreen === CLOSE_SUCCESS) {
+    return (
+      <StandardSuccessScreen
+        title="Disposable card closed"
+        body="Your disposable card was closed successfully. Your main card is unaffected."
+        actionLabel="Done"
+        onDone={() => {
+          if (nav.active) nav.primary()
+          else setLocalScreen(DISPOSABLE_DETAILS)
+        }}
+      />
+    )
   }
 
   if (!nav.active && (journeyState === 'creation-verification' || journeyState === 'list-verification')) {
@@ -794,7 +828,7 @@ function SerbiaCardsPrototype({
 
   if (pendingGeneration) {
     const completeGeneration = () => {
-      const card = createDisposableCard(disposableCards, new Date(), pendingGeneration.parent)
+      const card = createDisposableCard(disposableCards, new Date(), pendingGeneration.parent, country)
       setPendingGeneration(null)
       if (!card) return
       setDisposableCards((current) => [...current, card])
@@ -842,11 +876,12 @@ function SerbiaCardsPrototype({
     const completeFaceId = () => {
       if (!nav.active && journeyState === 'standard-verification') return
       if (nav.active && journeyState === 'creation-verification' && selectedCard) {
-        const card = createDisposableCard(disposableCards, new Date(), {
-          id: selectedCard.id,
-          type: selectedCard.type,
-          holder: selectedCard.cardHolderName ?? 'PETER JAGODIĆ',
-        })
+        const card = createDisposableCard(
+          disposableCards,
+          new Date(),
+          { id: selectedCard.id, type: selectedCard.type, holder: selectedCard.cardHolderName ?? 'PETER JAGODIĆ' },
+          country,
+        )
         if (card) {
           setDisposableCards((current) => [...current, card])
           setVerifiedDisposableId(card.id)
@@ -887,6 +922,7 @@ function SerbiaCardsPrototype({
     return (
       <DisposableCardsScreen
         cards={disposableCards}
+        activeLimit={activeLimit}
         initialSelectedId={verifiedDisposableId}
         initialSheet={journeyState === 'help' ? 'help' : journeyState === 'close-confirmation' ? 'close' : null}
         onBackFromCarousel={detailOrigin === 'carousel' ? returnToCards : undefined}
@@ -899,7 +935,7 @@ function SerbiaCardsPrototype({
           setDetailOrigin('list')
           setLastViewedDisposableId(id)
         }}
-        onCloseCard={(id) => setDisposableCards((current) => closeDisposableCard(current, id))}
+        onCloseCard={confirmClosure}
       />
     )
   }
@@ -922,6 +958,7 @@ function SerbiaCardsPrototype({
           <CardDetailsChoiceSheet
             card={selectedCard}
             disposableCards={disposableCards}
+            activeLimit={activeLimit}
             initialPage={carouselPage}
             onClose={returnToCards}
             onView={chooseCardDetails}
@@ -933,44 +970,49 @@ function SerbiaCardsPrototype({
   )
 }
 
-function SerbiaBaselineCardsPreview({
+function DisposableCardsPreview({
+  country,
   screen,
   parameters,
 }: {
+  country: CountryId
   screen: RsDisposableCardsScreenKind
   parameters?: Readonly<Record<string, string>>
 }) {
   return (
     <DemoProvider
       initialState={{
-        country: 'RS',
+        country,
         product: 'PI',
         release: 'release-current',
         bankingScenario: 'retail-multi-account-card',
       }}
     >
       <LanguageProvider initialLanguage="en">
-        <SerbiaCardsPrototype screen={screen} parameters={parameters} />
+        <DisposableCardsPrototype country={country} screen={screen} parameters={parameters} />
       </LanguageProvider>
     </DemoProvider>
   )
 }
 
-function SerbiaPreviewBoundary({
+function DisposableCardsPreviewBoundary({
+  country,
   screen,
   parameters,
 }: {
+  country: CountryId
   screen: RsDisposableCardsScreenKind
   parameters?: Readonly<Record<string, string>>
 }) {
   const nav = useFlowNav()
   return (
-    <SerbiaBaselineCardsPreview
+    <DisposableCardsPreview
       key={
         !nav.active && (parameters?.journeyState || JOURNEY_STATES[screen])
-          ? `${screen}:${parameters?.journeyState ?? ''}`
-          : 'interactive'
+          ? `${country}:${screen}:${parameters?.journeyState ?? ''}`
+          : country
       }
+      country={country}
       screen={screen}
       parameters={parameters}
     />
@@ -980,6 +1022,8 @@ function SerbiaPreviewBoundary({
 export function renderRsDisposableCardsPreview(
   screen: RsDisposableCardsScreenKind,
   parameters?: Readonly<Record<string, string>>,
+  country: CountryId = 'RS',
 ) {
-  return <SerbiaPreviewBoundary screen={screen} parameters={parameters} />
+  const market = DISPOSABLE_CARD_COUNTRIES.includes(country) ? country : 'RS'
+  return <DisposableCardsPreviewBoundary country={market} screen={screen} parameters={parameters} />
 }

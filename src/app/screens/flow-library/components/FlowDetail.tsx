@@ -1,11 +1,13 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { AppIcon } from '@/app/components/icons'
+import CountryFlagRoundel from '@/app/components/payments/CountryFlagRoundel'
 import { SelectionChip } from '@/app/screens/tools/toolsUi'
 import { isPrimeReferenceScreen, resolvePrimePrototypeTarget } from '@/features/prime/reference'
 import { buildFraudPresentationUrl, isFraudPresentationUrl } from '@/flows/ba/card-fraud/presentationUrl'
 import { buildPrimePresentationUrl, isPrimePresentationUrl, removePrimePresentationMarker } from '@/flows/shared/prime/presentation/presentationUrl'
 import { getPrimePhoneAppearance } from '@/flows/shared/prime/presentation/phoneAppearance'
 import { COUNTRY_META } from '@/app/registry/demoConfig'
+import type { CountryId } from '@/app/state/demoTypes'
 import { createPhoneScreenshotBlob } from '@/app/utils/phoneScreenshot'
 import MiniPhone from './MiniPhone'
 import { flowPreviewStatusBarVariant, renderFlowPreview } from './flowPreviews'
@@ -184,8 +186,8 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
   const steps = scenario.steps
   const safeStepIndex = Math.min(stepIndex, Math.max(0, steps.length - 1))
   const activeStep = steps[safeStepIndex]
-  const firstCountry = flow.countryScope[0]
-  const countryName = (firstCountry ? COUNTRY_META[firstCountry]?.nameEN : undefined) ?? firstCountry ?? ''
+  const [previewCountry, setPreviewCountry] = useState(flow.countryScope[0])
+  const canSelectPreviewCountry = flow.previewCountrySelection && flow.countryScope.length > 1
   const captureSteps = useMemo(() => {
     if (flow.id !== 'ba-card-fraud') return steps
     const seen = new Set<string>()
@@ -198,9 +200,9 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
   }, [flow, steps])
   const captureStrip = useMemo(() => captureSteps.map(step => (
     <MiniPhone key={step.id} scale={1} statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
-      {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
+      {renderFlowPreview(step.screen, { country: previewCountry, parameters: step.previewParameters })}
     </MiniPhone>
-  )), [captureSteps, countryName])
+  )), [captureSteps, previewCountry])
 
   const captureCurrentScreen = async () => {
     const container = captureRef.current
@@ -261,7 +263,9 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
   const exportMeta = () => ({
     flowTitle: flow.title,
     flowLabel: flow.label,
-    scenarioLabel: scenario.label,
+    scenarioLabel: canSelectPreviewCountry && previewCountry
+      ? `${scenario.label} · ${COUNTRY_META[previewCountry].nameEN}`
+      : scenario.label,
     scenarioDescription: scenario.description,
     countryScope: flow.countryScope.join(', '),
     status: flow.status.replace(/-/g, ' '),
@@ -320,7 +324,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
           includeScreens: true,
           analysisDocument,
         })
-        downloadFlowDocx(document, `flow-${slugify(flow.title)}-${slugify(scenario.label)}.docx`)
+        downloadFlowDocx(document, `flow-${slugify(flow.title)}-${slugify(meta.scenarioLabel)}.docx`)
       }
     } catch (error) {
       setExportError(error instanceof Error ? error.message : 'Export failed. Try again.')
@@ -358,6 +362,11 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
         exportError={exportError}
         copied={copied}
         onExport={handleExport}
+        previewCountry={canSelectPreviewCountry ? previewCountry : undefined}
+        onPreviewCountryChange={(country) => {
+          setPreviewCountry(country)
+          setPrototypeRequest(null)
+        }}
         onLaunchDemo={flow.id === 'pi-prime' || flow.id === 'ba-card-fraud' ? () => setPresentationMode('modal') : undefined}
         demoButtonRef={demoButtonRef}
       />
@@ -394,7 +403,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
           scenario={scenario}
           activeStepIndex={safeStepIndex}
           journeyView={journeyView}
-          countryName={countryName}
+          previewCountry={previewCountry}
           onScenarioSelect={selectScenario}
           onStepSelect={setStepIndex}
           onJourneyViewChange={setJourneyView}
@@ -412,7 +421,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
           scenario={scenario}
           activeStep={activeStep}
           activeStepIndex={safeStepIndex}
-          countryName={countryName}
+          previewCountry={previewCountry}
           onScenarioSelect={selectScenario}
           onStepSelect={setStepIndex}
           onOpenInPrototype={flow.prototype ? openInPrototype : undefined}
@@ -426,9 +435,10 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
 
       {activeTab === 'prototype' && flow.prototype && !presentationMode ? (
         <PrototypePanel
+          key={previewCountry}
           flow={flow}
           prototype={flow.prototype}
-          countryName={countryName}
+          previewCountry={previewCountry}
           request={prototypeRequest}
           onOpenScreenContract={openScreenContract}
           onOpenRule={openRule}
@@ -452,7 +462,7 @@ export default function FlowDetail({ flow, onBackToIndex, initialMatch }: { flow
       {activeTab === 'implementation' && flow.implementation ? (
         <FlowImplementationPanel
           flow={flow}
-          countryName={countryName}
+          previewCountry={previewCountry}
           onOpenRule={openRule}
           onOpenScreenContract={openScreenContract}
         />
@@ -473,6 +483,8 @@ function FlowHeader({
   exportError,
   copied,
   onExport,
+  previewCountry,
+  onPreviewCountryChange,
   onLaunchDemo,
   demoButtonRef,
 }: {
@@ -482,6 +494,8 @@ function FlowHeader({
   exportError: string | null
   copied: boolean
   onExport: (kind: ExportKind) => void
+  previewCountry?: CountryId
+  onPreviewCountryChange: (country: CountryId) => void
   onLaunchDemo?: () => void
   demoButtonRef?: RefObject<HTMLButtonElement>
 }) {
@@ -492,7 +506,32 @@ function FlowHeader({
     >
       <div className="flex flex-wrap items-start justify-between gap-[20px] sm:flex-nowrap">
         <div className="min-w-0 flex-1">
-          <h1 className={`${compact ? 'text-[24px] leading-[30px]' : 'text-[32px] leading-[38px]'} font-bold text-[var(--uc-text)]`}>{flow.title}</h1>
+          <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[6px]">
+            <h1 className={`${compact ? 'text-[24px] leading-[30px]' : 'text-[32px] leading-[38px]'} font-bold text-[var(--uc-text)]`}>{flow.title}</h1>
+            {previewCountry && (
+              <div role="group" aria-label="Preview country" className="inline-flex gap-[2px] rounded-[8px] bg-[var(--uc-surface-muted)] p-[2px]">
+                {flow.countryScope.map((country) => {
+                  const selected = previewCountry === country
+                  const name = COUNTRY_META[country].nameEN
+                  return (
+                    <button
+                      key={country}
+                      type="button"
+                      aria-label={name}
+                      aria-pressed={selected}
+                      title={name}
+                      disabled={exportKind !== null}
+                      onClick={() => { if (!selected) onPreviewCountryChange(country) }}
+                      className={`inline-flex min-h-[32px] items-center gap-[6px] rounded-[6px] border px-[8px] uc-type-n5-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--uc-action)] disabled:opacity-60 ${selected ? 'border-[var(--uc-action)] bg-[var(--uc-surface)] text-[var(--uc-action)]' : 'border-transparent text-[var(--uc-text-muted)] hover:bg-[var(--uc-surface)]'}`}
+                    >
+                      <CountryFlagRoundel country={country} size={16} />
+                      {country}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
           {!compact && <p className="mt-[10px] uc-type-n4 text-[var(--uc-text-muted)]">{flow.summary}</p>}
         </div>
 
@@ -828,7 +867,7 @@ function JourneyPanel({
   scenario,
   activeStepIndex,
   journeyView,
-  countryName,
+  previewCountry,
   onScenarioSelect,
   onStepSelect,
   onJourneyViewChange,
@@ -838,7 +877,7 @@ function JourneyPanel({
   scenario: FlowScenario
   activeStepIndex: number
   journeyView: JourneyView
-  countryName: string
+  previewCountry?: CountryId
   onScenarioSelect: (scenarioId: string) => void
   onStepSelect: (index: number) => void
   onJourneyViewChange: (view: JourneyView) => void
@@ -947,7 +986,7 @@ function JourneyPanel({
             {activeStep ? (
               <>
                 <MiniPhone ref={focusedScreenRef} scale={0.82} scrollable statusBarVariant={flowPreviewStatusBarVariant(activeStep.screen)}>
-                  {renderFlowPreview(activeStep.screen, { countryName, parameters: activeStep.previewParameters })}
+                  {renderFlowPreview(activeStep.screen, { country: previewCountry, parameters: activeStep.previewParameters })}
                 </MiniPhone>
                 <FlowScreenDownloadButton
                   screenRef={focusedScreenRef}
@@ -960,7 +999,7 @@ function JourneyPanel({
           </div>
         </div>
       ) : isEthocaFlow ? (
-        <EthocaJourneyGallery scenario={scenario} countryName={countryName} />
+        <EthocaJourneyGallery scenario={scenario} previewCountry={previewCountry} />
       ) : (
         <div className="mt-[20px] overflow-x-auto pb-[12px]">
           <div className="flex min-w-max items-start gap-[12px]">
@@ -969,7 +1008,7 @@ function JourneyPanel({
                 <FilmstripCard
                   step={step}
                   index={index}
-                  countryName={countryName}
+                  previewCountry={previewCountry}
                   onOpenSpec={() => onOpenSpec(index)}
                 />
                 {index < scenario.steps.length - 1 ? <JourneyArrow /> : null}
@@ -982,7 +1021,7 @@ function JourneyPanel({
   )
 }
 
-function EthocaJourneyGallery({ scenario, countryName }: { scenario: FlowScenario; countryName: string }) {
+function EthocaJourneyGallery({ scenario, previewCountry }: { scenario: FlowScenario; previewCountry?: CountryId }) {
   const entrySteps = scenario.steps.filter((step) => step.id.includes('list'))
   const detailSteps = scenario.steps.filter((step) => !step.id.includes('list'))
   const hasIndependentEntryPoints = entrySteps.length > 1
@@ -1012,7 +1051,7 @@ function EthocaJourneyGallery({ scenario, countryName }: { scenario: FlowScenari
                   key={step.id}
                   step={step}
                   index={index}
-                  countryName={countryName}
+                  previewCountry={previewCountry}
                   contextLabel={ethocaEntryContext(step)}
                   testId={ethocaEntryTestId(step)}
                 />
@@ -1044,7 +1083,7 @@ function EthocaJourneyGallery({ scenario, countryName }: { scenario: FlowScenari
                     key={step.id}
                     step={step}
                     index={index}
-                    countryName={countryName}
+                    previewCountry={previewCountry}
                     contextLabel="Transaction detail"
                   />
                 )
@@ -1072,14 +1111,14 @@ function ethocaEntryTestId(step: FlowStep) {
 function FilmstripCard({
   step,
   index,
-  countryName,
+  previewCountry,
   contextLabel,
   testId,
   onOpenSpec,
 }: {
   step: FlowStep
   index: number
-  countryName: string
+  previewCountry?: CountryId
   contextLabel?: string
   testId?: string
   onOpenSpec?: () => void
@@ -1090,7 +1129,7 @@ function FilmstripCard({
     <article className="w-[200px] shrink-0" data-testid={testId}>
       <div className="group relative">
         <MiniPhone ref={screenRef} scale={0.5} scrollable statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
-          {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
+          {renderFlowPreview(step.screen, { country: previewCountry, parameters: step.previewParameters })}
         </MiniPhone>
         <FlowScreenDownloadButton screenRef={screenRef} step={step} index={index} showOnHover />
       </div>
@@ -1282,14 +1321,14 @@ function JourneyArrow() {
 function PrototypePanel({
   flow,
   prototype,
-  countryName,
+  previewCountry,
   request,
   onOpenScreenContract,
   onOpenRule,
 }: {
   flow: FlowDefinition
   prototype: FlowPrototypeSpec
-  countryName: string
+  previewCountry?: CountryId
   /** A screen another tab asked to open here; the nonce lets the same screen be asked for twice. */
   request: PrototypeRequest | null
   onOpenScreenContract: (screen: FlowScreenKind) => void
@@ -1400,7 +1439,7 @@ function PrototypePanel({
           {/* The same device frame the Demo area uses, so this reads as a phone. */}
           <FlowNavProvider value={nav}>
             <MiniPhone scale={phoneScale} scrollable device statusBarVariant={flowPreviewStatusBarVariant(screen)} microphoneActive={isPrimeReferenceScreen(screen) && getPrimePhoneAppearance(screen).microphoneActive}>
-              {renderFlowPreview(screen, { countryName, parameters })}
+              {renderFlowPreview(screen, { country: previewCountry, parameters })}
             </MiniPhone>
           </FlowNavProvider>
         </div>
@@ -1816,7 +1855,7 @@ function SpecPanel({
   scenario,
   activeStep,
   activeStepIndex,
-  countryName,
+  previewCountry,
   onScenarioSelect,
   onStepSelect,
   onOpenInPrototype,
@@ -1827,7 +1866,7 @@ function SpecPanel({
   scenario: FlowScenario
   activeStep: FlowStep | undefined
   activeStepIndex: number
-  countryName: string
+  previewCountry?: CountryId
   onScenarioSelect: (scenarioId: string) => void
   onStepSelect: (index: number) => void
   onOpenInPrototype?: (screen: FlowScreenKind) => void
@@ -1903,7 +1942,7 @@ function SpecPanel({
             step={activeStep}
             spec={spec}
             stepIndex={activeStepIndex}
-            countryName={countryName}
+            previewCountry={previewCountry}
             onOpenInPrototype={onOpenInPrototype}
             onOpenRule={onOpenRule}
           />
@@ -2064,7 +2103,7 @@ function ScreenSpecView({
   step,
   spec,
   stepIndex,
-  countryName,
+  previewCountry,
   onOpenInPrototype,
   onOpenRule,
 }: {
@@ -2072,7 +2111,7 @@ function ScreenSpecView({
   step: FlowStep
   spec: FlowScreenSpec
   stepIndex: number
-  countryName: string
+  previewCountry?: CountryId
   onOpenInPrototype?: (screen: FlowScreenKind) => void
   onOpenRule?: (ruleId: string) => void
 }) {
@@ -2082,7 +2121,7 @@ function ScreenSpecView({
     <div className="mt-[18px] flex flex-col gap-[24px] xl:flex-row xl:items-start">
       <div className="shrink-0">
         <MiniPhone ref={screenRef} scale={0.62} scrollable device statusBarVariant={flowPreviewStatusBarVariant(step.screen)}>
-          {renderFlowPreview(step.screen, { countryName, parameters: step.previewParameters })}
+          {renderFlowPreview(step.screen, { country: previewCountry, parameters: step.previewParameters })}
         </MiniPhone>
         <FlowScreenDownloadLink screenRef={screenRef} step={step} index={stepIndex} />
       </div>

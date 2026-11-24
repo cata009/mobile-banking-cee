@@ -34,6 +34,24 @@ describe('disposable card lifecycle', () => {
     expect(createDisposableCard([first, second, third], new Date('2026-12-05T12:00:00Z'), parent)).toBeDefined()
   })
 
+  it('limits Bosnia and Herzegovina to one active card across parent cards', () => {
+    const now = new Date('2026-11-05T12:00:00Z')
+    const first = createDisposableCard([], now, parent, 'BA')!
+    const otherParent = { ...parent, id: 'debit-1', type: 'debit_card' }
+    expect(createDisposableCard([first], now, otherParent, 'BA')).toBeUndefined()
+    const inactiveVersions = [
+      closeDisposableCard([first], first.id),
+      recordDisposableCardPayment([first], first.id, 'successful', now),
+    ]
+    for (const inactive of inactiveVersions) {
+      const replacement = createDisposableCard(inactive, now, otherParent, 'BA')!
+      expect(replacement.pan).not.toBe(first.pan)
+      expect(replacement.parent).toEqual(otherParent)
+    }
+    const expiresAt = new Date(first.expiresAt)
+    expect(createDisposableCard([first], expiresAt, otherParent, 'BA')).toBeDefined()
+  })
+
   it('consumes only the card used for one successful payment and never reuses its PAN', () => {
     const now = new Date('2026-11-05T12:00:00Z')
     const first = createDisposableCard([], now, parent)!

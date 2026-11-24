@@ -1,7 +1,7 @@
 import type { CountryId } from '@/app/state/demoTypes'
 import type { FlowDefinition } from '@/app/screens/flow-library/flows/types'
 
-const RS_ONLY: readonly CountryId[] = ['RS']
+export const DISPOSABLE_CARD_COUNTRIES: readonly CountryId[] = ['RS', 'BA']
 const CARDS_SCREEN = 'rs-disposable-cards-screen'
 const DETAILS_SHEET = 'rs-disposable-cards-details-sheet'
 const FACE_ID_NORMAL = 'rs-disposable-cards-face-id-normal'
@@ -12,39 +12,47 @@ const CARD_OPTIONS = 'rs-disposable-cards-card-options'
 const DISPOSABLE_LIST = 'rs-disposable-cards-list'
 const DISPOSABLE_HELP = 'rs-disposable-cards-help'
 const CLOSE_CONFIRMATION = 'rs-disposable-cards-close-confirmation'
+const CLOSE_SUCCESS = 'rs-disposable-cards-close-success'
 
-/** Full RS baseline Cards screen that starts the Disposable Cards flow. */
+/** Full baseline Cards screen that starts the Disposable Cards flow. */
 export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
   id: 'rs-disposable-cards',
   title: 'Disposable Cards',
   label: 'Disposable Cards',
-  summary: 'Serbia preview for creating, viewing and managing single-use disposable cards linked to a main card.',
+  summary:
+    'Create, view and manage single-use disposable cards linked to a main card in Serbia or Bosnia and Herzegovina.',
   domain: 'Cards',
-  countryScope: RS_ONLY,
+  countryScope: DISPOSABLE_CARD_COUNTRIES,
+  previewCountrySelection: true,
   status: 'in-review',
   figmaFile: 'Serbia · DBN · Flows',
   figmaNodeId: '',
   sourceUrl: 'https://www.figma.com/design/LCJ2L7jAYTES68XMyHaCr2/Serbia--DBN---Flows',
   specLayout: 'document-and-screens',
   overview: {
-    purpose: 'Let a customer create, view and close single-use disposable cards from the Serbia Cards experience.',
+    purpose:
+      'Let a customer create, view and close single-use disposable cards from the Cards experience in Serbia and Bosnia and Herzegovina.',
     scopeNote:
-      'The RS preview starts from the baseline Cards screen. Show Card Details opens a card-choice carousel; Card options opens the disposable-card list. Customers can create or view up to three active disposable cards after simulated Face ID, and close them early. A card has its own number, is usable for one successful payment and expires after 30 days if unused.',
+      'Select Serbia (RS) or Bosnia and Herzegovina (BA) in the flow header. Both previews use their market’s baseline Cards screen, demo data and currency. Show Card Details opens a card-choice carousel. Card options opens the disposable-card list. Simulated Face ID is required to generate or view a disposable card. Serbia allows three active cards and Bosnia and Herzegovina allows one. Each card has its own number, is usable for one successful payment and expires after 30 days if unused. Confirming early closure opens a standard success screen.',
     businessAnalysis: {
       generalInformation: [
         {
           label: 'Business outcome',
           value: 'Offer a separate, single-use card number while keeping the payment visible under the main card.',
         },
-        { label: 'Customer scope', value: 'Serbian retail customers viewing cards in the Mobile PI baseline.' },
+        {
+          label: 'Customer scope',
+          value:
+            'Retail customers viewing cards in the Mobile PI baseline for Serbia (RS) or Bosnia and Herzegovina (BA).',
+        },
         {
           label: 'Prototype boundary',
           value:
-            'The preview is an RS-scoped demonstration with synthetic card numbers, simulated Face ID and a manual payment-detection control. It does not issue or process real cards or payments.',
+            'The preview uses synthetic card numbers, simulated Face ID and a manual payment-detection control for both markets. Card issuance and payment processing are simulated.',
         },
       ],
       versionContext:
-        'Flow Library preview updated 5 November 2026. The existing Serbia baseline Cards screen hosts the choice, management, verification and simulated payment journeys.',
+        'Both markets reuse the baseline Cards screen for card choice, management, verification and simulated payment. The Serbia Figma file remains the source reference for the shared journey.',
       versionHistory: [
         {
           version: '0.3',
@@ -56,6 +64,12 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
           date: '5 November 2026',
           detail:
             'Aligned card management, single-use payment simulation and Journey snapshots with the interactive prototype.',
+        },
+        {
+          version: '0.5',
+          date: '24 November 2026',
+          detail:
+            'Added Bosnia and Herzegovina with a one-active-card limit, market switching, and the standard closure success screen.',
         },
       ],
       openIssues: [
@@ -77,16 +91,17 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       requirements: [
         {
           title: 'Entry and card selection',
-          description: 'Use the Serbia baseline Cards screen as the starting point.',
+          description: 'Use the selected market’s baseline Cards screen as the starting point.',
           items: [
             'Show cardholder details, a masked card number, the card carousel and its position indicator.',
             'Show the selected card balance and the baseline card quick actions.',
             'Show transaction search and the selected card transaction rows.',
             'Open a card carousel from Show Card Details; tapping a card or the creation tile starts Face ID before details appear.',
             'Offer Disposable cards in Card options immediately below View PIN.',
-            'Allow up to three active disposable cards, each with its own PAN, usable once and valid for up to 30 days.',
-            'Allow early closure from the card details or the list row and explain applicable transaction limits in the help sheet.',
-            'Keep the flow available for Serbia only.',
+            'Allow up to three active disposable cards in Serbia and one in Bosnia and Herzegovina, each with its own PAN, usable once and valid for up to 30 days.',
+            'Allow early closure from the card details or the list row. Show the standard success screen after confirmation and use Done to return to the active-card list.',
+            'Use RSD in the Serbia preview and BAM in the Bosnia and Herzegovina preview, including the simulated payment.',
+            'Start a fresh prototype session when the preview country changes.',
           ],
         },
         {
@@ -115,7 +130,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
             'Reuse the full baseline Cards screen as the entry point.',
             'Route Show Card Details through the card-choice bottom sheet and simulated Face ID.',
             'List active disposable cards, verify before generation or viewing, and allow early closure after confirmation.',
-            'Show an empty state, prevent creation at the three-card limit, and make help and transaction limits discoverable.',
+            'Show an empty state, prevent creation at the selected market’s limit, and make help and transaction limits discoverable.',
           ],
         },
       ],
@@ -135,11 +150,11 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       { label: 'Card options', intent: 'Open Disposable cards below View PIN.' },
     ],
     preconditions: [
-      'The flow is available in the Serbia (RS) scope; its preview uses Serbia PI baseline data independently of the global demo selection.',
+      'The flow covers Serbia (RS) and Bosnia and Herzegovina (BA). The preview country is selected in the flow header, independently of the global demo.',
       'A main debit or credit card is available in the preview session.',
     ],
     businessRules: [
-      'At most three disposable cards can be active at once.',
+      'At most three disposable cards can be active at once in Serbia and one in Bosnia and Herzegovina.',
       'Each disposable card has its own PAN and expires 30 days after generation.',
       'In the simulation, a successful payment consumes the last viewed card permanently; a sample transaction appears under its parent card and the customer may generate a replacement.',
       'A card can be closed early; expired, consumed or closed cards no longer count toward the limit.',
@@ -147,7 +162,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
     ],
     successDestinations: [
       'The requested card details after simulated verification.',
-      'The disposable-card list after confirmed early closure.',
+      'The standard success screen after confirmed early closure. Done opens the active-card list.',
       'The parent card transaction list after a simulated successful payment.',
     ],
     analyticsEvents: [],
@@ -165,7 +180,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
   screenSpecs: {
     [CARDS_SCREEN]: {
       title: 'Cards',
-      purpose: 'Show the complete RS baseline Cards screen as the starting point for Disposable Cards.',
+      purpose: 'Show the selected market’s complete baseline Cards screen as the starting point for Disposable Cards.',
       defaultState: 'The first card is selected; its balance, quick actions and transaction list are visible.',
       states: ['A different card is selected and its balance and transaction list are shown.'],
       fields: [
@@ -210,7 +225,11 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       states: ['Empty list', 'One or two active cards', 'Three active cards with generation disabled'],
       fields: [
         { name: 'Disposable card', type: 'Artwork, masked number and expiry date' },
-        { name: 'Maximum reached', type: 'Message', notes: 'Shown when three cards are active.' },
+        {
+          name: 'Maximum reached',
+          type: 'Message',
+          notes: 'Shown when the active-card limit for the selected market is reached.',
+        },
       ],
       actions: [
         { label: 'Generate new card', result: 'Starts simulated Face ID and opens the new card details.' },
@@ -221,7 +240,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       ],
       acceptance: [
         'Expired, consumed and closed cards are excluded from the active list.',
-        'Generation is disabled at three active cards and the limit message is displayed above the button.',
+        'Generation is disabled at the market limit, and the limit message is displayed above the button.',
         'The card row uses the main card artwork and shows the last four digits and expiry date.',
       ],
     },
@@ -234,7 +253,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         { label: 'Close', result: 'Closes the information sheet and returns to the list.' },
       ],
       acceptance: [
-        'The sheet explains one successful payment, expiry after 30 days, up to three active cards and early closure.',
+        'The sheet explains one successful payment, expiry after 30 days, the selected market’s active-card limit and early closure.',
         'It states that payments appear under the main card and that transaction limits apply to all disposable cards.',
       ],
     },
@@ -243,13 +262,23 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       purpose: 'Confirm permanent closure of the chosen disposable card before changing its status.',
       defaultState: 'The confirmation identifies the card by its last four digits and explains the consequences.',
       actions: [
-        { label: 'Confirm closure', result: 'Closes the disposable card and returns to the active-card list.' },
+        { label: 'Confirm closure', result: 'Closes the disposable card and opens the standard success screen.' },
         { label: 'Cancel', result: 'Dismisses the sheet and keeps the card active.' },
         { label: 'Close', result: 'Dismisses the sheet and keeps the card active.' },
       ],
       acceptance: [
         'The same confirmation opens from Close disposable card or the list row Delete action.',
         'The sheet explains that the number can no longer be used, the main card is not affected and a new disposable card may be created.',
+      ],
+    },
+    [CLOSE_SUCCESS]: {
+      title: 'Disposable card closed',
+      purpose: 'Confirm that the chosen disposable card has been permanently closed.',
+      defaultState: 'The standard success screen confirms closure and explains that the main card is unaffected.',
+      actions: [{ label: 'Done', result: 'Returns to the active-card list.' }],
+      acceptance: [
+        'The closed card no longer appears in the list or the card-choice carousel.',
+        'Closure frees one slot for a replacement, within the active-card limit for the selected market.',
       ],
     },
     [DETAILS_SHEET]: {
@@ -260,8 +289,8 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         'The customer’s credit or debit card appears alongside a same-size creation tile when no disposable cards exist.',
       states: [
         'No active disposable cards',
-        'One to three active disposable cards',
-        'The three-card limit is reached',
+        'One or more active disposable cards, within the selected market’s limit',
+        'The active-card limit is reached',
         'The sheet is dismissed back to the Cards screen.',
       ],
       fields: [
@@ -270,7 +299,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         {
           name: 'Add new',
           type: 'Creation tile',
-          notes: 'Shown only while fewer than three disposable cards are active.',
+          notes: 'Shown only when the market has a free active-card slot.',
         },
       ],
       actions: [
@@ -278,18 +307,18 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         {
           label: 'Create disposable card',
           result:
-            'Starts Face ID, then creates a disposable card and opens its details when fewer than three are active.',
+            'Starts Face ID, then creates a disposable card and opens its details when the market has a free slot.',
         },
       ],
       back: 'Closing the sheet returns to the full Cards screen.',
       acceptance: [
         'The sheet opens from the Cards screen Show Card Details action.',
         'The carousel identifies the customer’s credit or debit card and shows active disposable cards as direct actions, with drag support.',
-        'When fewer than three disposable cards are active, a matching-size creation tile offers a single-use card.',
-        'The creation tile is absent once three disposable cards are active; Face ID precedes generation and protects the details of the chosen card.',
+        'When there is a free active-card slot, a matching-size creation tile offers a single-use card.',
+        'The creation tile is absent at the market limit. Face ID precedes generation and protects the details of the chosen card.',
         'The carousel shows two items per page, with one position dot per page when there is more than one page.',
-        'The sheet shows the selected main card and up to three active disposable cards; a tap opens a card directly without a separate View button.',
-        'The limit message is shown and the Add new tile is removed when three disposable cards are active.',
+        'The sheet shows the selected main card and the active disposable cards. A tap opens a card directly without a separate View button.',
+        'The limit message is shown and the Add new tile is removed when the market limit is reached.',
       ],
     },
     [NORMAL_DETAILS]: {
@@ -353,7 +382,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         {
           label: 'Generate new card',
           result:
-            'Starts Face ID, then creates a card valid for 30 days and opens its details, up to three active cards.',
+            'Starts Face ID, then creates a card valid for 30 days and opens its details when the market has a free slot.',
         },
         {
           label: 'View disposable card',
@@ -367,7 +396,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         { label: 'Delete', result: 'Opens the same closure confirmation from the list row actions.' },
         {
           label: 'Confirm closure',
-          result: 'Closes the selected disposable card and returns to the active-card list.',
+          result: 'Closes the selected disposable card and opens the standard success screen.',
         },
         { label: 'Cancel', result: 'Dismisses the confirmation without closing the card.' },
         { label: 'Help', result: 'Explains validity, the card limit and applicable transaction limits.' },
@@ -413,6 +442,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       { title: 'Choose a card', screens: [DETAILS_SHEET] },
       { title: 'Verify identity', screens: [FACE_ID_NORMAL, FACE_ID_DISPOSABLE] },
       { title: 'Card details', screens: [NORMAL_DETAILS, DISPOSABLE_DETAILS] },
+      { title: 'Closure', screens: [CLOSE_SUCCESS] },
     ],
     nodes: {
       [CARDS_SCREEN]: {
@@ -431,6 +461,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
       [DISPOSABLE_LIST]: { back: CARD_OPTIONS },
       [DISPOSABLE_HELP]: { back: DISPOSABLE_LIST },
       [CLOSE_CONFIRMATION]: { back: DISPOSABLE_DETAILS },
+      [CLOSE_SUCCESS]: { primary: { label: 'Done', to: DISPOSABLE_DETAILS } },
     },
   },
   defaultScenarioId: 'normal-card-details',
@@ -478,7 +509,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         {
           id: 'cards-screen',
           title: 'Cards',
-          description: 'Open the full RS baseline Cards screen.',
+          description: 'Open the selected market’s full baseline Cards screen.',
           screen: CARDS_SCREEN,
         },
         {
@@ -526,7 +557,7 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
         {
           id: 'manage-disposable-list',
           title: 'Disposable cards',
-          description: 'See active cards and generate another when fewer than three are active.',
+          description: 'See active cards and generate another when the selected market has a free slot.',
           screen: DISPOSABLE_LIST,
           previewParameters: { journeyState: 'list' },
         },
@@ -557,6 +588,12 @@ export const RS_DISPOSABLE_CARDS_FLOW: FlowDefinition = {
           description: 'Confirm closure from card details or use Delete in the list; Cancel keeps the card active.',
           screen: CLOSE_CONFIRMATION,
           previewParameters: { journeyState: 'close-confirmation' },
+        },
+        {
+          id: 'manage-close-success',
+          title: 'Disposable card closed',
+          description: 'See the standard success screen and select Done to return to the list.',
+          screen: CLOSE_SUCCESS,
         },
         {
           id: 'manage-empty-list',

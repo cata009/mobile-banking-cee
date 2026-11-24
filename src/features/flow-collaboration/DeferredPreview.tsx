@@ -1,8 +1,9 @@
 import { Component, Suspense, lazy, useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import type { FlowScreenKind } from '@/app/screens/flow-library/flows/types'
+import type { CountryId } from '@/app/state/demoTypes'
 
 export interface PreviewContext {
-  countryName?: string
+  country?: CountryId
   parameters?: Readonly<Record<string, string>>
 }
 export interface PreviewProps {

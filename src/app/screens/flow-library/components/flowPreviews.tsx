@@ -39,6 +39,7 @@ const loaders = {
         m.renderRsDisposableCardsPreview(
           screen as Parameters<typeof m.renderRsDisposableCardsPreview>[0],
           context.parameters,
+          context.country,
         ),
       ),
     ),

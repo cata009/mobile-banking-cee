@@ -1,3 +1,5 @@
+import type { CountryId } from '@/app/state/demoTypes'
+
 export interface DisposableCard {
   id: string
   pan: string
@@ -10,7 +12,9 @@ export interface DisposableCard {
 }
 
 const VALIDITY_MS = 30 * 24 * 60 * 60 * 1000
-const MAX_ACTIVE_CARDS = 3
+export function disposableCardLimit(country: CountryId) {
+  return country === 'BA' ? 1 : 3
+}
 
 export function activeDisposableCards(cards: DisposableCard[], now: Date): DisposableCard[] {
   return cards.filter((card) => !card.closed && !card.consumedAt && new Date(card.expiresAt).getTime() > now.getTime())
@@ -20,8 +24,9 @@ export function createDisposableCard(
   cards: DisposableCard[],
   now: Date,
   parent: DisposableCard['parent'],
+  country: CountryId = 'RS',
 ): DisposableCard | undefined {
-  if (activeDisposableCards(cards, now).length >= MAX_ACTIVE_CARDS) return undefined
+  if (activeDisposableCards(cards, now).length >= disposableCardLimit(country)) return undefined
   const sequence = cards.length + 1
   const base = `539210764411${String(sequence).padStart(3, '0')}`
   const sum = [...base].reverse().reduce((total, digit, index) => {

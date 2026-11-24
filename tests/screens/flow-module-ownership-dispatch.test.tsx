@@ -11,9 +11,9 @@ it('dispatches every declared screen kind through the owned preview entry for ev
       ...(Object.keys(flow.screenSpecs) as FlowScreenKind[]),
       ...flow.scenarios.flatMap((scenario) => scenario.steps.map((step) => step.screen)),
     ])
-    for (const countryName of flow.countryScope)
+    for (const country of flow.countryScope)
       for (const kind of kinds)
-        expect(isValidElement(renderFlowPreview(kind, { countryName })), `${id}:${countryName}:${kind}`).toBe(true)
+        expect(isValidElement(renderFlowPreview(kind, { country })), `${id}:${country}:${kind}`).toBe(true)
   }
   for (const unknown of ['unknown-runtime-kind', 'constructor', 'toString', '__proto__'])
     expect(renderFlowPreview(unknown as FlowScreenKind)).toBeNull()
