@@ -1,5 +1,6 @@
 import React from 'react';
 import Renderer, { act } from 'react-test-renderer';
+import { Path, Text as SvgText } from 'react-native-svg';
 import { DEFAULT_ROBO_DEMO_CLOCK } from '@/features/investments/robo/demoClock';
 import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures';
 import { ROBO_PORTFOLIOS } from '@/features/investments/robo/catalog';
@@ -15,6 +16,7 @@ import { TextInput } from '../src/universal/Typography';
 import { BaselineBottomSheet } from '../src/universal/BaselineBottomSheet';
 import { DemoViewport } from '../src/universal/DemoViewport';
 import { BaselineStandardSuccess } from '../src/universal/BaselineStandardSuccess';
+import { SourceRangeSlider } from '../src/universal/SourceRangeSlider';
 
 const accounts: CurrentAccount[] = [
   {
@@ -103,6 +105,17 @@ test('changes the account after insufficient funds while preserving the amount t
       showCloseButton: false,
       padding: 24,
     });
+    const sheet = tree.root.findByType(BaselineBottomSheet);
+    expect(
+      sheet
+        .findAllByProps({ accessibilityLabel: '75.000,00 CZK' })
+        .some(node => node.props.children === '75K CZK'),
+    ).toBe(true);
+    expect(
+      sheet
+        .findAllByProps({ accessibilityLabel: '50.000,00 CZK' })
+        .some(node => node.props.children === '50K CZK'),
+    ).toBe(true);
     press(tree, 'Edit amount or cash account');
     press(tree, 'Cash account');
     press(tree, 'Cash B, 890123402/2700, 100.000,00 CZK');
@@ -146,7 +159,7 @@ test('updates the selected projection and restores it after the Excel-aligned he
     expect(['Positive', 'Neutral', 'Negative'].every(hasText)).toBe(true);
     const amount = () => tree.root.findByType(TextInput);
     act(() => amount().props.onChangeText('75.000'));
-    expect(hasText('75.000 CZK')).toBe(true);
+    expect(hasText('75K CZK')).toBe(true);
     expect(hasText('Current plan')).toBe(false);
     press(tree, 'Help');
     expect(tree.root.findByType(Page).props.title).toBe(
@@ -157,10 +170,62 @@ test('updates the selected projection and restores it after the Excel-aligned he
     expect(tree.root.findByType(Page).props.title).toBe(
       'Investment projection',
     );
-    expect(hasText('75.000 CZK')).toBe(true);
+    expect(hasText('75K CZK')).toBe(true);
     expect(amount().props.value).toBe('75.000');
   } finally {
     act(() => tree.unmount());
+  }
+});
+
+test('keeps the zero-balance projection scale stable during a drag until the lines need more room', () => {
+  jest.useFakeTimers();
+  const tree = render();
+  const slider = () => tree.root.findByType(SourceRangeSlider);
+  const ticks = () =>
+    tree.root
+      .findAllByType(SvgText)
+      .filter(
+        node => node.props.textAnchor === 'end' && node.props.children !== 'Target',
+      )
+      .map(node => node.props.children);
+  const capitalY = () =>
+    Number(
+      tree.root
+        .findAllByType(Path)
+        .find(node => node.props.strokeDasharray)?.props.d.split(' ')[1],
+    );
+  const setAmount = (amount: number) => {
+    act(() => slider().props.onChange(amount));
+    act(() => jest.advanceTimersByTime(240));
+  };
+
+  try {
+    press(tree, 'Preview impact');
+    setAmount(5_000);
+    const initialTicks = ticks();
+    const initialY = capitalY();
+    expect(
+      tree.root.findAll(node => node.children.join('') === 'Portfolio today · 0 CZK'),
+    ).not.toHaveLength(0);
+    act(() => slider().props.onInteractionChange?.(true));
+
+    setAmount(5_500);
+    expect(ticks()).toEqual(initialTicks);
+    expect(capitalY()).toBeLessThan(initialY);
+    expect(initialTicks[0]).toBe('0');
+
+    setAmount(10_000_000);
+    const expandedTicks = ticks();
+    expect(expandedTicks).not.toEqual(initialTicks);
+    expect(capitalY()).toBeGreaterThanOrEqual(9);
+
+    setAmount(5_000);
+    expect(ticks()).toEqual(expandedTicks);
+    act(() => slider().props.onInteractionChange?.(false));
+    expect(ticks()).toEqual(initialTicks);
+  } finally {
+    act(() => tree.unmount());
+    jest.useRealTimers();
   }
 });
 

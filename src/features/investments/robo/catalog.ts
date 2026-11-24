@@ -1,6 +1,8 @@
 import { getRecommendedInvestmentBaskets } from '@/app/config/investmentBasketFundsConfig'
 import {
   type RoboPortfolio,
+  type RoboInvestorProfile,
+  type RoboStandalonePortfolio,
   type RoboStrategy,
   RoboPortfolioPresentation,
   RoboDocument,
@@ -140,6 +142,25 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
     })),
   ),
 ] as const
+
+function standalonePortfolio(isin: string, name: string, profileLabel: string): RoboStandalonePortfolio {
+  const suitabilitySummary = `Recommended for the ${profileLabel} investor profile.`
+  return {
+    id: `fund-${isin}`,
+    strategyId: 'sustainable-balanced',
+    name,
+    description: suitabilitySummary,
+    suitabilitySummary,
+    holdings: [],
+    standaloneFund: { isin, profileLabel },
+  }
+}
+
+export const ROBO_STANDALONE_PORTFOLIOS: Readonly<Record<RoboInvestorProfile, RoboStandalonePortfolio>> = {
+  V1: standalonePortfolio('LU2595011565', 'onemarkets Global Multibrand Selection Fund - M', 'Conservative - V1'),
+  V2: standalonePortfolio('LU3046603414', 'onemarkets UC Global Multibrand 60 Fund - M', 'Moderate - V2'),
+  V3: standalonePortfolio('LU3046604818', 'onemarkets UC Global Multibrand 90 Fund - M', 'Aggressive - V3'),
+}
 
 export const ROBO_PORTFOLIO_PRESENTATIONS: Record<RoboStrategy['id'], RoboPortfolioPresentation> = {
   'sustainable-balanced': {

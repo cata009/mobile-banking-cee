@@ -1,4 +1,4 @@
-import type { RoboExistingGoal, RoboReviewRow, RoboFundingMethod } from './types'
+import type { RoboExistingGoal, RoboReviewRow, RoboFundingMethod, RoboStandaloneFund } from './types'
 import { formatCzkInteger, getFundingFieldVisibility } from './model'
 import { ROBO_INVESTOR_PROFILE_LABELS } from './presentationData'
 import { isRoboFundingDateAllowed, type RoboDemoClock } from './demoClock'
@@ -9,14 +9,16 @@ export function buildRoboCreationReviewRows(
   targetAmount: string,
   portfolioName: string,
   horizonYears: number,
+  fund?: RoboStandaloneFund,
 ): RoboReviewRow[] {
   return [
     { label: 'Goal type', value: goalType, section: 'goal' },
     { label: 'Goal name', value: goalName, section: 'goal' },
     { label: 'Target amount', value: `${formatCzkInteger(targetAmount)} CZK`, section: 'goal' },
-    { label: 'Portfolio', value: portfolioName, section: 'goal' },
+    { label: fund ? 'Fund' : 'Portfolio', value: portfolioName, section: 'goal' },
+    ...(fund ? [{ label: 'ISIN', value: fund.isin, section: 'goal' as const }] : []),
     { label: 'Time horizon', value: `${horizonYears} years`, section: 'plan' },
-    { label: 'Investor profile', value: ROBO_INVESTOR_PROFILE_LABELS.moderate, section: 'plan' },
+    { label: 'Investor profile', value: fund?.profileLabel ?? ROBO_INVESTOR_PROFILE_LABELS.moderate, section: 'plan' },
   ]
 }
 

@@ -18,6 +18,7 @@ import {
   type RoboDemoClock,
 } from '@/features/investments/robo/demoClock';
 import { buildInitialRoboGoal } from '@/features/investments/robo/goalModel';
+import { ROBO_STANDALONE_PORTFOLIOS } from '@/features/investments/robo/catalog';
 import { formatCzkInteger } from '@/features/investments/robo/model';
 import {
   formatRoboGoalDate,
@@ -30,6 +31,7 @@ import { hydrateRoboGoal } from '@/features/investments/robo/goalHydration';
 import { canStartRoboTopUpProjection } from '@/features/investments/robo/topUpProjection';
 import type {
   RoboExistingGoal,
+  RoboInvestorProfile,
   RoboInvestorProfileStatus,
 } from '@/features/investments/robo/types';
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig';
@@ -93,6 +95,7 @@ export interface CzRoboFlowProps {
   securityCatalog?: readonly InvestmentCatalogSecurity[];
   demoClock?: RoboDemoClock;
   profileStatus?: RoboInvestorProfileStatus;
+  investorProfile?: RoboInvestorProfile;
   availableStrategyCount?: 1 | 2 | 3;
   amountsHidden?: boolean;
   screenTopInset?: number;
@@ -112,6 +115,7 @@ export function CzRoboFlow({
   securityCatalog = [],
   demoClock,
   profileStatus = 'valid',
+  investorProfile = profileStatus === 'expired' ? 'V3' : 'V2',
   availableStrategyCount = 3,
   amountsHidden = false,
   screenTopInset = 0,
@@ -120,6 +124,9 @@ export function CzRoboFlow({
   portfolioSwitcher,
   release = 'release-future-evo-2027',
 }: CzRoboFlowProps) {
+  const recommendedFund = release === 'release-future-cz-robo'
+    ? ROBO_STANDALONE_PORTFOLIOS[investorProfile]
+    : undefined;
   const [clock] = useState(() => demoClock ?? getCurrentRoboDemoClock());
   const [basketDetailsOpen, setBasketDetailsOpen] = useState(false);
   const [cashAccountId, setCashAccountId] = useState('');
@@ -271,7 +278,7 @@ export function CzRoboFlow({
           onExit={exit}
           onSigned={() => {
             const portfolio = view.selectedPortfolio;
-            if (!portfolio?.basketFund) return;
+            if (!portfolio || (!portfolio.basketFund && !portfolio.standaloneFund)) return;
             const start = formatRoboGoalDate(
               parseRoboCalendarDate(view.startDate),
             );
@@ -317,8 +324,9 @@ export function CzRoboFlow({
             containerStyle={roboStyles.processingIndicator}
           />
           <Copy style={roboStyles.processingCopy}>
-            We’re opening the investment account and sending your portfolio
-            orders.
+            {state.portfolio.standaloneFund
+              ? 'We’re linking the recommended fund to your goal.'
+              : 'We’re opening the investment account and sending your portfolio orders.'}
           </Copy>
           <Copy style={roboStyles.processingCopy}>
             Please keep the app open.
@@ -476,6 +484,7 @@ export function CzRoboFlow({
         onBack={back}
         onExit={exit}
         profileStatus={profileStatus}
+        recommendedFund={recommendedFund}
         availableStrategyCount={availableStrategyCount}
         securityCatalog={securityCatalog}
         onProfile={onProfile}

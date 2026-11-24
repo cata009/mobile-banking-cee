@@ -12,6 +12,7 @@ import {
   Choice,
 } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 import { BaselineAmountField } from '../src/universal/BaselineAmountField';
+import { BaselineInvestmentField } from '../src/experiences/pi/current/investments/baseline/Frame';
 import { BaselinePill } from '../src/universal/BaselinePill';
 import { CalendarPanel } from '../src/universal/DateField';
 import { PrimaryButton } from '../src/universal/PrimaryButton';
@@ -98,11 +99,12 @@ test('keeps the selected cash account number, name and balance on separate field
       value: '890123401/2700',
       helperText: 'Primary Account 1',
       helperText2: 'Available balance 22.850,50 CZK',
-      trailingIconSize: 32,
+      trailingIconSize: 24,
+      trailingIconLayout: 'compact',
       selectionControl: { expanded: false },
     });
     expect(field!.props.trailingIcon.type).toBe(AssetGlyph);
-    expect(field!.props.trailingIcon.props.size).toBe(32);
+    expect(field!.props.trailingIcon.props.size).toBe(24);
     expect(
       control(tree, 'Cash account, Primary Account 1').props.accessibilityRole,
     ).toBe('button');
@@ -246,7 +248,10 @@ test('retains funding validation when accounts are unavailable or an amount is e
 });
 
 test('uses the source radio list and amount presets while preserving the initial one-off draft', () => {
-  const tree = render();
+  const tree = render({
+    release: 'release-future-cz-robo',
+    currentAccounts: [{ ...accounts[0]!, balance: 100_000 }, accounts[1]!],
+  });
   try {
     const page = tree.root.findByType(Page);
     expect(page.props).toMatchObject({
@@ -310,8 +315,8 @@ test('uses the source radio list and amount presets while preserving the initial
     press(tree, 'Review investment');
     expect(
       tree.root
-        .findAllByType(Row)
-        .find(node => node.props.title === 'Amount to add')!.props.value,
+        .findAllByType(BaselineInvestmentField)
+        .find(node => node.props.label === 'Estimated amount')!.props.value,
     ).toBe('35.000,00 CZK');
   } finally {
     act(() => tree.unmount());

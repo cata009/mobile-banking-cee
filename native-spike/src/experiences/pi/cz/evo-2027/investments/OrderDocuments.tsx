@@ -152,7 +152,11 @@ export function OrderDocuments({
                             {description}
                           </Copy>
                         </View>
-                        <SourceCustomIcon name="chevron-right" size={24} />
+                        <View style={s.chevronFrame}>
+                          <View style={s.chevron}>
+                            <SourceCustomIcon name="chevron-right" size={16} />
+                          </View>
+                        </View>
                       </View>
                     ))
                   : null}

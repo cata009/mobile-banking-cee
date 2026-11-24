@@ -1,10 +1,13 @@
-import React, { useId, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import {
+  AccessibilityInfo,
+  PanResponder,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   View,
+  type ViewStyle,
 } from 'react-native';
 import Svg, {
   Circle,
@@ -23,6 +26,8 @@ import { formatCzkInteger } from '@/features/investments/robo/model';
 import { TextInput } from '../../../../../universal/Typography';
 import { SourceRangeSlider } from '../../../../../universal/SourceRangeSlider';
 import { useDemoViewport } from '../../../../../universal/DemoViewport';
+import { formatRoboChartNumber, formatRoboCompactMoney } from './amountDisplay';
+import { formatInvestmentMoney } from '@/app/utils/investmentAmountFormatting';
 import {
   Button,
   Copy,
@@ -32,6 +37,8 @@ import {
 } from '../investments/Primitives';
 
 type ProjectionPeriod = RoboTopUpProjection['periods'][number];
+type ProjectionPoint = RoboTopUpProjection['curve'][number];
+type ProjectionSeries = Exclude<keyof ProjectionPoint, 'month'>;
 
 const isPartialYear = ({ year, month }: ProjectionPeriod) => month < year * 12;
 const yearLabel = (period: ProjectionPeriod) =>
@@ -43,11 +50,9 @@ const yearLabel = (period: ProjectionPeriod) =>
 const czkContextAmount = new Intl.NumberFormat('de-DE', {
   maximumFractionDigits: 2,
 });
-const axisAmount = new Intl.NumberFormat('en', {
-  notation: 'compact',
-  maximumSignificantDigits: 3,
-});
 const dashedStroke = '4 4';
+const chartIntervals = 3;
+const roundChartSteps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
 const scenarios = [
   { key: 'positive', label: 'Positive', color: investmentColors.higher },
   { key: 'neutral', label: 'Neutral', color: investmentColors.estimated },
@@ -56,13 +61,9 @@ const scenarios = [
 type Scenario = (typeof scenarios)[number];
 
 function formatted(amount: number, hidden: boolean, signed = false) {
-  if (hidden) return '••••';
-  const rounded = Math.round(amount);
-  return (
-    (rounded < 0 ? '−' : signed && rounded > 0 ? '+' : '') +
-    formatCzkInteger(Math.abs(rounded)) +
-    ' CZK'
-  );
+  return hidden
+    ? undefined
+    : formatInvestmentMoney(amount, 'CZ', 'CZK', false, 0, 0, signed);
 }
 
 export function TopUpProjection({
@@ -93,6 +94,7 @@ export function TopUpProjection({
   onBack: () => void;
 }) {
   const [period, setPeriod] = useState(forecast.years);
+  const [adjustingAmount, setAdjustingAmount] = useState(false);
   const selected = forecast.periods[Math.min(period, forecast.years)]!;
   const capitalLabel =
     forecast.opening === 0 ? 'Total contributions' : 'Capital base';
@@ -140,6 +142,7 @@ export function TopUpProjection({
             forecast={forecast}
             selected={selected}
             amountsHidden={amountsHidden}
+            adjustingAmount={adjustingAmount}
             onSelect={setPeriod}
           />
           {forecast.goalYears > forecast.years ? (
@@ -149,13 +152,19 @@ export function TopUpProjection({
           ) : null}
         </View>
         {initial ? (
-          <Amount label="Add today" kind="initial" {...initial} />
+          <Amount
+            label="Add today"
+            kind="initial"
+            {...initial}
+            onInteractionChange={setAdjustingAmount}
+          />
         ) : null}
         {monthly ? (
           <Amount
             label="New monthly contribution"
             kind="monthly"
             {...monthly}
+            onInteractionChange={setAdjustingAmount}
           />
         ) : null}
         {monthly && date ? (
@@ -206,14 +215,26 @@ function ScenarioComparison({
               {scenario.label}
             </Copy>
           </View>
-          <Copy strong style={[styles.comparisonAmount, styles.valueColumn]}>
-            {formatted(selected[scenario.key], amountsHidden)}
+          <Copy
+            strong
+            accessibilityLabel={formatted(
+              selected[scenario.key],
+              amountsHidden,
+            )}
+            style={[styles.comparisonAmount, styles.valueColumn]}
+          >
+            {formatRoboCompactMoney(selected[scenario.key], amountsHidden)}
           </Copy>
           <Copy
             strong
+            accessibilityLabel={formatted(
+              selected[scenario.key] - selected.capital,
+              amountsHidden,
+              true,
+            )}
             style={[styles.comparisonAmount, styles.differenceColumn]}
           >
-            {formatted(
+            {formatRoboCompactMoney(
               selected[scenario.key] - selected.capital,
               amountsHidden,
               true,
@@ -238,8 +259,12 @@ function ScenarioComparison({
             {capitalLabel}
           </Copy>
         </View>
-        <Copy strong style={styles.comparisonAmount}>
-          {formatted(selected.capital, amountsHidden)}
+        <Copy
+          strong
+          accessibilityLabel={formatted(selected.capital, amountsHidden)}
+          style={styles.comparisonAmount}
+        >
+          {formatRoboCompactMoney(selected.capital, amountsHidden)}
         </Copy>
       </View>
     </View>
@@ -276,18 +301,132 @@ function ScenarioMarker({
   return <Circle cx={x} cy={y} r={4} {...paint} />;
 }
 
+function useReducedChartMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const preference = window.matchMedia?.(
+        '(prefers-reduced-motion: reduce)',
+      );
+      if (!preference) return;
+      const update = () => setReduced(preference.matches);
+      update();
+      preference.addEventListener('change', update);
+      return () => preference.removeEventListener('change', update);
+    }
+
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled()
+      .then(value => {
+        if (active) setReduced(value);
+      })
+      .catch(() => {});
+    const subscription = AccessibilityInfo.addEventListener(
+      'reduceMotionChanged',
+      setReduced,
+    );
+    return () => {
+      active = false;
+      subscription.remove();
+    };
+  }, []);
+  return reduced;
+}
+
+function useProjectionMotion(
+  curve: readonly ProjectionPoint[],
+  selectedMonth: number,
+  reducedMotion: boolean,
+) {
+  const [display, setDisplay] = useState({ curve, month: selectedMonth });
+  const lastFrame = useRef(display);
+
+  useEffect(() => {
+    const from = lastFrame.current;
+    const target = { curve, month: selectedMonth };
+    const render = (frame: typeof target) => {
+      lastFrame.current = frame;
+      setDisplay(frame);
+    };
+    if (from.curve === curve && from.month === selectedMonth) return;
+    if (reducedMotion || from.curve.length !== curve.length) {
+      render(target);
+      return;
+    }
+    let request: number;
+    let startedAt: number | undefined;
+    const animate = (now: number) => {
+      startedAt ??= now;
+      const progress = Math.min(1, (now - startedAt) / 160);
+      if (progress === 1) {
+        render(target);
+        return;
+      }
+      const ease = 1 - (1 - progress) ** 3;
+      const interpolate = (oldValue: number, value: number) =>
+        oldValue + (value - oldValue) * ease;
+      render({
+        curve:
+          from.curve === curve
+            ? curve
+            : curve.map((point, index) => ({
+                month: point.month,
+                capital: interpolate(from.curve[index]!.capital, point.capital),
+                positive: interpolate(
+                  from.curve[index]!.positive,
+                  point.positive,
+                ),
+                neutral: interpolate(from.curve[index]!.neutral, point.neutral),
+                negative: interpolate(
+                  from.curve[index]!.negative,
+                  point.negative,
+                ),
+              })),
+        month: interpolate(from.month, selectedMonth),
+      });
+      request = requestAnimationFrame(animate);
+    };
+    request = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(request);
+  }, [curve, selectedMonth, reducedMotion]);
+
+  return display.curve.length === curve.length && !reducedMotion
+    ? display
+    : { curve, month: selectedMonth };
+}
+
+function projectionTick(maximum: number): number {
+  const paddedTick = Math.max(1, (maximum * 1.2) / chartIntervals);
+  const magnitude = 10 ** Math.floor(Math.log10(paddedTick));
+  const step =
+    roundChartSteps.find(value => value * magnitude >= paddedTick) ?? 10;
+  return step * magnitude;
+}
+
 function ProjectionChart({
   forecast,
   selected,
   amountsHidden,
+  adjustingAmount,
   onSelect,
 }: {
   forecast: RoboTopUpProjection;
   selected: ProjectionPeriod;
   amountsHidden: boolean;
+  adjustingAmount: boolean;
   onSelect: (year: number) => void;
 }) {
-  const { width } = useDemoViewport();
+  const { width, scale = 1 } = useDemoViewport();
+  const reducedMotion = useReducedChartMotion();
+  const plot = useRef<React.ComponentRef<typeof View>>(null);
+  const plotOrigin = useRef<number | null>(null);
+  const gestureId = useRef(0);
+  const [dragMonth, setDragMonth] = useState<number | null>(null);
+  const display = useProjectionMotion(
+    forecast.curve,
+    dragMonth ?? selected.month,
+    reducedMotion || dragMonth !== null,
+  );
   const left = 45;
   const insetRight = 16;
   const plotWidth = Math.max(
@@ -306,36 +445,52 @@ function ProjectionChart({
     priorPeriod !== undefined &&
     right - x(priorPeriod.month) < 50;
   const height = bottom + (staggerTarget ? 44 : 26);
-  const values = forecast.curve.flatMap(
-    ({ capital, positive, neutral, negative }) => [
-      capital,
-      positive,
-      neutral,
-      negative,
-    ],
+  const maximum = useMemo(
+    () =>
+      forecast.curve.reduce(
+        (max, { capital, positive, neutral, negative }) =>
+          Math.max(max, capital, positive, neutral, negative),
+        0,
+      ),
+    [forecast.curve],
   );
-  const minimum = Math.min(...values);
-  const maximum = Math.max(0, ...values);
-  const spread = Math.max(maximum - minimum, maximum * 0.04, 1);
-  const lower = Math.max(0, minimum - spread * 1.5);
-  const upper = Math.max(3, maximum + spread * 0.15);
-  const tick = (upper - lower) / 3;
-  const y = (value: number) =>
-    bottom - ((bottom - top) * (value - lower)) / (upper - lower);
-  const path = (key: 'capital' | Scenario['key']) =>
-    forecast.curve
+  const [storedTick, setStoredTick] = useState(() => projectionTick(maximum));
+  const storedUpper = storedTick * chartIntervals;
+  // Expand before plotting the new forecast. Shrink only once the drag and curve animation have settled.
+  const shouldResize =
+    maximum > storedUpper ||
+    (!adjustingAmount &&
+      display.curve === forecast.curve &&
+      maximum < storedUpper * 0.4);
+  const tick = shouldResize ? projectionTick(maximum) : storedTick;
+  if (tick !== storedTick) setStoredTick(tick);
+  const upper = tick * chartIntervals;
+  const y = (value: number) => bottom - ((bottom - top) * value) / upper;
+  const path = (key: ProjectionSeries) =>
+    display.curve
       .map(
         (point, index) =>
           (index ? 'L' : 'M') + x(point.month) + ' ' + y(point[key]),
       )
       .join(' ');
-  const selectedX = x(selected.month);
+  const cursorMonth = display.month;
+  const selectedX = x(cursorMonth);
+  const upperIndex = display.curve.findIndex(
+    point => point.month >= cursorMonth,
+  );
+  const later = display.curve[upperIndex] ?? display.curve.at(-1)!;
+  const earlier = display.curve[Math.max(0, upperIndex - 1)] ?? later;
+  const ratio =
+    later.month === earlier.month
+      ? 0
+      : (cursorMonth - earlier.month) / (later.month - earlier.month);
+  const markerY = (key: ProjectionSeries) =>
+    y(earlier[key] + (later[key] - earlier[key]) * ratio);
   const markers = [scenarios[1], scenarios[0], scenarios[2]].reduce<Scenario[]>(
     (visible, scenario) => {
       if (
         visible.every(
-          item =>
-            Math.abs(y(selected[item.key]) - y(selected[scenario.key])) >= 7,
+          item => Math.abs(markerY(item.key) - markerY(scenario.key)) >= 7,
         )
       )
         visible.push(scenario);
@@ -344,8 +499,120 @@ function ProjectionChart({
     [],
   );
   const showCapitalMarker = markers.every(
-    item => Math.abs(y(selected[item.key]) - y(selected.capital)) >= 7,
+    item => Math.abs(markerY(item.key) - markerY('capital')) >= 7,
   );
+
+  const scrub = (pageX: number) => {
+    if (plotOrigin.current === null) return;
+    const month = Math.min(
+      finalPeriod.month,
+      Math.max(
+        0,
+        (((pageX - plotOrigin.current) / scale - left) * maxMonth) /
+          (right - left),
+      ),
+    );
+    setDragMonth(month);
+    const nearest = forecast.periods.reduce((best, period) =>
+      Math.abs(period.month - month) < Math.abs(best.month - month)
+        ? period
+        : best,
+    );
+    onSelect(nearest.year);
+  };
+  const dragEnabled = plotWidth <= width - 48 && finalPeriod.month > 0;
+  const interaction = useRef({ scrub, dragEnabled });
+  interaction.current = { scrub, dragEnabled };
+  useEffect(() => {
+    if (Platform.OS !== 'web') return;
+    const node = plot.current as unknown as HTMLElement | null;
+    if (!node) return;
+    let pointer: { id: number; x: number; y: number } | null = null;
+    let dragging = false;
+    let suppressClick = false;
+    const down = (event: PointerEvent) => {
+      suppressClick = false;
+      if (
+        !interaction.current.dragEnabled ||
+        !event.isPrimary ||
+        event.button !== 0
+      )
+        return;
+      pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    };
+    const move = (event: PointerEvent) => {
+      if (!pointer || event.pointerId !== pointer.id) return;
+      const distanceX = Math.abs(event.clientX - pointer.x);
+      const distanceY = Math.abs(event.clientY - pointer.y);
+      if (!dragging) {
+        if (distanceY > 5 && distanceY >= distanceX) {
+          pointer = null;
+          return;
+        }
+        if (distanceX <= 5) return;
+        plotOrigin.current = node.getBoundingClientRect().left + window.scrollX;
+        dragging = true;
+        suppressClick = true;
+      }
+      event.preventDefault();
+      interaction.current.scrub(event.pageX);
+    };
+    const stop = (event: PointerEvent) => {
+      if (!pointer || event.pointerId !== pointer.id) return;
+      if (dragging) {
+        if (event.type === 'pointerup') interaction.current.scrub(event.pageX);
+        plotOrigin.current = null;
+        setDragMonth(null);
+      }
+      pointer = null;
+      dragging = false;
+    };
+    const click = (event: MouseEvent) => {
+      if (!suppressClick || event.detail === 0) return;
+      suppressClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    node.addEventListener('pointerdown', down);
+    node.addEventListener('click', click, true);
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    return () => {
+      node.removeEventListener('pointerdown', down);
+      node.removeEventListener('click', click, true);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+      window.removeEventListener('pointercancel', stop);
+    };
+  }, []);
+
+  const { panHandlers } = useMemo(() => {
+    const stop = () => {
+      gestureId.current++;
+      plotOrigin.current = null;
+      setDragMonth(null);
+    };
+    return PanResponder.create({
+      onMoveShouldSetPanResponderCapture: (_event, gesture) =>
+        interaction.current.dragEnabled &&
+        Math.abs(gesture.dx) > 5 &&
+        Math.abs(gesture.dx) > Math.abs(gesture.dy),
+      onPanResponderGrant: event => {
+        const id = ++gestureId.current;
+        const pointerX = event.nativeEvent.pageX;
+        plot.current?.measure((_x, _y, _width, _height, pageX) => {
+          if (id !== gestureId.current) return;
+          plotOrigin.current = pageX;
+          interaction.current.scrub(pointerX);
+        });
+      },
+      onPanResponderMove: (event, gesture) =>
+        interaction.current.scrub(event.nativeEvent.pageX ?? gesture.moveX),
+      onPanResponderRelease: stop,
+      onPanResponderTerminate: stop,
+    });
+  }, []);
 
   return (
     <ScrollView
@@ -353,11 +620,19 @@ function ProjectionChart({
       showsHorizontalScrollIndicator={false}
       style={styles.chartScroll}
     >
-      <View style={{ width: plotWidth, height }}>
+      <View
+        ref={plot}
+        collapsable={false}
+        style={[
+          { width: plotWidth, height },
+          Platform.OS === 'web' && dragEnabled && styles.scrubbablePlot,
+        ]}
+        {...(Platform.OS === 'web' ? {} : panHandlers)}
+      >
         <Svg width={plotWidth} height={height} accessible={false}>
           {!amountsHidden ? (
             <>
-              {[lower, lower + tick, lower + 2 * tick, upper].map(
+              {[0, tick, 2 * tick, upper].map(
                 (value, index) => (
                   <React.Fragment key={index}>
                     <Line
@@ -375,7 +650,7 @@ function ProjectionChart({
                       fontSize={14}
                       textAnchor="end"
                     >
-                      {axisAmount.format(value)}
+                      {formatRoboChartNumber(value)}
                     </SvgText>
                   </React.Fragment>
                 ),
@@ -385,13 +660,16 @@ function ProjectionChart({
                 x2={selectedX}
                 y1={top}
                 y2={bottom}
-                stroke={colors.muted}
+                stroke={colors.accent}
+                strokeOpacity={0.7}
                 strokeDasharray="3 3"
               />
               <Path
                 d={path('capital')}
                 stroke={colors.muted}
                 strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 strokeDasharray={dashedStroke}
                 fill="none"
               />
@@ -401,13 +679,15 @@ function ProjectionChart({
                   d={path(scenario.key)}
                   stroke={scenario.color}
                   strokeWidth={scenario.key === 'neutral' ? 2.5 : 2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   fill="none"
                 />
               ))}
               {showCapitalMarker ? (
                 <Circle
                   cx={selectedX}
-                  cy={y(selected.capital)}
+                  cy={markerY('capital')}
                   r={3.5}
                   stroke={colors.muted}
                   strokeWidth={2}
@@ -419,7 +699,7 @@ function ProjectionChart({
                   key={scenario.key}
                   scenario={scenario}
                   x={selectedX}
-                  y={y(selected[scenario.key])}
+                  y={markerY(scenario.key)}
                   onChart
                 />
               ))}
@@ -527,11 +807,13 @@ function Amount({
   kind,
   value,
   onChange,
+  onInteractionChange,
 }: {
   label: string;
   kind: keyof typeof ROBO_TOP_UP_RANGES;
   value: string;
   onChange: (value: string) => void;
+  onInteractionChange: (active: boolean) => void;
 }) {
   const range = ROBO_TOP_UP_RANGES[kind];
   const valid = validateRoboTopUpAmount(Number(value), kind);
@@ -589,6 +871,7 @@ function Amount({
         color={colors.accent}
         presentation="feedback"
         onChange={next => onChange(String(next))}
+        onInteractionChange={onInteractionChange}
       />
       <View style={styles.flexRow}>
         <Copy muted>{formatCzkInteger(range.min)} CZK</Copy>
@@ -628,10 +911,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: colors.strongFont,
     fontSize: 16,
+    lineHeight: 20,
+    includeFontPadding: false,
     fontVariant: ['tabular-nums'],
     ...(Platform.OS === 'web' ? { outlineWidth: 0 } : {}),
   },
-  amountCurrency: { fontSize: 12, lineHeight: 16 },
+  amountCurrency: { fontSize: 12, lineHeight: 20, includeFontPadding: false },
   amountError: {
     color: investmentColors.negative,
     fontSize: 14,
@@ -657,6 +942,9 @@ const styles = StyleSheet.create({
   },
   capitalRow: { borderTopWidth: 1, borderColor: colors.border, paddingTop: 8 },
   chartScroll: { flexGrow: 0 },
+  scrubbablePlot: { touchAction: 'pan-y' } as ViewStyle & {
+    touchAction: 'pan-y';
+  },
   chartTarget: { position: 'absolute', top: 0, bottom: 0 },
   disclaimer: { fontSize: 14, lineHeight: 20 },
   example: {

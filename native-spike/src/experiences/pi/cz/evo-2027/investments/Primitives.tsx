@@ -47,12 +47,14 @@ export const investmentColors = {
 };
 export function Copy({
   children,
+  accessibilityLabel,
   strong = false,
   muted = false,
   style,
   header = false,
 }: {
   children: React.ReactNode;
+  accessibilityLabel?: string;
   strong?: boolean;
   muted?: boolean;
   style?: StyleProp<TextStyle>;
@@ -60,6 +62,7 @@ export function Copy({
 }) {
   return (
     <Text
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole={header ? 'header' : undefined}
       style={[
         ui.copy,
@@ -99,7 +102,9 @@ export function Button({
         onPress={onPress}
         disabled={disabled}
         // An outlined button in a custom colour (Sell): the surface variant plus a hairline in that colour.
-        variant={secondaryColor ? 'surface' : secondary ? 'secondary' : 'action'}
+        variant={
+          secondaryColor ? 'surface' : secondary ? 'secondary' : 'action'
+        }
         style={
           secondaryColor
             ? { borderWidth: 1, borderColor: secondaryColor }
@@ -127,6 +132,75 @@ export function Button({
     />
   );
 }
+export function InvestmentPageHeader({
+  background = czInvestmentTokens.background,
+  title = '',
+  titleControl,
+  progress = 0,
+  onBack,
+  onClose,
+  onHelp,
+  helpIcon,
+  showBack = true,
+  backGlyph = 'back-heavy',
+}: {
+  background?: string;
+  title?: string;
+  titleControl?: React.ReactNode;
+  progress?: number;
+  onBack: () => void;
+  onClose?: () => void;
+  onHelp?: () => void;
+  helpIcon?: React.ReactNode;
+  showBack?: boolean;
+  backGlyph?: 'back-heavy' | 'close-flow';
+}) {
+  const duoClose = useEvoDuoCloseAction(
+    onClose ?? (showBack && backGlyph === 'close-flow' ? onBack : undefined),
+  );
+  return (
+    <Header
+      variant="current"
+      renderLargeTitle={false}
+      backIcon={
+        <InvestmentGlyph
+          name={backGlyph}
+          size={backGlyph === 'close-flow' ? 24 : 20}
+        />
+      }
+      tokens={{ ...czInvestmentTokens, background }}
+      title={title}
+      titleControl={titleControl}
+      collapsedTitleProgress={progress}
+      onBack={onBack}
+      showBack={showBack && !(duoClose && backGlyph === 'close-flow')}
+      trailing={
+        onClose ? (
+          !duoClose ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              onPress={onClose}
+              style={ui.headerControl}
+            >
+              <InvestmentGlyph name="close-flow" size={20} />
+            </Pressable>
+          ) : undefined
+        ) : onHelp ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Help"
+            onPress={onHelp}
+            style={ui.headerControl}
+          >
+            {helpIcon ?? <InvestmentGlyph name="help-circle" size={20} />}
+          </Pressable>
+        ) : undefined
+      }
+    />
+  );
+}
+
 export function Page({
   title,
   description,
@@ -182,9 +256,6 @@ export function Page({
   showBack?: boolean;
   backGlyph?: 'back-heavy' | 'close-flow';
 }) {
-  const duoClose = useEvoDuoCloseAction(
-    onClose ?? (showBack && backGlyph === 'close-flow' ? onBack : undefined),
-  );
   const [progress, setProgress] = useState(0);
   const pageScroll = useRef<React.ElementRef<typeof ScrollView>>(null);
   useLayoutEffect(() => {
@@ -204,49 +275,17 @@ export function Page({
       ]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Header
-        variant="current"
-        renderLargeTitle={false}
-        backIcon={
-          <InvestmentGlyph
-            name={backGlyph}
-            size={backGlyph === 'close-flow' ? 24 : 20}
-          />
-        }
-        tokens={{
-          ...czInvestmentTokens,
-          background: gray
-            ? investmentColors.background
-            : czInvestmentTokens.background,
-        }}
+      <InvestmentPageHeader
+        background={gray ? investmentColors.background : undefined}
         title={compactTitle || progress > 0 ? title : ''}
         titleControl={headerTitle}
-        collapsedTitleProgress={compactTitle ? 1 : progress}
+        progress={compactTitle ? 1 : progress}
         onBack={onBack}
-        showBack={showBack && !(duoClose && backGlyph === 'close-flow')}
-        trailing={
-          onClose ? (
-            !duoClose ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Close"
-                onPress={onClose}
-                style={ui.headerControl}
-              >
-                <InvestmentGlyph name="close-flow" size={20} />
-              </Pressable>
-            ) : undefined
-          ) : onHelp ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Help"
-              onPress={onHelp}
-              style={ui.headerControl}
-            >
-              {helpIcon ?? <InvestmentGlyph name="help-circle" size={20} />}
-            </Pressable>
-          ) : undefined
-        }
+        onClose={onClose}
+        onHelp={onHelp}
+        helpIcon={helpIcon}
+        showBack={showBack}
+        backGlyph={backGlyph}
       />
       <ScrollView
         ref={pageScroll}

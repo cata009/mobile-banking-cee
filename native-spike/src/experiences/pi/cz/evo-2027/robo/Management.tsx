@@ -115,9 +115,10 @@ import { Signing } from '../investments/Signing';
 import { OrderDocuments } from '../investments/OrderDocuments';
 import { useCurrentInvestmentHost } from '../investments/hostAdapter';
 import { DEFAULT_CZECH_COUNTS } from '../contracts';
-import { PlanFields } from './CreationScreens';
+import { PlanFields, RoboFundSummary } from './CreationScreens';
 import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 import { TopUpProjection } from './TopUpProjection';
+import { formatRoboCompactMoney } from './amountDisplay';
 
 function FundingAmount({
   label,
@@ -229,6 +230,10 @@ export function Management({
     createRoboState(initial, clock),
   );
   const plan = getRoboFlowView(planState);
+  const fund = portfolio.standaloneFund;
+  const orderSubject = fund ? 'fund order' : 'basket order';
+  const productIsin =
+    fund?.isin ?? portfolio.basketFund?.marketInfo.basketIsin ?? goal.basketIsin ?? 'Not available';
   const goalPlanChanged =
     Number(plan.targetAmount) !==
       Number(goal.targetInteger.replace(/\D/g, '')) ||
@@ -382,6 +387,19 @@ export function Management({
       clock,
     );
   const balanceCheck = getRoboTopUpBalanceCheck(draft, orderAccount, clock);
+  const balanceDetails =
+    balanceCheck.kind === 'insufficient' && orderAccount
+      ? [
+          { label: 'Amount to invest now', amount: balanceCheck.amountDue },
+          { label: 'Available balance', amount: orderAccount.balance },
+        ].map(({ label, amount }) => ({
+          label,
+          exact: formatInvestmentMoney(amount, 'CZ', 'CZK', amountsHidden),
+          compact: formatRoboCompactMoney(amount, amountsHidden),
+        }))
+      : [];
+  const showExactBalance =
+    !amountsHidden && balanceDetails[0]?.compact === balanceDetails[1]?.compact;
   const forecast = useMemo(
     () =>
       projectionOpen && canPreview
@@ -470,8 +488,8 @@ export function Management({
           onPress={() => onMode('goal-plan')}
         />
         <BaselineNavigationRow
-          title="Model Portfolio"
-          description="View your selected basket and its product distribution."
+          title={fund ? 'Investment fund' : 'Model Portfolio'}
+          description={fund ? 'View the fund linked to your goal.' : 'View your selected basket and its product distribution.'}
           rowHeight={80}
           trailingAccessory="chevron"
           chevronIconName="chevron-link"
@@ -556,6 +574,17 @@ export function Management({
         }
       >
         <PlanFields view={plan} dispatch={dispatchPlan} />
+      </Page>
+    );
+  if (fund && (mode === 'add-money-basket' || (mode === 'settings' && modelOpen)))
+    return (
+      <Page
+        {...page}
+        kind="model-portfolio"
+        title="Investment fund"
+        onBack={mode === 'settings' ? () => setModelOpen(false) : onBack}
+      >
+        <RoboFundSummary name={portfolio.name} isin={fund.isin} />
       </Page>
     );
   if (mode === 'add-money-basket' || (mode === 'settings' && modelOpen))
@@ -756,7 +785,9 @@ export function Management({
       <Signing
         title="Confirm investment"
         pinLabel="Security code"
-        pinHelper="Confirm this investment from your selected cash account. One basket order will be submitted for execution."
+        pinHelper={fund && !fields.initialAmount
+          ? 'Confirm the monthly investment from your selected cash account.'
+          : `Confirm this investment from your selected cash account. One ${orderSubject} will be submitted for execution.`}
         actionLabel="Confirm investment"
         pinTopSpacing={132}
         pinFocused
@@ -801,10 +832,10 @@ export function Management({
         }
         message={
           state.topUp.method === 'regular'
-            ? 'Your monthly investment is scheduled. The goal value will change after the first basket order is executed.'
+            ? `Your monthly investment is scheduled. The goal value will change after the first ${orderSubject} is executed.`
             : state.topUp.method === 'combined'
-              ? 'Your basket order is pending and your monthly investment is scheduled. The goal value will update after the order is executed.'
-              : 'Your basket order is pending. The goal value and positions will update after it is executed. You can follow its status in History.'
+              ? `Your ${orderSubject} is pending and your monthly investment is scheduled. The goal value will update after the order is executed.`
+              : `Your ${orderSubject} is pending. The goal value and positions will update after it is executed. You can follow its status in History.`
         }
         actionLabel="Ok, I got it"
         onDone={() => onMode('menu')}
@@ -841,12 +872,8 @@ export function Management({
         />
         <BaselineInvestmentField
           host={historyHost}
-          label="Product ID"
-          value={
-            portfolio.basketFund?.marketInfo.basketIsin ??
-            goal.basketIsin ??
-            'Not available'
-          }
+          label={fund ? 'ISIN' : 'Product ID'}
+          value={productIsin}
         />
         <BaselineInvestmentField
           host={historyHost}
@@ -925,12 +952,8 @@ export function Management({
           subtitle={portfolio.basketFund?.title ?? portfolio.name}
         />
         <Row
-          title="Product ID"
-          subtitle={
-            portfolio.basketFund?.marketInfo.basketIsin ??
-            goal.basketIsin ??
-            'Not available'
-          }
+          title={fund ? 'ISIN' : 'Product ID'}
+          subtitle={productIsin}
         />
         <Row
           title="Order type"
@@ -1261,37 +1284,24 @@ export function Management({
                   continue.
                 </Copy>
                 <View style={fundingStyles.balanceDetails}>
-                  {[
-                    [
-                      'Cash account',
-                      displayRoboAccountNumber(
+                  <View style={fundingStyles.balanceRow}>
+                    <Copy style={fundingStyles.balanceLabel}>Cash account</Copy>
+                    <Copy strong style={fundingStyles.balanceValue}>
+                      {displayRoboAccountNumber(
                         orderAccount.accountNumber,
                         'CZ',
-                      ),
-                    ],
-                    [
-                      'Amount to invest now',
-                      formatInvestmentMoney(
-                        balanceCheck.amountDue,
-                        'CZ',
-                        'CZK',
-                        amountsHidden,
-                      ),
-                    ],
-                    [
-                      'Available balance',
-                      formatInvestmentMoney(
-                        orderAccount.balance,
-                        'CZ',
-                        'CZK',
-                        amountsHidden,
-                      ),
-                    ],
-                  ].map(([label, value]) => (
+                      )}
+                    </Copy>
+                  </View>
+                  {balanceDetails.map(({ label, compact, exact }) => (
                     <View key={label} style={fundingStyles.balanceRow}>
                       <Copy style={fundingStyles.balanceLabel}>{label}</Copy>
-                      <Copy strong style={fundingStyles.balanceValue}>
-                        {value}
+                      <Copy
+                        strong
+                        accessibilityLabel={amountsHidden ? undefined : exact}
+                        style={fundingStyles.balanceValue}
+                      >
+                        {showExactBalance ? exact : compact}
                       </Copy>
                     </View>
                   ))}
@@ -1409,7 +1419,6 @@ const fundingStyles = StyleSheet.create({
   accountField: {
     minHeight: 96,
     marginTop: 8,
-    marginRight: -12,
     paddingTop: 8,
     paddingBottom: 5,
   },

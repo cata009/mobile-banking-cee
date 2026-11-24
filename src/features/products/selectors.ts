@@ -5,7 +5,12 @@ import { RO_DEMO_CUSTOMER } from '@/data/customerProfile'
 import type { CountryId, ProductCounts, ReleaseId } from '@/app/state/demoTypes'
 import { applyProductCounts } from './counts'
 import { orderCardsForCountry } from './homePolicy'
-import { applyCzApp2027CurrentAccounts, applyCzApp2027TermDeposits, applyCzApp2027DebitCards } from './czEvoFixtures'
+import {
+  applyCzApp2027CurrentAccounts,
+  applyCzApp2027TermDeposits,
+  applyCzApp2027DebitCards,
+  CZ_ROBO_PRIMARY_DEMO_BALANCE,
+} from './czEvoFixtures'
 
 function formatProductIban(country: string, productId: string, baseNumber: string, productType?: string): string {
   const prefix = country === 'BA_BL' ? 'BA' : country
@@ -39,14 +44,19 @@ export function deriveProductCategories({
     ? applyCzApp2027DebitCards(applyCzApp2027CurrentAccounts(applyCzApp2027TermDeposits(baseCountedCategories)))
     : baseCountedCategories
   const countedProducts = countedCategories.flatMap((category) => category.products)
-  const secondCurrentAccountId = countedProducts.filter((product) => product.type === 'current_account')[1]?.id
+  const [primaryCurrentAccount, secondCurrentAccount] = countedProducts.filter(
+    (product) => product.type === 'current_account',
+  )
   const shouldUseEurForSecondAccount = EUR_SECOND_CURRENT_ACCOUNT_COUNTRIES.has(country) && !isCzApp2027
   const getAvailableCurrentAccount = (account: (typeof countedProducts)[number]) => {
     if (account.type !== 'current_account') return undefined
+    if (country === 'CZ' && release === 'release-future-cz-robo' && account.id === primaryCurrentAccount?.id) {
+      return { balance: CZ_ROBO_PRIMARY_DEMO_BALANCE, currency: 'CZK' as const }
+    }
     const localAvailableBalance = roundMoney(
       roundMoney(convertCurrency(account.balance, account.currency, localCurrency)) + 20000,
     )
-    return shouldUseEurForSecondAccount && account.id === secondCurrentAccountId
+    return shouldUseEurForSecondAccount && account.id === secondCurrentAccount?.id
       ? {
           balance: roundMoney(convertCurrency(localAvailableBalance, localCurrency, 'EUR')),
           currency: 'EUR' as const,

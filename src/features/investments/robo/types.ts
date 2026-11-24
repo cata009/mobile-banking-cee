@@ -3,6 +3,12 @@ import type { InvestmentHistoryOrder, InvestmentHistoryTransaction } from '@/app
 import type { Currency } from '@/data/products'
 
 export type RoboInvestorProfileStatus = 'valid' | 'expired' | 'missing'
+export type RoboInvestorProfile = 'V1' | 'V2' | 'V3'
+
+export interface RoboStandaloneFund {
+  isin: string
+  profileLabel: string
+}
 
 export type RoboFundingMethod = 'one-off' | 'regular' | 'combined'
 
@@ -65,7 +71,10 @@ export interface RoboPortfolio {
   suitabilitySummary: string
   holdings: readonly RoboHolding[]
   basketFund?: InvestmentBasketFund
+  standaloneFund?: RoboStandaloneFund
 }
+
+export type RoboStandalonePortfolio = RoboPortfolio & { standaloneFund: RoboStandaloneFund }
 
 export interface RoboExistingGoal {
   id: string

@@ -1,5 +1,7 @@
 import type { Product, ProductCategory } from '@/data/products'
 
+export const CZ_ROBO_PRIMARY_DEMO_BALANCE = 100_000
+
 const CZ_APP_2027_CURRENT_ACCOUNTS: ReadonlyArray<
   Pick<Product, 'id' | 'name' | 'accountNumber' | 'balance' | 'currency'>
 > = [

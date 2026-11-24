@@ -8,7 +8,6 @@ import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 import { Choice } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 import { ProductLogo } from '../src/experiences/pi/cz/evo-2027/investments/ProductRow';
-import { InvestmentGlyph } from '../src/experiences/pi/cz/evo-2027/investments/Glyph';
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { BaselineNavigationLink } from '../src/universal/BaselineNavigationLink';
@@ -139,6 +138,39 @@ async function signWithFaceId(tree: TestRenderer.ReactTestRenderer) {
 }
 
 describe('CZ Robo goal creation follows the Figma flow', () => {
+  it.each([
+    ['V1', 'LU2595011565', 'onemarkets Global Multibrand Selection Fund - M'],
+    ['V2', 'LU3046603414', 'onemarkets UC Global Multibrand 60 Fund - M'],
+    ['V3', 'LU3046604818', 'onemarkets UC Global Multibrand 90 Fund - M'],
+  ] as const)('recommends exactly one standalone fund for %s through review', (investorProfile, isin, name) => {
+    const tree = renderFlow({ release: 'release-future-cz-robo', investorProfile });
+    try {
+      toIntro(tree);
+      expect(elementText(tree.root)).toContain('We recommend a fund based on your investor profile.');
+      press(tree, 'Create Goal');
+      press(tree, 'Continue');
+      pressMatching(tree, /^General build-up wealth\./);
+      press(tree, 'Continue');
+      input(tree, 'Enter your goal name', 'New goal');
+      press(tree, 'Continue');
+      input(tree, 'Target amount', '100000');
+      press(tree, '10 years');
+      press(tree, 'Continue');
+      const recommendation = elementText(tree.root);
+      expect(recommendation).toContain('Your recommended fund');
+      expect(recommendation).toContain(name);
+      expect(recommendation).toContain(isin);
+      expect(recommendation.match(/LU\d{10}/g)).toEqual([isin]);
+      expect(recommendation).not.toContain('PRODUCTS DISTRIBUTION');
+      press(tree, 'Continue');
+      expect(elementText(tree.root)).toContain('Review goal details');
+      expect(elementText(tree.root)).toContain(name);
+      expect(elementText(tree.root)).toContain(isin);
+    } finally {
+      act(() => tree.unmount());
+    }
+  });
+
   it('shows contact confirmation first and lets Back from the introduction return to it', () => {
     const onBack = jest.fn();
     const tree = renderFlow({ onBack });
@@ -147,32 +179,30 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
 
     press(tree, 'I confirm these data');
     expect(tree.root.findByProps({ testID: 'cz-intro' })).toBeDefined();
-    expect(tree.root.findByProps({ testID: 'cz-intro-back' })).toBeDefined();
+    expect(tree.root.findByType(Header).props.backIcon.props).toMatchObject({
+      name: 'back-heavy',
+      size: 20,
+    });
     press(tree, 'Back');
     expect(tree.root.findByProps({ testID: 'cz-contact-phone' })).toBeDefined();
     expect(onBack).not.toHaveBeenCalled();
     act(() => tree.unmount());
   });
 
-  it('places the close control in the intro hero', () => {
+  it('uses the risk profile header geometry over the intro hero', () => {
     const tree = renderFlow();
     toIntro(tree);
-    const close = tree.root.findByProps({ testID: 'cz-intro-close' });
-    expect(close).toBeDefined();
-    expect(StyleSheet.flatten(close.props.style)).toMatchObject({
-      top: 24,
-      right: 16,
-      width: 32,
-      height: 32,
-    });
-    expect(
-      StyleSheet.flatten(close.props.style).backgroundColor,
-    ).toBeUndefined();
-    expect(close.findByType(InvestmentGlyph).props).toMatchObject({
-      name: 'close-flow',
-      color: '#262626',
-      size: 24,
-    });
+    const nav = () => tree.root.findByType(Header).props;
+    expect(nav().tokens.background).toBe('transparent');
+    const intro = nav();
+    press(tree, 'Create Goal');
+    const profile = nav();
+    expect(intro.variant).toBe(profile.variant);
+    expect(intro.backIcon.props).toEqual(profile.backIcon.props);
+    expect(intro.trailing.props.style).toEqual(profile.trailing.props.style);
+    expect(intro.trailing.props.children.props).toEqual(
+      profile.trailing.props.children.props,
+    );
     act(() => tree.unmount());
   });
 
@@ -182,8 +212,10 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     const intro = tree.root.findByProps({ testID: 'cz-intro' });
     const scroll = intro.findByType(ScrollView);
 
-    expect(scroll.findAllByProps({ testID: 'cz-intro-close' })).toHaveLength(0);
-    expect(intro.findByProps({ testID: 'cz-intro-close' })).toBeDefined();
+    expect(scroll.findAllByType(Header)).toHaveLength(0);
+    expect(
+      intro.findByProps({ testID: 'cz-intro-navigation' }).findByType(Header),
+    ).toBeDefined();
     act(() => tree.unmount());
   });
 
@@ -197,9 +229,9 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     expect(StyleSheet.flatten(footer.props.style).paddingHorizontal).toBe(24);
     expect(
       StyleSheet.flatten(
-        tree.root.findByProps({ testID: 'cz-intro-close' }).props.style,
+        tree.root.findByProps({ testID: 'cz-intro-navigation' }).props.style,
       ).top,
-    ).toBe(38);
+    ).toBe(54);
     act(() => tree.unmount());
   });
 
@@ -787,8 +819,8 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
     expect(
       tree.root.findAll(
         node => node.props.accessibilityLabel === 'I have read it',
-      ),
-    ).toHaveLength(0);
+      )[0]!.props.disabled,
+    ).toBe(true);
     act(() =>
       tree.root
         .findByProps({ testID: 'cz-investment-contract-scroll' })

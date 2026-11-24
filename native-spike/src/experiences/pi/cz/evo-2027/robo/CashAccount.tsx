@@ -59,8 +59,9 @@ export function CashAccountField({
       onChange={() => undefined}
       readOnly
       disabled={disabled}
-      trailingIcon={<AssetGlyph asset={fundingChevronDown} size={32} />}
-      trailingIconSize={32}
+      trailingIcon={<AssetGlyph asset={fundingChevronDown} size={24} />}
+      trailingIconSize={24}
+      trailingIconLayout="compact"
       helperText={account?.name}
       helperText2={
         account

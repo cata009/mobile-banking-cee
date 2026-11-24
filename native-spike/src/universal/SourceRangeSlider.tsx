@@ -7,6 +7,8 @@ export interface SourceRangeProps {
   step: number;
   value: number;
   onChange: (value: number) => void;
+  /** Reports a pointer gesture from press through release or cancellation. */
+  onInteractionChange?: (active: boolean) => void;
   color: string;
   /** Alternate authored8px track/24px thumb; range interaction remains shared. */
   presentation?: 'source' | 'feedback';
@@ -21,11 +23,13 @@ export function SourceRangeSlider({
   step,
   value,
   onChange,
+  onInteractionChange,
   color,
   presentation = 'source',
 }: SourceRangeProps) {
   const feedback = presentation === 'feedback';
   const [width, setWidth] = useState(0);
+  const endInteraction = onInteractionChange && (() => onInteractionChange(false));
   const latest = useRef({ width, min, max, step, onChange });
   latest.current = { width, min, max, step, onChange };
   const update = (position: number) => {
@@ -65,8 +69,13 @@ export function SourceRangeSlider({
       onLayout={event => setWidth(event.nativeEvent.layout.width)}
       onStartShouldSetResponder={() => true}
       onMoveShouldSetResponder={() => true}
-      onResponderGrant={event => update(event.nativeEvent.locationX)}
+      onResponderGrant={event => {
+        onInteractionChange?.(true);
+        update(event.nativeEvent.locationX);
+      }}
       onResponderMove={event => update(event.nativeEvent.locationX)}
+      onResponderRelease={endInteraction}
+      onResponderTerminate={endInteraction}
       style={[s.root, feedback ? s.feedbackRoot : undefined]}
     >
       <View style={[s.track, feedback ? s.feedbackTrack : undefined]} />

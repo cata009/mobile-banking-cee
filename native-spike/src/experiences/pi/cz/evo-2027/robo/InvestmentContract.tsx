@@ -155,7 +155,7 @@ export function InvestmentContract({
           style={styles.document}
           contentContainerStyle={styles.documentContent}
           nestedScrollEnabled
-          showsVerticalScrollIndicator
+          showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={event => {
             const { contentOffset, layoutMeasurement, contentSize } =

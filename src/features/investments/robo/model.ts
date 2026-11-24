@@ -2,7 +2,7 @@ import {
   getRecommendedInvestmentBaskets,
   type InvestmentBasketInvestorProfile,
 } from '@/app/config/investmentBasketFundsConfig'
-import { ROBO_STRATEGIES, ROBO_PORTFOLIOS } from '@/features/investments/robo/catalog'
+import { ROBO_STRATEGIES, ROBO_PORTFOLIOS, ROBO_STANDALONE_PORTFOLIOS } from '@/features/investments/robo/catalog'
 import {
   type RoboFundingMethod,
   type RoboExistingGoal,
@@ -104,6 +104,9 @@ export function getPortfoliosForStrategy(
 export function getRoboPortfolioForGoal(
   goal: Pick<RoboExistingGoal, 'portfolioId' | 'basketId' | 'basketKey'>,
 ): RoboPortfolio | null {
+  const standalone = Object.values(ROBO_STANDALONE_PORTFOLIOS).find((portfolio) => portfolio.id === goal.portfolioId)
+  if (standalone) return standalone
+
   const basketPortfolio =
     ROBO_PORTFOLIOS.find((portfolio) => portfolio.id === goal.portfolioId && portfolio.basketFund) ??
     (goal.basketKey ? ROBO_PORTFOLIOS.find((portfolio) => portfolio.basketFund?.id === goal.basketKey) : undefined) ??

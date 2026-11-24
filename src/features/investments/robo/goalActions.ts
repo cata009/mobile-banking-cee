@@ -5,7 +5,7 @@ import type {
   InvestmentHistoryOrder,
   InvestmentHistoryTransaction,
 } from '@/app/config/investmentsPortfolioConfig'
-import { roundMoney } from '@/data/exchangeRates'
+import { getCountryCurrency, roundMoney } from '@/data/exchangeRates'
 import { updateRoboGoalPositionValue, getRoboWithdrawalProducts } from './goalModel'
 import {
   addRoboBasketPurchaseToPositions,
@@ -30,19 +30,37 @@ export function applyRoboTopUp(
   operation: RoboOperation,
 ): RoboExistingGoal {
   const basket = portfolio.basketFund
-  if (!basket) return goal
-  const pendingOrders =
-    contribution.initialAmount > 0
-      ? buildRoboBasketPendingOrders(
-          basket,
-          contribution.initialAmount,
-          country,
-          securityCatalog,
-          operation.id,
-          contribution.cashAccountId,
-          operation.date,
-        )
-      : []
+  const fund = portfolio.standaloneFund
+  if (!basket && !fund) return goal
+  let pendingOrders: InvestmentHistoryOrder[] = []
+  if (contribution.initialAmount > 0) {
+    if (fund) {
+      pendingOrders = [
+        {
+          id: `${operation.id}-order`,
+          securityId: fund.isin,
+          cashAccountId: contribution.cashAccountId,
+          date: operation.date,
+          title: portfolio.name,
+          amount: roundMoney(contribution.initialAmount),
+          currency: getCountryCurrency(country),
+          orderType: 'BUY',
+          status: 'PENDING',
+          tone: 'neutral',
+        },
+      ]
+    } else if (basket) {
+      pendingOrders = buildRoboBasketPendingOrders(
+        basket,
+        contribution.initialAmount,
+        country,
+        securityCatalog,
+        operation.id,
+        contribution.cashAccountId,
+        operation.date,
+      )
+    }
+  }
   const recurringContribution =
     contribution.monthlyAmount > 0
       ? {

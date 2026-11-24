@@ -116,13 +116,16 @@ export function GoalDetail({
       : flags.hasSellHistory
         ? 'Your goal is currently empty'
         : 'Your goal is ready to invest';
+  const fund = portfolio.standaloneFund;
   const emptyDescription = flags.hasPendingBuyOrders
     ? 'Your goal will show positions and value after your investment is executed. Follow its status in History.'
     : flags.hasRecurringPlan
-      ? `Your monthly contribution is set to start on ${goal.recurringContribution?.startDate}. Positions appear after the first basket order is executed.`
+      ? `Your monthly contribution is set to start on ${goal.recurringContribution?.startDate}. Positions appear after the first ${fund ? 'fund' : 'basket'} order is executed.`
       : flags.hasSellHistory
         ? 'Your previous sales remain in History. Add money whenever you’re ready to invest again.'
-        : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.';
+        : fund
+          ? 'Your recommended fund is ready. Select Add money to make your first investment towards this goal.'
+          : 'Your model portfolio is ready. Select Add money to make your first investment towards this goal.';
   if (help)
     return (
       <RoboHelp

@@ -19,7 +19,10 @@ import { buildRoboCreationReviewRows } from '@/features/investments/robo/flowSel
 import { isValidRoboHorizon } from '@/features/investments/robo/validation';
 import type { RoboAdvisorFlowState } from '@/features/investments/robo/legacyFlowState';
 import type { RoboEvent } from '@/features/investments/robo/flowState';
-import type { RoboInvestorProfileStatus } from '@/features/investments/robo/types';
+import type {
+  RoboInvestorProfileStatus,
+  RoboStandalonePortfolio,
+} from '@/features/investments/robo/types';
 import type { InvestmentCatalogSecurity } from '@/app/config/investmentsPortfolioConfig';
 import type { InvestmentBasketFundHolding } from '@/app/config/investmentBasketFundsConfig';
 import { formatInvestmentBasketPerformance } from '@/app/config/investmentBasketFundsConfig';
@@ -31,7 +34,6 @@ import { ProductLogo } from '../investments/ProductRow';
 import { SourceBottomSheet } from '../../../../../universal/SourceBottomSheet';
 import { SourceCustomIcon } from '../../../../../universal/SourceCustomIcon';
 import { BaselineNavigationLink } from '../../../../../universal/BaselineNavigationLink';
-import { useEvoDuoCloseAction } from '../../../../../universal/EvoDuoNavigation';
 import { PortfolioCarousel } from './PortfolioCarousel';
 import { useMouseCarousel } from '../mouseCarousel';
 import { InvestmentContract } from './InvestmentContract';
@@ -48,6 +50,7 @@ import {
   Choice,
   Chips,
   Copy,
+  InvestmentPageHeader,
   Notice,
   Page,
   Row,
@@ -183,6 +186,18 @@ function ReviewField({ label, value }: { label: string; value: string }) {
   );
 }
 
+export function RoboFundSummary({ name, isin }: { name: string; isin: string }) {
+  return (
+    <View style={styles.fundSummary}>
+      <View style={styles.fundSummaryHeading}>
+        <ProductLogo size={32} />
+        <Copy strong style={styles.fundSummaryName}>{name}</Copy>
+      </View>
+      <ReviewField label="ISIN" value={isin} />
+    </View>
+  );
+}
+
 function StrategyRail({
   count,
   onSelect,
@@ -232,6 +247,7 @@ export function CreationScreens({
   onBack,
   onExit,
   profileStatus,
+  recommendedFund,
   availableStrategyCount,
   securityCatalog,
   onProfile,
@@ -249,6 +265,7 @@ export function CreationScreens({
   onBack: () => void;
   onExit: () => void;
   profileStatus: RoboInvestorProfileStatus;
+  recommendedFund?: RoboStandalonePortfolio;
   availableStrategyCount: 1 | 2 | 3;
   securityCatalog: readonly InvestmentCatalogSecurity[];
   onProfile?: () => void;
@@ -261,7 +278,6 @@ export function CreationScreens({
   amountsHidden?: boolean;
   onCashAccountSelected?: (id: string) => void;
 }) {
-  const duoClose = useEvoDuoCloseAction(onExit, view.step === 'intro');
   const [termsOpen, setTermsOpen] = useState(false);
   const [cashAccountSheetOpen, setCashAccountSheetOpen] = useState(false);
   const [profileUpdateInfoOpen, setProfileUpdateInfoOpen] = useState(false);
@@ -328,7 +344,9 @@ export function CreationScreens({
               Invest towards what matters
             </Copy>
             <Copy style={styles.introDescription}>
-              Create a goal and invest with a portfolio selected for your needs.
+              {recommendedFund
+                ? 'Create an investment goal and see the fund recommended for you.'
+                : 'Create a goal and invest with a portfolio selected for your needs.'}
             </Copy>
             <View style={styles.introFeatures}>
               {[
@@ -339,8 +357,10 @@ export function CreationScreens({
                 ],
                 [
                   'chart-bars',
-                  'Explore your investment options',
-                  'Compare suitable portfolios and explore potential outcomes before choosing one for your goal.',
+                  recommendedFund ? 'Review your recommended fund' : 'Explore your investment options',
+                  recommendedFund
+                    ? 'We recommend a fund based on your investor profile. Review its details before you continue.'
+                    : 'Compare suitable portfolios and explore potential outcomes before choosing one for your goal.',
                 ],
                 [
                   'shield-check',
@@ -371,9 +391,9 @@ export function CreationScreens({
               Your capital is at risk. Returns are not guaranteed.
             </Copy>
             <Copy style={styles.introRiskBody}>
-              Investments may rise or fall in value, and you could get back less
-              than you invest. We only show a portfolio after checking what is
-              suitable for you.
+              {recommendedFund
+                ? 'Investments may rise or fall in value, and you could get back less than you invest.'
+                : 'Investments may rise or fall in value, and you could get back less than you invest. We only show a portfolio after checking what is suitable for you.'}
             </Copy>
             <View style={styles.introDisclaimer}>
               <Copy style={styles.introDisclaimerText}>
@@ -383,29 +403,16 @@ export function CreationScreens({
             </View>
           </View>
         </ScrollView>
-        {!duoClose && (
-          <Pressable
-            testID="cz-intro-close"
-            accessibilityRole="button"
-            accessibilityLabel="Close"
-            onPress={onExit}
-            style={[
-              styles.introClose,
-              { top: Math.max(24, screenTopInset + 18) },
-            ]}
-          >
-            <InvestmentGlyph name="close-flow" color="#262626" size={24} />
-          </Pressable>
-        )}
-        <Pressable
-          testID="cz-intro-back"
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          style={[styles.introBack, { top: Math.max(24, screenTopInset + 18) }]}
+        <View
+          testID="cz-intro-navigation"
+          style={[styles.introNavigation, { top: screenTopInset }]}
         >
-          <InvestmentGlyph name="back-heavy" color="#262626" size={20} />
-        </Pressable>
+          <InvestmentPageHeader
+            background="transparent"
+            onBack={onBack}
+            onClose={onExit}
+          />
+        </View>
         <View testID="cz-intro-footer" style={[ui.footer, styles.introFooter]}>
           <Button label="Create Goal" onPress={() => navigate('profile')} />
         </View>
@@ -527,6 +534,8 @@ export function CreationScreens({
     );
   if (view.step === 'profile') {
     const blocking = isInvestorProfileBlocking(profileStatus);
+    const profileLabel = recommendedFund?.standaloneFund.profileLabel;
+    const recommendationSubject = recommendedFund ? 'funds' : 'portfolios';
     return (
       <Page
         {...page}
@@ -544,7 +553,7 @@ export function CreationScreens({
         <View testID={`cz-profile-${profileStatus}`}>
           <Copy style={styles.profileSubtitle}>
             {blocking
-              ? 'Your investor profile needs an update before we can check which portfolios are suitable for you.'
+              ? `Your investor profile needs an update before we can check which ${recommendationSubject} are suitable for you.`
               : 'Here you can see your current investor profile and its status.'}
           </Copy>
           {profileStatus === 'expired' ? (
@@ -554,21 +563,21 @@ export function CreationScreens({
           ) : null}
           {profileStatus === 'missing' ? (
             <Copy>
-              Your risk profile information is not available. Update your
-              investor profile so we can check which portfolios are suitable for
-              you.
+              {`Your risk profile information is not available. Update your investor profile so we can check which ${recommendationSubject} are suitable for you.`}
             </Copy>
           ) : (
             <View testID="cz-profile-card" style={styles.profileCard}>
               <Copy strong style={styles.profileCardTitle}>
                 {profileStatus === 'expired'
-                  ? 'Aggressive - V3'
-                  : 'Moderate - V2'}
+                  ? profileLabel ?? 'Aggressive - V3'
+                  : profileLabel ?? 'Moderate - V2'}
               </Copy>
               <Copy style={styles.profileDescription}>
                 {profileStatus === 'expired'
                   ? 'Your current investor profile is no longer valid.'
-                  : 'As a moderate risk investor you are willing to accept periods of market volatility in exchange for the possibility of receiving returns that will outpace inflation by a significant margin in the long run.'}
+                  : profileLabel && profileLabel !== 'Moderate - V2'
+                    ? 'We use this profile to recommend an investment fund.'
+                    : 'As a moderate risk investor you are willing to accept periods of market volatility in exchange for the possibility of receiving returns that will outpace inflation by a significant margin in the long run.'}
               </Copy>
             </View>
           )}
@@ -723,7 +732,9 @@ export function CreationScreens({
         {...page}
         kind="target-and-horizon"
         title="Set your target amount"
-        description="Choose a target amount and time horizon to shape your investment recommendation."
+        description={recommendedFund
+          ? 'Choose a target amount and time horizon for your goal.'
+          : 'Choose a target amount and time horizon to shape your investment recommendation.'}
         contentTop={20}
         footer={
           <Button
@@ -735,9 +746,7 @@ export function CreationScreens({
             }
             onPress={() => {
               dispatch({ type: 'open-portfolio', from: 'target' });
-              const portfolio = getPortfoliosForStrategy(
-                view.selectedStrategyId,
-              )[0];
+              const portfolio = recommendedFund ?? getPortfoliosForStrategy(view.selectedStrategyId)[0];
               if (portfolio)
                 dispatch({ type: 'portfolio-selected', portfolio });
             }}
@@ -844,6 +853,26 @@ export function CreationScreens({
       </Page>
     );
   }
+  if (view.step === 'portfolio' && recommendedFund)
+    return (
+      <Page
+        {...page}
+        kind="portfolio"
+        title="Your recommended fund"
+        description={`Based on your investor profile (${recommendedFund.standaloneFund.profileLabel}).`}
+        footer={
+          <Button
+            label="Continue"
+            onPress={() => {
+              dispatch({ type: 'portfolio-selected', portfolio: recommendedFund });
+              navigate('review');
+            }}
+          />
+        }
+      >
+        <RoboFundSummary name={recommendedFund.name} isin={recommendedFund.standaloneFund.isin} />
+      </Page>
+    );
   if (view.step === 'portfolio') {
     const portfolios = getPortfoliosForStrategy(view.selectedStrategyId),
       selected = view.selectedPortfolio ?? portfolios[0];
@@ -1019,6 +1048,7 @@ export function CreationScreens({
             view.targetAmount,
             view.selectedPortfolio.name,
             view.horizonYears || Number(view.manualHorizon),
+            view.selectedPortfolio.standaloneFund,
           );
           return (
             <>
@@ -1104,29 +1134,24 @@ export function CreationScreens({
   return null;
 }
 const styles = StyleSheet.create({
+  fundSummary: {
+    borderRadius: czInvestmentTokens.radius,
+    backgroundColor: czInvestmentTokens.surface,
+    padding: 16,
+    gap: 12,
+  },
+  fundSummaryHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  fundSummaryName: { flex: 1, fontSize: 18, lineHeight: 24 },
   goalCashAccount: { marginTop: 24, gap: 16 },
   selectedCard: { borderWidth: 2 },
   unselectedCard: { borderWidth: 1 },
   introHero: { position: 'relative' },
   introImage: { width: '100%', height: 400 },
-  introClose: {
+  introNavigation: {
     position: 'absolute',
-    top: 24,
-    right: 16,
-    width: 32,
-    height: 32,
+    left: 0,
+    right: 0,
     zIndex: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  introBack: {
-    position: 'absolute',
-    left: 16,
-    width: 32,
-    height: 32,
-    zIndex: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   introFooter: { paddingHorizontal: 24 },
   pageDescription: { fontSize: 18, lineHeight: 24 },

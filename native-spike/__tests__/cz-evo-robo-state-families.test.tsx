@@ -11,6 +11,7 @@ import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 
 const toTarget: readonly RoboEvent[] = [
   { type: 'navigate', to: 'contact' },
+  { type: 'navigate', to: 'intro' },
   { type: 'navigate', to: 'profile' },
   { type: 'navigate', to: 'goal-type' },
   {

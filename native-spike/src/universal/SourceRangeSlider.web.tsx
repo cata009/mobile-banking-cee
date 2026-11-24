@@ -9,9 +9,19 @@ export function SourceRangeSlider({
   step,
   value,
   onChange,
+  onInteractionChange,
   color,
   presentation = 'source',
 }: SourceRangeProps) {
+  const interaction = onInteractionChange && {
+    onPointerDown: (event: React.PointerEvent<HTMLInputElement>) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      onInteractionChange(true);
+    },
+    onLostPointerCapture: () => onInteractionChange(false),
+  };
+
   if (presentation === 'feedback') {
     const fraction = Math.max(
       0,
@@ -72,6 +82,7 @@ export function SourceRangeSlider({
           }}
         />
         <input
+          {...interaction}
           className="source-feedback-range"
           aria-label={label}
           type="range"
@@ -95,6 +106,7 @@ export function SourceRangeSlider({
   }
   return (
     <input
+      {...interaction}
       aria-label={label}
       type="range"
       min={min}

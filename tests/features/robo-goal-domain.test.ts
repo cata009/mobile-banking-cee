@@ -4,7 +4,7 @@ import { INITIAL_CZ_ROBO_GOALS } from '@/features/investments/robo/goalFixtures'
 import { buildInitialRoboGoal, getRoboGoalCurrentValue } from '@/features/investments/robo/goalModel'
 import { hydrateRoboGoal } from '@/features/investments/robo/goalHydration'
 import { applyRoboTopUp, applyRoboSale, executeRoboBuyOrder } from '@/features/investments/robo/goalActions'
-import { getRoboPortfolioForGoal, ROBO_STRATEGIES } from '@/features/investments/robo/model'
+import { getRoboPortfolioForGoal, ROBO_STANDALONE_PORTFOLIOS, ROBO_STRATEGIES } from '@/features/investments/robo/model'
 import {
   buildRoboProjection,
   calculateProjectedValue,
@@ -24,6 +24,29 @@ const catalog = buildInvestmentSecurityCatalog([], 'CZ', { includeRoboGoals: tru
 const operation = { id: 'test-trade', date: '2026-10-07T12:00:00.000Z' }
 
 describe('Robo goal policies and extraction fixtures', () => {
+  it('reopens the standalone fund goal and records one pending order against its ISIN', () => {
+    const fund = ROBO_STANDALONE_PORTFOLIOS.V2
+    const draft = { ...seed, basketId: undefined, basketKey: undefined, basketIsin: undefined }
+    const goal = buildInitialRoboGoal(fund, draft, 0, 'CZ', [], { date: operation.date })
+    expect(getRoboPortfolioForGoal(goal)).toBe(fund)
+    expect(getRoboGoalCurrentValue(goal)).toBe(0)
+    expect(goal.orders).toEqual([])
+
+    const updated = applyRoboTopUp(
+      goal,
+      fund,
+      { method: 'one-off', initialAmount: 5000, monthlyAmount: 0, startDate: '', cashAccountId: 'cash-cz' },
+      'CZ',
+      [],
+      operation,
+    )
+    expect(updated.orders).toEqual([
+      expect.objectContaining({ securityId: 'LU3046603414', title: fund.name, amount: 5000, status: 'PENDING' }),
+    ])
+    expect(updated.positions).toEqual([])
+    expect(getRoboGoalCurrentValue(updated)).toBe(0)
+  })
+
   it('creates an empty basket goal and retains zero units without opening activity', () => {
     const goal = buildInitialRoboGoal(portfolio, seed, 0, 'CZ', catalog, { date: operation.date })
     expect(getRoboGoalCurrentValue(goal)).toBe(0)

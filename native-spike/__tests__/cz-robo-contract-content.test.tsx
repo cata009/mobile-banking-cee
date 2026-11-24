@@ -71,6 +71,7 @@ describe('CZ Robo investment account contract document', () => {
       .findAllByType(Copy)
       .map(node => node.props.children)
       .join('\n');
+    expect(document.props.showsVerticalScrollIndicator).toBe(false);
     expect(copy).toContain('Demonstration document');
     expect(copy).toContain('1. Parties and purpose');
     expect(copy).toContain('8. Closing the account and acknowledgement');
@@ -85,22 +86,22 @@ describe('CZ Robo investment account contract document', () => {
     });
     expect(buttons(tree, 'Download document')).not.toHaveLength(0);
     expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
   });
 
-  it('keeps download enabled while requiring positive scrolling to show confirmation', () => {
+  it('keeps download enabled until scrolling enables confirmation', () => {
     const onConfirm = jest.fn();
     const tree = renderContract(onConfirm);
     expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
     scroll(tree, 0, 600, 600);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
     scroll(tree, 10, 600, 600);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
     scroll(tree, 0);
     scroll(tree, 400);
     scroll(tree, 2390);
     expect(buttons(tree, 'Download document')[0].props.disabled).not.toBe(true);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
     expect(onConfirm).not.toHaveBeenCalled();
 
     scroll(tree, 2400);
@@ -110,7 +111,7 @@ describe('CZ Robo investment account contract document', () => {
     expect(confirm.props.disabled).not.toBe(true);
     expect(onConfirm).not.toHaveBeenCalled();
     scroll(tree, 0);
-    expect(buttons(tree, 'I have read it')).not.toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(false);
     act(() => buttons(tree, 'I have read it')[0].props.onPress());
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
@@ -143,13 +144,13 @@ describe('CZ Robo investment account contract document', () => {
       tree.root.findByType(BaselineBottomSheet).props.maxHeightOffsetPx,
     ).toBe(96);
     scroll(tree, 2400);
-    expect(buttons(tree, 'I have read it')).not.toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(false);
     act(() => tree.root.findByType(BaselineBottomSheet).props.onClose());
     expect(tree.root.findAllByType(InvestmentContract)).toHaveLength(0);
     act(() => buttons(tree, 'Open contract')[0].props.onPress());
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
     scroll(tree, 400);
-    expect(buttons(tree, 'I have read it')).toHaveLength(0);
+    expect(buttons(tree, 'I have read it')[0].props.disabled).toBe(true);
   });
 
   it('downloads the same complete clauses as a paginated PDF without accepting them', async () => {

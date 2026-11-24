@@ -59,7 +59,7 @@ export function updateRoboGoalPositionValue(
 }
 
 export function buildInitialRoboGoal(
-  basketPortfolio: RoboPortfolio,
+  portfolio: RoboPortfolio,
   goal: Omit<
     RoboExistingGoal,
     'portfolioId' | 'basketId' | 'basketKey' | 'basketIsin' | 'positions' | 'transactions' | 'orders'
@@ -69,7 +69,13 @@ export function buildInitialRoboGoal(
   securityCatalog: readonly InvestmentCatalogSecurity[],
   operation: { date: string; tradeId?: string },
 ): RoboExistingGoal {
-  const basket = basketPortfolio.basketFund
+  if (portfolio.standaloneFund && initialInvestment === 0) {
+    return updateRoboGoalPositionValue({ ...goal, portfolioId: portfolio.id }, [], {
+      orders: [],
+      transactions: [],
+    })
+  }
+  const basket = portfolio.basketFund
   if (!basket) throw new Error('CZ Robo goals must reference a basket.')
   const date = operation.date
   const initialInvestmentCost =
@@ -97,7 +103,7 @@ export function buildInitialRoboGoal(
   }))
   const initialGoal: RoboExistingGoal = {
     ...goal,
-    portfolioId: basketPortfolio.id,
+    portfolioId: portfolio.id,
     basketId: basket.marketInfo.basketId,
     basketKey: basket.id,
     basketIsin: basket.marketInfo.basketIsin,
@@ -124,6 +130,11 @@ export function getRoboWithdrawalProducts(
   securityCatalog: readonly InvestmentCatalogSecurity[],
   goalPositions?: readonly RoboGoalPosition[],
 ): RoboWithdrawalProduct[] {
+  if (portfolio.standaloneFund) {
+    const id = portfolio.standaloneFund.isin
+    const position = goalPositions?.find((candidate) => candidate.id === id)
+    return [{ id, name: portfolio.name, percent: 100, localValue: position?.localValue ?? 0, security: null, position }]
+  }
   const basketHoldings = portfolio.basketFund?.holdings ?? []
   const basketProducts: Array<{ id: string; name: string; percent: number; position?: RoboGoalPosition }> =
     basketHoldings.map((holding, index) => {
