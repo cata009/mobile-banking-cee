@@ -2,6 +2,7 @@ import { getRecommendedInvestmentBaskets } from '@/app/config/investmentBasketFu
 import {
   type RoboPortfolio,
   type RoboInvestorProfile,
+  type RoboStandaloneFund,
   type RoboStandalonePortfolio,
   type RoboStrategy,
   RoboPortfolioPresentation,
@@ -143,23 +144,38 @@ export const ROBO_PORTFOLIOS: readonly RoboPortfolio[] = [
   ),
 ] as const
 
-function standalonePortfolio(isin: string, name: string, profileLabel: string): RoboStandalonePortfolio {
-  const suitabilitySummary = `Recommended for the ${profileLabel} investor profile.`
+function standalonePortfolio(name: string, fund: RoboStandaloneFund): RoboStandalonePortfolio {
+  const suitabilitySummary = `Recommended for the ${fund.profileLabel} investor profile.`
   return {
-    id: `fund-${isin}`,
+    id: `fund-${fund.isin}`,
     strategyId: 'sustainable-balanced',
     name,
     description: suitabilitySummary,
     suitabilitySummary,
     holdings: [],
-    standaloneFund: { isin, profileLabel },
+    standaloneFund: fund,
   }
 }
 
+// Fund descriptions are based on onemarkets.cz/en/productpage.html/{ISIN}.
 export const ROBO_STANDALONE_PORTFOLIOS: Readonly<Record<RoboInvestorProfile, RoboStandalonePortfolio>> = {
-  V1: standalonePortfolio('LU2595011565', 'onemarkets Global Multibrand Selection Fund - M', 'Conservative - V1'),
-  V2: standalonePortfolio('LU3046603414', 'onemarkets UC Global Multibrand 60 Fund - M', 'Moderate - V2'),
-  V3: standalonePortfolio('LU3046604818', 'onemarkets UC Global Multibrand 90 Fund - M', 'Aggressive - V3'),
+  V1: standalonePortfolio('onemarkets Global Multibrand Selection Fund - M', {
+    isin: 'LU2595011565',
+    profileLabel: 'Conservative - V1',
+    investmentFocus: 'Combines actively managed funds and index-tracking ETFs across shares and bonds.',
+  }),
+  V2: standalonePortfolio('onemarkets UC Global Multibrand 60 Fund - M', {
+    isin: 'LU3046603414',
+    profileLabel: 'Moderate - V2',
+    investmentFocus:
+      'Invests in a mix of global shares and bonds, with an equity allocation that can change over time.',
+  }),
+  V3: standalonePortfolio('onemarkets UC Global Multibrand 90 Fund - M', {
+    isin: 'LU3046604818',
+    profileLabel: 'Aggressive - V3',
+    investmentFocus:
+      'Focuses on global shares in developed and emerging markets and can adjust the mix as markets change.',
+  }),
 }
 
 export const ROBO_PORTFOLIO_PRESENTATIONS: Record<RoboStrategy['id'], RoboPortfolioPresentation> = {

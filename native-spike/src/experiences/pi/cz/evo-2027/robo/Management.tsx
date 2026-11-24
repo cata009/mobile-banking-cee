@@ -115,7 +115,8 @@ import { Signing } from '../investments/Signing';
 import { OrderDocuments } from '../investments/OrderDocuments';
 import { useCurrentInvestmentHost } from '../investments/hostAdapter';
 import { DEFAULT_CZECH_COUNTS } from '../contracts';
-import { PlanFields, RoboFundSummary } from './CreationScreens';
+import { PlanFields } from './CreationScreens';
+import { RoboFundOverview } from './FundOverview';
 import { BaselineStandardSuccess } from '../../../../../universal/BaselineStandardSuccess';
 import { TopUpProjection } from './TopUpProjection';
 import { formatRoboCompactMoney } from './amountDisplay';
@@ -584,7 +585,7 @@ export function Management({
         title="Investment fund"
         onBack={mode === 'settings' ? () => setModelOpen(false) : onBack}
       >
-        <RoboFundSummary name={portfolio.name} isin={fund.isin} />
+        <RoboFundOverview name={portfolio.name} fund={fund} amountsHidden={amountsHidden} />
       </Page>
     );
   if (mode === 'add-money-basket' || (mode === 'settings' && modelOpen))

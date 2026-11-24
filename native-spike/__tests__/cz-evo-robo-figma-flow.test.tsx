@@ -1,6 +1,6 @@
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { CzRoboFlow } from '../src/experiences/pi/cz/evo-2027/robo';
 import type { CzRoboFlowProps } from '../src/experiences/pi/cz/evo-2027/robo';
 import { Header } from '../src/universal/Header';
@@ -8,6 +8,7 @@ import { SourceCustomIcon } from '../src/universal/SourceCustomIcon';
 import { SourceBottomSheet } from '../src/universal/SourceBottomSheet';
 import { Choice } from '../src/experiences/pi/cz/evo-2027/investments/Primitives';
 import { ProductLogo } from '../src/experiences/pi/cz/evo-2027/investments/ProductRow';
+import { PerformanceChart } from '../src/experiences/pi/cz/evo-2027/investments/Charts';
 import { createCzInvestmentSnapshot } from '../src/experiences/pi/cz/evo-2027/investments/model';
 import { DEFAULT_CZECH_COUNTS } from '../src/experiences/pi/cz/evo-2027/contracts';
 import { BaselineNavigationLink } from '../src/universal/BaselineNavigationLink';
@@ -139,10 +140,11 @@ async function signWithFaceId(tree: TestRenderer.ReactTestRenderer) {
 
 describe('CZ Robo goal creation follows the Figma flow', () => {
   it.each([
-    ['V1', 'LU2595011565', 'onemarkets Global Multibrand Selection Fund - M'],
-    ['V2', 'LU3046603414', 'onemarkets UC Global Multibrand 60 Fund - M'],
-    ['V3', 'LU3046604818', 'onemarkets UC Global Multibrand 90 Fund - M'],
-  ] as const)('recommends exactly one standalone fund for %s through review', (investorProfile, isin, name) => {
+    ['V1', 'LU2595011565', 'onemarkets Global Multibrand Selection Fund - M', 120.09],
+    ['V2', 'LU3046603414', 'onemarkets UC Global Multibrand 60 Fund - M', 104.30],
+    ['V3', 'LU3046604818', 'onemarkets UC Global Multibrand 90 Fund - M', 110.90],
+  ] as const)('recommends exactly one standalone fund for %s through review', (investorProfile, isin, name, nav) => {
+    const openUrl = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
     const tree = renderFlow({ release: 'release-future-cz-robo', investorProfile });
     try {
       toIntro(tree);
@@ -160,14 +162,29 @@ describe('CZ Robo goal creation follows the Figma flow', () => {
       expect(recommendation).toContain('Your recommended fund');
       expect(recommendation).toContain(name);
       expect(recommendation).toContain(isin);
+      expect(recommendation).toContain('Actual market price');
+      expect(recommendation).toContain('Last update · 20 Nov 2026');
+      expect(recommendation).toContain('Product ID');
+      expect(recommendation).toContain('Security description');
       expect(recommendation.match(/LU\d{10}/g)).toEqual([isin]);
       expect(recommendation).not.toContain('PRODUCTS DISTRIBUTION');
+      expect(recommendation).not.toContain('My security');
+      expect(recommendation).not.toContain('Equity exposure');
+      const chart = () => tree.root.findByType(PerformanceChart).props.points;
+      expect(chart()[0].label).toBe('2025-11-20');
+      expect(chart().at(-1)).toMatchObject({ label: '2026-11-20', value: nav });
+      press(tree, '1 M');
+      expect(chart()[0].label).toBe('2026-10-20');
+      expect(chart().at(-1).value).toBe(nav);
+      press(tree, 'Key Information Document (KID)');
+      expect(openUrl).toHaveBeenCalledWith(`https://www.onemarkets.cz/en/productpage.html/${isin}#documents-tab-id`);
       press(tree, 'Continue');
       expect(elementText(tree.root)).toContain('Review goal details');
       expect(elementText(tree.root)).toContain(name);
       expect(elementText(tree.root)).toContain(isin);
     } finally {
       act(() => tree.unmount());
+      openUrl.mockRestore();
     }
   });
 

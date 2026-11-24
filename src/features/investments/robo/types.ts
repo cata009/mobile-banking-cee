@@ -8,6 +8,7 @@ export type RoboInvestorProfile = 'V1' | 'V2' | 'V3'
 export interface RoboStandaloneFund {
   isin: string
   profileLabel: string
+  investmentFocus: string
 }
 
 export type RoboFundingMethod = 'one-off' | 'regular' | 'combined'

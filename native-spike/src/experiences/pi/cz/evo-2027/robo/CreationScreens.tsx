@@ -38,6 +38,7 @@ import { PortfolioCarousel } from './PortfolioCarousel';
 import { useMouseCarousel } from '../mouseCarousel';
 import { InvestmentContract } from './InvestmentContract';
 import { BasketDetails, BasketSectionHeading } from './BasketDetails';
+import { RoboFundOverview } from './FundOverview';
 import {
   CashAccountField,
   CashAccountIntroduction,
@@ -182,18 +183,6 @@ function ReviewField({ label, value }: { label: string; value: string }) {
       <Copy strong style={styles.reviewFieldValue}>
         {value}
       </Copy>
-    </View>
-  );
-}
-
-export function RoboFundSummary({ name, isin }: { name: string; isin: string }) {
-  return (
-    <View style={styles.fundSummary}>
-      <View style={styles.fundSummaryHeading}>
-        <ProductLogo size={32} />
-        <Copy strong style={styles.fundSummaryName}>{name}</Copy>
-      </View>
-      <ReviewField label="ISIN" value={isin} />
     </View>
   );
 }
@@ -870,7 +859,11 @@ export function CreationScreens({
           />
         }
       >
-        <RoboFundSummary name={recommendedFund.name} isin={recommendedFund.standaloneFund.isin} />
+        <RoboFundOverview
+          name={recommendedFund.name}
+          fund={recommendedFund.standaloneFund}
+          amountsHidden={amountsHidden}
+        />
       </Page>
     );
   if (view.step === 'portfolio') {
@@ -1134,14 +1127,6 @@ export function CreationScreens({
   return null;
 }
 const styles = StyleSheet.create({
-  fundSummary: {
-    borderRadius: czInvestmentTokens.radius,
-    backgroundColor: czInvestmentTokens.surface,
-    padding: 16,
-    gap: 12,
-  },
-  fundSummaryHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  fundSummaryName: { flex: 1, fontSize: 18, lineHeight: 24 },
   goalCashAccount: { marginTop: 24, gap: 16 },
   selectedCard: { borderWidth: 2 },
   unselectedCard: { borderWidth: 1 },
