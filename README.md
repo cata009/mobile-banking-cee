@@ -1,8 +1,6 @@
 
   # Mobile Banking - CEE
 
-  This is a code bundle for Mobile Banking - CEE. The original project is available at [redacted]
-
   ## Running the code
 
   Use the Node version recorded in `.nvmrc`, then run `npm ci` to install the locked dependencies.
@@ -20,7 +18,5 @@
 
   Rotate either value through the deployment environment, never by committing it. Changing `ACCESS_COOKIE_SECRET` invalidates existing access cookies and share tokens.
 
-  This is a presentation gate for a stakeholder demo, not an authorization boundary for confidential data: the client bundle and static assets may still be fetched directly, and the application contains mock data. Durable brute-force protection and request throttling must be enforced at the hosting edge/infrastructure layer, where attempts cannot be reset by clearing a browser cookie. The application intentionally returns a uniform authentication failure and keeps no client-controlled attempt counter.
-
-  Architecture foundation lives in [`docs/architecture/PROJECT_MODEL.md`](./docs/architecture/PROJECT_MODEL.md).
+  This is a presentation gate
   
